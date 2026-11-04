@@ -1,5 +1,6 @@
 import { cannotFly, aircraftPrice, HUB_PRICE, RANKS, type AircraftType, type ApiKeyInfo, type Flight, type Job, type Leaderboard, type Me, type CompanyProfile, type Transaction, AIRCRAFT_CATEGORIES, WTCS, type Airport } from '@opc/shared';
-import { api, ApiError, downloadExport, session } from './api.ts';
+import { api, downloadExport, session } from './api.ts';
+import { ApiError } from './errors.ts';
 import { debounce, field, fmtDate, fmtMoney, fmtNum, h, input, notify, table } from './ui.ts';
 
 export type Ctx = { me: Me; refresh: () => Promise<void>; go: (page: string) => void };

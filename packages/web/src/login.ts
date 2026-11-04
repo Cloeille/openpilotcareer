@@ -1,4 +1,6 @@
-import { api, ApiError, GLOBAL_URL, fetchInfo, isOwnOrigin, normalizeServer, session } from './api.ts';
+import { api, GLOBAL_URL, fetchInfo, isOwnOrigin, session } from './api.ts';
+import { ApiError } from './errors.ts';
+import { normalizeServer } from './server-url.ts';
 import { h, field, input } from './ui.ts';
 import type { Me } from '@opc/shared';
 

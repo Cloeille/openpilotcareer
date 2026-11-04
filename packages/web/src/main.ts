@@ -1,5 +1,6 @@
 import type { Me } from '@opc/shared';
-import { api, ApiError, session, setUnauthorizedHandler } from './api.ts';
+import { api, session, setUnauthorizedHandler } from './api.ts';
+import { ApiError } from './errors.ts';
 import { loginView } from './login.ts';
 import { pages } from './pages.ts';
 import { h, notify } from './ui.ts';

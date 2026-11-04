@@ -1,4 +1,5 @@
 import { OPC_GLOBAL_URL, infoSchema, type ServerInfo } from '@opc/shared';
+import { ApiError } from './errors.ts';
 
 /** Default server: VITE_OPC_GLOBAL_URL at build time (empty = the server that served this page), else the shared OPC_GLOBAL_URL. */
 const env = import.meta.env.VITE_OPC_GLOBAL_URL as string | undefined;
@@ -27,24 +28,6 @@ export const session = {
     localStorage.setItem(STORE_KEY, JSON.stringify(state));
   },
 };
-
-export class ApiError extends Error {
-  readonly status: number;
-  readonly code: string;
-  constructor(status: number, code: string, message: string) {
-    super(message);
-    this.status = status;
-    this.code = code;
-  }
-}
-
-/** Accepts `host:port`-less typos gracefully: only http(s) URLs, no query/hash, no trailing slash. */
-export function normalizeServer(raw: string): string {
-  let u: URL;
-  try { u = new URL(raw.trim()); } catch { throw new ApiError(0, 'bad_url', 'enter a full URL such as https://opc.example.org'); }
-  if (u.protocol !== 'https:' && u.protocol !== 'http:') throw new ApiError(0, 'bad_url', 'the server URL must start with http:// or https://');
-  return u.origin + u.pathname.replace(/\/+$/, '');
-}
 
 let onUnauthorized: () => void = () => {};
 export const setUnauthorizedHandler = (fn: () => void): void => { onUnauthorized = fn; };
