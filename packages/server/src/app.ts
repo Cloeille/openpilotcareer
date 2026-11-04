@@ -132,6 +132,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     const u = get<{ id: number; pass_hash: string }>(db, 'SELECT id, pass_hash FROM users WHERE username = ?', b.username);
     const ok = await verifyPassword(b.password, u?.pass_hash ?? (await DUMMY_HASH));
     if (!u || !ok) throw new HttpError(401, 'bad_credentials', 'wrong username or password');
+    run(db, 'DELETE FROM sessions WHERE expires_at <= ?', now()); // expired sessions are only ever dead weight
     const token = createSession(db, u.id, now());
     return { token, ...meView(db, u.id) };
   });
@@ -263,7 +264,12 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     return flightView(tx(db, () => completeManually(db, activeFlight(db, p.companyId, idParam(req)), now())));
   });
 
-  // ---- verification ingest (per-user API key)
+  // ---- verification ingest (per-user API key). Keys can do exactly two things: list active flights and submit telemetry.
+  app.get('/api/v1/flights/active', async (req) => {
+    const p = apiKeyAuth(db, req, now());
+    return flightsOf(db, p.companyId, 50, undefined, 'active').map(flightView);
+  });
+
   app.post('/api/v1/flights/:id/telemetry-verify', async (req) => {
     const p = apiKeyAuth(db, req, now());
     const report = parse(telemetrySchema, req.body);

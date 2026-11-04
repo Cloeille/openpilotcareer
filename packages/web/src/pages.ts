@@ -207,7 +207,7 @@ const settings: Page = async ({ me }) => {
   return h('div', null, h('h1', null, 'Settings'),
     section('Server', h('p', null, `You are signed in as ${me.username} on `, h('strong', null, session.server), '. Accounts exist only on this server.')),
     section('API keys for simulator clients',
-      h('p', { class: 'muted' }, 'A key lets a simulator companion submit telemetry for your flights (POST /api/v1/flights/:id/telemetry-verify). It cannot read or change anything else. Keys are stored hashed and shown once.'),
+      h('p', { class: 'muted' }, 'A key lets a simulator companion list your active flights and submit telemetry for them (see docs/telemetry-api.md). It cannot read or change anything else. Keys are stored hashed and shown once.'),
       list,
       h('form', { class: 'row end', onsubmit: (e: Event) => { e.preventDefault(); void run('API key created.', async () => {
         const k = await api<ApiKeyInfo & { key: string }>('/me/api-keys', { method: 'POST', body: { label: label.value.trim() } });

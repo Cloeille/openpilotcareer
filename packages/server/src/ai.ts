@@ -41,7 +41,7 @@ export function seedAi(db: Db, now: number): void {
         createCompany(db, { userId: null, name: s.name, hub: s.hub, personality: s.personality, now });
       }
     }
-    // First boot starts a day in the past so the competition already has history when the first player arrives.
+    // First boot starts WARMUP_TICKS in the past so the competition already has history when the first player arrives.
     run(db, "INSERT INTO meta (key, value) VALUES ('ai_start_tick', ?) ON CONFLICT DO NOTHING", String(tickOf(now) - WARMUP_TICKS));
   });
 }

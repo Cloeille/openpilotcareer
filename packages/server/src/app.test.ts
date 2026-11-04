@@ -50,6 +50,8 @@ test('sessions expire; passwords and tokens are stored hashed', async () => {
   assert.equal((h.db.prepare('SELECT COUNT(*) n FROM sessions WHERE token_hash = ?').get(token) as { n: number }).n, 0, 'raw token is not stored');
   h.clock.t += 31 * 24 * 3_600_000;
   assert.equal((await h.call('GET', '/api/v1/me', { token })).status, 401);
+  await h.call('POST', '/api/v1/auth/login', { body: { username: 'dave', password: 'correct horse' } });
+  assert.equal((h.db.prepare('SELECT COUNT(*) n FROM sessions').get() as { n: number }).n, 1, 'expired session purged at the next login');
 });
 
 test('credential endpoints are rate limited', async () => {
@@ -190,6 +192,11 @@ test('telemetry endpoint: API-key auth only, schema validation, key revocation, 
   const flight = (await h.call('POST', `/api/v1/jobs/${job.id}/accept`, { token: a.token, body: { aircraftId: a.me.fleet[0].id } })).body;
   const url = `/api/v1/flights/${flight.id}/telemetry-verify`;
   const report = h.goodReport(job);
+  const active = await h.call('GET', '/api/v1/flights/active', { token: key });
+  assert.deepEqual(active.body.map((f: { id: number }) => f.id), [flight.id], 'a key lists its owner\'s active flights');
+  assert.equal((await h.call('GET', '/api/v1/flights/active', { token: keyB })).body.length, 0, 'and nobody else\'s');
+  assert.equal((await h.call('GET', '/api/v1/flights/active', { token: a.token })).status, 401, 'a session token is not an API key');
+  assert.equal((await h.call('GET', '/api/v1/me', { token: key })).status, 401, 'a key cannot read the account');
   assert.equal((await h.call('POST', url, { body: report })).status, 401, 'no credentials');
   assert.equal((await h.call('POST', url, { token: a.token, body: report })).status, 401, 'a session token is not an API key');
   assert.equal((await h.call('POST', url, { token: 'opc_forged', body: report })).status, 401);

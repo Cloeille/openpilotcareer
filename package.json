@@ -16,6 +16,12 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
     "dev:server": "npm run dev -w @opc/server",
-    "dev:web": "npm run dev -w @opc/web"
+    "dev:web": "npm run dev -w @opc/web",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "license": "AGPL-3.0-only",
+  "description": "Open-source flight sim career and economy hub",
+  "engines": {
+    "node": ">=26"
   }
 }
