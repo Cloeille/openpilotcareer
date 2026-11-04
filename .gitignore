@@ -3,3 +3,4 @@ dist/
 *.sqlite
 *.sqlite-*
 .env
+__pycache__/

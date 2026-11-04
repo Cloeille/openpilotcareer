@@ -30,7 +30,9 @@ HEAD = re.compile(
     r"^([A-Z0-9]{2,4}) @?(Fixed-wing|Helicopter|Gyroplane|Powered-lift)\s+(\d)([PTJER])/(S\+|S|L|H|J)?\s*(.*)$"
 )
 SPECIAL = re.compile(r"^([A-Z]{4})\s{3,}\(any manufacturer\), (.+?)\s*$")
-TAIL_FIELDS = re.compile(r"^(?:(?:Light|Medium|Heavy|Super|L/M)\s+)?(?:[A-I]\s+)?(?:(?:III|II|I)\s+)?(?:\d{1,2}\s+)?(.*)$")
+TAIL_FIELDS = re.compile(r"^(?:(Light|Medium|Heavy|Super|L/M)\s+)?(?:[A-I]\s+)?(?:(?:III|II|I)\s+)?(?:\d{1,2}\s+)?(.*)$")
+WTC = {"Light": "L", "Medium": "M", "Heavy": "H", "Super": "J", "L/M": "M"}
+WTC_FROM_FAA_WEIGHT = {"S": "L", "S+": "L", "L": "M", "H": "H", "J": "J"}
 NAME = re.compile(r"^([A-Z0-9][A-Z0-9 .&()'/-]*?)\s?,\s*(.+?)(?=\s+[A-Z][A-Z0-9 .&()'/-]*\s?,\s|\s*$)")
 NOISE = re.compile(r"^(=====PAGE=====|\d\d/\d\d/\d{4} JO 7360|Appendix A|A-\d+|Type|Designator|Engine|Number-|Type/FAA|Weight|Class|ICAO|WTC CWT)")
 
@@ -67,7 +69,9 @@ def parse_order(text: str) -> dict:
         m = HEAD.match(line)
         if m:
             icao, cls, engines, engine, weight, rest = m.groups()
-            rest = TAIL_FIELDS.match(rest).group(1).strip()
+            tail = TAIL_FIELDS.match(rest)
+            wtc = WTC.get(tail.group(1)) or WTC_FROM_FAA_WEIGHT[weight or "S"]
+            rest = tail.group(2).strip()
             j = i + 1
             while not NAME.match(rest) and j < len(lines) and j < i + 12:
                 cand = lines[j].strip()
@@ -77,11 +81,11 @@ def parse_order(text: str) -> dict:
             n = NAME.match(rest)
             name = f"{title(n.group(1))} {n.group(2).strip()}" if n else icao
             if icao not in types:
-                types[icao] = {"icao": icao, "name": name, "category": category(cls, int(engines), engine, weight or "S")}
+                types[icao] = {"icao": icao, "name": name, "category": category(cls, int(engines), engine, weight or "S"), "engines": int(engines), "wtc": wtc}
             continue
         s = SPECIAL.match(line)
         if s and s.group(1) not in types:
-            types[s.group(1)] = {"icao": s.group(1), "name": s.group(2), "category": "other"}
+            types[s.group(1)] = {"icao": s.group(1), "name": s.group(2), "category": "other", "engines": 1, "wtc": "L"}
     return types
 
 
@@ -97,8 +101,9 @@ def build_aircraft() -> None:
         if t is None:
             sys.exit(f"curated type {row['icao']} is not in FAA Order JO 7360.1K")
         t["perf"] = {k: int(row[k]) for k in ("seats", "cargoKg", "cruiseKts", "rangeNm")}
-        if row.get("category"):
-            t["category"] = row["category"]
+        for k in ("name", "category"):
+            if row.get(k):
+                t[k] = row[k]
     out = sorted(types.values(), key=lambda t: t["icao"])
     (HERE / "aircraft-types.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")) + "\n")
     print(f"aircraft-types.json: {len(out)} types, {len(curated)} with curated performance")
@@ -106,8 +111,8 @@ def build_aircraft() -> None:
 
 # ---------- airports (OurAirports) ----------
 
-AIRPORT_TYPES = {"large_airport": "large", "medium_airport": "medium", "small_airport": "small", "seaplane_base": "seaplane"}
-IDENT = re.compile(r"^[A-Z0-9]{3,4}$")
+AIRPORT_TYPES = {"large_airport": "large", "medium_airport": "medium", "small_airport": "small"}
+ICAO = re.compile(r"^[A-Z]{4}$")
 
 
 def build_airports() -> None:
@@ -115,10 +120,10 @@ def build_airports() -> None:
     out = []
     for r in rows:
         kind = AIRPORT_TYPES.get(r["type"])
-        if kind is None or not IDENT.match(r["ident"]):
+        if kind is None or not ICAO.match(r["icao_code"]):
             continue
         out.append([
-            r["ident"], r["name"], round(float(r["latitude_deg"]), 4), round(float(r["longitude_deg"]), 4),
+            r["icao_code"], r["name"], round(float(r["latitude_deg"]), 4), round(float(r["longitude_deg"]), 4),
             kind, r["iso_country"], r["municipality"], r["iata_code"],
         ])
     out.sort(key=lambda a: a[0])
