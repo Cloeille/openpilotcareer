@@ -243,20 +243,21 @@ export function activeFlight(db: Db, companyId: number, flightId: number): Fligh
 }
 
 /** Close a flight as paid (verified or unverified): books the settlement, moves the aircraft, updates stats and rank inputs.
- *  With a telemetry `report` the measured fuel, block time and landing rate replace the estimates. */
+ *  A telemetry `report` is always stored, but only a *verified* flight is costed from its measured fuel, block time and landing
+ *  rate; unverified (manual) flights use the type's estimates, so untrusted numbers can never lower a cost. */
 export function finishFlight(db: Db, f: FlightRow, status: 'verified' | 'unverified', at: number, report?: { telemetry: Telemetry; blockHours: number }): FlightRow {
   const type = typeFor(db, f.company_id, f.aircraft_icao);
   const t = report?.telemetry;
+  const measured = status === 'verified' && report ? { fuelUsedKg: report.telemetry.fuelUsedKg, blockHours: report.blockHours, landingFpm: report.telemetry.landingFpm } : {};
   const s = settle({
     payout: f.payout, distanceNm: f.distance_nm, aircraft: type, status,
-    destSize: airports.get(f.destination)?.size ?? 'small', destIsHub: hasHub(db, f.company_id, f.destination),
-    ...(t && report ? { fuelUsedKg: t.fuelUsedKg, blockHours: report.blockHours, landingFpm: t.landingFpm } : {}),
+    destSize: airports.get(f.destination)?.size ?? 'small', destIsHub: hasHub(db, f.company_id, f.destination), ...measured,
   });
   run(db, `UPDATE flights SET status = ?, completed_at = ?, season = ?, revenue = ?, fuel_cost = ?, landing_fee = ?, maintenance = ?, net = ?, telemetry = ? WHERE id = ?`,
     status, at, seasonOf(at), s.revenue, s.fuelCost, s.landingFee, s.maintenance, s.net, t ? JSON.stringify(t) : null, f.id);
   run(db, 'UPDATE aircraft SET location = ? WHERE id = ?', f.destination, f.aircraft_id);
   run(db, 'UPDATE companies SET flights = flights + 1, hours = hours + ?, revenue = revenue + ?, reputation = MIN(100, MAX(0, reputation + ?)) WHERE id = ?',
-    report?.blockHours ?? blockHours(type, f.distance_nm), s.revenue, s.reputationDelta, f.company_id);
+    measured.blockHours ?? blockHours(type, f.distance_nm), s.revenue, s.reputationDelta, f.company_id);
   const memo = `${f.origin}-${f.destination} ${f.aircraft_icao}`;
   post(db, f.company_id, at, 'payout', s.revenue, memo, f.id);
   post(db, f.company_id, at, 'fuel', -s.fuelCost, memo, f.id);

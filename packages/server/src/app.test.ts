@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cannotFly, type Job } from '@opc/shared';
+import { cannotFly, fuelBurnKg, type Job } from '@opc/shared';
 import { catalogType } from './catalog.ts';
 import { JOB_WINDOW_MS } from './board.ts';
 import { harness } from './harness.ts';
@@ -176,6 +176,8 @@ test('manual telemetry is accepted only as unverified with reduced pay', async (
   const r = await h.call('POST', `/api/v1/flights/${flight.id}/telemetry-verify`, { token: key, body: { ...h.goodReport(job), source: 'manual' } });
   assert.equal(r.body.verification, 'unverified');
   assert.equal(r.body.flight.revenue, Math.round(job.payout * 0.6));
+  // untrusted numbers never lower a cost: fuel is the type's estimate, not the (lower) reported figure
+  assert.equal(r.body.flight.fuelCost, Math.round(fuelBurnKg(catalogType('C172'), job.distanceNm) * 0.9));
 });
 
 test('telemetry endpoint: API-key auth only, schema validation, key revocation, ownership', async () => {
