@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@opc/shared": "*"
+    "@opc/shared": "*",
+    "fastify": "^5.12.8"
   }
 }
