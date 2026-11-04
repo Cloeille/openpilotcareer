@@ -39,6 +39,7 @@ export type AircraftType = z.infer<typeof aircraftTypeSchema>;
 export const customAircraftSchema = aircraftTypeSchema
   .omit({ derived: true })
   .refine((a) => a.seats + a.cargoKg > 0, { message: 'aircraft needs seats or cargo capacity' });
+export type CustomAircraftInput = z.infer<typeof customAircraftSchema>;
 
 /** One row of data/aircraft-types.json (FAA Order JO 7360.1K). `perf` exists only for curated types. */
 export type CatalogEntry = {
@@ -46,21 +47,21 @@ export type CatalogEntry = {
   perf?: { seats: number; cargoKg: number; cruiseKts: number; rangeNm: number };
 };
 
-// Per-category defaults. burn/maint/price are per tonne of capacity (see capacityKg).
+// Per-category defaults. burn/maint are per tonne of capacity (see capacityKg).
 const CATEGORY_DEFAULTS: Record<AircraftCategory, {
   engines: number; seats: number; cargoKg: number; cruiseKts: number; rangeNm: number;
-  burnKgNmPerTonne: number; maintPerHourPerTonne: number; pricePerTonne: number;
+  burnKgNmPerTonne: number; maintPerHourPerTonne: number;
 }> = {
-  'piston-single':      { engines: 1, seats: 4,   cargoKg: 150,    cruiseKts: 115, rangeNm: 550,  burnKgNmPerTonne: 0.6,  maintPerHourPerTonne: 90,  pricePerTonne: 600_000 },
-  'piston-multi':       { engines: 2, seats: 6,   cargoKg: 250,    cruiseKts: 170, rangeNm: 900,  burnKgNmPerTonne: 0.9,  maintPerHourPerTonne: 130, pricePerTonne: 1_000_000 },
-  'turboprop-single':   { engines: 1, seats: 8,   cargoKg: 800,    cruiseKts: 260, rangeNm: 1000, burnKgNmPerTonne: 1.0,  maintPerHourPerTonne: 150, pricePerTonne: 1_200_000 },
-  'turboprop-multi':    { engines: 2, seats: 10,  cargoKg: 900,    cruiseKts: 280, rangeNm: 1200, burnKgNmPerTonne: 1.1,  maintPerHourPerTonne: 180, pricePerTonne: 1_300_000 },
-  'turboprop-airliner': { engines: 2, seats: 60,  cargoKg: 1_500,  cruiseKts: 270, rangeNm: 800,  burnKgNmPerTonne: 0.35, maintPerHourPerTonne: 55,  pricePerTonne: 1_100_000 },
-  'jet-business':       { engines: 2, seats: 8,   cargoKg: 700,    cruiseKts: 440, rangeNm: 2800, burnKgNmPerTonne: 1.8,  maintPerHourPerTonne: 330, pricePerTonne: 4_000_000 },
-  'jet-airliner':       { engines: 2, seats: 150, cargoKg: 3_000,  cruiseKts: 450, rangeNm: 2800, burnKgNmPerTonne: 0.3,  maintPerHourPerTonne: 55,  pricePerTonne: 1_200_000 },
-  'jet-widebody':       { engines: 2, seats: 280, cargoKg: 15_000, cruiseKts: 490, rangeNm: 6500, burnKgNmPerTonne: 0.43, maintPerHourPerTonne: 75,  pricePerTonne: 2_500_000 },
-  'helicopter':         { engines: 1, seats: 4,   cargoKg: 300,    cruiseKts: 120, rangeNm: 300,  burnKgNmPerTonne: 1.5,  maintPerHourPerTonne: 300, pricePerTonne: 1_200_000 },
-  'other':              { engines: 1, seats: 4,   cargoKg: 400,    cruiseKts: 150, rangeNm: 600,  burnKgNmPerTonne: 1.0,  maintPerHourPerTonne: 150, pricePerTonne: 800_000 },
+  'piston-single':      { engines: 1, seats: 4,   cargoKg: 150,    cruiseKts: 115, rangeNm: 550,  burnKgNmPerTonne: 0.6,  maintPerHourPerTonne: 90 },
+  'piston-multi':       { engines: 2, seats: 6,   cargoKg: 250,    cruiseKts: 170, rangeNm: 900,  burnKgNmPerTonne: 0.9,  maintPerHourPerTonne: 130 },
+  'turboprop-single':   { engines: 1, seats: 8,   cargoKg: 800,    cruiseKts: 260, rangeNm: 1000, burnKgNmPerTonne: 1.0,  maintPerHourPerTonne: 150 },
+  'turboprop-multi':    { engines: 2, seats: 10,  cargoKg: 900,    cruiseKts: 280, rangeNm: 1200, burnKgNmPerTonne: 1.1,  maintPerHourPerTonne: 180 },
+  'turboprop-airliner': { engines: 2, seats: 60,  cargoKg: 1_500,  cruiseKts: 270, rangeNm: 800,  burnKgNmPerTonne: 0.35, maintPerHourPerTonne: 55 },
+  'jet-business':       { engines: 2, seats: 8,   cargoKg: 700,    cruiseKts: 440, rangeNm: 2800, burnKgNmPerTonne: 1.8,  maintPerHourPerTonne: 330 },
+  'jet-airliner':       { engines: 2, seats: 150, cargoKg: 3_000,  cruiseKts: 450, rangeNm: 2800, burnKgNmPerTonne: 0.3,  maintPerHourPerTonne: 55 },
+  'jet-widebody':       { engines: 2, seats: 280, cargoKg: 15_000, cruiseKts: 490, rangeNm: 6500, burnKgNmPerTonne: 0.43, maintPerHourPerTonne: 75 },
+  'helicopter':         { engines: 1, seats: 4,   cargoKg: 300,    cruiseKts: 120, rangeNm: 300,  burnKgNmPerTonne: 1.5,  maintPerHourPerTonne: 300 },
+  'other':              { engines: 1, seats: 4,   cargoKg: 400,    cruiseKts: 150, rangeNm: 600,  burnKgNmPerTonne: 1.0,  maintPerHourPerTonne: 150 },
 };
 
 /** Category/engine/WTC defaults for a type without curated performance (derived=true). */
@@ -94,6 +95,9 @@ export const STARTER_AIRCRAFT = 'C172';
 export const HUB_PRICE = 50_000;
 export const RESALE_FACTOR = 0.8;
 export const HARD_LANDING_FPM = 600;
+export const START_REPUTATION = 50;
+export const REJECT_REPUTATION_PENALTY = 2;
+const PRICE_PER_KG_KT = 1.0;
 const TAXI_HOURS = 0.3;
 
 export type JobKind = 'pax' | 'cargo';
@@ -102,7 +106,8 @@ export type AirportSize = 'large' | 'medium' | 'small';
 export type FlightStatus = 'active' | 'verified' | 'unverified' | 'rejected' | 'cancelled';
 
 export const capacityKg = (a: AircraftType): number => Math.max(a.seats * PAX_KG, a.cargoKg);
-export const aircraftPrice = (a: AircraftType): number => Math.round(CATEGORY_DEFAULTS[a.category].pricePerTonne * capacityKg(a) / 1000);
+/** Price follows earning power (capacity x speed), so every type pays back in a comparable number of flight hours. */
+export const aircraftPrice = (a: AircraftType): number => Math.round(PRICE_PER_KG_KT * capacityKg(a) * a.cruiseKts);
 export const aircraftValue = (a: AircraftType): number => Math.round(aircraftPrice(a) * RESALE_FACTOR);
 
 export function distanceNm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -130,6 +135,8 @@ export function cannotFly(a: AircraftType, j: JobShape): string | null {
 }
 
 export const blockHours = (a: AircraftType, dist: number): number => dist / a.cruiseKts + TAXI_HOURS;
+/** Fastest believable flight time: 25% above cruise speed (tailwind). Telemetry and manual completion both honour it. */
+export const minFlightHours = (a: AircraftType, dist: number): number => dist / (a.cruiseKts * 1.25);
 export const fuelBurnKg = (a: AircraftType, dist: number): number => CATEGORY_DEFAULTS[a.category].burnKgNmPerTonne * (capacityKg(a) / 1000) * dist;
 const LANDING_BASE: Record<Wtc, number> = { L: 40, M: 450, H: 1500, J: 3000 };
 const SIZE_FACTOR: Record<AirportSize, number> = { large: 1.5, medium: 1, small: 0.4 };
@@ -151,7 +158,7 @@ export function settle(i: SettleInput): Settlement {
   const fuelCost = Math.round((i.fuelUsedKg ?? fuelBurnKg(i.aircraft, i.distanceNm)) * FUEL_PRICE_PER_KG);
   const fee = landingFee(i.aircraft, i.destSize, i.destIsHub);
   const maintenance = Math.round((i.blockHours ?? blockHours(i.aircraft, i.distanceNm)) * maintenancePerHour(i.aircraft) * (hard ? 2 : 1));
-  const reputationDelta = (i.status === 'verified' ? 0.5 : 0.1) - (hard ? 1.5 : 0);
+  const reputationDelta = (i.status === 'verified' ? 0.1 : 0.02) - (hard ? 1.5 : 0);
   return { revenue, fuelCost, landingFee: fee, maintenance, net: revenue - fuelCost - fee - maintenance, reputationDelta };
 }
 
@@ -213,7 +220,7 @@ export function checkTelemetry(t: Telemetry, f: {
   if (landed > f.now + CLOCK_SKEW_MS) return no('landing is in the future');
   if (takeoff < f.acceptedAt - CLOCK_SKEW_MS) return no('takeoff predates the acceptance of this job');
   const hours = (landed - takeoff) / 3_600_000;
-  const minHours = f.distanceNm / (f.aircraft.cruiseKts * 1.25);
+  const minHours = minFlightHours(f.aircraft, f.distanceNm);
   const maxHours = 1 + f.distanceNm / (f.aircraft.cruiseKts * 0.4);
   if (hours < minHours) return no(`flight too short: ${hours.toFixed(2)} h for ${Math.round(f.distanceNm)} nm at ${f.aircraft.cruiseKts} kts`);
   if (hours > maxHours) return no(`flight too long: ${hours.toFixed(2)} h for ${Math.round(f.distanceNm)} nm`);
@@ -239,6 +246,7 @@ export const deleteAccountSchema = z.object({ password: z.string().min(1).max(12
 export const buyAircraftSchema = z.object({ icao: icaoTypeSchema, hub: icaoAirportSchema });
 export const buyHubSchema = z.object({ icao: icaoAirportSchema });
 export const acceptJobSchema = z.object({ aircraftId: z.int().positive() });
+export const listQuerySchema = z.object({ limit: z.coerce.number().int().min(1).max(200).default(50), before: z.coerce.number().int().positive().optional() });
 export const apiKeyCreateSchema = z.object({ label: z.string().trim().min(1).max(40) });
 export const simbriefImportSchema = z.object({ simbriefUsername: z.string().regex(/^[A-Za-z0-9._ -]{1,64}$/, 'invalid SimBrief username') });
 
@@ -248,6 +256,9 @@ export const infoSchema = z.object({
 export type ServerInfo = z.infer<typeof infoSchema>;
 
 // ---------------------------------------------------------------- API response shapes (used by the web client)
+
+/** Body of every non-2xx API response. */
+export type ApiError = { error: string; message: string };
 
 export type Airport = { icao: string; name: string; lat: number; lon: number; size: AirportSize; country: string; city: string; iata: string };
 
@@ -272,7 +283,8 @@ export type ApiKeyInfo = { id: number; label: string; createdAt: number; lastUse
 export type Me = { username: string; rank: string; company: Company; hubs: string[]; fleet: FleetAircraft[]; customAircraft: AircraftType[] };
 export type LeaderboardRow = { rank: number; companyId: number; name: string; isAI: boolean; netWorth: number; flights: number; reputation: number };
 export type Leaderboard = { season: string; seasons: string[]; rows: LeaderboardRow[] };
+export type Personality = { style: 'aggressive' | 'cautious'; preferred: string[] };
 export type CompanyProfile = Company & {
-  hubs: string[]; fleet: { icao: string; count: number }[]; personality: string | null;
+  hubs: string[]; fleet: { icao: string; count: number }[]; personality: Personality | null;
   seasons: { season: string; netWorth: number; flights: number; reputation: number }[];
 };

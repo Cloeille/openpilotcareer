@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   aircraftPrice, aircraftValue, blockHours, cannotFly, checkTelemetry, customAircraftSchema, deriveAircraft, distanceNm,
-  fallbackAircraft, fuelBurnKg, jobPayout, landingFee, rankFor, resolveCatalogEntry, seasonOf, settle, telemetrySchema,
+  fallbackAircraft, fuelBurnKg, jobPayout, minFlightHours, landingFee, rankFor, resolveCatalogEntry, seasonOf, settle, telemetrySchema,
   MANUAL_PAY_FACTOR, registerSchema,
   type AircraftType, type Telemetry,
 } from './index.ts';
@@ -91,6 +91,7 @@ test('costs scale: hub landing is cheaper, heavier aircraft cost more, longer fl
   assert.ok(landingFee(a320, 'large', false) > landingFee(c172, 'large', false));
   assert.ok(fuelBurnKg(a320, 800) > fuelBurnKg(a320, 400));
   assert.ok(blockHours(a320, 800) > blockHours(a320, 400));
+  assert.ok(minFlightHours(a320, 450) < 450 / a320.cruiseKts);
   assert.ok(aircraftValue(a320) < aircraftPrice(a320));
 });
 
