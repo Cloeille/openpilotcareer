@@ -6,7 +6,8 @@ import { hashSeed, mulberry32 } from './board.ts';
 import { all, get, run, tx, type Db } from './db.ts';
 import { buyAircraft, createCompany, finishFlight, openBoard, startFlight, typeFor, type AircraftRow } from './game.ts';
 
-export const TICK_MS = 3 * 3_600_000;
+/** ponytail: a tick lets each aircraft fly at most one leg; leg duration is not simulated. 6 h keeps AI pace within reach of a diligent human. */
+export const TICK_MS = 6 * 3_600_000;
 const MAX_CATCHUP_TICKS = 12;
 const MAX_AI_FLEET = 12;
 const WARMUP_TICKS = 8;

@@ -5,13 +5,19 @@ import { airportList, airports } from './catalog.ts';
 export const JOB_WINDOW_MS = 6 * 3_600_000;
 export const windowOf = (ms: number): number => Math.floor(ms / JOB_WINDOW_MS);
 
-const JOBS_PER_BOARD: Record<AirportSize, number> = { large: 14, medium: 9, small: 6 };
-const MAX_RANGE_NM: Record<AirportSize, number> = { large: 3000, medium: 1200, small: 450 };
-const MAX_PAX: Record<AirportSize, number> = { large: 300, medium: 90, small: 12 };
-const MAX_CARGO_KG: Record<AirportSize, number> = { large: 20_000, medium: 4_000, small: 500 };
+const JOBS_PER_BOARD: Record<AirportSize, number> = { large: 18, medium: 12, small: 8 };
+const MAX_RANGE_NM: Record<AirportSize, number> = { large: 3000, medium: 1500, small: 600 };
+
+/** Every board mixes load classes so any aircraft finds work: light (C172), regional (turboprop/regional jet), heavy (airliner). */
+const TIERS = [
+  { pax: [1, 4], cargoKg: [30, 200], nm: [30, 450] },
+  { pax: [5, 70], cargoKg: [200, 3_000], nm: [100, 1_500] },
+  { pax: [70, 320], cargoKg: [3_000, 20_000], nm: [300, 3_000] },
+] as const;
+/** Smaller airports only offer the lighter classes. */
+const TIERS_AT: Record<AirportSize, number> = { large: 3, medium: 2, small: 1 };
 const DEST_WEIGHT: Record<AirportSize, number> = { large: 4, medium: 2, small: 1 };
 const MIN_RANGE_NM = 25;
-const MIN_CARGO_KG = 30;
 const FALLBACK_DESTINATIONS = 10;
 const CACHE_LIMIT = 4000;
 
@@ -61,17 +67,19 @@ export function boardFor(origin: Airport, window: number): Job[] {
   const cands = candidatesFor(origin);
   const jobs: Job[] = [];
   for (let i = 0; cands.length > 0 && i < JOBS_PER_BOARD[origin.size]; i++) {
-    // Target distance is log-uniform so short hops (light aircraft) are as common as long hauls.
-    const first = cands[0]!, last = cands[cands.length - 1]!;
-    const target = logUniform(rand(), first.d, Math.max(last.d, first.d + 1));
+    const tier = TIERS[i % TIERS_AT[origin.size]]!;
+    // Target distance is log-uniform within the class, so short hops are as common as long hauls.
+    const reach = cands[cands.length - 1]!.d;
+    const lo = Math.min(tier.nm[0], reach), hi = Math.max(lo + 1, Math.min(tier.nm[1], reach));
+    const target = logUniform(rand(), lo, hi);
     const near = cands.filter((c) => c.d >= target * 0.85 && c.d <= target * 1.15);
     const pool = near.length > 0 ? near : [cands.reduce((best, c) => (Math.abs(c.d - target) < Math.abs(best.d - target) ? c : best))];
     let pick = rand() * pool.reduce((sum, c) => sum + DEST_WEIGHT[c.a.size], 0);
     let dest = pool[pool.length - 1]!;
     for (const c of pool) if ((pick -= DEST_WEIGHT[c.a.size]) < 0) { dest = c; break; }
     const kind = rand() < 0.65 ? 'pax' : 'cargo';
-    const pax = kind === 'pax' ? Math.max(1, Math.round(logUniform(rand(), 1, MAX_PAX[origin.size]))) : 0;
-    const payloadKg = kind === 'pax' ? pax * PAX_KG : Math.round(logUniform(rand(), MIN_CARGO_KG, MAX_CARGO_KG[origin.size]) / 10) * 10;
+    const pax = kind === 'pax' ? Math.round(logUniform(rand(), tier.pax[0], tier.pax[1])) : 0;
+    const payloadKg = kind === 'pax' ? pax * PAX_KG : Math.round(logUniform(rand(), tier.cargoKg[0], tier.cargoKg[1]) / 10) * 10;
     const distance = Math.round(dest.d);
     jobs.push({ id: boardJobId(origin.icao, window, i), source: 'board', kind, origin: origin.icao, destination: dest.a.icao, distanceNm: distance, payloadKg, pax, payout: jobPayout(kind, distance, payloadKg) });
   }

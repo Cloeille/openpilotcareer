@@ -362,3 +362,24 @@ test('SimBrief import is routed, validated and creates a pending custom job (det
   assert.equal(acc.status, 201, acc.text);
   assert.equal((await h.call('GET', '/api/v1/jobs', { token })).body.imported.length, 0);
 });
+
+test('with a web root, the server serves the app and falls back to index.html for client routes; API misses stay JSON', async () => {
+  const { mkdtempSync, writeFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const dir = mkdtempSync(join(tmpdir(), 'opc-web-'));
+  writeFileSync(join(dir, 'index.html'), '<!doctype html><title>app</title>');
+  const h = await harness({ webRoot: dir });
+  writeFileSync(join(dir, 'late.js'), 'console.log(1)'); // added after the app was built: must still be served
+  const late = await h.app.inject({ method: 'GET', url: '/late.js' });
+  assert.equal(late.statusCode, 200);
+  assert.match(String(late.headers['content-type']), /javascript/);
+  const root = await h.app.inject({ method: 'GET', url: '/' });
+  assert.equal(root.statusCode, 200);
+  assert.match(root.body, /<title>app/);
+  assert.equal((await h.app.inject({ method: 'GET', url: '/some/client/route' })).statusCode, 200);
+  const miss = await h.app.inject({ method: 'GET', url: '/api/v1/nope' });
+  assert.equal(miss.statusCode, 404);
+  assert.equal(JSON.parse(miss.body).error, 'not_found');
+  assert.equal((await h.app.inject({ method: 'POST', url: '/elsewhere' })).statusCode, 404);
+});

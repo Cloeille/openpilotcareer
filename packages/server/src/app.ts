@@ -1,3 +1,4 @@
+import fastifyStatic from '@fastify/static';
 import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import {
@@ -61,7 +62,6 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     console.error(err);
     return reply.status(500).send({ error: 'internal', message: 'internal server error' });
   });
-  app.setNotFoundHandler((_req, reply) => reply.status(404).send({ error: 'not_found', message: 'not found' }));
 
   // AI companies play lazily: any API request first plays the ticks that are due (cheap no-op otherwise).
   if (o.ai !== false) app.addHook('onRequest', async (req) => { if (req.url.startsWith('/api/')) catchUp(db, now()); });
@@ -77,11 +77,13 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   });
 
   if (o.webRoot) {
-    await app.register((await import('@fastify/static')).default, { root: o.webRoot, wildcard: false });
-    // single-page app: any other non-API GET gets index.html
-    app.setNotFoundHandler((req, reply) =>
-      req.method === 'GET' && !req.url.startsWith('/api/') ? reply.sendFile('index.html') : reply.status(404).send({ error: 'not_found', message: 'not found' }));
+    await app.register(fastifyStatic, { root: o.webRoot });
   }
+  // One handler (Fastify allows only one): API misses are JSON; with a web root, other GETs fall back to the single-page app.
+  app.setNotFoundHandler((req, reply) =>
+    o.webRoot && req.method === 'GET' && !req.url.startsWith('/api/')
+      ? reply.sendFile('index.html')
+      : reply.status(404).send({ error: 'not_found', message: 'not found' }));
 
   const user = (req: FastifyRequest): Principal & { token: string } => sessionAuth(db, req, now());
 
