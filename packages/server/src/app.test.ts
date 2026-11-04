@@ -141,6 +141,9 @@ test('verified telemetry pays the flight; ledger lines add up and the aircraft m
 
   const flights = (await h.call('GET', '/api/v1/me/flights', { token })).body;
   assert.equal(flights[0].status, 'verified');
+  assert.equal((await h.call('GET', '/api/v1/me/flights?status=active', { token })).body.length, 0);
+  assert.equal((await h.call('GET', '/api/v1/me/flights?status=verified', { token })).body.length, 1);
+  assert.equal((await h.call('GET', '/api/v1/me/flights?status=bogus', { token })).status, 400);
   // a closed flight cannot be settled twice
   assert.equal((await h.call('POST', `/api/v1/flights/${flight.id}/telemetry-verify`, { token: key, body: h.goodReport(job) })).status, 409);
 });

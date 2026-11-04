@@ -152,8 +152,8 @@ export const flightView = (r: FlightRow): Flight => ({
   acceptedAt: r.accepted_at, completedAt: r.completed_at, revenue: r.revenue, fuelCost: r.fuel_cost, landingFee: r.landing_fee, maintenance: r.maintenance, net: r.net,
 });
 
-export function flightsOf(db: Db, companyId: number, limit: number, before?: number): FlightRow[] {
-  return all<FlightRow>(db, 'SELECT * FROM flights WHERE company_id = ? AND id < ? ORDER BY id DESC LIMIT ?', companyId, before ?? Number.MAX_SAFE_INTEGER, limit);
+export function flightsOf(db: Db, companyId: number, limit: number, before?: number, status?: FlightStatus): FlightRow[] {
+  return all<FlightRow>(db, 'SELECT * FROM flights WHERE company_id = ?1 AND id < ?2 AND (?3 IS NULL OR status = ?3) ORDER BY id DESC LIMIT ?4', companyId, before ?? Number.MAX_SAFE_INTEGER, status ?? null, limit);
 }
 
 export function transactionsOf(db: Db, companyId: number, limit: number, before?: number): Transaction[] {

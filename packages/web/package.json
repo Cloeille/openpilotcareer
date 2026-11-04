@@ -2,5 +2,16 @@
   "name": "@opc/web",
   "version": "0.1.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "vite": "^7.0.0"
+  },
+  "dependencies": {
+    "@opc/shared": "*"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc -p ."
+  }
 }

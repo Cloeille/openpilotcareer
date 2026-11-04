@@ -2,7 +2,7 @@ import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import {
   API_VERSION, acceptJobSchema, apiKeyCreateSchema, buyAircraftSchema, buyHubSchema, checkTelemetry, customAircraftSchema, deleteAccountSchema,
-  icaoAirportSchema, icaoTypeSchema, listQuerySchema, loginSchema, registerSchema, simbriefImportSchema, telemetrySchema,
+  flightListQuerySchema, icaoAirportSchema, icaoTypeSchema, listQuerySchema, loginSchema, registerSchema, simbriefImportSchema, telemetrySchema,
   type ApiKeyInfo, type ServerInfo,
 } from '@opc/shared';
 import { catchUp, seedAi } from './ai.ts';
@@ -246,8 +246,8 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   });
 
   app.get('/api/v1/me/flights', async (req) => {
-    const q = parse(listQuerySchema, req.query);
-    return flightsOf(db, user(req).companyId, q.limit, q.before).map(flightView);
+    const q = parse(flightListQuerySchema, req.query);
+    return flightsOf(db, user(req).companyId, q.limit, q.before, q.status).map(flightView);
   });
 
   app.post('/api/v1/flights/:id/cancel', async (req) => {

@@ -246,7 +246,9 @@ export const deleteAccountSchema = z.object({ password: z.string().min(1).max(12
 export const buyAircraftSchema = z.object({ icao: icaoTypeSchema, hub: icaoAirportSchema });
 export const buyHubSchema = z.object({ icao: icaoAirportSchema });
 export const acceptJobSchema = z.object({ aircraftId: z.int().positive() });
+export const FLIGHT_STATUSES = ['active', 'verified', 'unverified', 'rejected', 'cancelled'] as const;
 export const listQuerySchema = z.object({ limit: z.coerce.number().int().min(1).max(200).default(50), before: z.coerce.number().int().positive().optional() });
+export const flightListQuerySchema = listQuerySchema.extend({ status: z.enum(FLIGHT_STATUSES).optional() });
 export const apiKeyCreateSchema = z.object({ label: z.string().trim().min(1).max(40) });
 export const simbriefImportSchema = z.object({ simbriefUsername: z.string().regex(/^[A-Za-z0-9._ -]{1,64}$/, 'invalid SimBrief username') });
 
