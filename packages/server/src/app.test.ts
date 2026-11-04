@@ -221,6 +221,8 @@ test('manual completion pays 60% but only after the fastest believable flight ti
   const balance = (await h.call('GET', '/api/v1/me', { token })).body.company.balance;
   assert.equal((await h.call('POST', `/api/v1/flights/${f2.id}/cancel`, { token })).body.status, 'cancelled');
   assert.equal((await h.call('GET', '/api/v1/me', { token })).body.company.balance, balance);
+  assert.ok((await h.call('GET', `/api/v1/jobs?airport=${j2.origin}`, { token })).body.jobs.some((j: Job) => j.id === j2.id), 'a cancelled job returns to the board');
+  assert.equal((await h.call('POST', `/api/v1/flights/${f2.id}/cancel`, { token })).status, 409, 'already closed');
 });
 
 test('buying hubs and aircraft: price checks, hub requirement, insufficient funds, any ICAO works', async () => {

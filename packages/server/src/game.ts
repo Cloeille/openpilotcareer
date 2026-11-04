@@ -273,12 +273,16 @@ export function completeManually(db: Db, f: FlightRow, at: number): FlightRow {
   return finishFlight(db, f, 'unverified', at);
 }
 
-/** Close a flight without pay: `rejected` (failed verification, reputation penalty) or `cancelled` (abandoned). */
+/** Close a flight without pay. `rejected` (failed verification): reputation penalty, the job stays claimed so a failed
+ *  attempt cannot be retried until it passes. `cancelled` (abandoned): the claim is released and the job returns to the board,
+ *  so accept-and-cancel cannot be used to hoard jobs. */
 export function closeUnpaid(db: Db, f: FlightRow, status: 'rejected' | 'cancelled', at: number, reason?: string, telemetry?: Telemetry): FlightRow {
   run(db, 'UPDATE flights SET status = ?, reject_reason = ?, completed_at = ?, season = ?, telemetry = ? WHERE id = ?', status, reason ?? null, at, seasonOf(at), telemetry ? JSON.stringify(telemetry) : null, f.id);
   if (status === 'rejected') {
     run(db, 'UPDATE companies SET reputation = MAX(0, reputation - ?) WHERE id = ?', REJECT_REPUTATION_PENALTY, f.company_id);
     snapshot(db, f.company_id, at);
+  } else {
+    run(db, 'DELETE FROM job_claims WHERE job_id = ? AND company_id = ?', f.job_id, f.company_id);
   }
   return get<FlightRow>(db, 'SELECT * FROM flights WHERE id = ?', f.id)!;
 }
