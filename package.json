@@ -1,0 +1,10 @@
+{
+  "name": "openpilotcareer",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/shared",
+    "packages/server",
+    "packages/web"
+  ]
+}
