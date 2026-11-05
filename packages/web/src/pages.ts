@@ -1,4 +1,4 @@
-import { cannotFly, aircraftPrice, HUB_PRICE, RANKS, type AircraftType, type ApiKeyInfo, type Flight, type Job, type Leaderboard, type Me, type CompanyProfile, type Transaction, AIRCRAFT_CATEGORIES, WTCS, type Airport } from '@opc/shared';
+import { cannotFly, aircraftPrice, HUB_PRICE, MAX_COMPANIES_PER_USER, RANKS, type AircraftType, type ApiKeyInfo, type Flight, type Job, type Leaderboard, type Me, type CompanyProfile, type Transaction, AIRCRAFT_CATEGORIES, WTCS, type Airport } from '@opc/shared';
 import { api, downloadExport, session } from './api.ts';
 import { ApiError } from './errors.ts';
 import { debounce, field, fmtDate, fmtMoney, fmtNum, h, input, notify, table } from './ui.ts';
@@ -31,13 +31,13 @@ const dashboard: Page = async ({ me, refresh }) => {
   ]);
   const c = me.company;
   const stat = (label: string, value: string): HTMLElement => h('div', { class: 'stat' }, h('dt', null, label), h('dd', null, value));
-  const next = RANKS.find((r) => r.hours > c.hours || r.flights > c.flights);
+  const next = RANKS.find((r) => r.hours > me.pilot.hours || r.flights > me.pilot.flights);
   return h('div', null,
     h('h1', null, c.name),
     h('dl', { class: 'stats' },
-      stat('Pilot rank', me.rank), stat('Balance', fmtMoney(c.balance)), stat('Net worth', fmtMoney(c.netWorth)),
+      stat('Pilot rank', me.pilot.rank), stat('Balance', fmtMoney(c.balance)), stat('Net worth', fmtMoney(c.netWorth)),
       stat('Reputation', `${c.reputation} / 100`), stat('Flights', fmtNum(c.flights)), stat('Hours', fmtNum(c.hours, 1))),
-    next ? h('p', { class: 'muted' }, `Next rank: ${next.name} at ${next.hours} h and ${next.flights} flights.`) : null,
+    next ? h('p', { class: 'muted' }, `Your rank is the pilot's, counted over all your companies (${fmtNum(me.pilot.hours, 1)} h, ${fmtNum(me.pilot.flights)} flights). Next rank: ${next.name} at ${next.hours} h and ${next.flights} flights.`) : null,
     section('Active flights', active.length === 0 ? h('p', { class: 'muted' }, 'No flight in progress. Accept a job on the job board.') : flightList(active, refresh)),
     section('Recent flights', recent.length === 0 ? h('p', { class: 'muted' }, 'Your first flight is waiting on the job board.') : flightTable(recent)));
 };
@@ -194,8 +194,12 @@ const leaderboard: Page = async ({ me }) => {
 
 // ------------------------------------------------------------------ settings
 
-const settings: Page = async ({ me }) => {
+const settings: Page = async ({ me, refresh }) => {
   const keys = await api<ApiKeyInfo[]>('/me/api-keys');
+  const newName = input({ name: 'rename', type: 'text', required: true, minlength: 2, maxlength: 40, value: me.company.name, autocomplete: 'off' });
+  const createName = input({ name: 'new-company-name', type: 'text', required: true, minlength: 2, maxlength: 40, autocomplete: 'off' });
+  const createHub = input({ name: 'new-company-hub', type: 'text', required: true, maxlength: 4, pattern: '[A-Za-z]{4}', autocomplete: 'off', style: 'text-transform:uppercase' });
+  const canCreate = me.companies.length < MAX_COMPANIES_PER_USER;
   const label = input({ type: 'text', name: 'key-label', required: true, maxlength: 40, placeholder: 'e.g. MSFS PC' });
   const reveal = h('div', { 'aria-live': 'polite' });
   const list = h('div');
@@ -206,6 +210,17 @@ const settings: Page = async ({ me }) => {
 
   return h('div', null, h('h1', null, 'Settings'),
     section('Server', h('p', null, `You are signed in as ${me.username} on `, h('strong', null, session.server), '. Accounts exist only on this server.')),
+    section('Rename your company',
+      h('p', { class: 'muted' }, `Renames ${me.company.name}, the company selected in the header. Names are unique on this server, ignoring upper/lower case.`),
+      h('form', { class: 'row end', onsubmit: (e: Event) => { e.preventDefault(); void run('Company renamed.', async () => { await api(`/companies/${me.company.id}`, { method: 'PATCH', body: { name: newName.value.trim() } }); await refresh(); }); } },
+        field('Company name', newName), h('button', { type: 'submit' }, 'Rename'))),
+    section('New company',
+      h('p', { class: 'muted' }, `You may run up to ${MAX_COMPANIES_PER_USER} companies (${me.companies.length} so far). Each starts from scratch with the same capital and one aircraft at its own hub; your pilot rank counts flights and hours from all of them.`),
+      canCreate ? h('form', { class: 'row end', onsubmit: (e: Event) => { e.preventDefault(); void run('Company created.', async () => {
+        const created = await api<Me>('/me/companies', { method: 'POST', body: { name: createName.value.trim(), hub: createHub.value.toUpperCase() } });
+        session.company = created.company.id;
+        await refresh();
+      }); } }, field('Company name', createName), field('Home hub (ICAO)', createHub), h('button', { type: 'submit' }, 'Create company')) : h('p', null, 'You have reached the limit.')),
     section('API keys for simulator clients',
       h('p', { class: 'muted' }, 'A key lets a simulator companion list your active flights and submit telemetry for them (see docs/telemetry-api.md). It cannot read or change anything else. Keys are stored hashed and shown once.'),
       list,
@@ -217,13 +232,13 @@ const settings: Page = async ({ me }) => {
       }); } }, field('Label', label), h('button', { type: 'submit' }, 'Create key')),
       reveal),
     section('Export your data',
-      h('p', { class: 'muted' }, 'Everything this server holds about you, as JSON (profile, company, hubs, fleet, flights, ledger), plus CSV tables.'),
+      h('p', { class: 'muted' }, 'Everything this server holds about you, as JSON (profile and every company with its hubs, fleet, flights and ledger). The CSV tables are for the company selected in the header.'),
       h('div', { class: 'row' },
         h('button', { type: 'button', onclick: () => void run('Export downloaded.', () => downloadExport('json')) }, 'Download JSON'),
         h('button', { type: 'button', class: 'secondary', onclick: () => void run('Export downloaded.', () => downloadExport('flights.csv')) }, 'Flights CSV'),
         h('button', { type: 'button', class: 'secondary', onclick: () => void run('Export downloaded.', () => downloadExport('transactions.csv')) }, 'Transactions CSV'))),
     h('section', { class: 'card danger-zone' }, h('h2', null, 'Delete account'),
-      h('p', null, 'Permanently deletes your account, company, fleet, flights and ledger from this server. This cannot be undone. Export first if you want a copy.'),
+      h('p', null, 'Permanently deletes your account and all of your companies, with their fleets, flights and ledgers, from this server. This cannot be undone. Export first if you want a copy.'),
       h('form', { class: 'row end', onsubmit: (e: Event) => { e.preventDefault(); if (!confirm(`Delete ${me.username} permanently?`)) return; void run('Account deleted.', async () => { await api('/me', { method: 'DELETE', body: { password: pw.value } }); session.set(session.server, null); location.reload(); }); } },
         field('Confirm with your password', pw), h('button', { type: 'submit', class: 'danger' }, 'Delete my account'))));
 };

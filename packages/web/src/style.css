@@ -18,7 +18,9 @@ nav { display: flex; flex-wrap: wrap; gap: .25rem; flex: 1; }
 nav a { padding: .35rem .7rem; border-radius: 6px; text-decoration: none; color: var(--text); }
 nav a:hover { background: var(--panel2); }
 nav a[aria-current='page'] { background: var(--accent); color: var(--accent-text); font-weight: 600; }
-.who { color: var(--muted); font-size: .9rem; }
+.who { color: var(--muted); font-size: .9rem; display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.switcher { display: inline-flex; gap: .4rem; align-items: center; }
+.switcher select { max-width: 14rem; }
 main { max-width: 1100px; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
 main:focus { outline: none; }
 main.center { display: grid; place-items: center; min-height: 100vh; }

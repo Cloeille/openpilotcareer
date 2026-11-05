@@ -1,4 +1,5 @@
 import { OPC_GLOBAL_URL, infoSchema, type ServerInfo } from '@opc/shared';
+import { readCompany, writeCompany } from './company-store.ts';
 import { ApiError } from './errors.ts';
 
 /** Default server: VITE_OPC_GLOBAL_URL at build time (empty = the server that served this page), else the shared OPC_GLOBAL_URL. */
@@ -18,6 +19,7 @@ function load(): Stored {
 }
 
 const state = load();
+let company = readCompany(localStorage, state.server);
 export const session = {
   get server() { return state.server; },
   get token() { return state.token; },
@@ -25,19 +27,27 @@ export const session = {
   set(server: string, token: string | null) {
     state.server = server;
     state.token = token;
+    company = readCompany(localStorage, server);
     localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  },
+  /** The company requests act as (sent as X-OPC-Company); null = the server's default, the player's oldest. */
+  get company() { return company; },
+  set company(id: number | null) {
+    company = id;
+    writeCompany(localStorage, state.server, id);
   },
 };
 
 let onUnauthorized: () => void = () => {};
 export const setUnauthorizedHandler = (fn: () => void): void => { onUnauthorized = fn; };
 
-type Opts = { method?: 'GET' | 'POST' | 'DELETE'; body?: unknown; server?: string; auth?: boolean };
+type Opts = { method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'; body?: unknown; server?: string; auth?: boolean };
 
 async function request(path: string, o: Opts): Promise<Response> {
   const headers: Record<string, string> = {};
   if (o.body !== undefined) headers['content-type'] = 'application/json';
   if (o.auth !== false && state.token) headers.authorization = `Bearer ${state.token}`;
+  if (o.auth !== false && company !== null) headers['x-opc-company'] = String(company);
   try {
     return await fetch(`${o.server ?? state.server}/api/v1${path}`, {
       method: o.method ?? (o.body === undefined ? 'GET' : 'POST'), headers, ...(o.body !== undefined ? { body: JSON.stringify(o.body) } : {}), signal: AbortSignal.timeout(20_000),

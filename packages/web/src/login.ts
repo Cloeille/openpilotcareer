@@ -6,7 +6,7 @@ import type { Me } from '@opc/shared';
 
 const CUSTOM = 'custom';
 /** Login / register with the server picker. `done` runs once a session exists. */
-export function loginView(root: HTMLElement, done: (me: Me) => void): void {
+export function loginView(root: HTMLElement, done: () => void): void {
   const isGlobal = session.server === GLOBAL_URL;
   const globalRadio = input({ type: 'radio', name: 'server', id: 'srv-global', value: 'global', checked: isGlobal });
   const customRadio = input({ type: 'radio', name: 'server', id: 'srv-custom', value: CUSTOM, checked: !isGlobal });
@@ -38,7 +38,7 @@ export function loginView(root: HTMLElement, done: (me: Me) => void): void {
       const r = await api<Me & { token: string }>(path, { server, auth: false, body: { username: username.value, password: password.value } });
       session.set(server, r.token);
       password.value = '';
-      done(r);
+      done();
     } catch (e) {
       error.textContent = e instanceof ApiError ? e.message : String(e);
     }
