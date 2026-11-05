@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenPilotCareer panel (browser mock)</title>
+<link rel="stylesheet" href="/panel/OpenPilotCareer.css">
+<style>
+  body { margin: 0; background: #05080c; display: flex; justify-content: center; }
+  #frame { width: 100%; max-width: 560px; height: 100vh; }
+</style>
+</head>
+<body>
+  <main id="frame"><div id="opc-root"></div></main>
+  <script src="/panel/view-model.js"></script>
+  <script src="/panel/panel.js"></script>
+  <script>OPCPanel.mount(document.getElementById('opc-root')).start();</script>
+</body>
+</html>

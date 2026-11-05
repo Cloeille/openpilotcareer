@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<SimBase.Document Type="InGamePanels" version="1,0">
+  <Filename>InGamePanel_OpenPilotCareer.spb</Filename>
+  <InGamePanels.InGamePanelDefinition id="PANEL_OPENPILOTCAREER" Name="OpenPilotCareer" url="html_ui/InGamePanels/OpenPilotCareer/OpenPilotCareer.html" resizeDirections="Both" minWidth="33" minHeight="35" defaultWidth="36" defaultHeight="50" defaultTop="33" defaultRight="2" icon="ICON_TOOLBAR_OPENPILOTCAREER_PANEL" buttonVisible="true">
+  </InGamePanels.InGamePanelDefinition>
+</SimBase.Document>

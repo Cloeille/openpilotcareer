@@ -1,0 +1,133 @@
+/* OpenPilotCareer panel. Dark EFB-style, base text 18px for tablet-size reading.
+ * Status is never colour-only: every state also has a glyph and a text label.
+ * Plain CSS on purpose (no custom properties, no flex gap): the sim's CSS engine level is not documented.
+ * Every text and border colour is checked for WCAG AA contrast by test/contrast.test.js. */
+.opc {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 12px;
+  background: #0e141b;
+  color: #f1f5f9;
+  font-family: Roboto, 'Segoe UI', Arial, sans-serif;
+  font-size: 18px;
+  line-height: 1.35;
+}
+.opc *, .opc *::before, .opc *::after { box-sizing: border-box; }
+.opc p, .opc h1, .opc h2, .opc ul, .opc ol { margin: 0; padding: 0; }
+.opc ul, .opc ol { list-style: none; }
+
+.opc-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.opc-muted { color: #b4c1cf; }
+.opc-glyph { display: inline-block; min-width: 1.2em; margin-right: 6px; text-align: center; }
+
+.opc-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.opc-head > * { margin: 0 8px 8px 0; }
+.opc-h1 { font-size: 22px; font-weight: 700; }
+.opc-conn {
+  padding: 4px 12px;
+  border: 2px solid #7f93a8;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.opc-conn[data-connection='online'] { border-color: #86e8b0; }
+.opc-conn[data-connection='connecting'] { border-color: #7cc4ff; }
+.opc-conn[data-connection='offline'] { border-color: #ffd166; }
+.opc-conn[data-connection='error'] { border-color: #ff9b9b; }
+
+.opc-notice {
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 2px solid #7f93a8;
+  border-radius: 10px;
+  background: #17202b;
+  word-wrap: break-word;
+}
+.opc[data-connection='offline'] .opc-notice { border-color: #ffd166; }
+.opc[data-connection='error'] .opc-notice { border-color: #ff9b9b; }
+
+.opc-section {
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid #7f93a8;
+  border-radius: 10px;
+  background: #17202b;
+}
+.opc-h2 {
+  margin-bottom: 6px !important;
+  color: #b4c1cf;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.opc-line { word-wrap: break-word; }
+.opc-label { color: #b4c1cf; }
+.opc-value { font-weight: 700; }
+.opc-route { font-size: 28px; font-weight: 700; word-wrap: break-word; }
+.opc-route.opc-muted { font-size: 20px; font-weight: 400; }
+.opc-phase { margin-bottom: 8px; font-size: 22px; font-weight: 700; }
+
+.opc-steps { display: flex; flex-wrap: wrap; }
+.opc-step {
+  margin: 0 6px 6px 0;
+  padding: 4px 10px;
+  border: 1px solid #7f93a8;
+  border-radius: 8px;
+  color: #b4c1cf;
+}
+.opc-step[data-state='current'] {
+  border: 2px solid #7cc4ff;
+  color: #f1f5f9;
+  font-weight: 700;
+}
+
+.opc-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border: 2px solid #7f93a8;
+  border-radius: 8px;
+  font-size: 22px;
+  font-weight: 700;
+}
+.opc-badge[data-verification='pending'] { border-color: #ffd166; }
+.opc-badge[data-verification='verified'] { border-color: #86e8b0; }
+.opc-badge[data-verification='rejected'] { border-color: #ff9b9b; border-style: dashed; }
+.opc-badge + .opc-line { margin-top: 8px; }
+
+.opc-has-flags { border: 2px solid #ffd166; }
+.opc-flag-count { font-weight: 700; }
+.opc-flags { margin-top: 6px; }
+.opc-flag { padding: 4px 0; word-wrap: break-word; }
+
+.opc-server { font-size: 15px; word-wrap: break-word; }
+.opc-checked { margin-top: 4px; font-size: 15px; }
+
+/* Sim wrapper (ingame-ui). No effect in the plain-browser mock page. */
+ingame-ui#OpenPilotCareerPanel,
+ingame-ui#OpenPilotCareerPanel .ingameUiWrapper,
+ingame-ui#OpenPilotCareerPanel .ingameUiContent {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+ingame-ui#OpenPilotCareerPanel #opc-root { flex: 1 1 auto; min-height: 0; }

@@ -1,0 +1,12 @@
+{
+  "name": "@opc/msfs-package",
+  "private": true,
+  "type": "commonjs",
+  "description": "MSFS 2020/2024 toolbar panel package for OpenPilotCareer (companion UI; the bridge verifies)",
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "build": "node build-layout.js",
+    "test": "node --test \"test/*.test.js\"",
+    "mock": "node mock/mock-status-server.js"
+  }
+}
