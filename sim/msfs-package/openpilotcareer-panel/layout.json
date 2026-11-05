@@ -2,8 +2,8 @@
   "content": [
     {
       "path": "html_ui/InGamePanels/OpenPilotCareer/OpenPilotCareer.css",
-      "size": 3988,
-      "date": 134383687624919794
+      "size": 4193,
+      "date": 134383689008623900
     },
     {
       "path": "html_ui/InGamePanels/OpenPilotCareer/OpenPilotCareer.html",
@@ -22,8 +22,8 @@
     },
     {
       "path": "html_ui/InGamePanels/OpenPilotCareer/view-model.js",
-      "size": 5981,
-      "date": 134383683558918735
+      "size": 6036,
+      "date": 134383689100063963
     },
     {
       "path": "html_ui/Textures/Menu/toolbar/ICON_TOOLBAR_OPENPILOTCAREER_PANEL.svg",

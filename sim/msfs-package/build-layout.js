@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Generates openpilotcareer-panel/layout.json: every file in the package (except layout.json and
  * manifest.json) with its byte size and mtime as a Windows FILETIME (100 ns ticks since 1601-01-01 UTC),
- * the format used by the layout.json files of the SDK samples we read.
+ * the magnitude/format seen in the community toolbar-panel template's layout.json; the SDK pages we read do not define it.
  *
  *   node build-layout.js           write layout.json
  *   node build-layout.js --check   fail if layout.json paths/sizes differ from the files on disk

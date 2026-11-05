@@ -66,9 +66,10 @@ test('flags: count, singular/plural summary, cap with hidden count, copy not ali
 
 test('announcement summarises the whole state for screen readers', () => {
   const text = VM.fromStatus(status({ verification: 'rejected', reason: 'Too fast.', flags: ['slew'] })).announcement;
-  for (const part of ['LFPG to LFMN', 'A20N', 'Airborne (step 3 of 5)', 'Rejected: Too fast.', '1 flag raised']) {
+  for (const part of ['LFPG to LFMN', 'A20N', 'Airborne (step 3 of 5)', 'Rejected: Too fast', '1 flag raised']) {
     assert.ok(text.includes(part), `missing "${part}" in: ${text}`);
   }
+  assert.ok(!text.includes('..'), text);
 });
 
 test('offline and connecting are distinct, labelled states with no data', () => {

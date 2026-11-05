@@ -120,7 +120,7 @@
       'Verification ' + v.label + (v.reason ? ': ' + v.reason : ''),
       vm.flags.summary
     ];
-    return parts.join('. ') + '.';
+    return parts.map(function (t) { return t.replace(/[.\s]+$/, ''); }).join('. ') + '.';
   }
 
   function fromStatus(s) {
