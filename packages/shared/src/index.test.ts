@@ -152,6 +152,16 @@ test('checkTelemetry rejects each implausible dimension with a reason', () => {
   }
 });
 
+test('client-raised anti-cheat flags fail the check; an empty list is fine; malformed flags are a schema error', () => {
+  const r = checkTelemetry({ ...report, flags: ['slew_detected', 'time_acceleration_above_1x'] }, flight);
+  assert.equal(r.ok, false);
+  if (!r.ok) assert.match(r.reason, /flagged.*slew_detected, time_acceleration_above_1x/);
+  assert.deepEqual(checkTelemetry({ ...report, flags: [] }, flight), { ok: true, blockHours: 0.75 });
+  assert.ok(telemetrySchema.safeParse({ ...report, flags: ['slew_detected'] }).success);
+  assert.ok(!telemetrySchema.safeParse({ ...report, flags: ['Not A Flag'] }).success);
+  assert.ok(!telemetrySchema.safeParse({ ...report, flags: 'slew' }).success);
+});
+
 test('register schema bounds username and password', () => {
   assert.ok(registerSchema.safeParse({ username: 'abc', password: '12345678' }).success);
   assert.ok(!registerSchema.safeParse({ username: 'a b', password: '12345678' }).success);
