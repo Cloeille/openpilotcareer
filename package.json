@@ -5,7 +5,8 @@
   "workspaces": [
     "packages/shared",
     "packages/server",
-    "packages/web"
+    "packages/web",
+    "sim/bridge"
   ],
   "devDependencies": {
     "@types/node": "^26.6.6",
