@@ -4,9 +4,12 @@
   "private": true,
   "type": "module",
   "description": "Simulator bridge: turns a SimConnect sample stream into a telemetry report for an OpenPilotCareer server",
-  "bin": { "opc-bridge": "./src/cli.ts" },
+  "bin": {
+    "opc-bridge": "./src/cli.ts"
+  },
   "dependencies": {
     "@opc/shared": "*",
+    "node-simconnect": "^4.2.1",
     "zod": "^4.6.7"
   },
   "scripts": {
