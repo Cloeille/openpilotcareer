@@ -87,13 +87,20 @@ Errors are `{ "error": "<code>", "message": "<text>" }`. Session routes take `Au
 | Server | `GET /info` |
 | Reference data | `GET /airports?q=`, `/airports/:icao`, `/aircraft-types?q=`, `/aircraft-types/:icao` |
 | Accounts | `POST /auth/register`, `/auth/login`, `/auth/logout`; `GET /me`; `DELETE /me` (needs password) |
+| Companies | `GET`/`POST /me/companies` (`{name, hub}`, up to 5 per player), `PATCH /companies/:id` (`{name}`, rename) |
 | Your data | `GET /me/export?format=json\|flights.csv\|transactions.csv`, `/me/flights`, `/me/transactions` |
 | API keys | `GET`/`POST /me/api-keys`, `DELETE /me/api-keys/:id` |
-| Company | `POST /me/hubs`, `/me/fleet`, `/me/custom-aircraft`; `DELETE /me/custom-aircraft/:icao` |
+| Active company | `POST /me/hubs`, `/me/fleet`, `/me/custom-aircraft`; `DELETE /me/custom-aircraft/:icao` |
 | Jobs | `GET /jobs[?airport=]`, `POST /jobs/:id/accept`, `POST /jobs/import-simbrief` |
 | Flights | `POST /flights/:id/complete` (manual, unverified), `/flights/:id/cancel` |
 | Verification | `GET /flights/active`, `POST /flights/:id/telemetry-verify` (API key): see [docs/telemetry-api.md](docs/telemetry-api.md) |
 | Competition | `GET /leaderboard[?season=YYYY-MM]`, `GET /companies/:id` |
+
+### Several companies
+
+A player owns up to 5 companies (`MAX_COMPANIES_PER_USER`); every one starts with the same capital and aircraft, so the cap is a speed bump against farming starting capital, not a hard defence. The **pilot** is the account: its rank counts the hours and flights of all its companies and is derived, never stored. Everything else (balance, fleet, hubs, flights, ledger, leaderboard row) belongs to one company.
+
+Session routes act as one company, chosen with the `X-OPC-Company: <id>` request header; without it the account's oldest company is used. Auth resolves the header once and answers `403 not_your_company` for any company that is not yours (someone else's, an AI company and a nonexistent id look the same); a malformed value is `400`. `GET /me` returns the active company, `companies` (all of yours) and the `pilot`. `PATCH /companies/:id` renames: names are unique ignoring case (`409 name_taken`); the id must be yours. Exports cover every company (`schemaVersion` 2: `companies[]` replaces the single `company`, `hubs`, `fleet`, `customAircraft`, `flights` and `transactions` at the top level); the CSV exports follow the active company. API keys belong to the account and work for all of its companies ([docs/telemetry-api.md](docs/telemetry-api.md)).
 
 ### SimBrief
 

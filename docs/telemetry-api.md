@@ -10,13 +10,13 @@ Create a key in **Settings → API keys** in the web app. A key is shown **once*
 Authorization: Bearer opc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-A key is bound to one account and can do exactly two things: list that account's active flights and submit telemetry for them. It cannot read the account, spend money or change anything else. Revoke it in the same screen; a revoked key is rejected immediately. Session tokens from the web login are **not** accepted here (401), and API keys are not accepted elsewhere.
+A key is bound to one **account**, not to one company: a player can own several companies (up to 5) and one key serves all of them. Every flight carries its `companyId`, and the server pays the company that accepted the job. The client needs no company selection and sends no `X-OPC-Company` header (it is ignored here). A key can do exactly two things: list the active flights of all of that account's companies and submit telemetry for any of them. It cannot read the account, spend money or change anything else. Revoke it in the same screen; a revoked key is rejected immediately. Session tokens from the web login are **not** accepted here (401), and API keys are not accepted elsewhere.
 
 ## Find the flight
 
 ```
 GET /api/v1/flights/active
-→ 200 [ { "id": 42, "status": "active", "aircraftIcao": "C172",
+→ 200 [ { "id": 42, "companyId": 7, "status": "active", "aircraftIcao": "C172",
           "job": { "origin": "LFPG", "destination": "EGLL", "distanceNm": 195, "payloadKg": 300, "pax": 3, "requiredAircraft": "A320"?, ... },
           "acceptedAt": 1783166400000, ... } ]
 ```
@@ -93,7 +93,7 @@ Every non-2xx response is `{ "error": "<code>", "message": "<text>" }`.
 |---|---|---|
 | 400 | `invalid_request` | Body failed schema validation (message lists the fields) |
 | 401 | `unauthorized` | Missing, wrong or revoked API key |
-| 404 | `flight_not_found` | No such flight **for this account** (other users' flights look identical) |
+| 404 | `flight_not_found` | No such flight in **any company of this account** (other players' flights look identical) |
 | 409 | `flight_closed` | Flight is no longer `active` |
 | 429 | `rate_limited` | Too many credential attempts from one IP |
 
