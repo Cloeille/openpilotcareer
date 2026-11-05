@@ -1,5 +1,5 @@
-import { flightsOf, hubsOf, customAircraftOf, fleetView, flightView, companyView, transactionsOf, type FlightRow } from './game.ts';
-import { EXPORT_SCHEMA_VERSION, rankFor, type ServerInfo } from '@opc/shared';
+import { companiesOf, customAircraftOf, fleetView, flightView, flightsOf, hubsOf, pilotView, transactionsOf, type FlightRow } from './game.ts';
+import { EXPORT_SCHEMA_VERSION, type ServerInfo } from '@opc/shared';
 import { all, get, type Db } from './db.ts';
 
 type Cell = string | number | null;
@@ -29,22 +29,22 @@ export function transactionsCsv(db: Db, companyId: number): string {
   return toCsv(['id', 'at', 'kind', 'amount', 'balanceAfter', 'flightId', 'memo'], allTransactions(db, companyId).map((t) => [t.id, iso(t.at), t.kind, t.amount, t.balanceAfter, t.flightId, t.memo]));
 }
 
-/** Everything the server holds about one account. Credentials (password hash, session tokens, API-key hashes) are not included. */
+/** Everything the server holds about one account, all of its companies included. Credentials (password hash, session tokens, API-key hashes) are not included. */
 export function exportDocument(db: Db, userId: number, server: ServerInfo, now: number) {
-  const user = get<{ username: string; created_at: number; company_id: number }>(db, 'SELECT u.username, u.created_at, c.id AS company_id FROM users u JOIN companies c ON c.user_id = u.id WHERE u.id = ?', userId)!;
-  const companyId = user.company_id;
-  const company = companyView(db, companyId);
+  const user = get<{ username: string; created_at: number }>(db, 'SELECT username, created_at FROM users WHERE id = ?', userId)!;
   return {
     schemaVersion: EXPORT_SCHEMA_VERSION,
     exportedAt: new Date(now).toISOString(),
     server: { name: server.name, version: server.version, apiVersion: server.apiVersion },
-    profile: { username: user.username, createdAt: new Date(user.created_at).toISOString(), rank: rankFor(company.hours, company.flights) },
-    company,
-    hubs: hubsOf(db, companyId),
-    fleet: fleetView(db, companyId),
-    customAircraft: customAircraftOf(db, companyId),
-    flights: allFlights(db, companyId).map((f) => ({ ...flightView(f), telemetry: f.telemetry ? (JSON.parse(f.telemetry) as unknown) : null })),
-    transactions: allTransactions(db, companyId),
+    profile: { username: user.username, createdAt: new Date(user.created_at).toISOString(), ...pilotView(db, userId) },
+    companies: companiesOf(db, userId).map((company) => ({
+      company,
+      hubs: hubsOf(db, company.id),
+      fleet: fleetView(db, company.id),
+      customAircraft: customAircraftOf(db, company.id),
+      flights: allFlights(db, company.id).map((f) => ({ ...flightView(f), telemetry: f.telemetry ? (JSON.parse(f.telemetry) as unknown) : null })),
+      transactions: allTransactions(db, company.id),
+    })),
     apiKeys: all<{ id: number; label: string; created_at: number; last_used_at: number | null }>(db, 'SELECT id, label, created_at, last_used_at FROM api_keys WHERE user_id = ? ORDER BY id', userId)
       .map((k) => ({ id: k.id, label: k.label, createdAt: iso(k.created_at), lastUsedAt: iso(k.last_used_at) })),
   };

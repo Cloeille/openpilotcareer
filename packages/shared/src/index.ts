@@ -3,7 +3,9 @@
 import { z } from 'zod';
 
 export const API_VERSION = 1;
-export const EXPORT_SCHEMA_VERSION = 1;
+export const EXPORT_SCHEMA_VERSION = 2;
+/** Companies one player may own. Not a defence against farming starting capital (registration is open): a speed bump. */
+export const MAX_COMPANIES_PER_USER = 5;
 /** Fallback "global" server for clients; deployments override it (web: VITE_OPC_GLOBAL_URL). */
 export const OPC_GLOBAL_URL = 'https://global.openpilotcareer.org';
 
@@ -235,12 +237,15 @@ export function checkTelemetry(t: Telemetry, f: {
 // ---------------------------------------------------------------- API request schemas
 
 export const usernameSchema = z.string().regex(/^[A-Za-z0-9_-]{3,24}$/, '3-24 chars: letters, digits, _ or -');
+export const companyNameSchema = z.string().trim().min(2).max(40);
 export const registerSchema = z.object({
   username: usernameSchema,
   password: z.string().min(8).max(128),
-  companyName: z.string().trim().min(2).max(40).optional(),
+  companyName: companyNameSchema.optional(),
   hub: icaoAirportSchema.optional(),
 });
+export const createCompanySchema = z.object({ name: companyNameSchema, hub: icaoAirportSchema });
+export const renameCompanySchema = z.object({ name: companyNameSchema });
 export const loginSchema = z.object({ username: z.string().min(1).max(64), password: z.string().min(1).max(128) });
 export const deleteAccountSchema = z.object({ password: z.string().min(1).max(128) });
 export const buyAircraftSchema = z.object({ icao: icaoTypeSchema, hub: icaoAirportSchema });
@@ -276,13 +281,16 @@ export type Company = {
 };
 export type FleetAircraft = { id: number; icao: string; type: AircraftType; location: string; busy: boolean; value: number };
 export type Flight = {
-  id: number; job: Job; aircraftId: number; aircraftIcao: string; status: FlightStatus; rejectReason: string | null;
+  id: number; companyId: number; job: Job; aircraftId: number; aircraftIcao: string; status: FlightStatus; rejectReason: string | null;
   acceptedAt: number; completedAt: number | null;
   revenue: number; fuelCost: number; landingFee: number; maintenance: number; net: number;
 };
 export type Transaction = { id: number; at: number; kind: string; amount: number; balanceAfter: number; flightId: number | null; memo: string };
 export type ApiKeyInfo = { id: number; label: string; createdAt: number; lastUsedAt: number | null };
-export type Me = { username: string; rank: string; company: Company; hubs: string[]; fleet: FleetAircraft[]; customAircraft: AircraftType[] };
+/** The pilot (the account), whose rank counts hours and flights over all their companies. */
+export type Pilot = { rank: string; hours: number; flights: number };
+/** The signed-in account seen through one company: `company` and everything below it is the ACTIVE company (X-OPC-Company); `companies` lists all of them. */
+export type Me = { username: string; pilot: Pilot; company: Company; companies: Company[]; hubs: string[]; fleet: FleetAircraft[]; customAircraft: AircraftType[] };
 export type LeaderboardRow = { rank: number; companyId: number; name: string; isAI: boolean; netWorth: number; flights: number; reputation: number };
 export type Leaderboard = { season: string; seasons: string[]; rows: LeaderboardRow[] };
 export type Personality = { style: 'aggressive' | 'cautious'; preferred: string[] };

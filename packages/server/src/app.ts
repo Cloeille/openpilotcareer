@@ -2,23 +2,22 @@ import fastifyStatic from '@fastify/static';
 import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import {
-  API_VERSION, acceptJobSchema, apiKeyCreateSchema, buyAircraftSchema, buyHubSchema, checkTelemetry, customAircraftSchema, deleteAccountSchema,
-  flightListQuerySchema, icaoAirportSchema, icaoTypeSchema, listQuerySchema, loginSchema, registerSchema, simbriefImportSchema, telemetrySchema,
+  API_VERSION, acceptJobSchema, apiKeyCreateSchema, buyAircraftSchema, buyHubSchema, checkTelemetry, createCompanySchema, customAircraftSchema, deleteAccountSchema,
+  flightListQuerySchema, icaoAirportSchema, icaoTypeSchema, listQuerySchema, loginSchema, registerSchema, renameCompanySchema, simbriefImportSchema, telemetrySchema,
   type ApiKeyInfo, type ServerInfo,
 } from '@opc/shared';
 import { catchUp, seedAi } from './ai.ts';
-import { apiKeyAuth, createSession, DUMMY_HASH, hashPassword, newToken, sessionAuth, sha256, verifyPassword, type Principal } from './auth.ts';
+import { apiKeyAuth, COMPANY_HEADER, createSession, defaultCompany, DUMMY_HASH, hashPassword, newToken, ownedCompany, sessionAuth, sha256, verifyPassword, type Principal } from './auth.ts';
 import { airports, catalogType, searchAircraftTypes, searchAirports } from './catalog.ts';
 import { all, get, run, tx, type Db } from './db.ts';
 import { exportDocument, flightsCsv, transactionsCsv } from './export.ts';
 import {
-  acceptJob, activeFlight, addCustomAircraft, buyAircraft, buyHub, closeUnpaid, companyProfile, completeManually, createCompany, currentSeason, deleteCustomAircraft,
-  finishFlight, flightView, flightsOf, importJob, leaderboard, meView, openBoard, pendingImports, transactionsOf, typeFor,
+  acceptJob, activeFlight, activeFlightsOfUser, addCustomAircraft, buyAircraft, buyHub, closeUnpaid, companiesOf, companyProfile, completeManually, createCompany, currentSeason,
+  deleteCustomAircraft, finishFlight, flightView, flightsOf, importJob, leaderboard, meView, openBoard, pendingImports, renameCompany, transactionsOf, typeFor,
 } from './game.ts';
-import { HttpError, Limiter, parse } from './http.ts';
+import { HttpError, Limiter, NUMERIC_ID, parse } from './http.ts';
 import { fetchLatestOfp, type Fetch } from './simbrief.ts';
 
-const NUMERIC_ID = /^\d+$/;
 const MAX_API_KEYS = 10;
 const AUTH_ATTEMPTS_PER_MINUTE = 20;
 const BODY_LIMIT = 64 * 1024;
@@ -72,7 +71,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     if (!req.url.startsWith('/api/')) return;
     reply.header('access-control-allow-origin', '*').header('access-control-expose-headers', 'content-disposition');
     if (req.method === 'OPTIONS') {
-      return reply.header('access-control-allow-methods', 'GET,POST,DELETE,OPTIONS').header('access-control-allow-headers', 'authorization,content-type').header('access-control-max-age', '600').status(204).send();
+      return reply.header('access-control-allow-methods', 'GET,POST,PATCH,DELETE,OPTIONS').header('access-control-allow-headers', `authorization,content-type,${COMPANY_HEADER}`).header('access-control-max-age', '600').status(204).send();
     }
   });
 
@@ -117,13 +116,13 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     const b = parse(registerSchema, req.body);
     const hash = await hashPassword(b.password);
     const at = now();
-    const { token, userId } = tx(db, () => {
+    const { token, userId, companyId } = tx(db, () => {
       if (get(db, 'SELECT 1 AS x FROM users WHERE username = ?', b.username)) throw new HttpError(409, 'username_taken', 'username is already taken');
       const userId = run(db, 'INSERT INTO users (username, pass_hash, created_at) VALUES (?, ?, ?)', b.username, hash, at).id;
-      createCompany(db, { userId, name: b.companyName ?? `${b.username} Aviation`, hub: b.hub ?? DEFAULT_HUB, now: at });
-      return { userId, token: createSession(db, userId, at) };
+      const companyId = createCompany(db, { userId, name: b.companyName ?? `${b.username} Aviation`, hub: b.hub ?? DEFAULT_HUB, now: at });
+      return { userId, companyId, token: createSession(db, userId, at) };
     });
-    return reply.status(201).send({ token, ...meView(db, userId) });
+    return reply.status(201).send({ token, ...meView(db, userId, companyId) });
   });
 
   app.post('/api/v1/auth/login', async (req) => {
@@ -134,7 +133,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     if (!u || !ok) throw new HttpError(401, 'bad_credentials', 'wrong username or password');
     run(db, 'DELETE FROM sessions WHERE expires_at <= ?', now()); // expired sessions are only ever dead weight
     const token = createSession(db, u.id, now());
-    return { token, ...meView(db, u.id) };
+    return { token, ...meView(db, u.id, defaultCompany(db, u.id)) };
   });
 
   app.post('/api/v1/auth/logout', async (req, reply) => {
@@ -143,7 +142,27 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     return reply.status(204).send();
   });
 
-  app.get('/api/v1/me', async (req) => meView(db, user(req).userId));
+  app.get('/api/v1/me', async (req) => {
+    const p = user(req);
+    return meView(db, p.userId, p.companyId);
+  });
+
+  // ---- companies: a player may own several; the client acts as one via the X-OPC-Company header (see auth.ts)
+  app.get('/api/v1/me/companies', async (req) => companiesOf(db, user(req).userId));
+
+  app.post('/api/v1/me/companies', async (req, reply) => {
+    const p = user(req);
+    const b = parse(createCompanySchema, req.body);
+    const id = tx(db, () => createCompany(db, { userId: p.userId, name: b.name, hub: b.hub, now: now() }));
+    return reply.status(201).send(meView(db, p.userId, id));
+  });
+
+  app.patch('/api/v1/companies/:id', async (req) => {
+    const p = user(req);
+    const id = ownedCompany(db, p.userId, idParam(req));
+    const b = parse(renameCompanySchema, req.body);
+    return tx(db, () => renameCompany(db, id, b.name));
+  });
 
   app.get('/api/v1/me/export', async (req, reply) => {
     const p = user(req);
@@ -199,14 +218,14 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     const p = user(req);
     const b = parse(buyHubSchema, req.body);
     tx(db, () => buyHub(db, p.companyId, b.icao, now()));
-    return reply.status(201).send(meView(db, p.userId));
+    return reply.status(201).send(meView(db, p.userId, p.companyId));
   });
 
   app.post('/api/v1/me/fleet', async (req, reply) => {
     const p = user(req);
     const b = parse(buyAircraftSchema, req.body);
     tx(db, () => buyAircraft(db, p.companyId, b.icao, b.hub, now()));
-    return reply.status(201).send(meView(db, p.userId));
+    return reply.status(201).send(meView(db, p.userId, p.companyId));
   });
 
   app.post('/api/v1/me/custom-aircraft', async (req, reply) => {
@@ -255,19 +274,20 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
 
   app.post('/api/v1/flights/:id/cancel', async (req) => {
     const p = user(req);
-    return flightView(tx(db, () => closeUnpaid(db, activeFlight(db, p.companyId, idParam(req)), 'cancelled', now())));
+    return flightView(tx(db, () => closeUnpaid(db, activeFlight(db, idParam(req), p.userId, p.companyId), 'cancelled', now())));
   });
 
   // Manual completion: no telemetry, so the flight is unverified (reduced pay) and only allowed once the fastest believable flight time has passed.
   app.post('/api/v1/flights/:id/complete', async (req) => {
     const p = user(req);
-    return flightView(tx(db, () => completeManually(db, activeFlight(db, p.companyId, idParam(req)), now())));
+    return flightView(tx(db, () => completeManually(db, activeFlight(db, idParam(req), p.userId, p.companyId), now())));
   });
 
-  // ---- verification ingest (per-user API key). Keys can do exactly two things: list active flights and submit telemetry.
+  // ---- verification ingest (per-player API key). Keys can do exactly two things: list active flights and submit telemetry.
+  // A key spans all of the player's companies: each flight names its company, and ownership is checked against the flight.
   app.get('/api/v1/flights/active', async (req) => {
     const p = apiKeyAuth(db, req, now());
-    return flightsOf(db, p.companyId, 50, undefined, 'active').map(flightView);
+    return activeFlightsOfUser(db, p.userId, 50).map(flightView);
   });
 
   app.post('/api/v1/flights/:id/telemetry-verify', async (req) => {
@@ -275,10 +295,10 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     const report = parse(telemetrySchema, req.body);
     const at = now();
     return tx(db, () => {
-      const f = activeFlight(db, p.companyId, idParam(req));
+      const f = activeFlight(db, idParam(req), p.userId);
       const check = checkTelemetry(report, {
         origin: f.origin, destination: f.destination, distanceNm: f.distance_nm, payloadKg: f.payload_kg, aircraftIcao: f.aircraft_icao,
-        aircraft: typeFor(db, p.companyId, f.aircraft_icao), acceptedAt: f.accepted_at, now: at,
+        aircraft: typeFor(db, f.company_id, f.aircraft_icao), acceptedAt: f.accepted_at, now: at,
       });
       if (!check.ok) return { verification: 'rejected', reason: check.reason, flight: flightView(closeUnpaid(db, f, 'rejected', at, check.reason, report)) };
       // manual reports are never trusted as verified: reduced pay, no measured values
