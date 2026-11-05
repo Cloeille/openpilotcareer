@@ -12,8 +12,10 @@ export async function harness(opts: Partial<AppOptions> = {}) {
   const db = openDb(':memory:');
   const app = await buildApp({ db, now: () => clock.t, ai: false, ...opts });
   type Res = { status: number; body: any; headers: Record<string, unknown>; text: string };
-  const call = async (method: 'GET' | 'POST' | 'DELETE', url: string, o: { token?: string; body?: unknown } = {}): Promise<Res> => {
-    const r = await app.inject({ method, url, ...(o.token ? { headers: { authorization: `Bearer ${o.token}` } } : {}), ...(o.body !== undefined ? { payload: o.body as object } : {}) });
+  /** `company` acts as that company (X-OPC-Company); `rawCompany` sends the header verbatim. */
+  const call = async (method: 'GET' | 'POST' | 'PATCH' | 'DELETE', url: string, o: { token?: string; body?: unknown; company?: number; rawCompany?: string } = {}): Promise<Res> => {
+    const company = o.rawCompany ?? (o.company === undefined ? undefined : String(o.company));
+    const r = await app.inject({ method, url, headers: { ...(company === undefined ? {} : { 'x-opc-company': company }), ...(o.token ? { authorization: `Bearer ${o.token}` } : {}) }, ...(o.body !== undefined ? { payload: o.body as object } : {}) });
     let body: any = null;
     try { body = r.body ? JSON.parse(r.body) : null; } catch { /* csv */ }
     return { status: r.statusCode, body, headers: r.headers, text: r.body };
@@ -24,10 +26,10 @@ export async function harness(opts: Partial<AppOptions> = {}) {
     assert.equal(r.status, 201, r.text);
     return { token: r.body.token as string, me: r.body, name };
   };
-  /** Advance windows until the starter C172 at `icao` has a job it can fly; returns it. */
-  const flyableJob = async (token: string, aircraftId: number): Promise<Job> => {
+  /** Advance windows until a starter C172 of the (active) company has a job it can fly; returns it. */
+  const flyableJob = async (token: string, aircraftId: number, company?: number): Promise<Job> => {
     for (let i = 0; i < 40; i++) {
-      const jobs = (await call('GET', '/api/v1/jobs', { token })).body.jobs as Job[];
+      const jobs = (await call('GET', '/api/v1/jobs', { token, ...(company === undefined ? {} : { company }) })).body.jobs as Job[];
       const j = jobs.find((x) => !cannotFly(catalogType('C172'), x));
       if (j) return j;
       clock.t += JOB_WINDOW_MS;
