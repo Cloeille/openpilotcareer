@@ -99,6 +99,14 @@ Errors are `{ "error": "<code>", "message": "<text>" }`. Session routes take `Au
 
 `POST /jobs/import-simbrief {"simbriefUsername": "…"}` makes the **server** fetch your latest plan from `https://www.simbrief.com/api/xml.fetcher.php?username=…&json=1` (8 s timeout, 4 MB cap, redirects refused, response validated with zod) and turn it into a private job for the aircraft type you planned. SimBrief being down, slow, unknown-user or returning garbage gives a clear 404/502/504 message instead of an error page.
 
+## Simulator integration
+
+- [docs/telemetry-api.md](docs/telemetry-api.md): the API-key contract a simulator client uses to find the active flight and submit telemetry. Live.
+- [docs/simbrief.md](docs/simbrief.md): how a SimBrief plan becomes a job, limits, errors, privacy, and differences from SimBrief's own documentation.
+- [docs/sayintentions.md](docs/sayintentions.md): what SayIntentions.AI documents for third parties and why the supported flow goes through SimBrief.
+- [sim/bridge](sim/bridge): the SimConnect bridge. *In progress; not on `main` yet, so this link is dead until it lands.*
+- [sim/msfs-package](sim/msfs-package): the MSFS package with the in-sim panel. *In progress; same caveat.*
+
 ## Privacy
 
 A server stores your username, a scrypt password hash, a hashed session token, hashed API keys (shown once), and your game data. No email, no analytics, no third-party requests except the SimBrief fetch you trigger. The operator of a server can see everything on it, so choose a server you trust or run your own. **Export** (Settings) gives you all of it as JSON/CSV; **Delete account** (Settings, password required) permanently removes the account, company, fleet, flights, ledger and keys from that server, and releases any jobs you had claimed. Telemetry you submit is stored with the flight.
