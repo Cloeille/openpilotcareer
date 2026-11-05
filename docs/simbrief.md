@@ -42,7 +42,7 @@ Accept: application/json        (8 s timeout, no redirects, 4 MiB cap)
   "requiredAircraft": "A320", "plannedFuelKg": 5200, "route": "DCT" }
 ```
 
-(Numbers from a local run: 150 pax LFPG → EGLL.)
+(Distance, payload and payout are from a local run of 150 pax, LFPG → EGLL, `weights.payload` 18 000 kg; the `id` is a made-up example.)
 
 ## Field mapping
 
