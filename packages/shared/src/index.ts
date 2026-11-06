@@ -1,6 +1,9 @@
 // Shared contract of OpenPilotCareer: domain types, zod schemas (trust boundary) and economy rules.
 // Everything the server, the AI companies and the web UI must agree on lives here.
 import { z } from 'zod';
+import { financingSchema, type FleetAircraftFinance } from './finance.ts';
+
+export * from './finance.ts';
 
 export const API_VERSION = 1;
 export const EXPORT_SCHEMA_VERSION = 2;
@@ -254,7 +257,7 @@ export const createCompanySchema = z.object({ name: companyNameSchema, hub: icao
 export const renameCompanySchema = z.object({ name: companyNameSchema });
 export const loginSchema = z.object({ username: z.string().min(1).max(64), password: z.string().min(1).max(128) });
 export const deleteAccountSchema = z.object({ password: z.string().min(1).max(128) });
-export const buyAircraftSchema = z.object({ icao: icaoTypeSchema, hub: icaoAirportSchema });
+export const buyAircraftSchema = z.object({ icao: icaoTypeSchema, hub: icaoAirportSchema, financing: financingSchema.optional() });
 export const buyHubSchema = z.object({ icao: icaoAirportSchema });
 export const acceptJobSchema = z.object({ aircraftId: z.int().positive() });
 export const FLIGHT_STATUSES = ['active', 'verified', 'unverified', 'rejected', 'cancelled'] as const;
@@ -287,7 +290,7 @@ export type Company = {
   id: number; name: string; balance: number; reputation: number; flights: number; hours: number; revenue: number;
   netWorth: number; isAI: boolean;
 };
-export type FleetAircraft = { id: number; icao: string; type: AircraftType; location: string; busy: boolean; value: number };
+export type FleetAircraft = { id: number; icao: string; type: AircraftType; location: string; busy: boolean; value: number } & FleetAircraftFinance;
 export type Flight = {
   id: number; companyId: number; job: Job; aircraftId: number; aircraftIcao: string; status: FlightStatus; rejectReason: string | null;
   acceptedAt: number; completedAt: number | null;

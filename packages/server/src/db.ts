@@ -1,4 +1,5 @@
 import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
+import { backfillRegistrations } from './registrations.ts';
 
 export type Db = DatabaseSync;
 
@@ -66,8 +67,42 @@ ALTER TABLE companies_new RENAME TO companies;
 CREATE INDEX companies_user ON companies(user_id);
 `;
 
+// Lot FINANCE: registrations, ownership, wear, maintenance, hub parking; leases/loans/club/rental contracts; monthly billing runs.
+// `returned_at` marks an aircraft handed back (lease ended, rental stopped): the row stays so flight history keeps its foreign key.
+const SCHEMA_V4 = `
+ALTER TABLE aircraft ADD COLUMN registration TEXT;
+ALTER TABLE aircraft ADD COLUMN ownership TEXT NOT NULL DEFAULT 'owned' CHECK (ownership IN ('owned','leased','financed','club','rented'));
+ALTER TABLE aircraft ADD COLUMN wear_pct REAL NOT NULL DEFAULT 0;
+ALTER TABLE aircraft ADD COLUMN status TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available','maintenance'));
+ALTER TABLE aircraft ADD COLUMN maintenance_until INTEGER;
+ALTER TABLE aircraft ADD COLUMN base TEXT;
+ALTER TABLE aircraft ADD COLUMN acquired_at INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE aircraft ADD COLUMN returned_at INTEGER;
+UPDATE aircraft SET base = COALESCE(
+  (SELECT h.icao FROM hubs h WHERE h.company_id = aircraft.company_id AND h.icao = aircraft.location),
+  (SELECT MIN(h.icao) FROM hubs h WHERE h.company_id = aircraft.company_id), aircraft.location),
+  acquired_at = COALESCE((SELECT c.created_at FROM companies c WHERE c.id = aircraft.company_id), 0);
+CREATE UNIQUE INDEX aircraft_registration ON aircraft(registration) WHERE registration IS NOT NULL;
+CREATE TABLE contracts (
+  id INTEGER PRIMARY KEY, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  aircraft_id INTEGER NOT NULL REFERENCES aircraft(id) ON DELETE CASCADE,
+  kind TEXT NOT NULL CHECK (kind IN ('lease','loan','club','rental')),
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','ended')),
+  started_at INTEGER NOT NULL, ends_at INTEGER, months INTEGER, months_paid INTEGER NOT NULL DEFAULT 0,
+  monthly INTEGER NOT NULL DEFAULT 0, hourly INTEGER, deposit INTEGER NOT NULL DEFAULT 0, insurance INTEGER NOT NULL DEFAULT 0,
+  principal INTEGER NOT NULL DEFAULT 0, terms TEXT, ended_at INTEGER);
+CREATE INDEX contracts_company ON contracts(company_id, status);
+CREATE INDEX contracts_aircraft ON contracts(aircraft_id);
+CREATE INDEX aircraft_maintenance ON aircraft(maintenance_until) WHERE status = 'maintenance';
+CREATE TABLE billing_runs (
+  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, month TEXT NOT NULL, at INTEGER NOT NULL,
+  PRIMARY KEY (company_id, month));
+-- Companies that exist now start being billed from the month of the migration (no retroactive parking fees).
+INSERT INTO billing_runs (company_id, month, at) SELECT id, strftime('%Y-%m', 'now'), CAST(strftime('%s', 'now') AS INTEGER) * 1000 FROM companies WHERE user_id IS NOT NULL;
+`;
+
 /** Append-only; `PRAGMA user_version` records how many ran. */
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2];
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V4];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);
@@ -84,6 +119,8 @@ export function openDb(path: string): Db {
       db.exec(`PRAGMA user_version = ${v + 1}`);
     });
   }
+  // Aircraft that existed before migration 4 (or were inserted without one) get their registration here: it needs the airport data, not SQL.
+  tx(db, () => backfillRegistrations(db));
   db.exec('PRAGMA foreign_keys = ON');
   return db;
 }

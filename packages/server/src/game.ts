@@ -3,27 +3,34 @@
 // Rule violations throw HttpError.
 import { randomUUID } from 'node:crypto';
 import {
-  HUB_PRICE, MAX_COMPANIES_PER_USER, PAX_KG, REJECT_REPUTATION_PENALTY, START_REPUTATION, STARTER_AIRCRAFT, STARTING_BALANCE,
+  HUB_PRICE, MAX_COMPANIES_PER_USER, loanOption, loanPayment, PAX_KG, REJECT_REPUTATION_PENALTY, START_REPUTATION, STARTER_AIRCRAFT, STARTING_BALANCE,
   aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, jobPayout, minFlightHours, rankFor, seasonOf, settle,
   type AircraftType, type Company, type CompanyProfile, type CustomAircraftInput, type FleetAircraft, type Flight,
-  type FlightStatus, type Job, type Leaderboard, type LeaderboardRow, type Me, type Personality, type Pilot, type Telemetry, type Transaction,
+  type Financing, type Ownership, type FlightStatus, type Job, type Leaderboard, type LeaderboardRow, type Me, type Personality, type Pilot, type Telemetry, type Transaction,
 } from '@opc/shared';
 import { airports, catalogType } from './catalog.ts';
 import { boardFor, boardJob, windowOf } from './board.ts';
 import { all, get, run, type Db } from './db.ts';
+import { accrueWear, activeContractsOf, assertFlyable, assertHubSpot, ferryFee, financeFields, flightCosts, insertAircraft, isHuman } from './fleet-extras.ts';
 import { HttpError } from './http.ts';
 import type { Ofp } from './simbrief.ts';
 
 export const MAX_CUSTOM_AIRCRAFT = 20;
 export const MAX_PENDING_IMPORTS = 25;
 const IMPORT_TTL_MS = 7 * 24 * 3_600_000;
-const NET_WORTH_SQL = `c.balance + COALESCE((SELECT SUM(value) FROM aircraft WHERE company_id = c.id), 0)`;
+// Net worth = cash + aircraft owned or financed (not leased, club or rented) + refundable lease deposits - remaining loan principal (a financed aircraft counts at full value, so the debt must come off).
+const NET_WORTH_SQL = `c.balance + COALESCE((SELECT SUM(value) FROM aircraft WHERE company_id = c.id AND returned_at IS NULL AND ownership IN ('owned','financed')), 0)
+  + COALESCE((SELECT SUM(deposit) FROM contracts WHERE company_id = c.id AND status = 'active'), 0)
+  - COALESCE((SELECT SUM(principal) FROM contracts WHERE company_id = c.id AND status = 'active' AND kind = 'loan'), 0)`;
 const SB_PREFIX = 'sb-';
 
 // ---------------------------------------------------------------- rows
 
 type CompanyRow = { id: number; user_id: number | null; name: string; personality: string | null; balance: number; reputation: number; flights: number; hours: number; revenue: number };
-export type AircraftRow = { id: number; company_id: number; icao: string; location: string; value: number };
+export type AircraftRow = {
+  id: number; company_id: number; icao: string; location: string; value: number;
+  registration: string | null; ownership: Ownership; wear_pct: number; status: string; maintenance_until: number | null; base: string | null; acquired_at: number; returned_at: number | null;
+};
 type JobColumns = {
   source: 'board' | 'simbrief'; kind: 'pax' | 'cargo'; origin: string; destination: string; distance_nm: number; payload_kg: number;
   pax: number; payout: number; required_aircraft: string | null; planned_fuel_kg: number | null; route: string | null;
@@ -62,7 +69,7 @@ function spend(db: Db, companyId: number, at: number, kind: string, price: numbe
 }
 
 /** Record the company's current numbers in the season of `at` (history for past seasons; the current one is read live). */
-function snapshot(db: Db, companyId: number, at: number): void {
+export function snapshot(db: Db, companyId: number, at: number): void {
   const season = seasonOf(at);
   run(db, `INSERT INTO season_stats (season, company_id, net_worth, flights, reputation)
     SELECT ?1, c.id, ${NET_WORTH_SQL}, (SELECT COUNT(*) FROM flights f WHERE f.company_id = c.id AND f.season = ?1 AND f.status IN ('verified','unverified')), c.reputation
@@ -85,9 +92,10 @@ export function createCompany(db: Db, o: { userId: number | null; name: string; 
   assertNameFree(db, o.name);
   const id = run(db, 'INSERT INTO companies (user_id, name, personality, balance, reputation, created_at) VALUES (?, ?, ?, 0, ?, ?)', o.userId, o.name, o.personality ? JSON.stringify(o.personality) : null, START_REPUTATION, o.now).id;
   post(db, id, o.now, 'grant', STARTING_BALANCE, 'starting capital');
+  if (o.userId !== null) run(db, 'INSERT INTO billing_runs (company_id, month, at) VALUES (?, ?, ?)', id, new Date(o.now).toISOString().slice(0, 7), o.now);
   run(db, 'INSERT INTO hubs (company_id, icao) VALUES (?, ?)', id, o.hub);
   const starter = catalogType(STARTER_AIRCRAFT);
-  run(db, 'INSERT INTO aircraft (company_id, icao, location, value) VALUES (?, ?, ?, ?)', id, starter.icao, o.hub, aircraftValue(starter));
+  insertAircraft(db, { companyId: id, icao: starter.icao, hub: o.hub, value: aircraftValue(starter), ownership: 'owned', at: o.now });
   return id;
 }
 
@@ -105,14 +113,39 @@ export function buyHub(db: Db, companyId: number, icao: string, now: number): vo
   snapshot(db, companyId, now);
 }
 
-export function buyAircraft(db: Db, companyId: number, icao: string, hub: string, now: number): AircraftRow {
+/** Buy an aircraft for cash, or on credit with `financing` (annuity at LOAN_RATE; down payment + convoy fee are paid now).
+ *  Players also pay the convoy/registration fee and need a free parking spot at the hub; AI companies pay the price only. */
+export function buyAircraft(db: Db, companyId: number, icao: string, hub: string, now: number, financing?: Financing): AircraftRow {
   if (!hasHub(db, companyId, hub)) throw new HttpError(422, 'not_a_hub', `${hub} is not one of your hubs`);
   const t = typeFor(db, companyId, icao);
-  spend(db, companyId, now, 'purchase_aircraft', aircraftPrice(t), `${t.icao} ${t.name}`);
-  const id = run(db, 'INSERT INTO aircraft (company_id, icao, location, value) VALUES (?, ?, ?, ?)', companyId, t.icao, hub, aircraftValue(t)).id;
+  const price = aircraftPrice(t);
+  const human = isHuman(db, companyId);
+  const ferry = human ? ferryFee(price) : 0;
+  assertHubSpot(db, companyId, hub);
+  const loan = financing ? loanOption(price, ferry, financing.downPct, financing.months) : null;
+  const upfront = loan ? loan.dueToday : price + ferry;
+  const balance = get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId)?.balance ?? 0;
+  if (balance < upfront) {
+    throw new HttpError(409, 'insufficient_funds', `needs ${upfront}, balance is ${balance}`, { needed: upfront, missing: upfront - balance, balance, ...(loan ? {} : { options: ['loan', 'lease'] }) });
+  }
+  const id = insertAircraft(db, { companyId, icao: t.icao, hub, value: aircraftValue(t), ownership: loan ? 'financed' : 'owned', at: now });
+  const registration = get<{ registration: string }>(db, 'SELECT registration FROM aircraft WHERE id = ?', id)!.registration;
+  post(db, companyId, now, 'purchase_aircraft', -(loan ? loan.down : price), `${t.icao} ${t.name} ${registration}`);
+  if (ferry > 0) post(db, companyId, now, 'ferry', -ferry, `convoy and registration ${registration}`);
+  if (financing && loan) {
+    const principal = price - loan.down;
+    run(db, `INSERT INTO contracts (company_id, aircraft_id, kind, started_at, ends_at, months, monthly, principal)
+      VALUES (?, ?, 'loan', ?, ?, ?, ?, ?)`, companyId, id, now, addMonths(now, financing.months), financing.months, loanPayment(principal, financing.months), principal);
+  }
   snapshot(db, companyId, now);
   return get<AircraftRow>(db, 'SELECT * FROM aircraft WHERE id = ?', id)!;
 }
+
+/** First instant of the UTC month `n` months after the month containing `at`. */
+export const addMonths = (at: number, n: number): number => {
+  const d = new Date(at);
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + n, 1);
+};
 
 export function addCustomAircraft(db: Db, companyId: number, a: CustomAircraftInput): AircraftType {
   const n = get<{ n: number }>(db, 'SELECT COUNT(*) AS n FROM custom_aircraft WHERE company_id = ?', companyId)!.n;
@@ -124,7 +157,7 @@ export function addCustomAircraft(db: Db, companyId: number, a: CustomAircraftIn
 }
 
 export function deleteCustomAircraft(db: Db, companyId: number, icao: string): void {
-  if (get(db, 'SELECT 1 AS x FROM aircraft WHERE company_id = ? AND icao = ?', companyId, icao)) throw new HttpError(409, 'in_use', `a ${icao} is in your fleet`);
+  if (get(db, 'SELECT 1 AS x FROM aircraft WHERE company_id = ? AND icao = ? AND returned_at IS NULL', companyId, icao)) throw new HttpError(409, 'in_use', `a ${icao} is in your fleet`);
   if (run(db, 'DELETE FROM custom_aircraft WHERE company_id = ? AND icao = ?', companyId, icao).changes === 0) throw new HttpError(404, 'not_found', `no custom aircraft ${icao}`);
 }
 
@@ -137,8 +170,9 @@ export function companyView(db: Db, id: number): Company {
 }
 
 export function fleetView(db: Db, companyId: number): FleetAircraft[] {
-  return all<AircraftRow & { busy: number }>(db, `SELECT a.*, EXISTS (SELECT 1 FROM flights f WHERE f.aircraft_id = a.id AND f.status = 'active') AS busy FROM aircraft a WHERE a.company_id = ? ORDER BY a.id`, companyId)
-    .map((a) => ({ id: a.id, icao: a.icao, type: typeFor(db, companyId, a.icao), location: a.location, busy: !!a.busy, value: a.value }));
+  const contracts = activeContractsOf(db, companyId);
+  return all<AircraftRow & { busy: number }>(db, `SELECT a.*, EXISTS (SELECT 1 FROM flights f WHERE f.aircraft_id = a.id AND f.status = 'active') AS busy FROM aircraft a WHERE a.company_id = ? AND a.returned_at IS NULL ORDER BY a.id`, companyId)
+    .map((a) => ({ id: a.id, icao: a.icao, type: typeFor(db, companyId, a.icao), location: a.location, busy: !!a.busy, value: a.value, ...financeFields(a, !!a.busy, contracts.get(a.id)) }));
 }
 
 export const hubsOf = (db: Db, companyId: number): string[] => all<{ icao: string }>(db, 'SELECT icao FROM hubs WHERE company_id = ? ORDER BY icao', companyId).map((h) => h.icao);
@@ -243,6 +277,7 @@ function resolveJob(db: Db, companyId: number, id: string, now: number): Job {
 
 /** Claim `job` (unique per job id, so a job can only ever be taken once) and open an active flight on `aircraft`. */
 export function startFlight(db: Db, companyId: number, job: Job, aircraft: AircraftRow, now: number): FlightRow {
+  assertFlyable(db, aircraft.id, now);
   if (aircraft.location !== job.origin) throw new HttpError(422, 'wrong_location', `aircraft ${aircraft.icao} is at ${aircraft.location}, the job starts at ${job.origin}`);
   const why = cannotFly(typeFor(db, companyId, aircraft.icao), job);
   if (why) throw new HttpError(422, 'cannot_fly', why);
@@ -257,7 +292,7 @@ export function startFlight(db: Db, companyId: number, job: Job, aircraft: Aircr
 }
 
 export function acceptJob(db: Db, companyId: number, jobId: string, aircraftId: number, now: number): FlightRow {
-  const aircraft = get<AircraftRow>(db, 'SELECT * FROM aircraft WHERE id = ? AND company_id = ?', aircraftId, companyId);
+  const aircraft = get<AircraftRow>(db, 'SELECT * FROM aircraft WHERE id = ? AND company_id = ? AND returned_at IS NULL', aircraftId, companyId);
   if (!aircraft) throw new HttpError(404, 'aircraft_not_found', 'aircraft not found');
   return startFlight(db, companyId, resolveJob(db, companyId, jobId, now), aircraft, now);
 }
@@ -277,20 +312,22 @@ export function finishFlight(db: Db, f: FlightRow, status: 'verified' | 'unverif
   const type = typeFor(db, f.company_id, f.aircraft_icao);
   const t = report?.telemetry;
   const measured = status === 'verified' && report ? { fuelUsedKg: report.telemetry.fuelUsedKg, blockHours: report.blockHours, landingFpm: report.telemetry.landingFpm } : {};
-  const s = settle({
+  const hours = measured.blockHours ?? blockHours(type, f.distance_nm);
+  const { settlement: s, fuelKind } = flightCosts(db, f.aircraft_id, hours, settle({
     payout: f.payout, distanceNm: f.distance_nm, aircraft: type, status,
     destSize: airports.get(f.destination)?.size ?? 'small', destIsHub: hasHub(db, f.company_id, f.destination), ...measured,
-  });
+  }));
   run(db, `UPDATE flights SET status = ?, completed_at = ?, season = ?, revenue = ?, fuel_cost = ?, landing_fee = ?, maintenance = ?, net = ?, telemetry = ? WHERE id = ?`,
     status, at, seasonOf(at), s.revenue, s.fuelCost, s.landingFee, s.maintenance, s.net, t ? JSON.stringify(t) : null, f.id);
   run(db, 'UPDATE aircraft SET location = ? WHERE id = ?', f.destination, f.aircraft_id);
   run(db, 'UPDATE companies SET flights = flights + 1, hours = hours + ?, revenue = revenue + ?, reputation = MIN(100, MAX(0, reputation + ?)) WHERE id = ?',
-    measured.blockHours ?? blockHours(type, f.distance_nm), s.revenue, s.reputationDelta, f.company_id);
+    hours, s.revenue, s.reputationDelta, f.company_id);
   const memo = `${f.origin}-${f.destination} ${f.aircraft_icao}`;
   post(db, f.company_id, at, 'payout', s.revenue, memo, f.id);
-  post(db, f.company_id, at, 'fuel', -s.fuelCost, memo, f.id);
+  post(db, f.company_id, at, fuelKind, -s.fuelCost, memo, f.id);
   post(db, f.company_id, at, 'landing_fee', -s.landingFee, memo, f.id);
   post(db, f.company_id, at, 'maintenance', -s.maintenance, memo, f.id);
+  accrueWear(db, f.company_id, f.aircraft_id, type.category, hours, at);
   snapshot(db, f.company_id, at);
   return get<FlightRow>(db, 'SELECT * FROM flights WHERE id = ?', f.id)!;
 }
@@ -334,7 +371,7 @@ export function leaderboard(db: Db, season: string, now: number): Leaderboard {
 export function companyProfile(db: Db, id: number): CompanyProfile {
   const c = companyView(db, id);
   const personality = get<{ personality: string | null }>(db, 'SELECT personality FROM companies WHERE id = ?', id)!.personality;
-  const fleet = all<{ icao: string; count: number }>(db, 'SELECT icao, COUNT(*) AS count FROM aircraft WHERE company_id = ? GROUP BY icao ORDER BY count DESC, icao', id);
+  const fleet = all<{ icao: string; count: number }>(db, 'SELECT icao, COUNT(*) AS count FROM aircraft WHERE company_id = ? AND returned_at IS NULL GROUP BY icao ORDER BY count DESC, icao', id);
   const seasons = all<{ season: string; net_worth: number; flights: number; reputation: number }>(db, 'SELECT * FROM season_stats WHERE company_id = ? ORDER BY season DESC LIMIT 12', id)
     .map((s) => ({ season: s.season, netWorth: s.net_worth, flights: s.flights, reputation: round1(s.reputation) }));
   return { ...c, hubs: hubsOf(db, id), fleet, personality: personality ? (JSON.parse(personality) as Personality) : null, seasons };

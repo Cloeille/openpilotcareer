@@ -57,7 +57,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   if (o.ai !== false) seedAi(db, now());
 
   app.setErrorHandler((err, _req, reply) => {
-    if (err instanceof HttpError) return reply.status(err.status).send({ error: err.code, message: err.message });
+    if (err instanceof HttpError) return reply.status(err.status).send({ ...err.extra, error: err.code, message: err.message });
     const status = (err as { statusCode?: number }).statusCode;
     if (typeof status === 'number' && status >= 400 && status < 500) return reply.status(status).send({ error: 'bad_request', message: (err as Error).message });
     console.error(err);
@@ -226,7 +226,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   app.post('/api/v1/me/fleet', async (req, reply) => {
     const p = user(req);
     const b = parse(buyAircraftSchema, req.body);
-    tx(db, () => buyAircraft(db, p.companyId, b.icao, b.hub, now()));
+    tx(db, () => buyAircraft(db, p.companyId, b.icao, b.hub, now(), b.financing));
     return reply.status(201).send(meView(db, p.userId, p.companyId));
   });
 
@@ -248,7 +248,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   app.get('/api/v1/jobs', async (req) => {
     const p = user(req);
     const q = parse(z.object({ airport: icaoAirportSchema.optional() }), req.query);
-    const airportCodes = q.airport ? [q.airport] : all<{ location: string }>(db, 'SELECT DISTINCT location FROM aircraft WHERE company_id = ? ORDER BY location', p.companyId).map((a) => a.location);
+    const airportCodes = q.airport ? [q.airport] : all<{ location: string }>(db, 'SELECT DISTINCT location FROM aircraft WHERE company_id = ? AND returned_at IS NULL ORDER BY location', p.companyId).map((a) => a.location);
     const at = now();
     return { jobs: airportCodes.flatMap((icao) => openBoard(db, icao, at)), imported: pendingImports(db, p.companyId, at) };
   });
