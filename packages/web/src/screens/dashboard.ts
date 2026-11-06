@@ -1,12 +1,15 @@
 import { blockHours, type Flight, type Job } from '@opc/shared';
 import { act } from '../actions.ts';
 import { api } from '../api.ts';
+import { fetchLive } from '../api-live.ts';
 import { button, icon, signDirection, signLocation, unknownValue } from '../components.ts';
 import { companyTitle, keyFigures } from '../figures.ts';
 import { fmt } from '../format.ts';
 import { jobsAtIdleAirports, flyable } from '../board.ts';
 import { t, tp } from '../i18n.ts';
 import { loadLabel } from '../job-view.ts';
+import { pollWhileShown } from '../live-poll.ts';
+import { liveFacts, progressOf, type LiveFacts } from '../live-view.ts';
 import { hashFor } from '../keys.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
@@ -17,29 +20,54 @@ function flightActions(f: Flight, refresh: () => Promise<void>): HTMLElement {
     button(t('dash.cancel'), { variant: 'ghost', icon: 'x', onclick: () => { if (confirm(t('dash.cancelConfirm'))) void act(t('dash.cancelled'), () => api(`/flights/${f.id}/cancel`, { method: 'POST' }), refresh); } }));
 }
 
-function currentFlight(f: Flight, ctx: Ctx, others: Flight[]): HTMLElement {
+function currentFlight(f: Flight, ctx: Ctx, others: Flight[], first: LiveFacts): HTMLElement {
   const { snap, refresh } = ctx;
   const fm = fmt();
   const aircraft = snap.me.fleet.find((a) => a.id === f.aircraftId);
   const fact = (label: string, value: string | Node): HTMLElement => h('div', { class: 'fact' }, h('span', { class: 'fact-label' }, label), h('span', { class: 'fact-value' }, value));
-  return h('section', { class: 'panel current-flight', 'aria-labelledby': 'flight-title' },
-    h('div', { class: 'flight-head' },
-      h('span', { class: 'status-line' }, h('span', { class: 'dot route' }), t('dash.liveSince', { time: fm.zulu(f.acceptedAt) })),
-      h('span', { class: 'verif' }, icon('scan-line', 14), t('dash.awaiting'))),
+  const dot = h('span', { class: 'dot route' });
+  const phase = h('span', null);
+  const verif = h('span', { class: 'verif' });
+  const eta = h('span', { class: 'fact-value' });
+  const remaining = h('span', { class: 'fact-value' });
+  const done = h('span', { class: 'remaining' });
+  const plane = h('span', { class: 'plane-dot', 'aria-hidden': 'true' });
+  const track = h('div', { class: 'track', 'aria-hidden': 'true' }, done, plane);
+  const show = (l: LiveFacts): void => {
+    dot.className = l.lost ? 'dot warn' : 'dot route';
+    phase.textContent = l.sample === null && !l.lost ? t('dash.liveSince', { time: fm.zulu(f.acceptedAt) }) : t('dash.liveStatus', { phase: t(`live.phase.${l.phase}` as 'live.phase.cruise') });
+    verif.className = l.lost ? 'verif live-chip warn' : 'verif';
+    verif.replaceChildren(icon(l.lost ? 'pause' : 'scan-line', 14), l.lost ? t('dash.verifPaused') : l.sample === null ? t('dash.awaiting') : t('dash.verifRunning'));
+    eta.replaceChildren(l.etaAt !== null ? fm.zulu(l.etaAt) : unknownValue());
+    remaining.replaceChildren(l.remainingNm !== null ? fm.nm(Math.round(l.remainingNm)) : unknownValue());
+    const p = progressOf(f.job.distanceNm, l.remainingNm);
+    done.style.width = `${Math.round((p ?? 0) * 100)}%`;
+    plane.hidden = p === null;
+    plane.style.left = `${Math.round((p ?? 0) * 100)}%`;
+  };
+  show(first);
+  const card = h('section', { class: 'panel current-flight', 'aria-labelledby': 'flight-title' },
+    h('div', { class: 'flight-head' }, h('span', { class: 'status-line' }, dot, phase), verif),
     h('div', { class: 'col tight' },
       h('h2', { id: 'flight-title', class: 'flight-title' }, `${f.job.origin} → ${f.job.destination}`),
       h('span', { class: 'mono dim small' }, t('dash.flightMeta', { id: f.id, aircraft: f.aircraftIcao, aircraftId: f.aircraftId }), ' · ', loadLabel(f.job))),
-    h('div', { class: 'route-line' }, signLocation(f.job.origin), h('div', { class: 'track', 'aria-hidden': 'true' }, h('span', { class: 'remaining' })), signDirection(f.job.destination)),
+    h('div', { class: 'route-line' }, signLocation(f.job.origin), track, signDirection(f.job.destination)),
     f.job.route ? h('span', { class: 'mono dim small route-text' }, f.job.route) : null,
     h('div', { class: 'facts' },
+      fact(t('dash.eta'), eta), fact(t('dash.remaining'), remaining),
       fact(t('dash.distance'), fm.nm(f.job.distanceNm)),
       fact(t('dash.blockTime'), aircraft ? fm.duration(blockHours(aircraft.type, f.job.distanceNm)) : unknownValue()),
       fact(t('dash.payout'), fm.money(f.job.payout))),
+    h('div', { class: 'row' },
+      button(t('dash.follow'), { variant: 'primary', key: t('key.enter'), onclick: () => ctx.go('#live') }),
+      button(t('dash.cutaway'), { variant: 'secondary', icon: 'scan-eye', key: 'C', onclick: () => ctx.go('#live/cutaway') })),
     flightActions(f, refresh),
     others.length > 0 ? h('div', { class: 'others' },
       h('span', { class: 'dim small' }, t('dash.others')),
       h('ul', { class: 'plain' }, others.slice(0, 2).map((o) => h('li', { class: 'other' }, h('span', { class: 'mono strong' }, `${o.job.origin} → ${o.job.destination}`), h('span', { class: 'dim small' }, `${o.aircraftIcao} #${o.aircraftId}`), flightActions(o, refresh)))),
       others.length > 2 ? h('a', { class: 'btn ghost', href: '#history' }, h('span', null, t('dash.seeAll', { n: others.length })), icon('chevron-right')) : null) : null);
+  pollWhileShown('dash', card, async () => { show(liveFacts(await fetchLive(f.id).catch(() => null), Date.now())); });
+  return card;
 }
 
 function nextDeparture(ctx: Ctx): HTMLElement {
@@ -70,11 +98,12 @@ export async function dashboard(ctx: Ctx): Promise<Screen> {
   const active = await api<Flight[]>('/me/flights?status=active&limit=50');
   const oldestFirst = [...active].sort((a, b) => a.acceptedAt - b.acceptedAt);
   const main = oldestFirst[0];
+  const first = main ? liveFacts(await fetchLive(main.id).catch(() => null), Date.now()) : null;
   const view = h('div', { class: 'wide-layout' }, companyTitle(snap),
-    h('div', { class: 'offline-row' }, main ? currentFlight(main, ctx, oldestFirst.slice(1)) : nextDeparture(ctx), keyFigures(snap.me, snap.lastFlight)));
+    h('div', { class: 'offline-row' }, main && first ? currentFlight(main, ctx, oldestFirst.slice(1), first) : nextDeparture(ctx), keyFigures(snap.me, snap.lastFlight)));
   return {
     title: t('tab.dashboard'), scene: 'dashboard', tab: 'dashboard', wide: true, view, back: null,
-    hints: main ? [] : [{ key: t('key.enter'), label: t('hint.openJobs') }, { key: 'I', label: t('hint.simbrief') }],
-    keys: main ? undefined : { i: () => ctx.go('#simbrief') },
+    hints: main ? [{ key: t('key.enter'), label: t('hint.follow') }, { key: 'C', label: t('hint.cutaway') }] : [{ key: t('key.enter'), label: t('hint.openJobs') }, { key: 'I', label: t('hint.simbrief') }],
+    keys: main ? { c: () => ctx.go('#live/cutaway') } : { i: () => ctx.go('#simbrief') },
   };
 }
