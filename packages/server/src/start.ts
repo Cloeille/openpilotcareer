@@ -87,8 +87,8 @@ export function foundCompany(db: Db, userId: number, b: CreateCompanyStart, now:
   const before = onboardingOf(db, userId);
   if (!before.completed && before.companyId !== null) dropOnboardingCompany(db, userId, before.companyId);
   const id = createCompany(db, { userId, name: b.name, hub: b.hub, now, startMode: b.startMode, ...identity });
-  const fresh = before.completed || !get(db, 'SELECT 1 AS x FROM onboarding WHERE user_id = ?', userId);
-  save(db, userId, { completed: false, step: fresh ? 3 : before.step, startMode: b.startMode, companyId: id, draft: fresh ? {} : before.draft }, now);
+  // The company is founded at the end of step 2: the player moves on to the first aircraft (3) unless they are already further.
+  save(db, userId, { completed: false, step: Math.max(3, before.completed ? 3 : before.step) as OnboardingStep, startMode: b.startMode, companyId: id, draft: before.completed ? {} : before.draft }, now);
   return id;
 }
 
