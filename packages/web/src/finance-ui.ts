@@ -10,14 +10,13 @@ import { h, notify } from './ui.ts';
 
 export const locale = (): string => (getLang() === 'fr' ? 'fr-FR' : 'en-GB');
 
-export type HubChoice = { icao: string; airport: Airport | null; free: number | null; main: boolean };
+export type HubChoice = { icao: string; airport: Airport | null; free: number | null };
 
 /** "Base d'attache": one radio per hub; a hub without a free parking space is listed but cannot be picked. */
 export function hubPicker(name: string, label: string, hubs: HubChoice[], selected: string, onChange: (icao: string) => void): HTMLElement {
   return h('div', { class: 'hub-pick', role: 'radiogroup', 'aria-label': label }, hubs.map((hub) => {
     const full = hub.free === 0;
     const parts: string[] = [];
-    if (hub.main) parts.push(t('fin.buy.mainHub'));
     if (full) parts.push(t('fin.buy.hubFull'));
     else if (hub.free !== null) parts.push(tp('fin.buy.hubSpots', hub.free));
     const id = `${name}-${hub.icao}`;

@@ -28,7 +28,7 @@ export async function buy(ctx: Ctx): Promise<Screen> {
   const balance = me.company.balance;
   const price = aircraftPrice(chosen);
   const usage = await hubUsage().catch((): HubUsage[] | null => null);
-  const hubs: HubChoice[] = await Promise.all(me.hubs.map(async (icao, i) => ({ icao, airport: await airportInfo(icao), free: freeSpots(usage, icao), main: i === 0 })));
+  const hubs: HubChoice[] = await Promise.all(me.hubs.map(async (icao) => ({ icao, airport: await airportInfo(icao), free: freeSpots(usage, icao) })));
   let hub = (hubs.find((x) => x.free !== 0) ?? hubs[0])!.icao;
   let quote: FleetQuote | null = await fleetQuote(chosen.icao, hub).catch(() => null);
   const sub = t('buy.sub', { cat: categoryName(chosen.category), seats: chosen.seats, cargo: fm.kg(chosen.cargoKg), kt: fm.kt(chosen.cruiseKts), nm: fm.nm(chosen.rangeNm) });
