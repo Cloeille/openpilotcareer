@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { resolveCatalogEntry, type AircraftType } from '@opc/shared';
 import { buildModel, placeTags, project, schematicCategory, SCHEMATIC_CATEGORIES, DEPTH_LEVELS } from './schematic.ts';
 import { cabinItems, deriveCabin, layoutCabin, occupiedSeats } from './cabin.ts';
-import { aircraftExtras, altitudeOf, checksOf, engineVm, flightLevelLabel, fuelVm, liveFacts, loadVm, phaseOf, progressOf, wearLevel } from './live-view.ts';
+import { aircraftExtras, altitudeOf, arcDash, callsignLabel, checksOf, engineVm, enginesRunning, flightLevelLabel, fuelVm, liveFacts, loadVm, nextView, phaseOf, progressOf, ringDash, wearLevel, zuluSeconds } from './live-view.ts';
 import type { LiveResponse, LiveSample } from './api-live.ts';
 
 const type = (category: AircraftType['category'], seats: number, engines = 2): AircraftType =>
@@ -189,4 +189,27 @@ test('wear levels and defensive reading of fields other lots add', () => {
   assert.deepEqual([wearLevel(18), wearLevel(37), wearLevel(80)], ['ok', 'warn', 'danger']);
   assert.deepEqual(aircraftExtras({ registration: 'F-HAZR', wearPct: 22 }), { registration: 'F-HAZR', wearPct: 22 });
   assert.deepEqual(aircraftExtras(undefined), {});
+});
+
+test('arc geometry: dial sweeps 270 degrees, red zone starts at the redline, ring is a share of the circle', () => {
+  const r = 70;
+  const c = 2 * Math.PI * r;
+  const full = arcDash(r, 0, 110);
+  assert.equal(Number(full.dasharray.split(' ')[0]), Number((0.75 * c).toFixed(2)));
+  assert.equal(full.dashoffset, -0);
+  const red = arcDash(r, 100, 110);
+  assert.ok(Math.abs(red.dashoffset + (100 / 110) * 0.75 * c) < 1e-9);
+  assert.ok(Number(red.dasharray.split(' ')[0]) < Number(full.dasharray.split(' ')[0]) / 5);
+  assert.equal(Number(arcDash(r, 0, 500).dasharray.split(' ')[0]), Number(full.dasharray.split(' ')[0]));
+  assert.equal(Number(arcDash(r, 0, -4).dasharray.split(' ')[0]), 0);
+  assert.equal(Number(ringDash(35, 50).split(' ')[0]), Number((Math.PI * 35).toFixed(2)));
+  assert.equal(Number(ringDash(35, 400).split(' ')[0]), Number((2 * Math.PI * 35).toFixed(2)));
+});
+
+test('running engines, UTC clock with seconds, view cycle, callsign label', () => {
+  assert.equal(enginesRunning([engineVm({ torquePct: 84 }, 0), engineVm({ torquePct: 0 }, 1), engineVm({}, 2)]), 1);
+  assert.equal(zuluSeconds(Date.UTC(2026, 10, 6, 17, 58, 12)), '17:58:12Z');
+  assert.deepEqual([nextView('cutaway'), nextView('cabin'), nextView('systems')], ['cabin', 'systems', 'cutaway']);
+  assert.equal(callsignLabel('AZR', 4127), 'AZR 4127');
+  assert.equal(callsignLabel(null, 4127), null);
 });

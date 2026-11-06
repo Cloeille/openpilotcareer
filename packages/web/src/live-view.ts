@@ -1,4 +1,4 @@
-import { fuelBurnKg, type AircraftType, type Job } from '@opc/shared';
+import { fuelBurnKg, type AircraftType, type Flight, type FleetAircraft, type Job } from '@opc/shared';
 import type { LiveEngine, LiveResponse, LiveSample } from './api-live.ts';
 
 // View-model of the live screens: what GET /flights/:id/live says, turned into the figures the screens show. No DOM, no language.
@@ -116,3 +116,52 @@ export type AircraftExtras = { registration?: string | null; wearPct?: number | 
 export const aircraftExtras = (a: object | undefined): AircraftExtras => (a ?? {}) as AircraftExtras;
 export type CompanyExtras = { callsign?: string | null; code?: string | null };
 export const companyExtras = (c: object): CompanyExtras => c as CompanyExtras;
+
+// ------------------------------------------------------------------ gauges
+
+/** Engine dial: a 270 degree sweep opening at the bottom, 0..DIAL_MAX percent, red from the redline up. */
+export const DIAL_MAX = 110;
+export const DIAL_REDLINE = 100;
+const SWEEP = 0.75;
+/** `stroke-dasharray`/`stroke-dashoffset` for an arc of a circle of radius `r` that spans [fromPct, toPct] of the dial, drawn after rotating the circle by 135 degrees. */
+export function arcDash(r: number, fromPct: number, toPct: number, max = DIAL_MAX): { dasharray: string; dashoffset: number } {
+  const c = 2 * Math.PI * r;
+  const clamp = (v: number): number => Math.min(max, Math.max(0, v));
+  const a = clamp(fromPct);
+  const b = clamp(toPct);
+  const len = Math.max(0, ((b - a) / max) * SWEEP * c);
+  return { dasharray: `${len.toFixed(2)} ${c.toFixed(2)}`, dashoffset: -((a / max) * SWEEP * c) };
+}
+/** Full ring (wear): `stroke-dasharray` for pct percent of the circumference, drawn from the top. */
+export const ringDash = (r: number, pct: number): string => {
+  const c = 2 * Math.PI * r;
+  return `${((Math.min(100, Math.max(0, pct)) / 100) * c).toFixed(2)} ${c.toFixed(2)}`;
+};
+
+const RUNNING_MIN_PCT = 5;
+/** An engine whose torque (or N1) is at or above 5 percent is counted as running. */
+export const enginesRunning = (engines: EngineVm[]): number => engines.filter((e) => (e.dial?.value ?? 0) >= RUNNING_MIN_PCT).length;
+
+/** `17:58:12Z`. */
+export const zuluSeconds = (ms: number): string => `${new Date(ms).toISOString().slice(11, 19)}Z`;
+
+// ------------------------------------------------------------------ what the live screens share
+
+export type LiveViewId = 'cutaway' | 'cabin' | 'systems';
+export const LIVE_VIEWS: readonly LiveViewId[] = ['cutaway', 'cabin', 'systems'];
+export const nextView = (v: LiveViewId): LiveViewId => LIVE_VIEWS[(LIVE_VIEWS.indexOf(v) + 1) % LIVE_VIEWS.length]!;
+
+/** Everything a live view knows about the flight that does not change while it is open. */
+export type LiveCtx = {
+  flight: Flight; type: AircraftType; aircraft: FleetAircraft | undefined;
+  registration: string | null; wearPct: number | null;
+  /** `AZR 4127` when the company has a callsign (contract START), `Flight #12` otherwise. */
+  flightLabel: string;
+  /** City names of the route ends, ICAO codes while unknown. */
+  from: string; to: string;
+};
+/** One of the three views: its element, and how it follows the live data (called after every poll). */
+export type Body = { el: HTMLElement; update: (f: LiveFacts) => void };
+
+/** Callsign and flight id, `AZR 4127`; null without a callsign. */
+export const callsignLabel = (callsign: string | null | undefined, flightId: number): string | null => (callsign ? `${callsign} ${flightId}` : null);

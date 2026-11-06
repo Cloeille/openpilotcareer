@@ -44,7 +44,9 @@ export function hudTop(d: HudData): HTMLElement {
       if (v === NEW_COMPANY) { (e.target as HTMLSelectElement).value = String(me.company.id); location.hash = '#company'; } else d.onCompany(Number(v));
     },
   }, [...me.companies.map((c) => h('option', { value: c.id, selected: c.id === me.company.id }, c.name)), h('option', { value: NEW_COMPANY }, t('nc.menu'))]);
-  const tabLink = (tab: Tab): HTMLElement => h('a', { href: `#${tab}`, 'aria-current': tab === d.tab ? 'page' : null }, t(`tab.${tab}`), tab === 'jobs' ? h('span', { class: 'tab-count' }, d.jobCount) : null);
+  const flying = me.fleet.some((a) => a.busy);
+  const tabLink = (tab: Tab): HTMLElement => h('a', { href: `#${tab}`, 'aria-current': tab === d.tab ? 'page' : null },
+    t(`tab.${tab}`), tab === 'jobs' ? h('span', { class: 'tab-count' }, d.jobCount) : null, tab === 'live' && flying ? h('span', { class: 'dot route', role: 'img', 'aria-label': t('live.hud.active') }) : null);
   return h('header', { class: 'hud-top' },
     brandBlock(PRODUCT_NAME, h('div', { class: 'server-line' + (d.offline ? ' off' : '') },
       h('span', { class: d.offline ? 'dot off' : 'dot' }), d.offline ? t('offline.server', { server: serverName() }) : serverName(), h('span', { class: 'dim', 'aria-hidden': 'true' }, '·'),

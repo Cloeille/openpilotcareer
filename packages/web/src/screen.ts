@@ -2,7 +2,7 @@ import type { Snapshot } from './snapshot.ts';
 import type { SceneId } from './scenes.ts';
 
 /** The tabs of the Q / E cycle, in HUD order. Settings is reached from the gear and is outside the cycle. */
-export const TABS = ['dashboard', 'jobs', 'fleet', 'history', 'leaderboard'] as const;
+export const TABS = ['dashboard', 'live', 'jobs', 'fleet', 'history', 'leaderboard'] as const;
 export type Tab = (typeof TABS)[number];
 
 export type Hint = { key: string; label: string };

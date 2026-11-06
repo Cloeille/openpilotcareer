@@ -14,6 +14,7 @@ import { manual } from './screens/manual.ts';
 import { jobDetail } from './screens/job.ts';
 import { newCompany } from './screens/new-company.ts';
 import { jobs } from './screens/jobs.ts';
+import { live } from './screens/live.ts';
 import { simbrief } from './screens/simbrief.ts';
 import { h } from './ui.ts';
 import type { SceneId } from './scenes.ts';
@@ -29,6 +30,7 @@ function legacy(page: keyof typeof pages, scene: SceneId, tab: Tab | 'settings')
 
 export const routes: Record<string, ScreenFn> = {
   dashboard,
+  live,
   jobs,
   job: jobDetail,
   simbrief,

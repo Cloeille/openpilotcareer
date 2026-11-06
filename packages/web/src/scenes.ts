@@ -10,6 +10,9 @@ import flight from './design/scenes/generated-8.webp';
 import leaderboard from './design/scenes/generated-9.webp';
 import ai from './design/scenes/generated-10.webp';
 
+/** The plain dark backdrop of the live-flight screens (the mockup draws them on a radial gradient, not a photo). */
+const plain = `data:image/svg+xml,${encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><radialGradient id='g' cx='50%' cy='58%' r='70%'><stop offset='0' stop-color='#18202B'/><stop offset='1' stop-color='#0B0F15' stop-opacity='0'/></radialGradient></defs><rect width='1600' height='900' fill='#07090C'/><rect width='1600' height='900' fill='url(#g)'/></svg>")}`;
+
 /** Static backdrops standing in for the mockup's real-time 3D scene; the file each screen uses is the one the mockup frame uses. */
-export const SCENES = { login, settings, dashboard, jobs, job, catalogue, fleet, history, flight, leaderboard, ai } as const;
+export const SCENES = { login, settings, dashboard, jobs, job, catalogue, fleet, history, flight, leaderboard, ai, plain } as const;
 export type SceneId = keyof typeof SCENES;
