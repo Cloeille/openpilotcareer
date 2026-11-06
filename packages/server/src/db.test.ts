@@ -47,7 +47,9 @@ test('migration 2 lets a user own several companies and loses no row, id or rela
   assert.equal(get<{ user_version: number }>(db, 'PRAGMA user_version')!.user_version, MIGRATIONS.length);
   assert.equal(get<{ foreign_keys: number }>(db, 'PRAGMA foreign_keys')!.foreign_keys, 1, 'foreign keys are enforced again after migrating');
   assert.deepEqual(all(db, 'PRAGMA foreign_key_check'), []);
-  for (const t of TABLES) assert.deepEqual(all(db, `SELECT * FROM ${t} ORDER BY rowid`), before[t], `${t} unchanged`);
+  // later migrations only ADD columns: every column the v1 schema had keeps its value
+  const keepOldColumns = (rows: Record<string, unknown>[], old: Record<string, unknown>[]) => rows.map((r) => Object.fromEntries(Object.keys(old[0] ?? {}).map((k) => [k, r[k]])));
+  for (const t of TABLES) assert.deepEqual(keepOldColumns(all(db, `SELECT * FROM ${t} ORDER BY rowid`), before[t]!), keepOldColumns(before[t]!, before[t]!), `${t} unchanged`);
 
   // the old one-company-per-user constraint is gone ...
   db.exec("INSERT INTO companies (user_id, name, balance, reputation, created_at) VALUES (1, 'Alice Cargo', 1, 50, 99)");

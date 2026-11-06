@@ -46,7 +46,10 @@ export const COMPANY_HEADER = 'x-opc-company';
 /** The ownership check: every company id a client names (the active-company header, `PATCH /companies/:id`) passes through here.
  *  403 for a company that is someone else's, an AI company or nonexistent alike, so the answer reveals nothing. */
 export function ownedCompany(db: Db, userId: number, companyId: number): number {
-  if (!get(db, 'SELECT 1 AS x FROM companies WHERE id = ? AND user_id = ?', companyId, userId)) throw new HttpError(403, 'not_your_company', 'that company is not yours');
+  if (!get(db, 'SELECT 1 AS x FROM companies WHERE id = ? AND user_id = ?', companyId, userId)) {
+    if (!get(db, 'SELECT 1 AS x FROM companies WHERE user_id = ?', userId)) throw new HttpError(409, 'no_company', 'you have no company yet: finish the onboarding');
+    throw new HttpError(403, 'not_your_company', 'that company is not yours');
+  }
   return companyId;
 }
 

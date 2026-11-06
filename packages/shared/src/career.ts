@@ -142,7 +142,7 @@ export type OnboardingUpdate = z.infer<typeof onboardingUpdateSchema>;
 export const hubQuerySchema = z.object({ mode: z.enum(START_MODE_IDS), q: z.string().trim().max(60).optional() });
 
 /** Why a hub is suggested: a stable tag the client can translate, next to a plain English `note`. */
-export const HUB_NOTE_KEYS = ['most_jobs', 'cheapest', 'least_competition', 'balanced'] as const;
+export const HUB_NOTE_KEYS = ['most_jobs', 'least_competition', 'balanced', 'match'] as const;
 export type HubNoteKey = (typeof HUB_NOTE_KEYS)[number];
 
 export type HubSuggestion = {
