@@ -433,17 +433,13 @@ test('a reservation blocks the AI tick: reserved jobs are never claimed by an AI
   assert.ok(claimedFree.length > 0, 'control: Aurora Airways flies a job out of EGLL when nothing is reserved');
 
   const blocked = world();
-  const pilot = run(blocked, "INSERT INTO companies (name, balance, reputation, created_at) VALUES ('Reserver', 0, 50, 1)").id;
-  for (const id of egllIds) run(blocked, 'INSERT OR REPLACE INTO job_reservations (job_id, company_id, reserved_until) VALUES (?, ?, ?)', id, pilot + 1000 + egllIds.indexOf(id), at + FIRST_JOB_RESERVATION_MS);
-  // job_reservations.company_id is UNIQUE per company: hold the jobs through real rows, one reserving company each
-  run(blocked, 'DELETE FROM job_reservations');
+  // job_reservations.company_id is UNIQUE: hold each job through its own reserving company
   for (const [i, id] of egllIds.entries()) {
     const c = run(blocked, 'INSERT INTO companies (name, balance, reputation, created_at) VALUES (?, 0, 50, 1)', `Holder ${i}`).id;
     reserve(blocked, c, id, at + FIRST_JOB_RESERVATION_MS);
   }
   runTick(blocked, tick);
   assert.deepEqual(all(blocked, "SELECT job_id FROM job_claims WHERE job_id LIKE 'EGLL-%'"), [], 'the AI took none of the reserved EGLL jobs');
-  assert.ok(pilot > 0);
 
   const expired = world();
   for (const [i, id] of egllIds.entries()) {
@@ -471,7 +467,7 @@ test('bankruptcyBailout: clears a negative balance once per season when the togg
   assert.equal(tx(h.db, () => applyBailout(h.db, id, T)), 120_000);
   assert.equal(bal(), 0);
   const line = all<{ kind: string; amount: number; balance_after: number }>(h.db, "SELECT kind, amount, balance_after FROM transactions WHERE company_id = ? AND kind = 'bailout'", id);
-  assert.deepEqual(line, [{ kind: 'bailout', amount: 120_000, balance_after: 0 }]);
+  assert.deepEqual(line.map((l) => ({ ...l })), [{ kind: 'bailout', amount: 120_000, balance_after: 0 }]);
   run(h.db, 'UPDATE companies SET balance = -5000 WHERE id = ?', id);
   assert.equal(applyBailout(h.db, id, T + 86_400_000), 0, 'once per season');
   assert.equal(bal(), -5000);
