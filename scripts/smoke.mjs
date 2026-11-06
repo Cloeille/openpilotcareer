@@ -23,12 +23,16 @@ const fail = (msg, detail) => { console.error(`FAIL    ${msg}${detail === undefi
 const expect = (cond, msg, detail) => (cond ? ok(msg) : fail(msg, detail));
 
 const port = await new Promise((resolve) => { const s = createServer().listen(0, '127.0.0.1', () => { const p = s.address().port; s.close(() => resolve(p)); }); });
-const t0 = Date.now();
-const serverNow = () => t0 + (Date.now() - t0) * WARP;
+// The server's clock starts one minute into a 6 h job-board window (a window lasts 36 real seconds at x600): the board listed at the start
+// of the run is still the current one when its jobs are accepted. Starting at a random point let a run cross a window boundary in between,
+// and a job of a refreshed board is correctly refused (404 job_not_found), which showed up as \"accepted ... -> flight undefined\".
+const realStart = Date.now();
+const t0 = Math.floor(realStart / (6 * HOUR)) * 6 * HOUR + 60_000;
+const serverNow = () => t0 + (Date.now() - realStart) * WARP;
 const sleepUntil = (serverMs) => new Promise((r) => setTimeout(r, Math.max(0, (serverMs - serverNow()) / WARP)));
 const dir = mkdtempSync(join(tmpdir(), 'opc-smoke-'));
 server = spawn(process.execPath, ['--import', here('./warp-clock.mjs'), here('../packages/server/src/index.ts')], {
-  env: { ...process.env, OPC_DB: join(dir, 'smoke.sqlite'), OPC_PORT: String(port), OPC_HOST: '127.0.0.1', OPC_WARP: String(WARP), OPC_WARP_T0: String(t0) },
+  env: { ...process.env, OPC_DB: join(dir, 'smoke.sqlite'), OPC_PORT: String(port), OPC_HOST: '127.0.0.1', OPC_WARP: String(WARP), OPC_WARP_T0: String(t0), OPC_WARP_REAL_T0: String(realStart) },
   stdio: ['ignore', 'inherit', 'inherit'],
 });
 server.on('exit', (code) => { if (code) { console.error(`server exited with ${code}`); process.exit(1); } });
