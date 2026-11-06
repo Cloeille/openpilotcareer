@@ -173,3 +173,12 @@ test('month labels follow the language, year only on request', async () => {
   assert.equal(monthLabel('fr-FR', ms, true), 'octobre 2028');
   assert.equal(monthLabel('en-GB', ms, true), 'October 2028');
 });
+
+test('the newest aircraft of a type is the highest id, by registration when it has one', async () => {
+  const { newestOf, ADDON_CATEGORY } = await import('./finance-view.ts');
+  const fleet = [{ id: 1, icao: 'C172', registration: 'F-HAZA' }, { id: 5, icao: 'C172', registration: 'F-HAZE' }, { id: 9, icao: 'A320' }];
+  assert.equal(newestOf(fleet, 'C172'), 'F-HAZE');
+  assert.equal(newestOf(fleet, 'A320'), 'A320 #9');
+  assert.equal(newestOf(fleet, 'B738'), 'B738');
+  assert.equal(ADDON_CATEGORY.turboprop, 'turboprop-single');
+});

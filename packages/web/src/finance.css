@@ -140,3 +140,8 @@ table.data tbody tr.est td, table.data tbody tr.est .model { color: var(--text-t
 .hub-card .head { display: flex; align-items: center; gap: 10px; font: 400 14px var(--mono); }
 .hub-card .n { font-size: 15px; font-weight: 500; }
 .hub-card .s { font-size: 13px; color: var(--text-tertiary); }
+.fin-split { display: flex; justify-content: space-between; width: 100%; gap: 20px; min-height: 0; }
+.fin-catalogue .panel.grow { flex: 1 1 auto; }
+.fin-catalogue .panel-fill { overflow: auto; }
+.fin-catalogue .list-footer { align-items: center; border-top: 1px solid var(--border); }
+.fin-sheet { display: flex; flex-direction: column; gap: 26px; }

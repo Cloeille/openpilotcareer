@@ -151,3 +151,15 @@ export function starterSummary(row: StarterRow, mode: 'lease' | 'buy', balance: 
 export function monthLabel(locale: string, ms: number, withYear: boolean): string {
   return new Intl.DateTimeFormat(locale, { timeZone: 'UTC', month: 'long', ...(withYear ? { year: 'numeric' } : {}) }).format(ms);
 }
+
+/** The aircraft just bought or leased: the highest id of that type (POST /me/fleet returns the whole fleet). */
+export function newestOf(fleet: Pick<FleetAircraftV2, 'id' | 'icao' | 'registration'>[], icao: string): string {
+  const mine = fleet.filter((a) => a.icao === icao).sort((a, b) => b.id - a.id)[0];
+  return mine ? aircraftName(mine) : icao;
+}
+
+export type AddonCategory = 'piston' | 'turboprop' | 'jet' | 'helicopter';
+/** The category a player picks for an add-on aircraft whose type the catalogue does not know, mapped to the finer server category its performance is estimated from. */
+export const ADDON_CATEGORY: Record<AddonCategory, 'piston-single' | 'turboprop-single' | 'jet-business' | 'helicopter'> = {
+  piston: 'piston-single', turboprop: 'turboprop-single', jet: 'jet-business', helicopter: 'helicopter',
+};

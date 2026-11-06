@@ -1,9 +1,9 @@
 import { aircraftPrice, type AircraftType } from '@opc/shared';
 import { api } from '../api.ts';
-import { fleetQuote, leaseOffers, signLease, buyAircraftWith, type FleetAircraftV2, type LeaseOffer } from '../api-finance.ts';
+import { fleetQuote, leaseOffers, signLease, buyAircraftWith, type FleetAircraftV2 } from '../api-finance.ts';
 import { airportInfo, cityOf } from '../airports.ts';
 import { button, line, panel, titleBlock } from '../components.ts';
-import { starterRow, starterSummary, inBudget, type StarterRow } from '../finance-view.ts';
+import { inBudget, newestOf, starterRow, starterSummary, type StarterRow } from '../finance-view.ts';
 import { enterConfirms, hubCity, perform } from '../finance-ui.ts';
 import { fmt } from '../format.ts';
 import { t } from '../i18n.ts';
@@ -53,7 +53,7 @@ export async function starter(ctx: Ctx): Promise<Screen> {
       if (!d) return;
       void perform(() => signLease(row.offer.id, row.months as 12 | 24 | 36, hub), (r) => done(r.aircraft.registration ?? r.aircraft.icao), ctx.refresh).then((ok) => { if (ok) go('#fleet'); });
     } else {
-      void perform(() => buyAircraftWith(row.icao, hub), (m) => done(newest(m.fleet as FleetAircraftV2[], row.icao)), ctx.refresh).then((ok) => { if (ok) go('#fleet'); });
+      void perform(() => buyAircraftWith(row.icao, hub), (m) => done(newestOf(m.fleet as FleetAircraftV2[], row.icao)), ctx.refresh).then((ok) => { if (ok) go('#fleet'); });
     }
   };
 
@@ -164,11 +164,3 @@ export async function starter(ctx: Ctx): Promise<Screen> {
     keys: { a: () => go('#catalogue') },
   };
 }
-
-/** Registration of the aircraft just bought: the highest id of that type (the fleet is returned whole by POST /me/fleet). */
-function newest(fleet: FleetAircraftV2[], icao: string): string {
-  const mine = fleet.filter((a) => a.icao === icao).sort((a, b) => b.id - a.id)[0];
-  return mine ? (mine.registration ?? `${mine.icao} #${mine.id}`) : icao;
-}
-
-export type { LeaseOffer };

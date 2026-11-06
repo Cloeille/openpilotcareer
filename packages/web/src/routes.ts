@@ -14,6 +14,7 @@ import { manual } from './screens/manual.ts';
 import { jobDetail } from './screens/job.ts';
 import { newCompany } from './screens/new-company.ts';
 import { jobs } from './screens/jobs.ts';
+import { lease } from './screens/lease.ts';
 import { simbrief } from './screens/simbrief.ts';
 import { h } from './ui.ts';
 import type { SceneId } from './scenes.ts';
@@ -33,6 +34,7 @@ export const routes: Record<string, ScreenFn> = {
   job: jobDetail,
   simbrief,
   fleet, catalogue, buy, hubs, custom, company: newCompany,
+  lease,
   history, flight: flightDetail, manual,
   leaderboard: legacy('leaderboard', 'leaderboard', 'leaderboard'),
   settings: legacy('settings', 'settings', 'settings'),
