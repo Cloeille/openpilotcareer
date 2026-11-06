@@ -114,6 +114,15 @@ export function runOnboarding(host: OnboardingHost, initial: Onboarding, additio
     cleanup = result.cleanup ?? null;
     bottom = obBottom(result.hints, null);
     const main = h('main', { id: 'main', class: 'view wide', tabindex: -1 }, result.view);
+    // A radio has no native Enter, but the global input layer leaves every <input> alone: so Enter on a card or a row presses the screen's primary button here.
+    main.addEventListener('keydown', (e) => {
+      const el = e.target;
+      if (e.key !== 'Enter' || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || !(el instanceof HTMLInputElement) || el.type !== 'radio') return;
+      const primary = main.querySelector<HTMLButtonElement>('[data-primary]:not(:disabled)');
+      if (!primary) return;
+      e.preventDefault();
+      primary.click();
+    });
     host.root.replaceChildren(stage(result.scene, main,
       obTop(n, n, (s) => void render(s), () => void quit()), bottom.el));
     document.title = `${t(`ob.step.${['depart', 'company', 'aircraft', 'realism', 'bridge', 'go'][n - 1]}` as 'ob.step.depart')} - ${PRODUCT_NAME}`;

@@ -49,7 +49,8 @@ export async function step6(w: Wizard): Promise<StepResult> {
   };
 
   // ---- first job card
-  const gain = job ? Math.round(job.payout * (w.bridge === 'skipped' ? UNVERIFIED_PAY_PCT / 100 : 1)) : 0;
+  // Same formula as the server's settle(): unverified flights pay 60 %, then the realism pay modifier applies.
+  const gain = job ? Math.round(job.payout * (w.bridge === 'skipped' ? UNVERIFIED_PAY_PCT / 100 : 1) * (1 + (company.realism?.payModifierPct ?? 0) / 100)) : 0;
   const acceptBtn = button(t('ob.s6.accept'), { variant: 'primary', key: t('key.enter'), disabled: !job || !flier, onclick: (e) => void guarded(e.currentTarget as HTMLButtonElement, error, () => done('#dashboard', true)) });
   const jobsBtn = button(t('ob.s6.allJobs'), { variant: 'secondary', icon: 'clipboard-list', onclick: (e) => void guarded(e.currentTarget as HTMLButtonElement, error, () => done('#jobs', false)) });
   const finishBtn = button(t('ob.s6.finish'), { variant: 'primary', key: t('key.enter'), onclick: (e) => void guarded(e.currentTarget as HTMLButtonElement, error, () => done('#dashboard', false)) });

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   CLUB, MONTHLY_RENTAL, cheapestAbove, LADDER, ladderRank, PRESET_TOGGLES, bridgeVerdict, cheapestBelow, clampStep, hardcoreOptions, keyUsed, leaseRecap, listedTerm, modifiersOf, normalizeCallsign, normalizeCode,
-  pickLoan, presetRealism, readDraft, resumeStep, signedPct, stepPreset, suggestCallsign, suggestCode, toDraft, typicalGain, withToggle, monthlyCost, activeToggles, fuelPerHour, liveryIdOf, DRAFT_MAX_BYTES, emptyForm,
+  pickLoan, presetRealism, readDraft, resumeStep, signedPct, stepPreset, suggestCallsign, suggestCode, toDraft, typicalGain, withToggle, monthlyCost, activeToggles, runningCostPerHour, liveryIdOf, DRAFT_MAX_BYTES, emptyForm,
 } from './onboarding-model.ts';
 
 test('presets add up to the pay and reputation of the mockup', () => {
@@ -87,6 +87,7 @@ test('the 20 h per month column of the hardcore table matches the mockup', () =>
   assert.equal(monthlyCost(monthly!), 4_100);
   assert.equal(monthlyCost(credit!), 3_510);
   assert.equal(credit!.upfront, 15_500);
+  assert.equal(credit!.price, 62_000);
   assert.equal(monthlyCost(club!, 0), 0);
 });
 
@@ -104,11 +105,11 @@ test('the club is cheapest below 13 h per month against the mockup options', () 
   assert.equal(MONTHLY_RENTAL.deposit, 5_000);
 });
 
-test('fuel per hour of another trainer scales with burn', () => {
-  const c172 = { seats: 4, cargoKg: 150, cruiseKts: 122 };
-  const c152 = { seats: 2, cargoKg: 25, cruiseKts: 107 };
-  assert.equal(fuelPerHour(c172, c172), 110);
-  assert.ok(fuelPerHour(c152, c172) < 110);
+test('running cost per hour is fuel plus upkeep from the game settlement formula', () => {
+  const c152 = { icao: 'C152', name: 'Cessna 152', category: 'piston-single', engines: 1, wtc: 'L', seats: 2, cargoKg: 25, cruiseKts: 107, rangeNm: 415, derived: false } as const;
+  const jet = { icao: 'A20N', name: 'A320neo', category: 'jet-airliner', engines: 2, wtc: 'M', seats: 180, cargoKg: 4000, cruiseKts: 447, rangeNm: 3400, derived: false } as const;
+  assert.equal(runningCostPerHour(c152), 30, '12 EUR fuel + 18 EUR upkeep');
+  assert.ok(runningCostPerHour(jet) > runningCostPerHour(c152) * 100);
 });
 
 test('bridge verdict: waiting, connected, failed after 60 s', () => {

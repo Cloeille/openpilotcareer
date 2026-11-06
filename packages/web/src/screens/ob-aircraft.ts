@@ -3,7 +3,7 @@ import { button, icon, panel } from '../components.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import {
-  CLUB, CREDIT_ICAO, LADDER, LOAN_RATE, MONTHLY_RENTAL, cheapestBelow, fuelPerHour, hardcoreOptions, ladderRank, leaseRecap, listedTerm, monthlyCost, typicalGain,
+  CLUB, CREDIT_ICAO, LADDER, LOAN_RATE, MONTHLY_RENTAL, cheapestBelow, runningCostPerHour, hardcoreOptions, ladderRank, leaseRecap, listedTerm, monthlyCost, typicalGain,
   type HardcoreId, type HardcoreOption,
 } from '../onboarding-model.ts';
 import { aircraftType, buyFinanced, clubRental, fleetQuote, leaseAircraft, leaseOffers, monthlyRental } from '../api-onboarding.ts';
@@ -205,8 +205,8 @@ export async function step3b(w: Wizard): Promise<StepResult> {
 
   let quote: FleetQuote | null = null;
   try { quote = await fleetQuote(CREDIT_ICAO, hub); } catch { quote = null; }
-  const [c152, c172] = await Promise.all([aircraftType(CREDIT_ICAO), aircraftType(CLUB.icao)]);
-  const creditHourly = c152 && c172 ? fuelPerHour(c152, c172) : null;
+  const c152 = await aircraftType(CREDIT_ICAO);
+  const creditHourly = c152 ? runningCostPerHour(c152) : null;
   const options = hardcoreOptions(quote, creditHourly);
   let sel = 0;
   const error = h('p', { class: 'ob-error', role: 'alert' });
@@ -223,7 +223,7 @@ export async function step3b(w: Wizard): Promise<StepResult> {
   const captions = (o: HardcoreOption): [string | undefined, string | undefined, string | undefined, string | undefined] =>
     o.id === 'club' ? [undefined, undefined, t('ob.s3b.capFuelIncl'), undefined]
       : o.id === 'monthly' ? [t('ob.s3b.capDeposit'), undefined, t('ob.s3b.capFuelReal'), undefined]
-        : [t('ob.s3b.capDown'), t('ob.s3b.capLoan'), t('ob.s3b.capFuelEst'), t('ob.s3b.capNoBreak')];
+        : [t('ob.s3b.capDown'), t('ob.s3b.capLoan'), t('ob.s3b.capUpkeep'), t('ob.s3b.capNoBreak')];
 
   const paint = (): void => {
     const o = options[sel]!;

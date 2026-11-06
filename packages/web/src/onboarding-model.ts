@@ -1,4 +1,4 @@
-import { MANUAL_PAY_FACTOR, PAX_KG, RANKS, capacityKg, jobPayout, type AircraftType } from '@opc/shared';
+import { MANUAL_PAY_FACTOR, PAX_KG, RANKS, fuelBurnKg, jobPayout, settle, type AircraftType } from '@opc/shared';
 import {
   REALISM_TOGGLES, type FleetQuote, type LeaseOffer, type LoanQuote, type Onboarding, type OnboardingStep, type Realism, type RealismPreset, type RealismToggle, type StartMode,
 } from './onboarding-types.ts';
@@ -137,10 +137,10 @@ export const MONTHLY_RENTAL = { icao: 'C172', deposit: 5_000, monthly: 1_900, ho
 export const LOAN_RATE = 0.069;
 export const CREDIT_ICAO = 'C152';
 
-/** Fuel per flight hour of the credit-bought C152, scaled from the C172's 110 EUR/h by fuel burn per hour (capacity x cruise speed). */
-export function fuelPerHour(t: Pick<AircraftType, 'seats' | 'cargoKg' | 'cruiseKts'>, ref: Pick<AircraftType, 'seats' | 'cargoKg' | 'cruiseKts'>, refHourly = MONTHLY_RENTAL.hourly): number {
-  const burn = (a: Pick<AircraftType, 'seats' | 'cargoKg' | 'cruiseKts'>): number => capacityKg(a as AircraftType) * a.cruiseKts;
-  return Math.round(refHourly * (burn(t) / burn(ref)));
+/** What one flight hour of an aircraft you own costs: fuel plus upkeep, taken from the game's own settlement formula (one hour at cruise speed, no landing fee). Real fuel prices (a realism toggle) move the fuel part by up to 25 %. */
+export function runningCostPerHour(t: AircraftType): number {
+  const s = settle({ payout: 0, distanceNm: t.cruiseKts, aircraft: t, destSize: 'small', destIsHub: true, status: 'verified', fuelUsedKg: fuelBurnKg(t, t.cruiseKts), blockHours: 1 });
+  return s.fuelCost + s.maintenance;
 }
 
 /** Picks the loan of the quote closest to "a quarter down, 5 years", the shape of the mockup's third option. */
