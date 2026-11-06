@@ -49,7 +49,7 @@ let lastSync: number | null = null;
 /** When the server last answered a signed-in request (ms), or null if it has not yet. */
 export const lastSyncAt = (): number | null => lastSync;
 
-type Opts = { method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'; body?: unknown; server?: string; auth?: boolean; timeoutMs?: number };
+type Opts = { method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'; body?: unknown; server?: string; auth?: boolean; timeoutMs?: number };
 
 async function request(path: string, o: Opts): Promise<Response> {
   const headers: Record<string, string> = {};
