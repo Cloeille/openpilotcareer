@@ -124,3 +124,20 @@ export const line = (label: Child, value: Child, cls = ''): HTMLElement => h('di
 
 /** Placeholder for a figure the API does not provide: shown honestly, never invented. */
 export const unknownValue = (): HTMLElement => h('span', { class: 'unknown', title: '-' }, '–');
+
+// ------------------------------------------------------------------ Switch
+
+type SwitchOpts = { checked: boolean; onchange: (value: boolean) => void; /** Accessible name; or point `labelledBy` at the visible label. */ label?: string; labelledBy?: string; describedBy?: string; id?: string; disabled?: boolean };
+/** Switch: a 36x20 track, the knob at the end when on. A real button with role=switch, so Space and Enter toggle it. */
+export function switchControl(o: SwitchOpts): HTMLButtonElement {
+  const el = h('button', {
+    type: 'button', role: 'switch', class: 'switch', id: o.id, disabled: o.disabled, 'aria-checked': String(o.checked),
+    'aria-label': o.labelledBy ? null : o.label, 'aria-labelledby': o.labelledBy, 'aria-describedby': o.describedBy,
+  }, h('span', { class: 'switch-knob' }));
+  el.addEventListener('click', () => {
+    const next = el.getAttribute('aria-checked') !== 'true';
+    el.setAttribute('aria-checked', String(next));
+    o.onchange(next);
+  });
+  return el;
+}

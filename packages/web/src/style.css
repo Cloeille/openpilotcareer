@@ -1,6 +1,7 @@
 @import './design/tokens.css';
 @import './fonts.css';
 @import './legacy.css';
+@import './onboarding.css';
 
 :root {
   color-scheme: dark;
