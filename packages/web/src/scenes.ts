@@ -9,9 +9,10 @@ import history from './design/scenes/generated-7.webp';
 import flight from './design/scenes/generated-8.webp';
 import leaderboard from './design/scenes/generated-9.webp';
 import ai from './design/scenes/generated-10.webp';
+import bridge from './design/scenes/generated-13.webp';
 
 /** Static backdrops standing in for the mockup's real-time 3D scene; the file each screen uses is the one the mockup frame uses. */
-export const SCENES = { login, settings, dashboard, jobs, job, catalogue, fleet, history, flight, leaderboard, ai } as const;
+export const SCENES = { login, settings, dashboard, jobs, job, catalogue, fleet, history, flight, leaderboard, ai, bridge } as const;
 export type SceneId = keyof typeof SCENES;
 
 /** Kept alive so the browser holds on to the decoded pixels of every backdrop. */

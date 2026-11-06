@@ -18,6 +18,7 @@ import { newCompany } from './screens/new-company.ts';
 import { jobs } from './screens/jobs.ts';
 import { settings } from './screens/settings.ts';
 import { simbrief } from './screens/simbrief.ts';
+import { realism } from './screens/ob-realism.ts';
 
 export const routes: Record<string, ScreenFn> = {
   dashboard,
@@ -28,6 +29,7 @@ export const routes: Record<string, ScreenFn> = {
   history, flight: flightDetail, manual,
   leaderboard, duel: duelScreen, 'company-sheet': companySheet, recap,
   settings,
+  realism,
 };
 
 /** Old bookmarks (`#flights`) keep working. */
