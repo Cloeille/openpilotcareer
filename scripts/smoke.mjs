@@ -36,10 +36,10 @@ process.on('exit', () => { server.kill(); rmSync(dir, { recursive: true, force: 
 
 const base = `http://127.0.0.1:${port}`;
 const api = `${base}/api/v1`;
-async function call(method, path, { token, body, raw } = {}) {
+async function call(method, path, { token, body, raw, company } = {}) {
   const res = await fetch(`${api}${path}`, {
     method,
-    headers: { ...(token ? { authorization: `Bearer ${token}` } : {}), ...(body !== undefined ? { 'content-type': 'application/json' } : {}) },
+    headers: { ...(company === undefined ? {} : { 'x-opc-company': String(company) }), ...(token ? { authorization: `Bearer ${token}` } : {}), ...(body !== undefined ? { 'content-type': 'application/json' } : {}) },
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   });
   const text = await res.text();
@@ -58,7 +58,7 @@ expect(info.status === 200 && info.body.apiVersion === 1, `server up on ${base}:
 const username = `smoke${Date.now().toString(36)}`;
 const password = 'smoke-test-password';
 const reg = await call('POST', '/auth/register', { body: { username, password, hub: 'LFPG' } });
-expect(reg.status === 201, `registered ${username}: rank ${reg.body.rank}, balance ${reg.body.company.balance}, ${reg.body.fleet[0].icao} at ${reg.body.fleet[0].location}`, reg);
+expect(reg.status === 201, `registered ${username}: rank ${reg.body.pilot.rank}, balance ${reg.body.company.balance}, ${reg.body.fleet[0].icao} at ${reg.body.fleet[0].location}`, reg);
 const token = reg.body.token;
 const plane = reg.body.fleet[0];
 const t = plane.type;
@@ -127,6 +127,27 @@ const ledger = (await call('GET', '/me/transactions?limit=200', { token })).body
 expect(ledger.reduce((s, x) => s + x.amount, 0) === me.company.balance, `ledger (${ledger.length} lines) sums to the balance`);
 expect((await call('DELETE', `/me/api-keys/${key.body.id}`, { token })).status === 204 && (await call('GET', '/flights/active', { token: apiKey })).status === 401, 'revoking the key stops it working immediately');
 
+// --- a second company: create, rename, act as it, ownership
+const created = await call('POST', '/me/companies', { token, body: { name: `${username} Cargo`, hub: 'EGLL' } });
+expect(created.status === 201 && created.body.companies.length === 2, `second company created: ${created.body.company?.name}, ${created.body.fleet?.[0]?.icao} at ${created.body.fleet?.[0]?.location}`, created);
+const cid = created.body.company.id;
+expect(cid !== me.company.id && created.body.company.balance === 400_000 && created.body.hubs.join() === 'EGLL', `the new company starts from scratch (balance ${created.body.company.balance}, hubs ${created.body.hubs.join()})`, created.body.company);
+const renamed = await call('PATCH', `/companies/${cid}`, { token, body: { name: `${username} Freight` } });
+expect(renamed.status === 200 && renamed.body.name === `${username} Freight`, `renamed to "${renamed.body.name}"`, renamed);
+expect((await call('PATCH', `/companies/${cid}`, { token, body: { name: me.company.name.toUpperCase() } })).status === 409, 'a name clash (case-insensitive) is refused with 409');
+expect((await call('GET', '/me', { token, company: rival.body.company.id })).status === 403 && (await call('PATCH', `/companies/${rival.body.company.id}`, { token, body: { name: 'Hijacked' } })).status === 403, "acting as, or renaming, someone else's company is refused with 403");
+const secondPlane = created.body.fleet[0];
+let job2;
+for (const j of (await call('GET', '/jobs?airport=EGLL', { token, company: cid })).body.jobs) if (j.distanceNm <= secondPlane.type.rangeNm && (j.kind === 'pax' ? j.pax <= secondPlane.type.seats : j.payloadKg <= secondPlane.type.cargoKg)) { job2 = j; break; }
+const acc3 = await call('POST', `/jobs/${job2.id}/accept`, { token, company: cid, body: { aircraftId: secondPlane.id } });
+expect(acc3.status === 201 && acc3.body.companyId === cid, `the second company accepted ${job2.origin}-${job2.destination} -> flight ${acc3.body.id} (company ${acc3.body.companyId})`, acc3);
+expect((await call('POST', `/flights/${acc3.body.id}/cancel`, { token, company: me.company.id })).status === 404, "the first company cannot touch the second company's flight");
+const one = (await call('GET', '/me', { token, company: me.company.id })).body;
+const two = (await call('GET', '/me', { token, company: cid })).body;
+expect(one.company.flights === 1 && two.company.flights === 0 && one.fleet.length === 1 && two.fleet.length === 1 && two.fleet[0].busy && !one.fleet[0].busy, 'fleet, flights and stats are per company');
+expect(two.pilot.flights === 1 && two.pilot.rank === one.pilot.rank, `the pilot is shared: ${two.pilot.rank}, ${two.pilot.flights} flight over both companies`);
+expect((await call('POST', `/flights/${acc3.body.id}/cancel`, { token, company: cid })).status === 200, 'cancelled it again (the job returns to the board)');
+
 // --- AI companies on the same server
 const lb = (await call('GET', '/leaderboard')).body;
 const ais = lb.rows.filter((r) => r.isAI);
@@ -140,8 +161,8 @@ expect(JSON.stringify(boardAfter.map((j) => j.id)) !== '[]' && (await call('GET'
 // --- export
 const exp = await call('GET', '/me/export', { token, raw: true });
 const doc = JSON.parse(exp.text);
-expect(exp.status === 200 && doc.schemaVersion === 1 && doc.flights.length === 2 && doc.transactions.length === ledger.length && doc.profile.username === username && doc.flights[0].telemetry.source === 'simconnect',
-  `export JSON: schemaVersion ${doc.schemaVersion}, profile+company+${doc.hubs.length} hub+${doc.fleet.length} aircraft+${doc.flights.length} flights+${doc.transactions.length} transactions (${exp.text.length} bytes)`);
+expect(exp.status === 200 && doc.schemaVersion === 2 && doc.companies.length === 2 && doc.companies[0].flights.length === 2 && doc.companies[0].transactions.length === ledger.length && doc.profile.username === username && doc.companies[0].flights[0].telemetry.source === 'simconnect',
+  `export JSON: schemaVersion ${doc.schemaVersion}, profile + ${doc.companies.length} companies (first: ${doc.companies[0].hubs.length} hub, ${doc.companies[0].fleet.length} aircraft, ${doc.companies[0].flights.length} flights, ${doc.companies[0].transactions.length} transactions; ${exp.text.length} bytes)`);
 expect(!/pass_hash|key_hash|opc_/.test(exp.text), 'the export contains no credentials');
 const fcsv = await call('GET', '/me/export?format=flights.csv', { token, raw: true });
 expect(fcsv.status === 200 && fcsv.text.trim().split('\r\n').length === 3 && /^text\/csv/.test(fcsv.headers.get('content-type')), 'flights.csv: header + 2 rows');

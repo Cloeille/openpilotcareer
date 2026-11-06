@@ -3,10 +3,10 @@
 // Rule violations throw HttpError.
 import { randomUUID } from 'node:crypto';
 import {
-  HUB_PRICE, PAX_KG, REJECT_REPUTATION_PENALTY, START_REPUTATION, STARTER_AIRCRAFT, STARTING_BALANCE,
+  HUB_PRICE, MAX_COMPANIES_PER_USER, PAX_KG, REJECT_REPUTATION_PENALTY, START_REPUTATION, STARTER_AIRCRAFT, STARTING_BALANCE,
   aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, jobPayout, minFlightHours, rankFor, seasonOf, settle,
   type AircraftType, type Company, type CompanyProfile, type CustomAircraftInput, type FleetAircraft, type Flight,
-  type FlightStatus, type Job, type Leaderboard, type LeaderboardRow, type Me, type Personality, type Telemetry, type Transaction,
+  type FlightStatus, type Job, type Leaderboard, type LeaderboardRow, type Me, type Personality, type Pilot, type Telemetry, type Transaction,
 } from '@opc/shared';
 import { airports, catalogType } from './catalog.ts';
 import { boardFor, boardJob, windowOf } from './board.ts';
@@ -72,15 +72,29 @@ function snapshot(db: Db, companyId: number, at: number): void {
 
 // ---------------------------------------------------------------- company, hubs, fleet
 
+function assertNameFree(db: Db, name: string, exceptId = 0): void {
+  if (get(db, 'SELECT 1 AS x FROM companies WHERE name = ? AND id != ?', name, exceptId)) throw new HttpError(409, 'name_taken', `company name "${name}" is already taken`);
+}
+
+/** Every new company gets the same starting capital and aircraft, so the per-player cap is what limits farming that grant. */
 export function createCompany(db: Db, o: { userId: number | null; name: string; hub: string; personality?: Personality; now: number }): number {
   if (!airports.has(o.hub)) throw new HttpError(422, 'unknown_airport', `airport ${o.hub} is not in the airport database`);
-  if (get(db, 'SELECT 1 AS x FROM companies WHERE name = ?', o.name)) throw new HttpError(409, 'name_taken', `company name "${o.name}" is already taken`);
+  if (o.userId !== null && get<{ n: number }>(db, 'SELECT COUNT(*) AS n FROM companies WHERE user_id = ?', o.userId)!.n >= MAX_COMPANIES_PER_USER) {
+    throw new HttpError(409, 'limit_reached', `at most ${MAX_COMPANIES_PER_USER} companies per player`);
+  }
+  assertNameFree(db, o.name);
   const id = run(db, 'INSERT INTO companies (user_id, name, personality, balance, reputation, created_at) VALUES (?, ?, ?, 0, ?, ?)', o.userId, o.name, o.personality ? JSON.stringify(o.personality) : null, START_REPUTATION, o.now).id;
   post(db, id, o.now, 'grant', STARTING_BALANCE, 'starting capital');
   run(db, 'INSERT INTO hubs (company_id, icao) VALUES (?, ?)', id, o.hub);
   const starter = catalogType(STARTER_AIRCRAFT);
   run(db, 'INSERT INTO aircraft (company_id, icao, location, value) VALUES (?, ?, ?, ?)', id, starter.icao, o.hub, aircraftValue(starter));
   return id;
+}
+
+export function renameCompany(db: Db, companyId: number, name: string): Company {
+  assertNameFree(db, name, companyId);
+  run(db, 'UPDATE companies SET name = ? WHERE id = ?', name, companyId);
+  return companyView(db, companyId);
 }
 
 export function buyHub(db: Db, companyId: number, icao: string, now: number): void {
@@ -132,11 +146,20 @@ export const hubsOf = (db: Db, companyId: number): string[] => all<{ icao: strin
 export const customAircraftOf = (db: Db, companyId: number): AircraftType[] =>
   all<{ icao: string }>(db, 'SELECT icao FROM custom_aircraft WHERE company_id = ? ORDER BY icao', companyId).map((c) => typeFor(db, companyId, c.icao));
 
-export function meView(db: Db, userId: number): Me {
-  const u = get<{ username: string; company_id: number }>(db, 'SELECT u.username, c.id AS company_id FROM users u JOIN companies c ON c.user_id = u.id WHERE u.id = ?', userId);
+export const companiesOf = (db: Db, userId: number): Company[] =>
+  all<{ id: number }>(db, 'SELECT id FROM companies WHERE user_id = ? ORDER BY id', userId).map((c) => companyView(db, c.id));
+
+/** The pilot is the account: rank counts hours and flights over all of the player's companies, so it is derived, never stored. */
+export function pilotView(db: Db, userId: number): Pilot {
+  const t = get<{ hours: number; flights: number }>(db, 'SELECT COALESCE(SUM(hours), 0) AS hours, COALESCE(SUM(flights), 0) AS flights FROM companies WHERE user_id = ?', userId)!;
+  return { rank: rankFor(t.hours, t.flights), hours: round1(t.hours), flights: t.flights };
+}
+
+/** The account seen through `companyId`, which the caller has already proven is the user's (auth.ts `ownedCompany`). */
+export function meView(db: Db, userId: number, companyId: number): Me {
+  const u = get<{ username: string }>(db, 'SELECT username FROM users WHERE id = ?', userId);
   if (!u) throw new HttpError(404, 'user_not_found', 'user not found');
-  const company = companyView(db, u.company_id);
-  return { username: u.username, rank: rankFor(company.hours, company.flights), company, hubs: hubsOf(db, u.company_id), fleet: fleetView(db, u.company_id), customAircraft: customAircraftOf(db, u.company_id) };
+  return { username: u.username, pilot: pilotView(db, userId), company: companyView(db, companyId), companies: companiesOf(db, userId), hubs: hubsOf(db, companyId), fleet: fleetView(db, companyId), customAircraft: customAircraftOf(db, companyId) };
 }
 
 export function jobView(r: JobColumns & { id: string }): Job {
@@ -148,13 +171,17 @@ export function jobView(r: JobColumns & { id: string }): Job {
 }
 
 export const flightView = (r: FlightRow): Flight => ({
-  id: r.id, job: jobView({ ...r, id: r.job_id }), aircraftId: r.aircraft_id, aircraftIcao: r.aircraft_icao, status: r.status, rejectReason: r.reject_reason,
+  id: r.id, companyId: r.company_id, job: jobView({ ...r, id: r.job_id }), aircraftId: r.aircraft_id, aircraftIcao: r.aircraft_icao, status: r.status, rejectReason: r.reject_reason,
   acceptedAt: r.accepted_at, completedAt: r.completed_at, revenue: r.revenue, fuelCost: r.fuel_cost, landingFee: r.landing_fee, maintenance: r.maintenance, net: r.net,
 });
 
 export function flightsOf(db: Db, companyId: number, limit: number, before?: number, status?: FlightStatus): FlightRow[] {
   return all<FlightRow>(db, 'SELECT * FROM flights WHERE company_id = ?1 AND id < ?2 AND (?3 IS NULL OR status = ?3) ORDER BY id DESC LIMIT ?4', companyId, before ?? Number.MAX_SAFE_INTEGER, status ?? null, limit);
 }
+
+/** Active flights across all of a player's companies: what a (player-wide) API key reports on. */
+export const activeFlightsOfUser = (db: Db, userId: number, limit: number): FlightRow[] =>
+  all<FlightRow>(db, `SELECT f.* FROM flights f JOIN companies c ON c.id = f.company_id WHERE c.user_id = ? AND f.status = 'active' ORDER BY f.id DESC LIMIT ?`, userId, limit);
 
 export function transactionsOf(db: Db, companyId: number, limit: number, before?: number): Transaction[] {
   return all<{ id: number; at: number; kind: string; amount: number; balance_after: number; flight_id: number | null; memo: string }>(
@@ -235,8 +262,9 @@ export function acceptJob(db: Db, companyId: number, jobId: string, aircraftId: 
   return startFlight(db, companyId, resolveJob(db, companyId, jobId, now), aircraft, now);
 }
 
-export function activeFlight(db: Db, companyId: number, flightId: number): FlightRow {
-  const f = get<FlightRow>(db, 'SELECT * FROM flights WHERE id = ? AND company_id = ?', flightId, companyId);
+/** An active flight of one of the player's companies; with `companyId`, of that company only (what a session acting as it may touch). */
+export function activeFlight(db: Db, flightId: number, userId: number, companyId?: number): FlightRow {
+  const f = get<FlightRow>(db, 'SELECT f.* FROM flights f JOIN companies c ON c.id = f.company_id WHERE f.id = ?1 AND c.user_id = ?2 AND (?3 IS NULL OR c.id = ?3)', flightId, userId, companyId ?? null);
   if (!f) throw new HttpError(404, 'flight_not_found', 'flight not found');
   if (f.status !== 'active') throw new HttpError(409, 'flight_closed', `flight is already ${f.status}`);
   return f;

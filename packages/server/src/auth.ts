@@ -1,7 +1,7 @@
 import { createHash, randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 import type { FastifyRequest } from 'fastify';
 import { get, run, type Db } from './db.ts';
-import { HttpError } from './http.ts';
+import { HttpError, NUMERIC_ID } from './http.ts';
 
 const SESSION_MS = 30 * 24 * 3_600_000;
 const KEY_LEN = 64;
@@ -37,22 +37,41 @@ export function createSession(db: Db, userId: number, now: number): string {
 
 const bearer = (req: FastifyRequest): string | null => /^Bearer (\S+)$/.exec(req.headers.authorization ?? '')?.[1] ?? null;
 
-export type Principal = { userId: number; companyId: number; username: string };
-const PRINCIPAL_SQL = `SELECT u.id AS userId, c.id AS companyId, u.username AS username FROM users u JOIN companies c ON c.user_id = u.id`;
+/** A player owns one or more companies; a request acts as exactly one of them (`companyId`, the ACTIVE company). */
+export type User = { userId: number; username: string };
+export type Principal = User & { companyId: number };
 
-/** Session-token auth for the web app. Throws 401. */
-export function sessionAuth(db: Db, req: FastifyRequest, now: number): Principal & { token: string } {
-  const token = bearer(req);
-  const p = token && get<Principal>(db, `${PRINCIPAL_SQL} JOIN sessions s ON s.user_id = u.id WHERE s.token_hash = ? AND s.expires_at > ?`, sha256(token), now);
-  if (!token || !p) throw new HttpError(401, 'unauthorized', 'missing or invalid session token');
-  return { ...p, token };
+export const COMPANY_HEADER = 'x-opc-company';
+
+/** The ownership check: every company id a client names (the active-company header, `PATCH /companies/:id`) passes through here.
+ *  403 for a company that is someone else's, an AI company or nonexistent alike, so the answer reveals nothing. */
+export function ownedCompany(db: Db, userId: number, companyId: number): number {
+  if (!get(db, 'SELECT 1 AS x FROM companies WHERE id = ? AND user_id = ?', companyId, userId)) throw new HttpError(403, 'not_your_company', 'that company is not yours');
+  return companyId;
 }
 
-/** API-key auth for telemetry clients. Throws 401. */
-export function apiKeyAuth(db: Db, req: FastifyRequest, now: number): Principal {
+/** The company a request acts as when it names none (and the one shown after login): the player's oldest. */
+export const defaultCompany = (db: Db, userId: number): number => get<{ id: number }>(db, 'SELECT id FROM companies WHERE user_id = ? ORDER BY id LIMIT 1', userId)!.id;
+
+function activeCompany(db: Db, userId: number, req: FastifyRequest): number {
+  const raw = req.headers[COMPANY_HEADER];
+  if (raw === undefined) return defaultCompany(db, userId);
+  if (typeof raw !== 'string' || !NUMERIC_ID.test(raw)) throw new HttpError(400, 'invalid_request', `${COMPANY_HEADER} must be a company id`);
+  return ownedCompany(db, userId, Number(raw));
+}
+
+/** Session-token auth for the web app, resolving the active company. Throws 401 (bad session), then 403 (company not yours). */
+export function sessionAuth(db: Db, req: FastifyRequest, now: number): Principal & { token: string } {
+  const token = bearer(req);
+  const u = token && get<User>(db, 'SELECT u.id AS userId, u.username AS username FROM users u JOIN sessions s ON s.user_id = u.id WHERE s.token_hash = ? AND s.expires_at > ?', sha256(token), now);
+  if (!token || !u) throw new HttpError(401, 'unauthorized', 'missing or invalid session token');
+  return { ...u, token, companyId: activeCompany(db, u.userId, req) };
+}
+
+/** API-key auth for telemetry clients. A key belongs to the player, not to one company: flights carry their company. Throws 401. */
+export function apiKeyAuth(db: Db, req: FastifyRequest, now: number): User {
   const key = bearer(req);
-  const row = key && get<Principal & { keyId: number }>(db, `SELECT u.id AS userId, c.id AS companyId, u.username AS username, k.id AS keyId
-    FROM api_keys k JOIN users u ON u.id = k.user_id JOIN companies c ON c.user_id = u.id WHERE k.key_hash = ?`, sha256(key));
+  const row = key && get<User & { keyId: number }>(db, 'SELECT u.id AS userId, u.username AS username, k.id AS keyId FROM api_keys k JOIN users u ON u.id = k.user_id WHERE k.key_hash = ?', sha256(key));
   if (!key || !row) throw new HttpError(401, 'unauthorized', 'missing or invalid API key');
   run(db, 'UPDATE api_keys SET last_used_at = ? WHERE id = ?', now, row.keyId);
   return row;

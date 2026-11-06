@@ -53,19 +53,38 @@ CREATE TABLE ai_ticks (tick INTEGER PRIMARY KEY);
 CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 `;
 
+// A user may own several companies: SQLite cannot drop a UNIQUE constraint, so the table is rebuilt (ids and every child row survive).
+const SCHEMA_V2 = `
+CREATE TABLE companies_new (
+  id INTEGER PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL UNIQUE COLLATE NOCASE, personality TEXT, balance INTEGER NOT NULL, reputation REAL NOT NULL,
+  flights INTEGER NOT NULL DEFAULT 0, hours REAL NOT NULL DEFAULT 0, revenue INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL);
+INSERT INTO companies_new (id, user_id, name, personality, balance, reputation, flights, hours, revenue, created_at)
+  SELECT id, user_id, name, personality, balance, reputation, flights, hours, revenue, created_at FROM companies;
+DROP TABLE companies;
+ALTER TABLE companies_new RENAME TO companies;
+CREATE INDEX companies_user ON companies(user_id);
+`;
+
 /** Append-only; `PRAGMA user_version` records how many ran. */
-const MIGRATIONS = [SCHEMA_V1];
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);
-  db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;');
+  db.exec('PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000;');
   const row = db.prepare('PRAGMA user_version').get() as { user_version: number };
+  // Foreign keys stay off while migrations run: rebuilding a parent table would otherwise cascade-delete its children.
+  // (The pragma is a no-op inside a transaction.) Each migration must leave no dangling reference, or it rolls back.
+  db.exec('PRAGMA foreign_keys = OFF');
   for (let v = row.user_version; v < MIGRATIONS.length; v++) {
     tx(db, () => {
       db.exec(MIGRATIONS[v]!);
+      const dangling = db.prepare('PRAGMA foreign_key_check').all().length;
+      if (dangling > 0) throw new Error(`migration ${v + 1} left ${dangling} dangling foreign key(s)`);
       db.exec(`PRAGMA user_version = ${v + 1}`);
     });
   }
+  db.exec('PRAGMA foreign_keys = ON');
   return db;
 }
 

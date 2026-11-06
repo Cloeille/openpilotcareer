@@ -16,7 +16,8 @@ test('GET /info describes the server; unknown routes are 404 JSON', async () => 
 test('registration: validation, uniqueness, closed servers; login/logout lifecycle', async () => {
   const h = await harness();
   const a = await h.register('alice');
-  assert.equal(a.me.rank, 'Student Pilot');
+  assert.equal(a.me.pilot.rank, 'Student Pilot');
+  assert.deepEqual(a.me.companies.map((c: { id: number }) => c.id), [a.me.company.id]);
   assert.equal(a.me.company.balance, 400_000);
   assert.deepEqual(a.me.hubs, ['LFPG']);
   assert.equal(a.me.fleet[0]?.icao, 'C172');
@@ -293,12 +294,15 @@ test('export: full JSON with schemaVersion, CSV for flights and transactions, no
   assert.equal(json.status, 200);
   assert.match(String(json.headers['content-disposition']), /attachment; filename="opc-export\.json-2026/);
   const d = json.body;
-  assert.equal(d.schemaVersion, 1);
-  for (const k of ['profile', 'company', 'hubs', 'fleet', 'flights', 'transactions']) assert.ok(k in d, k);
+  assert.equal(d.schemaVersion, 2);
+  for (const k of ['profile', 'companies']) assert.ok(k in d, k);
   assert.equal(d.profile.username, 'exporter');
-  assert.equal(d.flights.length, 1);
-  assert.equal(d.flights[0].telemetry.source, 'simconnect');
-  assert.equal(d.transactions.length, 5);
+  assert.equal(d.profile.rank, 'Student Pilot');
+  assert.equal(d.companies.length, 1);
+  for (const k of ['company', 'hubs', 'fleet', 'customAircraft', 'flights', 'transactions']) assert.ok(k in d.companies[0], k);
+  assert.equal(d.companies[0].flights.length, 1);
+  assert.equal(d.companies[0].flights[0].telemetry.source, 'simconnect');
+  assert.equal(d.companies[0].transactions.length, 5);
   assert.ok(!/pass_hash|token|key_hash|opc_/.test(json.text), 'no credentials in the export');
 
   const fl = await h.call('GET', '/api/v1/me/export?format=flights.csv', { token });

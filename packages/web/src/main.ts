@@ -15,13 +15,36 @@ const pageName = (): string => {
 
 function signedOut(): void {
   me = null;
-  loginView(root, (m) => { me = m; location.hash = '#dashboard'; void show(); });
+  loginView(root, () => { location.hash = '#dashboard'; void refresh(); });
 }
 setUnauthorizedHandler(() => { session.set(session.server, null); signedOut(); notify('Your session ended, please sign in again.', 'error'); });
 
+/** The account as the remembered company: if that company is gone or was never ours (another account on this server), fall back to the default. */
+async function loadMe(): Promise<Me> {
+  let m: Me;
+  try {
+    m = await api<Me>('/me');
+  } catch (e) {
+    if (!(e instanceof ApiError && e.code === 'not_your_company')) throw e;
+    session.company = null;
+    m = await api<Me>('/me');
+  }
+  session.company = m.company.id;
+  return m;
+}
+
 async function refresh(): Promise<void> {
-  me = await api<Me>('/me');
+  me = await loadMe();
   await show();
+}
+
+async function switchCompany(id: number): Promise<void> {
+  session.company = id;
+  try {
+    await refresh();
+  } catch (e) {
+    notify(e instanceof ApiError ? e.message : String(e), 'error');
+  }
 }
 
 async function show(): Promise<void> {
@@ -33,7 +56,7 @@ async function show(): Promise<void> {
     h('a', { href: `#${key}`, 'aria-current': key === name ? 'page' : null }, p.title)));
   root.replaceChildren(
     h('header', { class: 'bar' }, h('span', { class: 'brand' }, 'OpenPilotCareer'), nav,
-      h('span', { class: 'who' }, `${me.username} - ${me.company.name} - `, h('button', { type: 'button', class: 'link', onclick: () => void logout() }, 'Sign out'))),
+      h('span', { class: 'who' }, `${me.username} `, companySwitcher(me), ' ', h('button', { type: 'button', class: 'link', onclick: () => void logout() }, 'Sign out'))),
     main);
   document.title = `${page.title} - OpenPilotCareer`;
   try {
@@ -42,6 +65,12 @@ async function show(): Promise<void> {
     main.replaceChildren(h('p', { class: 'error-text', role: 'alert' }, e instanceof ApiError ? e.message : String(e)));
   }
   main.removeAttribute('aria-busy');
+}
+
+function companySwitcher(m: Me): HTMLElement {
+  const select = h('select', { id: 'company-switch', name: 'company', onchange: (e: Event) => void switchCompany(Number((e.target as HTMLSelectElement).value)) },
+    m.companies.map((c) => h('option', { value: c.id, selected: c.id === m.company.id }, c.name)));
+  return h('span', { class: 'switcher' }, h('label', { for: 'company-switch' }, 'Company'), ' ', select);
 }
 
 async function logout(): Promise<void> {
@@ -53,7 +82,7 @@ async function logout(): Promise<void> {
 window.addEventListener('hashchange', () => { void show().then(() => document.getElementById('main')?.focus()); });
 
 if (session.token) {
-  api<Me>('/me').then((m) => { me = m; return show(); }).catch((e: unknown) => {
+  loadMe().then((m) => { me = m; return show(); }).catch((e: unknown) => {
     if (!(e instanceof ApiError && e.status === 401)) notify(e instanceof ApiError ? e.message : String(e), 'error');
     signedOut();
   });

@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+export const NUMERIC_ID = /^\d+$/;
+
 /** An error with a stable machine code, rendered as `{ error, message }` by the app's error handler. */
 export class HttpError extends Error {
   readonly status: number;
