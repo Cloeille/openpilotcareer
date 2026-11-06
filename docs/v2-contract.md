@@ -86,6 +86,13 @@ Wear accrues per block hour by category, and only when `wearEnabled` is true. Th
 - `GET /flights/:id/live` (session, ownership) returns `{ sample: LiveSample|null; receivedAt: number|null; bridgeLost: boolean; remainingNm: number|null; etaAt: number|null }`. `bridgeLost` is true when an active flight has received no sample for more than 30 s.
 - The bridge `GET http://127.0.0.1:7878/status` gains `sim: 'connected'|'waiting'|'unavailable'` and `version: string`. The web onboarding step 5 reads it directly from the player's PC (CORS `*` is already sent).
 
+Implementation notes (be-live; details in `docs/telemetry-api.md` "Live position"):
+- Errors: `404 flight_not_found` (not your flight), `409 flight_closed` (POST on a non-active flight), `429 rate_limited` (second sample inside 1 s), `400 invalid_request` (body). `GET` on a closed flight answers 200 with `sample: null`, `bridgeLost: false`.
+- Open question (default picked): `bridgeLost` is false while a flight has NEVER received a sample (`sample: null`, `receivedAt: null`): the bridge has not started yet, which the UI should word as "waiting for the bridge", not "lost". It turns true once a sample existed and nothing arrived for more than 30 s. After a server restart the sample is gone but `receivedAt` comes from `flights.last_live_at`, so it still works.
+- Open question (default picked): `etaAt` is null unless `phase` is `airborne`, not paused and `gsKts >= 30`; it accounts for `simRate`. `remainingNm` is the great-circle distance to the destination airport, null when the destination is not in the airport data.
+- `LiveSample` and the helpers (`liveSampleSchema`, `liveProgress`, `isBridgeLost`, constants) live in `packages/shared/src/live.ts`. Engine gauges that an aircraft does not have are omitted from `engines[n]` (never 0); `engines` is `[]` for none.
+- `/status` of the bridge: `sim` is `connected` (SimConnect session open), `waiting` (no simulator yet, or it quit), `unavailable` (no SimConnect client could be loaded on this machine). The panel fields are unchanged.
+
 ## Merge plan (orchestrator only)
 Merge order into `career-v2-base`: be-start, be-finance, be-live, fe-onboarding, fe-finance, fe-live, bridge, efb. Conflicts in `packages/web/src/messages.ts` and `routes.ts` are expected (each lot appends): resolve by keeping both sides.
 To keep conflicts trivial every lot follows these rules:
