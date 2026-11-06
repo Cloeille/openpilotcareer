@@ -1,7 +1,7 @@
 // Lot LIVE: live flight telemetry. A bridge posts a LiveSample every couple of seconds while the player flies;
 // the web app reads the latest one back. Nothing here is persisted except `flights.last_live_at`.
 import { z } from 'zod';
-import { distanceNm } from './index.ts';
+import { distanceNm, type FlightStatus } from './index.ts';
 
 /** Same phases the bridge tracker walks through (sim/bridge/src/types.ts). */
 export const LIVE_PHASES = ['preflight', 'taxiOut', 'airborne', 'landed', 'parked'] as const;
@@ -48,6 +48,8 @@ export type LiveSample = z.infer<typeof liveSampleSchema>;
 
 /** `GET /flights/:id/live`. */
 export type LiveState = {
+  /** The flight's own status: a client polling an `active` flight learns here that it was settled (and must reload its fleet and balance). */
+  status: FlightStatus;
   sample: LiveSample | null;
   /** Server clock when the latest sample arrived (persisted `last_live_at` when the sample itself was lost in a restart). */
   receivedAt: number | null;

@@ -154,13 +154,16 @@ test('engines: torque dial first, N1 as the fallback, nothing when the stream ha
 });
 
 test('facts: rounds the sample, ages the silence, and falls back to nothing when no sample ever came', () => {
-  const r: LiveState = { sample: sample(), receivedAt: 995_000, bridgeLost: false, remainingNm: 312, etaAt: 5_000_000 };
+  const r: LiveState = { status: 'active', sample: sample(), receivedAt: 995_000, bridgeLost: false, remainingNm: 312, etaAt: 5_000_000 };
   const f = liveFacts(r, 1_000_000);
   assert.deepEqual([f.gsKts, f.fuelKg, f.silentMs, f.phase, f.remainingNm, f.etaAt, f.lost], [412, 2140, 5000, 'cruise', 312, 5_000_000, false]);
   assert.equal(f.engines.length, 1);
-  const none = liveFacts({ sample: null, receivedAt: null, bridgeLost: false, remainingNm: null, etaAt: null }, 1);
+  const none = liveFacts({ status: 'active', sample: null, receivedAt: null, bridgeLost: false, remainingNm: null, etaAt: null }, 1);
   assert.deepEqual([none.sample, none.gsKts, none.altitude, none.silentMs, none.phase], [null, null, null, null, 'unknown']);
   assert.equal(liveFacts(null, 1).lost, false);
+  assert.equal(f.settled, false);
+  assert.equal(liveFacts({ ...r, status: 'verified', sample: null }, 1).settled, true, 'a flight that is no longer active is settled');
+  assert.equal(liveFacts(null, 1).settled, false, 'a failed poll is not a settlement');
   assert.equal(liveFacts({ ...r, bridgeLost: true }, 1_000_000).lost, true);
 });
 

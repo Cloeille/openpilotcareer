@@ -52,6 +52,8 @@ export const engineVm = (e: LiveEngine, index: number): EngineVm => ({
 });
 
 export type LiveFacts = {
+  /** The flight is no longer active (settled, rejected or cancelled): the screen must reload the account instead of waiting for telemetry. */
+  settled: boolean;
   sample: LiveSample | null;
   receivedAt: number | null;
   lost: boolean;
@@ -70,6 +72,7 @@ export type LiveFacts = {
 export function liveFacts(r: LiveState | null, now: number): LiveFacts {
   const s = r?.sample ?? null;
   return {
+    settled: r !== null && r.status !== 'active',
     sample: s, receivedAt: r?.receivedAt ?? null, lost: r?.bridgeLost ?? false,
     silentMs: r?.receivedAt != null ? Math.max(0, now - r.receivedAt) : null,
     phase: phaseOf(s), altitude: s ? altitudeOf(s.altFt) : null, gsKts: s ? Math.round(s.gsKts) : null, fuelKg: s ? Math.round(s.fuelKg) : null,

@@ -26,7 +26,7 @@ test('live: a sample posted with the API key is read back by the owner with rema
   const url = `/api/v1/flights/${p.flight.id}/live`;
   const before = await h.call('GET', url, { token: p.token });
   assert.equal(before.status, 200);
-  assert.deepEqual(before.body, { sample: null, receivedAt: null, bridgeLost: false, remainingNm: null, etaAt: null }, 'no sample yet: waiting for the bridge, not lost');
+  assert.deepEqual(before.body, { status: 'active', sample: null, receivedAt: null, bridgeLost: false, remainingNm: null, etaAt: null }, 'no sample yet: waiting for the bridge, not lost');
 
   const dest = airports.get(p.job.destination)!;
   const s = sample({ lat: dest.lat, lon: dest.lon + 0.5 });
@@ -157,7 +157,7 @@ test('live: last_live_at is stored; after a server restart the sample is gone bu
     return JSON.parse(r.body);
   };
   h.clock.t += 5_000;
-  assert.deepEqual(await read(), { sample: null, receivedAt: at, bridgeLost: false, remainingNm: null, etaAt: null });
+  assert.deepEqual(await read(), { status: 'active', sample: null, receivedAt: at, bridgeLost: false, remainingNm: null, etaAt: null });
   h.clock.t += LIVE_BRIDGE_LOST_MS;
   assert.equal((await read()).bridgeLost, true);
 });
@@ -174,7 +174,7 @@ test('live: a closed flight takes no samples (409) and reports no live state', a
   assert.equal(post.body.error, 'flight_closed');
   const r = await h.call('GET', url, { token: p.token });
   assert.equal(r.status, 200);
-  assert.deepEqual([r.body.sample, r.body.bridgeLost, r.body.remainingNm, r.body.etaAt], [null, false, null, null]);
+  assert.deepEqual([r.body.status, r.body.sample, r.body.bridgeLost, r.body.remainingNm, r.body.etaAt], ['cancelled', null, false, null, null]);
 });
 
 test('live: the telemetry-verify flow is untouched (flight with live samples still settles)', async () => {

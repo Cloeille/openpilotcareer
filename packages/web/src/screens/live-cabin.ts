@@ -76,7 +76,7 @@ export function cabinBody(c: LiveCtx): Body {
     h('div', { class: 'cg' },
       h('div', { class: 'cg-head' }, h('span', { class: 'live-fact-label' }, t('live.mass.cg')), h('span', { class: 'cg-value' }, t('live.mass.cgNone'))),
       h('span', { class: 'mass-sub' }, t('live.mass.cgSub'))));
-  update({ sample: null, receivedAt: null, lost: false, silentMs: null, phase: 'unknown', altitude: null, gsKts: null, fuelKg: null, remainingNm: null, etaAt: null, checks: [], engines: [] });
+  update({ settled: false, sample: null, receivedAt: null, lost: false, silentMs: null, phase: 'unknown', altitude: null, gsKts: null, fuelKg: null, remainingNm: null, etaAt: null, checks: [], engines: [] });
 
   const el = h('div', { class: 'cabin-stage' }, h('div', { class: 'cabin-plan' }, plan, legendRow, h('p', { class: 'dim small cabin-note' }, t('live.cabin.note'))), equip, strip);
   return { el, update };

@@ -6,12 +6,12 @@ import { airports } from './catalog.ts';
 import { apiKeyAuth, sessionAuth } from './auth.ts';
 import { get, run, type Db } from './db.ts';
 import { HttpError, NUMERIC_ID, parse } from './http.ts';
-import { isBridgeLost, liveProgress, liveSampleSchema, LIVE_MIN_INTERVAL_MS, type LiveSample, type LiveState } from '@opc/shared';
+import { isBridgeLost, liveProgress, liveSampleSchema, LIVE_MIN_INTERVAL_MS, type FlightStatus, type LiveSample, type LiveState } from '@opc/shared';
 
 export type LiveCtx = { db: Db; now: () => number };
 
 type Entry = { sample: LiveSample; receivedAt: number };
-type FlightFacts = { id: number; status: string; destination: string; last_live_at: number | null };
+type FlightFacts = { id: number; status: FlightStatus; destination: string; last_live_at: number | null };
 
 const PRUNE_ABOVE = 200;
 const STALE_ENTRY_MS = 24 * 3_600_000;
@@ -65,12 +65,12 @@ export function registerLive(app: FastifyInstance, ctx: LiveCtx): void {
     const at = now();
     if (f.status !== 'active') {
       latest.delete(id);
-      return { sample: null, receivedAt: f.last_live_at, bridgeLost: false, remainingNm: null, etaAt: null };
+      return { status: f.status, sample: null, receivedAt: f.last_live_at, bridgeLost: false, remainingNm: null, etaAt: null };
     }
     const e = latest.get(id);
     const receivedAt = e?.receivedAt ?? f.last_live_at;
     const dest = airports.get(f.destination);
     const progress = e ? liveProgress(e.sample, e.receivedAt, dest ?? null) : { remainingNm: null, etaAt: null };
-    return { sample: e?.sample ?? null, receivedAt, bridgeLost: isBridgeLost(receivedAt, at), ...progress };
+    return { status: f.status, sample: e?.sample ?? null, receivedAt, bridgeLost: isBridgeLost(receivedAt, at), ...progress };
   });
 }

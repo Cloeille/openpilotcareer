@@ -63,7 +63,11 @@ function currentFlight(f: Flight, ctx: Ctx, others: Flight[], first: LiveFacts):
       h('span', { class: 'dim small' }, t('dash.others')),
       h('ul', { class: 'plain' }, others.slice(0, 2).map((o) => h('li', { class: 'other' }, h('span', { class: 'mono strong' }, `${o.job.origin} → ${o.job.destination}`), h('span', { class: 'dim small' }, `${o.aircraftIcao} #${o.aircraftId}`), flightActions(o, refresh)))),
       others.length > 2 ? h('a', { class: 'btn ghost', href: '#history' }, h('span', null, t('dash.seeAll', { n: others.length })), icon('chevron-right')) : null) : null);
-  pollWhileShown('dash', card, async () => { show(liveFacts(await fetchLive(f.id).catch(() => null), Date.now())); });
+  pollWhileShown('dash', card, async () => {
+    const facts = liveFacts(await fetchLive(f.id).catch(() => null), Date.now());
+    if (facts.settled) return refresh(); // settled while this card was open: reload the account, the dashboard re-renders without the flight
+    show(facts);
+  });
   return card;
 }
 

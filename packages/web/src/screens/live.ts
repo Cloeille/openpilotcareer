@@ -127,6 +127,7 @@ export async function live(ctx: Ctx): Promise<Screen> {
   async function tick(): Promise<void> {
     const f = liveFacts(await fetchLive(flight!.id).catch(() => null), Date.now());
     facts = f;
+    if (f.settled) return ctx.refresh(); // settled while this view was open: reload the account, the screen re-renders without the flight
     if (f.lost !== (root.classList.contains('lost'))) return redraw();
     body.update(f);
     setStatusAll(f);
