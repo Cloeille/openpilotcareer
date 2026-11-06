@@ -85,7 +85,7 @@ table.data tbody tr.est td, table.data tbody tr.est .model { color: var(--text-t
 .hub-pick .name { font-size: 15px; font-weight: 500; }
 .hub-pick .sub { font-size: 13px; color: var(--text-tertiary); }
 
-.fleet-v2 { display: flex; gap: 20px; width: 100%; min-height: 0; }
+.fleet-v2 { display: flex; justify-content: space-between; gap: 20px; width: 100%; min-height: 0; }
 .fleet-v2 .fleet-left { width: 720px; }
 .fleet-v2 .right-col { width: 410px; flex: none; display: flex; flex-direction: column; gap: 14px; align-self: flex-start; }
 .wear-pct { font-size: 14px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
@@ -96,14 +96,17 @@ table.data tbody tr.est td, table.data tbody tr.est .model { color: var(--text-t
 .status-cell .status-line { font-size: 14px; font-weight: 400; color: var(--text-primary); }
 .status-sub { font-size: 12px; color: var(--text-tertiary); }
 .dot.maint { background: var(--warning); }
-.fleet-note { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; }
+.fleet-note { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; flex: none; white-space: nowrap; }
 .fleet-note .l { font-size: 12px; color: var(--text-tertiary); }
 .fleet-note .v { font-size: 14px; color: var(--text-secondary); }
 .fin-panel-list { display: flex; flex-direction: column; gap: 10px; }
 .fin-charge { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
 .fin-charge .when { color: var(--text-tertiary); font-size: 13px; }
 .fin-charge .what { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.detail-v2 { display: flex; flex-direction: column; gap: 28px; }
+.detail-v2 { display: flex; flex-direction: column; gap: 18px; }
+.fleet-v2 .detail-panel .panel-body { padding-top: 20px; gap: 18px; }
+.fleet-v2 #fin-money { min-height: 0; flex: 0 1 auto; }
+.fleet-v2 #fin-money .panel-body { overflow: auto; padding-top: 10px; }
 .detail-v2 .identity { display: flex; flex-direction: column; gap: 6px; }
 .detail-v2 .cond { display: flex; flex-direction: column; gap: 10px; }
 .detail-v2 .cond .top { display: flex; justify-content: space-between; align-items: flex-end; }
@@ -145,3 +148,24 @@ table.data tbody tr.est td, table.data tbody tr.est .model { color: var(--text-t
 .fin-catalogue .panel-fill { overflow: auto; }
 .fin-catalogue .list-footer { align-items: center; border-top: 1px solid var(--border); }
 .fin-sheet { display: flex; flex-direction: column; gap: 26px; }
+
+/* panels whose rows carry their own padding, like the mockup's Content frames */
+.panel.flush > .panel-body { padding: 0; gap: 0; }
+.lessor-host:not(:empty) { padding: 10px 22px 0; }
+.fin-hub-note { padding: 0 22px 14px; }
+.fin-in-note { padding: 0 22px 16px; }
+.starter-list { padding-bottom: 12px; }
+.loan-tune { padding: 10px 22px 8px; }
+.fin-purchase { max-height: 100%; overflow-y: auto; scrollbar-width: none; }
+.fin-purchase .panel-body { gap: 20px; padding: 22px 24px 22px; }
+.fin-purchase .panel-body.addon { gap: 12px; padding: 10px 24px 22px; }
+.fin-sheet { gap: 20px; }
+.addon-ids { display: flex; gap: 8px; }
+.addon-ids .input-field:first-child { width: 96px; flex: none; }
+.addon-ids .input-field:last-child { flex: 1; min-width: 0; }
+.fin-catalogue table.data thead th { white-space: nowrap; }
+.fin-catalogue table.data th, .fin-catalogue table.data td { padding: 0 8px; }
+.fin-catalogue table.data th:first-child, .fin-catalogue table.data td:first-child { padding-left: 22px; }
+.fin-catalogue table.data th:last-child, .fin-catalogue table.data td:last-child { padding-right: 22px; }
+.addon-ids .input-field:first-child { width: 110px; }
+.panel.summary.fin-summary .panel-body { gap: 22px; }

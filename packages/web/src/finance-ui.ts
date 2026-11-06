@@ -28,7 +28,12 @@ export function hubPicker(name: string, label: string, hubs: HubChoice[], select
   }));
 }
 
-export const hubCity = (a: Airport | null, icao: string): string => (a ? cityOf(a) : icao);
+/** City of an airport for display. The data can hold `Paris (Roissy-en-France, Val-d'Oise)`: cutting at the first comma must not leave a dangling parenthesis. */
+export function tidyCity(a: Airport): string {
+  const c = cityOf(a);
+  return (c.match(/\(/g)?.length ?? 0) > (c.match(/\)/g)?.length ?? 0) ? c.replace(/\s*\(.*$/, '') : c;
+}
+export const hubCity = (a: Airport | null, icao: string): string => (a ? tidyCity(a) : icao);
 
 /** Localised label of a ledger kind, falling back to the raw kind. */
 export function chargeKind(kind: string): string {

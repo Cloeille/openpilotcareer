@@ -20,11 +20,11 @@ export function newCompany(ctx: Ctx): Screen {
     void act(t('nc.created'), async () => {
       const created = await api<Me>('/me/companies', { method: 'POST', body: { name: name.control.value.trim(), hub: hub.input.value.trim().toUpperCase() } });
       session.company = created.company.id;
-    }, ctx.refresh).then((ok) => { if (ok) go('#dashboard'); });
+    }, ctx.refresh).then((ok) => { if (ok) go('#fleet'); });
   } }, name.root, hub.root, h('div', { class: 'row' }, button(t('nc.create'), { variant: 'primary', type: 'submit', disabled: full, key: full ? undefined : t('key.enter') })));
   const view = h('div', { class: 'briefing-column' },
     h('div', { class: 'col' }, titleBlock(t('nc.status', { user: me.username }), t('nc.title')), h('p', { class: 'muted intro' }, t('nc.intro')), h('p', { class: 'dim' }, tp('nc.count', me.companies.length, { max: MAX_COMPANIES_PER_USER }))),
     full ? h('p', { class: 'error-text', role: 'alert' }, t('nc.limit', { max: MAX_COMPANIES_PER_USER })) : panel({ title: t('nc.title') }, form),
-    panel({ title: t('nc.start') }, line(t('nc.capital'), fm.money(STARTING_BALANCE)), line(t('nc.aircraft'), t('nc.aircraftV', { icao: STARTER_AIRCRAFT })), h('p', { class: 'dim small' }, t('nc.firstHub'))));
+    panel({ title: t('nc.start') }, line(t('nc.capital'), fm.money(STARTING_BALANCE)), line(t('nc.aircraft'), t('nc.aircraftV', { icao: STARTER_AIRCRAFT })), h('p', { class: 'dim small' }, t('nc.firstHub')), h('p', { class: 'dim small' }, t('fin.nc.lease'))));
   return { title: t('nc.title'), scene: 'fleet', tab: 'fleet', view, back: '#fleet', hints: [{ key: t('key.esc'), label: t('hint.fleet') }, { key: t('key.enter'), label: t('hint.create') }] };
 }

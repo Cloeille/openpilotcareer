@@ -1,10 +1,10 @@
 import { aircraftPrice, type AircraftType } from '@opc/shared';
 import { api } from '../api.ts';
 import { fleetQuote, leaseOffers, signLease, buyAircraftWith, type FleetAircraftV2 } from '../api-finance.ts';
-import { airportInfo, cityOf } from '../airports.ts';
+import { airportInfo } from '../airports.ts';
 import { button, line, panel, titleBlock } from '../components.ts';
 import { inBudget, newestOf, starterRow, starterSummary, type StarterRow } from '../finance-view.ts';
-import { enterConfirms, hubCity, perform } from '../finance-ui.ts';
+import { enterConfirms, hubCity, perform, tidyCity } from '../finance-ui.ts';
 import { fmt } from '../format.ts';
 import { t } from '../i18n.ts';
 import type { Key } from '../messages.ts';
@@ -119,7 +119,7 @@ export async function starter(ctx: Ctx): Promise<Screen> {
       h('div', { class: 'name' }, h('span', { class: 'n' }, row.offer.typeName), sub ? h('span', { class: 's' }, sub) : null),
       h('div', { class: 'opts' }, card(row, 'lease'), card(row, 'buy')));
   };
-  const list = h('div', { class: 'col', style: 'gap:0' },
+  const list = h('div', { class: 'col starter-list', style: 'gap:0' },
     h('div', { class: 'starter-head' }, h('span', { class: 'grow' }, t('fin.start.colPlane')), h('span', { class: 'opt' }, t('fin.start.colLease')), h('span', { class: 'opt' }, t('fin.start.colBuy'))),
     rows.map(rowEl),
     h('div', { class: 'explain' },
@@ -131,13 +131,13 @@ export async function starter(ctx: Ctx): Promise<Screen> {
     return h('label', { class: 'hub-card', for: id },
       h('span', { class: 'head' }, h('input', { type: 'radio', name: 'start-hub', id, value: icao, checked: icao === hub, onchange: () => { hub = icao; needFees(); drawSummary(); } }), icao),
       h('span', { class: 'n' }, airport ? airport.name : icao),
-      airport ? h('span', { class: 's' }, `${cityOf(airport)} · ${t(`hub.size.${airport.size}` as Key)}`) : null);
+      airport ? h('span', { class: 's' }, `${tidyCity(airport)} · ${t(`hub.size.${airport.size}` as Key)}`) : null);
   }));
 
   select(pick.icao, pick.mode);
   const column = h('div', { class: 'starter-column' }, head,
-    panel({ title: t('fin.start.panel'), action: t('fin.start.inBudget', { n: inBudget(rows) }), id: 'starter-panel' }, list),
-    panel({ title: t('fin.start.hub'), action: t('fin.start.hubFree'), id: 'starter-hub' }, hubCards));
+    panel({ title: t('fin.start.panel'), action: t('fin.start.inBudget', { n: inBudget(rows) }), id: 'starter-panel', class: 'flush' }, list),
+    panel({ title: t('fin.start.hub'), action: t('fin.start.hubFree'), id: 'starter-hub', class: 'flush' }, hubCards));
   const view = h('div', { class: 'starter-layout' }, column,
     panel({ title: t('buy.summary'), action: t('fin.start.sumSub'), class: 'summary fin-summary' }, summaryHost));
 

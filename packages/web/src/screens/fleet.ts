@@ -1,11 +1,11 @@
 import type { Flight } from '@opc/shared';
 import { api } from '../api.ts';
 import { buyoutLease, financeOverview, hubUsage, terminateLease, type FinanceOverview, type FleetAircraftV2, type HubUsage } from '../api-finance.ts';
-import { airportInfo, cityOf } from '../airports.ts';
+import { airportInfo } from '../airports.ts';
 import { fleetSummary } from '../catalogue.ts';
 import { badge, button, dataTable, line, panel, unknownValue } from '../components.ts';
 import { aircraftName, byRegistration, monthLabel, nextCharges, parkingSummary, statusOf, wearOf, type ActiveFlightInfo } from '../finance-view.ts';
-import { chargeKind, locale, perform } from '../finance-ui.ts';
+import { chargeKind, locale, perform, tidyCity } from '../finance-ui.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import type { Key } from '../messages.ts';
@@ -63,7 +63,7 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
       : [c.monthly > 0 ? t('fin.contract.monthly', { amount: fm.money(c.monthly) }) : null, c.hourly ? t('fin.contract.hourly', { amount: fm.money(c.hourly) }) : null,
         c.endsAt ? t('fin.contract.until', { date: monthLabel(locale(), c.endsAt, true) }) : null].filter(Boolean).join(' · ');
     const baseLine = h('span', { class: 'mono' }, a.location);
-    void airportInfo(a.location).then((ap) => { if (ap) baseLine.textContent = `${a.location} · ${cityOf(ap)}`; });
+    void airportInfo(a.location).then((ap) => { if (ap) baseLine.textContent = `${a.location} · ${tidyCity(ap)}`; });
     const actions = h('div', { class: 'fin-actions-row' });
     if (c?.kind === 'lease') {
       if (confirming) {
@@ -92,8 +92,7 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
         own ? line(t('fin.fleet.ownership'), own) : null,
         contractText ? line(t('fin.fleet.contract'), contractText) : null,
         line(t('fin.fleet.value'), fm.moneyShort(a.value)),
-        line(t('fleet.capacity'), t('fleet.capacityV', { seats: a.type.seats, cargo: fm.kg(a.type.cargoKg) })),
-        line(t('fleet.perf'), `${fm.kt(a.type.cruiseKts)} / ${fm.nm(a.type.rangeNm)}`)),
+        line(t('fleet.capacity'), t('fleet.capacityV', { seats: a.type.seats, cargo: fm.kg(a.type.cargoKg) }))),
       actions));
   };
   showDetail(planes.find((a) => a.id === selected));
@@ -114,7 +113,7 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
     };
   });
 
-  const upcoming = nextCharges(finance?.upcoming ?? [], 4);
+  const upcoming = nextCharges(finance?.upcoming ?? [], 3);
   const financePanel = finance === null ? null : panel({ title: t('fin.money.title'), action: t('fin.money.sub'), id: 'fin-money' },
     upcoming.length === 0 ? h('p', { class: 'dim small' }, t('fin.money.none'))
       : h('div', { class: 'fin-panel-list' }, upcoming.map((u) => h('div', { class: 'fin-charge' },

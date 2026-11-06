@@ -35,7 +35,7 @@ export async function lease(ctx: Ctx): Promise<Screen> {
   const termsHost = h('div');
   const summaryHost = h('div');
   const titleHost = h('div', { class: 'title-block' });
-  const lessorHost = h('div');
+  const lessorHost = h('div', { class: 'lessor-host' });
 
   const money = fm.money;
   const drawTitle = (): void => titleHost.replaceChildren(
@@ -118,8 +118,8 @@ export async function lease(ctx: Ctx): Promise<Screen> {
 
   const view = h('div', { class: 'contract-layout' },
     h('div', { class: 'contract-column' }, titleHost,
-      panel({ title: t('fin.lease.duration'), action: t('fin.lease.durationHint'), id: 'lease-duration' }, durationHost),
-      panel({ title: t('fin.lease.terms'), action: offer.lessor, id: 'lease-terms' }, lessorHost, termsHost)),
+      panel({ title: t('fin.lease.duration'), action: t('fin.lease.durationHint'), id: 'lease-duration', class: 'flush' }, durationHost),
+      panel({ title: t('fin.lease.terms'), action: offer.lessor, id: 'lease-terms', class: 'flush' }, lessorHost, termsHost)),
     panel({ title: t('buy.summary'), action: t('buy.step'), class: 'summary fin-summary', id: 'lease-summary' }, summaryHost));
   enterConfirms(view, confirm);
   return {

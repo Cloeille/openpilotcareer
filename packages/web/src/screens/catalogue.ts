@@ -141,7 +141,7 @@ export async function catalogue(ctx: Ctx): Promise<Screen> {
 /** "Ajouter un avion d'addon": a type the catalogue does not know gets the performance of its category and joins the company's own catalogue. */
 function addonPanel(ctx: Ctx): HTMLElement {
   const fm = fmt();
-  const icao = h('input', { id: 'addon-icao', type: 'text', name: 'addon-icao', maxlength: 4, autocomplete: 'off', spellcheck: 'false', class: 'upper', 'aria-label': t('fin.addon.enter'), placeholder: t('fin.addon.enter') });
+  const icao = h('input', { id: 'addon-icao', type: 'text', name: 'addon-icao', maxlength: 4, autocomplete: 'off', spellcheck: 'false', class: 'upper', 'aria-label': t('fin.addon.enter'), placeholder: t('fin.addon.icao') });
   const model = h('input', { id: 'addon-name', type: 'text', name: 'addon-name', maxlength: 80, autocomplete: 'off', 'aria-label': t('fin.addon.name'), placeholder: t('fin.addon.name') });
   const status = h('div', { class: 'status-line', 'aria-live': 'polite' });
   const estimate = h('p', { class: 'fin-estimate' });
@@ -180,9 +180,10 @@ function addonPanel(ctx: Ctx): HTMLElement {
       icao: d.icao, name: d.name, category: d.category, engines: d.engines, wtc: d.wtc, seats: d.seats, cargoKg: d.cargoKg, cruiseKts: d.cruiseKts, rangeNm: d.rangeNm } }), ctx.refresh);
   });
   refresh();
-  return panel({ title: t('fin.addon.title'), id: 'addon' },
-    h('div', { class: 'col', style: 'gap:14px' },
-      h('div', { class: 'input-field', style: 'height:42px' }, icao), h('div', { class: 'input-field', style: 'height:42px' }, model), status,
-      h('div', { class: 'fin-pick' }, h('span', { class: 'fin-label' }, t('fin.addon.pick')), h('span', { class: 'hint' }, t('fin.addon.pickHint')), segHost),
-      estimate, add));
+  const body = panel({ title: t('fin.addon.title'), id: 'addon' },
+    h('div', { class: 'addon-ids' }, h('div', { class: 'input-field', style: 'height:42px' }, icao), h('div', { class: 'input-field', style: 'height:42px' }, model)), status,
+    h('div', { class: 'fin-pick' }, h('span', { class: 'fin-label' }, t('fin.addon.pick')), h('span', { class: 'hint' }, t('fin.addon.pickHint')), segHost),
+    estimate, add);
+  body.querySelector('.panel-body')?.classList.add('addon');
+  return body;
 }
