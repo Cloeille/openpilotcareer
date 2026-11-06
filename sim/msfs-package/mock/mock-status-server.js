@@ -13,8 +13,19 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const PANEL_DIR = path.join(__dirname, '..', 'openpilotcareer-panel', 'html_ui', 'InGamePanels', 'OpenPilotCareer');
-const FLIGHT = { id: 'fl_01HZX3', from: 'LFPG', to: 'LFMN', aircraftIcao: 'A20N' };
 const SERVER_URL = 'https://careers.example.org';
+// What the real bridge sends today (sim/bridge/src/session.ts): the id is a number, nothing else is optional-rich.
+const FLIGHT = { id: 7, from: 'LFPG', to: 'LFMN', aircraftIcao: 'A20N' };
+// The richer, OPTIONAL fields the EFB can show (see the header of view-model.js). The values are made-up examples that
+// reproduce the three design frames; the real bridge does not send them yet and the panel then shows a dash.
+const RICH_FLIGHT = { id: 4127, from: 'LFMN', to: 'LFPG', aircraftIcao: 'AT76', fromName: 'Nice', toName: 'Paris-CDG', callsign: 'AZR 4127', aircraftName: 'ATR 72-600', registration: 'F-HAZR' };
+const T = (iso) => Date.parse(iso);
+const RICH = {
+  simTime: T('2026-11-06T17:56:00Z'),
+  sim: 'connected',
+  plan: { blockFuelKg: 2150, tripFuelKg: 1640, reserveFuelKg: 420, cruiseAltFt: 24000 },
+  cabin: { passengers: 68, cargoKg: 410 },
+};
 
 const SCENARIOS = {
   preflight: { phase: 'preflight', flight: FLIGHT, verification: null, flags: [], serverUrl: SERVER_URL },
@@ -26,8 +37,50 @@ const SCENARIOS = {
     flight: FLIGHT,
     verification: 'rejected',
     reason: 'Landed at LFMD, not at the destination LFMN.',
-    flags: ['destination_mismatch'],
+    flags: [],
     serverUrl: SERVER_URL,
+  },
+  // Design frame "Panneau en jeu · EFB": cruise, ETA / fuel / estimated pay, verification running, close disabled.
+  'efb-flight': {
+    phase: 'airborne',
+    flight: RICH_FLIGHT,
+    verification: 'pending',
+    flags: [],
+    serverUrl: SERVER_URL,
+    ...RICH,
+    live: { altFt: 24000, progress: 0.37, etaAt: T('2026-11-06T18:42:00Z'), fuelArrivalKg: 1280 },
+    estimatedPay: 14820,
+  },
+  // Design frame "vol terminé": parked, landing figures, verified, net pay.
+  'efb-finished': {
+    phase: 'parked',
+    flight: RICH_FLIGHT,
+    verification: 'verified',
+    flags: [],
+    serverUrl: SERVER_URL,
+    ...RICH,
+    result: { landingFpm: -142, gForce: 1.18, fuelRemainingKg: 1310, fuelVsSimbriefKg: 30, netPay: 14820, blockMinutes: 101, stand: 'F12', parkedAt: T('2026-11-06T18:39:00Z') },
+  },
+  // Design frame "vol rejeté": same landing, the bridge flagged time acceleration, 0 EUR.
+  'efb-rejected': {
+    phase: 'parked',
+    flight: RICH_FLIGHT,
+    verification: 'rejected',
+    reason: 'The simulator client flagged this flight: time_acceleration_above_1x',
+    flags: ['time_acceleration_above_1x'],
+    serverUrl: SERVER_URL,
+    ...RICH,
+    result: { landingFpm: -142, gForce: 1.18, fuelRemainingKg: 1310, fuelVsSimbriefKg: 30, blockMinutes: 101, stand: 'F12', parkedAt: T('2026-11-06T18:39:00Z') },
+  },
+  // The simulator is not running yet: the bridge is up, the status bar says so.
+  'efb-sim-waiting': {
+    phase: 'preflight',
+    flight: RICH_FLIGHT,
+    verification: null,
+    flags: [],
+    serverUrl: SERVER_URL,
+    ...RICH,
+    sim: 'waiting',
   },
   flags: {
     phase: 'airborne',
@@ -43,7 +96,7 @@ const SCENARIOS = {
   'bad-http': 'http-500',
 };
 
-const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.woff2': 'font/woff2' };
 
 function createServer(initial = 'airborne-pending') {
   let current = initial;
@@ -74,6 +127,10 @@ function createServer(initial = 'airborne-pending') {
       return void res.writeHead(200).end(`scenario: ${name}\n`);
     }
     if (url.pathname === '/') return serveFile(res, path.join(__dirname, 'index.html'), TYPES['.html']);
+    if (url.pathname.startsWith('/panel/fonts/')) {
+      const name = path.basename(url.pathname);
+      return serveFile(res, path.join(PANEL_DIR, 'fonts', name), TYPES[path.extname(name)] ?? 'application/octet-stream');
+    }
     if (url.pathname.startsWith('/panel/')) {
       const name = path.basename(url.pathname);
       return serveFile(res, path.join(PANEL_DIR, name), TYPES[path.extname(name)] ?? 'application/octet-stream');

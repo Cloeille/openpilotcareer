@@ -116,13 +116,20 @@ test('malformed answers become an error state and never throw', () => {
   }
 });
 
+test('the real bridge sends a numeric flight id and the panel accepts it (a string id too)', () => {
+  assert.equal(VM.fromStatus(status({ flight: { id: 7, from: 'LFPN', to: 'LFAQ', aircraftIcao: 'C172' } })).connection, 'online');
+  assert.equal(VM.fromStatus(status({ flight: { id: 'fl_7', from: 'LFPN', to: 'LFAQ', aircraftIcao: 'C172' } })).connection, 'online');
+});
+
 test('contract violations are each rejected', () => {
   const bad = [
     { phase: 'sideways' },
     { phase: undefined },
     { flight: 'LFPG' },
     { flight: { id: 'x', from: 'A', to: 'B' } },
-    { flight: { id: 1, from: 'A', to: 'B', aircraftIcao: 'A20N' } },
+    { flight: { id: 1.5, from: 'A', to: 'B', aircraftIcao: 'A20N' } },
+    { flight: { id: null, from: 'A', to: 'B', aircraftIcao: 'A20N' } },
+    { flight: { id: NaN, from: 'A', to: 'B', aircraftIcao: 'A20N' } },
     { verification: 'maybe' },
     { verification: undefined },
     { reason: 5 },
