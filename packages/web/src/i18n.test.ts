@@ -42,6 +42,14 @@ test('plural forms follow the language rules', () => {
   assert.equal(translatePlural('fr', 'hud.daysLeft', 25), 'encore 25 jours');
 });
 
+test('a job load of one passenger is singular in both languages (French counts 0 and 1 as singular)', () => {
+  assert.equal(translatePlural('en', 'job.pax', 1), '1 passenger');
+  assert.equal(translatePlural('fr', 'job.pax', 1), '1 passager');
+  assert.equal(translatePlural('fr', 'job.pax', 0), '0 passager');
+  assert.equal(translatePlural('fr', 'job.pax', 2), '2 passagers');
+  assert.equal(translatePlural('en', 'job.pax', 2), '2 passengers');
+});
+
 test('both dictionaries have exactly the same keys and the same placeholders', () => {
   assert.deepEqual(Object.keys(fr).sort(), Object.keys(en).sort());
   const vars = (s: string): string[] => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]!).sort();

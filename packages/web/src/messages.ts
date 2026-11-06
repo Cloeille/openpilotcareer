@@ -187,7 +187,7 @@ const table = {
   'dash.importSimbrief': ['Import from SimBrief', 'Importer de SimBrief'],
   'hint.openJobs': ['Open the job board', 'Ouvrir le tableau de jobs'],
   'hint.simbrief': ['SimBrief', 'SimBrief'],
-  'job.pax': ['{n} passengers', '{n} passagers'],
+  'job.pax.one': ['{n} passenger', '{n} passager'], 'job.pax.other': ['{n} passengers', '{n} passagers'],
   'job.cargoKg': ['{kg} cargo', '{kg} de fret'],
   'jobs.available': ['Available jobs', 'Jobs disponibles'],
   'jobs.status': ['{n} offers from {airports} · board refreshes at {time}', '{n} offres au départ de {airports} · prochaine vague à {time}'],
