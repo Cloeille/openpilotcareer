@@ -1,6 +1,7 @@
 import { OPC_GLOBAL_URL, infoSchema, type ServerInfo } from '@opc/shared';
 import { readCompany, writeCompany } from './company-store.ts';
 import { ApiError } from './errors.ts';
+import { exportFileName } from './settings-model.ts';
 
 /** Default server: VITE_OPC_GLOBAL_URL at build time (empty = the server that served this page), else the shared OPC_GLOBAL_URL. */
 const env = import.meta.env.VITE_OPC_GLOBAL_URL as string | undefined;
@@ -89,15 +90,16 @@ export async function fetchInfo(server: string): Promise<ServerInfo> {
   return parsed.data;
 }
 
-/** Download an authenticated export (the browser cannot send the Bearer header from a plain link). */
-export async function downloadExport(format: 'json' | 'flights.csv' | 'transactions.csv'): Promise<void> {
+/** Download an authenticated export (the browser cannot send the Bearer header from a plain link). Resolves with the file size in bytes. */
+export async function downloadExport(format: 'json' | 'flights.csv' | 'transactions.csv'): Promise<number> {
   const res = await request(`/me/export?format=${format}`, {});
   if (!res.ok) return fail(res, true);
-  const name = /filename="([^"]+)"/.exec(res.headers.get('content-disposition') ?? '')?.[1] ?? `opc-${format}`;
-  const url = URL.createObjectURL(await res.blob());
-  const a = Object.assign(document.createElement('a'), { href: url, download: name });
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement('a'), { href: url, download: exportFileName(res.headers.get('content-disposition'), format) });
   document.body.append(a);
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+  return blob.size;
 }

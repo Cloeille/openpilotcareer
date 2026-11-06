@@ -151,6 +151,8 @@ window.addEventListener('opc:redraw', () => {
   const id = document.activeElement?.id;
   void show().then(() => { if (id) document.getElementById(id)?.focus(); });
 });
+/** The Settings screen's "Change" link does what the HUD's does: sign out to pick another server. */
+window.addEventListener('opc:change-server', () => void logout(true));
 window.addEventListener('opc:lang', () => { if (snap) void show(); else signedOut(); });
 
 if (session.token) void boot();

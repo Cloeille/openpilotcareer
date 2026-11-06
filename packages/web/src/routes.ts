@@ -1,7 +1,5 @@
 import { parseHash } from './keys.ts';
-import { t } from './i18n.ts';
-import type { Ctx, Screen, ScreenFn, Tab } from './screen.ts';
-import { pages } from './pages.ts';
+import type { ScreenFn } from './screen.ts';
 import { companySheet } from './screens/company-sheet.ts';
 import { dashboard } from './screens/dashboard.ts';
 import { duelScreen } from './screens/duel.ts';
@@ -18,18 +16,8 @@ import { manual } from './screens/manual.ts';
 import { jobDetail } from './screens/job.ts';
 import { newCompany } from './screens/new-company.ts';
 import { jobs } from './screens/jobs.ts';
+import { settings } from './screens/settings.ts';
 import { simbrief } from './screens/simbrief.ts';
-import { h } from './ui.ts';
-import type { SceneId } from './scenes.ts';
-
-/** Pages not yet rebuilt run inside the new shell, in a scrollable pane with their old styling. */
-function legacy(page: keyof typeof pages, scene: SceneId, tab: Tab | 'settings'): ScreenFn {
-  return async (ctx: Ctx): Promise<Screen> => {
-    const p = pages[page]!;
-    const view = h('div', { class: 'legacy' }, await p.render({ me: ctx.snap.me, refresh: ctx.refresh, go: (name) => ctx.go(`#${name}`) }));
-    return { title: p.title, scene, tab, hints: [{ key: t('key.esc'), label: t('hint.back') }], back: null, view };
-  };
-}
 
 export const routes: Record<string, ScreenFn> = {
   dashboard,
@@ -39,7 +27,7 @@ export const routes: Record<string, ScreenFn> = {
   fleet, catalogue, buy, hubs, custom, company: newCompany,
   history, flight: flightDetail, manual,
   leaderboard, duel: duelScreen, 'company-sheet': companySheet, recap,
-  settings: legacy('settings', 'settings', 'settings'),
+  settings,
 };
 
 /** Old bookmarks (`#flights`) keep working. */
