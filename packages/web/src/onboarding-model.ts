@@ -1,6 +1,6 @@
 import { MANUAL_PAY_FACTOR, PAX_KG, RANKS, fuelBurnKg, jobPayout, settle, type AircraftType } from '@opc/shared';
 import {
-  REALISM_TOGGLES, type FleetQuote, type LeaseOffer, type LoanQuote, type Onboarding, type OnboardingStep, type Realism, type RealismPreset, type RealismToggle, type StartMode,
+  REALISM_TOGGLES, type FleetQuote, type LeaseOffer, type LoanOption, type Onboarding, type OnboardingStep, type Realism, type RealismPreset, type RealismToggle, type StartMode,
 } from './onboarding-types.ts';
 
 // Pure view-model of the onboarding: everything computed on screen lives here so it can be tested with fixtures.
@@ -129,7 +129,7 @@ export function leaseRecap(capital: number, offer: Pick<LeaseOffer, 'deposit' | 
 // ---------------------------------------------------------------- 3b: hardcore comparison
 
 export type HardcoreId = 'club' | 'monthly' | 'credit';
-export type HardcoreOption = { id: HardcoreId; icao: string; upfront: number; monthly: number; hourly: number; loan?: LoanQuote; price?: number };
+export type HardcoreOption = { id: HardcoreId; icao: string; upfront: number; monthly: number; hourly: number; loan?: LoanOption; price?: number };
 
 /** Contract constants of lot FINANCE (club rental and monthly rental of the C172); replaced by the shared ones once merged. */
 export const CLUB = { icao: 'C172', hourly: 210 } as const;
@@ -144,7 +144,7 @@ export function runningCostPerHour(t: AircraftType): number {
 }
 
 /** Picks the loan of the quote closest to "a quarter down, 5 years", the shape of the mockup's third option. */
-export function pickLoan(loans: LoanQuote[]): LoanQuote | null {
+export function pickLoan(loans: LoanOption[]): LoanOption | null {
   return [...loans].sort((a, b) => Math.abs(a.months - 60) - Math.abs(b.months - 60) || Math.abs(a.downPct - 25) - Math.abs(b.downPct - 25))[0] ?? null;
 }
 

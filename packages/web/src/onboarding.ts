@@ -7,7 +7,7 @@ import { t } from './i18n.ts';
 import { bridgeStatus } from './api-onboarding.ts';
 import { START_FACTS, clampStep, emptyForm, readDraft, resumeStep, toDraft, type Draft } from './onboarding-model.ts';
 import { obBottom, obTop, type BottomBar, type StepResult, type Wizard } from './onboarding-shell.ts';
-import type { BridgeStatus, MeV2, Onboarding, OnboardingStep, StartMode } from './onboarding-types.ts';
+import type { BridgeStatus, Me, Onboarding, OnboardingStep, StartMode } from './onboarding-types.ts';
 import { step1, step2 } from './screens/ob-start.ts';
 import { step3a, step3b } from './screens/ob-aircraft.ts';
 import { step4 } from './screens/ob-realism.ts';
@@ -67,7 +67,7 @@ export function runOnboarding(host: OnboardingHost, initial: Onboarding, additio
     me: null,
     async loadMe(fresh = false) {
       if (w.me && !fresh) return w.me;
-      const me: MeV2 = await getMe();
+      const me: Me = await getMe();
       w.me = me;
       return me;
     },

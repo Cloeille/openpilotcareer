@@ -7,7 +7,7 @@ import {
   type HardcoreId, type HardcoreOption,
 } from '../onboarding-model.ts';
 import { aircraftType, buyFinanced, clubRental, fleetQuote, leaseAircraft, leaseOffers, monthlyRental } from '../api-onboarding.ts';
-import type { FleetQuote, LeaseOffer, LoanQuote } from '../onboarding-types.ts';
+import type { FleetQuote, LeaseOffer, LoanOption } from '../onboarding-types.ts';
 import { arrows, guarded, hintsOf, titleArea, type StepResult, type Wizard } from '../onboarding-shell.ts';
 import { airportInfo, cityOf } from '../airports.ts';
 import { h } from '../ui.ts';
@@ -156,7 +156,7 @@ function creditPanel(w: Wizard, r: OfferRow, quote: FleetQuote, capital: number,
   const fm = fmt();
   const error = h('p', { class: 'ob-error', role: 'alert' });
   let sel = Math.max(0, quote.loans.findIndex((l) => l.months === 60));
-  const loans: LoanQuote[] = quote.loans;
+  const loans: LoanOption[] = quote.loans;
   const list = h('div', { class: 'ob-credit-list', role: 'radiogroup', 'aria-label': t('ob.s3a.creditPanel', { name: shortName(r.offer.typeName) }) },
     loans.map((l, i) => {
       const input = h('input', { type: 'radio', name: 'loan', value: String(i), checked: i === sel });

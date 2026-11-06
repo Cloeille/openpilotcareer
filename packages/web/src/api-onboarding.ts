@@ -1,10 +1,9 @@
-import type { AircraftType, ApiKeyInfo } from '@opc/shared';
+import type { AircraftType, ApiKeyInfo, PurchaseResult } from '@opc/shared';
 import { api, session } from './api.ts';
 import { ApiError } from './errors.ts';
-import type { BridgeStatus, FleetAircraftV2, FirstJob, FleetQuote, HubSuggestion, LeaseOffer, MeV2, NewCompanyBody, Onboarding, OnboardingStep, Realism, RealismPreset, RealismToggle, StartMode } from './onboarding-types.ts';
+import type { BridgeStatus, FirstJob, FleetQuote, HubSuggestion, LeaseOffer, Me, NewCompanyBody, Onboarding, OnboardingStep, Realism, RealismPreset, RealismToggle, StartMode } from './onboarding-types.ts';
 
-// Typed client for the START / FINANCE sections of docs/v2-contract.md. The shapes are mirrored here (not imported)
-// so this lot builds before lots be-start / be-finance are merged; after the merge they can be swapped for the shared types.
+// Typed client for the START / FINANCE sections of docs/v2-contract.md; the wire types come from @opc/shared.
 
 export * from './onboarding-types.ts';
 
@@ -24,10 +23,10 @@ export const hubSuggestions = (mode: StartMode, q: string): Promise<HubSuggestio
   api<HubSuggestion[]>(`/onboarding/hubs?mode=${mode}${q.trim() ? `&q=${encodeURIComponent(q.trim())}` : ''}`);
 export const codeAvailable = async (code: string): Promise<boolean> => (await api<{ available: boolean }>(`/airlines/code/${encodeURIComponent(code)}`)).available;
 
-export const createOnboardingCompany = (body: NewCompanyBody): Promise<MeV2> => api<MeV2>('/me/companies', { method: 'POST', body });
+export const createOnboardingCompany = (body: NewCompanyBody): Promise<Me> => api<Me>('/me/companies', { method: 'POST', body });
 /** Ids of the player's companies (account-level route: works before the first company exists). */
 export const myCompanyIds = async (): Promise<number[]> => (await api<{ id: number }[]>('/me/companies')).map((c) => c.id);
-export const getMe = (): Promise<MeV2> => api<MeV2>('/me');
+export const getMe = (): Promise<Me> => api<Me>('/me');
 export const setRealism = (companyId: number, body: { preset: RealismPreset } | { toggles: Partial<Record<RealismToggle, boolean>> }): Promise<Realism> =>
   api<Realism>(`/companies/${companyId}/realism`, { method: 'PUT', body });
 export const firstJob = (companyId: number): Promise<FirstJob> => api<FirstJob>(`/companies/${companyId}/first-job`);
@@ -37,7 +36,7 @@ export const acceptJob = (jobId: string, aircraftId: number): Promise<unknown> =
 
 export const leaseOffers = (hub: string, icao?: string): Promise<LeaseOffer[]> =>
   api<LeaseOffer[]>(`/leasing/offers?hub=${hub}${icao ? `&icao=${icao}` : ''}`);
-export const leaseAircraft = (offerId: LeaseOffer['id'], months: number, hub: string): Promise<{ aircraft: FleetAircraftV2; firstPayment: number; balanceAfter: number }> =>
+export const leaseAircraft = (offerId: LeaseOffer['id'], months: number, hub: string): Promise<PurchaseResult> =>
   api('/me/leases', { method: 'POST', body: { offerId, months, hub } });
 export const fleetQuote = (icao: string, hub: string): Promise<FleetQuote> => api<FleetQuote>(`/me/fleet/quote?icao=${icao}&hub=${hub}`);
 export const buyFinanced = (icao: string, hub: string, financing: { downPct: number; months: number }): Promise<unknown> =>

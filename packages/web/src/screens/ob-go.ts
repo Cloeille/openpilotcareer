@@ -4,7 +4,7 @@ import { fmt } from '../format.ts';
 import { t } from '../i18n.ts';
 import { UNVERIFIED_PAY_PCT } from '../onboarding-model.ts';
 import { acceptJob, completeOnboarding, firstJob } from '../api-onboarding.ts';
-import type { FirstJob, MeV2 } from '../onboarding-types.ts';
+import type { FirstJob, Me } from '../onboarding-types.ts';
 import { airportInfo, cityOf } from '../airports.ts';
 import { guarded, hintsOf, obError, titleArea, tk, type StepResult, type Wizard } from '../onboarding-shell.ts';
 import { notify, h } from '../ui.ts';
@@ -12,7 +12,7 @@ import type { Key } from '../messages.ts';
 
 const NBSP = '\u00a0';
 
-function aircraftLine(me: MeV2): string {
+function aircraftLine(me: Me): string {
   const a = me.fleet[0];
   if (!a) return '–';
   const name = a.type.name.replace(/^Airbus |^Boeing |^Embraer |^Cessna /, '');

@@ -5,6 +5,9 @@ import {
   pickLoan, presetRealism, readDraft, resumeStep, signedPct, stepPreset, suggestCallsign, suggestCode, toDraft, typicalGain, withToggle, monthlyCost, activeToggles, runningCostPerHour, liveryIdOf, DRAFT_MAX_BYTES, emptyForm,
 } from './onboarding-model.ts';
 
+const loanOpt = (downPct: number, months: number, monthly: number, total: number) => ({ downPct, months, monthly, total, down: 0, dueToday: 0 });
+const quoteOf = (cash: number, loans: ReturnType<typeof loanOpt>[], leaseOffers: number) => ({ cash, loans, leaseOffers, price: cash, ferryFee: 0, balance: 0 });
+
 test('presets add up to the pay and reputation of the mockup', () => {
   const m = (p: keyof typeof PRESET_TOGGLES) => modifiersOf(PRESET_TOGGLES[p]);
   assert.deepEqual(m('relaxed'), { pay: -5, rep: -10 });
@@ -81,7 +84,7 @@ test('typical gain follows the game pay formula for a jet airliner and a trainer
 });
 
 test('the 20 h per month column of the hardcore table matches the mockup', () => {
-  const quote = { cash: 62_000, loans: [{ downPct: 25, months: 60, monthly: 1_510, total: 90_600 }, { downPct: 50, months: 36, monthly: 1_200, total: 43_200 }], leaseOffers: 3 };
+  const quote = quoteOf(62_000, [loanOpt(25, 60, 1_510, 90_600), loanOpt(50, 36, 1_200, 43_200)], 3);
   const [club, monthly, credit] = hardcoreOptions(quote, 100);
   assert.equal(monthlyCost(club!), 4_200);
   assert.equal(monthlyCost(monthly!), 4_100);
@@ -93,12 +96,12 @@ test('the 20 h per month column of the hardcore table matches the mockup', () =>
 
 test('without a loan quote only the two rentals are offered', () => {
   assert.equal(hardcoreOptions(null, null).length, 2);
-  assert.equal(hardcoreOptions({ cash: 62_000, loans: [], leaseOffers: 0 }, 100).length, 2);
+  assert.equal(hardcoreOptions(quoteOf(62_000, [], 0), 100).length, 2);
   assert.equal(pickLoan([]), null);
 });
 
 test('the club is cheapest below 13 h per month against the mockup options', () => {
-  const opts = hardcoreOptions({ cash: 62_000, loans: [{ downPct: 25, months: 60, monthly: 1_510, total: 0 }], leaseOffers: 0 }, 100);
+  const opts = hardcoreOptions(quoteOf(62_000, [loanOpt(25, 60, 1_510, 0)], 0), 100);
   assert.equal(cheapestBelow(opts[0]!, opts.slice(1)), 13);
   assert.equal(cheapestBelow(opts[1]!, [opts[0]!]), null, 'monthly rental costs more fixed AND is cheaper per hour: no ceiling against the club');
   assert.equal(CLUB.hourly, 210);
@@ -162,7 +165,7 @@ test('the wizard resumes where the saved state allows', () => {
 });
 
 test('the credit plan becomes the cheapest above a number of flight hours', () => {
-  const opts = hardcoreOptions({ cash: 62_000, loans: [{ downPct: 25, months: 60, monthly: 1_510, total: 0 }], leaseOffers: 0 }, 100);
+  const opts = hardcoreOptions(quoteOf(62_000, [loanOpt(25, 60, 1_510, 0)], 0), 100);
   assert.equal(cheapestAbove(opts[2]!, opts.slice(0, 2)), 14, 'vs the club: 1510 / (210 - 100) = 13.7 h; vs the monthly rental it is cheaper at every volume');
   assert.equal(cheapestAbove(opts[0]!, opts.slice(1)), null, 'the club has the dearest hour: never cheapest at high volume');
 });

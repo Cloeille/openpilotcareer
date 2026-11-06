@@ -6,7 +6,7 @@ import { fmt } from './format.ts';
 import { GLOBAL_URL, session } from './api.ts';
 import { t, tp } from './i18n.ts';
 import { messageFor, type Key } from './messages.ts';
-import type { BridgeStatus, MeV2, Onboarding, OnboardingStep, StartMode } from './onboarding-types.ts';
+import type { BridgeStatus, Me, Onboarding, OnboardingStep, StartMode } from './onboarding-types.ts';
 import type { Draft, Form } from './onboarding-model.ts';
 import type { Hint } from './screen.ts';
 import type { SceneId } from './scenes.ts';
@@ -24,8 +24,8 @@ export type Wizard = {
   wantsCustom: boolean;
   /** The bridge key created on step 5; the secret exists only here, in memory, and only until the step is left. */
   key: { id: number; label: string; secret: string | null } | null;
-  me: MeV2 | null;
-  loadMe: (fresh?: boolean) => Promise<MeV2>;
+  me: Me | null;
+  loadMe: (fresh?: boolean) => Promise<Me>;
   go: (step: OnboardingStep) => void;
   next: () => void;
   prev: () => void;
