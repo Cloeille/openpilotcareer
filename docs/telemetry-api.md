@@ -41,7 +41,8 @@ Content-Type: application/json
   "fuelUsedKg": 1450,
   "landingFpm": -240,
   "distanceNm": 205,
-  "source": "simconnect"
+  "source": "simconnect",
+  "flags": []
 }
 ```
 
@@ -55,21 +56,23 @@ Content-Type: application/json
 | `landingFpm` | number | Vertical speed at touchdown (negative = descending). ±10 000 max in the schema |
 | `distanceNm` | number ≥ 0 | Distance flown |
 | `source` | `"simconnect"` or `"manual"` | Where the data came from |
+| `flags` | optional array of up to 16 names (`a-z`, `0-9`, `_`, max 40 chars) | Anti-cheat flags the client raised during the flight: `slew_detected`, `time_acceleration_above_1x`, `teleport_jump_over_50nm`, `long_pause`. Always send them, never decide yourself: any flag rejects the flight (unless the server has anti-cheat off). Stored with the report |
 
 Unknown fields are ignored; wrong types or missing fields are a `400`.
 
 ### Server-side checks
 
-All must pass, otherwise the flight is **rejected**:
+All must pass, otherwise the flight is **rejected**. Checks 1-3 tie the report to the accepted job and always apply; the rest are anti-cheat ([see below](#turning-anti-cheat-off)).
 
 1. `departureIcao` / `arrivalIcao` equal the job's origin and destination.
 2. `aircraftIcao` equals the aircraft assigned to the flight.
 3. `landedAt` is after `takeoffAt`, not in the future (5 min clock skew allowed), and `takeoffAt` is not before the job was accepted (5 min skew).
-4. Duration is plausible for the distance and the aircraft's cruise speed: not faster than 125 % of cruise, not slower than 40 % of cruise plus one hour.
-5. `distanceNm` is between 85 % and 2× (+20 nm) of the job distance.
-6. `payloadKg` is at least 90 % of the job payload.
-7. `fuelUsedKg` is between 25 % and 300 % of the aircraft type's expected burn.
-8. `|landingFpm|` ≤ 1500.
+4. *(anti-cheat)* Duration is plausible for the distance and the aircraft's cruise speed: not faster than 125 % of cruise, not slower than 40 % of cruise plus one hour.
+5. *(anti-cheat)* `distanceNm` is between 85 % and 2× (+20 nm) of the job distance.
+6. *(anti-cheat)* `payloadKg` is at least 90 % of the job payload.
+7. *(anti-cheat)* `fuelUsedKg` is between 25 % and 300 % of the aircraft type's expected burn.
+8. *(anti-cheat)* `|landingFpm|` ≤ 1500.
+9. *(anti-cheat)* `flags` is empty or absent.
 
 ### Response `200`
 
@@ -99,4 +102,14 @@ Every non-2xx response is `{ "error": "<code>", "message": "<text>" }`.
 
 ## Manual completion without a client
 
-The web app offers **Complete manually** on an active flight. It is equivalent to a `manual` report: `unverified`, 60 % pay, estimated costs, and only allowed once the fastest believable flight time (distance ÷ 1.25 × cruise speed) has elapsed.
+The web app offers **Complete manually** on an active flight. It is equivalent to a `manual` report: `unverified`, 60 % pay, estimated costs, and only allowed once the fastest believable flight time (distance ÷ 1.25 × cruise speed) has elapsed (no wait when anti-cheat is off).
+
+## Turning anti-cheat off
+
+A server owner can disable anti-cheat for the whole server with `OPC_ANTICHEAT=off` (default on), for example for a private server where people use time acceleration. It is a single switch, there are no per-check settings. `GET /api/v1/info` reports it as `"antiCheat": false`; servers that predate the setting omit the field and always verify. Clients should tell the pilot.
+
+With anti-cheat off:
+
+- **Skipped:** client `flags`, duration, flown distance, payload, fuel used and landing rate (the checks marked *anti-cheat* above), and the minimum wait before **Complete manually**. Reported values are accepted as they are, so a report is `verified` and paid in full with the measured fuel, block time and landing rate. Flags and numbers are still stored with the flight.
+- **Still enforced:** departure, arrival and aircraft must match the job, and landing must come after takeoff, not in the future and not before the job was accepted. These make the report about the accepted job; they are not cheating checks.
+- **Unchanged:** `source: "manual"` and **Complete manually** remain `unverified` at 60 % pay with estimated costs, because they carry no measurement.

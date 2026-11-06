@@ -200,7 +200,7 @@ export const telemetrySchema = z.object({
   landingFpm: z.number().min(-10_000).max(10_000),
   distanceNm: z.number().min(0).max(20_000),
   source: z.enum(TELEMETRY_SOURCES),
-  /** Anti-cheat flags raised by the client (slew, time acceleration, teleport...). Any flag makes the report fail the check. */
+  /** Anti-cheat flags raised by the client (slew, time acceleration, teleport...). Any flag fails the check, unless the server has anti-cheat off. */
   flags: z.array(z.string().regex(/^[a-z0-9_]{1,40}$/)).max(16).optional(),
 });
 export type Telemetry = z.infer<typeof telemetrySchema>;
@@ -210,13 +210,15 @@ const MAX_LANDING_FPM = 1500;
 
 export type TelemetryCheck = { ok: true; blockHours: number } | { ok: false; reason: string };
 
-/** Plausibility checks of a telemetry report against the accepted flight. Pure: the server supplies the facts. */
+/** Checks a telemetry report against the accepted flight. Pure: the server supplies the facts.
+ *  Job integrity (the report is about this job, this aircraft, a landing between acceptance and now) always applies.
+ *  With `antiCheat` the report must also be physically plausible and free of client flags; a server that turns it off takes the numbers as reported. */
 export function checkTelemetry(t: Telemetry, f: {
   origin: string; destination: string; distanceNm: number; payloadKg: number;
-  aircraftIcao: string; aircraft: AircraftType; acceptedAt: number; now: number;
+  aircraftIcao: string; aircraft: AircraftType; acceptedAt: number; now: number; antiCheat: boolean;
 }): TelemetryCheck {
   const no = (reason: string): TelemetryCheck => ({ ok: false, reason });
-  if (t.flags && t.flags.length > 0) return no(`the simulator client flagged this flight: ${t.flags.join(', ')}`);
+  if (f.antiCheat && t.flags && t.flags.length > 0) return no(`the simulator client flagged this flight: ${t.flags.join(', ')}`);
   if (t.departureIcao !== f.origin) return no(`departure ${t.departureIcao} does not match job origin ${f.origin}`);
   if (t.arrivalIcao !== f.destination) return no(`arrival ${t.arrivalIcao} does not match job destination ${f.destination}`);
   if (t.aircraftIcao !== f.aircraftIcao) return no(`aircraft ${t.aircraftIcao} does not match the assigned ${f.aircraftIcao}`);
@@ -225,6 +227,7 @@ export function checkTelemetry(t: Telemetry, f: {
   if (landed > f.now + CLOCK_SKEW_MS) return no('landing is in the future');
   if (takeoff < f.acceptedAt - CLOCK_SKEW_MS) return no('takeoff predates the acceptance of this job');
   const hours = (landed - takeoff) / 3_600_000;
+  if (!f.antiCheat) return { ok: true, blockHours: hours };
   const minHours = minFlightHours(f.aircraft, f.distanceNm);
   const maxHours = 1 + f.distanceNm / (f.aircraft.cruiseKts * 0.4);
   if (hours < minHours) return no(`flight too short: ${hours.toFixed(2)} h for ${Math.round(f.distanceNm)} nm at ${f.aircraft.cruiseKts} kts`);
@@ -262,6 +265,8 @@ export const simbriefImportSchema = z.object({ simbriefUsername: z.string().rege
 
 export const infoSchema = z.object({
   name: z.string(), version: z.string(), apiVersion: z.number(), registrationOpen: z.boolean(),
+  /** Whether the server verifies flights (OPC_ANTICHEAT). Servers that predate the setting omit it: they always verify. */
+  antiCheat: z.boolean().default(true),
 });
 export type ServerInfo = z.infer<typeof infoSchema>;
 

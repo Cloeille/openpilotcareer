@@ -295,10 +295,10 @@ export function finishFlight(db: Db, f: FlightRow, status: 'verified' | 'unverif
   return get<FlightRow>(db, 'SELECT * FROM flights WHERE id = ?', f.id)!;
 }
 
-/** Pay a flight without telemetry (unverified, reduced pay) - but not before it could physically have been flown. */
-export function completeManually(db: Db, f: FlightRow, at: number): FlightRow {
+/** Pay a flight without telemetry (unverified, reduced pay) - with anti-cheat on, not before it could physically have been flown. */
+export function completeManually(db: Db, f: FlightRow, at: number, antiCheat: boolean): FlightRow {
   const waitMs = f.accepted_at + minFlightHours(typeFor(db, f.company_id, f.aircraft_icao), f.distance_nm) * 3_600_000 - at;
-  if (waitMs > 0) throw new HttpError(409, 'too_early', `this flight takes at least ${Math.ceil(waitMs / 60_000)} more minute(s) to fly`);
+  if (antiCheat && waitMs > 0) throw new HttpError(409, 'too_early', `this flight takes at least ${Math.ceil(waitMs / 60_000)} more minute(s) to fly`);
   return finishFlight(db, f, 'unverified', at);
 }
 

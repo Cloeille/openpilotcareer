@@ -29,6 +29,8 @@ export type AppOptions = {
   name?: string;
   version?: string;
   registrationOpen?: boolean;
+  /** Verify flights against cheating (default true). Off: job integrity is still checked, plausibility and client flags are not. */
+  antiCheat?: boolean;
   now?: () => number;
   fetch?: Fetch;
   /** Directory of the built web app to serve at `/` (omit for API only). */
@@ -48,7 +50,7 @@ const idParam = (req: FastifyRequest): number => {
 export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   const { db } = o;
   const now = o.now ?? Date.now;
-  const info: ServerInfo = { name: o.name ?? 'OpenPilotCareer', version: o.version ?? '0.1.0', apiVersion: API_VERSION, registrationOpen: o.registrationOpen ?? true };
+  const info: ServerInfo = { name: o.name ?? 'OpenPilotCareer', version: o.version ?? '0.1.0', apiVersion: API_VERSION, registrationOpen: o.registrationOpen ?? true, antiCheat: o.antiCheat ?? true };
   const authLimiter = new Limiter(AUTH_ATTEMPTS_PER_MINUTE, 60_000, now);
   const app = Fastify({ logger: false, bodyLimit: BODY_LIMIT, trustProxy: o.trustProxy ?? false });
   const doFetch = o.fetch ?? fetch;
@@ -277,10 +279,10 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     return flightView(tx(db, () => closeUnpaid(db, activeFlight(db, idParam(req), p.userId, p.companyId), 'cancelled', now())));
   });
 
-  // Manual completion: no telemetry, so the flight is unverified (reduced pay) and only allowed once the fastest believable flight time has passed.
+  // Manual completion: no telemetry, so the flight is unverified (reduced pay) and, with anti-cheat on, only allowed once the fastest believable flight time has passed.
   app.post('/api/v1/flights/:id/complete', async (req) => {
     const p = user(req);
-    return flightView(tx(db, () => completeManually(db, activeFlight(db, idParam(req), p.userId, p.companyId), now())));
+    return flightView(tx(db, () => completeManually(db, activeFlight(db, idParam(req), p.userId, p.companyId), now(), info.antiCheat)));
   });
 
   // ---- verification ingest (per-player API key). Keys can do exactly two things: list active flights and submit telemetry.
@@ -298,7 +300,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
       const f = activeFlight(db, idParam(req), p.userId);
       const check = checkTelemetry(report, {
         origin: f.origin, destination: f.destination, distanceNm: f.distance_nm, payloadKg: f.payload_kg, aircraftIcao: f.aircraft_icao,
-        aircraft: typeFor(db, f.company_id, f.aircraft_icao), acceptedAt: f.accepted_at, now: at,
+        aircraft: typeFor(db, f.company_id, f.aircraft_icao), acceptedAt: f.accepted_at, now: at, antiCheat: info.antiCheat,
       });
       if (!check.ok) return { verification: 'rejected', reason: check.reason, flight: flightView(closeUnpaid(db, f, 'rejected', at, check.reason, report)) };
       // manual reports are never trusted as verified: reduced pay, no measured values
