@@ -3,6 +3,7 @@
 @import './settings.css';
 @import './motion.css';
 @import './onboarding.css';
+@import './finance.css';
 
 :root {
   color-scheme: dark;

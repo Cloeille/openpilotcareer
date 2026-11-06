@@ -17,6 +17,7 @@ import { jobDetail } from './screens/job.ts';
 import { newCompany } from './screens/new-company.ts';
 import { jobs } from './screens/jobs.ts';
 import { settings } from './screens/settings.ts';
+import { lease } from './screens/lease.ts';
 import { simbrief } from './screens/simbrief.ts';
 import { realism } from './screens/ob-realism.ts';
 
@@ -26,6 +27,7 @@ export const routes: Record<string, ScreenFn> = {
   job: jobDetail,
   simbrief,
   fleet, catalogue, buy, hubs, custom, company: newCompany,
+  lease,
   history, flight: flightDetail, manual,
   leaderboard, duel: duelScreen, 'company-sheet': companySheet, recap,
   settings,

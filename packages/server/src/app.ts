@@ -18,6 +18,7 @@ import {
 import { HttpError, Limiter, NUMERIC_ID, parse } from './http.ts';
 import { registerStart } from './routes-start.ts';
 import { registerLive } from './routes-live.ts';
+import { registerCatalogueStats } from './routes-catalogue-stats.ts';
 import { fetchLatestOfp, type Fetch } from './simbrief.ts';
 import { maintenanceTick } from './finance.ts';
 import { registerFinance } from './routes-finance.ts';
@@ -111,6 +112,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     if (!a) throw new HttpError(404, 'unknown_airport', 'airport not found');
     return a;
   });
+  registerCatalogueStats(app);
   app.get('/api/v1/aircraft-types', async (req) => searchAircraftTypes(String((req.query as { q?: string }).q ?? '')));
   app.get('/api/v1/aircraft-types/:icao', async (req) => {
     const icao = parse(icaoTypeSchema, String((req.params as { icao: string }).icao).toUpperCase());
