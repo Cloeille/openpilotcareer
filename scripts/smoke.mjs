@@ -52,7 +52,7 @@ for (let i = 0; ; i++) {
 }
 
 const info = await call('GET', '/info');
-expect(info.status === 200 && info.body.apiVersion === 1, `server up on ${base}: ${info.body.name} v${info.body.version}, registration ${info.body.registrationOpen ? 'open' : 'closed'}`, info);
+expect(info.status === 200 && info.body.apiVersion === 1 && info.body.antiCheat === true, `server up on ${base}: ${info.body.name} v${info.body.version}, registration ${info.body.registrationOpen ? 'open' : 'closed'}, anti-cheat ${info.body.antiCheat ? 'on' : 'off'}`, info);
 
 // --- account
 const username = `smoke${Date.now().toString(36)}`;

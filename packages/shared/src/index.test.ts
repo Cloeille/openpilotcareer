@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  aircraftPrice, aircraftValue, blockHours, cannotFly, checkTelemetry, customAircraftSchema, deriveAircraft, distanceNm,
+  aircraftPrice, aircraftValue, blockHours, cannotFly, checkTelemetry, customAircraftSchema, infoSchema, deriveAircraft, distanceNm,
   fallbackAircraft, fuelBurnKg, jobPayout, minFlightHours, landingFee, rankFor, resolveCatalogEntry, seasonOf, settle, telemetrySchema,
   MANUAL_PAY_FACTOR, registerSchema,
   type AircraftType, type Telemetry,
@@ -111,7 +111,7 @@ test('seasonOf is the UTC month', () => {
 
 const flight = {
   origin: 'LFPG', destination: 'EGLL', distanceNm: 200, payloadKg: 8000, aircraftIcao: 'A320', aircraft: a320 as AircraftType,
-  acceptedAt: Date.UTC(2026, 10, 4, 10), now: Date.UTC(2026, 10, 4, 14),
+  acceptedAt: Date.UTC(2026, 10, 4, 10), now: Date.UTC(2026, 10, 4, 14), antiCheat: true,
 };
 const report: Telemetry = {
   takeoffAt: '2026-11-04T10:30:00Z', landedAt: '2026-11-04T11:15:00Z', departureIcao: 'LFPG', arrivalIcao: 'EGLL', aircraftIcao: 'A320',
@@ -160,6 +160,28 @@ test('client-raised anti-cheat flags fail the check; an empty list is fine; malf
   assert.ok(telemetrySchema.safeParse({ ...report, flags: ['slew_detected'] }).success);
   assert.ok(!telemetrySchema.safeParse({ ...report, flags: ['Not A Flag'] }).success);
   assert.ok(!telemetrySchema.safeParse({ ...report, flags: 'slew' }).success);
+});
+
+test('with anti-cheat off, flags and implausible numbers pass but the report must still match the job', () => {
+  const off = { ...flight, antiCheat: false };
+  const cheat: Telemetry = {
+    ...report, flags: ['time_acceleration_above_1x'], landedAt: '2026-11-04T11:00:00Z', takeoffAt: '2026-11-04T10:59:00Z',
+    distanceNm: 20, payloadKg: 100, fuelUsedKg: 5, landingFpm: -4000,
+  };
+  const on = checkTelemetry(cheat, flight);
+  assert.equal(on.ok, false);
+  assert.deepEqual(checkTelemetry(cheat, off), { ok: true, blockHours: 1 / 60 });
+  for (const patch of [{ departureIcao: 'LFPO' }, { arrivalIcao: 'EGKK' }, { aircraftIcao: 'C172' }, { landedAt: '2026-11-04T10:00:00Z' },
+    { landedAt: '2026-11-04T15:00:00Z', takeoffAt: '2026-11-04T14:30:00Z' }, { takeoffAt: '2026-11-04T08:00:00Z' }]) {
+    for (const antiCheat of [true, false]) assert.equal(checkTelemetry({ ...cheat, ...patch }, { ...flight, antiCheat }).ok, false, `${JSON.stringify(patch)} antiCheat=${antiCheat}`);
+  }
+});
+
+test('server info: antiCheat defaults to true for servers that predate the setting', () => {
+  const base = { name: 'Old', version: '0.1.0', apiVersion: 1, registrationOpen: true };
+  assert.equal(infoSchema.parse(base).antiCheat, true);
+  assert.equal(infoSchema.parse({ ...base, antiCheat: false }).antiCheat, false);
+  assert.ok(!infoSchema.safeParse({ ...base, antiCheat: 'off' }).success);
 });
 
 test('register schema bounds username and password', () => {

@@ -81,6 +81,12 @@ function connect(f: Flags) {
   return { dir, ...clientFor(server, key) };
 }
 
+/** Pilots should know up front when a server takes their flights at face value. Informational: a failure here is not worth stopping for. */
+async function warnIfAntiCheatOff(client: ServerClient): Promise<void> {
+  const info = await client.info().catch(() => null);
+  if (info && !info.antiCheat) log(`note: ${info.name} has anti-cheat off: your flights are accepted without plausibility checks`);
+}
+
 async function setup(f: Flags): Promise<void> {
   const { server, key } = await askMissing(f);
   const { serverUrl, client } = clientFor(server, key);
@@ -93,7 +99,9 @@ async function setup(f: Flags): Promise<void> {
 }
 
 async function flights(f: Flags): Promise<void> {
-  const list = await connect(f).client.activeFlights();
+  const { client } = connect(f);
+  await warnIfAntiCheatOff(client);
+  const list = await client.activeFlights();
   if (list.length === 0) return log('no active flight: accept a job in the web app first');
   for (const x of list) console.log(`${String(x.id).padStart(6)}  ${x.job.origin} -> ${x.job.destination}  ${x.aircraftIcao.padEnd(5)} ${Math.round(x.job.distanceNm)} nm  ${Math.round(x.job.payloadKg)} kg`);
 }
@@ -102,6 +110,7 @@ async function flights(f: Flags): Promise<void> {
 async function fly(id: string | undefined, f: Flags): Promise<number> {
   if (!id || !/^\d+$/.test(id)) throw new Error('fly needs a flight id (see `opc-bridge flights`)');
   const { client, serverUrl, dir } = connect(f);
+  await warnIfAntiCheatOff(client);
   const flight = (await client.activeFlights()).find((x) => x.id === Number(id));
   if (!flight) throw new Error(`flight ${id} is not among your active flights (see \`opc-bridge flights\`)`);
   const outbox = new Outbox(dir);

@@ -1,5 +1,5 @@
 import type { Me } from '@opc/shared';
-import { api, session, setUnauthorizedHandler } from './api.ts';
+import { api, fetchInfo, session, setUnauthorizedHandler } from './api.ts';
 import { ApiError } from './errors.ts';
 import { loginView } from './login.ts';
 import { pages } from './pages.ts';
@@ -7,6 +7,7 @@ import { h, notify } from './ui.ts';
 
 const root = document.getElementById('app')!;
 let me: Me | null = null;
+let antiCheat = true;
 
 const pageName = (): string => {
   const p = location.hash.slice(1);
@@ -30,6 +31,7 @@ async function loadMe(): Promise<Me> {
     m = await api<Me>('/me');
   }
   session.company = m.company.id;
+  antiCheat = await fetchInfo(session.server).then((i) => i.antiCheat, () => true); // a badge is a courtesy: an unreachable /info must not break the page
   return m;
 }
 
@@ -56,6 +58,7 @@ async function show(): Promise<void> {
     h('a', { href: `#${key}`, 'aria-current': key === name ? 'page' : null }, p.title)));
   root.replaceChildren(
     h('header', { class: 'bar' }, h('span', { class: 'brand' }, 'OpenPilotCareer'), nav,
+      antiCheat ? null : h('span', { class: 'badge active', title: 'This server does not check flights for cheating: time acceleration and the like are allowed.' }, 'Anti-cheat: off'),
       h('span', { class: 'who' }, `${me.username} `, companySwitcher(me), ' ', h('button', { type: 'button', class: 'link', onclick: () => void logout() }, 'Sign out'))),
     main);
   document.title = `${page.title} - OpenPilotCareer`;

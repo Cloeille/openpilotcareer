@@ -40,6 +40,7 @@ For development run the server (`npm run dev:server`) and the Vite dev server (`
 | `OPC_PORT` / `OPC_HOST` | `8080` / `0.0.0.0` | Listen address |
 | `OPC_SERVER_NAME` | `OpenPilotCareer` | Name shown in `/api/v1/info` |
 | `OPC_REGISTRATION` | open | `closed` stops new sign-ups |
+| `OPC_ANTICHEAT` | on | `off` disables anti-cheat for the whole server (casual or private servers, time acceleration allowed). Flights must still match their job; see [docs/telemetry-api.md](docs/telemetry-api.md#turning-anti-cheat-off). Shown to players as `antiCheat` in `/api/v1/info`, the login card, the header and the bridge |
 | `OPC_TRUST_PROXY` | off | `1` behind a reverse proxy, so rate limiting uses the real client IP |
 | `OPC_WEB_ROOT` | `packages/web/dist` | Built web app to serve (skipped when absent: API only) |
 
@@ -50,7 +51,7 @@ Put the server behind HTTPS (a reverse proxy such as Caddy or nginx) before expo
 There is no central account system. **Every server has its own accounts, companies, economy and leaderboard, and identities are not shared across servers**: `alice` on one server is unrelated to `alice` on another, and nothing moves between them except an export you do yourself.
 
 - The web app defaults to the **global server**, set at build time by `VITE_OPC_GLOBAL_URL` (the `npm run build` here builds a self-hosted app whose default is whichever server serves it; `npm run build:static -w @opc/web` builds against the constant `OPC_GLOBAL_URL` in `packages/shared`).
-- At login you can pick **Custom server** and enter any URL. The app checks `GET /api/v1/info` → `{ name, version, apiVersion, registrationOpen }` before sending credentials, and remembers the choice in `localStorage`. Switching server signs you out.
+- At login you can pick **Custom server** and enter any URL. The app checks `GET /api/v1/info` → `{ name, version, apiVersion, registrationOpen, antiCheat }` before sending credentials, and remembers the choice in `localStorage`. Switching server signs you out.
 - The API allows cross-origin requests (`Access-Control-Allow-Origin: *`) so any static host can serve the web app. Authentication is a `Bearer` header, never a cookie.
 
 ## Architecture

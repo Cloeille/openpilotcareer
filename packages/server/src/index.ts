@@ -11,6 +11,7 @@ const app = await buildApp({
   db,
   name: env.OPC_SERVER_NAME ?? 'OpenPilotCareer',
   registrationOpen: env.OPC_REGISTRATION !== 'closed',
+  antiCheat: env.OPC_ANTICHEAT !== 'off',
   trustProxy: env.OPC_TRUST_PROXY === '1',
   ...(existsSync(webRoot) ? { webRoot } : {}),
 });

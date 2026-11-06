@@ -12,15 +12,15 @@ const fixture = (n: string) => fileURLToPath(new URL(`../fixtures/${n}.json`, im
 const KEY = 'opc_testkey-0123456789';
 
 type Ctx = { after: (f: () => void) => void };
-/** A server that knows one active flight (LFPN -> LFAQ, C172, id 7) and answers every report with `verdict`. */
-async function stub(t: Ctx, verdict: { verification: string; reason: string | null }) {
+/** A server that knows one active flight (LFPN -> LFAQ, C172, id 7) and answers every report with `verdict`. `antiCheat` is left out of /info unless given (older servers). */
+async function stub(t: Ctx, verdict: { verification: string; reason: string | null }, antiCheat?: boolean) {
   const seen: { auth: string | undefined; body: unknown }[] = [];
   const s = createServer((req, res) => {
     let raw = '';
     req.on('data', (c) => { raw += c; });
     req.on('end', () => {
       const json = (status: number, body: unknown) => res.writeHead(status, { 'content-type': 'application/json' }).end(JSON.stringify(body));
-      if (req.url === '/api/v1/info') return json(200, { name: 'Stub', version: '0', apiVersion: 1, registrationOpen: true });
+      if (req.url === '/api/v1/info') return json(200, { name: 'Stub', version: '0', apiVersion: 1, registrationOpen: true, ...(antiCheat === undefined ? {} : { antiCheat }) });
       if (req.headers.authorization !== `Bearer ${KEY}`) return json(401, { error: 'unauthorized', message: 'bad key' });
       if (req.url === '/api/v1/flights/active') return json(200, [{ id: 7, aircraftIcao: 'C172', acceptedAt: Date.now() - 60_000, job: { origin: 'LFPN', destination: 'LFAQ', distanceNm: 50, payloadKg: 100 } }]);
       if (req.method === 'POST' && req.url === '/api/v1/flights/7/telemetry-verify') { seen.push({ auth: req.headers.authorization, body: JSON.parse(raw) }); return json(200, verdict); }
@@ -96,4 +96,16 @@ test('setup checks the key against the server before saving it (mode 600); fligh
     p.on('close', () => resolve(out));
   });
   assert.match(again, /7 {2}LFPN -> LFAQ {2}C172/);
+});
+
+test('flights tells the pilot when the server has anti-cheat off, and stays quiet otherwise', async (t) => {
+  const off = await stub(t, { verification: 'verified', reason: null }, false);
+  const r = await run(t, ['flights', '--server', off.url, '--key', KEY]);
+  assert.equal(r.code, 0, r.out);
+  assert.match(r.out, /Stub has anti-cheat off/);
+  assert.match(r.out, /7 {2}LFPN -> LFAQ/);
+  for (const antiCheat of [true, undefined]) {
+    const on = await stub(t, { verification: 'verified', reason: null }, antiCheat);
+    assert.doesNotMatch((await run(t, ['flights', '--server', on.url, '--key', KEY])).out, /anti-cheat/);
+  }
 });

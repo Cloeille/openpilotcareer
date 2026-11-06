@@ -8,7 +8,7 @@ import { harness } from './harness.ts';
 test('GET /info describes the server; unknown routes are 404 JSON', async () => {
   const h = await harness({ name: 'Test Server', registrationOpen: false });
   const r = await h.call('GET', '/api/v1/info');
-  assert.deepEqual(r.body, { name: 'Test Server', version: '0.1.0', apiVersion: 1, registrationOpen: false });
+  assert.deepEqual(r.body, { name: 'Test Server', version: '0.1.0', apiVersion: 1, registrationOpen: false, antiCheat: true });
   assert.equal((await h.call('GET', '/api/v1/nope')).status, 404);
   assert.equal(r.headers['access-control-allow-origin'], '*');
 });
@@ -180,6 +180,41 @@ test('telemetry carrying client anti-cheat flags is rejected with the flags in t
   assert.equal(r.status, 200);
   assert.equal(r.body.verification, 'rejected');
   assert.match(r.body.reason, /flagged.*slew_detected/);
+});
+
+test('a server with anti-cheat off says so, pays flagged and too-fast flights in full, but still ties the report to the job', async () => {
+  const h = await harness({ antiCheat: false });
+  assert.equal((await h.call('GET', '/api/v1/info')).body.antiCheat, false);
+  const { token, me } = await h.register('casual');
+  const key = await h.apiKey(token);
+  const flyable = async () => {
+    const job = await h.flyableJob(token, me.fleet[0].id);
+    const flight = (await h.call('POST', `/api/v1/jobs/${job.id}/accept`, { token, body: { aircraftId: me.fleet[0].id } })).body;
+    return { job, flight, url: `/api/v1/flights/${flight.id}/telemetry-verify` };
+  };
+  const a = await flyable();
+  const cheat = { ...h.goodReport(a.job), flags: ['time_acceleration_above_1x'], fuelUsedKg: 1, landingFpm: -3000 };
+  const ok = await h.call('POST', a.url, { token: key, body: cheat });
+  assert.equal(ok.body.verification, 'verified', ok.text);
+  assert.equal(ok.body.flight.revenue, a.job.payout);
+  const stored = JSON.parse((h.db.prepare('SELECT telemetry FROM flights WHERE id = ?').get(a.flight.id) as { telemetry: string }).telemetry);
+  assert.deepEqual(stored.flags, ['time_acceleration_above_1x'], 'flags are still recorded');
+
+  const b = await flyable();
+  const wrong = await h.call('POST', b.url, { token: key, body: { ...h.goodReport(b.job), arrivalIcao: 'EGKK' } });
+  assert.equal(wrong.body.verification, 'rejected');
+  assert.match(wrong.body.reason, /arrival/);
+});
+
+test('with anti-cheat off a manual completion needs no wait and still pays 60%', async () => {
+  const h = await harness({ antiCheat: false });
+  const { token, me } = await h.register('impatient');
+  const job = await h.flyableJob(token, me.fleet[0].id);
+  const flight = (await h.call('POST', `/api/v1/jobs/${job.id}/accept`, { token, body: { aircraftId: me.fleet[0].id } })).body;
+  const done = await h.call('POST', `/api/v1/flights/${flight.id}/complete`, { token });
+  assert.equal(done.status, 200, done.text);
+  assert.equal(done.body.status, 'unverified');
+  assert.equal(done.body.revenue, Math.round(job.payout * 0.6));
 });
 
 test('manual telemetry is accepted only as unverified with reduced pay', async () => {
