@@ -22,6 +22,8 @@ const statusContract = z.strictObject({
   flags: z.array(z.string()),
   serverUrl: z.string(),
 });
+// What GET /status really serves: the panel contract above plus the fields the web app reads (v2 contract, lot LIVE).
+const servedContract = statusContract.extend({ sim: z.enum(['connected', 'waiting', 'unavailable']), version: z.string().min(1) }).strict();
 
 const flight: FlightInfo = { id: 7, from: 'LFPN', to: 'LFAQ', aircraftIcao: 'C172' };
 const fixture = (n: string) => readSamples(fileURLToPath(new URL(`../fixtures/${n}.json`, import.meta.url)));
@@ -103,7 +105,7 @@ test('status endpoint: 127.0.0.1 only, CORS for the panel, GET /status only, rej
   const res = await fetch(`${url}/status`);
   assert.equal(res.status, 200);
   assert.equal(res.headers.get('access-control-allow-origin'), '*');
-  assert.deepEqual(statusContract.parse(await res.json()), { phase: 'preflight', flight, verification: null, flags: [], serverUrl: 'http://127.0.0.1:1' });
+  assert.deepEqual(servedContract.parse(await res.json()), { phase: 'preflight', flight, verification: null, flags: [], serverUrl: 'http://127.0.0.1:1', sim: 'waiting', version: '0.1.0' });
   assert.equal((await fetch(`${url}/status`, { method: 'OPTIONS' })).status, 204);
   assert.equal((await fetch(`${url}/status`, { method: 'POST' })).status, 404);
   assert.equal((await fetch(`${url}/other`)).status, 404);
@@ -112,4 +114,17 @@ test('status endpoint: 127.0.0.1 only, CORS for the panel, GET /status only, rej
   });
   assert.equal(rebinding, 403);
   await assert.rejects(serveStatus(() => s.status, addr.port), /in use/);
+});
+
+test('status endpoint: sim follows the simulator link and version is the bridge package version', async (t) => {
+  const s = make('http://127.0.0.1:1', tmp(t));
+  let link: 'connected' | 'waiting' | 'unavailable' = 'unavailable';
+  const server = await serveStatus(() => s.status, 0, { sim: () => link, version: '9.9.9' });
+  t.after(() => server.close());
+  const url = `http://127.0.0.1:${(server.address() as { port: number }).port}/status`;
+  assert.deepEqual(await fetch(url).then((r) => r.json()).then((b) => [b.sim, b.version]), ['unavailable', '9.9.9']);
+  link = 'connected';
+  assert.equal((await fetch(url).then((r) => r.json())).sim, 'connected');
+  // the panel contract fields are all still there, unchanged
+  assert.deepEqual(statusContract.parse(await fetch(url).then((r) => r.json()).then(({ sim: _s, version: _v, ...rest }) => rest)).phase, 'preflight');
 });

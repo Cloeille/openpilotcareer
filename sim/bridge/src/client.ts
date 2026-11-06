@@ -1,6 +1,6 @@
 // Client of the OpenPilotCareer API (docs/telemetry-api.md). Every response is validated; the API key is only ever put in
 // the Authorization header, never in a URL, error message or log line.
-import { icaoAirportSchema, icaoTypeSchema, infoSchema, type ServerInfo, type Telemetry } from '@opc/shared';
+import { icaoAirportSchema, icaoTypeSchema, infoSchema, type LiveSample, type ServerInfo, type Telemetry } from '@opc/shared';
 import { z } from 'zod';
 
 /** network/server: worth retrying. refused: the server answered 4xx. protocol: it answered 2xx with a body we cannot trust. */
@@ -18,6 +18,8 @@ export class ApiError extends Error {
 }
 
 const REQUEST_TIMEOUT_MS = 10_000;
+/** Live position is best effort and every sample is replaced by the next one: do not wait long for it. */
+const LIVE_TIMEOUT_MS = 4_000;
 
 /** The part of a flight the bridge needs; the server sends more and zod drops it. */
 export const activeFlightSchema = z.object({
@@ -49,8 +51,11 @@ export class ServerClient {
   activeFlights = (): Promise<ActiveFlight[]> => this.#call('GET', '/api/v1/flights/active', undefined, z.array(activeFlightSchema), true);
   verify = (flightId: number, report: Telemetry): Promise<VerifyResponse> =>
     this.#call('POST', `/api/v1/flights/${flightId}/telemetry-verify`, report, verifyResponseSchema, true);
+  /** POST /flights/:id/live (204). Throws ApiError like every call; 429 means "too soon", the caller just drops the sample. */
+  postLive = (flightId: number, sample: LiveSample): Promise<null> =>
+    this.#call('POST', `/api/v1/flights/${flightId}/live`, sample, z.null(), true, LIVE_TIMEOUT_MS);
 
-  async #call<T>(method: string, path: string, body: unknown, schema: z.ZodType<T>, auth: boolean): Promise<T> {
+  async #call<T>(method: string, path: string, body: unknown, schema: z.ZodType<T>, auth: boolean, timeoutMs: number = REQUEST_TIMEOUT_MS): Promise<T> {
     let res: Response;
     let text: string;
     try {
@@ -58,7 +63,7 @@ export class ServerClient {
         method,
         headers: { ...(auth ? { authorization: `Bearer ${this.#key}` } : {}), ...(body !== undefined ? { 'content-type': 'application/json' } : {}) },
         ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        signal: AbortSignal.timeout(timeoutMs),
       });
       text = await res.text();
     } catch (e) {
