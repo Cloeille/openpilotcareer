@@ -105,7 +105,7 @@
     bar.appendChild(left);
 
     var right = el('div', 'opc-sb-right');
-    right.appendChild(el('span', 'opc-clock opc-mono', h.clock));
+    if (h.clock !== null) right.appendChild(el('span', 'opc-clock opc-mono', h.clock));
     var lang = el('button', 'opc-lang', vm.lang === 'fr' ? 'EN' : 'FR');
     lang.type = 'button';
     lang.setAttribute('data-focus', 'lang');
@@ -364,6 +364,7 @@
         if (!vm.pages[tab] && tab !== 'flight') tab = 'flight';
         frag.appendChild(renderTabs(vm, tab, selectTab));
         main.id = 'opc-panel';
+        if (tab !== 'flight') main.className = 'opc-body opc-body-page';
         main.setAttribute('role', 'tabpanel');
         main.setAttribute('aria-labelledby', 'opc-tab-' + tab);
         main.appendChild(tab === 'flight' ? renderFlightBody(vm.view) : renderPage(vm.pages[tab]));

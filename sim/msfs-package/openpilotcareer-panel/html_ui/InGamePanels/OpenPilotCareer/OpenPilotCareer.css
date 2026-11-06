@@ -66,7 +66,8 @@
 .opc .opc-bridge { display: flex; align-items: center; margin-left: 8px; }
 .opc .opc-dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: #5CC98A; }
 .opc .opc-bridge[data-tone='wait'] .opc-dot { background: #E9A046; }
-.opc .opc-bridge[data-tone='off'] .opc-dot { background: #E5625B; }
+.opc .opc-bridge[data-tone='off'] .opc-dot { background: #E9A046; }
+.opc .opc-bridge[data-tone='bad'] .opc-dot { background: #E5625B; }
 .opc .opc-bridge-text { margin-left: 8px; color: #A6A8AB; font-size: 12px; }
 .opc .opc-sb-right > * + * { margin-left: 10px; }
 .opc .opc-clock { font-size: 11px; color: #ECEAE5; }
@@ -84,6 +85,7 @@
 /* ---- body ---- */
 .opc .opc-body { flex: 1 1 auto; min-height: 0; padding: 30px 36px; overflow-y: auto; }
 .opc .opc-body > * + * { margin-top: 26px; }
+.opc .opc-body-page { padding-top: 20px; padding-bottom: 20px; }
 .opc .opc-status { display: flex; align-items: center; color: #A6A8AB; font-size: 15px; font-weight: 500; }
 .opc .opc-status > * + * { margin-left: 8px; }
 .opc .opc-live-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: #D27AE4; }
@@ -138,9 +140,9 @@
 .opc .opc-gain[data-tone='ok'] .opc-gain-value { color: #5CC98A; }
 
 /* details tabs (Job, SimBrief, Cabin) */
-.opc .opc-section + .opc-section { margin-top: 26px; }
+.opc .opc-section + .opc-section { margin-top: 20px; }
 .opc .opc-h2 { margin-bottom: 10px; color: #7C7F83; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
-.opc .opc-rows > div { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #1A1C1F; }
+.opc .opc-rows > div { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #1A1C1F; }
 .opc .opc-rows dt { flex: none; margin-right: 24px; color: #A6A8AB; font-size: 14px; }
 .opc .opc-rows dd { min-width: 0; font-size: 14px; text-align: right; word-wrap: break-word; }
 .opc .opc-rows dd.opc-mono { font-size: 12px; }

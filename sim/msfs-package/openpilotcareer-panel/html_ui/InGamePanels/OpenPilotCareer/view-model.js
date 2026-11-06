@@ -416,7 +416,7 @@
       lang: lang,
       mode: connection,
       brand: BRAND,
-      header: { brand: BRAND, bridgeLabel: label, bridgeSr: label, bridgeTone: connection === 'connecting' ? 'wait' : 'off', clock: DASH },
+      header: { brand: BRAND, bridgeLabel: label, bridgeSr: label, bridgeTone: connection === 'connecting' ? 'wait' : connection === 'offline' ? 'off' : 'bad', clock: null },
       job: null,
       phase: null,
       verification: null,
