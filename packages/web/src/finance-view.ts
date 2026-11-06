@@ -95,7 +95,7 @@ export const loanMonths = (loans: LoanQuote[], downPct: number): number[] => [..
 export type LoanBreakdown = { down: number; financed: number; monthly: number; months: number; downPct: number; balanceAfter: number; affordable: boolean; interest: number };
 export function loanBreakdown(price: number, loan: LoanQuote, balance: number): LoanBreakdown {
   const down = downPayment(price, loan);
-  return { down, financed: price - down, monthly: loan.monthly, months: loan.months, downPct: loan.downPct, balanceAfter: balance - down, affordable: down <= balance, interest: Math.max(0, loan.total - (price - down)) };
+  return { down, financed: price - down, monthly: loan.monthly, months: loan.months, downPct: loan.downPct, balanceAfter: balance - down, affordable: down <= balance, interest: Math.max(0, loan.monthly * loan.months - (price - down)) };
 }
 
 export type FundingOption = { kind: 'loan'; loan: LoanBreakdown } | { kind: 'lease'; rent: number; deposit: number; balanceAfter: number };

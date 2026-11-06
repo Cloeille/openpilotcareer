@@ -16,6 +16,7 @@ import {
   deleteCustomAircraft, finishFlight, flightView, flightsOf, importJob, leaderboard, meView, openBoard, pendingImports, renameCompany, transactionsOf, typeFor,
 } from './game.ts';
 import { HttpError, Limiter, NUMERIC_ID, parse } from './http.ts';
+import { registerCatalogueStats } from './routes-catalogue-stats.ts';
 import { fetchLatestOfp, type Fetch } from './simbrief.ts';
 
 const MAX_API_KEYS = 10;
@@ -96,6 +97,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     if (!a) throw new HttpError(404, 'unknown_airport', 'airport not found');
     return a;
   });
+  registerCatalogueStats(app);
   app.get('/api/v1/aircraft-types', async (req) => searchAircraftTypes(String((req.query as { q?: string }).q ?? '')));
   app.get('/api/v1/aircraft-types/:icao', async (req) => {
     const icao = parse(icaoTypeSchema, String((req.params as { icao: string }).icao).toUpperCase());

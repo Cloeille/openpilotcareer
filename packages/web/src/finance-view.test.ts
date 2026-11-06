@@ -99,7 +99,7 @@ test('loan: 20 % of 4 200 000 down, as in the mockup', () => {
   assert.equal(b.financed, 3_360_000);
   assert.equal(b.balanceAfter, 444_560);
   assert.equal(b.affordable, true);
-  assert.equal(b.interest, 4_100_000 - 3_360_000);
+  assert.equal(b.interest, 47_450 * 84 - 3_360_000);
   assert.equal(loanBreakdown(4_200_000, loans[1]!, 100_000).affordable, false);
 });
 

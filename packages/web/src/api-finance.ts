@@ -4,6 +4,8 @@ import { ApiError } from './errors.ts';
 
 /** Typed client for the FINANCE section of docs/v2-contract.md. The types mirror the contract: they move to `@opc/shared` once lot be-finance is merged. */
 
+/** Annual loan rate of the contract (LOAN_RATE in shared/finance.ts once lot be-finance is merged). */
+export const LOAN_RATE = 0.069;
 export const LOAN_MONTHS = { min: 36, max: 120 } as const;
 export const LOAN_DOWN_PCT = { min: 20, max: 50 } as const;
 

@@ -1,6 +1,7 @@
 @import './design/tokens.css';
 @import './fonts.css';
 @import './legacy.css';
+@import './finance.css';
 
 :root {
   color-scheme: dark;
