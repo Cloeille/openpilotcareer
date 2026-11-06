@@ -4,19 +4,22 @@ import { createInterface } from 'node:readline/promises';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { Writable } from 'node:stream';
 import { parseArgs } from 'node:util';
-import { ServerClient } from './client.ts';
+import { ApiError, ServerClient, type ActiveFlight } from './client.ts';
 import { configSchema, defaultConfigDir, loadConfig, normalizeServerUrl, saveConfig, sendsKeyInClear } from './config.ts';
 import { readSamples, rebaseToStart } from './fixture.ts';
 import { flushOutbox } from './deliver.ts';
 import { LiveReporter } from './live.ts';
 import { Outbox } from './outbox.ts';
-import { Session } from './session.ts';
+import { Session, type Status } from './session.ts';
 import { watchSim, type SimLink } from './simconnect.ts';
 import { BRIDGE_VERSION, serveStatus, STATUS_PORT } from './status.ts';
 import { FlightTracker } from './tracker.ts';
 
-const USAGE = `usage: opc-bridge <command>
+const USAGE = `usage: opc-bridge [command]
 
+  (no command)                        double click / launched by MSFS: first run asks for your server and API key, then follows MSFS
+                                      like \`fly\` for your only active flight (the one accepted last if there are several). With no
+                                      active flight it checks every 15 s until you accept a job in the web app.
   setup [--server URL] [--key KEY]    save the server and your API key (asked for what is missing; the key is typed hidden)
   flights                             list the active flights you can report on
   fly <flightId>                      follow MSFS (Windows, SimConnect) and report that flight when you park; leave it running.
@@ -107,21 +110,29 @@ async function flights(f: Flags): Promise<void> {
   for (const x of list) console.log(`${String(x.id).padStart(6)}  ${x.job.origin} -> ${x.job.destination}  ${x.aircraftIcao.padEnd(5)} ${Math.round(x.job.distanceNm)} nm  ${Math.round(x.job.payloadKg)} kg`);
 }
 
+type Conn = ReturnType<typeof connect>;
+const statusPort = (): number => Number(process.env.OPC_STATUS_PORT) || STATUS_PORT; // OPC_STATUS_PORT: tests only
+
 /** Runs until Ctrl+C: the status endpoint stays up after the verdict so the panel can keep showing it. */
 async function fly(id: string | undefined, f: Flags): Promise<number> {
   if (!id || !/^\d+$/.test(id)) throw new Error('fly needs a flight id (see `opc-bridge flights`)');
-  const { client, serverUrl, dir } = connect(f);
-  await warnIfAntiCheatOff(client);
-  const flight = (await client.activeFlights()).find((x) => x.id === Number(id));
+  const conn = connect(f);
+  await warnIfAntiCheatOff(conn.client);
+  const flight = (await conn.client.activeFlights()).find((x) => x.id === Number(id));
   if (!flight) throw new Error(`flight ${id} is not among your active flights (see \`opc-bridge flights\`)`);
+  return follow(flight, conn);
+}
+
+async function follow(flight: ActiveFlight, { client, serverUrl, dir }: Conn): Promise<number> {
   const outbox = new Outbox(dir);
   const session = new Session({
     flight: { id: flight.id, from: flight.job.origin, to: flight.job.destination, aircraftIcao: flight.aircraftIcao },
     serverUrl, client, outbox, log, live: new LiveReporter({ client, flightId: flight.id, log }),
   });
   let sim: SimLink = 'waiting';
-  const status = await serveStatus(() => session.status, STATUS_PORT, { sim: () => sim, version: BRIDGE_VERSION });
-  log(`flight ${flight.id}: ${flight.job.origin} -> ${flight.job.destination} in a ${flight.aircraftIcao}; status at http://127.0.0.1:${STATUS_PORT}/status`);
+  const port = statusPort();
+  const status = await serveStatus(() => session.status, port, { sim: () => sim, version: BRIDGE_VERSION });
+  log(`flight ${flight.id}: ${flight.job.origin} -> ${flight.job.destination} in a ${flight.aircraftIcao}; status at http://127.0.0.1:${port}/status`);
   // reports an earlier run could not deliver (sim closed while the server was down) go out in the background
   void flushOutbox(client, outbox, serverUrl, { onRetry: (e) => log(`earlier report: ${e.message}`) }).then((ds) => ds.forEach((d) => log(`earlier report: ${d.state}`)));
   const stop = await watchSim((s) => session.feed(s), { log, onState: (state) => { sim = state; } });
@@ -130,6 +141,47 @@ async function fly(id: string | undefined, f: Flags): Promise<number> {
   stop();
   status.close();
   return 0;
+}
+
+/** The flight to follow when nobody said which: the only active one, else the one accepted last (highest id on a tie). */
+const pickFlight = (list: ActiveFlight[]): ActiveFlight | undefined =>
+  list.reduce<ActiveFlight | undefined>((best, x) => (!best || x.acceptedAt > best.acceptedAt || (x.acceptedAt === best.acceptedAt && x.id > best.id) ? x : best), undefined);
+
+/**
+ * No command (double click, or MSFS starting the exe from exe.xml). Never set up: ask for the server and key first.
+ * Then wait for an active flight (the panel meanwhile shows "no job") and follow it like `fly`.
+ */
+async function auto(f: Flags): Promise<number> {
+  const configured = (f.server && (f.key ?? process.env.OPC_API_KEY)) || loadConfig(defaultConfigDir()) !== null;
+  if (!configured) {
+    await setup(f);
+    f = {}; // the saved setup is used from here on
+  }
+  const conn = connect(f);
+  await warnIfAntiCheatOff(conn.client);
+  const quit = new AbortController();
+  process.once('SIGINT', () => quit.abort());
+  const pollMs = Number(process.env.OPC_POLL_MS) || 15_000; // OPC_POLL_MS: tests only
+  let idle: Awaited<ReturnType<typeof serveStatus>> | null = null;
+  let flight = pickFlight(await conn.client.activeFlights());
+  while (!flight) {
+    idle ??= await serveStatus((): Status => ({ phase: 'parked', flight: null, verification: null, flags: [], serverUrl: conn.serverUrl }), statusPort());
+    log('waiting for a job accepted in the web app');
+    try {
+      await sleep(pollMs, undefined, { signal: quit.signal });
+    } catch {
+      idle.close();
+      return 0; // Ctrl+C
+    }
+    try {
+      flight = pickFlight(await conn.client.activeFlights());
+    } catch (e) {
+      if (!(e instanceof ApiError) || !e.retryable) throw e; // a refused key will not get better by waiting
+      log(`${(e as Error).message}; trying again`);
+    }
+  }
+  if (idle) { idle.closeAllConnections(); await new Promise((r) => idle!.close(r)); }
+  return follow(flight, conn);
 }
 
 /** Exit code: 0 verified, 2 rejected, 1 nothing was reported (or it is still queued). */
@@ -179,10 +231,11 @@ async function main(argv: string[]): Promise<number> {
     options: { server: { type: 'string' }, key: { type: 'string' }, flight: { type: 'string' }, speed: { type: 'string' }, help: { type: 'boolean', short: 'h' } },
   });
   const [command, arg, ...extra] = positionals;
-  if (values.help || !command || extra.length > 0) {
+  if (values.help || extra.length > 0) {
     console.log(USAGE);
-    return values.help || !command ? 0 : 1;
+    return values.help ? 0 : 1;
   }
+  if (!command) return auto(values);
   switch (command) {
     case 'setup': await setup(values); return 0;
     case 'flights': await flights(values); return 0;
@@ -194,7 +247,14 @@ async function main(argv: string[]): Promise<number> {
   }
 }
 
-main(process.argv.slice(2)).then((code) => { process.exitCode = code; }, (e: unknown) => {
+const args = process.argv.slice(2);
+main(args).then((code) => { process.exitCode = code; }, async (e: unknown) => {
   console.error(`opc-bridge: ${process.env.OPC_DEBUG ? ((e as Error).stack ?? e) : (e as Error).message}`);
   process.exitCode = 1;
+  // double-clicked in a console window: keep it open so the message can be read
+  if (args.length === 0 && process.stdin.isTTY && process.stdout.isTTY) {
+    const rl = createInterface({ input: process.stdin, output: process.stdout });
+    await rl.question('Press Enter to close ');
+    rl.close();
+  }
 });

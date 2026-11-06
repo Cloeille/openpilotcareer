@@ -22,6 +22,7 @@ import { fetchLatestOfp, type Fetch } from './simbrief.ts';
 import { maintenanceTick } from './finance.ts';
 import { registerFinance } from './routes-finance.ts';
 import { onboardingOf, toleratedFlags } from './start.ts';
+import { registerDownloads } from './routes-downloads.ts';
 
 const MAX_API_KEYS = 10;
 const AUTH_ATTEMPTS_PER_MINUTE = 20;
@@ -44,6 +45,8 @@ export type AppOptions = {
   ai?: boolean;
   /** Behind a reverse proxy: take the client IP (rate limiting) from X-Forwarded-For. */
   trustProxy?: boolean;
+  /** Directory holding the Windows bridge exe and the panel zip, served at /downloads/:file (omit: 404). */
+  downloads?: string;
 };
 
 const idParam = (req: FastifyRequest): number => {
@@ -93,6 +96,8 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     o.webRoot && req.method === 'GET' && !req.url.startsWith('/api/')
       ? reply.sendFile('index.html')
       : reply.status(404).send({ error: 'not_found', message: 'not found' }));
+
+  registerDownloads(app, { downloads: o.downloads });
 
   const user = (req: FastifyRequest): Principal & { token: string } => sessionAuth(db, req, now());
   // Account-level routes work for a player who has not founded a company yet (v2 onboarding); company-scoped ones answer 409 no_company.

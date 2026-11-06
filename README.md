@@ -43,6 +43,7 @@ For development run the server (`npm run dev:server`) and the Vite dev server (`
 | `OPC_ANTICHEAT` | on | `off` disables anti-cheat for the whole server (casual or private servers, time acceleration allowed). Flights must still match their job; see [docs/telemetry-api.md](docs/telemetry-api.md#turning-anti-cheat-off). Shown to players as `antiCheat` in `/api/v1/info`, the login card, the header and the bridge |
 | `OPC_TRUST_PROXY` | off | `1` behind a reverse proxy, so rate limiting uses the real client IP |
 | `OPC_WEB_ROOT` | `packages/web/dist` | Built web app to serve (skipped when absent: API only) |
+| `OPC_DOWNLOADS` | unset | Directory served at `/downloads/:file`, only `opc-bridge-win-x64.exe` and `openpilotcareer-panel.zip` (404 otherwise). Build the exe with `npm run build:win -w @opc/bridge`; install guide: [docs/install-windows.md](docs/install-windows.md) |
 
 Put the server behind HTTPS (a reverse proxy such as Caddy or nginx) before exposing it: logins and API keys are bearer tokens.
 
