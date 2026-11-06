@@ -56,7 +56,7 @@ export function obError(e: unknown): string {
     const own = messageFor(`ob.err.${e.code}`);
     if (own) return t(own);
   }
-  return errorText(e);
+  return e instanceof Error && !(e instanceof ApiError) ? e.message : errorText(e);
 }
 
 function serverName(): string {

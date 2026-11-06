@@ -77,13 +77,16 @@
 .ob-codes input { font-weight: 700; }
 .ob-hint-ok { color: var(--success); }
 .ob-hint-bad { color: var(--danger); }
-.input small.ob-hint-ok, .input small.ob-hint-bad { font-size: 12px; }
+.input small.ob-hint-ok { color: var(--success); }
+.input small.ob-hint-bad { color: var(--danger); }
+.input-field .ob-field-state.ok .icon { color: var(--success); }
+.input-field .ob-field-state.bad .icon { color: var(--danger); }
 .ob-field-state { display: grid; place-items: center; flex: none; }
 .ob-field-state.ok { color: var(--success); }
 .ob-field-state.bad { color: var(--danger); }
 .ob-final { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--text-secondary); }
 .ob-final .icon { color: var(--text-tertiary); flex: none; }
-.ob-livery { display: flex; flex-direction: column; gap: 10px; padding-top: 6px; border: 0; margin: 0; min-width: 0; }
+.ob-livery { display: flex; flex-direction: column; gap: 10px; padding: 6px 0 0; border: 0; margin: 0; min-width: 0; }
 .ob-livery legend { padding: 0; font-size: 13px; font-weight: 500; color: var(--text-secondary); float: left; width: 100%; margin-bottom: 10px; }
 .ob-livery legend + * { clear: both; }
 .ob-livery legend span { color: var(--text-tertiary); font-weight: 400; }
@@ -125,11 +128,14 @@
 .ob-impl-fact .s { font-size: 13px; color: var(--text-secondary); }
 
 /* 3a: leasing */
-.ob-offers { flex: 1; min-width: 0; }
+.ob-offers { flex: 1; min-width: 0; align-self: stretch; }
 .ob-offers .panel-head { padding: 22px 26px 6px; }
 .ob-offers .panel-head h2 { font-size: 20px; }
 .ob-offers .panel-body { padding: 10px 26px 22px; gap: 0; }
 .ob-thead, .ob-offer-row { display: flex; align-items: center; gap: 16px; padding: 0 16px; }
+.ob-thead > *, .ob-offer-row > * { min-width: 0; }
+.ob-thead .dotspace { width: 18px; flex: none; }
+.c-name { overflow: hidden; }
 .ob-thead { padding-bottom: 10px; font-size: 13px; color: var(--text-tertiary); }
 .ob-offer { position: relative; border-radius: 4px; cursor: pointer; border-top: 1px solid var(--border); }
 .ob-offer:first-child { border-top-color: transparent; }
@@ -143,27 +149,27 @@
 .ob-offer:has(input:checked) .ob-radio-dot { border-color: var(--text-primary); }
 .ob-offer:has(input:checked) .ob-radio-dot::after { display: block; }
 .c-name { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-.c-name .n { display: flex; gap: 10px; align-items: baseline; }
-.c-name .n b { font: 600 19px var(--ui); }
+.c-name .n { display: flex; gap: 10px; align-items: baseline; flex-wrap: nowrap; }
+.c-name .n b { font: 600 19px var(--ui); white-space: nowrap; }
 .c-name .n span { font-size: 12px; color: var(--text-tertiary); }
-.c-name small { font-size: 13px; color: var(--text-tertiary); }
-.c-rent { width: 128px; font-size: 19px; font-weight: 500; flex: none; }
-.c-dep { width: 112px; flex: none; }
+.c-name small { font-size: 13px; color: var(--text-tertiary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.c-rent { width: 128px; font-size: 19px; font-weight: 500; flex: none; white-space: nowrap; }
+.c-dep { width: 112px; flex: none; white-space: nowrap; }
 .c-min { width: 88px; flex: none; }
 .c-seats { width: 60px; flex: none; }
 .c-range { width: 84px; flex: none; }
 .c-maint { width: 112px; flex: none; }
-.ob-offer .c-dep, .ob-offer .c-min, .ob-offer .c-seats, .ob-offer .c-range, .ob-offer .c-maint { font-size: 15px; color: var(--text-secondary); }
+.ob-offer .c-dep, .ob-offer .c-min, .ob-offer .c-seats, .ob-offer .c-range, .ob-offer .c-maint { font-size: 15px; color: var(--text-secondary); white-space: nowrap; }
 .ob-offer .c-maint.inc { color: var(--text-primary); }
 .ob-terms { font-size: 13px; line-height: 1.4; color: var(--text-tertiary); margin-top: auto; padding-top: 16px; }
-.ob-recap { width: 480px; flex: none; }
-.ob-recap .panel-body { padding: 26px 28px; gap: 22px; }
+.ob-recap { width: 452px; flex: none; }
+.ob-recap .panel-body { padding: 22px 28px; gap: 16px; }
 .ob-rent-name { font-size: 14px; color: var(--text-secondary); }
 .ob-rent { display: flex; align-items: flex-end; gap: 8px; margin-top: 6px; }
-.ob-rent b { font: 600 44px/1 var(--display); }
+.ob-rent b { font: 600 40px/1 var(--display); }
 .ob-rent span { font-size: 16px; color: var(--text-secondary); padding-bottom: 3px; }
 .ob-rent-terms { font-size: 14px; color: var(--text-tertiary); margin-top: 6px; }
-.ob-capital { display: flex; flex-direction: column; gap: 12px; }
+.ob-capital { display: flex; flex-direction: column; gap: 10px; }
 .ob-capital-head { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
 .ob-capital-head span { color: var(--text-secondary); }
 .ob-capital-head b { font-size: 15px; font-weight: 500; }
@@ -172,7 +178,7 @@
 .ob-bar .dep { background: var(--text-secondary); }
 .ob-bar .first { background: var(--text-primary); }
 .ob-bar .rest { background: var(--border-strong); }
-.ob-legend { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
+.ob-legend { display: flex; flex-direction: column; gap: 7px; padding-top: 2px; }
 .ob-legend-row { display: flex; align-items: center; gap: 10px; font-size: 14px; }
 .ob-legend-row i { width: 8px; height: 8px; border-radius: 1px; flex: none; }
 .ob-legend-row .t { flex: 1; display: flex; gap: 6px; align-items: baseline; min-width: 0; }
@@ -355,3 +361,11 @@
 .ob-loading { display: flex; align-items: center; gap: 10px; color: var(--text-secondary); font-size: 14px; padding: 8px 0; }
 .ob-empty { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; padding: 8px 0; color: var(--text-secondary); font-size: 14px; line-height: 1.45; }
 @media (prefers-reduced-motion: no-preference) { .ob-loading .icon, .ob-state-icon .spin, .ob-check.wait .icon { animation: spin 1.2s linear infinite; } }
+.ob-foot-left .btn.ghost:first-child { margin-left: -4px; }
+
+.ob-legend-row i.sw-dep { background: var(--text-secondary); }
+.ob-legend-row i.sw-first { background: var(--text-primary); }
+.ob-legend-row i.sw-rest { background: var(--border-strong); }
+.ob-thead .c-rent.hd { font-size: 13px; font-weight: 400; }
+.ob-recap { align-self: stretch; }
+.ob-recap .panel-body { justify-content: space-between; }

@@ -69,7 +69,7 @@ export function step1(w: Wizard): StepResult {
 // ------------------------------------------------------------------ step 2: compagnie & hub
 
 const sizeKey = { large: 'ob.s2.sizeLarge', medium: 'ob.s2.sizeMedium', small: 'ob.s2.sizeSmall' } as const;
-const NOTE_KEYS: Record<string, Key> = { balanced: 'ob.s2.note.balanced', most_jobs: 'ob.s2.note.most_jobs', cheapest: 'ob.s2.note.cheapest', least_competition: 'ob.s2.note.least_competition' };
+const NOTE_KEYS: Record<string, Key> = { match: 'ob.s2.note.match', balanced: 'ob.s2.note.balanced', most_jobs: 'ob.s2.note.most_jobs', cheapest: 'ob.s2.note.cheapest', least_competition: 'ob.s2.note.least_competition' };
 const noteOf = (s: HubSuggestion): string => (s.noteKey && NOTE_KEYS[s.noteKey] ? t(NOTE_KEYS[s.noteKey]!) : s.note);
 
 function implications(s: HubSuggestion | null): HTMLElement {
@@ -83,6 +83,7 @@ function implications(s: HubSuggestion | null): HTMLElement {
       fact(t('ob.s2.rivals'), tp('ob.s2.rivalsV', s.aiCompaniesBased), t('ob.s2.rivalsS', { icao: s.icao }))));
 }
 
+const SUGGESTED = 3;
 type CodeState = 'idle' | 'checking' | 'free' | 'taken' | 'unknown';
 
 export async function step2(w: Wizard): Promise<StepResult> {
@@ -197,6 +198,7 @@ export async function step2(w: Wizard): Promise<StepResult> {
     if (!chosen && f.hub) {
       try { chosen = (await hubSuggestions(mode, f.hub)).find((s) => s.icao === f.hub) ?? null; } catch { /* the hub just stays unexplained */ }
     }
+    if (!q.trim()) results = results.slice(0, SUGGESTED); // the mockup's three curated suggestions; a search shows up to six
     if (!chosen && !q && !locked && results[0]) { chosen = results[0]; f.hub = results[0].icao; }
     paintList(q.trim() !== '');
   };
@@ -224,10 +226,8 @@ export async function step2(w: Wizard): Promise<StepResult> {
     }
     w.go(3);
   };
-  const cont = button(t(mode === 'airliner' ? 'ob.s2.continue' : 'ob.s2.continueHardcore'), { variant: 'primary', key: t('key.enter'), onclick: (e) => void guarded(e.currentTarget as HTMLButtonElement, error, proceed).then(() => undefined) });
-  const guardMsg = async (b: HTMLButtonElement): Promise<void> => guarded(b, error, proceed);
-  cont.onclick = (e) => void guardMsg(e.currentTarget as HTMLButtonElement);
-  const form = h('form', { class: 'ob-page', novalidate: true, onsubmit: (e: Event) => { e.preventDefault(); void guardMsg(cont); } },
+  const cont = button(t(mode === 'airliner' ? 'ob.s2.continue' : 'ob.s2.continueHardcore'), { variant: 'primary', key: t('key.enter'), onclick: (e) => void guarded(e.currentTarget as HTMLButtonElement, error, proceed) });
+  const form = h('form', { class: 'ob-page', novalidate: true, oninput: () => { error.textContent = ''; }, onsubmit: (e: Event) => { e.preventDefault(); void guarded(cont, error, proceed); } },
     titleArea(t(mode === 'airliner' ? 'ob.s2.overAirliner' : 'ob.s2.overHardcore'), t('ob.s2.title'), t('ob.s2.sub')),
     h('div', { class: 'ob-main' }, companyPanel, hubPanel),
     h('div', { class: 'ob-foot' }, h('div', { class: 'ob-foot-left' }, h('span', { class: 'ob-note' }, locked ? t('ob.s2.created') : t('ob.s2.more')), error), cont));

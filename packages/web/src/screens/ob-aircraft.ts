@@ -54,7 +54,7 @@ export async function step3a(w: Wizard): Promise<StepResult> {
   }));
   let sel = 0;
   const error = h('p', { class: 'ob-error', role: 'alert' });
-  const recapHost = h('div');
+  const recapHost = h('div', { style: 'display:contents' });
   const leaseBtnHost = h('div');
   const year = new Date().getUTCFullYear();
 
@@ -64,7 +64,7 @@ export async function step3a(w: Wizard): Promise<StepResult> {
     const gain = r.type ? typicalGain(r.type) : null;
     const rc = leaseRecap(capital, r.offer, r.rent, gain);
     const legend = (cls: string, label: string, sub: string, value: number, short = false): HTMLElement =>
-      h('div', { class: `ob-legend-row${short ? ' short' : ''}` }, h('i', { class: cls, style: cls === 'dep' ? 'background:var(--text-secondary)' : cls === 'first' ? 'background:var(--text-primary)' : 'background:var(--border-strong)' }),
+      h('div', { class: `ob-legend-row${short ? ' short' : ''}` }, h('i', { class: `sw-${cls}` }),
         h('span', { class: 't' }, label, h('small', null, sub)), h('b', null, fm.money(value)));
     const pct = (n: number): string => `${Math.round(n * 1000) / 10}%`;
     recapHost.replaceChildren(panel({ title: `${r.offer.typeName} · ${r.offer.lessor}`, headless: true, class: 'ob-recap' },
@@ -116,13 +116,13 @@ export async function step3a(w: Wizard): Promise<StepResult> {
   const table = rows.length === 0
     ? h('div', { class: 'ob-empty' }, h('p', null, loadError ? loadError : t('ob.s3a.none')), button(t('ob.retry'), { variant: 'secondary', onclick: () => w.go(3) }))
     : h('div', { class: 'col', style: 'gap:0;flex:1;min-height:0' },
-      h('div', { class: 'ob-thead', 'aria-hidden': 'true' }, h('span', { style: 'width:18px' }), h('span', { class: 'c-name' }, t('ob.s3a.cAircraft')), h('span', { class: 'c-rent', style: 'font-size:13px;font-weight:400' }, t('ob.s3a.cRent')),
+      h('div', { class: 'ob-thead', 'aria-hidden': 'true' }, h('span', { class: 'dotspace' }), h('span', { class: 'c-name' }, t('ob.s3a.cAircraft')), h('span', { class: 'c-rent hd' }, t('ob.s3a.cRent')),
         h('span', { class: 'c-dep' }, t('ob.s3a.cDeposit')), h('span', { class: 'c-min' }, t('ob.s3a.cMin')), h('span', { class: 'c-seats' }, t('ob.s3a.cSeats')), h('span', { class: 'c-range' }, t('ob.s3a.cRange')), h('span', { class: 'c-maint' }, t('ob.s3a.cMaint'))),
       h('div', { class: 'ob-offer-list', role: 'radiogroup', 'aria-label': t('ob.s3a.panel') }, rows.map(offerRow)),
       h('p', { class: 'ob-terms' }, t('ob.s3a.terms')));
-  const delivery = rows[0]?.offer.deliveryHours ?? 48;
+  const delivery = rows[0]?.offer.deliveryHours ?? 0;
   const view = h('div', { class: 'ob-page' },
-    titleArea(overText, t('ob.s3a.title'), t('ob.s3a.sub', { n: rows.length || 3, h: delivery })),
+    titleArea(overText, t('ob.s3a.title'), delivery > 0 ? t('ob.s3a.sub', { n: rows.length || 3, h: delivery }) : t('ob.s3a.subNoDelay', { n: rows.length || 3 })),
     h('div', { class: 'ob-main' },
       panel({ title: t('ob.s3a.panel'), action: tp('ob.s3a.panelSub', rows.length, { year }), id: 'ob-offers', class: 'ob-offers' }, table),
       recapHost),

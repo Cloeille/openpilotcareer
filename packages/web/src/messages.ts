@@ -522,6 +522,7 @@ const table = {
   'man.gap': ['Declaring a free-form flight (route, times, fuel) is not supported by the server: only an accepted job can be completed.', 'Déclarer un vol libre (route, horaires, carburant) n’est pas géré par le serveur : seul un job accepté peut être clos.'],
   // @@ units append below
   // ---- fe-onboarding
+  'ob.s2.note.match': ['Matches your search', 'Correspond à ta recherche'],
   'ob.s2.note.balanced': ['Balanced to get started', 'Équilibré pour débuter'],
   'ob.s2.note.most_jobs': ['The most jobs, the dearest', 'Le plus de jobs, le plus cher'],
   'ob.s2.note.cheapest': ['The cheapest of the three', 'Le moins cher des trois'],
@@ -603,7 +604,7 @@ const table = {
   'ob.s2.sub': ["Give it a name, a code and a base. Your first jobs leave from your hub, and that's where your aircraft spend the night.", "Donne-lui un nom, un code et une base. C'est de ton hub que partiront tes premiers jobs, et c'est là que tes avions passeront la nuit."],
   'ob.s2.panel': ['Company', 'Compagnie'],
   'ob.s2.name': ['Company name', 'Nom de la compagnie'],
-  'ob.s2.nameHint': ['Can be renamed later.', 'Modifiable plus tard.'],
+  'ob.s2.nameHint': ['Can be renamed later from your company sheet.', 'Modifiable plus tard depuis ta fiche compagnie.'],
   'ob.s2.code': ['ICAO code', 'Code OACI'],
   'ob.s2.codeHint': ['3 letters', '3 lettres'],
   'ob.s2.codeChecking': ['Checking…', 'Vérification…'],
@@ -657,6 +658,7 @@ const table = {
   'ob.s2.hubsFailed': ['The hub suggestions could not be loaded.', 'Les suggestions de hub sont indisponibles.'],
   'ob.s3a.over': ['Airliner path · first aircraft', 'Parcours airliner · premier avion'],
   'ob.s3a.title': ['Lease your first aircraft', 'Loue ton premier avion'],
+  'ob.s3a.subNoDelay': ["{n} lessors can deliver an aircraft to your hub. You pay a rent every month instead of buying: your capital stays available for fuel, crews and the unexpected.", "{n} loueurs peuvent livrer un appareil à ton hub. Tu paies un loyer chaque mois au lieu d'acheter : ton capital reste disponible pour le carburant, les équipages et les imprévus."],
   'ob.s3a.sub': ["{n} lessors can deliver an aircraft to your hub within {h} h. You pay a rent every month instead of buying: your capital stays available for fuel, crews and the unexpected.", "{n} loueurs peuvent livrer un appareil à ton hub sous {h} h. Tu paies un loyer chaque mois au lieu d'acheter : ton capital reste disponible pour le carburant, les équipages et les imprévus."],
   'ob.s3a.panel': ['Lease offers', 'Offres de location'],
   'ob.s3a.panelSub.one': ['{n} offer · {year} rents', '{n} offre · loyers {year}'],

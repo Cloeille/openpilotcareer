@@ -18,7 +18,7 @@ export type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
 export type Onboarding = { completed: boolean; step: OnboardingStep; startMode: StartMode | null; companyId: number | null; draft: Record<string, unknown> };
 export type HubSuggestion = {
   icao: string; name: string; city: string; size: 'large' | 'medium' | 'small';
-  parkingMonthly: number; jobsNearby: number; aiCompaniesBased: number; note: string; noteKey?: 'most_jobs' | 'cheapest' | 'least_competition' | 'balanced';
+  parkingMonthly: number; jobsNearby: number; aiCompaniesBased: number; note: string; noteKey?: 'most_jobs' | 'cheapest' | 'least_competition' | 'balanced' | 'match';
 };
 export type LeaseOffer = {
   id: number | string; lessor: string; icao: string; typeName: string; year: number; airframeHours: number; maintenanceIncluded: boolean;
