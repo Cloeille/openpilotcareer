@@ -13,3 +13,20 @@ import ai from './design/scenes/generated-10.webp';
 /** Static backdrops standing in for the mockup's real-time 3D scene; the file each screen uses is the one the mockup frame uses. */
 export const SCENES = { login, settings, dashboard, jobs, job, catalogue, fleet, history, flight, leaderboard, ai } as const;
 export type SceneId = keyof typeof SCENES;
+
+/** Kept alive so the browser holds on to the decoded pixels of every backdrop. */
+const images = new Map<SceneId, { img: HTMLImageElement; ready: Promise<void> }>();
+
+/** Fetch and decode a backdrop ahead of use, so showing it never waits on the image. Resolves (never rejects) once decoded or failed: a missing backdrop must not block a screen. */
+export function decodeScene(id: SceneId): Promise<void> {
+  let entry = images.get(id);
+  if (!entry) {
+    const img = new Image();
+    img.src = SCENES[id];
+    entry = { img, ready: img.decode().then(() => undefined, () => undefined) };
+    images.set(id, entry);
+  }
+  return entry.ready;
+}
+
+export const preloadScenes = (): Promise<void> => Promise.all((Object.keys(SCENES) as SceneId[]).map(decodeScene)).then(() => undefined);
