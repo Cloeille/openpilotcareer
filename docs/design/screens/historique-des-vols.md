@@ -1,0 +1,47 @@
+# Historique des vols
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Historique des vols» width=1600 height=900 layout="none" fill="$bg" clip=true x=0 y=5200
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-7.png", "mode": "cover"} x=0 y=0
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"... x=0 y=0
+  - frame «Content» width=1600 height=778 layout="vertical" gap=20 padding=[28, 32, 24, 32] x=0 y=76
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Carnet de vol · Azur Régional
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Historique des vols
+      - frame «Season Facts» gap=56 alignItems="end"
+        - frame «Fact · Gain net de la saison» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Gain net de la saison
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 33 850 €
+        - frame «Fact · Heures de vol» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Heures de vol
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 7 h 37
+        - frame «Fact · Vols vérifiés» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Vols vérifiés
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 7 sur 11
+    - frame «Filters» width="fill_container" alignItems="center" justifyContent="space_between"
+      - frame «Status Tabs» gap=32
+        - frame «Tab · Tous» gap=8 padding=[0, 0, 10, 0] alignItems="center" stroke="$text-primary" strokeWidth={"bottom": 2}
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Tous
+          - text «Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 11
+        - frame «Tab · Vérifiés» gap=8 padding=[0, 0, 10, 0] alignItems="center" stroke={"type": "color", "color": "$text-primary", "enabled": false} strokeWidth={"bottom": 2}
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Vérifiés
+          - text «Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 7
+        - frame «Tab · Non vérifiés» gap=8 padding=[0, 0, 10, 0] alignItems="center" stroke={"type": "color", "color": "$text-primary", "enabled": false} strokeWidth={"bottom": 2}
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Non vérifiés
+          - text «Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 2
+        - frame «Tab · Rejetés» gap=8 padding=[0, 0, 10, 0] alignItems="center" stroke={"type": "color", "color": "$text-primary", "enabled": false} strokeWidth={"bottom": 2}
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Rejetés
+          - text «Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 2
+      - frame «Selects» gap=32 padding=[0, 0, 10, 0] alignItems="center"
+        - frame «Select · Toute la flotte» gap=6 alignItems="center"
+          - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Toute la flotte
+          - icon «Chevron» width=14 height=14 fill="$text-tertiary" icon="chevron-down"
+        - frame «Select · Saison de novembre» gap=6 alignItems="center"
+          - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Saison de novembre
+          - icon «Chevron» width=14 height=14 fill="$text-tertiary" icon="chevron-down"
+    - ref «Flight Log» width="fill_container" height="fill_container" ref="bibzm" descendants={"uBW0Z": {"enabled": false}, "q5ftx0": {"gap": 0, "padding": [4, 0, 0, 0], "height": "fill_container", "children": [{"type": "frame", "i...  (instance of «Panel»)
+  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": {"type": "color", "color": "$text-primary", "enabled": false}}, "Ely3m": {"fill": "$text-tertiary"}, "oRNeg": {"stro... x=0 y=0  (instance of «HUD/Top»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"content": "Tableau de bord"}, "msx5l/Mw53t": {"content": "↑ ↓"}, "sA5qV": {"content": "P... x=0 y=854  (instance of «HUD/Bottom»)

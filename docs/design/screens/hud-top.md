@@ -1,0 +1,55 @@
+# HUD/Top
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «HUD/Top» width=1600 height=76 padding=[0, 32] alignItems="center" justifyContent="space_between" fill={"type": "gradient", "gradientType": "linear", "enabled": true, "rotation": 180, "size": {"height": 1}, "colors": [{"color": "#000000F0",... reusable=true x=0 y=-1100
+  - frame «Brand» width=250 gap=12 alignItems="center"
+    - frame «Logo Mark» width=36 height=36 alignItems="center" justifyContent="center" fill="$text-primary" cornerRadius=2
+      - icon «Logo Icon» width=20 height=20 fill="$on-btn-primary" icon="plane-takeoff"
+    - frame «Brand Stack» layout="vertical" gap=3
+      - text «Brand Name» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: OpenHangar
+      - frame «Server» gap=6 alignItems="center"
+        - ellipse «Server Dot» width=6 height=6 fill="$success"
+        - text «Server Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Serveur global
+        - text «Server Sep» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="700"  TEXT: ·
+        - text «Server Change» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Changer
+  - frame «Tabs» height="fill_container" gap=2 alignItems="center"
+    - ref «Key Prev» ref="T9v0n" descendants={"Mw53t": {"content": "Q"}}  (instance of «Keycap»)
+    - frame «Tab · TABLEAU DE BORD» height="fill_container" gap=7 padding=[0, 16] alignItems="center" stroke="$text-primary" strokeWidth={"bottom": 2}
+      - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Tableau de bord
+    - frame «Tab · VOL EN COURS» height="fill_container" gap=7 padding=[0, 16] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
+      - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Vol en cours
+      - ellipse «Live Dot» width=7 height=7 fill="$route"
+    - frame «Tab · JOBS» height="fill_container" gap=7 padding=[0, 16] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
+      - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Jobs
+      - text «Count» fill="$text-tertiary" fontFamily="$font-mono" fontSize=11  TEXT: 42
+    - frame «Tab · FLOTTE» height="fill_container" gap=7 padding=[0, 16] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
+      - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Flotte
+    - frame «Tab · HISTORIQUE» height="fill_container" gap=7 padding=[0, 16] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
+      - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Historique
+    - frame «Tab · CLASSEMENT» height="fill_container" gap=7 padding=[0, 16] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
+      - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Classement
+    - ref «Key Next» ref="T9v0n" descendants={"Mw53t": {"content": "E"}}  (instance of «Keycap»)
+  - frame «Resources» gap=22 alignItems="center"
+    - frame «Money» layout="vertical" gap=3
+      - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11  TEXT: Solde
+      - frame «Value Row» gap=6 alignItems="center"
+        - icon «Icon» width=13 height=13 fill="$text-tertiary" icon="wallet"
+        - text «Value» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: 1 284 560 €
+    - frame «Reputation» layout="vertical" gap=3
+      - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11  TEXT: Réputation
+      - frame «Value Row» gap=6 alignItems="center"
+        - icon «Icon» width=13 height=13 fill="$text-tertiary" icon="star"
+        - text «Value» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: 4,6
+    - rectangle «Res Divider» width=1 height=30 fill="$border-strong"
+    - frame «Pilot» gap=10 alignItems="center"
+      - frame «Rank Ring» width=40 height=40 layout="none"
+        - ellipse «Ring Track» width=40 height=40 fill="#FFFFFF1F" x=0 y=0
+        - ellipse «Ring Progress» width=40 height=40 fill="$text-primary" x=0 y=0
+        - frame «Rank Center» width=40 height=40 alignItems="center" justifyContent="center" x=0 y=0
+          - text «Rank» fill="$text-primary" fontFamily="$font-display" fontSize=14 fontWeight="600"  TEXT: R4
+      - frame «Pilot Stack» layout="vertical" gap=2
+        - text «Pilot Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="600"  TEXT: Cdt. L. Moreau
+        - text «Pilot XP» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11  TEXT: Rang 4 · 72 %
+    - frame «Settings Button» width=38 height=38 alignItems="center" justifyContent="center" fill="#FFFFFF0A" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+      - icon «Gear» width=18 height=18 fill="$text-secondary" icon="settings"

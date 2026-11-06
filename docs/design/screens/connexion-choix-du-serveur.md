@@ -1,0 +1,42 @@
+# Connexion · choix du serveur
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Connexion · choix du serveur» width=1600 height=900 layout="none" fill="$bg" clip=true x=0 y=800
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated.png", "mode": "cover"} x=0 y=0
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"... x=0 y=0
+  - frame «Content» width=1600 height=900 layout="vertical" padding=[28, 32, 24, 32] justifyContent="space_between" x=0 y=0
+    - frame «Brand» gap=12 alignItems="center"
+      - frame «Logo Mark» width=36 height=36 alignItems="center" justifyContent="center" fill="$text-primary" cornerRadius=2
+        - icon «Logo Icon» width=20 height=20 fill="$on-btn-primary" icon="plane-takeoff"
+      - frame «Brand Stack» layout="vertical" gap=3
+        - text «Brand Name» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: OpenHangar
+        - text «Brand Tagline» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Carrière et économie pour Microsoft Flight Simulator
+    - frame «Login Column» width=500 layout="vertical" gap=20
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Étape 1 sur 2 · serveur et compte
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Connexion
+      - ref «Panel · Connexion» width="fill_container" ref="bibzm" descendants={"uBW0Z": {"padding": [26, 28, 0, 28], "enabled": false}, "e0veVE": {"content": "Connexion", "fontSize": 20}, "A9Tx2K": {"content": "Étap...  (instance of «Panel»)
+    - frame «Footer» width="fill_container" alignItems="center" justifyContent="space_between"
+      - frame «Client Status» gap=28 alignItems="center"
+        - frame «Sim» gap=8 alignItems="center"
+          - ellipse «Sim Dot» width=7 height=7 fill="$success"
+          - text «Sim Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Simulateur
+          - text «Sim Value» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: MSFS 2024 détecté
+        - frame «Client» gap=8 alignItems="center"
+          - text «Client Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Client
+          - text «Client Value» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 0.9.4 (build 2611)
+      - frame «Hints» gap=22 alignItems="center"
+        - frame «Hint · Quitter» gap=8 alignItems="center"
+          - ref «Key» ref="T9v0n" descendants={"Mw53t": {"content": "Échap"}}  (instance of «Keycap»)
+          - text «Hint Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Quitter
+        - frame «Hint · Champ suivant» gap=8 alignItems="center"
+          - ref «Key» ref="T9v0n" descendants={"Mw53t": {"content": "Tab"}}  (instance of «Keycap»)
+          - text «Hint Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Champ suivant
+        - frame «Hint · Se connecter» gap=8 alignItems="center"
+          - ref «Key» ref="T9v0n" descendants={"Mw53t": {"content": "Entrée"}}  (instance of «Keycap»)
+          - text «Hint Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Se connecter
+        - frame «Hint · Vérifier à nouveau» gap=8 alignItems="center"
+          - ref «Key» ref="T9v0n" descendants={"Mw53t": {"content": "F5"}}  (instance of «Keycap»)
+          - text «Hint Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Vérifier à nouveau

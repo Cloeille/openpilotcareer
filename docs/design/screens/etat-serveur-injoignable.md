@@ -1,0 +1,76 @@
+# État · serveur injoignable
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «État · serveur injoignable» width=1600 height=900 layout="none" fill="$bg" clip=true x=7500 y=800
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-2.png", "mode": "cover"} x=0 y=0
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"... x=0 y=0
+  - frame «Content» width=1600 height=778 layout="vertical" padding=[44, 64, 36, 64] justifyContent="space_between" x=0 y=76
+    - frame «Company Title» layout="vertical" gap=6
+      - text «Overline» fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Ta compagnie
+      - text «Company Name» fill="$text-primary" fontFamily="$font-display" fontSize=56 fontWeight="600"  TEXT: Azur Régional
+      - text «Company Line» fill="$text-secondary" fontFamily="$font-ui" fontSize=16  TEXT: 7e sur 24 cette saison · valeur nette 8,42 M€
+    - frame «Bottom Row» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Server Offline» width=700 layout="vertical" gap=22 padding=[26, 30, 28, 30] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 28}
+        - frame «Head» width="fill_container" alignItems="center" justifyContent="space_between"
+          - frame «Status» gap=8 alignItems="center"
+            - icon «Offline Icon» width=15 height=15 fill="$danger" icon="cloud-off"
+            - text «Status Text» fill="$danger" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Hors ligne depuis 3 min
+          - frame «Server» gap=7 alignItems="center"
+            - icon «Server Icon» width=14 height=14 fill="$text-tertiary" icon="server"
+            - text «Server Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Serveur global
+        - frame «Title» width="fill_container" layout="vertical" gap=6
+          - text «Title Text» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="600"  TEXT: Serveur injoignable
+          - text «Title Sub» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Tes données restent consultables en lecture seule, telles qu'au dernier échange avec le serveur.
+        - frame «Retry» width="fill_container" layout="vertical" gap=12
+          - frame «Retry Row» width="fill_container" alignItems="end" justifyContent="space_between"
+            - frame «Countdown» layout="vertical" gap=3
+              - text «Countdown Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Nouvelle tentative dans
+              - text «Countdown Value» fill="$text-primary" fontFamily="$font-ui" fontSize=26 fontWeight="500"  TEXT: 12 s
+            - text «Attempt» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Tentative 4 · toutes les 30 s
+          - frame «Retry Progress» width="fill_container" height=2 fill="$border-strong"
+            - rectangle «Retry Fill» width=256 height=2 fill="$text-primary"
+        - frame «Offline Rules» width="fill_container" layout="vertical" gap=12 padding=[6, 0, 0, 0]
+          - frame «Rule · Dernière synchronisation» width="fill_container" gap=10 alignItems="center"
+            - icon «Icon» width=15 height=15 fill="$text-tertiary" icon="history"
+            - text «Label» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Dernière synchronisation
+            - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 18:42Z
+          - frame «Rule · Prise de jobs, achats et ventes» width="fill_container" gap=10 alignItems="center"
+            - icon «Icon» width=15 height=15 fill="$text-tertiary" icon="lock"
+            - text «Label» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Prise de jobs, achats et ventes
+            - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: en pause jusqu'au retour
+          - frame «Rule · Vols suivis par le pont» width="fill_container" gap=10 alignItems="center"
+            - icon «Icon» width=15 height=15 fill="$text-tertiary" icon="cable"
+            - text «Label» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Vols suivis par le pont
+            - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: enregistrés, envoyés au retour
+        - frame «Actions» gap=16 padding=[4, 0, 0, 0] alignItems="center"
+          - ref «Retry Now» ref="Im067" descendants={"h8MyJ": {"content": "Réessayer maintenant"}}  (instance of «Button/Primary»)
+          - ref «Change Server» ref="n9Pulf" descendants={"RUCj0": {"content": "Changer de serveur"}}  (instance of «Button/Ghost»)
+      - frame «Key Figures» width=320 layout="vertical" gap=20 padding=[24, 26] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 28}
+        - frame «Snapshot Note» gap=7 alignItems="center"
+          - icon «Lock Icon» width=13 height=13 fill="$text-tertiary" icon="lock"
+          - text «Snapshot Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Lecture seule · données de 18:42Z
+        - frame «Figure · Solde» width="fill_container" layout="vertical" gap=3
+          - text «Figure Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Solde
+          - text «Figure Value» fill="$text-secondary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 1 284 560 €
+          - text «Figure Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: +48 210 € cette semaine
+        - frame «Figure · Réputation» width="fill_container" layout="vertical" gap=3
+          - text «Figure Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Réputation
+          - text «Figure Value» fill="$text-secondary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 4,6 sur 5
+        - frame «Figure · Rang» width="fill_container" layout="vertical" gap=3
+          - text «Figure Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Rang
+          - text «Figure Value» fill="$text-secondary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: Commandant
+          - frame «Rank Progress» width="fill_container" height=2 fill="$border-strong"
+            - rectangle «Rank Fill» width=193 height=2 fill="$text-primary"
+          - text «Rank Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: 72 % vers commandant senior
+        - rectangle «Divider» width="fill_container" height=1 fill="$border"
+        - frame «Last Flight» width="fill_container" layout="vertical" gap=4
+          - text «Last Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Dernier vol · hier
+          - frame «Last Row» width="fill_container" alignItems="center" justifyContent="space_between"
+            - text «Last Route» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: LFLL → LFMN
+            - text «Last Gain» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: +12 480 €
+          - frame «Last Status» gap=6 alignItems="center"
+            - icon «Ok» width=13 height=13 fill="$success" icon="shield-check"
+            - text «Last Status Text» fill="$success" fontFamily="$font-ui" fontSize=13  TEXT: Vérifié
+  - ref «HUD Top» ref="a93UHQ" descendants={"xhb39": {"fill": "$danger"}, "mqqR8": {"content": "Serveur global hors ligne", "fill": "$danger"}, "Uth8f": {"stroke": "$text-primary"}... x=0 y=0  (instance of «HUD/Top»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"content": "Menu"}, "msx5l/Mw53t": {"content": "Entrée"}, "sA5qV": {"content": "Réessayer... x=0 y=854  (instance of «HUD/Bottom»)

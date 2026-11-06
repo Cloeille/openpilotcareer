@@ -1,0 +1,53 @@
+# Schéma générique · tous types d'appareils
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Schéma générique · tous types d'appareils» width=1600 height=900 layout="vertical" gap=28 padding=[48, 56] fill=["#07090C", {"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.3, "height": 1.1}, "colors... clip=true x=3100 y=7700
+  - frame «Header Row» width="fill_container" gap=40 alignItems="end" justifyContent="space_between"
+    - frame «Board Header» width="fill_container" layout="vertical" gap=8
+      - text «Board Title» fill="$text-primary" fontFamily="$font-display" fontSize=34 fontWeight="600"  TEXT: Un seul schéma, tous les appareils
+      - text «Board Sub» width=640 fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Nuage de points généré à partir de la catégorie, du nombre de moteurs et de sièges. Aucun modèle 3D par avion : la même brique sert pour un Cessna, un A320 ou un hélicoptère.
+    - frame «Style Variants» gap=20
+      - frame «Variant · Points 3D» width=220 layout="vertical" gap=6
+        - script «Schematic · Points 3D» width=220 height=110
+        - text «Variant Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Points 3D
+      - frame «Variant · Maillage 3D» width=220 layout="vertical" gap=6
+        - script «Schematic · Maillage 3D» width=220 height=110
+        - text «Variant Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Maillage 3D
+      - frame «Variant · Profil 2D» width=220 layout="vertical" gap=6
+        - script «Schematic · Profil 2D» width=220 height=110
+        - text «Variant Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Profil 2D
+  - frame «Row 1» width="fill_container" height="fill_container" gap=20
+    - frame «Cell · Turbopropulseur» width="fill_container" height="fill_container" layout="vertical" gap=10 padding=[0, 0, 8, 0] stroke="$border" strokeWidth={"top": 1}
+      - script «Schematic · turboprop» width="fill_container" height="fill_container"
+      - text «Category» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: Turbopropulseur
+      - text «Example» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: ATR 72-600 · 68 sièges
+    - frame «Cell · Jet régional» width="fill_container" height="fill_container" layout="vertical" gap=10 padding=[0, 0, 8, 0] stroke="$border" strokeWidth={"top": 1}
+      - script «Schematic · regional-jet» width="fill_container" height="fill_container"
+      - text «Category» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: Jet régional
+      - text «Example» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: E175 · 76 sièges
+    - frame «Cell · Monocouloir» width="fill_container" height="fill_container" layout="vertical" gap=10 padding=[0, 0, 8, 0] stroke="$border" strokeWidth={"top": 1}
+      - script «Schematic · narrowbody» width="fill_container" height="fill_container"
+      - text «Category» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: Monocouloir
+      - text «Example» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: A320neo · 180 sièges
+    - frame «Cell · Gros-porteur» width="fill_container" height="fill_container" layout="vertical" gap=10 padding=[0, 0, 8, 0] stroke="$border" strokeWidth={"top": 1}
+      - script «Schematic · widebody» width="fill_container" height="fill_container"
+      - text «Category» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: Gros-porteur
+      - text «Example» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: B747-8 · 4 moteurs
+  - frame «Row 2» width="fill_container" height="fill_container" gap=20
+    - frame «Cell · Jet d'affaires» width="fill_container" height="fill_container" layout="vertical" gap=10 padding=[0, 0, 8, 0] stroke="$border" strokeWidth={"top": 1}
+      - script «Schematic · bizjet» width="fill_container" height="fill_container"
+      - text «Category» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: Jet d'affaires
+      - text «Example» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Citation Latitude · 9 sièges
+    - frame «Cell · Monomoteur à pistons» width="fill_container" height="fill_container" layout="vertical" gap=10 padding=[0, 0, 8, 0] stroke="$border" strokeWidth={"top": 1}
+      - script «Schematic · piston-single» width="fill_container" height="fill_container"
+      - text «Category» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: Monomoteur à pistons
+      - text «Example» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Cessna 172 · 4 sièges
+    - frame «Cell · Bimoteur à pistons» width="fill_container" height="fill_container" layout="vertical" gap=10 padding=[0, 0, 8, 0] stroke="$border" strokeWidth={"top": 1}
+      - script «Schematic · piston-twin» width="fill_container" height="fill_container"
+      - text «Category» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: Bimoteur à pistons
+      - text «Example» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Beechcraft Baron 58 · 6 sièges
+    - frame «Cell · Hélicoptère» width="fill_container" height="fill_container" layout="vertical" gap=10 padding=[0, 0, 8, 0] stroke="$border" strokeWidth={"top": 1}
+      - script «Schematic · helicopter» width="fill_container" height="fill_container"
+      - text «Category» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: Hélicoptère
+      - text «Example» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: H135 · 6 sièges

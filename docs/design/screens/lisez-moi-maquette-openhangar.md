@@ -1,0 +1,79 @@
+# Lisez-moi · maquette OpenHangar
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Lisez-moi · maquette OpenHangar» width=1600 layout="vertical" gap=44 padding=[56, 64, 64, 64] fill=["#07090C", {"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.4, "height": 1.2}, "colors... x=-1800 y=800
+  - frame «Header» width="fill_container" layout="vertical" gap=10
+    - frame «Brand» gap=12 alignItems="center"
+      - frame «Logo Mark» width=40 height=40 alignItems="center" justifyContent="center" fill="$text-primary" cornerRadius=3
+        - icon «Logo Icon» width=22 height=22 fill="$on-btn-primary" icon="plane-takeoff"
+      - text «Brand Name» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="600"  TEXT: OpenHangar
+    - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=52 fontWeight="600"  TEXT: Maquette de l'interface
+    - text «Sub» width=1000 fill="$text-secondary" fontFamily="$font-ui" fontSize=17  TEXT: Mod open source de carrière et d'économie pour Microsoft Flight Simulator 2020 et 2024 : client web, panneau en jeu et pont SimConnect. Maquette du 6 novembre 2026.
+  - frame «Columns» width="fill_container" gap=46
+    - frame «Column · Lire ce fichier» width="fill_container" layout="vertical" gap=16
+      - text «Column Title» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Lire ce fichier
+      - frame «Item · Une rangée par domaine» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Une rangée par domaine
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: De 01 à 06 : les écrans principaux à gauche, les états et cas limites à droite de chaque rangée.
+      - frame «Item · Un viewport de jeu fixe» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Un viewport de jeu fixe
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Tous les écrans font 1600 × 900. Ce ne sont pas des pages qui défilent : le contenu tient dans l'écran, le détail passe par des vues secondaires.
+      - frame «Item · Les références» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Les références
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: La rangée 07 regroupe la carte des parcours, le schéma d'avion générique et les plans de cabine paramétriques.
+      - frame «Item · Les composants» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Les composants
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Ils sont en haut du canvas, au-dessus de la rangée 01. Toutes les couleurs, polices et rayons sont des variables.
+    - frame «Column · Système de design» width="fill_container" layout="vertical" gap=16
+      - text «Column Title» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Système de design
+      - frame «Item · Polices» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Polices
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Barlow pour le texte, Barlow Semi Condensed pour les titres, B612 Mono (police des cockpits Airbus) pour les codes et les données.
+      - frame «Item · Couleur dosée» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Couleur dosée
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Neutre partout. La couleur sert seulement : vert = vérifié, ambre = à surveiller, rouge = rejeté ou hors service, magenta = route active, jaune et noir = panneaux ICAO type taxiway, bleu = PNC et info.
+      - frame «Item · Casse et formats» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Casse et formats
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Majuscule en début de phrase uniquement ; majuscules réservées aux codes (ICAO, immatriculations, unités). 1 284 560 € · 18:42Z · 1 070 kg · FL240 · 412 kt.
+      - frame «Item · Composants» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Composants
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Button, Badge, Sign/Location et Sign/Direction, Keycap, Input, Stat, Panel, HUD/Top, HUD/Bottom, View Switcher.
+    - frame «Column · Pour l'implémentation» width="fill_container" layout="vertical" gap=16
+      - text «Column Title» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Pour l'implémentation
+      - frame «Item · Clavier et manette d'abord» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Clavier et manette d'abord
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Q / E pour les onglets, Échap pour revenir, Entrée pour l'action principale. Voir la carte des parcours en rangée 07.
+      - frame «Item · Deux scripts à reprendre» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Deux scripts à reprendre
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: scripts/aircraft-schematic.js : avion en nuage de points généré par catégorie. scripts/cabin-layout.js : plan de cabine depuis une configuration JSON (ponts, classes, toilettes, galleys, usure). Du JavaScript simple, réutilisable côté client.
+      - frame «Item · Images et 3D» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Images et 3D
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Les fonds sont des rendus d'illustration ; dans l'app, ce sera une scène temps réel. Flotte, catalogue, achat et comparaison afficheront un vrai modèle 3D (glTF) à sourcer.
+      - frame «Item · Données» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Données
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Tout vient du serveur (API REST /api/v1, auto-hébergeable) ou du pont SimConnect (télémétrie). Contrat d'API à écrire à partir de ces écrans. Hors maquette : SayIntentions, contraintes du panneau MSFS.
+  - frame «Index» width="fill_container" layout="vertical" gap=14 padding=[8, 0, 0, 0]
+    - text «Index Title» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Sommaire
+    - frame «Index Rows» width="fill_container" gap=12
+      - frame «Index · 01» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 01
+        - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Accès & réglages
+      - frame «Index · 02» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 02
+        - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Tableau de bord & vol
+      - frame «Index · 03» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 03
+        - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Jobs
+      - frame «Index · 04» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 04
+        - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Flotte
+      - frame «Index · 05» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 05
+        - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Historique
+      - frame «Index · 06» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 06
+        - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Compétition IA
+      - frame «Index · 07» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 07
+        - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Références

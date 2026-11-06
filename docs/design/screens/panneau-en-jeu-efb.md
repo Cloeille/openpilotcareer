@@ -1,0 +1,98 @@
+# Panneau en jeu · EFB
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Panneau en jeu · EFB» width=1600 height=900 layout="none" fill="$bg" clip=true x=6800 y=1900
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-13.png", "mode": "cover"} x=0 y=0
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.4, "height": 1.4}, "colors": [{"color"... x=0 y=0
+  - frame «Sim Toolbar» gap=4 padding=5 alignItems="center" fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=4 effect={"type": "background_blur", "radius": 20} x=650 y=20
+    - frame «Tool» width=38 height=38 alignItems="center" justifyContent="center" cornerRadius=3
+      - icon «Tool Icon» width=18 height=18 fill="$text-secondary" icon="map"
+    - frame «Tool» width=38 height=38 alignItems="center" justifyContent="center" cornerRadius=3
+      - icon «Tool Icon» width=18 height=18 fill="$text-secondary" icon="radio-tower"
+    - frame «Tool» width=38 height=38 alignItems="center" justifyContent="center" cornerRadius=3
+      - icon «Tool Icon» width=18 height=18 fill="$text-secondary" icon="cloud-sun"
+    - frame «Tool» width=38 height=38 alignItems="center" justifyContent="center" cornerRadius=3
+      - icon «Tool Icon» width=18 height=18 fill="$text-secondary" icon="gauge"
+    - frame «Tool · OpenHangar» width=38 height=38 alignItems="center" justifyContent="center" fill="$text-primary" cornerRadius=3
+      - icon «Tool Icon» width=18 height=18 fill="$on-btn-primary" icon="plane-takeoff"
+    - frame «Tool» width=38 height=38 alignItems="center" justifyContent="center" cornerRadius=3
+      - icon «Tool Icon» width=18 height=18 fill="$text-secondary" icon="camera"
+    - frame «Tool» width=38 height=38 alignItems="center" justifyContent="center" cornerRadius=3
+      - icon «Tool Icon» width=18 height=18 fill="$text-secondary" icon="settings"
+  - frame «Context Caption» layout="vertical" gap=4 x=40 y=36
+    - text «Caption Title» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="600"  TEXT: Panneau en jeu
+    - text «Caption Meta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: MSFS 2024 · dossier Community · openhangar-panel 0.3
+  - frame «EFB Tablet» width=820 height=590 padding=14 fill="#101215" stroke="#2A2E35" strokeWidth=2 cornerRadius=24 effect={"type": "shadow", "shadowType": "outer", "color": "#000000B3", "offset": {"x": 0, "y": 30}, "blur": 60} x=690 y=150
+    - frame «Screen» width="fill_container" height="fill_container" layout="vertical" fill="#07090C" stroke="#000000" strokeWidth=1 cornerRadius=12 clip=true
+      - frame «Status Bar» width="fill_container" height=32 padding=[0, 16] alignItems="center" justifyContent="space_between"
+        - frame «Status Left» gap=8 alignItems="center"
+          - frame «Mini Mark» width=18 height=18 alignItems="center" justifyContent="center" fill="$text-primary" cornerRadius=2
+            - icon «Mini Icon» width=11 height=11 fill="$on-btn-primary" icon="plane-takeoff"
+          - text «App Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="600"  TEXT: OpenHangar
+          - ellipse «Bridge Dot» width=6 height=6 fill="$success"
+          - text «Bridge» fill="$success" fontFamily="$font-mono" fontSize=9 fontWeight="700" x=124 y=3.5  TEXT: PONT CONNECTÉ
+        - frame «Status Right» gap=10 alignItems="center"
+          - text «Clock» fill="$text-primary" fontFamily="$font-mono" fontSize=11  TEXT: 17:56Z
+          - icon «Wifi» width=14 height=14 fill="$text-secondary" icon="wifi"
+          - icon «Battery» width=16 height=16 fill="$text-secondary" icon="battery-medium"
+      - frame «EFB Tabs» width="fill_container" height=46 stroke="$border" strokeWidth={"top": 1, "bottom": 1}
+        - frame «Tab · VOL» width="fill_container" height="fill_container" gap=8 alignItems="center" justifyContent="center" fill="#00000000" stroke="$text-primary" strokeWidth={"bottom": 2}
+          - icon «Tab Icon» width=16 height=16 fill="$text-primary" icon="plane"
+          - text «Tab Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Vol
+        - frame «Tab · JOB» width="fill_container" height="fill_container" gap=8 alignItems="center" justifyContent="center" fill="#00000000" stroke="#00000000" strokeWidth={"bottom": 2}
+          - icon «Tab Icon» width=16 height=16 fill="$text-tertiary" icon="clipboard-list"
+          - text «Tab Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Job
+        - frame «Tab · SIMBRIEF» width="fill_container" height="fill_container" gap=8 alignItems="center" justifyContent="center" fill="#00000000" stroke="#00000000" strokeWidth={"bottom": 2}
+          - icon «Tab Icon» width=16 height=16 fill="$text-tertiary" icon="file-text"
+          - text «Tab Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: SimBrief
+        - frame «Tab · CABINE» width="fill_container" height="fill_container" gap=8 alignItems="center" justifyContent="center" fill="#00000000" stroke="#00000000" strokeWidth={"bottom": 2}
+          - icon «Tab Icon» width=16 height=16 fill="$text-tertiary" icon="armchair"
+          - text «Tab Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Cabine
+      - frame «Body» width="fill_container" height="fill_container" layout="vertical" gap=26 padding=[30, 36]
+        - frame «Status» gap=8 alignItems="center"
+          - ellipse «Live Dot» width=7 height=7 fill="$route"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: En vol · croisière FL240
+        - frame «Flight Title» layout="vertical" gap=6
+          - text «Route Title» fill="$text-primary" fontFamily="$font-display" fontSize=34 fontWeight="600"  TEXT: Nice → Paris-CDG
+          - text «Flight Meta» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: AZR 4127 · ATR 72-600 · F-HAZR
+        - frame «Route» width="fill_container" gap=14 alignItems="center"
+          - ref «Dep» ref="pirBQ" descendants={"OYKAu": {"content": "LFMN", "fontSize": 15}}  (instance of «Sign/Location»)
+          - frame «Track» width="fill_container" alignItems="center"
+            - rectangle «Flown» width=200 height=2 fill="$route"
+            - ellipse «Aircraft» width=10 height=10 fill="$text-primary"
+            - rectangle «Remaining» width="fill_container" height=1 fill="$border-strong"
+          - ref «Arr» ref="B3YF1" descendants={"gljan": {"content": "LFPG", "fontSize": 15}}  (instance of «Sign/Direction»)
+        - frame «Stages» width="fill_container" gap=8
+          - frame «Stage · Préparation» width="fill_container" layout="vertical" gap=8
+            - rectangle «Bar» width="fill_container" height=2 fill="$text-secondary"
+            - text «Stage» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Préparation
+          - frame «Stage · Roulage» width="fill_container" layout="vertical" gap=8
+            - rectangle «Bar» width="fill_container" height=2 fill="$text-secondary"
+            - text «Stage» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Roulage
+          - frame «Stage · En vol» width="fill_container" layout="vertical" gap=8
+            - rectangle «Bar» width="fill_container" height=2 fill="$route"
+            - text «Stage» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="600"  TEXT: En vol
+          - frame «Stage · Atterri» width="fill_container" layout="vertical" gap=8
+            - rectangle «Bar» width="fill_container" height=2 fill="#FFFFFF1F"
+            - text «Stage» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Atterri
+          - frame «Stage · Parqué» width="fill_container" layout="vertical" gap=8
+            - rectangle «Bar» width="fill_container" height=2 fill="#FFFFFF1F"
+            - text «Stage» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Parqué
+        - frame «Facts» width="fill_container" gap=48
+          - frame «Fact · Arrivée prévue» layout="vertical" gap=4
+            - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Arrivée prévue
+            - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="500"  TEXT: 18:42Z
+          - frame «Fact · Carburant à l'arrivée» layout="vertical" gap=4
+            - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Carburant à l'arrivée
+            - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="500"  TEXT: 1 280 kg
+          - frame «Fact · Gain estimé» layout="vertical" gap=4
+            - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Gain estimé
+            - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="500"  TEXT: ≈ 14 820 €
+      - frame «Footer» width="fill_container" gap=12 padding=[14, 36] alignItems="center" justifyContent="space_between" fill="#00000000" stroke="$border" strokeWidth={"top": 1}
+        - frame «Verification» gap=8 alignItems="center"
+          - icon «Verif Icon» width=15 height=15 fill="$text-tertiary" icon="scan-line"
+          - text «Verif Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Vérification en cours · aucune anomalie
+        - frame «Close Flight» gap=14 alignItems="center"
+          - text «Close Hint» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Disponible une fois parqué
+          - ref «Close Button» opacity=0.35 ref="Im067" descendants={"h8MyJ": {"content": "Clôturer le vol"}, "w76AjN": {"enabled": false}}  (instance of «Button/Primary»)

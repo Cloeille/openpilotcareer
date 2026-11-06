@@ -1,0 +1,69 @@
+# Tableau de bord
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Tableau de bord» width=1600 height=900 layout="none" fill="$bg" clip=true x=0 y=1900
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-2.png", "mode": "cover"} x=0 y=0
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"... x=0 y=0
+  - frame «Content» width=1600 height=778 layout="vertical" padding=[44, 64, 36, 64] justifyContent="space_between" x=0 y=76
+    - frame «Company Title» layout="vertical" gap=6
+      - text «Overline» fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Ta compagnie
+      - text «Company Name» fill="$text-primary" fontFamily="$font-display" fontSize=56 fontWeight="600"  TEXT: Azur Régional
+      - text «Company Line» fill="$text-secondary" fontFamily="$font-ui" fontSize=16  TEXT: 7e sur 24 cette saison · valeur nette 8,42 M€
+    - frame «Bottom Row» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Current Flight» width=700 layout="vertical" gap=22 padding=[26, 30, 28, 30] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 28}
+        - frame «Flight Head» width="fill_container" alignItems="center" justifyContent="space_between"
+          - frame «Status» gap=8 alignItems="center"
+            - ellipse «Live Dot» width=7 height=7 fill="$route"
+            - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Vol en cours · en croisière
+          - frame «Verification» gap=7 alignItems="center"
+            - icon «Verif Icon» width=14 height=14 fill="$text-tertiary" icon="scan-line"
+            - text «Verif Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Vérification en cours
+        - frame «Flight Title» layout="vertical" gap=6
+          - text «Route Title» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="600"  TEXT: Nice → Paris-Charles de Gaulle
+          - text «Flight Meta» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: AZR 4127 · ATR 72-600 · F-HAZR
+        - frame «Route» width="fill_container" gap=14 alignItems="center"
+          - ref «Dep Sign» ref="pirBQ" descendants={"OYKAu": {"content": "LFMN", "fontSize": 14}}  (instance of «Sign/Location»)
+          - frame «Track» width="fill_container" alignItems="center"
+            - rectangle «Flown» width=260 height=2 fill="$route"
+            - ellipse «Aircraft» width=9 height=9 fill="$text-primary"
+            - rectangle «Remaining» width="fill_container" height=1 fill="$border-strong"
+          - ref «Arr Sign» ref="B3YF1" descendants={"gljan": {"content": "LFPG", "fontSize": 14}}  (instance of «Sign/Direction»)
+        - frame «Facts» width="fill_container" gap=40
+          - frame «Fact · Arrivée prévue» layout="vertical" gap=4
+            - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Arrivée prévue
+            - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="500"  TEXT: 18:42Z
+          - frame «Fact · Distance restante» layout="vertical" gap=4
+            - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Distance restante
+            - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="500"  TEXT: 312 NM
+          - frame «Fact · Gain estimé» layout="vertical" gap=4
+            - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Gain estimé
+            - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="500"  TEXT: ≈ 14 820 €
+        - frame «Actions» gap=12 padding=[4, 0, 0, 0] alignItems="center"
+          - ref «Follow» ref="Im067" descendants={"h8MyJ": {"content": "Suivre le vol"}}  (instance of «Button/Primary»)
+          - ref «Cutaway» ref="v6he7" descendants={"RU69u": {"icon": "scan-eye"}, "BxHlG": {"content": "Vue en coupe"}}  (instance of «Button/Secondary»)
+      - frame «Key Figures» width=320 layout="vertical" gap=20 padding=[24, 26] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 28}
+        - frame «Figure · Solde» width="fill_container" layout="vertical" gap=3
+          - text «Figure Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Solde
+          - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 1 284 560 €
+          - text «Figure Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: +48 210 € cette semaine
+        - frame «Figure · Réputation» width="fill_container" layout="vertical" gap=3
+          - text «Figure Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Réputation
+          - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 4,6 sur 5
+        - frame «Figure · Rang» width="fill_container" layout="vertical" gap=3
+          - text «Figure Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Rang
+          - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: Commandant
+          - frame «Rank Progress» width="fill_container" height=2 fill="$border-strong"
+            - rectangle «Rank Fill» width=193 height=2 fill="$text-primary"
+          - text «Rank Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: 72 % vers commandant senior
+        - rectangle «Divider» width="fill_container" height=1 fill="$border"
+        - frame «Last Flight» width="fill_container" layout="vertical" gap=4
+          - text «Last Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Dernier vol · hier
+          - frame «Last Row» width="fill_container" alignItems="center" justifyContent="space_between"
+            - text «Last Route» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: LFLL → LFMN
+            - text «Last Gain» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: +12 480 €
+          - frame «Last Status» gap=6 alignItems="center"
+            - icon «Ok» width=13 height=13 fill="$success" icon="shield-check"
+            - text «Last Status Text» fill="$success" fontFamily="$font-ui" fontSize=13  TEXT: Vérifié
+  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": "$text-primary"}, "Ely3m": {"fill": "$text-primary"}} x=0 y=0  (instance of «HUD/Top»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"content": "Menu"}, "msx5l/Mw53t": {"content": "Entrée"}, "sA5qV": {"content": "Suivre le... x=0 y=854  (instance of «HUD/Bottom»)

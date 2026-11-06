@@ -1,0 +1,45 @@
+# Saison · récapitulatif de fin
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Saison · récapitulatif de fin» width=1600 height=900 layout="none" fill="$bg" clip=true x=5100 y=6300
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-9.png", "mode": "cover"} x=0 y=0
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"... x=0 y=0
+  - frame «Content» width=1600 height=778 gap=56 padding=[28, 32, 24, 32] alignItems="end" justifyContent="space_between" x=0 y=76
+    - frame «Recap Column» width=760 height="fill_container" layout="vertical" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Classement · saison terminée le 30 novembre à 23:59Z
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Fin de la saison de novembre
+      - frame «Final Rank» layout="vertical" gap=22
+        - frame «Rank Row» gap=28 alignItems="end"
+          - frame «Rank Figure» gap=4
+            - text «Rank Number» fill="$text-primary" fontFamily="$font-display" fontSize=184 fontWeight="600"  TEXT: 7
+            - frame «Rank Suffix Wrap» padding=[14, 0, 0, 0]
+              - text «Rank Suffix» fill="$text-primary" fontFamily="$font-display" fontSize=64 fontWeight="600"  TEXT: e
+          - frame «Rank Context» layout="vertical" gap=6 padding=[0, 0, 10, 0]
+            - text «Rank Of» fill="$text-secondary" fontFamily="$font-display" fontSize=28 fontWeight="500"  TEXT: sur 24 compagnies
+            - text «Rank Path» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Meilleur rang 6e le 18 novembre · 9e en octobre
+        - text «Reset Note» width=520 fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: Le classement de saison repart à zéro le 1er décembre pour toutes les compagnies. Ton solde, ta flotte, ta réputation et tes statistiques carrière restent acquis.
+      - frame «Season Facts» gap=56
+        - frame «Fact · Gain de saison» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Gain de saison
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: +1 486 200 €
+          - text «Fact Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Carrière : 7 940 300 €
+        - frame «Fact · Vols de saison» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Vols de saison
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 268
+          - text «Fact Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Carrière : 1 412
+        - frame «Fact · Ponctualité» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Ponctualité
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 95 %
+          - text «Fact Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Carrière : 92 %
+        - frame «Fact · Réputation» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Réputation
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 4,7 sur 5
+          - text «Fact Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: +0,1 cette saison
+    - frame «Outcome Column» width=380 layout="vertical" gap=16
+      - ref «Final Standings» width="fill_container" ref="bibzm" descendants={"e0veVE": {"content": "Podium de novembre"}, "A9Tx2K": {"content": "Gain de saison", "fill": "$text-tertiary", "fontFamily": "$font-ui",...  (instance of «Panel»)
+      - ref «Rewards» width="fill_container" ref="bibzm" descendants={"e0veVE": {"content": "Récompenses"}, "A9Tx2K": {"content": "3 gains", "fill": "$text-tertiary", "fontFamily": "$font-ui", "fontSize": 1...  (instance of «Panel»)
+  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": {"type": "color", "color": "$text-primary", "enabled": false}}, "Ely3m": {"fill": "$text-tertiary"}, "Btj9I": {"stro... x=0 y=0  (instance of «HUD/Top»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"xYqJx": {"content": "Saison de novembre"}, "N4OGhY": {"content": "terminée le 30 novembre"}, "oFiTj": {"name": "Hint · Tableau de bord"... x=0 y=854  (instance of «HUD/Bottom»)

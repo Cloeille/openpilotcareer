@@ -1,0 +1,52 @@
+# Détail d'un vol · rejeté
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Détail d'un vol · rejeté» width=1600 height=900 layout="none" fill="$bg" clip=true x=5100 y=5200
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-8.png", "mode": "cover"} x=0 y=0
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"... x=0 y=0
+  - frame «Content» width=1600 height=778 layout="vertical" gap=28 padding=[40, 64, 32, 64] x=0 y=76
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=10
+        - text «Overline» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Rapport de télémétrie · 2 nov. 2026
+        - frame «Title Row» gap=20 alignItems="center"
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=52 fontWeight="600"  TEXT: AZR 4109
+          - frame «Verdict» gap=8 alignItems="center"
+            - ellipse «Dot» width=7 height=7 fill="$danger"
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: Rejeté
+        - text «Subline» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: Nice Côte d'Azur → Ajaccio Napoléon Bonaparte · DHC-6 Twin Otter F-HAZF
+      - frame «Views» gap=32 alignItems="center"
+        - frame «View · Télémétrie» gap=10 padding=[0, 0, 10, 0] alignItems="center" stroke="$text-primary" strokeWidth={"bottom": 2}
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Télémétrie
+        - frame «View · Calcul du gain» gap=10 padding=[0, 0, 10, 0] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Calcul du gain
+          - ref «Key» ref="T9v0n" descendants={"Mw53t": {"content": "G"}}  (instance of «Keycap»)
+    - frame «Middle» width="fill_container" height="fill_container" gap=24
+      - frame «Verdict Panel» width="fill_container" height="fill_container" layout="vertical" gap=14 padding=[22, 28, 24, 28] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 24}
+        - frame «Verdict Head» gap=14 alignItems="center"
+          - frame «Verdict Icon» width=44 height=44 alignItems="center" justifyContent="center" fill="$danger-soft" cornerRadius=6
+            - icon «Icon» width=22 height=22 fill="$danger" icon="shield-x"
+          - frame «Verdict Title» layout="vertical" gap=3
+            - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="600"  TEXT: Vol rejeté par la vérification
+            - text «Rule» fill="$danger" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Règle enfreinte : accélération du temps interdite
+        - text «Reason» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Le pont SimConnect a relevé une accélération du temps ×4 de 17:32Z à 17:38Z, pendant la croisière. Le vol n'est donc pas payé et ne compte pas pour la saison.
+        - frame «Consequences» width="fill_container" layout="vertical" gap=10 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+          - frame «Consequence · Gain» width="fill_container" alignItems="center" justifyContent="space_between"
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Gain
+            - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 0 € au lieu de ≈ 4 860 €
+          - frame «Consequence · Saison de novembre» width="fill_container" alignItems="center" justifyContent="space_between"
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Saison de novembre
+            - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: vol non comptabilisé
+          - frame «Consequence · Réputation» width="fill_container" alignItems="center" justifyContent="space_between"
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Réputation
+            - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: −0,1
+        - frame «Spacer» width="fill_container" height="fill_container"
+        - frame «Contest» width="fill_container" layout="vertical" gap=12
+          - text «Contest Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Tu peux contester jusqu'au 5 nov. à 17:49Z. Un modérateur du serveur relit le rapport et ton explication.
+          - frame «Contest Actions» gap=12 alignItems="center"
+            - ref «Contest» ref="Im067" descendants={"h8MyJ": {"content": "Contester la décision"}}  (instance of «Button/Primary»)
+            - ref «Evidence» ref="n9Pulf" descendants={"RUCj0": {"content": "Voir la preuve"}}  (instance of «Button/Ghost»)
+      - ref «Anti-Cheat Panel» width=420 height="fill_container" ref="bibzm" descendants={"e0veVE": {"content": "Contrôles anti-triche"}, "A9Tx2K": {"content": "5 sur 6 réussis", "fill": "$text-secondary"}, "q5ftx0": {"gap": 1...  (instance of «Panel»)
+    - ref «Timeline Panel» width="fill_container" ref="bibzm" descendants={"e0veVE": {"content": "Phases du vol"}, "A9Tx2K": {"content": "Décollage 17:05Z · toucher 17:49Z", "fill": "$text-tertiary"}, "q5ftx0": ...  (instance of «Panel»)
+  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": "#00000000"}, "Ely3m": {"fill": "$text-tertiary"}, "oRNeg": {"stroke": "$text-primary"}, "ZLZNH": {"fill": "$text-pr... x=0 y=0  (instance of «HUD/Top»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"content": "Retour au carnet"}, "msx5l/Mw53t": {"content": "Entrée"}, "sA5qV": {"content"... x=0 y=854  (instance of «HUD/Bottom»)
