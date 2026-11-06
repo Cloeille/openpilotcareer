@@ -18,14 +18,18 @@ export function keyAction(e: KeyLike, typing: boolean): Action | null {
   }
 }
 
-/** A bare letter, digit or `/` pressed outside a field: the screen-specific shortcut (A = buy, I = import, S = change server...). Lower-cased; Q and E stay with the tab cycle unless a screen claims them. */
+/** A bare letter, digit, `/` or ← → (as 'left' / 'right') pressed outside a field: the screen-specific shortcut (A = buy, I = import, S = change server...). Lower-cased; Q and E stay with the tab cycle unless a screen claims them. */
 export function shortcutOf(e: KeyLike, typing: boolean): string | null {
-  if (typing || e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1) return null;
+  if (typing || e.ctrlKey || e.metaKey || e.altKey) return null;
+  if (e.key === 'ArrowLeft') return 'left';
+  if (e.key === 'ArrowRight') return 'right';
   return /^[a-z0-9/]$/i.test(e.key) ? e.key.toLowerCase() : null;
 }
 
 /** Standard-mapping gamepad: A = Enter, B = Esc, LB / RB = Q / E, d-pad = arrows. */
 export const PAD_BUTTONS: Readonly<Record<number, Action>> = { 0: 'confirm', 1: 'back', 4: 'prev', 5: 'next', 12: 'up', 13: 'down' };
+/** Pad buttons that trigger a screen shortcut (see `shortcutOf`): d-pad left / right. */
+export const PAD_SHORTCUTS: Readonly<Record<number, string>> = { 14: 'left', 15: 'right' };
 
 /** The tab `dir` steps away from `current`, wrapping around; from a screen outside the cycle, the first (next) or last (prev) tab. */
 export function cycleTab(tabs: readonly string[], current: string | null, dir: 1 | -1): string {

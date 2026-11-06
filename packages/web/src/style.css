@@ -281,7 +281,7 @@ table.data tbody td, table.data tbody th { border-bottom: 1px solid var(--border
 .suggest .icon { color: var(--text-tertiary); }
 .suggest-type { flex: 1; font-size: 14px; }
 .suggest-gain { font-weight: 600; font-size: 14px; min-width: 90px; text-align: right; }
-.btn.secondary .btn-key, .btn.danger .btn-key { background: #FFFFFF0F; border-color: #FFFFFF4D; color: var(--text-primary); }
+.btn.secondary .btn-key, .btn.ghost .btn-key, .btn.danger .btn-key { background: #FFFFFF0F; border-color: #FFFFFF4D; color: var(--text-primary); }
 
 /* ---------------------------------------------------------------- jobs */
 .jobs-view { width: 1000px; display: flex; flex-direction: column; gap: 28px; min-height: 0; }
@@ -394,3 +394,56 @@ input.upper { text-transform: uppercase; }
 .manual-card { display: flex; flex-direction: column; gap: 14px; padding: 6px 0 18px; border-bottom: 1px solid var(--border); }
 .manual-card:last-of-type { border-bottom: 0; }
 .history-view .filter select { max-width: none; }
+
+/* ---------------------------------------------------------------- leaderboard, duel, company sheet, recap */
+.lb-layout { display: flex; gap: 56px; width: 100%; min-height: 0; justify-content: space-between; }
+.lb-column { width: 880px; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; min-height: 0; }
+.lb-table-group { gap: 14px; min-height: 0; flex: 1 1 auto; }
+.lb-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.lb-selection { width: 340px; flex: none; display: flex; flex-direction: column; justify-content: flex-end; }
+.panel.lb-panel { min-height: 0; flex: 0 1 auto; }
+.selected-company .panel-body { gap: 18px; padding-top: 6px; }
+.small-value { font-size: 18px; }
+.rank { font: 600 15px var(--mono); color: var(--text-secondary); }
+.rank.me { color: var(--text-primary); }
+.seg:disabled { opacity: .45; cursor: default; }
+.duel-layout { width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; min-height: 0; }
+.duel-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
+.duel-header > .title-block { flex: 1; }
+.title-block.end { align-items: flex-end; text-align: right; }
+.duel-center { width: 200px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding-bottom: 2px; }
+.duel-vs { font: 500 20px var(--display); color: var(--text-tertiary); }
+.duel-lines { display: flex; flex-direction: column; gap: 16px; padding-top: 6px; }
+.duel-line { display: grid; grid-template-columns: 130px 1fr 210px 1fr 130px; align-items: center; gap: 12px; }
+.duel-value { font: 500 20px var(--display); font-variant-numeric: tabular-nums; }
+.duel-value:first-child { text-align: right; }
+.duel-value.win { color: var(--text-primary); }
+.duel-value:not(.win) { color: var(--text-secondary); }
+.duel-label { text-align: center; font-size: 14px; color: var(--text-secondary); }
+.duel-bar { height: 8px; border-radius: 4px; background: var(--neutral-soft); display: flex; }
+.duel-bar.left { justify-content: flex-end; }
+.duel-bar span { display: block; height: 100%; border-radius: 4px; background: var(--text-secondary); }
+.sheet-layout { display: flex; gap: 56px; width: 100%; min-height: 0; justify-content: space-between; }
+.sheet-profile { width: 560px; display: flex; flex-direction: column; gap: 22px; }
+.doctrine { max-width: 480px; font-size: 16px; }
+.network { display: flex; gap: 32px; padding-top: 6px; }
+.network > .col { flex: 1; gap: 12px; }
+.network > .col:last-child { flex: 1.7; }
+.type-row span:first-child { white-space: nowrap; }
+.row.between { justify-content: space-between; }
+.sheet-side { width: 420px; display: flex; flex-direction: column; gap: 16px; justify-content: flex-end; min-height: 0; }
+.contested-list { display: flex; flex-direction: column; gap: 10px; }
+.contested-list a { color: inherit; text-decoration: none; }
+.recap-layout { display: flex; gap: 56px; width: 100%; min-height: 0; justify-content: space-between; }
+.recap-column { width: 620px; display: flex; flex-direction: column; gap: 24px; }
+.recap-outcome { width: 540px; display: flex; flex-direction: column; justify-content: flex-end; gap: 18px; }
+.final-rank { display: flex; align-items: baseline; gap: 20px; }
+.rank-number { font: 600 96px/1 var(--display); }
+.rank-of { font-size: 20px; color: var(--text-secondary); }
+
+.duel-bar span { background: var(--text-tertiary); }
+.duel-bar span.win { background: var(--text-primary); }
+.lb-toolbar .filter select { min-width: 190px; }
+
+.note { color: var(--text-secondary); max-width: 560px; }
+.sheet-side { overflow: auto; }

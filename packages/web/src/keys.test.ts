@@ -60,6 +60,10 @@ test('hash routes round-trip their argument', () => {
 test('shortcuts are single letters or digits outside fields, lower-cased, never with modifiers', () => {
   assert.equal(shortcutOf(press('A'), false), 'a');
   assert.equal(shortcutOf(press('1'), false), '1');
+  assert.equal(shortcutOf(press('ArrowLeft'), false), 'left');
+  assert.equal(shortcutOf(press('ArrowRight'), false), 'right');
+  assert.equal(shortcutOf(press('ArrowLeft'), true), null);
+  assert.equal(shortcutOf(press('ArrowUp'), false), null);
   assert.equal(shortcutOf(press('a'), true), null);
   assert.equal(shortcutOf(press('a', { ctrlKey: true }), false), null);
   assert.equal(shortcutOf(press('Enter'), false), null);

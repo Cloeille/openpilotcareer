@@ -1,4 +1,4 @@
-import { PAD_BUTTONS, cycleTab, keyAction, shortcutOf, stepRow, type Action } from './keys.ts';
+import { PAD_BUTTONS, PAD_SHORTCUTS, cycleTab, keyAction, shortcutOf, stepRow, type Action } from './keys.ts';
 import { TABS, type Screen, type Tab } from './screen.ts';
 
 /** What the input layer needs to know about the screen on display. `null` = no HUD (login, loading). */
@@ -70,8 +70,13 @@ export function installInput(nav: Nav): void {
     if (!pad) { polling = false; held.clear(); return; }
     pad.buttons.forEach((b, i) => {
       const action = PAD_BUTTONS[i];
-      if (!action) return;
-      if (b.pressed && !held.has(i)) { held.add(i); run(action, nav, document.activeElement); }
+      const shortcut = PAD_SHORTCUTS[i];
+      if (!action && !shortcut) return;
+      if (b.pressed && !held.has(i)) {
+        held.add(i);
+        if (action) run(action, nav, document.activeElement);
+        else nav.state()?.keys?.[shortcut!]?.();
+      }
       else if (!b.pressed) held.delete(i);
     });
     requestAnimationFrame(poll);

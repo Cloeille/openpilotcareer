@@ -2,7 +2,11 @@ import { parseHash } from './keys.ts';
 import { t } from './i18n.ts';
 import type { Ctx, Screen, ScreenFn, Tab } from './screen.ts';
 import { pages } from './pages.ts';
+import { companySheet } from './screens/company-sheet.ts';
 import { dashboard } from './screens/dashboard.ts';
+import { duelScreen } from './screens/duel.ts';
+import { leaderboard } from './screens/leaderboard.ts';
+import { recap } from './screens/recap.ts';
 import { buy } from './screens/buy.ts';
 import { catalogue } from './screens/catalogue.ts';
 import { custom } from './screens/custom.ts';
@@ -34,7 +38,7 @@ export const routes: Record<string, ScreenFn> = {
   simbrief,
   fleet, catalogue, buy, hubs, custom, company: newCompany,
   history, flight: flightDetail, manual,
-  leaderboard: legacy('leaderboard', 'leaderboard', 'leaderboard'),
+  leaderboard, duel: duelScreen, 'company-sheet': companySheet, recap,
   settings: legacy('settings', 'settings', 'settings'),
 };
 
