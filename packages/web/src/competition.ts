@@ -14,6 +14,13 @@ async function load(): Promise<Rivals> {
   return { profiles, types };
 }
 
+/** The AI companies' profiles and the aircraft types they own (loaded once per server, shared with the contested badges). */
+export async function aiRivals(): Promise<Rivals> {
+  let p = cache.get(session.server);
+  if (!p) { p = load(); cache.set(session.server, p); }
+  try { return await p; } catch { cache.delete(session.server); return { profiles: [], types: new Map() }; }
+}
+
 /** Ids of the given jobs that an AI company could take. Loaded once per server and session; a failure means "unknown", shown as nothing. */
 export async function contestedIds(jobs: Job[]): Promise<Set<string>> {
   let p = cache.get(session.server);

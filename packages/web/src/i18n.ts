@@ -15,10 +15,14 @@ export function pickLang(stored: string | null, preferred: readonly string[]): L
   return 'en';
 }
 
+/** French elision before the months that start with a vowel: "saison de octobre" -> "saison d’octobre". Only month names, so no other text is touched. */
+export const elide = (text: string): string => text.replace(/\b([Dd])e (?=(?:avril|août|octobre)\b)/g, '$1’');
+
 /** Look a key up in `lang`, falling back to English, then to the key itself; `{name}` placeholders are filled from `vars`. */
 export function translate(lang: Lang, key: Key, vars?: Record<string, string | number>): string {
   const text = dicts[lang][key] ?? en[key] ?? key;
-  return vars ? text.replace(/\{(\w+)\}/g, (m, k: string) => (k in vars ? String(vars[k]) : m)) : text;
+  const filled = vars ? text.replace(/\{(\w+)\}/g, (m, k: string) => (k in vars ? String(vars[k]) : m)) : text;
+  return lang === 'fr' ? elide(filled) : filled;
 }
 
 /** Plural form chosen with Intl.PluralRules: looks up `${base}.${category}`, then `${base}.other`. `{n}` is filled in. */

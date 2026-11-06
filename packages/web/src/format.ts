@@ -32,6 +32,7 @@ export function makeFormat(lang: Lang) {
     dateTime: (ms: number): string => `${day.format(ms)} · ${zulu.format(ms)}Z`,
     nm: (n: number): string => `${num(n)}${NBSP}NM`,
     kg: (n: number): string => `${num(n)}${NBSP}kg`,
+    hours: (n: number): string => `${num(n, 1)}${NBSP}h`,
     kt: (n: number): string => `${num(n)}${NBSP}kt`,
     /** Fraction 0..1 as `72 %`. */
     percent: (fraction: number): string => `${num(Math.round(fraction * 100))}${NBSP}%`,
@@ -41,6 +42,10 @@ export function makeFormat(lang: Lang) {
       const end = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1);
       return { month: new Intl.DateTimeFormat(locale, { timeZone: 'UTC', month: 'long' }).format(now), daysLeft: Math.floor((end - now) / 86_400_000) };
     },
+    /** Long month name of a `YYYY-MM` season id: `novembre`. */
+    seasonMonth: (season: string): string => new Intl.DateTimeFormat(locale, { timeZone: 'UTC', month: 'long' }).format(Date.parse(`${season}-15T12:00:00Z`)),
+    /** Last instant's calendar date of a `YYYY-MM` season: `30 nov.`. */
+    seasonEnd: (season: string): string => new Intl.DateTimeFormat(locale, { timeZone: 'UTC', day: 'numeric', month: 'long' }).format(Date.UTC(Number(season.slice(0, 4)), Number(season.slice(5, 7)), 0)),
     /** Elapsed time, coarse: `12 s`, `3 min`, `2 h`. */
     elapsed: (ms: number): string => {
       const s = Math.max(0, Math.round(ms / 1000));

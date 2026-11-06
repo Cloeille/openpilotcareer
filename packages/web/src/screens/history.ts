@@ -4,7 +4,7 @@ import { button, dataTable, keycap, segments } from '../components.ts';
 import { loadFlights, loadLedger } from '../flights-data.ts';
 import { flightBadge } from '../flight-view.ts';
 import { fmt } from '../format.ts';
-import { getLang, t, tp } from '../i18n.ts';
+import { t, tp } from '../i18n.ts';
 import { loadLabel } from '../job-view.ts';
 import { hashFor } from '../keys.ts';
 import type { Key } from '../messages.ts';
@@ -16,8 +16,6 @@ const txKind = (kind: string): string => (TX_KIND[kind] ? t(TX_KIND[kind]!) : ki
 
 let filter: FlightFilter = { ...NO_FILTER };
 let view: 'flights' | 'ledger' = 'flights';
-
-const monthName = (season: string): string => new Intl.DateTimeFormat(getLang(), { timeZone: 'UTC', month: 'long' }).format(Date.parse(`${season}-15T12:00:00Z`));
 
 export async function history(ctx: Ctx): Promise<Screen> {
   const { snap, go } = ctx;
@@ -72,7 +70,7 @@ export async function history(ctx: Ctx): Promise<Screen> {
     h('div', { class: 'title-row' },
       h('div', { class: 'title-block' }, h('div', { class: 'status-line' }, t('hist.status', { company: me.company.name })), h('h1', { class: 'title' }, t('hist.title'))),
       h('div', { class: 'facts' },
-        fact(t('hist.factNet', { season: monthName(current) }), fm.money(totals.net)),
+        fact(t('hist.factNet', { season: fm.seasonMonth(current) }), fm.money(totals.net)),
         fact(t('hist.factVerified'), t('hist.factVerifiedV', { v: totals.verified, n: totals.flown })))),
     h('section', { class: 'panel jobs-panel', 'aria-label': t('hist.title') },
       h('div', { class: 'filter-bar' },
@@ -82,7 +80,7 @@ export async function history(ctx: Ctx): Promise<Screen> {
         h('div', { class: 'filters' },
           segments(t('hist.views'), [{ value: 'flights', label: t('hist.view.flights') }, { value: 'ledger', label: t('hist.view.ledger') }], view, (v) => { view = v; window.dispatchEvent(new Event('opc:redraw')); }),
           view === 'flights' ? select(t('hist.col.aircraft'), 'f-aircraft', [['', t('hist.allFleet')], ...fleetIds.map((id): [string, string] => [String(id), aircraftLabel(id)])], filter.aircraftId === null ? '' : String(filter.aircraftId), (v) => set({ aircraftId: v === '' ? null : Number(v) })) : null,
-          view === 'flights' ? select(t('hist.season', { month: '' }), 'f-season', [['', t('hist.allSeasons')], ...seasons.map((s): [string, string] => [s, t('hist.season', { month: monthName(s) })])], filter.season ?? '', (v) => set({ season: v === '' ? null : v })) : null)),
+          view === 'flights' ? select(t('hist.season', { month: '' }), 'f-season', [['', t('hist.allSeasons')], ...seasons.map((s): [string, string] => [s, t('hist.season', { month: fm.seasonMonth(s) })])], filter.season ?? '', (v) => set({ season: v === '' ? null : v })) : null)),
       body,
       view === 'flights' && shown.length > 0 ? h('p', { class: 'list-footer' }, tp('hist.count', shown.length)) : null),
     h('div', { class: 'row' }, keycap('N'), button(t('hist.manual'), { variant: 'ghost', icon: 'plus', onclick: () => go('#manual') })));

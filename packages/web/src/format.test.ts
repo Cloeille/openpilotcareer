@@ -80,3 +80,15 @@ test('dates are UTC like the clock beside them: 23:18Z stays on its own day', ()
   assert.equal(fr.dateTime(late), '4 nov. · 23:18Z');
   assert.equal(en.date(late), '4 Nov');
 });
+
+test('season ids give their month name and last day', () => {
+  assert.equal(fr.seasonMonth('2026-11'), 'novembre');
+  assert.equal(en.seasonMonth('2026-02'), 'February');
+  assert.equal(fr.seasonEnd('2026-11'), '30 novembre');
+  assert.equal(en.seasonEnd('2028-02'), '29 February');
+});
+
+test('hours carry their unit', () => {
+  assert.equal(fr.hours(68.6), `68,6${NBSP}h`);
+  assert.equal(en.hours(1200), `1,200.0${NBSP}h`);
+});

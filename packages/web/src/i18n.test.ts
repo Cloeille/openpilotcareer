@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { pickLang, translate, translatePlural } from './i18n.ts';
+import { elide, pickLang, translate, translatePlural } from './i18n.ts';
 import { en, fr } from './messages.ts';
 
 test('a stored choice wins over the browser language', () => {
@@ -46,4 +46,14 @@ test('both dictionaries have exactly the same keys and the same placeholders', (
   assert.deepEqual(Object.keys(fr).sort(), Object.keys(en).sort());
   const vars = (s: string): string[] => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]!).sort();
   for (const k of Object.keys(en) as (keyof typeof en)[]) assert.deepEqual(vars(fr[k]), vars(en[k]), k);
+});
+
+test('French elides "de" before the vowel months only', () => {
+  assert.equal(elide('Saison de octobre'), 'Saison d’octobre');
+  assert.equal(elide('Fin de la saison de avril'), 'Fin de la saison d’avril');
+  assert.equal(elide('Podium de août'), 'Podium d’août');
+  assert.equal(elide('Saison de novembre'), 'Saison de novembre');
+  assert.equal(elide('décembre'), 'décembre');
+  assert.equal(translate('fr', 'hud.season', { month: 'octobre' }), 'Saison d’octobre');
+  assert.equal(translate('en', 'hud.season', { month: 'October' }), 'October season');
 });
