@@ -1,10 +1,10 @@
 // Airport lookup for the bridge: the same data/airports.json the server uses, so ICAO codes always agree.
-// ponytail: the bridge runs from a repository checkout (it reads ../../../data); a packaged build would bundle the file.
-import { readFileSync } from 'node:fs';
+// The JSON is imported, not read from disk, so the single-file Windows build (scripts/build-win.ts) carries it inside the exe.
 import { distanceNm } from '@opc/shared';
+import airportsFile from '../../../data/airports.json' with { type: 'json' };
 
 type Row = [icao: string, name: string, lat: number, lon: number, ...rest: unknown[]];
-const rows = (JSON.parse(readFileSync(new URL('../../../data/airports.json', import.meta.url), 'utf8')) as { rows: Row[] }).rows;
+const rows = (airportsFile as unknown as { rows: Row[] }).rows;
 
 export const airportPosition = (icao: string): { lat: number; lon: number } | null => {
   const r = rows.find((x) => x[0] === icao);
