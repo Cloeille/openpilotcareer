@@ -22,7 +22,7 @@ Types:
 - `Realism = { preset: 'relaxed'|'balanced'|'hardcore'|'custom'; toggles: Record<RealismToggle, boolean>; payModifierPct: number; repModifierPct: number; enforced: Record<RealismToggle, boolean> }`. `enforced[t]` is false for a toggle the server stores but cannot apply yet. That is the case for `delayPenalties` (jobs have no schedule) and `realWeatherRequired` (no weather data). The UI must say "pas encore appliqué" for those.
 - `Onboarding = { completed: boolean; step: 1|2|3|4|5|6; startMode: 'airliner'|'hardcore'|null; companyId: number|null; draft: Record<string, unknown> }`. `draft` is client-owned JSON of at most 8 KB, for "Enregistrer et quitter".
 - `Company` gains these fields: `code: string|null` (3 letters, unique per server, immutable once set), `callsign: string|null` (3 to 12 letters A-Z, immutable), `liveryColor: string|null` (`#RRGGBB`), `startMode: 'airliner'|'hardcore'|null`, `realism: Realism`.
-- `Me` gains `onboarding: Onboarding`. `Me.company` becomes `Company | null`, and is null while the player has no company yet.
+- `Me` type is UNCHANGED (company stays non-null). A user without any company gets `409 no_company` from `GET /me` and from every company-scoped route (never a crash). The web client calls `GET /onboarding` right after login/register and routes to the onboarding while `completed` is false.
 
 Routes:
 - `POST /auth/register` accepts `onboarding?: boolean`. When it is true, no company is created. The web app always sends true. Without it, today's behaviour stays, so existing tests and the smoke test keep passing.
@@ -85,3 +85,10 @@ Wear accrues per block hour by category, and only when `wearEnabled` is true. Th
 - `POST /flights/:id/live` (API key) takes a `LiveSample` and returns 204. It is rate-limited to 1 per second per flight, and the body is validated with zod. Only the latest sample is kept in memory per flight, plus `last_live_at` on the flight.
 - `GET /flights/:id/live` (session, ownership) returns `{ sample: LiveSample|null; receivedAt: number|null; bridgeLost: boolean; remainingNm: number|null; etaAt: number|null }`. `bridgeLost` is true when an active flight has received no sample for more than 30 s.
 - The bridge `GET http://127.0.0.1:7878/status` gains `sim: 'connected'|'waiting'|'unavailable'` and `version: string`. The web onboarding step 5 reads it directly from the player's PC (CORS `*` is already sent).
+
+## Merge plan (orchestrator only)
+Merge order into `career-v2-base`: be-start, be-finance, be-live, fe-onboarding, fe-finance, fe-live, bridge, efb. Conflicts in `packages/web/src/messages.ts` and `routes.ts` are expected (each lot appends): resolve by keeping both sides.
+To keep conflicts trivial every lot follows these rules:
+- Server: put new routes in a NEW file `packages/server/src/routes-<lot>.ts` exporting `register<Lot>(app, ctx)`; touch `app.ts` with ONE line that calls it. New tables in a NEW migration constant appended to `MIGRATIONS` in `db.ts` (be-start = SCHEMA_V3, be-finance = SCHEMA_V4, be-live = SCHEMA_V5 — fixed numbering, even if another lot merges first). Shared types in a NEW file `packages/shared/src/<lot>.ts` re-exported by ONE line in `index.ts`.
+- Web: new screens in NEW files under `packages/web/src/screens/`; add routes with ONE line each in `routes.ts`; add strings ONLY in a block `// ---- <lot>` appended at the end of the `table` in `messages.ts`.
+- Frontend lots code against this contract with a typed client module `packages/web/src/api-<lot>.ts`; while the backend lot is not merged, test pure view-models with fixtures (no live server needed).
