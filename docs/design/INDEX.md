@@ -1,6 +1,6 @@
-# Design index (OpenHangar mockup, pen.dev, 6 Nov 2026)
+# Design index (OpenHangar mockup v2, pen.dev snapshot of 6 Nov 2026, etag cb9180b7)
 
-Source: docs/design/openhangar.pen. Backdrops: docs/design/assets/*.webp (converted from the pen images/generated*.png). Scripts: docs/design/scripts/{aircraft-schematic,cabin-layout}.js (Pen script nodes: `pencil.width/height/input` globals, adapt to DOM/canvas).
+Source: docs/design/openhangar.pen. v2 adds row 02 Onboarding (6 steps + HUD/Onboarding), the Location · contrat (lease contract) screen and the Switch component, and changes Catalogue d'avions and Flotte · nouvelle compagnie (lease-first). Backdrops: docs/design/assets/*.webp. Scripts: docs/design/scripts/{aircraft-schematic,cabin-layout}.js.
 
 | Frame | Extract | Size |
 |---|---|---|
@@ -57,19 +57,30 @@ Source: docs/design/openhangar.pen. Backdrops: docs/design/assets/*.webp (conver
 | Job board · aucun job disponible | screens/job-board-aucun-job-disponible.md | 18 lines |
 | Détail d'un job · pris par une IA | screens/detail-d-un-job-pris-par-une-ia.md | 24 lines |
 | Achat · fonds insuffisants | screens/achat-fonds-insuffisants.md | 19 lines |
-| Flotte · nouvelle compagnie | screens/flotte-nouvelle-compagnie.md | 19 lines |
+| Flotte · nouvelle compagnie | screens/flotte-nouvelle-compagnie.md | 18 lines |
 | Détail d'un vol · rejeté | screens/detail-d-un-vol-rejete.md | 50 lines |
 | Historique · saisie manuelle d'un vol | screens/historique-saisie-manuelle-d-un-vol.md | 21 lines |
 | Saison · récapitulatif de fin | screens/saison-recapitulatif-de-fin.md | 43 lines |
 | Classement · nouvelle saison | screens/classement-nouvelle-saison.md | 35 lines |
 | Section · 01 Accès & réglages | screens/section-01-acces-reglages.md | 7 lines |
-| Section · 02 Tableau de bord & vol en cours | screens/section-02-tableau-de-bord-vol-en-cours.md | 7 lines |
-| Section · 03 Jobs | screens/section-03-jobs.md | 7 lines |
-| Section · 04 Flotte | screens/section-04-flotte.md | 7 lines |
-| Section · 05 Historique des vols | screens/section-05-historique-des-vols.md | 7 lines |
-| Section · 06 Compétition IA | screens/section-06-competition-ia.md | 7 lines |
-| Section · 07 Références pour les devs | screens/section-07-references-pour-les-devs.md | 7 lines |
-| Carte des parcours & navigation clavier | screens/carte-des-parcours-navigation-clavier.md | 374 lines |
+| Section · 03 Tableau de bord & vol en cours | screens/section-03-tableau-de-bord-vol-en-cours.md | 7 lines |
+| Section · 04 Jobs | screens/section-04-jobs.md | 7 lines |
+| Section · 05 Flotte | screens/section-05-flotte.md | 7 lines |
+| Section · 06 Historique des vols | screens/section-06-historique-des-vols.md | 7 lines |
+| Section · 07 Compétition IA | screens/section-07-competition-ia.md | 7 lines |
+| Section · 08 Références pour les devs | screens/section-08-references-pour-les-devs.md | 7 lines |
+| Carte des parcours & navigation clavier | screens/carte-des-parcours-navigation-clavier.md | 490 lines |
 | Section · 00 Lisez-moi | screens/section-00-lisez-moi.md | 7 lines |
 | Section · — Composants | screens/section-composants.md | 7 lines |
-| Lisez-moi · maquette OpenHangar | screens/lisez-moi-maquette-openhangar.md | 77 lines |
+| Lisez-moi · maquette OpenHangar | screens/lisez-moi-maquette-openhangar.md | 80 lines |
+| Section · 02 Onboarding | screens/section-02-onboarding.md | 7 lines |
+| HUD/Onboarding | screens/hud-onboarding.md | 48 lines |
+| Onboarding · 1 choix du départ | screens/onboarding-1-choix-du-depart.md | 83 lines |
+| Onboarding · 2 compagnie & hub | screens/onboarding-2-compagnie-hub.md | 18 lines |
+| Onboarding · 3a premier avion (airliner) | screens/onboarding-3a-premier-avion-airliner.md | 20 lines |
+| Onboarding · 3b premier avion (hardcore) | screens/onboarding-3b-premier-avion-hardcore.md | 109 lines |
+| Onboarding · 4 réalisme & difficulté | screens/onboarding-4-realisme-difficulte.md | 63 lines |
+| Onboarding · 5 pont simulateur | screens/onboarding-5-pont-simulateur.md | 71 lines |
+| Onboarding · 6 récapitulatif & premier job | screens/onboarding-6-recapitulatif-premier-job.md | 77 lines |
+| Location · contrat | screens/location-contrat.md | 18 lines |
+| Switch | screens/switch.md | 4 lines |

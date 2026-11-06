@@ -2,10 +2,10 @@
 
 Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
 
-- frame «Vol en cours · systèmes» width=1600 height=900 layout="none" fill="$bg" clip=true x=5100 y=1900
-  - frame «Backdrop» width=1600 height=900 fill=["#07090C", {"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.3, "height": 1.1}, "colors... x=0 y=0
-  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.6, "height": 1.6}, "colors": [{"color"... x=0 y=0
-  - frame «Content» width=1600 height=778 layout="vertical" gap=22 padding=[28, 32, 24, 32] x=0 y=76
+- frame «Vol en cours · systèmes» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Backdrop» width=1600 height=900 fill=["#07090C", {"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.3, "height": 1.1}, "colors...
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.6, "height": 1.6}, "colors": [{"color"...
+  - frame «Content» width=1600 height=778 layout="vertical" gap=22 padding=[28, 32, 24, 32]
     - frame «Live Header» width="fill_container" alignItems="end" justifyContent="space_between"
       - frame «Title Block» layout="vertical" gap=6
         - frame «Status» gap=8 alignItems="center"
@@ -22,10 +22,10 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
           - frame «Engine Dials» gap=56
             - frame «Moteur 1» layout="vertical" gap=16 alignItems="center"
               - frame «Dial» width=160 height=160 layout="none"
-                - ellipse «Track» width=160 height=160 fill="#FFFFFF1A" x=0 y=0
-                - ellipse «Redline» width=160 height=160 fill="$danger" opacity=0.5 x=0 y=0
-                - ellipse «Value Arc» width=160 height=160 fill="$text-primary" x=0 y=0
-                - frame «Dial Center» width=160 height=160 layout="vertical" alignItems="center" justifyContent="center" x=0 y=0
+                - ellipse «Track» width=160 height=160 fill="#FFFFFF1A"
+                - ellipse «Redline» width=160 height=160 fill="$danger" opacity=0.5
+                - ellipse «Value Arc» width=160 height=160 fill="$text-primary"
+                - frame «Dial Center» width=160 height=160 layout="vertical" alignItems="center" justifyContent="center"
                   - text «Dial Value» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="500"  TEXT: 84,2
                   - text «Dial Unit» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: % couple
               - text «Engine Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Moteur 1
@@ -41,10 +41,10 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
                   - text «Readout Value» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="500"  TEXT: 62 psi
             - frame «Moteur 2» layout="vertical" gap=16 alignItems="center"
               - frame «Dial» width=160 height=160 layout="none"
-                - ellipse «Track» width=160 height=160 fill="#FFFFFF1A" x=0 y=0
-                - ellipse «Redline» width=160 height=160 fill="$danger" opacity=0.5 x=0 y=0
-                - ellipse «Value Arc» width=160 height=160 fill="$text-primary" x=0 y=0
-                - frame «Dial Center» width=160 height=160 layout="vertical" alignItems="center" justifyContent="center" x=0 y=0
+                - ellipse «Track» width=160 height=160 fill="#FFFFFF1A"
+                - ellipse «Redline» width=160 height=160 fill="$danger" opacity=0.5
+                - ellipse «Value Arc» width=160 height=160 fill="$text-primary"
+                - frame «Dial Center» width=160 height=160 layout="vertical" alignItems="center" justifyContent="center"
                   - text «Dial Value» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="500"  TEXT: 84,0
                   - text «Dial Unit» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: % couple
               - text «Engine Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Moteur 2
@@ -107,30 +107,30 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
           - frame «Wear Rings» gap=40
             - frame «Wear · Cellule» layout="vertical" gap=10 alignItems="center"
               - frame «Ring» width=78 height=78 layout="none"
-                - ellipse «Track» width=78 height=78 fill="#FFFFFF1A" x=0 y=0
-                - ellipse «Value Arc» width=78 height=78 fill="$text-primary" x=0 y=0
-                - frame «Ring Center» width=78 height=78 alignItems="center" justifyContent="center" x=0 y=0
+                - ellipse «Track» width=78 height=78 fill="#FFFFFF1A"
+                - ellipse «Value Arc» width=78 height=78 fill="$text-primary"
+                - frame «Ring Center» width=78 height=78 alignItems="center" justifyContent="center"
                   - text «Ring Value» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: 18 %
               - text «Part» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Cellule
             - frame «Wear · Moteurs» layout="vertical" gap=10 alignItems="center"
               - frame «Ring» width=78 height=78 layout="none"
-                - ellipse «Track» width=78 height=78 fill="#FFFFFF1A" x=0 y=0
-                - ellipse «Value Arc» width=78 height=78 fill="$text-primary" x=0 y=0
-                - frame «Ring Center» width=78 height=78 alignItems="center" justifyContent="center" x=0 y=0
+                - ellipse «Track» width=78 height=78 fill="#FFFFFF1A"
+                - ellipse «Value Arc» width=78 height=78 fill="$text-primary"
+                - frame «Ring Center» width=78 height=78 alignItems="center" justifyContent="center"
                   - text «Ring Value» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: 24 %
               - text «Part» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Moteurs
             - frame «Wear · Trains» layout="vertical" gap=10 alignItems="center"
               - frame «Ring» width=78 height=78 layout="none"
-                - ellipse «Track» width=78 height=78 fill="#FFFFFF1A" x=0 y=0
-                - ellipse «Value Arc» width=78 height=78 fill="$text-primary" x=0 y=0
-                - frame «Ring Center» width=78 height=78 alignItems="center" justifyContent="center" x=0 y=0
+                - ellipse «Track» width=78 height=78 fill="#FFFFFF1A"
+                - ellipse «Value Arc» width=78 height=78 fill="$text-primary"
+                - frame «Ring Center» width=78 height=78 alignItems="center" justifyContent="center"
                   - text «Ring Value» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: 21 %
               - text «Part» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Trains
             - frame «Wear · Pneus & freins» layout="vertical" gap=10 alignItems="center"
               - frame «Ring» width=78 height=78 layout="none"
-                - ellipse «Track» width=78 height=78 fill="#FFFFFF1A" x=0 y=0
-                - ellipse «Value Arc» width=78 height=78 fill="$warning" x=0 y=0
-                - frame «Ring Center» width=78 height=78 alignItems="center" justifyContent="center" x=0 y=0
+                - ellipse «Track» width=78 height=78 fill="#FFFFFF1A"
+                - ellipse «Value Arc» width=78 height=78 fill="$warning"
+                - frame «Ring Center» width=78 height=78 alignItems="center" justifyContent="center"
                   - text «Ring Value» fill="$warning" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: 37 %
               - text «Part» fill="$warning" fontFamily="$font-ui" fontSize=13  TEXT: Pneus & freins
     - frame «Verification Checks» width="fill_container" gap=36 alignItems="center"
@@ -147,5 +147,5 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
       - frame «Check · Sauts de position» gap=7 alignItems="center"
         - icon «Ok» width=15 height=15 fill="$success" icon="circle-check"
         - text «Check» fill="$text-primary" fontFamily="$font-ui" fontSize=14  TEXT: Sauts de position
-  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": "#00000000"}, "Ely3m": {"fill": "$text-tertiary"}, "W1uf3B": {"stroke": "$text-primary"}, "DbACz": {"fill": "$text-p... x=0 y=0  (instance of «HUD/Top»)
-  - ref «HUD Bottom» ref="t2yhjE" descendants={"D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"content": "Tableau de bord"}, "msx5l/Mw53t": {"content": "V"}, "sA5qV": {"content": "Cha... x=0 y=854  (instance of «HUD/Bottom»)
+  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": "#00000000"}, "Ely3m": {"fill": "$text-tertiary"}, "W1uf3B": {"stroke": "$text-primary"}, "DbACz": {"fill": "$text-p...  (instance of «HUD/Top»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"content": "Tableau de bord"}, "msx5l/Mw53t": {"content": "V"}, "sA5qV": {"content": "Cha...  (instance of «HUD/Bottom»)

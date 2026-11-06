@@ -1,0 +1,73 @@
+# Onboarding · 5 pont simulateur
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Onboarding · 5 pont simulateur» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-13.png", "mode": "cover"}
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"...
+  - rectangle «Readability Scrim» width=1600 height=900 fill={"type": "gradient", "gradientType": "linear", "enabled": true, "rotation": 270, "size": {"height": 1}, "colors": [{"color": "$scene-scri...
+  - frame «Content» width=1600 height=778 layout="vertical" padding=[40, 64, 36, 64] justifyContent="space_between"
+    - frame «Body» width="fill_container" gap=72
+      - frame «Left Column» width=600 layout="vertical" gap=40
+        - frame «Title Block» width="fill_container" layout="vertical" gap=8
+          - text «Overline» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Microsoft Flight Simulator 2020 ou 2024
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=52 fontWeight="600"  TEXT: Relie ton simulateur
+          - text «Sub» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: OpenHangar Bridge lit tes vols dans MSFS via SimConnect et les envoie au serveur. C'est ce qui les rend vérifiés, donc payés au tarif plein.
+        - frame «Steps» width="fill_container" layout="vertical" gap=28
+          - frame «Step · Installer le pont» width="fill_container" gap=16
+            - frame «Index» width=26 height=26 alignItems="center" justifyContent="center" fill="$surface-selected" cornerRadius=13
+              - icon «Check» width=13 height=13 fill="$text-primary" icon="check"
+            - frame «Step Body» width="fill_container" layout="vertical" gap=12
+              - frame «Step Head» width="fill_container" layout="vertical" gap=4
+                - text «Step Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Installe OpenHangar Bridge
+                - text «Step Detail» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Application compagnon pour Windows 10 ou 11, à lancer avant ton simulateur.
+              - frame «Download Row» gap=16 alignItems="center"
+                - ref «Button · Télécharger» ref="v6he7" descendants={"RU69u": {"icon": "download"}, "BxHlG": {"content": "Télécharger pour Windows"}}  (instance of «Button/Secondary»)
+                - text «File Info» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Version 0.6.2 · 18 Mo
+          - frame «Step · Clé API» width="fill_container" gap=16
+            - frame «Index» width=26 height=26 alignItems="center" justifyContent="center" fill="$surface-selected" cornerRadius=13
+              - icon «Check» width=13 height=13 fill="$text-primary" icon="check"
+            - frame «Step Body» width="fill_container" layout="vertical" gap=12
+              - frame «Step Head» width="fill_container" layout="vertical" gap=4
+                - text «Step Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Colle ta clé dans le pont
+                - text «Step Detail» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: On l'a créée pour toi. Dans OpenHangar Bridge, ouvre Compte › Clé API et colle-la.
+              - frame «Reveal · Clé créée» width="fill_container" layout="vertical" gap=12 padding=[16, 18, 14, 18] fill="$surface-sunken" cornerRadius=4
+                - frame «Reveal Header» width="fill_container" gap=8 alignItems="center"
+                  - icon «Icon» width=14 height=14 fill="$accent" icon="key-round"
+                  - text «Status» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="600"  TEXT: Clé « PC principal » créée automatiquement
+                  - text «Once» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Affichée une seule fois
+                - frame «Key Row» width="fill_container" gap=8 alignItems="center"
+                  - frame «Key Box» width="fill_container" height=42 padding=[0, 12] alignItems="center" fill="$bg" stroke="$border" strokeWidth=1 cornerRadius=3
+                    - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="normal"  TEXT: oh_sk_7Hq2Lm9RtV4xKc8NwP3aZe5JyB6dF1
+                  - ref «Button · Copier» ref="Im067" descendants={"h8MyJ": {"content": "Copier"}, "zU1n6": {"content": "C"}}  (instance of «Button/Primary»)
+                - frame «Warning Row» width="fill_container" gap=10 alignItems="center"
+                  - icon «Icon» width=14 height=14 fill="$warning" icon="triangle-alert"
+                  - text «Message» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Perdue ? Révoque-la et crées-en une autre dans Réglages › Clés API.
+                  - ref «Button · J'ai copié» height=30 ref="n9Pulf" descendants={"RUCj0": {"content": "J'ai copié", "fontSize": 13}, "xcWI8": {"icon": "check", "width": 14, "height": 14}}  (instance of «Button/Ghost»)
+      - frame «Right Column» width="fill_container" layout="vertical" gap=16
+        - ref «Panel · Test de connexion» width="fill_container" ref="bibzm" descendants={"uBW0Z": {"padding": [24, 28, 14, 28]}, "e0veVE": {"content": "Test de connexion", "fontSize": 20}, "A9Tx2K": {"id": "t7M0J", "type": "r...  (instance of «Panel»)
+        - frame «Other States» width="fill_container" gap=16
+          - frame «State · Connecté» width="fill_container" layout="vertical" gap=8 padding=[16, 20, 18, 20] fill="$surface-sunken" stroke="$border" strokeWidth=1 cornerRadius=6
+            - frame «When» gap=8 alignItems="center"
+              - icon «Icon» width=15 height=15 fill="$success" icon="circle-check"
+              - text «When Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Si le test réussit
+            - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Connecté à MSFS 2024
+            - text «Message» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Tes vols sont vérifiés automatiquement et « Continuer » s'active.
+          - frame «State · Échec» width="fill_container" layout="vertical" gap=8 padding=[16, 20, 18, 20] fill="$surface-sunken" stroke="$border" strokeWidth=1 cornerRadius=6
+            - frame «When» gap=8 alignItems="center"
+              - icon «Icon» width=15 height=15 fill="$danger" icon="circle-x"
+              - text «When Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Si le test échoue
+            - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Pont injoignable
+            - text «Message» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Aucune réponse en 60 s. Vérifie que l'app est lancée et autorisée par le pare-feu Windows.
+    - frame «Footer» width="fill_container" alignItems="center" justifyContent="space_between"
+      - frame «Skip» gap=20 alignItems="center"
+        - ref «Button · Passer» ref="n9Pulf" descendants={"RUCj0": {"content": "Passer, je connecterai plus tard"}}  (instance of «Button/Ghost»)
+        - frame «Skip Note» gap=8 alignItems="center"
+          - text «Note Start» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Tes vols seront
+          - ref «Badge · Non vérifié» ref="I8wiU"  (instance of «Badge/Non vérifié»)
+          - text «Note End» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: et payés à 60 % de leur gain net.
+      - frame «Continue Group» gap=16 alignItems="center"
+        - text «Continue Hint» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Disponible une fois connecté
+        - ref «Continue · indisponible» opacity=0.4 ref="Im067" descendants={"h8MyJ": {"content": "Continuer"}}  (instance of «Button/Primary»)
+  - ref «HUD Onboarding» ref="uCkER" descendants={"TZdq9": {"fill": "#FFFFFF1F", "stroke": "#00000000"}, "cyUlI": {"enabled": false}, "R9K1Zp": {"enabled": true}, "eP7CE": {"fill": "$tex...  (instance of «HUD/Onboarding»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"TDwDs": {"fill": "$info"}, "GPYhN": {"content": "En attente du simulateur", "fill": "$info"}, "D3kro/Mw53t": {"content": "Échap"}, "XuZ...  (instance of «HUD/Bottom»)

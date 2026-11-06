@@ -2,10 +2,10 @@
 
 Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
 
-- frame «Panneau en jeu · EFB» width=1600 height=900 layout="none" fill="$bg" clip=true x=6800 y=1900
-  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-13.png", "mode": "cover"} x=0 y=0
-  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.4, "height": 1.4}, "colors": [{"color"... x=0 y=0
-  - frame «Sim Toolbar» gap=4 padding=5 alignItems="center" fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=4 effect={"type": "background_blur", "radius": 20} x=650 y=20
+- frame «Panneau en jeu · EFB» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-13.png", "mode": "cover"}
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.4, "height": 1.4}, "colors": [{"color"...
+  - frame «Sim Toolbar» gap=4 padding=5 alignItems="center" fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=4 effect={"type": "background_blur", "radius": 20}
     - frame «Tool» width=38 height=38 alignItems="center" justifyContent="center" cornerRadius=3
       - icon «Tool Icon» width=18 height=18 fill="$text-secondary" icon="map"
     - frame «Tool» width=38 height=38 alignItems="center" justifyContent="center" cornerRadius=3
@@ -20,10 +20,10 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
       - icon «Tool Icon» width=18 height=18 fill="$text-secondary" icon="camera"
     - frame «Tool» width=38 height=38 alignItems="center" justifyContent="center" cornerRadius=3
       - icon «Tool Icon» width=18 height=18 fill="$text-secondary" icon="settings"
-  - frame «Context Caption» layout="vertical" gap=4 x=40 y=36
+  - frame «Context Caption» layout="vertical" gap=4
     - text «Caption Title» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="600"  TEXT: Panneau en jeu
     - text «Caption Meta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: MSFS 2024 · dossier Community · openhangar-panel 0.3
-  - frame «EFB Tablet» width=820 height=590 padding=14 fill="#101215" stroke="#2A2E35" strokeWidth=2 cornerRadius=24 effect={"type": "shadow", "shadowType": "outer", "color": "#000000B3", "offset": {"x": 0, "y": 30}, "blur": 60} x=690 y=150
+  - frame «EFB Tablet» width=820 height=590 padding=14 fill="#101215" stroke="#2A2E35" strokeWidth=2 cornerRadius=24 effect={"type": "shadow", "shadowType": "outer", "color": "#000000B3", "offset": {"x": 0, "y": 30}, "blur": 60}
     - frame «Screen» width="fill_container" height="fill_container" layout="vertical" fill="#07090C" stroke="#000000" strokeWidth=1 cornerRadius=12 clip=true
       - frame «Status Bar» width="fill_container" height=32 padding=[0, 16] alignItems="center" justifyContent="space_between"
         - frame «Status Left» gap=8 alignItems="center"
@@ -31,7 +31,7 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
             - icon «Mini Icon» width=11 height=11 fill="$on-btn-primary" icon="plane-takeoff"
           - text «App Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="600"  TEXT: OpenHangar
           - ellipse «Bridge Dot» width=6 height=6 fill="$success"
-          - text «Bridge» fill="$success" fontFamily="$font-mono" fontSize=9 fontWeight="700" x=124 y=3.5  TEXT: PONT CONNECTÉ
+          - text «Bridge» fill="$success" fontFamily="$font-mono" fontSize=9 fontWeight="700"  TEXT: PONT CONNECTÉ
         - frame «Status Right» gap=10 alignItems="center"
           - text «Clock» fill="$text-primary" fontFamily="$font-mono" fontSize=11  TEXT: 17:56Z
           - icon «Wifi» width=14 height=14 fill="$text-secondary" icon="wifi"

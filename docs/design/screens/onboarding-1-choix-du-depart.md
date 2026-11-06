@@ -1,0 +1,85 @@
+# Onboarding · 1 choix du départ
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Onboarding · 1 choix du départ» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-5.png", "mode": "cover"}
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"...
+  - frame «Content» width=1600 height=778 layout="vertical" padding=[40, 64, 36, 64] justifyContent="space_between"
+    - frame «Title Block» layout="vertical" gap=8
+      - text «Overline» fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Bienvenue sur OpenHangar
+      - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=52 fontWeight="600"  TEXT: Comment veux-tu commencer ?
+      - text «Sub» width=720 fill="$text-secondary" fontFamily="$font-ui" fontSize=16  TEXT: Choisis ton point de départ. Tu pourras toujours faire grandir ta compagnie, louer d'autres avions ou durcir le réalisme plus tard.
+    - frame «Paths» width="fill_container" gap=24
+      - frame «Path · Airliner» width="fill_container" layout="vertical" gap=18 padding=[26, 28, 28, 28] fill="$surface" stroke="$text-primary" strokeWidth=1.5 cornerRadius=8 effect={"type": "background_blur", "radius": 28}
+        - frame «Path Head» width="fill_container" alignItems="center" justifyContent="space_between"
+          - frame «Path Icon» width=44 height=44 alignItems="center" justifyContent="center" fill="#FFFFFF12" cornerRadius=6
+            - icon «Icon» width=22 height=22 fill="$text-primary" icon="plane"
+          - frame «Tags» gap=8 alignItems="center"
+            - frame «Selected» gap=6 padding=[4, 10] alignItems="center" fill="$text-primary" cornerRadius=4
+              - icon «Check» width=13 height=13 fill="$on-btn-primary" icon="check"
+              - text «Selected Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: Sélectionné
+            - frame «Tag» padding=[4, 10] stroke="$border-strong" strokeWidth=1 cornerRadius=4
+              - text «Tag Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Le plus rapide
+        - frame «Path Text» width="fill_container" layout="vertical" gap=6
+          - text «Path Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Directement en airliner
+          - text «Path Description» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Tu diriges une compagnie établie dès le premier vol : un avion de ligne en location, un grand hub et des vols passagers tout de suite.
+        - frame «Facts» width="fill_container" layout="vertical" gap=10 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+          - frame «Fact · Capital de départ» width="fill_container" gap=16 alignItems="center" justifyContent="space_between"
+            - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Capital de départ
+            - text «Fact Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 2 500 000 €
+          - frame «Fact · Premier avion» width="fill_container" gap=16 alignItems="center" justifyContent="space_between"
+            - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Premier avion
+            - text «Fact Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: A320neo, 737-800 ou E195-E2 en location
+          - frame «Fact · Hub» width="fill_container" gap=16 alignItems="center" justifyContent="space_between"
+            - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Hub
+            - text «Fact Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Grand aéroport (LFMN, LFPG, LFLL…)
+          - frame «Fact · Réalisme» width="fill_container" gap=16 alignItems="center" justifyContent="space_between"
+            - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Réalisme
+            - text «Fact Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Équilibré, modifiable
+        - frame «Demand» width="fill_container" padding=[4, 0, 0, 0] alignItems="center" justifyContent="space_between"
+          - text «Demand Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Exigence
+          - frame «Demand Meter» gap=4 alignItems="center"
+            - rectangle «Seg 1» width=30 height=4 fill="$text-primary" cornerRadius=2
+            - rectangle «Seg 2» width=30 height=4 fill="$text-primary" cornerRadius=2
+            - rectangle «Seg 3» width=30 height=4 fill="#FFFFFF1F" cornerRadius=2
+            - rectangle «Seg 4» width=30 height=4 fill="#FFFFFF1F" cornerRadius=2
+            - rectangle «Seg 5» width=30 height=4 fill="#FFFFFF1F" cornerRadius=2
+      - frame «Path · Hardcore» width="fill_container" layout="vertical" gap=18 padding=[26, 28, 28, 28] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=8 effect={"type": "background_blur", "radius": 28}
+        - frame «Path Head» width="fill_container" alignItems="center" justifyContent="space_between"
+          - frame «Path Icon» width=44 height=44 alignItems="center" justifyContent="center" fill="#FFFFFF12" cornerRadius=6
+            - icon «Icon» width=22 height=22 fill="$text-primary" icon="fan"
+          - frame «Tags» gap=8 alignItems="center"
+            - frame «Tag» padding=[4, 10] stroke="$border-strong" strokeWidth=1 cornerRadius=4
+              - text «Tag Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Le plus exigeant
+        - frame «Path Text» width="fill_container" layout="vertical" gap=6
+          - text «Path Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Hardcore, petit Cessna
+          - text «Path Description» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Tu pars de presque rien sur un petit aérodrome. Chaque heure de vol compte, et c'est toi qui gagnes ta place jusqu'à l'airliner.
+        - frame «Facts» width="fill_container" layout="vertical" gap=10 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+          - frame «Fact · Capital de départ» width="fill_container" gap=16 alignItems="center" justifyContent="space_between"
+            - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Capital de départ
+            - text «Fact Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 45 000 €
+          - frame «Fact · Premier avion» width="fill_container" gap=16 alignItems="center" justifyContent="space_between"
+            - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Premier avion
+            - text «Fact Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Cessna 172 loué à l'heure à l'aéroclub
+          - frame «Fact · Hub» width="fill_container" gap=16 alignItems="center" justifyContent="space_between"
+            - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Hub
+            - text «Fact Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Petit aérodrome (LFMD, LFKC, LFNH…)
+          - frame «Fact · Réalisme» width="fill_container" gap=16 alignItems="center" justifyContent="space_between"
+            - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Réalisme
+            - text «Fact Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Hardcore : usure, pannes, carburant réel
+        - frame «Demand» width="fill_container" padding=[4, 0, 0, 0] alignItems="center" justifyContent="space_between"
+          - text «Demand Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Exigence
+          - frame «Demand Meter» gap=4 alignItems="center"
+            - rectangle «Seg 1» width=30 height=4 fill="$text-primary" cornerRadius=2
+            - rectangle «Seg 2» width=30 height=4 fill="$text-primary" cornerRadius=2
+            - rectangle «Seg 3» width=30 height=4 fill="$text-primary" cornerRadius=2
+            - rectangle «Seg 4» width=30 height=4 fill="$text-primary" cornerRadius=2
+            - rectangle «Seg 5» width=30 height=4 fill="$text-primary" cornerRadius=2
+    - frame «Footer» width="fill_container" alignItems="center" justifyContent="space_between"
+      - frame «Footer Left» gap=24 alignItems="center"
+        - ref «Custom» ref="n9Pulf" descendants={"RUCj0": {"content": "Configuration personnalisée"}}  (instance of «Button/Ghost»)
+        - text «Footer Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Tu peux changer d'avis jusqu'à la fin de l'onboarding.
+      - ref «Continue» ref="Im067" descendants={"h8MyJ": {"content": "Continuer avec ce départ"}}  (instance of «Button/Primary»)
+  - ref «HUD Onboarding» ref="uCkER" descendants={"TZdq9": {"fill": "$text-primary", "stroke": "#00000000"}, "cyUlI": {"fill": "$on-btn-primary"}, "eP7CE": {"fill": "$text-primary", "fon...  (instance of «HUD/Onboarding»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"content": "Retour"}, "msx5l/Mw53t": {"content": "← →"}, "sA5qV": {"content": "Changer de...  (instance of «HUD/Bottom»)

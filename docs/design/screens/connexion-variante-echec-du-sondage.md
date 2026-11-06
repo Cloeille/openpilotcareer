@@ -2,7 +2,7 @@
 
 Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
 
-- frame «Connexion · variante échec du sondage» width=600 layout="vertical" gap=20 padding=[28, 50, 50, 50] fill=[{"type": "image", "enabled": true, "url": "images/generated.png", "mode": "cover"}, "$scene-scrim"] clip=true x=5100 y=800
+- frame «Connexion · variante échec du sondage» width=600 layout="vertical" gap=20 padding=[28, 50, 50, 50] fill=[{"type": "image", "enabled": true, "url": "images/generated.png", "mode": "cover"}, "$scene-scrim"] clip=true
   - text «Caption» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Variante : le serveur ne répond pas
   - frame «Title Block» layout="vertical" gap=6
     - frame «Status» gap=8 alignItems="center"

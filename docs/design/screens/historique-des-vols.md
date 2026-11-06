@@ -2,10 +2,10 @@
 
 Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
 
-- frame «Historique des vols» width=1600 height=900 layout="none" fill="$bg" clip=true x=0 y=5200
-  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-7.png", "mode": "cover"} x=0 y=0
-  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"... x=0 y=0
-  - frame «Content» width=1600 height=778 layout="vertical" gap=20 padding=[28, 32, 24, 32] x=0 y=76
+- frame «Historique des vols» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-7.png", "mode": "cover"}
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"...
+  - frame «Content» width=1600 height=778 layout="vertical" gap=20 padding=[28, 32, 24, 32]
     - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
       - frame «Title Block» layout="vertical" gap=6
         - frame «Status» gap=8 alignItems="center"
@@ -43,5 +43,5 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
           - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Saison de novembre
           - icon «Chevron» width=14 height=14 fill="$text-tertiary" icon="chevron-down"
     - ref «Flight Log» width="fill_container" height="fill_container" ref="bibzm" descendants={"uBW0Z": {"enabled": false}, "q5ftx0": {"gap": 0, "padding": [4, 0, 0, 0], "height": "fill_container", "children": [{"type": "frame", "i...  (instance of «Panel»)
-  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": {"type": "color", "color": "$text-primary", "enabled": false}}, "Ely3m": {"fill": "$text-tertiary"}, "oRNeg": {"stro... x=0 y=0  (instance of «HUD/Top»)
-  - ref «HUD Bottom» ref="t2yhjE" descendants={"D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"content": "Tableau de bord"}, "msx5l/Mw53t": {"content": "↑ ↓"}, "sA5qV": {"content": "P... x=0 y=854  (instance of «HUD/Bottom»)
+  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": {"type": "color", "color": "$text-primary", "enabled": false}}, "Ely3m": {"fill": "$text-tertiary"}, "oRNeg": {"stro...  (instance of «HUD/Top»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"content": "Tableau de bord"}, "msx5l/Mw53t": {"content": "↑ ↓"}, "sA5qV": {"content": "P...  (instance of «HUD/Bottom»)

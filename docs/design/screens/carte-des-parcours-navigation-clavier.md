@@ -2,7 +2,7 @@
 
 Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
 
-- frame «Carte des parcours & navigation clavier» width=2900 layout="vertical" gap=40 padding=[56, 64, 64, 64] fill=["#07090C", {"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.4, "height": 1.2}, "colors... x=0 y=7700
+- frame «Carte des parcours & navigation clavier» width=2900 layout="vertical" gap=40 padding=[56, 64, 64, 64] fill=["#07090C", {"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.4, "height": 1.2}, "colors...
   - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
     - frame «Header Text» layout="vertical" gap=8
       - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=36 fontWeight="600"  TEXT: Carte des parcours & navigation clavier
@@ -128,9 +128,106 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
         - ellipse «Pip» width=7 height=7 fill="$warning"
         - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Serveur injoignable
         - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Perte de connexion depuis n'importe quel écran ; données en lecture seule
-  - frame «Lane · Tableau de bord & vol» width="fill_container" gap=40 padding=[28, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+  - frame «Lane · Onboarding» width="fill_container" gap=40 padding=[28, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
     - frame «Lane Label» width=190 layout="vertical" gap=2
       - text «Num» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 02
+      - text «Lane Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Onboarding
+    - frame «Flows» width="fill_container" layout="vertical" gap=16
+      - frame «Flow» alignItems="center"
+        - frame «Node · Chargement» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Chargement
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Premier lancement détecté
+        - frame «Edge · Automatique» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Automatique
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · 1 · Choix du départ» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 1 · Choix du départ
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Airliner ou hardcore
+        - frame «Edge · Continuer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - ref «Key · Entrée» ref="T9v0n" descendants={"Mw53t": {"content": "Entrée"}}  (instance of «Keycap»)
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Continuer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · 2 · Compagnie & hub» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 2 · Compagnie & hub
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Nom, code ICAO, hub
+        - frame «Edge · Continuer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - ref «Key · Entrée» ref="T9v0n" descendants={"Mw53t": {"content": "Entrée"}}  (instance of «Keycap»)
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Continuer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · 3a · Premier avion» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 3a · Premier avion
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Airliner en location
+      - frame «Flow» alignItems="center"
+        - frame «Node · 3b · Premier avion» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 3b · Premier avion
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Cessna à l'heure, location ou occasion
+        - frame «Edge · Continuer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - ref «Key · Entrée» ref="T9v0n" descendants={"Mw53t": {"content": "Entrée"}}  (instance of «Keycap»)
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Continuer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · 4 · Réalisme» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 4 · Réalisme
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Préréglage puis réglages fins
+        - frame «Edge · Continuer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - ref «Key · Entrée» ref="T9v0n" descendants={"Mw53t": {"content": "Entrée"}}  (instance of «Keycap»)
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Continuer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · 5 · Pont simulateur» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 5 · Pont simulateur
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Connexion SimConnect
+        - frame «Edge · Continuer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - ref «Key · Entrée» ref="T9v0n" descendants={"Mw53t": {"content": "Entrée"}}  (instance of «Keycap»)
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Continuer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · 6 · C'est parti» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 6 · C'est parti
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Récapitulatif et premier job
+      - frame «Flow» alignItems="center"
+        - frame «Node · 6 · C'est parti» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 6 · C'est parti
+        - frame «Edge · Accepter le premier job» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - ref «Key · Entrée» ref="T9v0n" descendants={"Mw53t": {"content": "Entrée"}}  (instance of «Keycap»)
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Accepter le premier job
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Détail d'un job» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Détail d'un job
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Job verrouillé
+        - frame «Edge · Plus tard» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - ref «Key · Échap» ref="T9v0n" descendants={"Mw53t": {"content": "Échap"}}  (instance of «Keycap»)
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Plus tard
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Tableau de bord» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Tableau de bord
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Compagnie prête
+    - frame «States» width=660 layout="vertical" gap=8
+      - text «States Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: États et cas limites
+      - frame «State · Le chemin choisi décide l'étape 3» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Le chemin choisi décide l'étape 3
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Airliner → 3a (location) ; hardcore → 3b (aéroclub)
+      - frame «State · Code compagnie déjà pris» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Code compagnie déjà pris
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Le code ICAO à 3 lettres est unique par serveur
+      - frame «State · Pont passé» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Pont passé
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Possible ; les vols seront « non vérifiés » et payés moins
+      - frame «State · Configuration personnalisée» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Configuration personnalisée
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Capital, avion et réalisme choisis librement
+  - frame «Lane · Tableau de bord & vol» width="fill_container" gap=40 padding=[28, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+    - frame «Lane Label» width=190 layout="vertical" gap=2
+      - text «Num» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 03
       - text «Lane Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Tableau de bord & vol
     - frame «Flows» width="fill_container" layout="vertical" gap=16
       - frame «Flow» alignItems="center"
@@ -196,7 +293,7 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
         - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Anti-triche déclenché à la clôture du vol
   - frame «Lane · Jobs» width="fill_container" gap=40 padding=[28, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
     - frame «Lane Label» width=190 layout="vertical" gap=2
-      - text «Num» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 03
+      - text «Num» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 04
       - text «Lane Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Jobs
     - frame «Flows» width="fill_container" layout="vertical" gap=16
       - frame «Flow» alignItems="center"
@@ -256,7 +353,7 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
         - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Une compagnie IA prend le job pendant la lecture du briefing
   - frame «Lane · Flotte» width="fill_container" gap=40 padding=[28, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
     - frame «Lane Label» width=190 layout="vertical" gap=2
-      - text «Num» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 04
+      - text «Num» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 05
       - text «Lane Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Flotte
     - frame «Flows» width="fill_container" layout="vertical" gap=16
       - frame «Flow» alignItems="center"
@@ -287,6 +384,25 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
         - frame «Node · Flotte» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
           - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Flotte
           - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Avion ajouté
+      - frame «Flow» alignItems="center"
+        - frame «Node · Catalogue d'avions» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Catalogue d'avions
+        - frame «Edge · Louer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - ref «Key · L» ref="T9v0n" descendants={"Mw53t": {"content": "L"}}  (instance of «Keycap»)
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Louer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Location · contrat» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Location · contrat
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Loyer, dépôt, durée, option d'achat
+        - frame «Edge · Signer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - ref «Key · Entrée» ref="T9v0n" descendants={"Mw53t": {"content": "Entrée"}}  (instance of «Keycap»)
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Signer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Flotte» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Flotte
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Avion loué ajouté
     - frame «States» width=660 layout="vertical" gap=8
       - text «States Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: États et cas limites
       - frame «State · Fonds insuffisants» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
@@ -296,10 +412,10 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
       - frame «State · Nouvelle compagnie» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
         - ellipse «Pip» width=7 height=7 fill="$warning"
         - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Nouvelle compagnie
-        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Premier lancement : choisir un avion de départ et un hub
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Premier lancement sans avion : location proposée en premier, puis achat
   - frame «Lane · Historique des vols» width="fill_container" gap=40 padding=[28, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
     - frame «Lane Label» width=190 layout="vertical" gap=2
-      - text «Num» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 05
+      - text «Num» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 06
       - text «Lane Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Historique des vols
     - frame «Flows» width="fill_container" layout="vertical" gap=16
       - frame «Flow» alignItems="center"
@@ -341,7 +457,7 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
         - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Anti-triche : motif, preuve sur la chronologie, contestation
   - frame «Lane · Compétition IA» width="fill_container" gap=40 padding=[28, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
     - frame «Lane Label» width=190 layout="vertical" gap=2
-      - text «Num» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 06
+      - text «Num» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 07
       - text «Lane Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Compétition IA
     - frame «Flows» width="fill_container" layout="vertical" gap=16
       - frame «Flow» alignItems="center"

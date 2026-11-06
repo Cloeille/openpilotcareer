@@ -2,10 +2,10 @@
 
 Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
 
-- frame «Saison · récapitulatif de fin» width=1600 height=900 layout="none" fill="$bg" clip=true x=5100 y=6300
-  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-9.png", "mode": "cover"} x=0 y=0
-  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"... x=0 y=0
-  - frame «Content» width=1600 height=778 gap=56 padding=[28, 32, 24, 32] alignItems="end" justifyContent="space_between" x=0 y=76
+- frame «Saison · récapitulatif de fin» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-9.png", "mode": "cover"}
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"...
+  - frame «Content» width=1600 height=778 gap=56 padding=[28, 32, 24, 32] alignItems="end" justifyContent="space_between"
     - frame «Recap Column» width=760 height="fill_container" layout="vertical" justifyContent="space_between"
       - frame «Title Block» layout="vertical" gap=6
         - frame «Status» gap=8 alignItems="center"
@@ -41,5 +41,5 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
     - frame «Outcome Column» width=380 layout="vertical" gap=16
       - ref «Final Standings» width="fill_container" ref="bibzm" descendants={"e0veVE": {"content": "Podium de novembre"}, "A9Tx2K": {"content": "Gain de saison", "fill": "$text-tertiary", "fontFamily": "$font-ui",...  (instance of «Panel»)
       - ref «Rewards» width="fill_container" ref="bibzm" descendants={"e0veVE": {"content": "Récompenses"}, "A9Tx2K": {"content": "3 gains", "fill": "$text-tertiary", "fontFamily": "$font-ui", "fontSize": 1...  (instance of «Panel»)
-  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": {"type": "color", "color": "$text-primary", "enabled": false}}, "Ely3m": {"fill": "$text-tertiary"}, "Btj9I": {"stro... x=0 y=0  (instance of «HUD/Top»)
-  - ref «HUD Bottom» ref="t2yhjE" descendants={"xYqJx": {"content": "Saison de novembre"}, "N4OGhY": {"content": "terminée le 30 novembre"}, "oFiTj": {"name": "Hint · Tableau de bord"... x=0 y=854  (instance of «HUD/Bottom»)
+  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": {"type": "color", "color": "$text-primary", "enabled": false}}, "Ely3m": {"fill": "$text-tertiary"}, "Btj9I": {"stro...  (instance of «HUD/Top»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"xYqJx": {"content": "Saison de novembre"}, "N4OGhY": {"content": "terminée le 30 novembre"}, "oFiTj": {"name": "Hint · Tableau de bord"...  (instance of «HUD/Bottom»)

@@ -1,0 +1,50 @@
+# HUD/Onboarding
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «HUD/Onboarding» width=1600 height=76 padding=[0, 32] alignItems="center" justifyContent="space_between" fill={"type": "gradient", "gradientType": "linear", "enabled": true, "rotation": 180, "size": {"height": 1}, "colors": [{"color": "#000000F0",... reusable=true
+  - frame «Brand» width=250 gap=12 alignItems="center"
+    - frame «Logo Mark» width=36 height=36 alignItems="center" justifyContent="center" fill="$text-primary" cornerRadius=3
+      - icon «Logo Icon» width=20 height=20 fill="$on-btn-primary" icon="plane-takeoff"
+    - frame «Brand Stack» layout="vertical" gap=3
+      - text «Brand Name» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: OpenHangar
+      - text «Server» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Serveur global · nouvelle compagnie
+  - frame «Steps» gap=10 alignItems="center"
+    - frame «Step · Départ» gap=8 alignItems="center"
+      - frame «Index» width=22 height=22 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=11
+        - text «Number» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 1
+        - icon «Check» width=12 height=12 fill="$text-primary" icon="check"
+      - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Départ
+    - rectangle «Connector» width=22 height=1 fill="$border-strong"
+    - frame «Step · Compagnie» gap=8 alignItems="center"
+      - frame «Index» width=22 height=22 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=11
+        - text «Number» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 2
+        - icon «Check» width=12 height=12 fill="$text-primary" icon="check"
+      - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Compagnie
+    - rectangle «Connector» width=22 height=1 fill="$border-strong"
+    - frame «Step · Premier avion» gap=8 alignItems="center"
+      - frame «Index» width=22 height=22 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=11
+        - text «Number» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 3
+        - icon «Check» width=12 height=12 fill="$text-primary" icon="check"
+      - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Premier avion
+    - rectangle «Connector» width=22 height=1 fill="$border-strong"
+    - frame «Step · Réalisme» gap=8 alignItems="center"
+      - frame «Index» width=22 height=22 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=11
+        - text «Number» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 4
+        - icon «Check» width=12 height=12 fill="$text-primary" icon="check"
+      - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Réalisme
+    - rectangle «Connector» width=22 height=1 fill="$border-strong"
+    - frame «Step · Simulateur» gap=8 alignItems="center"
+      - frame «Index» width=22 height=22 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=11
+        - text «Number» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 5
+        - icon «Check» width=12 height=12 fill="$text-primary" icon="check"
+      - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Simulateur
+    - rectangle «Connector» width=22 height=1 fill="$border-strong"
+    - frame «Step · C'est parti» gap=8 alignItems="center"
+      - frame «Index» width=22 height=22 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=11
+        - text «Number» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 6
+        - icon «Check» width=12 height=12 fill="$text-primary" icon="check"
+      - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: C'est parti
+  - frame «Quit» width=250 gap=8 alignItems="center" justifyContent="end"
+    - text «Quit Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Enregistrer et quitter
+    - icon «Quit Icon» width=15 height=15 fill="$text-tertiary" icon="log-out"

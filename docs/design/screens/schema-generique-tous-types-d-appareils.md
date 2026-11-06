@@ -2,7 +2,7 @@
 
 Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
 
-- frame «Schéma générique · tous types d'appareils» width=1600 height=900 layout="vertical" gap=28 padding=[48, 56] fill=["#07090C", {"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.3, "height": 1.1}, "colors... clip=true x=3100 y=7700
+- frame «Schéma générique · tous types d'appareils» width=1600 height=900 layout="vertical" gap=28 padding=[48, 56] fill=["#07090C", {"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.3, "height": 1.1}, "colors... clip=true
   - frame «Header Row» width="fill_container" gap=40 alignItems="end" justifyContent="space_between"
     - frame «Board Header» width="fill_container" layout="vertical" gap=8
       - text «Board Title» fill="$text-primary" fontFamily="$font-display" fontSize=34 fontWeight="600"  TEXT: Un seul schéma, tous les appareils

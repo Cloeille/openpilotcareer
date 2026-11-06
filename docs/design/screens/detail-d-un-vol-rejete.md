@@ -2,10 +2,10 @@
 
 Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
 
-- frame «Détail d'un vol · rejeté» width=1600 height=900 layout="none" fill="$bg" clip=true x=5100 y=5200
-  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-8.png", "mode": "cover"} x=0 y=0
-  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"... x=0 y=0
-  - frame «Content» width=1600 height=778 layout="vertical" gap=28 padding=[40, 64, 32, 64] x=0 y=76
+- frame «Détail d'un vol · rejeté» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-8.png", "mode": "cover"}
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"...
+  - frame «Content» width=1600 height=778 layout="vertical" gap=28 padding=[40, 64, 32, 64]
     - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
       - frame «Title Block» layout="vertical" gap=10
         - text «Overline» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Rapport de télémétrie · 2 nov. 2026
@@ -48,5 +48,5 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
             - ref «Evidence» ref="n9Pulf" descendants={"RUCj0": {"content": "Voir la preuve"}}  (instance of «Button/Ghost»)
       - ref «Anti-Cheat Panel» width=420 height="fill_container" ref="bibzm" descendants={"e0veVE": {"content": "Contrôles anti-triche"}, "A9Tx2K": {"content": "5 sur 6 réussis", "fill": "$text-secondary"}, "q5ftx0": {"gap": 1...  (instance of «Panel»)
     - ref «Timeline Panel» width="fill_container" ref="bibzm" descendants={"e0veVE": {"content": "Phases du vol"}, "A9Tx2K": {"content": "Décollage 17:05Z · toucher 17:49Z", "fill": "$text-tertiary"}, "q5ftx0": ...  (instance of «Panel»)
-  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": "#00000000"}, "Ely3m": {"fill": "$text-tertiary"}, "oRNeg": {"stroke": "$text-primary"}, "ZLZNH": {"fill": "$text-pr... x=0 y=0  (instance of «HUD/Top»)
-  - ref «HUD Bottom» ref="t2yhjE" descendants={"D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"content": "Retour au carnet"}, "msx5l/Mw53t": {"content": "Entrée"}, "sA5qV": {"content"... x=0 y=854  (instance of «HUD/Bottom»)
+  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": "#00000000"}, "Ely3m": {"fill": "$text-tertiary"}, "oRNeg": {"stroke": "$text-primary"}, "ZLZNH": {"fill": "$text-pr...  (instance of «HUD/Top»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"content": "Retour au carnet"}, "msx5l/Mw53t": {"content": "Entrée"}, "sA5qV": {"content"...  (instance of «HUD/Bottom»)

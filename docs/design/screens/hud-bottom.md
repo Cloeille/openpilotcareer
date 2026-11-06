@@ -2,7 +2,7 @@
 
 Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
 
-- frame «HUD/Bottom» width=1600 height=46 padding=[0, 32] alignItems="center" justifyContent="space_between" fill={"type": "gradient", "gradientType": "linear", "enabled": true, "rotation": 0, "size": {"height": 1}, "colors": [{"color": "#000000F0", "... reusable=true x=0 y=-1000
+- frame «HUD/Bottom» width=1600 height=46 padding=[0, 32] alignItems="center" justifyContent="space_between" fill={"type": "gradient", "gradientType": "linear", "enabled": true, "rotation": 0, "size": {"height": 1}, "colors": [{"color": "#000000F0", "... reusable=true
   - frame «Status» gap=28 alignItems="center"
     - frame «Bridge» gap=8 alignItems="center"
       - ellipse «Bridge Dot» width=7 height=7 fill="$success"

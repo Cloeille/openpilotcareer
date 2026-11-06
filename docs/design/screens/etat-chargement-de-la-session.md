@@ -2,10 +2,10 @@
 
 Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
 
-- frame «État · chargement de la session» width=1600 height=900 layout="none" fill="$bg" clip=true x=5800 y=800
-  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-2.png", "mode": "cover"} x=0 y=0
-  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"... x=0 y=0
-  - frame «Content» width=1600 height=900 layout="vertical" gap=91 padding=[28, 32, 24, 32] x=0 y=0
+- frame «État · chargement de la session» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-2.png", "mode": "cover"}
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"...
+  - frame «Content» width=1600 height=900 layout="vertical" gap=91 padding=[28, 32, 24, 32]
     - frame «Brand» gap=12 alignItems="center"
       - frame «Logo Mark» width=36 height=36 alignItems="center" justifyContent="center" fill="$text-primary" cornerRadius=2
         - icon «Logo Icon» width=20 height=20 fill="$on-btn-primary" icon="plane-takeoff"
@@ -34,7 +34,7 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
             - text «Step Label» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Jobs
             - text «Step Detail» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 18 offres reçues sur 42
             - frame «Step Progress» width="fill_container" height=2 layout="none" fill="$border-strong"
-              - rectangle «Progress Fill» width=183 height=2 fill="$text-primary" x=0 y=0
+              - rectangle «Progress Fill» width=183 height=2 fill="$text-primary"
         - frame «Step · Flotte» width="fill_container" gap=14
           - icon «Step Icon» width=20 height=20 fill="$text-tertiary" icon="circle-dashed"
           - frame «Stack» width="fill_container" layout="vertical" gap=4
