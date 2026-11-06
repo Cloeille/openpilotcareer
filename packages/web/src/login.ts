@@ -2,6 +2,7 @@ import { api, GLOBAL_URL, fetchInfo, isOwnOrigin, session } from './api.ts';
 import { ApiError } from './errors.ts';
 import { normalizeServer } from './server-url.ts';
 import { h, field, input } from './ui.ts';
+import { stage } from './shell.ts';
 import type { Me } from '@opc/shared';
 
 const CUSTOM = 'custom';
@@ -60,6 +61,6 @@ export function loginView(root: HTMLElement, done: () => void): void {
     field('Password', password, 'At least 8 characters.'),
     error,
     h('div', { class: 'row' }, submit, register));
-  root.replaceChildren(h('main', { id: 'main', class: 'center' }, form));
+  root.replaceChildren(stage('login', h('main', { id: 'main', class: 'view bare legacy', style: 'justify-content:center;align-items:center' }, form)));
   username.focus();
 }

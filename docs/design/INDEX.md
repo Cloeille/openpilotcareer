@@ -1,6 +1,6 @@
 # Design index (OpenHangar mockup, pen.dev, 6 Nov 2026)
 
-Source: docs/design/openhangar.pen. Backdrops: docs/design/assets/*.webp (converted from the pen images/generated*.png). Scripts: docs/design/scripts/{aircraft-schematic,cabin-layout}.js (Pen script nodes: `pencil.width/height/input` globals, adapt to DOM/canvas).
+Source: docs/design/openhangar.pen. Backdrops: packages/web/src/design/scenes/*.webp (used by the web app; converted from the pen images/generated*.png) and docs/design/assets/generated-13.webp (in-game EFB, not used yet). Tokens: packages/web/src/design/tokens.css. Scripts: docs/design/scripts/{aircraft-schematic,cabin-layout}.js (Pen script nodes: `pencil.width/height/input` globals, adapt to DOM/canvas).
 
 | Frame | Extract | Size |
 |---|---|---|

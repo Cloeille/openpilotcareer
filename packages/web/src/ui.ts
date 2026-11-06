@@ -1,3 +1,5 @@
+import { fmt } from './format.ts';
+
 type Child = Node | string | number | null | false | undefined | Child[];
 type Props = Record<string, unknown>;
 
@@ -19,10 +21,9 @@ export function h<K extends keyof HTMLElementTagNameMap>(tag: K, props?: Props |
   return el;
 }
 
-const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-export const fmtMoney = (n: number): string => money.format(n);
-export const fmtNum = (n: number, digits = 0): string => n.toLocaleString('en-US', { maximumFractionDigits: digits });
-export const fmtDate = (ms: number | null): string => (ms === null ? '' : new Date(ms).toLocaleString());
+export const fmtMoney = (n: number): string => fmt().money(n);
+export const fmtNum = (n: number, digits = 0): string => fmt().num(n, digits);
+export const fmtDate = (ms: number | null): string => (ms === null ? '' : fmt().dateTime(ms));
 
 let uid = 0;
 /** A labelled form control: <label for> + control, so every field has an accessible name. */

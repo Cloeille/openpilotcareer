@@ -1,0 +1,9 @@
+/* Self-hosted from @fontsource (OFL): Barlow for text, Barlow Semi Condensed for titles, B612 Mono for codes and data. Latin subset, woff2 only. */
+@font-face { font-family: 'Barlow'; font-weight: 400; font-display: swap; src: url('@fontsource/barlow/files/barlow-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow'; font-weight: 500; font-display: swap; src: url('@fontsource/barlow/files/barlow-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow'; font-weight: 600; font-display: swap; src: url('@fontsource/barlow/files/barlow-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow'; font-weight: 700; font-display: swap; src: url('@fontsource/barlow/files/barlow-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow Semi Condensed'; font-weight: 500; font-display: swap; src: url('@fontsource/barlow-semi-condensed/files/barlow-semi-condensed-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow Semi Condensed'; font-weight: 600; font-display: swap; src: url('@fontsource/barlow-semi-condensed/files/barlow-semi-condensed-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'B612 Mono'; font-weight: 400; font-display: swap; src: url('@fontsource/b612-mono/files/b612-mono-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'B612 Mono'; font-weight: 700; font-display: swap; src: url('@fontsource/b612-mono/files/b612-mono-latin-700-normal.woff2') format('woff2'); }

@@ -1,24 +1,30 @@
 import type { Me } from '@opc/shared';
 import { api, fetchInfo, session, setUnauthorizedHandler } from './api.ts';
+import { PRODUCT_NAME } from './brand.ts';
 import { ApiError } from './errors.ts';
+import { t } from './i18n.ts';
+import { installInput, type NavState } from './input.ts';
 import { loginView } from './login.ts';
-import { pages } from './pages.ts';
+import { resolve, routes } from './routes.ts';
+import { bareView, fitStage, hudStage, stage } from './shell.ts';
 import { h, notify } from './ui.ts';
 
 const root = document.getElementById('app')!;
 let me: Me | null = null;
 let antiCheat = true;
+let nav: NavState = null;
 
-const pageName = (): string => {
-  const p = location.hash.slice(1);
-  return p in pages ? p : 'dashboard';
-};
+installInput({ state: () => nav, go: (hash) => { location.hash = hash; } });
+fitStage();
+window.addEventListener('resize', fitStage);
 
 function signedOut(): void {
   me = null;
+  nav = null;
+  document.title = PRODUCT_NAME;
   loginView(root, () => { location.hash = '#dashboard'; void refresh(); });
 }
-setUnauthorizedHandler(() => { session.set(session.server, null); signedOut(); notify('Your session ended, please sign in again.', 'error'); });
+setUnauthorizedHandler(() => { session.set(session.server, null); signedOut(); notify(t('session.ended'), 'error'); });
 
 /** The account as the remembered company: if that company is gone or was never ours (another account on this server), fall back to the default. */
 async function loadMe(): Promise<Me> {
@@ -49,42 +55,35 @@ async function switchCompany(id: number): Promise<void> {
   }
 }
 
-async function show(): Promise<void> {
-  if (!me) return signedOut();
-  const name = pageName();
-  const page = pages[name]!;
-  const main = h('main', { id: 'main', tabindex: -1, 'aria-busy': 'true' }, h('p', { class: 'muted' }, 'Loading...'));
-  const nav = h('nav', { 'aria-label': 'Main' }, Object.entries(pages).map(([key, p]) =>
-    h('a', { href: `#${key}`, 'aria-current': key === name ? 'page' : null }, p.title)));
-  root.replaceChildren(
-    h('header', { class: 'bar' }, h('span', { class: 'brand' }, 'OpenPilotCareer'), nav,
-      antiCheat ? null : h('span', { class: 'badge active', title: 'This server does not check flights for cheating: time acceleration and the like are allowed.' }, 'Anti-cheat: off'),
-      h('span', { class: 'who' }, `${me.username} `, companySwitcher(me), ' ', h('button', { type: 'button', class: 'link', onclick: () => void logout() }, 'Sign out'))),
-    main);
-  document.title = `${page.title} - OpenPilotCareer`;
-  try {
-    main.replaceChildren(await page.render({ me, refresh, go: (p) => { location.hash = `#${p}`; } }));
-  } catch (e) {
-    main.replaceChildren(h('p', { class: 'error-text', role: 'alert' }, e instanceof ApiError ? e.message : String(e)));
-  }
-  main.removeAttribute('aria-busy');
-}
-
-function companySwitcher(m: Me): HTMLElement {
-  const select = h('select', { id: 'company-switch', name: 'company', onchange: (e: Event) => void switchCompany(Number((e.target as HTMLSelectElement).value)) },
-    m.companies.map((c) => h('option', { value: c.id, selected: c.id === m.company.id }, c.name)));
-  return h('span', { class: 'switcher' }, h('label', { for: 'company-switch' }, 'Company'), ' ', select);
-}
-
 async function logout(): Promise<void> {
   await api('/auth/logout', { method: 'POST' }).catch(() => undefined);
   session.set(session.server, null);
   signedOut();
 }
 
+async function show(): Promise<void> {
+  if (!me) return signedOut();
+  const current = me;
+  const { name, arg } = resolve(location.hash);
+  let screen;
+  try {
+    screen = await routes[name]!({ me: current, arg, refresh, go: (hash) => { location.hash = hash; } });
+  } catch (e) {
+    const message = e instanceof ApiError ? e.message : String(e);
+    screen = { title: t('error.title'), scene: 'dashboard' as const, tab: null, hints: [], back: '#dashboard', view: h('p', { class: 'error-text', role: 'alert' }, message) };
+  }
+  if (me !== current) return; // signed out or switched company while loading
+  nav = { tab: screen.tab, back: screen.back };
+  const view = h('main', { id: 'main', class: 'view', tabindex: -1 }, screen.view);
+  root.replaceChildren(hudStage(screen.scene, view, { me: current, tab: screen.tab, antiCheat, onCompany: (id) => void switchCompany(id), onChangeServer: () => void logout() }, screen.hints));
+  document.title = `${screen.title} - ${PRODUCT_NAME}`;
+}
+
 window.addEventListener('hashchange', () => { void show().then(() => document.getElementById('main')?.focus()); });
+window.addEventListener('opc:lang', () => { if (me) void show(); else signedOut(); });
 
 if (session.token) {
+  root.replaceChildren(stage('dashboard', bareView(h('p', { class: 'muted' }, t('common.loading')))));
   loadMe().then((m) => { me = m; return show(); }).catch((e: unknown) => {
     if (!(e instanceof ApiError && e.status === 401)) notify(e instanceof ApiError ? e.message : String(e), 'error');
     signedOut();
