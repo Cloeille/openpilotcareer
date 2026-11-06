@@ -1,0 +1,48 @@
+// Contract of the bridge core: what the simulator tells us (SimSample) and what the core concludes (phases, flags, outcome).
+// SimSample is a trust boundary (sim host and fixture files), hence the zod schema is the single definition.
+import { z } from 'zod';
+import type { Telemetry } from '@opc/shared';
+
+export const PHASES = ['preflight', 'taxiOut', 'airborne', 'landed', 'parked'] as const;
+export type Phase = (typeof PHASES)[number];
+
+export const ENGINE_KINDS = ['piston', 'turboprop', 'jet', 'helicopter', 'other'] as const;
+export type EngineKind = (typeof ENGINE_KINDS)[number];
+
+const finite = z.number().refine(Number.isFinite, 'must be finite');
+
+/** One reading of the user aircraft. Units are fixed here so the core never converts: knots, feet/minute, kilograms. */
+export const simSampleSchema = z.object({
+  /** Host wall clock, ms since epoch. Becomes takeoffAt/landedAt in the report. */
+  t: z.number().int().positive(),
+  onGround: z.boolean(),
+  lat: finite.pipe(z.number().min(-90).max(90)),
+  lon: finite.pipe(z.number().min(-180).max(180)),
+  groundSpeedKts: finite.pipe(z.number().min(0)),
+  verticalSpeedFpm: finite,
+  /** Latched touchdown rate of the last landing, only present on samples where the host saw it change. Any sign. */
+  touchdownFpm: finite.optional(),
+  fuelKg: finite.pipe(z.number().min(0)),
+  totalWeightKg: finite.pipe(z.number().min(0)),
+  emptyWeightKg: finite.pipe(z.number().min(0)).optional(),
+  simRate: finite.pipe(z.number().positive()),
+  slew: z.boolean(),
+  paused: z.boolean(),
+  /** SimVar ATC MODEL: either a bare ICAO designator or MSFS's `TT:ATCCOM.AC_MODEL_<ICAO>.0.text` token. */
+  atcModel: z.string().max(200),
+  title: z.string().max(200),
+  engineKind: z.enum(ENGINE_KINDS),
+});
+export type SimSample = z.infer<typeof simSampleSchema>;
+
+/** Anti-cheat flag names are part of the panel contract (shown verbatim in the in-sim panel). */
+export const FLAGS = ['slew_detected', 'time_acceleration_above_1x', 'teleport_jump_over_50nm', 'long_pause'] as const;
+export type Flag = (typeof FLAGS)[number];
+
+/** Final verdict of one flight: a report to send to the server, or the reason there is nothing to send. */
+export type Outcome = { ok: true; report: Telemetry } | { ok: false; reason: string };
+
+export type TrackerOptions = {
+  /** ICAO type designator to report when ATC MODEL is not a valid designator (e.g. add-on aircraft). */
+  aircraftIcao?: string;
+};

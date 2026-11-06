@@ -170,6 +170,18 @@ test('implausible telemetry is rejected with a reason: no pay, reputation penalt
   assert.equal((await h.call('GET', `/api/v1/jobs?airport=${job.origin}`, { token })).body.jobs.some((j: Job) => j.id === job.id), false);
 });
 
+test('telemetry carrying client anti-cheat flags is rejected with the flags in the reason', async () => {
+  const h = await harness();
+  const { token, me } = await h.register('flagged');
+  const key = await h.apiKey(token);
+  const job = await h.flyableJob(token, me.fleet[0].id);
+  const flight = (await h.call('POST', `/api/v1/jobs/${job.id}/accept`, { token, body: { aircraftId: me.fleet[0].id } })).body;
+  const r = await h.call('POST', `/api/v1/flights/${flight.id}/telemetry-verify`, { token: key, body: { ...h.goodReport(job), flags: ['slew_detected'] } });
+  assert.equal(r.status, 200);
+  assert.equal(r.body.verification, 'rejected');
+  assert.match(r.body.reason, /flagged.*slew_detected/);
+});
+
 test('manual telemetry is accepted only as unverified with reduced pay', async () => {
   const h = await harness();
   const { token, me } = await h.register('manual');

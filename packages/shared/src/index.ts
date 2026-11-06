@@ -200,6 +200,8 @@ export const telemetrySchema = z.object({
   landingFpm: z.number().min(-10_000).max(10_000),
   distanceNm: z.number().min(0).max(20_000),
   source: z.enum(TELEMETRY_SOURCES),
+  /** Anti-cheat flags raised by the client (slew, time acceleration, teleport...). Any flag makes the report fail the check. */
+  flags: z.array(z.string().regex(/^[a-z0-9_]{1,40}$/)).max(16).optional(),
 });
 export type Telemetry = z.infer<typeof telemetrySchema>;
 
@@ -214,6 +216,7 @@ export function checkTelemetry(t: Telemetry, f: {
   aircraftIcao: string; aircraft: AircraftType; acceptedAt: number; now: number;
 }): TelemetryCheck {
   const no = (reason: string): TelemetryCheck => ({ ok: false, reason });
+  if (t.flags && t.flags.length > 0) return no(`the simulator client flagged this flight: ${t.flags.join(', ')}`);
   if (t.departureIcao !== f.origin) return no(`departure ${t.departureIcao} does not match job origin ${f.origin}`);
   if (t.arrivalIcao !== f.destination) return no(`arrival ${t.arrivalIcao} does not match job destination ${f.destination}`);
   if (t.aircraftIcao !== f.aircraftIcao) return no(`aircraft ${t.aircraftIcao} does not match the assigned ${f.aircraftIcao}`);
