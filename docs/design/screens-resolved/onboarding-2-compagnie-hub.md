@@ -1,0 +1,118 @@
+# Onboarding · 2 compagnie & hub
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Onboarding · 2 compagnie & hub» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-3.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=32 padding=[40, 64, 36, 64] justifyContent="space_between"
+    - frame «Title Block» layout="vertical" gap=8
+      - text «Overline» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Parcours airliner · compagnie et hub
+      - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=52 fontWeight="600"  TEXT: Fonde ta compagnie
+      - text «Sub» width=720 fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: Donne-lui un nom, un code et une base. C'est de ton hub que partiront tes premiers jobs, et c'est là que tes avions passeront la nuit.
+    - frame «Main Row» width="fill_container" gap=24
+      - instance «Panel · Compagnie» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Compagnie
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=18 padding=[20, 24, 24, 24]
+          - instance «Input · Nom de la compagnie» of «Input»
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Nom de la compagnie
+            - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+              - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="building-2"
+              - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Azur Régional
+            - text «Hint» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Modifiable plus tard depuis ta fiche compagnie.
+          - frame «Codes Row» width="fill_container" gap=16
+            - instance «Input · Code OACI» of «Input»
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Code OACI
+              - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="hash"
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-mono" fontSize=15 fontWeight="700"  TEXT: AZR
+                - icon «Available Icon» width=16 height=16 fill="$success" icon="circle-check"
+              - text «Hint» fill="$success" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Disponible sur ce serveur
+            - instance «Input · Indicatif radio» of «Input»
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Indicatif radio
+              - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="radio"
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-mono" fontSize=15 fontWeight="700"  TEXT: AZUR
+              - text «Hint» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: À la radio : « AZUR 4127 »
+          - frame «Note · Codes définitifs» width="fill_container" gap=8 alignItems="center"
+            - icon «Icon» width=14 height=14 fill="$text-tertiary" icon="info"
+            - text «Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Le code et l'indicatif ne pourront plus être changés ensuite.
+          - frame «Livery Colour» width="fill_container" layout="vertical" gap=10 padding=[6, 0, 0, 0]
+            - frame «Label Row» gap=6 alignItems="center"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Couleur de livrée
+              - text «Optional» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: facultatif
+            - frame «Swatches» gap=10 alignItems="center"
+              - frame «Swatch · Aucune» width=28 height=28 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                - icon «Icon» width=14 height=14 fill="$text-tertiary" icon="ban"
+              - frame «Swatch · Bleu azur» width=28 height=28 alignItems="center" justifyContent="center" fill="$info" stroke="$text-primary" strokeWidth=2 cornerRadius=3
+                - icon «Selected» width=14 height=14 fill="$on-accent" icon="check"
+              - frame «Swatch · Jaune balisage» width=28 height=28 alignItems="center" justifyContent="center" fill="$accent" cornerRadius=3
+              - frame «Swatch · Magenta» width=28 height=28 alignItems="center" justifyContent="center" fill="$route" cornerRadius=3
+              - frame «Swatch · Orange» width=28 height=28 alignItems="center" justifyContent="center" fill="$warning" cornerRadius=3
+              - frame «Swatch · Vert» width=28 height=28 alignItems="center" justifyContent="center" fill="$success" cornerRadius=3
+              - frame «Swatch · Blanc cassé» width=28 height=28 alignItems="center" justifyContent="center" fill="$text-primary" cornerRadius=3
+              - text «Selected Name» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Bleu azur
+            - text «Hint» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Appliquée aux livrées compatibles et à ta fiche au classement.
+      - instance «Panel · Hub principal» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Hub principal
+        - frame «Content» width="fill_container" height="fill_container" layout="horizontal" gap=28 padding=[20, 24, 24, 24]
+          - frame «Search Column» width="fill_container" layout="vertical" gap=18
+            - instance «Input · Rechercher un aéroport» of «Input»
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Rechercher un aéroport
+              - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="search"
+                - text «Value» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Code OACI, ville ou nom d'aéroport
+            - frame «Suggestions» width="fill_container" layout="vertical" gap=4
+              - frame «Suggestions Head» width="fill_container" padding=[0, 0, 4, 0] alignItems="center" justifyContent="space_between"
+                - text «Title» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Suggestions pour un A320neo, un 737-800 ou un E195-E2
+                - text «Criteria» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Piste d'au moins 2 000 m
+              - frame «Airport · LFMN» width="fill_container" gap=16 padding=[13, 14] alignItems="center" fill="$surface-selected" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                - instance «Code» of «Sign/Location»
+                  - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=13 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+                - frame «Name Stack» width="fill_container" layout="vertical" gap=2
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Nice Côte d'Azur
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Nice · piste de 2 960 m
+                - text «Why» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Équilibré pour débuter
+                - icon «Selected» width=16 height=16 fill="$text-primary" icon="check"
+              - frame «Airport · LFPG» width="fill_container" gap=16 padding=[13, 14] alignItems="center" cornerRadius=3
+                - instance «Code» of «Sign/Location»
+                  - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=13 fontWeight="700" letterSpacing=0.5  TEXT: LFPG
+                - frame «Name Stack» width="fill_container" layout="vertical" gap=2
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Paris-Charles de Gaulle
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Roissy-en-France · piste de 4 215 m
+                - text «Why» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Le plus de jobs, le plus cher
+              - frame «Airport · LFLL» width="fill_container" gap=16 padding=[13, 14] alignItems="center" cornerRadius=3
+                - instance «Code» of «Sign/Location»
+                  - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=13 fontWeight="700" letterSpacing=0.5  TEXT: LFLL
+                - frame «Name Stack» width="fill_container" layout="vertical" gap=2
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Lyon-Saint-Exupéry
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Colombier-Saugnieu · piste de 4 000 m
+                - text «Why» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Le moins cher des trois
+          - rectangle «Divider» width=1 height="fill_container" fill="$border"
+          - frame «Implications · LFMN» width=300 layout="vertical" gap=22
+            - frame «Head» width="fill_container" layout="vertical" gap=4
+              - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Basée à Nice
+              - text «Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Ce que ce hub implique pour ta compagnie.
+            - frame «Facts» width="fill_container" layout="vertical" gap=20
+              - frame «Fact · Parking» width="fill_container" layout="vertical" gap=3
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Parking
+                - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 3 900 € par mois
+                - text «Sub» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: par avion stationné, prélevé le 1er
+              - frame «Fact · Jobs à proximité» width="fill_container" layout="vertical" gap=3
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Jobs à proximité
+                - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 46 départs
+                - text «Sub» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: à moins de 300 NM, renouvelés chaque jour
+              - frame «Fact · Concurrence» width="fill_container" layout="vertical" gap=3
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Concurrence
+                - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 3 compagnies IA
+                - text «Sub» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: déjà basées à LFMN
+    - frame «Footer» width="fill_container" alignItems="center" justifyContent="space_between"
+      - text «Footer Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Tu pourras ouvrir d'autres bases quand ta flotte grandira.
+      - instance «Continue» of «Button/Primary»
+        - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Choisir mon premier avion
+        - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+          - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+  - [instance «HUD/Onboarding» — see screens-resolved/hud-onboarding.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

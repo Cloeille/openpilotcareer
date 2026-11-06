@@ -1,0 +1,26 @@
+AZR 4127 · télémétrie interrompue
+Nice → Paris-Charles de Gaulle
+Vue en coupe
+Cabine & charge
+Systèmes
+Altitude
+FL240
+Vitesse sol
+412 kt
+Arrivée prévue
+18:42Z
+Carburant
+2 140 kg
+Vérification en pause · dernières valeurs à 17:58Z
+Pont SimConnect perdu
+Aucune donnée reçue depuis 42 s
+Ton vol continue normalement dans le simulateur. La vérification reprendra dès que le pont se reconnectera, et les données manquantes seront complétées à partir du simulateur si possible.
+Dernier paquet reçu
+17:58:12Z
+Reconnexion automatique
+tentative 3 sur 10
+Au-delà de 10 min de coupure
+le vol passera en « non vérifié »
+Relancer le pont
+Entrée
+Diagnostic

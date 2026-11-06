@@ -1,0 +1,157 @@
+# Vol en cours · systèmes
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Vol en cours · systèmes» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Backdrop» width=1600 height=900 fill=["#07090C", {"type": "gradient", "gradientType": "radial", "enabled": true, "rotation":...
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=22 padding=[28, 32, 24, 32]
+    - frame «Live Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - ellipse «Live Dot» width=7 height=7 fill="$route"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: F-HAZR · ATR 72-600 · télémétrie à 20 Hz
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Systèmes
+      - instance «View Switcher» of «View Switcher»
+        - frame «View · Vue en coupe» padding=[8, 16] fill="#00000000" cornerRadius=4
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Vue en coupe
+        - frame «View · Cabine & charge» padding=[8, 16] cornerRadius=4
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Cabine & charge
+        - frame «View · Systèmes» padding=[8, 16] fill="#FFFFFF1A" cornerRadius=4
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Systèmes
+    - frame «Systems Body» width="fill_container" layout="vertical" gap=34 padding=[28, 40] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 28}
+      - frame «Row · Propulsion» width="fill_container" gap=96
+        - frame «Engines» layout="vertical" gap=22
+          - frame «Group Head» layout="vertical" gap=4
+            - text «Group Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Moteurs
+            - text «Group Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: PW127M · 1 284 h depuis la dernière révision
+          - frame «Engine Dials» gap=56
+            - frame «Moteur 1» layout="vertical" gap=16 alignItems="center"
+              - frame «Dial» width=160 height=160 layout="none"
+                - ellipse «Track» width=160 height=160 fill="#FFFFFF1A"
+                - ellipse «Redline» width=160 height=160 fill="$danger" opacity=0.5
+                - ellipse «Value Arc» width=160 height=160 fill="$text-primary"
+                - frame «Dial Center» width=160 height=160 layout="vertical" alignItems="center" justifyContent="center"
+                  - text «Dial Value» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="500"  TEXT: 84,2
+                  - text «Dial Unit» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: % couple
+              - text «Engine Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Moteur 1
+              - frame «Readouts» gap=26
+                - frame «Readout · Hélice» layout="vertical" gap=2 alignItems="center"
+                  - text «Readout Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Hélice
+                  - text «Readout Value» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="500"  TEXT: 82 %
+                - frame «Readout · ITT» layout="vertical" gap=2 alignItems="center"
+                  - text «Readout Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: ITT
+                  - text «Readout Value» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="500"  TEXT: 712 °C
+                - frame «Readout · Huile» layout="vertical" gap=2 alignItems="center"
+                  - text «Readout Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Huile
+                  - text «Readout Value» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="500"  TEXT: 62 psi
+            - frame «Moteur 2» layout="vertical" gap=16 alignItems="center"
+              - frame «Dial» width=160 height=160 layout="none"
+                - ellipse «Track» width=160 height=160 fill="#FFFFFF1A"
+                - ellipse «Redline» width=160 height=160 fill="$danger" opacity=0.5
+                - ellipse «Value Arc» width=160 height=160 fill="$text-primary"
+                - frame «Dial Center» width=160 height=160 layout="vertical" alignItems="center" justifyContent="center"
+                  - text «Dial Value» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="500"  TEXT: 84,0
+                  - text «Dial Unit» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: % couple
+              - text «Engine Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Moteur 2
+              - frame «Readouts» gap=26
+                - frame «Readout · Hélice» layout="vertical" gap=2 alignItems="center"
+                  - text «Readout Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Hélice
+                  - text «Readout Value» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="500"  TEXT: 82 %
+                - frame «Readout · ITT» layout="vertical" gap=2 alignItems="center"
+                  - text «Readout Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: ITT
+                  - text «Readout Value» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="500"  TEXT: 718 °C
+                - frame «Readout · Huile» layout="vertical" gap=2 alignItems="center"
+                  - text «Readout Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Huile
+                  - text «Readout Value» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="500"  TEXT: 61 psi
+        - frame «Fuel» width="fill_container" layout="vertical" gap=22
+          - frame «Group Head» layout="vertical" gap=4
+            - text «Group Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Carburant
+            - text «Group Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Réservoirs d'aile
+          - frame «Fuel Gauges» gap=40 alignItems="end"
+            - frame «Tank · Gauche» layout="vertical" gap=12 alignItems="center"
+              - frame «Tank» width=52 height=160 layout="vertical" padding=4 justifyContent="end" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+                - rectangle «Level» width="fill_container" height=65 fill="$text-primary" cornerRadius=3 opacity=0.85
+              - text «Tank Name» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Gauche
+              - text «Tank Value» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="500"  TEXT: 1 070 kg
+            - frame «Tank · Droit» layout="vertical" gap=12 alignItems="center"
+              - frame «Tank» width=52 height=160 layout="vertical" padding=4 justifyContent="end" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+                - rectangle «Level» width="fill_container" height=65 fill="$text-primary" cornerRadius=3 opacity=0.85
+              - text «Tank Name» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Droit
+              - text «Tank Value» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="500"  TEXT: 1 070 kg
+            - frame «Fuel Total» layout="vertical" gap=6 padding=[0, 0, 6, 24]
+              - text «Total Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: À bord
+              - text «Total Value» fill="$text-primary" fontFamily="$font-display" fontSize=44 fontWeight="500"  TEXT: 2 140 kg
+              - text «Endurance» fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Endurance 2 h 12
+              - text «Arrival» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: 1 280 kg prévus à l'arrivée · marge de 90 kg
+      - frame «Row · Condition» width="fill_container" gap=96 padding=[28, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - frame «Circuits» layout="vertical" gap=22
+          - frame «Group Head» layout="vertical" gap=4
+            - text «Group Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Circuits
+            - text «Group Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Aucune alarme
+          - frame «Circuit Items» gap=48
+            - frame «Circuit · Électrique» layout="vertical" gap=8
+              - icon «Icon» width=22 height=22 fill="$text-primary" icon="zap"
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Électrique
+              - text «State» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: 28 V · normal
+            - frame «Circuit · Hydraulique» layout="vertical" gap=8
+              - icon «Icon» width=22 height=22 fill="$text-primary" icon="droplets"
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Hydraulique
+              - text «State» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: 3 000 psi · normal
+            - frame «Circuit · Pressurisation» layout="vertical" gap=8
+              - icon «Icon» width=22 height=22 fill="$text-primary" icon="gauge"
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Pressurisation
+              - text «State» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: cabine à 6 800 ft
+            - frame «Circuit · Anti-givrage» layout="vertical" gap=8
+              - icon «Icon» width=22 height=22 fill="$text-primary" icon="snowflake"
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Anti-givrage
+              - text «State» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: hélices actives
+        - frame «Wear» width="fill_container" layout="vertical" gap=22
+          - frame «Group Head» layout="vertical" gap=4
+            - text «Group Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Usure
+            - text «Group Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Prochaine visite A dans 38 h de vol
+          - frame «Wear Rings» gap=40
+            - frame «Wear · Cellule» layout="vertical" gap=10 alignItems="center"
+              - frame «Ring» width=78 height=78 layout="none"
+                - ellipse «Track» width=78 height=78 fill="#FFFFFF1A"
+                - ellipse «Value Arc» width=78 height=78 fill="$text-primary"
+                - frame «Ring Center» width=78 height=78 alignItems="center" justifyContent="center"
+                  - text «Ring Value» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: 18 %
+              - text «Part» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Cellule
+            - frame «Wear · Moteurs» layout="vertical" gap=10 alignItems="center"
+              - frame «Ring» width=78 height=78 layout="none"
+                - ellipse «Track» width=78 height=78 fill="#FFFFFF1A"
+                - ellipse «Value Arc» width=78 height=78 fill="$text-primary"
+                - frame «Ring Center» width=78 height=78 alignItems="center" justifyContent="center"
+                  - text «Ring Value» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: 24 %
+              - text «Part» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Moteurs
+            - frame «Wear · Trains» layout="vertical" gap=10 alignItems="center"
+              - frame «Ring» width=78 height=78 layout="none"
+                - ellipse «Track» width=78 height=78 fill="#FFFFFF1A"
+                - ellipse «Value Arc» width=78 height=78 fill="$text-primary"
+                - frame «Ring Center» width=78 height=78 alignItems="center" justifyContent="center"
+                  - text «Ring Value» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: 21 %
+              - text «Part» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Trains
+            - frame «Wear · Pneus & freins» layout="vertical" gap=10 alignItems="center"
+              - frame «Ring» width=78 height=78 layout="none"
+                - ellipse «Track» width=78 height=78 fill="#FFFFFF1A"
+                - ellipse «Value Arc» width=78 height=78 fill="$warning"
+                - frame «Ring Center» width=78 height=78 alignItems="center" justifyContent="center"
+                  - text «Ring Value» fill="$warning" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: 37 %
+              - text «Part» fill="$warning" fontFamily="$font-ui" fontSize=13  TEXT: Pneus & freins
+    - frame «Verification Checks» width="fill_container" gap=36 alignItems="center"
+      - text «AC Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Contrôles de vérification
+      - frame «Check · Mode slew» gap=7 alignItems="center"
+        - icon «Ok» width=15 height=15 fill="$success" icon="circle-check"
+        - text «Check» fill="$text-primary" fontFamily="$font-ui" fontSize=14  TEXT: Mode slew
+      - frame «Check · Accélération du temps» gap=7 alignItems="center"
+        - icon «Ok» width=15 height=15 fill="$success" icon="circle-check"
+        - text «Check» fill="$text-primary" fontFamily="$font-ui" fontSize=14  TEXT: Accélération du temps
+      - frame «Check · Pause» gap=7 alignItems="center"
+        - icon «Ok» width=15 height=15 fill="$success" icon="circle-check"
+        - text «Check» fill="$text-primary" fontFamily="$font-ui" fontSize=14  TEXT: Pause
+      - frame «Check · Sauts de position» gap=7 alignItems="center"
+        - icon «Ok» width=15 height=15 fill="$success" icon="circle-check"
+        - text «Check» fill="$text-primary" fontFamily="$font-ui" fontSize=14  TEXT: Sauts de position
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

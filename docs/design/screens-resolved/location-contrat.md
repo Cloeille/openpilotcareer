@@ -1,0 +1,111 @@
+# Location · contrat
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Location · contrat» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-5.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 padding=[28, 32, 24, 32] justifyContent="space_between"
+    - frame «Contract Column» width=640 height="fill_container" layout="vertical" gap=28
+      - frame «Title Block» width="fill_container" layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Catalogue d'avions · location
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: DHC-6 Twin Otter 400
+        - text «Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Loué par Viking Air Leasing · occasion de 2015 · 6 840 h de vol · F-HAZG
+      - instance «Duration Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Durée du contrat
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Plus long, loyer plus bas
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="horizontal" gap=4 padding=[8, 10, 14, 10]
+          - frame «Duration · 12 mois» width="fill_container" layout="vertical" gap=8 padding=12 cornerRadius="$radius-md"
+            - frame «Head» gap=10 alignItems="center"
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+              - text «Months» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 12 mois
+            - frame «Rent Stack» width="fill_container" layout="vertical" gap=3
+              - text «Rent» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 42 000 € / mois
+              - text «Total» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 504 000 € au total
+          - frame «Duration · 24 mois» width="fill_container" layout="vertical" gap=8 padding=12 fill="$surface-hover" cornerRadius="$radius-md"
+            - frame «Head» gap=10 alignItems="center"
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=9
+                - ellipse «Radio Dot» width=8 height=8 fill="$text-primary"
+              - text «Months» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 24 mois
+            - frame «Rent Stack» width="fill_container" layout="vertical" gap=3
+              - text «Rent» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 38 000 € / mois
+              - text «Total» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 912 000 € au total
+          - frame «Duration · 36 mois» width="fill_container" layout="vertical" gap=8 padding=12 cornerRadius="$radius-md"
+            - frame «Head» gap=10 alignItems="center"
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+              - text «Months» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 36 mois
+            - frame «Rent Stack» width="fill_container" layout="vertical" gap=3
+              - text «Rent» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 34 500 € / mois
+              - text «Total» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1 242 000 € au total
+      - instance «Terms Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Ce que prévoit le contrat
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Viking Air Leasing
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[4, 0, 8, 0]
+          - frame «Term · Maintenance» width="fill_container" height=64 gap=16 padding=[0, 22] alignItems="center"
+            - frame «Term Stack» width="fill_container" layout="vertical" gap=3
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Maintenance
+              - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Visites, pièces et main-d'œuvre chez le loueur
+            - frame «Outcome» gap=8 alignItems="center"
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Incluse
+          - frame «Term · Assurance» width="fill_container" height=64 gap=16 padding=[0, 22] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Term Stack» width="fill_container" layout="vertical" gap=3
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Assurance
+              - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: À souscrire à part, environ 2 100 € / mois
+            - frame «Outcome» gap=8 alignItems="center"
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Non incluse
+          - frame «Term · Sortie anticipée» width="fill_container" height=64 gap=16 padding=[0, 22] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Term Stack» width="fill_container" layout="vertical" gap=3
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Sortie anticipée
+              - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Préavis de 30 jours, pénalité de 2 loyers soit 76 000 €
+            - frame «Outcome» gap=8 alignItems="center"
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Dès 6 mois
+          - frame «Term · Option d'achat» width="fill_container" height=64 gap=16 padding=[0, 22] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Term Stack» width="fill_container" layout="vertical" gap=3
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Option d'achat
+              - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: À la fin des 24 mois, au lieu de rendre l'avion
+            - frame «Outcome» gap=8 alignItems="center"
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 2 650 000 €
+          - frame «Term · Base d'attache» width="fill_container" height=64 gap=16 padding=[0, 22] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Term Stack» width="fill_container" layout="vertical" gap=3
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Base d'attache
+              - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Nice Côte d'Azur · livraison le 7 novembre
+            - frame «Outcome» gap=8 alignItems="center"
+              - text «Value» fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="normal"  TEXT: LFMN
+              - icon «Change Icon» width=16 height=16 fill="$text-tertiary" icon="chevron-right"
+    - frame «Summary Column» width=420 height="fill_container" layout="vertical"
+      - instance «Summary Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Récapitulatif
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Étape 2 sur 2
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=22 padding=[16, 24, 24, 24]
+          - frame «Lines» width="fill_container" layout="vertical" gap=12
+            - frame «Line · Premier loyer, novembre» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Premier loyer, novembre
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 38 000 €
+            - frame «Line · Caution, rendue en fin de contrat» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Caution, rendue en fin de contrat
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 76 000 €
+            - frame «Line · Convoyage et immatriculation» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Convoyage et immatriculation
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 12 500 €
+          - rectangle «Divider» width="fill_container" height=1 fill="$border"
+          - frame «Pay Today» width="fill_container" layout="vertical" gap=2
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Premier paiement
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=38 fontWeight="600"  TEXT: 126 500 €
+          - frame «Balance» width="fill_container" layout="vertical" gap=4
+            - frame «Balance Row» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Solde après signature
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 1 158 060 €
+            - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Puis 38 000 € le 1er de chaque mois, jusqu'en octobre 2028.
+          - frame «Actions» width="fill_container" gap=10 padding=[6, 0, 0, 0]
+            - instance «Btn · Annuler» of «Button/Secondary»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Annuler
+            - instance «Btn · Confirmer la location» of «Button/Primary»
+              - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Confirmer la location
+              - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

@@ -1,0 +1,55 @@
+# Détail d'un job
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Détail d'un job» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-4.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 gap=24 padding=[28, 32, 24, 32]
+    - frame «Briefing Column» width=620 height="fill_container" layout="vertical" gap=32
+      - frame «Job Header» width="fill_container" layout="vertical" gap=12
+        - frame «Title Block» layout="vertical" gap=6
+          - frame «Status» gap=8 alignItems="center"
+            - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Job passagers · J-20915
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Nice → Rome-Fiumicino
+        - text «Route Line» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: LFMN → LIRF · 254 NM · environ 1 h 30 de vol
+        - frame «Contest Status» gap=10 padding=[8, 0, 0, 0] alignItems="center"
+          - instance «Contesté» of «Badge/Contesté»
+            - icon «Icon» width=12 height=12 fill="$warning" icon="swords"
+            - text «Label» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Contesté
+          - text «Note» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Corsica Wings positionne un ATR 72 à Nice : prise estimée dans 6 min environ.
+      - instance «Briefing Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[24, 28, 4, 28] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Briefing
+        - frame «Content» width="fill_container" layout="vertical" gap=32 padding=[16, 28, 28, 28]
+          - frame «Facts» width="fill_container" layout="vertical" gap=28
+            - frame «Facts Row 1» width="fill_container" gap=32
+              - instance «Fact · Charge» of «Stat»
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Charge
+                - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=28 fontWeight="500"  TEXT: 46 passagers
+                - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: 4 764 kg avec bagages et courrier
+              - instance «Fact · Échéance» of «Stat»
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Échéance
+                - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=28 fontWeight="500"  TEXT: Avant 22:30Z
+                - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Décollage au plus tard 21:00Z
+            - frame «Facts Row 2» width="fill_container" gap=32
+              - instance «Fact · Appareil» of «Stat»
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Appareil
+                - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=28 fontWeight="500"  TEXT: ATR 42-600
+                - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: F-HAZT, prêt à Nice
+              - instance «Fact · Gain estimé» of «Stat»
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Gain estimé
+                - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=28 fontWeight="500"  TEXT: 11 380 €
+                - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Ajusté après vérification du vol
+          - rectangle «Divider» width="fill_container" height=1 fill="$border"
+          - frame «Accept Block» width="fill_container" layout="vertical" gap=16
+            - frame «Buttons» gap=12 alignItems="center"
+              - instance «Accept Button» of «Button/Primary»
+                - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Accepter et verrouiller
+                - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                  - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+              - instance «SimBrief Button» of «Button/Secondary»
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Envoyer à SimBrief
+            - text «Lock Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.4  TEXT: Le job est réservé à ton nom jusqu'au décollage, 21:00Z au plus tard. Aucune compagnie IA ne pourra plus le prendre.
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

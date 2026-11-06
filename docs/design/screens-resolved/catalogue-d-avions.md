@@ -1,0 +1,229 @@
+# Catalogue d'avions
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Catalogue d'avions» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-5.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 padding=[28, 32, 24, 32] justifyContent="space_between"
+    - frame «Catalogue Column» width=780 height="fill_container" layout="vertical" gap=28
+      - frame «Page Header» width="fill_container" alignItems="end" justifyContent="space_between"
+        - frame «Title Block» layout="vertical" gap=6
+          - frame «Status» gap=8 alignItems="center"
+            - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Flotte · acheter un avion
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600" lineHeight=1  TEXT: Catalogue d'avions
+        - frame «Catalogue Stats» padding=[0, 0, 6, 0]
+          - text «Catalogue Summary» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 2 547 types OACI · 412 avec données réelles
+      - instance «Catalogue Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Types d'appareils
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Trier par pertinence
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[8, 0, 6, 0]
+          - frame «Toolbar» width="fill_container" layout="vertical" gap=14 padding=[6, 22, 14, 22] stroke="$border"
+            - frame «Search Row» width="fill_container" gap=12 alignItems="center"
+              - frame «Search Field» width="fill_container" height=42 gap=10 padding=[0, 10, 0, 14] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="search"
+                - frame «Query» gap=1 alignItems="center"
+                  - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: DHC
+                  - rectangle «Caret» width=1 height=18 fill="$text-primary"
+                - text «Scope» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: code OACI, constructeur ou modèle
+                - frame «Spacer» width="fill_container" height=1
+                - text «Results» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 11 résultats
+                - instance «Key» of «Keycap»
+                  - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: /
+            - frame «Category Row» width="fill_container" alignItems="center" justifyContent="space_between"
+              - frame «Category Tabs» gap=8 alignItems="center"
+                - instance «Key Prev» of «Keycap»
+                  - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Z
+                - frame «Segments» gap=2 padding=2 fill="$surface-sunken" stroke="$border" strokeWidth=1 cornerRadius=2
+                  - frame «Seg · Tous» height=30 gap=7 padding=[0, 14] alignItems="center" fill="$surface-hover" cornerRadius=2
+                    - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Tous
+                  - frame «Seg · Piston» height=30 gap=7 padding=[0, 14] alignItems="center" cornerRadius=2
+                    - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Piston
+                  - frame «Seg · Turbopropulseur» height=30 gap=7 padding=[0, 14] alignItems="center" cornerRadius=2
+                    - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Turbopropulseur
+                  - frame «Seg · Jet» height=30 gap=7 padding=[0, 14] alignItems="center" cornerRadius=2
+                    - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Jet
+                  - frame «Seg · Hélicoptère» height=30 gap=7 padding=[0, 14] alignItems="center" cornerRadius=2
+                    - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Hélicoptère
+                - instance «Key Next» of «Keycap»
+                  - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: C
+          - frame «Column Header» width="fill_container" height=36 gap=8 padding=[0, 22] alignItems="center"
+            - text «Header · Type» width=250 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Type
+            - text «Header · Catégorie» width=130 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Catégorie
+            - text «Header · Sièges» width=60 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: Sièges
+            - text «Header · Rayon» width=90 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: Rayon (NM)
+            - text «Header · Prix» width=110 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: Prix
+          - frame «Row · DHC2» width="fill_container" height=54 gap=8 padding=[0, 22] alignItems="center" stroke="$border"
+            - frame «Ident» width=250 layout="vertical" gap=4
+              - frame «Line 1» gap=10 alignItems="center"
+                - text «Model» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: DHC-2 Beaver
+                - frame «ICAO Chip» cornerRadius=2
+                  - text «ICAO» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12 fontWeight="normal"  TEXT: DHC2
+              - text «Maker» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: De Havilland Canada
+            - frame «Category» width=130 gap=6 alignItems="center"
+              - text «Cat» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Piston
+            - text «Seats» width=60 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" textAlign="right"  TEXT: 7
+            - text «Range» width=90 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" textAlign="right"  TEXT: 395
+            - text «Price» width=110 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500" textAlign="right"  TEXT: 640 000 €
+          - frame «Row · DHC6» width="fill_container" height=54 gap=8 padding=[0, 22] alignItems="center" fill="$surface-hover"
+            - frame «Ident» width=250 layout="vertical" gap=4
+              - frame «Line 1» gap=10 alignItems="center"
+                - text «Model» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: DHC-6 Twin Otter 400
+                - frame «ICAO Chip» cornerRadius=2
+                  - text «ICAO» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12 fontWeight="normal"  TEXT: DHC6
+              - text «Maker» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: De Havilland · Viking Air
+            - frame «Category» width=130 gap=6 alignItems="center"
+              - text «Cat» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Turbopropulseur
+            - text «Seats» width=60 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" textAlign="right"  TEXT: 19
+            - text «Range» width=90 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" textAlign="right"  TEXT: 799
+            - text «Price» width=110 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500" textAlign="right"  TEXT: 4 200 000 €
+          - frame «Row · DH8D» width="fill_container" height=54 gap=8 padding=[0, 22] alignItems="center" stroke="$border"
+            - frame «Ident» width=250 layout="vertical" gap=4
+              - frame «Line 1» gap=10 alignItems="center"
+                - text «Model» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: Dash 8-400 · Q400
+                - frame «ICAO Chip» cornerRadius=2
+                  - text «ICAO» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12 fontWeight="normal"  TEXT: DH8D
+              - text «Maker» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: De Havilland Canada
+            - frame «Category» width=130 gap=6 alignItems="center"
+              - text «Cat» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Turbopropulseur
+            - text «Seats» width=60 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" textAlign="right"  TEXT: 78
+            - text «Range» width=90 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" textAlign="right"  TEXT: 1 100
+            - text «Price» width=110 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500" textAlign="right"  TEXT: 11 600 000 €
+          - frame «Row · DHC7» width="fill_container" height=54 gap=8 padding=[0, 22] alignItems="center" stroke="$border"
+            - frame «Ident» width=250 layout="vertical" gap=4
+              - frame «Line 1» gap=10 alignItems="center"
+                - text «Model» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: DHC-7 Dash 7
+                - frame «ICAO Chip» cornerRadius=2
+                  - text «ICAO» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12 fontWeight="normal"  TEXT: DHC7
+              - text «Maker» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: De Havilland Canada
+            - frame «Category» width=130 gap=6 alignItems="center"
+              - text «Cat» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Turbopropulseur
+            - frame «Seats» width=60 gap=2 alignItems="center" justifyContent="end"
+              - text «Seats» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 50
+            - frame «Range» width=90 gap=2 alignItems="center" justifyContent="end"
+              - text «Range» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 1 100
+            - frame «Price» width=80 gap=2 alignItems="center" justifyContent="end"
+              - text «Price» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 7 800 000 €
+            - frame «Data» width="fill_container" alignItems="center" justifyContent="end"
+              - instance «Estimé Badge» of «Badge/Estimé»
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: ≈ estimé
+          - frame «Row · DHC3» width="fill_container" height=54 gap=8 padding=[0, 22] alignItems="center" stroke="$border"
+            - frame «Ident» width=250 layout="vertical" gap=4
+              - frame «Line 1» gap=10 alignItems="center"
+                - text «Model» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: DHC-3 Otter
+                - frame «ICAO Chip» cornerRadius=2
+                  - text «ICAO» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12 fontWeight="normal"  TEXT: DHC3
+              - text «Maker» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: De Havilland Canada
+            - frame «Category» width=130 gap=6 alignItems="center"
+              - text «Cat» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Piston
+            - frame «Seats» width=60 gap=2 alignItems="center" justifyContent="end"
+              - text «Seats» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 6
+            - frame «Range» width=90 gap=2 alignItems="center" justifyContent="end"
+              - text «Range» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 700
+            - frame «Price» width=80 gap=2 alignItems="center" justifyContent="end"
+              - text «Price» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 350 000 €
+            - frame «Data» width="fill_container" alignItems="center" justifyContent="end"
+              - instance «Estimé Badge» of «Badge/Estimé»
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: ≈ estimé
+          - frame «Row · DH8A» width="fill_container" height=54 gap=8 padding=[0, 22] alignItems="center" stroke="$border"
+            - frame «Ident» width=250 layout="vertical" gap=4
+              - frame «Line 1» gap=10 alignItems="center"
+                - text «Model» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: Dash 8-100
+                - frame «ICAO Chip» cornerRadius=2
+                  - text «ICAO» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12 fontWeight="normal"  TEXT: DH8A
+              - text «Maker» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: De Havilland Canada
+            - frame «Category» width=130 gap=6 alignItems="center"
+              - text «Cat» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Turbopropulseur
+            - text «Seats» width=60 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" textAlign="right"  TEXT: 37
+            - text «Range» width=90 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" textAlign="right"  TEXT: 1 020
+            - text «Price» width=110 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500" textAlign="right"  TEXT: 2 400 000 €
+          - frame «Row · DHC5» width="fill_container" height=54 gap=8 padding=[0, 22] alignItems="center" stroke="$border"
+            - frame «Ident» width=250 layout="vertical" gap=4
+              - frame «Line 1» gap=10 alignItems="center"
+                - text «Model» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: DHC-5 Buffalo
+                - frame «ICAO Chip» cornerRadius=2
+                  - text «ICAO» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12 fontWeight="normal"  TEXT: DHC5
+              - text «Maker» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: De Havilland Canada
+            - frame «Category» width=130 gap=6 alignItems="center"
+              - text «Cat» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Turbopropulseur
+            - frame «Seats» width=60 gap=2 alignItems="center" justifyContent="end"
+              - text «Seats» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 44
+            - frame «Range» width=90 gap=2 alignItems="center" justifyContent="end"
+              - text «Range» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 1 000
+            - frame «Price» width=80 gap=2 alignItems="center" justifyContent="end"
+              - text «Price» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 6 500 000 €
+            - frame «Data» width="fill_container" alignItems="center" justifyContent="end"
+              - instance «Estimé Badge» of «Badge/Estimé»
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: ≈ estimé
+          - frame «Table Footer» width="fill_container" height=44 gap=10 padding=[0, 22] alignItems="center" stroke="$border"
+            - text «Shown» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 7 sur 11
+            - frame «Spacer» width="fill_container" height=1
+            - instance «Legend Badge» of «Badge/Estimé»
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: ≈ estimé
+            - text «Legend» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: valeurs déduites de la catégorie FAA
+    - frame «Purchase Column» width=420 height="fill_container" layout="vertical" gap=20 justifyContent="space_between"
+      - instance «Purchase Panel» of «Panel»
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=26 padding=[26, 24, 24, 24]
+          - frame «Identity» width="fill_container" layout="vertical" gap=6
+            - frame «Model Row» width="fill_container" gap=10 alignItems="center"
+              - text «Model» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="600" lineHeight=1  TEXT: DHC-6 Twin Otter 400
+              - frame «ICAO Chip» cornerRadius=2
+                - text «ICAO» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: DHC6
+            - text «Sub» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: De Havilland · Viking Air · turbopropulseur
+          - frame «Facts» width="fill_container" layout="vertical" gap=12
+            - frame «Fact · Sièges» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Sièges
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 19
+            - frame «Fact · Fret» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Fret
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 1 400 kg
+            - frame «Fact · Croisière» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Croisière
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 182 kt
+            - frame «Fact · Rayon d'action» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Rayon d'action
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 799 NM
+          - frame «Totals» width="fill_container" alignItems="end"
+            - frame «Pay Now» width="fill_container" layout="vertical" gap=2
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Prix catalogue
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="600" lineHeight=1  TEXT: 4 200 000 €
+            - frame «Lease Indicative» layout="vertical" gap=4 alignItems="end"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Location indicative
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600" lineHeight=1  TEXT: 38 000 € / mois
+          - frame «Actions» width="fill_container" gap=10
+            - instance «Btn · Louer» of «Button/Secondary»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Louer
+            - instance «Btn · Acheter cet avion» of «Button/Primary»
+              - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Acheter cet avion
+              - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+      - instance «Custom Aircraft Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Ajouter un avion d'addon
+        - frame «Content» width="fill_container" height="fit_content" layout="vertical" gap=20 padding=[14, 24, 24, 24] alignItems="start"
+          - frame «Detected» width="fill_container" layout="vertical" gap=4
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Détecté dans le simulateur
+            - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="600"  TEXT: Kodiak 900 · SimWorks Studios
+            - frame «Status» gap=8 padding=[4, 0, 0, 0] alignItems="center"
+              - ellipse «Dot» width=7 height=7 fill="$warning"
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Type OACI inconnu
+          - frame «Category Pick» width="fill_container" layout="vertical" gap=10
+            - frame «Pick Head» width="fill_container" layout="vertical" gap=2
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Choisir une catégorie
+              - text «Hint» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Ses performances seront estimées à partir de la catégorie.
+            - frame «Segments» gap=2 padding=2 fill="$surface-sunken" stroke="$border" strokeWidth=1 cornerRadius=2
+              - frame «Opt · Piston» height=30 padding=[0, 12] alignItems="center" cornerRadius=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Piston
+              - frame «Opt · Turbopropulseur» height=30 padding=[0, 12] alignItems="center" fill="$surface-hover" cornerRadius=2
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Turbopropulseur
+              - frame «Opt · Jet» height=30 padding=[0, 12] alignItems="center" cornerRadius=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Jet
+              - frame «Opt · Hélicoptère» height=30 padding=[0, 12] alignItems="center" cornerRadius=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Hélicoptère
+            - frame «Estimate Row» width="fill_container" layout="vertical" gap=16
+              - text «Estimate» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: ≈ 9 sièges · 900 kg · 230 kt · 1 000 NM
+              - instance «Btn · Ajouter au catalogue» of «Button/Secondary»
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Ajouter au catalogue
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

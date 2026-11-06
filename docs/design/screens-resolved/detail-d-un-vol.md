@@ -1,0 +1,139 @@
+# Détail d'un vol
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Détail d'un vol» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-8.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=28 padding=[40, 64, 32, 64]
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=10
+        - text «Overline» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Rapport de télémétrie · 4 nov. 2026
+        - frame «Title Row» gap=20 alignItems="center"
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=52 fontWeight="600" lineHeight=1  TEXT: AZR 4122
+          - frame «Verdict» gap=8 alignItems="center"
+            - ellipse «Dot» width=7 height=7 fill="$success"
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: Vérifié
+        - text «Subline» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: Lyon-Saint-Exupéry → Nice Côte d'Azur · ATR 72-600 F-HAZR · bloc 1 h 04
+      - frame «Views» gap=32 alignItems="center"
+        - frame «View · Télémétrie» gap=10 padding=[0, 0, 10, 0] alignItems="center" stroke="$text-primary" strokeWidth={"bottom": 2}
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Télémétrie
+        - frame «View · Calcul du gain» gap=10 padding=[0, 0, 10, 0] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Calcul du gain
+          - instance «Key» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: G
+    - frame «Middle» width="fill_container" height="fill_container" justifyContent="space_between"
+      - instance «Landing Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Atterrissage
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Nice · piste 04R · 21:10Z
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[18, 22, 24, 22]
+          - text «Rate Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Taux de chute au toucher
+          - frame «Rate Value» gap=10 padding=[6, 0, 4, 0] alignItems="end"
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=88 fontWeight="600" lineHeight=1  TEXT: −142
+            - frame «Unit Wrap» padding=[0, 0, 12, 0]
+              - text «Unit» fill="$text-secondary" fontFamily="$font-ui" fontSize=22 fontWeight="normal"  TEXT: fpm
+          - text «Rate Note» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Toucher doux, sous le seuil de 200 fpm
+          - frame «Scale» width="fill_container" gap=4 padding=[22, 0, 0, 0]
+            - frame «Band · Doux» width="fill_container" layout="vertical" gap=8
+              - rectangle «Bar» width="fill_container" height=4 fill="$text-primary"
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Doux
+            - frame «Band · Normal» width="fill_container" layout="vertical" gap=8
+              - rectangle «Bar» width="fill_container" height=4 fill="#FFFFFF1F"
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Normal
+            - frame «Band · Ferme» width="fill_container" layout="vertical" gap=8
+              - rectangle «Bar» width="fill_container" height=4 fill="#FFFFFF1F"
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Ferme
+            - frame «Band · Dur» width="fill_container" layout="vertical" gap=8
+              - rectangle «Bar» width="fill_container" height=4 fill="#FFFFFF1F"
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Dur
+          - frame «Push» width="fill_container" height="fill_container"
+          - frame «Figures» width="fill_container" gap=40
+            - frame «Figure · Facteur de charge» layout="vertical" gap=4
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Facteur de charge
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=28 fontWeight="500" lineHeight=1.1  TEXT: 1,09 G
+            - frame «Figure · Vitesse au toucher» layout="vertical" gap=4
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Vitesse au toucher
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=28 fontWeight="500" lineHeight=1.1  TEXT: 113 kt
+            - frame «Figure · Rebond» layout="vertical" gap=4
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Rebond
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=28 fontWeight="500" lineHeight=1.1  TEXT: Aucun
+      - instance «Anti-Cheat Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Contrôles anti-triche
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 6 sur 6 réussis
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=14 padding=[16, 22, 20, 22]
+          - frame «Check · Mode slew» width="fill_container" gap=14
+            - frame «Icon Wrap» padding=[2, 0, 0, 0]
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="check"
+            - frame «Text» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Mode slew
+              - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Jamais activé pendant le vol
+          - frame «Check · Accélération du temps» width="fill_container" gap=14
+            - frame «Icon Wrap» padding=[2, 0, 0, 0]
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="check"
+            - frame «Text» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Accélération du temps
+              - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ×1 sur toute la durée du vol
+          - frame «Check · Pause» width="fill_container" gap=14
+            - frame «Icon Wrap» padding=[2, 0, 0, 0]
+              - icon «Icon» width=16 height=16 fill="$warning" icon="circle-alert"
+            - frame «Text» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Pause
+              - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Une pause de 0:38 en croisière, tolérée jusqu'à 2:00
+          - frame «Check · Sauts de position» width="fill_container" gap=14
+            - frame «Icon Wrap» padding=[2, 0, 0, 0]
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="check"
+            - frame «Text» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Sauts de position
+              - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Écart maximal de 0,3 NM entre deux relevés
+          - frame «Check · Carburant et charge» width="fill_container" gap=14
+            - frame «Icon Wrap» padding=[2, 0, 0, 0]
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="check"
+            - frame «Text» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Carburant et charge
+              - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Aucune modification en vol
+          - frame «Check · Intégrité du rapport» width="fill_container" gap=14
+            - frame «Icon Wrap» padding=[2, 0, 0, 0]
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="check"
+            - frame «Text» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Intégrité du rapport
+              - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Signature du pont valide
+    - instance «Timeline Panel» of «Panel»
+      - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+        - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Phases du vol
+        - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Décollage 20:19Z · toucher 21:10Z
+      - frame «Content» width="fill_container" height="fit_content(80)" layout="horizontal" gap=56 padding=[18, 22, 22, 22] alignItems="end" justifyContent="space_between"
+        - frame «Timeline» width=1100 layout="vertical" gap=12
+          - frame «Phase Bar» width="fill_container" gap=4
+            - rectangle «Phase · Roulage» width=157 height=6 fill="#FFFFFF33"
+            - rectangle «Phase · Montée» width=313 height=6 fill="#FFFFFF80"
+            - rectangle «Phase · Croisière FL210» width=209 height=6 fill="$text-primary"
+            - rectangle «Phase · Descente» width=226 height=6 fill="#FFFFFF80"
+            - rectangle «Phase · Approche» width=122 height=6 fill="#FFFFFF4D"
+            - rectangle «Phase · Roulage» width=53 height=6 fill="#FFFFFF33"
+          - frame «Phase Labels» width="fill_container" gap=4
+            - frame «Label · Roulage» width=157 layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Roulage
+              - text «Duration» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 9 min
+            - frame «Label · Montée» width=313 layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Montée
+              - text «Duration» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 18 min
+            - frame «Label · Croisière FL210» width=209 layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Croisière FL210
+              - text «Duration» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 12 min, dont 0:38 de pause
+            - frame «Label · Descente» width=226 layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Descente
+              - text «Duration» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 13 min
+            - frame «Label · Approche» width=122 layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Approche
+              - text «Duration» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 7 min
+            - frame «Label · Roulage» width=53 layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Roulage
+              - text «Duration» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 3 min
+        - frame «Fuel» layout="vertical" gap=4 alignItems="end"
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Carburant consommé
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="500" lineHeight=1.1  TEXT: 1 180 kg
+          - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 30 kg sous le plan de vol
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

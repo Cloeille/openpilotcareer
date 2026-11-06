@@ -1,0 +1,60 @@
+F-HAZR · ATR 72-600 · télémétrie à 20 Hz
+Systèmes
+Vue en coupe
+Cabine & charge
+Systèmes
+Moteurs
+PW127M · 1 284 h depuis la dernière révision
+84,2
+% couple
+Moteur 1
+Hélice
+82 %
+ITT
+712 °C
+Huile
+62 psi
+84,0
+% couple
+Moteur 2
+Hélice
+82 %
+ITT
+718 °C
+Huile
+61 psi
+Carburant
+Réservoirs d'aile
+Gauche
+1 070 kg
+Droit
+1 070 kg
+À bord
+2 140 kg
+Endurance 2 h 12
+1 280 kg prévus à l'arrivée · marge de 90 kg
+Circuits
+Aucune alarme
+Électrique
+28 V · normal
+Hydraulique
+3 000 psi · normal
+Pressurisation
+cabine à 6 800 ft
+Anti-givrage
+hélices actives
+Usure
+Prochaine visite A dans 38 h de vol
+18 %
+Cellule
+24 %
+Moteurs
+21 %
+Trains
+37 %
+Pneus & freins
+Contrôles de vérification
+Mode slew
+Accélération du temps
+Pause
+Sauts de position

@@ -1,0 +1,95 @@
+# Comparaison IA
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Comparaison IA» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-10.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" padding=[28, 32, 24, 32] justifyContent="space_between"
+    - frame «Versus Top» width="fill_container" layout="vertical" gap=14
+      - frame «Versus Header» width="fill_container" alignItems="end" justifyContent="space_between"
+        - frame «Title Block · Azur Régional» width="fill_container" layout="vertical" gap=6
+          - frame «Status» gap=8 alignItems="center"
+            - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Toi · 7e cette saison
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Azur Régional
+        - frame «Versus Center» width=200 layout="vertical" gap=4 padding=[0, 0, 2, 0] alignItems="center"
+          - text «VS» fill="$text-tertiary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: vs
+          - text «Score» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Égalité, 3 à 3
+        - frame «Title Block · Alpes Air Link» width="fill_container" layout="vertical" gap=6 alignItems="end"
+          - frame «Status» gap=8 alignItems="center"
+            - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: IA prudente · 6e cette saison
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Alpes Air Link
+    - frame «Versus Deck» width="fill_container" gap=20 justifyContent="center"
+      - instance «Duel» of «Panel»
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[14, 22, 18, 22]
+          - frame «Duel · Valeur nette» width="fill_container" height=36 gap=16 alignItems="center"
+            - frame «Value» width="fill_container" justifyContent="end"
+              - text «Value» fill="$text-tertiary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: 8,42 M€
+            - frame «Bar Area» width=140 justifyContent="end"
+              - rectangle «Bar» width=132 height=4 fill="$border-strong" cornerRadius=2
+            - frame «Label» width=180 justifyContent="center"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Valeur nette
+            - frame «Bar Area» width=140
+              - rectangle «Bar» width=140 height=4 fill="$text-secondary" cornerRadius=2
+            - frame «Value» width="fill_container"
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: 8,90 M€
+          - frame «Duel · Gain de saison» width="fill_container" height=36 gap=16 alignItems="center"
+            - frame «Value» width="fill_container" justifyContent="end"
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: +253 k€
+            - frame «Bar Area» width=140 justifyContent="end"
+              - rectangle «Bar» width=140 height=4 fill="$text-secondary" cornerRadius=2
+            - frame «Label» width=180 justifyContent="center"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Gain de saison
+            - frame «Bar Area» width=140
+              - rectangle «Bar» width=105 height=4 fill="$border-strong" cornerRadius=2
+            - frame «Value» width="fill_container"
+              - text «Value» fill="$text-tertiary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: +190 k€
+          - frame «Duel · Vols de saison» width="fill_container" height=36 gap=16 alignItems="center"
+            - frame «Value» width="fill_container" justifyContent="end"
+              - text «Value» fill="$text-tertiary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: 47
+            - frame «Bar Area» width=140 justifyContent="end"
+              - rectangle «Bar» width=56 height=4 fill="$border-strong" cornerRadius=2
+            - frame «Label» width=180 justifyContent="center"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Vols de saison
+            - frame «Bar Area» width=140
+              - rectangle «Bar» width=140 height=4 fill="$text-secondary" cornerRadius=2
+            - frame «Value» width="fill_container"
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: 118
+          - frame «Duel · Réputation» width="fill_container" height=36 gap=16 alignItems="center"
+            - frame «Value» width="fill_container" justifyContent="end"
+              - text «Value» fill="$text-tertiary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: 4,6
+            - frame «Bar Area» width=140 justifyContent="end"
+              - rectangle «Bar» width=137 height=4 fill="$border-strong" cornerRadius=2
+            - frame «Label» width=180 justifyContent="center"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Réputation
+            - frame «Bar Area» width=140
+              - rectangle «Bar» width=140 height=4 fill="$text-secondary" cornerRadius=2
+            - frame «Value» width="fill_container"
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: 4,7
+          - frame «Duel · Ponctualité» width="fill_container" height=36 gap=16 alignItems="center"
+            - frame «Value» width="fill_container" justifyContent="end"
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: 96 %
+            - frame «Bar Area» width=140 justifyContent="end"
+              - rectangle «Bar» width=140 height=4 fill="$text-secondary" cornerRadius=2
+            - frame «Label» width=180 justifyContent="center"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Ponctualité
+            - frame «Bar Area» width=140
+              - rectangle «Bar» width=133 height=4 fill="$border-strong" cornerRadius=2
+            - frame «Value» width="fill_container"
+              - text «Value» fill="$text-tertiary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: 91 %
+          - frame «Duel · Marge moyenne par vol» width="fill_container" height=36 gap=16 alignItems="center"
+            - frame «Value» width="fill_container" justifyContent="end"
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: 5 380 €
+            - frame «Bar Area» width=140 justifyContent="end"
+              - rectangle «Bar» width=140 height=4 fill="$text-secondary" cornerRadius=2
+            - frame «Label» width=180 justifyContent="center"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Marge moyenne par vol
+            - frame «Bar Area» width=140
+              - rectangle «Bar» width=42 height=4 fill="$border-strong" cornerRadius=2
+            - frame «Value» width="fill_container"
+              - text «Value» fill="$text-tertiary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: 1 610 €
+          - rectangle «Divider» width="fill_container" height=1 fill="$border"
+          - frame «Projection» width="fill_container" padding=[16, 0, 0, 0] justifyContent="center"
+            - text «Projection Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: L'écart fond de 13 k€ par jour. Il en faudrait 19 pour passer 6e avant la remise à zéro du 1er décembre.
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

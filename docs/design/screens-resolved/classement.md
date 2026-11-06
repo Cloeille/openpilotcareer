@@ -1,0 +1,188 @@
+# Classement
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Classement» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-9.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 gap=56 padding=[28, 32, 24, 32] justifyContent="space_between"
+    - frame «Leaderboard Column» width=880 height="fill_container" layout="vertical" justifyContent="space_between"
+      - frame «Title Block» width="fill_container" layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Saison de novembre · jour 5 sur 30 · remise à zéro le 1er décembre
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600" lineHeight=1.05  TEXT: Classement
+      - frame «Table Group» width="fill_container" layout="vertical" gap=16
+        - frame «Toolbar» width="fill_container" alignItems="center" justifyContent="space_between"
+          - frame «Sort» gap=4 alignItems="center"
+            - frame «Sort · Valeur nette» gap=8 padding=[8, 12] alignItems="center" fill="$surface-hover" cornerRadius=4
+              - instance «Key» of «Keycap»
+                - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: 1
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Valeur nette
+            - frame «Sort · Vols» gap=8 padding=[8, 12] alignItems="center" cornerRadius=4
+              - instance «Key» of «Keycap»
+                - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: 2
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Vols
+            - frame «Sort · Réputation» gap=8 padding=[8, 12] alignItems="center" cornerRadius=4
+              - instance «Key» of «Keycap»
+                - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: 3
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Réputation
+          - frame «Scope» gap=10 alignItems="center"
+            - instance «Key» of «Keycap»
+              - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Tab
+            - frame «Scope Toggle» gap=2 padding=2 alignItems="center" fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=4 effect={"type": "background_blur", "radius": 28}
+              - frame «Scope · Saison» padding=[6, 14] fill="$surface-hover" cornerRadius=3
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Saison
+              - frame «Scope · Carrière» padding=[6, 14] cornerRadius=3
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Carrière
+        - instance «Leaderboard» of «Panel»
+          - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[8, 8, 10, 8]
+            - frame «Header Row» width="fill_container" height=40 gap=16 padding=[0, 16] alignItems="center"
+              - frame «H · Rang» width=40
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Rang
+              - frame «H · Compagnie» width="fill_container"
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Compagnie
+              - frame «H · Hub» width=64
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Hub
+              - frame «H · Vols» width=64 justifyContent="end"
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Vols
+              - frame «H · Réputation» width=96 justifyContent="end"
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Réputation
+              - frame «H · Valeur nette» width=112 justifyContent="end"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Valeur nette
+            - frame «Rank · Transalpine Express» width="fill_container" height=46 gap=16 padding=[0, 16] alignItems="center" cornerRadius=4
+              - frame «Cell» width=40 gap=10 alignItems="center"
+                - text «Rank» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 1
+              - frame «Cell» width="fill_container" gap=10 alignItems="center"
+                - text «Company» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Transalpine Express
+                - text «Kind» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: IA prudente
+              - frame «Cell» width=64 gap=10 alignItems="center"
+                - text «Hub» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LSZH
+              - frame «Cell» width=64 gap=10 alignItems="center" justifyContent="end"
+                - text «Flights» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 412
+              - frame «Cell» width=96 gap=10 alignItems="center" justifyContent="end"
+                - text «Reputation» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 4,8
+              - frame «Cell» width=112 gap=10 alignItems="center" justifyContent="end"
+                - text «Net Worth» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 21,4 M€
+            - frame «Rank · Ibérica Sol» width="fill_container" height=46 gap=16 padding=[0, 16] alignItems="center" cornerRadius=4
+              - frame «Cell» width=40 gap=10 alignItems="center"
+                - text «Rank» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 2
+              - frame «Cell» width="fill_container" gap=10 alignItems="center"
+                - text «Company» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Ibérica Sol
+                - text «Kind» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: IA agressive
+              - frame «Cell» width=64 gap=10 alignItems="center"
+                - text «Hub» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LEBL
+              - frame «Cell» width=64 gap=10 alignItems="center" justifyContent="end"
+                - text «Flights» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 455
+              - frame «Cell» width=96 gap=10 alignItems="center" justifyContent="end"
+                - text «Reputation» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 3,9
+              - frame «Cell» width=112 gap=10 alignItems="center" justifyContent="end"
+                - text «Net Worth» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 18,9 M€
+            - frame «Rank · Aéro Provence» width="fill_container" height=46 gap=16 padding=[0, 16] alignItems="center" cornerRadius=4
+              - frame «Cell» width=40 gap=10 alignItems="center"
+                - text «Rank» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 3
+              - frame «Cell» width="fill_container" gap=10 alignItems="center"
+                - text «Company» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Aéro Provence
+                - text «Kind» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Joueur · m.tournier
+              - frame «Cell» width=64 gap=10 alignItems="center"
+                - text «Hub» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFML
+              - frame «Cell» width=64 gap=10 alignItems="center" justifyContent="end"
+                - text «Flights» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 138
+              - frame «Cell» width=96 gap=10 alignItems="center" justifyContent="end"
+                - text «Reputation» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 4,7
+              - frame «Cell» width=112 gap=10 alignItems="center" justifyContent="end"
+                - text «Net Worth» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 14,2 M€
+            - frame «Podium Divider» width="fill_container" padding=[6, 16]
+              - rectangle «Line» width="fill_container" height=1 fill="$border"
+            - frame «Rank · Rhône Air» width="fill_container" height=46 gap=16 padding=[0, 16] alignItems="center" cornerRadius=4
+              - frame «Cell» width=40 gap=10 alignItems="center"
+                - text «Rank» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 4
+              - frame «Cell» width="fill_container" gap=10 alignItems="center"
+                - text «Company» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Rhône Air
+                - text «Kind» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: IA prudente
+              - frame «Cell» width=64 gap=10 alignItems="center"
+                - text «Hub» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFLL
+              - frame «Cell» width=64 gap=10 alignItems="center" justifyContent="end"
+                - text «Flights» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 196
+              - frame «Cell» width=96 gap=10 alignItems="center" justifyContent="end"
+                - text «Reputation» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 4,5
+              - frame «Cell» width=112 gap=10 alignItems="center" justifyContent="end"
+                - text «Net Worth» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 11,7 M€
+            - frame «Rank · Méridia Cargo» width="fill_container" height=46 gap=16 padding=[0, 16] alignItems="center" cornerRadius=4
+              - frame «Cell» width=40 gap=10 alignItems="center"
+                - text «Rank» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 5
+              - frame «Cell» width="fill_container" gap=10 alignItems="center"
+                - text «Company» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Méridia Cargo
+                - text «Kind» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: IA agressive
+              - frame «Cell» width=64 gap=10 alignItems="center"
+                - text «Hub» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LIMC
+              - frame «Cell» width=64 gap=10 alignItems="center" justifyContent="end"
+                - text «Flights» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 151
+              - frame «Cell» width=96 gap=10 alignItems="center" justifyContent="end"
+                - text «Reputation» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 3,8
+              - frame «Cell» width=112 gap=10 alignItems="center" justifyContent="end"
+                - text «Net Worth» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 9,80 M€
+            - frame «Rank · Alpes Air Link» width="fill_container" height=46 gap=16 padding=[0, 16] alignItems="center" stroke="$border-strong" strokeWidth=1 cornerRadius=4
+              - frame «Cell» width=40 gap=10 alignItems="center"
+                - text «Rank» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 6
+              - frame «Cell» width="fill_container" gap=10 alignItems="center"
+                - text «Company» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Alpes Air Link
+                - text «Kind» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: IA prudente
+              - frame «Cell» width=64 gap=10 alignItems="center"
+                - text «Hub» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LSGG
+              - frame «Cell» width=64 gap=10 alignItems="center" justifyContent="end"
+                - text «Flights» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 118
+              - frame «Cell» width=96 gap=10 alignItems="center" justifyContent="end"
+                - text «Reputation» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 4,7
+              - frame «Cell» width=112 gap=10 alignItems="center" justifyContent="end"
+                - text «Net Worth» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 8,90 M€
+            - frame «Rank · Azur Régional» width="fill_container" height=46 gap=16 padding=[0, 16] alignItems="center" fill="$neutral-soft" cornerRadius=4
+              - frame «Cell» width=40 gap=10 alignItems="center"
+                - text «Rank» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 7
+              - frame «Cell» width="fill_container" gap=10 alignItems="center"
+                - text «Company» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Azur Régional
+                - text «Kind» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Toi
+              - frame «Cell» width=64 gap=10 alignItems="center"
+                - text «Hub» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN
+              - frame «Cell» width=64 gap=10 alignItems="center" justifyContent="end"
+                - text «Flights» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 47
+              - frame «Cell» width=96 gap=10 alignItems="center" justifyContent="end"
+                - text «Reputation» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 4,6
+              - frame «Cell» width=112 gap=10 alignItems="center" justifyContent="end"
+                - text «Net Worth» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 8,42 M€
+            - frame «Rank · Corsica Wings» width="fill_container" height=46 gap=16 padding=[0, 16] alignItems="center" cornerRadius=4
+              - frame «Cell» width=40 gap=10 alignItems="center"
+                - text «Rank» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 8
+              - frame «Cell» width="fill_container" gap=10 alignItems="center"
+                - text «Company» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Corsica Wings
+                - text «Kind» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: IA agressive
+              - frame «Cell» width=64 gap=10 alignItems="center"
+                - text «Hub» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFKJ
+              - frame «Cell» width=64 gap=10 alignItems="center" justifyContent="end"
+                - text «Flights» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 164
+              - frame «Cell» width=96 gap=10 alignItems="center" justifyContent="end"
+                - text «Reputation» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 3,6
+              - frame «Cell» width=112 gap=10 alignItems="center" justifyContent="end"
+                - text «Net Worth» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 8,11 M€
+            - frame «Footer» width="fill_container" padding=[14, 16, 4, 16] alignItems="center" justifyContent="space_between"
+              - frame «More» gap=10 alignItems="center"
+                - instance «Key» of «Keycap»
+                  - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Pg suiv
+                - text «More Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 16 autres compagnies
+              - text «Objective» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Encore 480 k€ pour passer 6e
+    - frame «Selection Column» width=340 height="fill_container" layout="vertical" justifyContent="end"
+      - instance «Selected Company» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Alpes Air Link
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 6e
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=20 padding=[6, 22, 22, 22]
+          - text «Kind» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: IA prudente · hub LSGG
+          - frame «Figure · Valeur nette» width="fill_container" layout="vertical" gap=3
+            - text «Figure Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Valeur nette
+            - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 8,90 M€
+            - text «Figure Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 480 k€ devant toi
+          - instance «Open Profile Button» of «Button/Primary»
+            - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Voir la fiche
+            - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+              - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

@@ -1,0 +1,69 @@
+# Vol en cours · cabine & charge
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Vol en cours · cabine & charge» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Backdrop» width=1600 height=900 fill=["#07090C", {"type": "gradient", "gradientType": "radial", "enabled": true, "rotation":...
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" padding=[28, 32, 24, 32] justifyContent="space_between"
+    - frame «Live Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - ellipse «Live Dot» width=7 height=7 fill="$route"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: AZR 4127 · embarquement clos à 16:41Z
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Cabine & charge
+      - instance «View Switcher» of «View Switcher»
+        - frame «View · Vue en coupe» padding=[8, 16] fill="#00000000" cornerRadius=4
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Vue en coupe
+        - frame «View · Cabine & charge» padding=[8, 16] fill="#FFFFFF1A" cornerRadius=4
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Cabine & charge
+        - frame «View · Systèmes» padding=[8, 16] cornerRadius=4
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Systèmes
+    - frame «Cabin Stage» width="fill_container" layout="vertical" gap=26
+      - script «Cabin Layout» width="fill_container" height=330
+      - frame «Cabin Equipment» gap=56 padding=[0, 0, 0, 23]
+        - frame «Equipment · Toilettes» layout="vertical" gap=3
+          - frame «Head» gap=8 alignItems="end"
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 1
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Toilettes
+          - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: usure 31 %
+        - frame «Equipment · Galley» layout="vertical" gap=3
+          - frame «Head» gap=8 alignItems="end"
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 1
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Galley
+          - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: usure 18 %
+        - frame «Equipment · Sièges» layout="vertical" gap=3
+          - frame «Head» gap=8 alignItems="end"
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 70
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Sièges
+          - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: usure moyenne 22 %
+        - frame «Equipment · Portes» layout="vertical" gap=3
+          - frame «Head» gap=8 alignItems="end"
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 2
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Portes
+          - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: contrôlées à 16:39Z
+    - frame «Weight & Balance» width="fill_container" gap=56
+      - frame «Mass · Masse au décollage» layout="vertical" gap=4
+        - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Masse au décollage
+        - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 21 080 kg
+        - text «Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: max. 23 000 kg
+      - frame «Mass · Masse actuelle» layout="vertical" gap=4
+        - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Masse actuelle
+        - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 20 610 kg
+      - frame «Mass · Carburant» layout="vertical" gap=4
+        - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Carburant
+        - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 2 140 kg
+        - text «Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: 1 280 kg prévus à l'arrivée
+      - frame «CG» width="fill_container" layout="vertical" gap=8
+        - frame «CG Head» width="fill_container" alignItems="end" justifyContent="space_between"
+          - text «CG Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Centrage
+          - text «CG Value» fill="$success" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 26,4 % MAC · dans l'enveloppe
+        - frame «CG Envelope» width="fill_container" height=10 layout="none"
+          - rectangle «Track» width=1024 height=2 fill="$border-strong"
+          - rectangle «Envelope» width=644 height=4 fill="#FFFFFF33"
+          - rectangle «CG Marker» width=2 height=10 fill="$success"
+        - frame «CG Scale» width="fill_container" justifyContent="space_between"
+          - text «Tick» fill="$text-tertiary" fontFamily="$font-mono" fontSize=10  TEXT: 10 %
+          - text «Tick» fill="$text-tertiary" fontFamily="$font-mono" fontSize=10  TEXT: 45 %
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

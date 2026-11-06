@@ -1,0 +1,74 @@
+# Achat · fonds insuffisants
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Achat · fonds insuffisants» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-5.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 padding=[28, 32, 24, 32] justifyContent="space_between"
+    - frame «Options Column» width=640 height="fill_container" layout="vertical" gap=28
+      - frame «Title Block» width="fill_container" layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - ellipse «Status Dot» width=7 height=7 fill="$danger"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Fonds insuffisants pour un achat comptant
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: DHC-6 Twin Otter 400
+        - text «Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Occasion de 2015 · 6 840 h de vol · immatriculation F-HAZG
+      - instance «Options Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Comment financer cet achat ?
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 2 solutions
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[8, 0, 12, 0]
+          - frame «Option · Prendre un crédit» width="fill_container" height=80 gap=16 padding=[0, 22] alignItems="center" fill="$surface-hover"
+            - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=9
+              - ellipse «Radio Dot» width=8 height=8 fill="$text-primary"
+            - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Prendre un crédit
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 80 % du prix sur 84 mois, apport de 852 500 € aujourd'hui
+            - frame «Outcome» layout="vertical" gap=3 alignItems="end"
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 47 450 € par mois
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Solde après : 432 060 €
+          - frame «Option · Vendre un appareil» width="fill_container" height=80 gap=16 padding=[0, 22] alignItems="center"
+            - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+            - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Vendre un appareil
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZE · Pilatus PC-12 NGX, reprise estimée à 3 150 000 €
+            - frame «Outcome» layout="vertical" gap=3 alignItems="end"
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Achat comptant
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Solde après : 222 060 €
+      - text «Credit Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Durée et apport restent modifiables à l'étape suivante, de 36 à 120 mois et de 20 à 50 %.
+    - frame «Summary Column» width=420 height="fill_container" layout="vertical"
+      - instance «Summary Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Récapitulatif
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Achat comptant
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=22 padding=[16, 24, 24, 24]
+          - frame «Lines» width="fill_container" layout="vertical" gap=12
+            - frame «Line · Prix d'achat» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Prix d'achat
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 4 200 000 €
+            - frame «Line · Convoyage et immatriculation» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Convoyage et immatriculation
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 12 500 €
+            - frame «Line · Total à payer» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Total à payer
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 4 212 500 €
+          - rectangle «Divider» width="fill_container" height=1 fill="$border"
+          - frame «Missing» width="fill_container" layout="vertical" gap=2
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Il manque
+            - text «Value» fill="$danger" fontFamily="$font-display" fontSize=38 fontWeight="600"  TEXT: 2 927 940 €
+          - frame «Coverage» width="fill_container" layout="vertical" gap=8
+            - frame «Balance Row» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Solde disponible
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 1 284 560 €
+            - frame «Coverage Track» width="fill_container" height=4 layout="none" fill="$neutral-soft" cornerRadius=2
+              - rectangle «Level» width=113 height=4 fill="$text-secondary" cornerRadius=2
+            - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Ton solde couvre 30 % du total.
+          - frame «Actions» width="fill_container" gap=10 padding=[6, 0, 0, 0]
+            - instance «Btn · Annuler l'achat» of «Button/Secondary»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Annuler l'achat
+            - instance «Btn · Prendre le crédit» of «Button/Primary»
+              - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Prendre le crédit
+              - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

@@ -1,0 +1,47 @@
+OpenHangar
+Maquette de l'interface
+Mod open source de carrière et d'économie pour Microsoft Flight Simulator 2020 et 2024 : client web, panneau en jeu et pont SimConnect. Maquette du 6 novembre 2026.
+Lire ce fichier
+Une rangée par domaine
+De 01 à 07 : les écrans principaux à gauche, les états et cas limites à droite de chaque rangée.
+Un viewport de jeu fixe
+Tous les écrans font 1600 × 900. Ce ne sont pas des pages qui défilent : le contenu tient dans l'écran, le détail passe par des vues secondaires.
+Les références
+La rangée 08 regroupe la carte des parcours, le schéma d'avion générique et les plans de cabine paramétriques.
+Les composants
+Ils sont en haut du canvas, au-dessus de la rangée 01. Toutes les couleurs, polices et rayons sont des variables.
+Système de design
+Polices
+Barlow pour le texte, Barlow Semi Condensed pour les titres, B612 Mono (police des cockpits Airbus) pour les codes et les données.
+Couleur dosée
+Neutre partout. La couleur sert seulement : vert = vérifié, ambre = à surveiller, rouge = rejeté ou hors service, magenta = route active, jaune et noir = panneaux ICAO type taxiway, bleu = PNC et info.
+Casse et formats
+Majuscule en début de phrase uniquement ; majuscules réservées aux codes (ICAO, immatriculations, unités). 1 284 560 € · 18:42Z · 1 070 kg · FL240 · 412 kt.
+Composants
+Button, Badge, Sign/Location et Sign/Direction, Keycap, Input, Stat, Panel, HUD/Top, HUD/Bottom, View Switcher.
+Pour l'implémentation
+Clavier et manette d'abord
+Q / E pour les onglets, Échap pour revenir, Entrée pour l'action principale. Voir la carte des parcours en rangée 08.
+Deux scripts à reprendre
+scripts/aircraft-schematic.js : avion en nuage de points généré par catégorie. scripts/cabin-layout.js : plan de cabine depuis une configuration JSON (ponts, classes, toilettes, galleys, usure). Du JavaScript simple, réutilisable côté client.
+Images et 3D
+Les fonds sont des rendus d'illustration ; dans l'app, ce sera une scène temps réel. Flotte, catalogue, achat et comparaison afficheront un vrai modèle 3D (glTF) à sourcer.
+Données
+Tout vient du serveur (API REST /api/v1, auto-hébergeable) ou du pont SimConnect (télémétrie). Contrat d'API à écrire à partir de ces écrans. Hors maquette : SayIntentions, contraintes du panneau MSFS.
+Sommaire
+01
+Accès & réglages
+02
+Onboarding
+03
+Tableau de bord & vol
+04
+Jobs
+05
+Flotte
+06
+Historique
+07
+Compétition IA
+08
+Références

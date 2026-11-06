@@ -1,0 +1,24 @@
+Rapport de télémétrie · 2 nov. 2026
+AZR 4109
+Rejeté
+Nice Côte d'Azur → Ajaccio Napoléon Bonaparte · DHC-6 Twin Otter F-HAZF
+Télémétrie
+Calcul du gain
+G
+Vol rejeté par la vérification
+Règle enfreinte : accélération du temps interdite
+Le pont SimConnect a relevé une accélération du temps ×4 de 17:32Z à 17:38Z, pendant la croisière. Le vol n'est donc pas payé et ne compte pas pour la saison.
+Gain
+0 € au lieu de ≈ 4 860 €
+Saison de novembre
+vol non comptabilisé
+Réputation
+−0,1
+Tu peux contester jusqu'au 5 nov. à 17:49Z. Un modérateur du serveur relit le rapport et ton explication.
+Contester la décision
+Entrée
+Voir la preuve
+Contrôles anti-triche
+5 sur 6 réussis
+Phases du vol
+Décollage 17:05Z · toucher 17:49Z

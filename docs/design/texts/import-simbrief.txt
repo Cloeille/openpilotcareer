@@ -1,0 +1,9 @@
+Jobs · job personnalisé
+Importer depuis SimBrief
+Ton dernier plan de vol devient un job personnalisé : route, carburant prévu, appareil et charge sont repris tels quels.
+Nom d'utilisateur SimBrief
+lmoreau_azr
+Texte d'aide
+Récupérer le plan
+Aperçu du job
+Plan généré il y a 8 min
