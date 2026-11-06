@@ -3,15 +3,17 @@
 // Rule violations throw HttpError.
 import { randomUUID } from 'node:crypto';
 import {
-  HUB_PRICE, MAX_COMPANIES_PER_USER, PAX_KG, REJECT_REPUTATION_PENALTY, START_REPUTATION, STARTER_AIRCRAFT, STARTING_BALANCE,
-  aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, jobPayout, minFlightHours, rankFor, seasonOf, settle,
+  HUB_PRICE, MAX_COMPANIES_PER_USER, PAX_KG, REJECT_REPUTATION_PENALTY, START_MODES, START_REPUTATION, STARTER_AIRCRAFT, STARTING_BALANCE,
+  aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, fuelPriceFactor, jobPayout, minFlightHours, presetSetting, rankFor, realismModifiers, realismView, seasonOf, settle,
   type AircraftType, type Company, type CompanyProfile, type CustomAircraftInput, type FleetAircraft, type Flight,
-  type FlightStatus, type Job, type Leaderboard, type LeaderboardRow, type Me, type Personality, type Pilot, type Telemetry, type Transaction,
+  type FlightStatus, type Job, type Leaderboard, type LeaderboardRow, type Me, type Personality, type Pilot, type StartMode, type Telemetry, type Transaction,
 } from '@opc/shared';
 import { airports, catalogType } from './catalog.ts';
 import { boardFor, boardJob, windowOf } from './board.ts';
 import { all, get, run, type Db } from './db.ts';
 import { HttpError } from './http.ts';
+import { parseRealism, realismSettingOf, saveRealism } from './realism.ts';
+import { release, reservedAgainst, reservedIds, reservationOf, windowOfJobId } from './reservations.ts';
 import type { Ofp } from './simbrief.ts';
 
 export const MAX_CUSTOM_AIRCRAFT = 20;
@@ -22,7 +24,10 @@ const SB_PREFIX = 'sb-';
 
 // ---------------------------------------------------------------- rows
 
-type CompanyRow = { id: number; user_id: number | null; name: string; personality: string | null; balance: number; reputation: number; flights: number; hours: number; revenue: number };
+type CompanyRow = {
+  id: number; user_id: number | null; name: string; personality: string | null; balance: number; reputation: number; flights: number; hours: number; revenue: number;
+  code: string | null; callsign: string | null; livery_color: string | null; start_mode: StartMode | null; realism: string | null;
+};
 export type AircraftRow = { id: number; company_id: number; icao: string; location: string; value: number };
 type JobColumns = {
   source: 'board' | 'simbrief'; kind: 'pax' | 'cargo'; origin: string; destination: string; distance_nm: number; payload_kg: number;
@@ -76,18 +81,30 @@ function assertNameFree(db: Db, name: string, exceptId = 0): void {
   if (get(db, 'SELECT 1 AS x FROM companies WHERE name = ? AND id != ?', name, exceptId)) throw new HttpError(409, 'name_taken', `company name "${name}" is already taken`);
 }
 
+export type NewCompany = {
+  userId: number | null; name: string; hub: string; personality?: Personality; now: number;
+  /** v2 identity. With `startMode` the company starts from that mode's capital with NO aircraft (the onboarding leases or rents one) and its suggested realism. */
+  code?: string; callsign?: string; liveryColor?: string | null; startMode?: StartMode;
+};
+
 /** Every new company gets the same starting capital and aircraft, so the per-player cap is what limits farming that grant. */
-export function createCompany(db: Db, o: { userId: number | null; name: string; hub: string; personality?: Personality; now: number }): number {
+export function createCompany(db: Db, o: NewCompany): number {
   if (!airports.has(o.hub)) throw new HttpError(422, 'unknown_airport', `airport ${o.hub} is not in the airport database`);
   if (o.userId !== null && get<{ n: number }>(db, 'SELECT COUNT(*) AS n FROM companies WHERE user_id = ?', o.userId)!.n >= MAX_COMPANIES_PER_USER) {
     throw new HttpError(409, 'limit_reached', `at most ${MAX_COMPANIES_PER_USER} companies per player`);
   }
   assertNameFree(db, o.name);
-  const id = run(db, 'INSERT INTO companies (user_id, name, personality, balance, reputation, created_at) VALUES (?, ?, ?, 0, ?, ?)', o.userId, o.name, o.personality ? JSON.stringify(o.personality) : null, START_REPUTATION, o.now).id;
-  post(db, id, o.now, 'grant', STARTING_BALANCE, 'starting capital');
+  if (o.code !== undefined && get(db, 'SELECT 1 AS x FROM companies WHERE code = ?', o.code)) throw new HttpError(409, 'code_taken', `airline code ${o.code} is already taken`);
+  const mode = o.startMode ? START_MODES[o.startMode] : null;
+  const id = run(db, `INSERT INTO companies (user_id, name, personality, balance, reputation, created_at, code, callsign, livery_color, start_mode, realism) VALUES (?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?)`,
+    o.userId, o.name, o.personality ? JSON.stringify(o.personality) : null, START_REPUTATION, o.now, o.code ?? null, o.callsign ?? null, o.liveryColor ?? null, o.startMode ?? null,
+    mode ? JSON.stringify(presetSetting(mode.suggestedRealism)) : null).id;
+  post(db, id, o.now, 'grant', mode?.capital ?? STARTING_BALANCE, 'starting capital');
   run(db, 'INSERT INTO hubs (company_id, icao) VALUES (?, ?)', id, o.hub);
-  const starter = catalogType(STARTER_AIRCRAFT);
-  run(db, 'INSERT INTO aircraft (company_id, icao, location, value) VALUES (?, ?, ?, ?)', id, starter.icao, o.hub, aircraftValue(starter));
+  if (!mode) {
+    const starter = catalogType(STARTER_AIRCRAFT);
+    run(db, 'INSERT INTO aircraft (company_id, icao, location, value) VALUES (?, ?, ?, ?)', id, starter.icao, o.hub, aircraftValue(starter));
+  }
   return id;
 }
 
@@ -133,7 +150,10 @@ export function deleteCustomAircraft(db: Db, companyId: number, icao: string): v
 export function companyView(db: Db, id: number): Company {
   const r = get<CompanyRow & { net_worth: number }>(db, `SELECT c.*, ${NET_WORTH_SQL} AS net_worth FROM companies c WHERE c.id = ?`, id);
   if (!r) throw new HttpError(404, 'company_not_found', 'company not found');
-  return { id: r.id, name: r.name, balance: r.balance, reputation: round1(r.reputation), flights: r.flights, hours: round1(r.hours), revenue: r.revenue, netWorth: r.net_worth, isAI: r.user_id === null };
+  return {
+    id: r.id, name: r.name, balance: r.balance, reputation: round1(r.reputation), flights: r.flights, hours: round1(r.hours), revenue: r.revenue, netWorth: r.net_worth, isAI: r.user_id === null,
+    code: r.code, callsign: r.callsign, liveryColor: r.livery_color, startMode: r.start_mode, realism: realismView(parseRealism(r.realism)),
+  };
 }
 
 export function fleetView(db: Db, companyId: number): FleetAircraft[] {
@@ -194,13 +214,16 @@ export function transactionsOf(db: Db, companyId: number, limit: number, before?
 const claimedIds = (db: Db, prefix: string): Set<string> =>
   new Set(all<{ job_id: string }>(db, 'SELECT job_id FROM job_claims WHERE job_id LIKE ?', `${prefix}%`).map((c) => c.job_id));
 
-/** Shared board of an airport for the window containing `now`, minus jobs already taken by anyone. */
-export function openBoard(db: Db, icao: string, now: number): Job[] {
+/** Shared board of an airport for the window containing `now`, minus jobs already taken by anyone and jobs reserved for another
+ *  company (`companyId`: the one looking; without it every live reservation is hidden, which is what the AI sees). */
+export function openBoard(db: Db, icao: string, now: number, companyId?: number): Job[] {
   const origin = airports.get(icao);
   if (!origin) throw new HttpError(404, 'unknown_airport', `airport ${icao} is not in the airport database`);
   const window = windowOf(now);
-  const taken = claimedIds(db, `${icao}-${window}-`);
-  return boardFor(origin, window).filter((j) => !taken.has(j.id));
+  const prefix = `${icao}-${window}-`;
+  const taken = claimedIds(db, prefix);
+  const held = reservedIds(db, prefix, companyId, now);
+  return boardFor(origin, window).filter((j) => !taken.has(j.id) && !held.has(j.id));
 }
 
 export function pendingImports(db: Db, companyId: number, now: number): Job[] {
@@ -234,7 +257,10 @@ function resolveJob(db: Db, companyId: number, id: string, now: number): Job {
     if (!j) throw new HttpError(404, 'job_not_found', 'imported job not found or expired');
     return jobView({ ...j, source: 'simbrief' });
   }
-  const b = boardJob(id, windowOf(now));
+  // A first-job reservation outlives the 6 h board window it was made in: the reserving company may still accept it.
+  const w = windowOf(now);
+  const own = reservationOf(db, companyId, now);
+  const b = boardJob(id, own?.jobId === id ? (windowOfJobId(id) ?? w) : w);
   if (!b) throw new HttpError(404, 'job_not_found', 'job not found or its board has been refreshed');
   return b;
 }
@@ -247,9 +273,11 @@ export function startFlight(db: Db, companyId: number, job: Job, aircraft: Aircr
   const why = cannotFly(typeFor(db, companyId, aircraft.icao), job);
   if (why) throw new HttpError(422, 'cannot_fly', why);
   if (get(db, "SELECT 1 AS x FROM flights WHERE aircraft_id = ? AND status = 'active'", aircraft.id)) throw new HttpError(409, 'aircraft_busy', `aircraft ${aircraft.id} is already on a flight`);
+  if (reservedAgainst(db, job.id, companyId, now)) throw new HttpError(409, 'job_reserved', 'this job is reserved for another company');
   if (run(db, 'INSERT INTO job_claims (job_id, company_id, claimed_at) VALUES (?, ?, ?) ON CONFLICT DO NOTHING', job.id, companyId, now).changes === 0) {
     throw new HttpError(409, 'job_taken', 'this job has already been taken');
   }
+  release(db, companyId, job.id);
   const id = run(db, `INSERT INTO flights (company_id, aircraft_id, aircraft_icao, job_id, source, kind, origin, destination, distance_nm, payload_kg, pax, payout, required_aircraft, planned_fuel_kg, route, status, accepted_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?)`,
   companyId, aircraft.id, aircraft.icao, job.id, job.source, job.kind, job.origin, job.destination, job.distanceNm, job.payloadKg, job.pax, job.payout, job.requiredAircraft ?? null, job.plannedFuelKg ?? null, job.route ?? null, now).id;
@@ -277,9 +305,12 @@ export function finishFlight(db: Db, f: FlightRow, status: 'verified' | 'unverif
   const type = typeFor(db, f.company_id, f.aircraft_icao);
   const t = report?.telemetry;
   const measured = status === 'verified' && report ? { fuelUsedKg: report.telemetry.fuelUsedKg, blockHours: report.blockHours, landingFpm: report.telemetry.landingFpm } : {};
+  const realism = realismSettingOf(db, f.company_id);
   const s = settle({
     payout: f.payout, distanceNm: f.distance_nm, aircraft: type, status,
     destSize: airports.get(f.destination)?.size ?? 'small', destIsHub: hasHub(db, f.company_id, f.destination), ...measured,
+    ...realismModifiers(realism.toggles),
+    ...(realism.toggles.realFuelPrice ? { fuelPriceFactor: fuelPriceFactor(f.origin, f.accepted_at) } : {}),
   });
   run(db, `UPDATE flights SET status = ?, completed_at = ?, season = ?, revenue = ?, fuel_cost = ?, landing_fee = ?, maintenance = ?, net = ?, telemetry = ? WHERE id = ?`,
     status, at, seasonOf(at), s.revenue, s.fuelCost, s.landingFee, s.maintenance, s.net, t ? JSON.stringify(t) : null, f.id);

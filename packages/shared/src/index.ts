@@ -1,6 +1,9 @@
 // Shared contract of OpenPilotCareer: domain types, zod schemas (trust boundary) and economy rules.
 // Everything the server, the AI companies and the web UI must agree on lives here.
 import { z } from 'zod';
+import type { Realism, StartMode } from './career.ts';
+
+export * from './career.ts';
 
 export const API_VERSION = 1;
 export const EXPORT_SCHEMA_VERSION = 2;
@@ -150,17 +153,21 @@ export type SettleInput = {
   status: 'verified' | 'unverified';
   /** Measured values (telemetry); estimated from the aircraft type when absent. */
   fuelUsedKg?: number; blockHours?: number; landingFpm?: number;
+  /** Realism of the company (percent, see career.ts): scales the revenue and the reputation change. */
+  payModifierPct?: number; repModifierPct?: number;
+  /** Multiplies the flat fuel price (the real-fuel-price toggle: per airport and day). */
+  fuelPriceFactor?: number;
 };
 export type Settlement = { revenue: number; fuelCost: number; landingFee: number; maintenance: number; net: number; reputationDelta: number };
 
 /** The one profit formula, used for players, AI companies and AI decision scoring. */
 export function settle(i: SettleInput): Settlement {
   const hard = i.landingFpm !== undefined && Math.abs(i.landingFpm) >= HARD_LANDING_FPM;
-  const revenue = Math.round(i.payout * (i.status === 'verified' ? 1 : MANUAL_PAY_FACTOR));
-  const fuelCost = Math.round((i.fuelUsedKg ?? fuelBurnKg(i.aircraft, i.distanceNm)) * FUEL_PRICE_PER_KG);
+  const revenue = Math.round(i.payout * (i.status === 'verified' ? 1 : MANUAL_PAY_FACTOR) * (1 + (i.payModifierPct ?? 0) / 100));
+  const fuelCost = Math.round((i.fuelUsedKg ?? fuelBurnKg(i.aircraft, i.distanceNm)) * FUEL_PRICE_PER_KG * (i.fuelPriceFactor ?? 1));
   const fee = landingFee(i.aircraft, i.destSize, i.destIsHub);
   const maintenance = Math.round((i.blockHours ?? blockHours(i.aircraft, i.distanceNm)) * maintenancePerHour(i.aircraft) * (hard ? 2 : 1));
-  const reputationDelta = (i.status === 'verified' ? 0.1 : 0.02) - (hard ? 1.5 : 0);
+  const reputationDelta = (i.status === 'verified' ? 0.1 : 0.02) * (1 + (i.repModifierPct ?? 0) / 100) - (hard ? 1.5 : 0); // realism scales the gain, never the hard-landing penalty
   return { revenue, fuelCost, landingFee: fee, maintenance, net: revenue - fuelCost - fee - maintenance, reputationDelta };
 }
 
@@ -216,9 +223,12 @@ export type TelemetryCheck = { ok: true; blockHours: number } | { ok: false; rea
 export function checkTelemetry(t: Telemetry, f: {
   origin: string; destination: string; distanceNm: number; payloadKg: number;
   aircraftIcao: string; aircraft: AircraftType; acceptedAt: number; now: number; antiCheat: boolean;
+  /** Flags the company's realism setting tolerates (pause tolerance: `long_pause`). */
+  ignoreFlags?: readonly string[];
 }): TelemetryCheck {
   const no = (reason: string): TelemetryCheck => ({ ok: false, reason });
-  if (f.antiCheat && t.flags && t.flags.length > 0) return no(`the simulator client flagged this flight: ${t.flags.join(', ')}`);
+  const flags = (t.flags ?? []).filter((x) => !f.ignoreFlags?.includes(x));
+  if (f.antiCheat && flags.length > 0) return no(`the simulator client flagged this flight: ${flags.join(', ')}`);
   if (t.departureIcao !== f.origin) return no(`departure ${t.departureIcao} does not match job origin ${f.origin}`);
   if (t.arrivalIcao !== f.destination) return no(`arrival ${t.arrivalIcao} does not match job destination ${f.destination}`);
   if (t.aircraftIcao !== f.aircraftIcao) return no(`aircraft ${t.aircraftIcao} does not match the assigned ${f.aircraftIcao}`);
@@ -249,6 +259,8 @@ export const registerSchema = z.object({
   password: z.string().min(8).max(128),
   companyName: companyNameSchema.optional(),
   hub: icaoAirportSchema.optional(),
+  /** true: create the account only; the company is founded by the onboarding (`POST /me/companies` with `startMode`). */
+  onboarding: z.boolean().optional(),
 });
 export const createCompanySchema = z.object({ name: companyNameSchema, hub: icaoAirportSchema });
 export const renameCompanySchema = z.object({ name: companyNameSchema });
@@ -286,6 +298,10 @@ export type Job = {
 export type Company = {
   id: number; name: string; balance: number; reputation: number; flights: number; hours: number; revenue: number;
   netWorth: number; isAI: boolean;
+  /** Identity chosen at onboarding: 3-letter code, radio callsign (both immutable once set) and livery colour. Null for companies that predate v2. */
+  code: string | null; callsign: string | null; liveryColor: string | null;
+  startMode: StartMode | null;
+  realism: Realism;
 };
 export type FleetAircraft = { id: number; icao: string; type: AircraftType; location: string; busy: boolean; value: number };
 export type Flight = {

@@ -48,6 +48,19 @@ Effects the server enforces:
 - `bankruptcyBailout` clears a negative balance once per season, when the monthly billing (lot FINANCE) runs. Expose a function for that.
 - `wearAndFailures` is read by lot FINANCE. Expose `wearEnabled(db, companyId): boolean`.
 
+Implementation notes (be-start, as built):
+- Open question (default taken): `GET /me`-style responses for a user with no company. `POST /auth/register` with `onboarding: true` and `POST /auth/login` of such a user return `{ token, username, onboarding: Onboarding }` instead of a `Me`. The web calls `GET /onboarding` anyway.
+- Open question (default taken): `Company.realism` is neutral (`preset: 'custom'`, all toggles off, modifiers 0) for companies that predate v2 and for AI companies. Founding with `startMode` stores the mode's suggested preset. `wearEnabled` is false for them, so lot FINANCE must treat a neutral company as "no wear" (the contract's "default true" applies only while this lot is not merged).
+- `POST /me/companies` now lives in `routes-start.ts` (the legacy handler in `app.ts` was removed). With `startMode`, `code` and `callsign` are required (400 otherwise); a duplicate code is `409 code_taken`; an unfinished onboarding company of the same player is replaced (it is deleted, never if it has flown: `409 company_exists`). The onboarding moves to step 3.
+- `PUT /onboarding` with a `startMode` on a completed onboarding re-opens it (new additional company). Changing the start mode drops the unfinished onboarding company.
+- `PATCH /companies/:id` with `code` or `callsign` is `409 immutable`.
+- `PUT /companies/:id/realism` body is strict: `{ preset: 'relaxed'|'balanced'|'hardcore' }` or `{ toggles: Partial<Record<RealismToggle, boolean>> }`. `GET /companies/:id/realism` also exists. Toggle modifiers are in `REALISM_TOGGLE_INFO` (`packages/shared/src/career.ts`). The preset headline numbers of the mockup (relaxed -5/-10, balanced +10/+10, hardcore +30/+30) are exactly the sums of the toggles each preset switches on (asserted in `career.test.ts`), so the server always applies `realismModifiers(toggles)`.
+- `GET /onboarding/hubs` rows also carry `noteKey` (`most_jobs|least_competition|balanced|match`) so the client can translate `note`. `jobsNearby` counts departures within 300 nm on the 4 boards of the current UTC day.
+- `GET /companies/:id/first-job`: `409 no_aircraft` when the fleet is empty, `409 no_flyable_job` when nothing at the hub fits. Accepting a job reserved for another company is `409 job_reserved`. The reservation survives the 6 h board refresh for its owner and is consumed on accept. `GET /jobs` hides other companies' reservations; the AI tick hides all of them.
+- Server hooks for other lots (`packages/server/src/start.ts`): `wearEnabled(db, companyId)`, `applyBailout(db, companyId, at): number` (posts a `bailout` ledger line, once per UTC season, returns the amount cleared; call it inside the monthly billing transaction), `toleratedFlags`. Fuel: `fuelPriceFactor(icao, atMs)` in shared, applied at settlement with the origin airport and the acceptance time.
+- `access-control-allow-methods` now includes `PUT`.
+- Company-scoped routes answer `409 no_company` through `sessionAuth`; account-level routes (onboarding, API keys, company list, export JSON, logout, delete) use `sessionUser` and work without a company.
+
 ## Lot FINANCE: leasing, credit, club rental, registrations, wear, parking, monthly billing (owner: be-finance)
 
 Shared constants and types (in `packages/shared/src/finance.ts`, re-exported):
