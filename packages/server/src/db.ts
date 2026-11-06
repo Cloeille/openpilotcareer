@@ -106,7 +106,7 @@ export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V4];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);
-  db.exec('PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000;');
+  db.exec('PRAGMA busy_timeout = 5000; PRAGMA journal_mode = WAL;');
   const row = db.prepare('PRAGMA user_version').get() as { user_version: number };
   // Foreign keys stay off while migrations run: rebuilding a parent table would otherwise cascade-delete its children.
   // (The pragma is a no-op inside a transaction.) Each migration must leave no dangling reference, or it rolls back.
@@ -120,7 +120,7 @@ export function openDb(path: string): Db {
     });
   }
   // Aircraft that existed before migration 4 (or were inserted without one) get their registration here: it needs the airport data, not SQL.
-  tx(db, () => backfillRegistrations(db));
+  if (db.prepare('SELECT 1 FROM aircraft WHERE registration IS NULL LIMIT 1').get()) tx(db, () => backfillRegistrations(db)); // no write lock when nothing is missing
   db.exec('PRAGMA foreign_keys = ON');
   return db;
 }
