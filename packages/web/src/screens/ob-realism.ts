@@ -23,7 +23,7 @@ const presetName = (p: Realism['preset']): string => t(`ob.s4.${p}` as Key);
 function realismEditor(companyId: number, initial: Realism, o: { suggested: RealismPreset | null; startOnCustom: boolean; onChange: (r: Realism) => void; compactTitle?: boolean }): RealismEditor {
   let cur: Realism = { ...initial, enforced: { ...ENFORCED_DEFAULT, ...initial.enforced } };
   const error = h('p', { class: 'ob-error', role: 'alert' });
-  const settingsPanel = h('div');
+  const settingsPanel = h('div', { class: 'ob-settings-host' });
   const cards = h('div', { class: 'ob-presets', role: 'radiogroup', 'aria-label': t('ob.s4.group') });
   let seq = 0;
 
