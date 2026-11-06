@@ -3,7 +3,7 @@ import { api } from '../api.ts';
 import { fleetQuote, leaseOffers, signLease, buyAircraftWith, type FleetAircraftV2 } from '../api-finance.ts';
 import { airportInfo } from '../airports.ts';
 import { button, line, panel, titleBlock } from '../components.ts';
-import { inBudget, newestOf, starterRow, starterSummary, type StarterRow } from '../finance-view.ts';
+import { inBudget, newestOf, purchaseFees, starterRow, starterSummary, type StarterRow } from '../finance-view.ts';
 import { enterConfirms, hubCity, perform, tidyCity } from '../finance-ui.ts';
 import { fmt } from '../format.ts';
 import { t } from '../i18n.ts';
@@ -25,7 +25,13 @@ export async function starter(ctx: Ctx): Promise<Screen> {
 
   const offers = (await leaseOffers().catch(() => null)) ?? [];
   const types = await Promise.all(offers.map((o) => api<AircraftType>(`/aircraft-types/${o.icao}`).catch(() => null)));
-  const rows: StarterRow[] = offers.map((o, i) => { const ty = types[i] ?? null; return starterRow(o, ty, ty ? aircraftPrice(ty) : null, balance); });
+  const defaultHub = me.hubs[0]!;
+  const quotes = await Promise.all(offers.map((o) => fleetQuote(o.icao, defaultHub).catch(() => null)));
+  const rows: StarterRow[] = offers.map((o, i) => {
+    const ty = types[i] ?? null;
+    const price = ty ? aircraftPrice(ty) : null;
+    return starterRow(o, ty, price, balance, purchaseFees(price ?? 0, quotes[i] ?? null));
+  });
   const head = titleBlock(t('fin.start.status', { company: code ? `${me.company.name} · ${code}` : me.company.name }), t('fin.start.title'), h('p', { class: 'muted' }, t('fin.start.sub', { capital: fm.money(balance) })));
 
   if (rows.length === 0) {
@@ -40,8 +46,9 @@ export async function starter(ctx: Ctx): Promise<Screen> {
   const first = rows.find((r) => r.leaseAffordable) ?? rows.find((r) => r.buyAffordable) ?? rows[0]!;
   let pick: { icao: string; mode: Mode } = { icao: first.icao, mode: first.leaseAffordable ? 'lease' : 'buy' };
   const fees = new Map<string, number>();
+  rows.forEach((r) => fees.set(`${r.icao}|${defaultHub}`, r.buyFees));
 
-  const summaryHost = h('div', { class: 'fin-summary-host' });
+  const summaryHost = h('div', { class: 'sum-host' });
   const goBtn = (): HTMLButtonElement => summaryHost.querySelector<HTMLButtonElement>('[data-primary]')!;
 
   const sign = (): void => {
@@ -59,12 +66,12 @@ export async function starter(ctx: Ctx): Promise<Screen> {
 
   const drawSummary = (): void => {
     const row = rows.find((r) => r.icao === pick.icao);
-    const sum = row ? starterSummary(row, pick.mode, balance) : null;
+    const extra = row ? fees.get(`${row.icao}|${hub}`) ?? row.buyFees : 0;
+    const sum = row ? starterSummary(row, pick.mode, balance, extra) : null;
     if (!row || !sum) { summaryHost.replaceChildren(); return; }
     const city = hubCity(hubs.find((x) => x.icao === hub)?.airport ?? null, hub);
     const lease = pick.mode === 'lease';
-    const extra = fees.get(`${row.icao}|${hub}`) ?? 0;
-    const after = lease ? sum.balanceAfter : sum.balanceAfter - extra;
+    const after = sum.balanceAfter;
     const lines = lease
       ? [line(t('fin.start.capital'), fm.money(balance)), line(t('fin.sum.deposit'), fm.money(-row.deposit)), line(t('fin.start.firstRent'), fm.money(-(row.rent ?? 0))),
         line(t('fin.start.ferryTo', { city }), fm.money(-row.ferry)), line(t('fin.start.hubLine', { icao: hub }), t('fin.start.free'))]

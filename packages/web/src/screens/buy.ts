@@ -48,7 +48,7 @@ export async function buy(ctx: Ctx): Promise<Screen> {
   const loans = quote?.loans ?? [];
   let loan = loanPick ? findLoan(loans, loanPick.downPct, loanPick.months) ?? defaultLoan(loans) : null;
   if (loanPick && !loan) loanPick = null;
-  const summaryHost = h('div');
+  const summaryHost = h('div', { class: 'sum-host' });
   const loanHost = h('div');
   const hubNote = h('p', { class: 'dim small fin-hub-note' });
   const parking = parkingSummary(usage);

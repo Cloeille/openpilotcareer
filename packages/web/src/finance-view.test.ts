@@ -140,19 +140,22 @@ test('funding options: loan first, then the lease when the server has one', () =
   assert.deepEqual(fundingOptions(4_200_000, null, 1_284_560, null), []);
 });
 
-test('starter list: lease vs buy for a 1 500 000 capital (mockup row C208)', () => {
+test('starter list reproduces the mockup row C208: lease leaves 1 435 000, buy 170 500, so 1 264 500 more in the bank', () => {
   const c208 = offer({ icao: 'C208', typeName: 'Cessna 208B', deposit: 37_000, ferryFee: 9_500, durations: [{ months: 12, monthlyRent: 20_000 }, { months: 24, monthlyRent: 18_500 }, { months: 36, monthlyRent: 17_000 }] });
-  const row = starterRow(c208, null, 1_320_000, 1_500_000);
+  const row = starterRow(c208, null, 1_320_000, 1_500_000, 9_500);
   assert.equal(row.rent, 18_500);
   assert.equal(row.months, 24);
   assert.equal(row.leaseAffordable, true);
   assert.equal(row.buyAffordable, true);
-  assert.equal(row.buyBalanceAfter, 180_000);
+  assert.equal(row.buyBalanceAfter, 170_500);
   const lease = starterSummary(row, 'lease', 1_500_000)!;
   assert.equal(lease.balanceAfter, 1_435_000);
   assert.equal(lease.today, 65_000);
-  assert.equal(lease.saved, 1_255_000);
-  assert.equal(starterSummary(row, 'buy', 1_500_000)!.balanceAfter, 180_000);
+  assert.equal(lease.saved, 1_264_500);
+  const buy = starterSummary(row, 'buy', 1_500_000)!;
+  assert.equal(buy.balanceAfter, 170_500);
+  assert.equal(buy.today, 1_329_500);
+  assert.equal(starterSummary(row, 'buy', 1_500_000, 0)!.balanceAfter, 180_000);
   assert.equal(starterSummary(starterRow(c208, null, null, 1_500_000), 'buy', 1_500_000), null);
 });
 
@@ -163,7 +166,9 @@ test('starter list: counts what fits the budget, buy disabled when it does not',
   assert.equal(rows[0]!.leaseAffordable, true);
   assert.equal(rows[1]!.leaseAffordable, false);
   assert.equal(inBudget(rows), 2);
-  assert.equal(starterSummary(rows[0]!, 'lease', 1_500_000)!.saved, 90_000_000 - 126_500);
+  assert.equal(starterSummary(rows[0]!, 'lease', 1_500_000)!.saved, null);
+  // buying the 640 000 aircraft is affordable, so the lease is compared with it
+  assert.equal(starterSummary(rows[2]!, 'lease', 1_500_000)!.saved, 1_500_000 - 126_500 - (1_500_000 - 640_000));
 });
 
 test('month labels follow the language, year only on request', async () => {

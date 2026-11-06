@@ -122,27 +122,29 @@ export function fundingOptions(price: number, quote: FleetQuote | null, balance:
 
 export type StarterRow = {
   icao: string; offer: LeaseOffer; type: AircraftType | null; price: number | null;
+  /** ferry and registration added to a cash purchase at the default hub (0 when the server does not quote it) */ buyFees: number;
   rent: number | null; deposit: number; ferry: number; months: number;
   leaseAffordable: boolean; buyAffordable: boolean; buyBalanceAfter: number | null;
 };
-export function starterRow(offer: LeaseOffer, type: AircraftType | null, price: number | null, balance: number): StarterRow {
+export function starterRow(offer: LeaseOffer, type: AircraftType | null, price: number | null, balance: number, buyFees = 0): StarterRow {
   const d = defaultDuration(offer);
   const q = d ? leaseQuote(offer, d.months, balance) : null;
   return {
-    icao: offer.icao, offer, type, price, rent: d?.monthlyRent ?? null, deposit: offer.deposit, ferry: offer.ferryFee, months: d?.months ?? 0,
-    leaseAffordable: q?.affordable ?? false, buyAffordable: price !== null && price <= balance, buyBalanceAfter: price === null ? null : balance - price,
+    icao: offer.icao, offer, type, price, buyFees, rent: d?.monthlyRent ?? null, deposit: offer.deposit, ferry: offer.ferryFee, months: d?.months ?? 0,
+    leaseAffordable: q?.affordable ?? false, buyAffordable: price !== null && price + buyFees <= balance, buyBalanceAfter: price === null ? null : balance - price - buyFees,
   };
 }
 /** "3 dans ton budget": rows the company can sign with its capital (lease or purchase). */
 export const inBudget = (rows: StarterRow[]): number => rows.filter((r) => r.leaseAffordable || r.buyAffordable).length;
 
 export type StarterSummary = { balanceAfter: number; today: number; saved: number | null };
-/** Balance after signing a starter aircraft by lease or by purchase, and (lease) how much more cash it leaves than buying. */
-export function starterSummary(row: StarterRow, mode: 'lease' | 'buy', balance: number): StarterSummary | null {
-  if (mode === 'buy') return row.price === null ? null : { balanceAfter: balance - row.price, today: row.price, saved: null };
+/** Balance after signing a starter aircraft by lease or by purchase. `buyFees` is the convoy fee of the purchase at the chosen hub; `saved` (lease only) is how much more cash the lease leaves than buying, when buying is affordable at all, both after their ferry fees (mockup: 1 435 000 − 170 500 = 1 264 500). */
+export function starterSummary(row: StarterRow, mode: 'lease' | 'buy', balance: number, buyFees = row.buyFees): StarterSummary | null {
+  const buyAfter = row.price === null ? null : balance - row.price - buyFees;
+  if (mode === 'buy') return row.price === null ? null : { balanceAfter: buyAfter!, today: row.price + buyFees, saved: null };
   const q = leaseQuote(row.offer, row.months, balance);
   if (!q) return null;
-  return { balanceAfter: q.balanceAfter, today: q.firstPayment, saved: row.price !== null && row.price > q.firstPayment ? row.price - q.firstPayment : null };
+  return { balanceAfter: q.balanceAfter, today: q.firstPayment, saved: buyAfter !== null && buyAfter >= 0 && q.balanceAfter > buyAfter ? q.balanceAfter - buyAfter : null };
 }
 
 // ------------------------------------------------------------------ labels

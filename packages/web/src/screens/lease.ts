@@ -33,7 +33,7 @@ export async function lease(ctx: Ctx): Promise<Screen> {
 
   const durationHost = h('div');
   const termsHost = h('div');
-  const summaryHost = h('div');
+  const summaryHost = h('div', { class: 'sum-host' });
   const titleHost = h('div', { class: 'title-block' });
   const lessorHost = h('div', { class: 'lessor-host' });
 

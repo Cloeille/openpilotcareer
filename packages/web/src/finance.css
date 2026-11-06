@@ -169,3 +169,5 @@ table.data tbody tr.est td, table.data tbody tr.est .model { color: var(--text-t
 .fin-catalogue table.data th:last-child, .fin-catalogue table.data td:last-child { padding-right: 22px; }
 .addon-ids .input-field:first-child { width: 110px; }
 .panel.summary.fin-summary .panel-body { gap: 22px; }
+.sum-host { display: flex; flex-direction: column; gap: 22px; }
+.sum-host > .col { gap: 12px; }
