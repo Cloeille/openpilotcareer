@@ -1,0 +1,106 @@
+# Détail d'un vol · calcul du gain
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Détail d'un vol · calcul du gain» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-8.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=28 padding=[40, 64, 32, 64]
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=10
+        - text «Overline» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Calcul du gain · job J-20794
+        - frame «Title Row» gap=20 alignItems="center"
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=52 fontWeight="600" lineHeight=1  TEXT: AZR 4122
+          - frame «Verdict» gap=8 alignItems="center"
+            - ellipse «Dot» width=7 height=7 fill="$success"
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: Vérifié
+        - text «Subline» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: Lyon-Saint-Exupéry → Nice Côte d'Azur · ATR 72-600 F-HAZR · bloc 1 h 04
+      - frame «Views» gap=32 alignItems="center"
+        - frame «View · Télémétrie» gap=10 padding=[0, 0, 10, 0] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Télémétrie
+          - instance «Key» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: G
+        - frame «View · Calcul du gain» gap=10 padding=[0, 0, 10, 0] alignItems="center" stroke="$text-primary" strokeWidth={"bottom": 2}
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Calcul du gain
+    - frame «Body» width="fill_container" height="fill_container" justifyContent="space_between"
+      - instance «Statement Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Relevé du gain
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Crédité le 4 nov. à 21:19Z
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[8, 26, 24, 26]
+          - frame «Section · Revenu» width="fill_container" padding=[12, 0, 6, 0] justifyContent="space_between"
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Revenu
+            - text «Total» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: +15 424 €
+          - frame «Line · Billets» width="fill_container" height=36 gap=16 alignItems="center"
+            - text «Name» width=230 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Billets
+            - text «Basis» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 68 passagers × 209 €
+            - text «Amount» width=110 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal" textAlign="right"  TEXT: +14 212 €
+          - frame «Line · Fret» width="fill_container" height=36 gap=16 alignItems="center"
+            - text «Name» width=230 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Fret
+            - text «Basis» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 340 kg × 1,80 €
+            - text «Amount» width=110 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal" textAlign="right"  TEXT: +612 €
+          - frame «Line · Prime de ponctualité» width="fill_container" height=36 gap=16 alignItems="center"
+            - text «Name» width=230 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Prime de ponctualité
+            - text «Basis» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Arrivée 2 min en avance
+            - text «Amount» width=110 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal" textAlign="right"  TEXT: +350 €
+          - frame «Line · Prime d'atterrissage doux» width="fill_container" height=36 gap=16 alignItems="center"
+            - text «Name» width=230 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Prime d'atterrissage doux
+            - text «Basis» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Toucher à −142 fpm
+            - text «Amount» width=110 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal" textAlign="right"  TEXT: +250 €
+          - frame «Section · Charges» width="fill_container" padding=[22, 0, 6, 0] justifyContent="space_between"
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Charges
+            - text «Total» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: −2 944 €
+          - frame «Line · Carburant» width="fill_container" height=36 gap=16 alignItems="center"
+            - text «Name» width=230 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Carburant
+            - text «Basis» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 1 180 kg × 1,12 €
+            - text «Amount» width=110 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal" textAlign="right"  TEXT: −1 322 €
+          - frame «Line · Taxes d'atterrissage» width="fill_container" height=36 gap=16 alignItems="center"
+            - text «Name» width=230 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Taxes d'atterrissage
+            - text «Basis» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Nice, avion de 23 t
+            - text «Amount» width=110 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal" textAlign="right"  TEXT: −485 €
+          - frame «Line · Maintenance» width="fill_container" height=36 gap=16 alignItems="center"
+            - text «Name» width=230 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Maintenance
+            - text «Basis» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 1 h 04 × 1 066 € par heure
+            - text «Amount» width=110 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal" textAlign="right"  TEXT: −1 137 €
+          - frame «Verification Coefficient» width="fill_container" gap=16 padding=[14, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - text «Name» width=230 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Coefficient de vérification
+            - text «Basis» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Vol vérifié par télémétrie, aucune décote
+            - text «Amount» width=110 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal" textAlign="right"  TEXT: ×1,00
+          - frame «Push» width="fill_container" height="fill_container"
+          - frame «Net» width="fill_container" padding=[18, 0, 0, 0] alignItems="end" justifyContent="space_between" stroke="$border-strong" strokeWidth={"top": 1}
+            - frame «Net Label» layout="vertical" gap=4 padding=[0, 0, 6, 0]
+              - text «Label» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Gain net
+              - text «Formula» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: (15 424 € − 2 944 €) × 1,00
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=48 fontWeight="600" lineHeight=1  TEXT: +12 480 €
+      - instance «Pay Rules Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Vérification et paie
+        - frame «Content» width="fill_container" height="fit_content" layout="vertical" gap=22 padding=[14, 22, 24, 22]
+          - text «Intro» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.4  TEXT: Le gain net est multiplié par un coefficient qui dépend de la vérification du vol.
+          - frame «Rule · Vérifié» width="fill_container" gap=12
+            - frame «Dot Wrap» padding=[7, 0, 0, 0]
+              - ellipse «Dot» width=7 height=7 fill="$success"
+            - frame «Text» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Vérifié · ce vol
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Télémétrie complète, contrôles réussis
+            - text «Coefficient» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: ×1,00
+          - frame «Rule · Non vérifié» width="fill_container" gap=12
+            - frame «Dot Wrap» padding=[7, 0, 0, 0]
+              - ellipse «Dot» width=7 height=7 stroke="$text-secondary" strokeWidth=1.5
+            - frame «Text» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Non vérifié
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Saisie manuelle, sans télémétrie
+            - text «Coefficient» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: ×0,60
+          - frame «Rule · Rejeté» width="fill_container" gap=12
+            - frame «Dot Wrap» padding=[7, 0, 0, 0]
+              - ellipse «Dot» width=7 height=7 fill="$danger"
+            - frame «Text» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Rejeté
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Un contrôle anti-triche a échoué
+            - text «Coefficient» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: ×0
+          - frame «If Unverified» width="fill_container" layout="vertical" gap=4 padding=[18, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: En saisie manuelle, ce vol aurait rapporté
+            - text «Value» fill="$text-secondary" fontFamily="$font-display" fontSize=30 fontWeight="500" lineHeight=1.1  TEXT: +7 488 €
+            - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Soit 4 992 € de moins, après décote ×0,60
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

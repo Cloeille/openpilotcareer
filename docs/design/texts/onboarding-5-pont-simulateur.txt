@@ -1,0 +1,31 @@
+Microsoft Flight Simulator 2020 ou 2024
+Relie ton simulateur
+OpenHangar Bridge lit tes vols dans MSFS via SimConnect et les envoie au serveur. C'est ce qui les rend vérifiés, donc payés au tarif plein.
+Installe OpenHangar Bridge
+Application compagnon pour Windows 10 ou 11, à lancer avant ton simulateur.
+Télécharger pour Windows
+Version 0.6.2 · 18 Mo
+Colle ta clé dans le pont
+On l'a créée pour toi. Dans OpenHangar Bridge, ouvre Compte › Clé API et colle-la.
+Clé « PC principal » créée automatiquement
+Affichée une seule fois
+oh_sk_7Hq2Lm9RtV4xKc8NwP3aZe5JyB6dF1
+Copier
+C
+Perdue ? Révoque-la et crées-en une autre dans Réglages › Clés API.
+J'ai copié
+Test de connexion
+Tout voir
+Si le test réussit
+Connecté à MSFS 2024
+Tes vols sont vérifiés automatiquement et « Continuer » s'active.
+Si le test échoue
+Pont injoignable
+Aucune réponse en 60 s. Vérifie que l'app est lancée et autorisée par le pare-feu Windows.
+Passer, je connecterai plus tard
+Tes vols seront
+Non vérifié
+et payés à 60 % de leur gain net.
+Disponible une fois connecté
+Continuer
+Entrée

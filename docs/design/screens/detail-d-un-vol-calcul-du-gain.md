@@ -2,10 +2,10 @@
 
 Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
 
-- frame «Détail d'un vol · calcul du gain» width=1600 height=900 layout="none" fill="$bg" clip=true x=3400 y=5200
-  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-8.png", "mode": "cover"} x=0 y=0
-  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"... x=0 y=0
-  - frame «Content» width=1600 height=778 layout="vertical" gap=28 padding=[40, 64, 32, 64] x=0 y=76
+- frame «Détail d'un vol · calcul du gain» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-8.png", "mode": "cover"}
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"...
+  - frame «Content» width=1600 height=778 layout="vertical" gap=28 padding=[40, 64, 32, 64]
     - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
       - frame «Title Block» layout="vertical" gap=10
         - text «Overline» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Calcul du gain · job J-20794
@@ -24,5 +24,5 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
     - frame «Body» width="fill_container" height="fill_container" justifyContent="space_between"
       - ref «Statement Panel» width=680 height="fill_container" ref="bibzm" descendants={"e0veVE": {"content": "Relevé du gain"}, "A9Tx2K": {"content": "Crédité le 4 nov. à 21:19Z", "fill": "$text-tertiary"}, "q5ftx0": {"gap"...  (instance of «Panel»)
       - ref «Pay Rules Panel» width=420 height="fit_content" ref="bibzm" descendants={"e0veVE": {"content": "Vérification et paie"}, "A9Tx2K": {"enabled": false}, "q5ftx0": {"gap": 22, "padding": [14, 22, 24, 22], "height"...  (instance of «Panel»)
-  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": "#00000000"}, "Ely3m": {"fill": "$text-tertiary"}, "oRNeg": {"stroke": "$text-primary"}, "ZLZNH": {"fill": "$text-pr... x=0 y=0  (instance of «HUD/Top»)
-  - ref «HUD Bottom» ref="t2yhjE" descendants={"D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"content": "Retour au carnet"}, "msx5l/Mw53t": {"content": "Z"}, "sA5qV": {"content": "Vo... x=0 y=854  (instance of «HUD/Bottom»)
+  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": "#00000000"}, "Ely3m": {"fill": "$text-tertiary"}, "oRNeg": {"stroke": "$text-primary"}, "ZLZNH": {"fill": "$text-pr...  (instance of «HUD/Top»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"content": "Retour au carnet"}, "msx5l/Mw53t": {"content": "Z"}, "sA5qV": {"content": "Vo...  (instance of «HUD/Bottom»)

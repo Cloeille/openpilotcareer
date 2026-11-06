@@ -1,0 +1,79 @@
+# Achat · confirmation
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Achat · confirmation» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-5.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 padding=[28, 32, 24, 32] justifyContent="space_between"
+    - frame «Choice Column» width=640 height="fill_container" layout="vertical" gap=28
+      - frame «Title Block» width="fill_container" layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Catalogue d'avions · achat
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: DHC-6 Twin Otter 400
+        - text «Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Occasion de 2015 · 6 840 h de vol · immatriculation F-HAZG
+      - instance «Hub Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Base d'attache
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 4 parkings libres sur 10
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[8, 0, 12, 0]
+          - frame «Hub · LFMN» width="fill_container" height=64 gap=16 padding=[0, 22] alignItems="center"
+            - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+            - text «Code» width=56 fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="normal"  TEXT: LFMN
+            - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Nice Côte d'Azur
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Hub principal · 2 parkings libres
+          - frame «Hub · LFML» width="fill_container" height=64 gap=16 padding=[0, 22] alignItems="center"
+            - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+            - text «Code» width=56 fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="normal"  TEXT: LFML
+            - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Marseille Provence
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1 parking libre
+          - frame «Hub · LFKJ» width="fill_container" height=64 gap=16 padding=[0, 22] alignItems="center" fill="$surface-hover"
+            - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=9
+              - ellipse «Radio Dot» width=8 height=8 fill="$text-primary"
+            - text «Code» width=56 fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="normal"  TEXT: LFKJ
+            - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Ajaccio Napoléon Bonaparte
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1 parking libre
+          - frame «Hub · LFKB» width="fill_container" height=64 gap=16 padding=[0, 22] alignItems="center" opacity=0.45
+            - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+            - text «Code» width=56 fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="normal"  TEXT: LFKB
+            - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Bastia Poretta
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Complet
+      - text «Delivery Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Livraison à Ajaccio le 7 novembre, par convoyage depuis Calgary (CYYC).
+    - frame «Summary Column» width=420 height="fill_container" layout="vertical"
+      - instance «Summary Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Récapitulatif
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Étape 2 sur 2
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=22 padding=[16, 24, 24, 24]
+          - frame «Lines» width="fill_container" layout="vertical" gap=12
+            - frame «Line · Prix d'achat» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Prix d'achat
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 4 200 000 €
+            - frame «Line · Convoyage et immatriculation» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Convoyage et immatriculation
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 12 500 €
+            - frame «Line · Crédit sur 84 mois, 80 %» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Crédit sur 84 mois, 80 %
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: − 3 360 000 €
+          - rectangle «Divider» width="fill_container" height=1 fill="$border"
+          - frame «Pay Today» width="fill_container" layout="vertical" gap=2
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: À payer aujourd'hui
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=38 fontWeight="600"  TEXT: 852 500 €
+          - frame «Balance» width="fill_container" layout="vertical" gap=4
+            - frame «Balance Row» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Solde après achat
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 432 060 €
+            - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Puis 47 450 € par mois pendant 84 mois.
+          - frame «Actions» width="fill_container" gap=10 padding=[6, 0, 0, 0]
+            - instance «Btn · Annuler» of «Button/Secondary»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Annuler
+            - instance «Btn · Confirmer l'achat» of «Button/Primary»
+              - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Confirmer l'achat
+              - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

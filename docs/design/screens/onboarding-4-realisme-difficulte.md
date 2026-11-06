@@ -1,0 +1,65 @@
+# Onboarding · 4 réalisme & difficulté
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Onboarding · 4 réalisme & difficulté» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-1.png", "mode": "cover"}
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"...
+  - frame «Content» width=1600 height=778 layout="vertical" padding=[40, 64, 36, 64] justifyContent="space_between"
+    - frame «Body» width="fill_container" gap=72
+      - frame «Left Column» width=640 layout="vertical" gap=36
+        - frame «Title Block» width="fill_container" layout="vertical" gap=8
+          - text «Overline» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Départ : directement en airliner
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=52 fontWeight="600"  TEXT: Quel niveau de réalisme ?
+          - text «Sub» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: Équilibré est présélectionné pour ton départ en airliner, Hardcore l'est pour le petit Cessna. Tu peux ensuite ajuster chaque réglage.
+        - frame «Presets» width="fill_container" layout="vertical" gap=12
+          - frame «Preset · Détendu» width="fill_container" gap=24 padding=[20, 24] alignItems="center" fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=8 effect={"type": "background_blur", "radius": 24}
+            - frame «Preset Text» width="fill_container" layout="vertical" gap=6
+              - frame «Name Row» gap=12 alignItems="center"
+                - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="600"  TEXT: Détendu
+              - text «Description» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Ni usure ni météo imposée, pauses libres : idéal pour découvrir.
+            - frame «Impact» width=140 layout="vertical" gap=6
+              - frame «Impact · Paie» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Paie
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: −5 %
+              - frame «Impact · Réputation» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Réputation
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: −10 %
+          - frame «Preset · Équilibré» width="fill_container" gap=24 padding=[20, 24] alignItems="center" fill="$surface" stroke="$text-primary" strokeWidth=1.5 cornerRadius=8 effect={"type": "background_blur", "radius": 24}
+            - frame «Preset Text» width="fill_container" layout="vertical" gap=6
+              - frame «Name Row» gap=12 alignItems="center"
+                - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="600"  TEXT: Équilibré
+                - frame «Selected» gap=6 padding=[4, 10] alignItems="center" fill="$text-primary" cornerRadius=4
+                  - icon «Check» width=13 height=13 fill="$on-btn-primary" icon="check"
+                  - text «Selected Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: Sélectionné
+                - frame «Tag» padding=[4, 10] stroke="$border-strong" strokeWidth=1 cornerRadius=4
+                  - text «Tag Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Suggéré pour ton départ
+              - text «Description» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: L'usure et les retards comptent, mais la banque te rattrape.
+            - frame «Impact» width=140 layout="vertical" gap=6
+              - frame «Impact · Paie» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Paie
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: +10 %
+              - frame «Impact · Réputation» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Réputation
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: +10 %
+          - frame «Preset · Hardcore» width="fill_container" gap=24 padding=[20, 24] alignItems="center" fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=8 effect={"type": "background_blur", "radius": 24}
+            - frame «Preset Text» width="fill_container" layout="vertical" gap=6
+              - frame «Name Row» gap=12 alignItems="center"
+                - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="600"  TEXT: Hardcore
+              - text «Description» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Tout est réel, et aucune aide si tu fais faillite.
+            - frame «Impact» width=140 layout="vertical" gap=6
+              - frame «Impact · Paie» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Paie
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: +30 %
+              - frame «Impact · Réputation» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Réputation
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: +30 %
+        - frame «Bonus Rule» width="fill_container" gap=12 padding=[0, 4]
+          - icon «Icon» width=18 height=18 fill="$text-secondary" icon="trending-up"
+          - text «Message» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Tu pourras baisser le réalisme plus tard. C'est en le montant que tu gagnes des bonus de paie et de réputation.
+      - ref «Panel · Réglages du préréglage» width="fill_container" ref="bibzm" descendants={"uBW0Z": {"padding": [24, 28, 14, 28]}, "e0veVE": {"content": "Ce que règle Équilibré", "fontSize": 20}, "A9Tx2K": {"content": "4 sur 6 ...  (instance of «Panel»)
+    - frame «Footer» width="fill_container" alignItems="center" justifyContent="space_between"
+      - text «Footer Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Changer un seul réglage fait passer ton préréglage en « Personnalisé ».
+      - ref «Continue» ref="Im067" descendants={"h8MyJ": {"content": "Continuer avec Équilibré"}}  (instance of «Button/Primary»)
+  - ref «HUD Onboarding» ref="uCkER" descendants={"TZdq9": {"fill": "#FFFFFF1F", "stroke": "#00000000"}, "cyUlI": {"enabled": false}, "R9K1Zp": {"enabled": true}, "eP7CE": {"fill": "$tex...  (instance of «HUD/Onboarding»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"TDwDs": {"fill": "$text-tertiary"}, "GPYhN": {"content": "Pas encore configuré"}, "D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"conte...  (instance of «HUD/Bottom»)

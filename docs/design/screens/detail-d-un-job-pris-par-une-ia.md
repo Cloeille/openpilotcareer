@@ -2,10 +2,10 @@
 
 Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
 
-- frame «Détail d'un job · pris par une IA» width=1600 height=900 layout="none" fill="$bg" clip=true x=6800 y=3000
-  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-4.png", "mode": "cover"} x=0 y=0
-  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"... x=0 y=0
-  - frame «Content» width=1600 height=778 gap=20 padding=[28, 32, 24, 32] x=0 y=76
+- frame «Détail d'un job · pris par une IA» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-4.png", "mode": "cover"}
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"...
+  - frame «Content» width=1600 height=778 gap=20 padding=[28, 32, 24, 32]
     - frame «Briefing Column» width=620 height="fill_container" layout="vertical" gap=32
       - frame «Job Header» width="fill_container" layout="vertical" gap=12
         - frame «Title Block» layout="vertical" gap=6
@@ -22,5 +22,5 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
       - frame «Board Return» width="fill_container" gap=16 alignItems="center"
         - ref «Back to Board Button» ref="v6he7" descendants={"RU69u": {"icon": "arrow-left"}, "BxHlG": {"content": "Retour aux jobs"}}  (instance of «Button/Secondary»)
         - text «Board Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 42 offres au départ de Nice
-  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": "#00000000"}, "Ely3m": {"fill": "$text-tertiary"}, "wAYyl": {"stroke": "$text-primary"}, "VKGo6": {"fill": "$text-pr... x=0 y=0  (instance of «HUD/Top»)
-  - ref «HUD Bottom» ref="t2yhjE" descendants={"oFiTj": {"name": "Hint · Retour aux jobs"}, "D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"content": "Retour aux jobs"}, "qtpFg": {"na... x=0 y=854  (instance of «HUD/Bottom»)
+  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": "#00000000"}, "Ely3m": {"fill": "$text-tertiary"}, "wAYyl": {"stroke": "$text-primary"}, "VKGo6": {"fill": "$text-pr...  (instance of «HUD/Top»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"oFiTj": {"name": "Hint · Retour aux jobs"}, "D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"content": "Retour aux jobs"}, "qtpFg": {"na...  (instance of «HUD/Bottom»)

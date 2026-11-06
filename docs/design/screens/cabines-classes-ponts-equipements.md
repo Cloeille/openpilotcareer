@@ -2,7 +2,7 @@
 
 Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
 
-- frame «Cabines · classes, ponts & équipements» width=1600 layout="vertical" gap=36 padding=[48, 56, 56, 56] fill=["#07090C", {"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.3, "height": 1.1}, "colors... clip=true x=4800 y=7700
+- frame «Cabines · classes, ponts & équipements» width=1600 layout="vertical" gap=36 padding=[48, 56, 56, 56] fill=["#07090C", {"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.3, "height": 1.1}, "colors... clip=true
   - frame «Board Header» width="fill_container" layout="vertical" gap=8
     - text «Board Title» fill="$text-primary" fontFamily="$font-display" fontSize=34 fontWeight="600"  TEXT: Un plan de cabine pour chaque configuration
     - text «Board Sub» width=900 fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Le plan est généré depuis la configuration de l'appareil : ponts, classes, portes, toilettes, galleys, escaliers et PNC. Les équipements usés apparaissent en ambre, hors service en rouge.

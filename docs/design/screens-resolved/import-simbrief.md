@@ -1,0 +1,59 @@
+# Import SimBrief
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Import SimBrief» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-3.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 gap=20 padding=[28, 32, 24, 32]
+    - frame «Import Column» width=620 height="fill_container" layout="vertical" gap=28
+      - frame «Header» width="fill_container" layout="vertical" gap=12
+        - frame «Title Block» layout="vertical" gap=6
+          - frame «Status» gap=8 alignItems="center"
+            - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Jobs · job personnalisé
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Importer depuis SimBrief
+        - text «Intro» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal" lineHeight=1.4  TEXT: Ton dernier plan de vol devient un job personnalisé : route, carburant prévu, appareil et charge sont repris tels quels.
+      - frame «User Row» width="fill_container" gap=12 alignItems="end"
+        - instance «Username Input» of «Input»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Nom d'utilisateur SimBrief
+          - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+            - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="user"
+            - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: lmoreau_azr
+        - instance «Fetch Button» of «Button/Secondary»
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Récupérer le plan
+      - instance «Preview Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[24, 28, 4, 28] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Aperçu du job
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Plan généré il y a 8 min
+        - frame «Content» width="fill_container" layout="vertical" gap=28 padding=[16, 28, 28, 28]
+          - frame «Route» width="fill_container" layout="vertical" gap=8
+            - frame «Route Head» width="fill_container" gap=14 alignItems="center"
+              - text «Codes» fill="$text-primary" fontFamily="$font-mono" fontSize=20 fontWeight="700"  TEXT: LFMN → LIEO
+              - text «Leg» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Nice → Olbia · 186 NM · FL170 · 1 h 07
+            - text «Route String» width="fill_container" fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal" lineHeight=1.5  TEXT: LFMN/22L NERAS6W NERAS UM728 BALEN UL12 MEDAL MEDA1F LIEO/23
+          - frame «Facts» width="fill_container" gap=32
+            - instance «Fact · Carburant prévu» of «Stat»
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Carburant prévu
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 1 840 kg
+              - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Carburant bloc
+            - instance «Fact · Appareil» of «Stat»
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Appareil
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: ATR 72-600
+              - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: F-HAZS
+            - instance «Fact · Charge» of «Stat»
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Charge
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 62 passagers
+              - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: 1 100 kg de fret
+          - rectangle «Divider» width="fill_container" height=1 fill="$border"
+          - frame «Create Block» width="fill_container" layout="vertical" gap=16
+            - frame «Create Row» width="fill_container" gap=20 alignItems="center" justifyContent="space_between"
+              - instance «Create Button» of «Button/Primary»
+                - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Créer le job
+                - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                  - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+              - frame «Gain» gap=10 alignItems="center"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Gain estimé
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=18 fontWeight="600"  TEXT: 8 120 €
+            - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.4  TEXT: Le job reste privé : il n'apparaît pas sur le tableau public et ne peut pas être contesté.
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

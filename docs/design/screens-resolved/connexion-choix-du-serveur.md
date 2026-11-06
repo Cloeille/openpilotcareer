@@ -1,0 +1,88 @@
+# Connexion · choix du serveur
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Connexion · choix du serveur» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=900 layout="vertical" padding=[28, 32, 24, 32] justifyContent="space_between"
+    - frame «Brand» gap=12 alignItems="center"
+      - frame «Logo Mark» width=36 height=36 alignItems="center" justifyContent="center" fill="$text-primary" cornerRadius=2
+        - icon «Logo Icon» width=20 height=20 fill="$on-btn-primary" icon="plane-takeoff"
+      - frame «Brand Stack» layout="vertical" gap=3
+        - text «Brand Name» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: OpenHangar
+        - text «Brand Tagline» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Carrière et économie pour Microsoft Flight Simulator
+    - frame «Login Column» width=500 layout="vertical" gap=20
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Étape 1 sur 2 · serveur et compte
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Connexion
+      - instance «Panel · Connexion» of «Panel»
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=32 padding=28
+          - frame «Server» width="fill_container" layout="vertical" gap=12
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Serveur
+            - frame «Server Choice» width="fill_container" gap=3 padding=3 fill="$surface-sunken" stroke="$border" strokeWidth=1 cornerRadius=4
+              - frame «Option · Serveur global» width="fill_container" height=36 alignItems="center" justifyContent="center" cornerRadius=3
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Serveur global
+              - frame «Option · Serveur personnalisé» width="fill_container" height=36 alignItems="center" justifyContent="center" fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Serveur personnalisé
+            - instance «Input · Adresse du serveur» of «Input»
+              - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="link"
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="normal"  TEXT: https://hangar.aeroclub-cannes.fr
+            - frame «Probe · Succès» width="fill_container" gap=10 padding=[2, 0, 0, 2]
+              - icon «Icon» width=16 height=16 fill="$success" icon="circle-check"
+              - frame «Stack» width="fill_container" layout="vertical" gap=3
+                - text «Server Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="600"  TEXT: Hangar · Aéroclub de Cannes-Mandelieu
+                - text «Details» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Version 1.3.2, compatible · inscriptions ouvertes
+          - frame «Credentials» width="fill_container" layout="vertical" gap=16
+            - instance «Input · Nom d'utilisateur» of «Input»
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Nom d'utilisateur
+              - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="user"
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: lmoreau
+            - instance «Input · Mot de passe» of «Input»
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Mot de passe
+              - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$text-tertiary" strokeWidth=1 cornerRadius=3
+                - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="lock"
+                - frame «Value Wrap» width="fill_container" gap=2 alignItems="center"
+                  - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal" letterSpacing=1  TEXT: ••••••••••••
+                  - rectangle «Caret» width=1.5 height=18 fill="$text-primary"
+                - icon «Reveal» width=16 height=16 fill="$text-tertiary" icon="eye-off"
+            - frame «Note · Comptes par serveur» width="fill_container" gap=8 padding=[4, 0, 0, 0] alignItems="center"
+              - icon «Icon» width=14 height=14 fill="$text-tertiary" icon="info"
+              - text «Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Les comptes sont propres à chaque serveur.
+          - frame «Actions» width="fill_container" gap=20 alignItems="center"
+            - instance «Button · Se connecter» of «Button/Primary»
+              - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Se connecter
+              - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+            - instance «Button · Créer un compte» of «Button/Ghost»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Créer un compte
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+    - frame «Footer» width="fill_container" alignItems="center" justifyContent="space_between"
+      - frame «Client Status» gap=28 alignItems="center"
+        - frame «Sim» gap=8 alignItems="center"
+          - ellipse «Sim Dot» width=7 height=7 fill="$success"
+          - text «Sim Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Simulateur
+          - text «Sim Value» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: MSFS 2024 détecté
+        - frame «Client» gap=8 alignItems="center"
+          - text «Client Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Client
+          - text «Client Value» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 0.9.4 (build 2611)
+      - frame «Hints» gap=22 alignItems="center"
+        - frame «Hint · Quitter» gap=8 alignItems="center"
+          - instance «Key» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Échap
+          - text «Hint Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Quitter
+        - frame «Hint · Champ suivant» gap=8 alignItems="center"
+          - instance «Key» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Tab
+          - text «Hint Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Champ suivant
+        - frame «Hint · Se connecter» gap=8 alignItems="center"
+          - instance «Key» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Hint Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Se connecter
+        - frame «Hint · Vérifier à nouveau» gap=8 alignItems="center"
+          - instance «Key» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: F5
+          - text «Hint Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Vérifier à nouveau

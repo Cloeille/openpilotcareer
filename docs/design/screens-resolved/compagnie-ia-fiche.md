@@ -1,0 +1,84 @@
+# Compagnie IA · fiche
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Compagnie IA · fiche» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-10.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 gap=56 padding=[28, 32, 24, 32] justifyContent="space_between"
+    - frame «Profile Column» width=560 height="fill_container" layout="vertical" justifyContent="space_between"
+      - frame «Identity» width="fill_container" layout="vertical" gap=14
+        - frame «Title Block» layout="vertical" gap=6
+          - frame «Status» gap=8 alignItems="center"
+            - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Compagnie IA · 6e au classement
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Alpes Air Link
+        - frame «Personality Line» gap=6 alignItems="center"
+          - text «Personality» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Prudente
+          - text «Since» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: · active depuis la saison 3 · hub principal LSGG
+        - frame «Doctrine Wrap» width="fill_container" padding=[4, 0, 0, 0]
+          - text «Doctrine» width=480 fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal" lineHeight=1.5  TEXT: Ne prend que des jobs à marge sûre, évite la météo marginale et n'emprunte jamais. Progresse lentement, recule rarement.
+      - instance «Network» of «Panel»
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="horizontal" gap=40 padding=[24, 26]
+          - frame «Hubs» layout="vertical" gap=14
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Hubs préférés
+            - frame «Hub · LSGG» gap=12 alignItems="center"
+              - instance «Hub Sign» of «Sign/Location»
+                - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=14 fontWeight="700" letterSpacing=0.5  TEXT: LSGG
+              - text «City» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Genève
+            - frame «Hub · LFLB» gap=12 alignItems="center"
+              - instance «Hub Sign» of «Sign/Location»
+                - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=14 fontWeight="700" letterSpacing=0.5  TEXT: LFLB
+              - text «City» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Chambéry
+          - frame «Aircraft» width="fill_container" layout="vertical" gap=14
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Appareils préférés
+            - frame «Aircraft List» width="fill_container" layout="vertical" gap=10
+              - frame «Type · DHC-8 Q400» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Type» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: DHC-8 Q400
+                - text «Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 4 en flotte
+              - frame «Type · ATR 42-600» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Type» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: ATR 42-600
+                - text «Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 3 en flotte
+              - frame «Type · PC-12 NGX» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Type» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: PC-12 NGX
+                - text «Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 2 en flotte
+    - frame «Moves Column» width=420 height="fill_container" layout="vertical" justifyContent="end"
+      - instance «Recent Moves» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Mouvements récents
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Cette saison
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=18 padding=[12, 22, 22, 22]
+          - frame «Moves» width="fill_container" layout="vertical" gap=16
+            - frame «Move · A pris LFMN → LSGG avant toi» width="fill_container" gap=12 justifyContent="space_between"
+              - frame «Text» width="fill_container" layout="vertical" gap=3
+                - frame «Title Line» gap=8 alignItems="center"
+                  - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: A pris LFMN → LSGG avant toi
+                - text «Meta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Navette affaires · aujourd'hui 09:41Z
+              - text «Amount» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 14 200 €
+            - frame «Move · Ouvre une base à LFLL, ton hub» width="fill_container" gap=12 justifyContent="space_between"
+              - frame «Text» width="fill_container" layout="vertical" gap=3
+                - frame «Title Line» gap=8 alignItems="center"
+                  - ellipse «Warn Dot» width=6 height=6 fill="$warning"
+                  - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Ouvre une base à LFLL, ton hub
+                - text «Meta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Depuis le 3 novembre
+            - frame «Move · A pris LFLL → LFLB» width="fill_container" gap=12 justifyContent="space_between"
+              - frame «Text» width="fill_container" layout="vertical" gap=3
+                - frame «Title Line» gap=8 alignItems="center"
+                  - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: A pris LFLL → LFLB
+                - text «Meta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Fret pharmaceutique · hier, pendant ton vol
+              - text «Amount» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 6 900 €
+            - frame «Move · A pris LFMN → LFLS avant toi» width="fill_container" gap=12 justifyContent="space_between"
+              - frame «Text» width="fill_container" layout="vertical" gap=3
+                - frame «Title Line» gap=8 alignItems="center"
+                  - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: A pris LFMN → LFLS avant toi
+                - text «Meta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Charter VIP · 3 novembre
+              - text «Amount» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 11 800 €
+          - rectangle «Divider» width="fill_container" height=1 fill="$border"
+          - frame «Summary» width="fill_container" alignItems="center" justifyContent="space_between"
+            - text «Summary Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 5 jobs pris avant toi cette saison
+            - text «Summary Value» fill="$warning" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: −50 650 €
+          - instance «Compare Button» of «Button/Primary»
+            - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Comparer avec Azur Régional
+            - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+              - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

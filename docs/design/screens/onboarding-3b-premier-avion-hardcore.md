@@ -1,0 +1,111 @@
+# Onboarding · 3b premier avion (hardcore)
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Onboarding · 3b premier avion (hardcore)» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-5.png", "mode": "cover"}
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"...
+  - frame «Content» width=1600 height=778 layout="vertical" padding=[40, 64, 36, 64] justifyContent="space_between"
+    - frame «Top Row» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» width=920 layout="vertical" gap=8
+        - frame «Overline» gap=12 alignItems="center"
+          - ref «Base Sign» ref="pirBQ" descendants={"OYKAu": {"content": "LFMD"}}  (instance of «Sign/Location»)
+          - text «Overline Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Parcours hardcore · base de Cannes-Mandelieu
+        - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=52 fontWeight="600"  TEXT: Comment obtenir ton premier avion ?
+        - text «Sub» width=720 fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: 45 000 € en poche et aucun renflouement. Tu pourras changer de formule plus tard depuis la Flotte.
+      - ref «Capital After Choice» width="fit_content" ref="stcmC" descendants={"V6gpg0": {"content": "Capital après ce choix"}, "GqS8d": {"content": "45 000 €"}, "JT5Iq": {"content": "Intact · aucun renflouement pos...  (instance of «Stat»)
+    - frame «Main Row» width="fill_container" gap=24
+      - frame «Options» width="fill_container" layout="vertical" gap=10
+        - frame «Column Labels» width="fill_container" gap=24 padding=[0, 24]
+          - text «Label · Formule» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Formule
+          - frame «Figure Labels» gap=16
+            - text «Label · Mise de départ» width=124 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Mise de départ
+            - text «Label · Coût fixe par mois» width=124 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Coût fixe par mois
+            - text «Label · Heure de vol» width=124 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Heure de vol
+            - text «Label · Pour 20 h par mois» width=124 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Pour 20 h par mois
+        - frame «Option · Aéroclub» width="fill_container" layout="vertical" gap=16 padding=[18, 24] fill="$surface" stroke="$text-primary" strokeWidth=1.5 cornerRadius="$radius-lg" effect={"type": "background_blur", "radius": 28}
+          - frame «Option Head» width="fill_container" gap=24
+            - frame «Option Info» width="fill_container" layout="vertical" gap=5
+              - frame «Title Line» gap=10 alignItems="center"
+                - text «Option Title» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Louer à l'heure à l'aéroclub
+                - frame «Selected» gap=6 padding=[3, 9] alignItems="center" fill="$text-primary" cornerRadius=4
+                  - icon «Check» width=13 height=13 fill="$on-btn-primary" icon="check"
+                  - text «Selected Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: Sélectionné
+              - text «Option Description» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Cessna 172 de 4 places, partagé avec les membres du club.
+            - frame «Figures» gap=16
+              - frame «Figure · Mise de départ» width=124 layout="vertical" gap=3
+                - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 0 €
+              - frame «Figure · Coût fixe» width=124 layout="vertical" gap=3
+                - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 0 €
+              - frame «Figure · Heure de vol» width=124 layout="vertical" gap=3
+                - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 210 €
+                - text «Figure Caption» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: carburant compris
+              - frame «Figure · Pour 20 h» width=124 layout="vertical" gap=3
+                - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 4 200 €
+          - frame «Trade-offs» width="fill_container" gap=32 padding=[16, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+            - frame «Column · Avantages» width="fill_container" layout="vertical" gap=9
+              - text «Column Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Avantages
+              - frame «Item» width="fill_container" gap=9 alignItems="center"
+                - icon «Item Icon» width=14 height=14 fill="$text-secondary" icon="plus"
+                - text «Item Text» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Ton capital reste intact pour démarrer
+              - frame «Item» width="fill_container" gap=9 alignItems="center"
+                - icon «Item Icon» width=14 height=14 fill="$text-secondary" icon="plus"
+                - text «Item Text» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Usure, entretien et pannes à la charge du club
+              - frame «Item» width="fill_container" gap=9 alignItems="center"
+                - icon «Item Icon» width=14 height=14 fill="$text-secondary" icon="plus"
+                - text «Item Text» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Aucun engagement, tu arrêtes quand tu veux
+            - frame «Column · Contraintes» width="fill_container" layout="vertical" gap=9
+              - text «Column Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Contraintes
+              - frame «Item» width="fill_container" gap=9 alignItems="center"
+                - icon «Item Icon» width=14 height=14 fill="$text-secondary" icon="minus"
+                - text «Item Text» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: L'heure de vol la plus chère des trois
+              - frame «Item» width="fill_container" gap=9 alignItems="center"
+                - icon «Item Icon» width=14 height=14 fill="$text-secondary" icon="minus"
+                - text «Item Text» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Créneaux à réserver, l'avion n'est pas toujours libre
+              - frame «Item» width="fill_container" gap=9 alignItems="center"
+                - icon «Item Icon» width=14 height=14 fill="$text-secondary" icon="minus"
+                - text «Item Text» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Rien à revendre, aucun avion à ton actif
+        - frame «Option · Location mensuelle» width="fill_container" layout="vertical" gap=16 padding=[18, 24] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius="$radius-lg" effect={"type": "background_blur", "radius": 28}
+          - frame «Option Head» width="fill_container" gap=24
+            - frame «Option Info» width="fill_container" layout="vertical" gap=5
+              - frame «Title Line» gap=10 alignItems="center"
+                - text «Option Title» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Louer un Cessna 172 au mois
+              - text «Option Description» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Rien qu'à toi et disponible à tout moment, 6 mois minimum.
+            - frame «Figures» gap=16
+              - frame «Figure · Mise de départ» width=124 layout="vertical" gap=3
+                - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 5 000 €
+                - text «Figure Caption» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: dépôt rendu à la fin
+              - frame «Figure · Coût fixe» width=124 layout="vertical" gap=3
+                - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 1 900 €
+              - frame «Figure · Heure de vol» width=124 layout="vertical" gap=3
+                - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 110 €
+                - text «Figure Caption» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: carburant au prix réel
+              - frame «Figure · Pour 20 h» width=124 layout="vertical" gap=3
+                - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 4 100 €
+        - frame «Option · Achat à crédit» width="fill_container" layout="vertical" gap=16 padding=[18, 24] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius="$radius-lg" effect={"type": "background_blur", "radius": 28}
+          - frame «Option Head» width="fill_container" gap=24
+            - frame «Option Info» width="fill_container" layout="vertical" gap=5
+              - frame «Title Line» gap=10 alignItems="center"
+                - text «Option Title» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Acheter un Cessna 152 d'occasion
+              - text «Option Description» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 62 000 € à crédit sur 5 ans à 6,9 %, seulement 2 places.
+            - frame «Figures» gap=16
+              - frame «Figure · Mise de départ» width=124 layout="vertical" gap=3
+                - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 15 000 €
+                - text «Figure Caption» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: apport
+              - frame «Figure · Coût fixe» width=124 layout="vertical" gap=3
+                - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 1 510 €
+                - text «Figure Caption» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: crédit et assurance
+              - frame «Figure · Heure de vol» width=124 layout="vertical" gap=3
+                - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 100 €
+                - text «Figure Caption» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: carburant au prix réel
+              - frame «Figure · Pour 20 h» width=124 layout="vertical" gap=3
+                - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 3 510 €
+                - text «Figure Caption» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: hors pannes
+      - ref «Progression Ladder» width=440 height="fill_container" ref="bibzm" descendants={"e0veVE": {"content": "Ta progression"}, "A9Tx2K": {"content": "Aperçu", "fill": "$text-tertiary"}, "q5ftx0": {"gap": 0, "padding": [16,...  (instance of «Panel»)
+    - frame «Footer» width="fill_container" alignItems="center" justifyContent="space_between"
+      - frame «Footer Left» gap=10 alignItems="center"
+        - icon «Hint Icon» width=16 height=16 fill="$text-tertiary" icon="scale"
+        - text «Footer Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Repère : sous 13 h de vol par mois, l'aéroclub reste la formule la moins chère.
+      - ref «Continue» ref="Im067" descendants={"h8MyJ": {"content": "Continuer avec l'aéroclub"}}  (instance of «Button/Primary»)
+  - ref «HUD Onboarding» ref="uCkER" descendants={"TZdq9": {"fill": "#FFFFFF1F", "stroke": "#00000000"}, "cyUlI": {"enabled": false}, "R9K1Zp": {"enabled": true}, "eP7CE": {"fill": "$tex...  (instance of «HUD/Onboarding»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"content": "Étape précédente"}, "msx5l/Mw53t": {"content": "↑"}, "sA5qV": {"content": "Op...  (instance of «HUD/Bottom»)

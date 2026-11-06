@@ -1,0 +1,15 @@
+OpenHangar
+Serveur global · nouvelle compagnie
+1
+Départ
+2
+Compagnie
+3
+Premier avion
+4
+Réalisme
+5
+Simulateur
+6
+C'est parti
+Enregistrer et quitter

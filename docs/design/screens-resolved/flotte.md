@@ -1,0 +1,154 @@
+# Flotte
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Flotte» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-6.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 padding=[28, 32, 24, 32] justifyContent="space_between"
+    - frame «Left Column» width=720 height="fill_container" layout="vertical" gap=28
+      - frame «Page Header» width="fill_container" alignItems="end" justifyContent="space_between"
+        - frame «Title Block» layout="vertical" gap=6
+          - frame «Status» gap=8 alignItems="center"
+            - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Azur Régional · AZR
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600" lineHeight=1  TEXT: Flotte
+        - frame «Fleet Stats» padding=[0, 0, 6, 0]
+          - text «Fleet Summary» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 6 appareils · 3 disponibles
+      - instance «Roster Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Appareils
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Trier par immatriculation
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[8, 0, 12, 0]
+          - frame «Column Header» width="fill_container" height=36 gap=8 padding=[0, 22] alignItems="center"
+            - text «Header · Appareil» width=260 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Appareil
+            - text «Header · Base» width=100 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Base
+            - text «Header · Usure» width=90 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Usure
+            - text «Header · État» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: État
+          - frame «Row · F-HAZA» width="fill_container" height=64 gap=8 padding=[0, 22] alignItems="center" stroke="$border"
+            - frame «Ident» width=260 layout="vertical" gap=4
+              - frame «Line 1» gap=8 alignItems="center"
+                - text «Reg» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: F-HAZA
+              - text «Model · Category» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72-600 · turbopropulseur
+            - frame «Base» width=100
+              - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN
+            - frame «Wear» width=90 gap=8 alignItems="center"
+              - text «Pct» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 18 %
+            - frame «Status» width="fill_container" layout="vertical" gap=4
+              - frame «Status Line» gap=8 alignItems="center"
+                - rectangle «Dot» width=6 height=6 fill="$success" cornerRadius=3
+                - text «Status Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Disponible
+          - frame «Row · F-HAZB» width="fill_container" height=64 gap=8 padding=[0, 22] alignItems="center" stroke="$border"
+            - frame «Ident» width=260 layout="vertical" gap=4
+              - frame «Line 1» gap=8 alignItems="center"
+                - text «Reg» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: F-HAZB
+              - text «Model · Category» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72-600 · turbopropulseur
+            - frame «Base» width=100
+              - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN
+            - frame «Wear» width=90 gap=8 alignItems="center"
+              - text «Pct» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 41 %
+            - frame «Status» width="fill_container" layout="vertical" gap=4
+              - frame «Status Line» gap=8 alignItems="center"
+                - rectangle «Dot» width=6 height=6 fill="$route" cornerRadius=3
+                - text «Status Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: En vol
+              - text «Status Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: AZR 4127 → LFPG
+          - frame «Row · F-HAZC» width="fill_container" height=64 gap=8 padding=[0, 22] alignItems="center" fill="$surface-hover"
+            - frame «Ident» width=260 layout="vertical" gap=4
+              - frame «Line 1» gap=8 alignItems="center"
+                - text «Reg» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: F-HAZC
+              - text «Model · Category» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Bombardier CRJ700 · jet régional
+            - frame «Base» width=100
+              - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFML
+            - frame «Wear» width=90 gap=8 alignItems="center"
+              - text «Pct» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 63 %
+            - frame «Status» width="fill_container" layout="vertical" gap=4
+              - frame «Status Line» gap=8 alignItems="center"
+                - rectangle «Dot» width=6 height=6 fill="$warning" cornerRadius=3
+                - text «Status Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: En inspection
+              - text «Status Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Visite A · reste 12 h
+          - frame «Row · F-HAZD» width="fill_container" height=64 gap=8 padding=[0, 22] alignItems="center" stroke="$border"
+            - frame «Ident» width=260 layout="vertical" gap=4
+              - frame «Line 1» gap=8 alignItems="center"
+                - text «Reg» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: F-HAZD
+              - text «Model · Category» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Airbus A220-300 · jet
+            - frame «Base» width=100
+              - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN
+            - frame «Wear» width=90 gap=8 alignItems="center"
+              - text «Pct» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 9 %
+            - frame «Status» width="fill_container" layout="vertical" gap=4
+              - frame «Status Line» gap=8 alignItems="center"
+                - rectangle «Dot» width=6 height=6 fill="$success" cornerRadius=3
+                - text «Status Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Disponible
+          - frame «Row · F-HAZE» width="fill_container" height=64 gap=8 padding=[0, 22] alignItems="center" stroke="$border"
+            - frame «Ident» width=260 layout="vertical" gap=4
+              - frame «Line 1» gap=8 alignItems="center"
+                - text «Reg» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: F-HAZE
+              - text «Model · Category» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Pilatus PC-12 NGX · turbopropulseur
+            - frame «Base» width=100
+              - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFKJ
+            - frame «Wear» width=90 gap=8 alignItems="center"
+              - text «Pct» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 27 %
+            - frame «Status» width="fill_container" layout="vertical" gap=4
+              - frame «Status Line» gap=8 alignItems="center"
+                - rectangle «Dot» width=6 height=6 fill="$success" cornerRadius=3
+                - text «Status Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Disponible
+          - frame «Row · F-HAZF» width="fill_container" height=64 gap=8 padding=[0, 22] alignItems="center" stroke="$border"
+            - frame «Ident» width=260 layout="vertical" gap=4
+              - frame «Line 1» gap=8 alignItems="center"
+                - text «Reg» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: F-HAZF
+              - text «Model · Category» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Cessna Grand Caravan EX · turbopropulseur
+            - frame «Base» width=100
+              - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFKB
+            - frame «Wear» width=90 gap=8 alignItems="center"
+              - text «Pct» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 82 %
+            - frame «Status» width="fill_container" layout="vertical" gap=4
+              - frame «Status Line» gap=8 alignItems="center"
+                - rectangle «Dot» width=6 height=6 fill="$danger" cornerRadius=3
+                - text «Status Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Immobilisé
+              - text «Status Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Panne moteur · 3 jours
+      - frame «Fleet Actions» width="fill_container" gap=12 alignItems="center"
+        - instance «Btn · Acheter un avion» of «Button/Primary»
+          - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Acheter un avion
+          - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+            - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: A
+        - instance «Btn · Acheter un hub» of «Button/Secondary»
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Acheter un hub
+        - frame «Spacer» width="fill_container" height=1
+        - frame «Capacity Note» layout="vertical" gap=3 alignItems="end"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Parkings libres
+          - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 4 sur 10 · LFKB complet
+    - frame «Right Column» width=410 height="fill_container" layout="vertical" gap=14
+      - instance «Detail Panel» of «Panel»
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=28 padding=[26, 24, 24, 24]
+          - frame «Identity» width="fill_container" layout="vertical" gap=6
+            - frame «Reg Row» width="fill_container" gap=10 alignItems="center"
+              - text «Reg» fill="$text-primary" fontFamily="$font-display" fontSize=36 fontWeight="600" lineHeight=1  TEXT: F-HAZC
+            - text «Model Line» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Bombardier CRJ700 · jet régional · 22 ans
+            - frame «Status Line» gap=8 padding=[6, 0, 0, 0] alignItems="center"
+              - ellipse «Dot» width=7 height=7 fill="$warning"
+              - text «Status» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: En inspection · reste 12 h
+          - frame «Condition» width="fill_container" layout="vertical" gap=10
+            - frame «Global Wear» width="fill_container" layout="vertical" gap=10
+              - frame «Global Top» width="fill_container" gap=10 alignItems="end" justifyContent="space_between"
+                - frame «Global Text» layout="vertical" gap=2
+                  - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Usure
+                - text «Global Pct» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500" lineHeight=1  TEXT: 63 %
+              - frame «Wear Track» width="fill_container" height=4 layout="none" fill="$neutral-soft" cornerRadius=2
+                - rectangle «Level» width=229 height=4 fill="$text-secondary" cornerRadius=2
+            - text «Wear Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: La visite A en cours ramènera l'usure à 31 %.
+          - frame «Facts» width="fill_container" layout="vertical" gap=12
+            - frame «Fact · Base» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Base
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: LFML · Marseille
+            - frame «Fact · Coût horaire» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Coût horaire
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 2 860 €
+            - frame «Fact · Valeur estimée» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Valeur estimée
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 7,4 M€
+          - frame «Actions» width="fill_container" gap=10 padding=[4, 0, 0, 0]
+            - instance «Btn · Transférer» of «Button/Secondary»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Transférer
+            - instance «Btn · Vendre» of «Button/Secondary»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Vendre
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

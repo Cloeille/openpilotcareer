@@ -1,0 +1,81 @@
+# État · serveur injoignable
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «État · serveur injoignable» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-2.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" padding=[44, 64, 36, 64] justifyContent="space_between"
+    - frame «Company Title» layout="vertical" gap=6
+      - text «Overline» fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Ta compagnie
+      - text «Company Name» fill="$text-primary" fontFamily="$font-display" fontSize=56 fontWeight="600"  TEXT: Azur Régional
+      - text «Company Line» fill="$text-secondary" fontFamily="$font-ui" fontSize=16  TEXT: 7e sur 24 cette saison · valeur nette 8,42 M€
+    - frame «Bottom Row» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Server Offline» width=700 layout="vertical" gap=22 padding=[26, 30, 28, 30] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 28}
+        - frame «Head» width="fill_container" alignItems="center" justifyContent="space_between"
+          - frame «Status» gap=8 alignItems="center"
+            - icon «Offline Icon» width=15 height=15 fill="$danger" icon="cloud-off"
+            - text «Status Text» fill="$danger" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Hors ligne depuis 3 min
+          - frame «Server» gap=7 alignItems="center"
+            - icon «Server Icon» width=14 height=14 fill="$text-tertiary" icon="server"
+            - text «Server Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Serveur global
+        - frame «Title» width="fill_container" layout="vertical" gap=6
+          - text «Title Text» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="600"  TEXT: Serveur injoignable
+          - text «Title Sub» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal" lineHeight=1.4  TEXT: Tes données restent consultables en lecture seule, telles qu'au dernier échange avec le serveur.
+        - frame «Retry» width="fill_container" layout="vertical" gap=12
+          - frame «Retry Row» width="fill_container" alignItems="end" justifyContent="space_between"
+            - frame «Countdown» layout="vertical" gap=3
+              - text «Countdown Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Nouvelle tentative dans
+              - text «Countdown Value» fill="$text-primary" fontFamily="$font-ui" fontSize=26 fontWeight="500"  TEXT: 12 s
+            - text «Attempt» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Tentative 4 · toutes les 30 s
+          - frame «Retry Progress» width="fill_container" height=2 fill="$border-strong"
+            - rectangle «Retry Fill» width=256 height=2 fill="$text-primary"
+        - frame «Offline Rules» width="fill_container" layout="vertical" gap=12 padding=[6, 0, 0, 0]
+          - frame «Rule · Dernière synchronisation» width="fill_container" gap=10 alignItems="center"
+            - icon «Icon» width=15 height=15 fill="$text-tertiary" icon="history"
+            - text «Label» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Dernière synchronisation
+            - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 18:42Z
+          - frame «Rule · Prise de jobs, achats et ventes» width="fill_container" gap=10 alignItems="center"
+            - icon «Icon» width=15 height=15 fill="$text-tertiary" icon="lock"
+            - text «Label» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Prise de jobs, achats et ventes
+            - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: en pause jusqu'au retour
+          - frame «Rule · Vols suivis par le pont» width="fill_container" gap=10 alignItems="center"
+            - icon «Icon» width=15 height=15 fill="$text-tertiary" icon="cable"
+            - text «Label» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Vols suivis par le pont
+            - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: enregistrés, envoyés au retour
+        - frame «Actions» gap=16 padding=[4, 0, 0, 0] alignItems="center"
+          - instance «Retry Now» of «Button/Primary»
+            - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Réessayer maintenant
+            - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+              - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+          - instance «Change Server» of «Button/Ghost»
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Changer de serveur
+            - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+      - frame «Key Figures» width=320 layout="vertical" gap=20 padding=[24, 26] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 28}
+        - frame «Snapshot Note» gap=7 alignItems="center"
+          - icon «Lock Icon» width=13 height=13 fill="$text-tertiary" icon="lock"
+          - text «Snapshot Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Lecture seule · données de 18:42Z
+        - frame «Figure · Solde» width="fill_container" layout="vertical" gap=3
+          - text «Figure Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Solde
+          - text «Figure Value» fill="$text-secondary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 1 284 560 €
+          - text «Figure Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: +48 210 € cette semaine
+        - frame «Figure · Réputation» width="fill_container" layout="vertical" gap=3
+          - text «Figure Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Réputation
+          - text «Figure Value» fill="$text-secondary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 4,6 sur 5
+        - frame «Figure · Rang» width="fill_container" layout="vertical" gap=3
+          - text «Figure Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Rang
+          - text «Figure Value» fill="$text-secondary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: Commandant
+          - frame «Rank Progress» width="fill_container" height=2 fill="$border-strong"
+            - rectangle «Rank Fill» width=193 height=2 fill="$text-primary"
+          - text «Rank Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: 72 % vers commandant senior
+        - rectangle «Divider» width="fill_container" height=1 fill="$border"
+        - frame «Last Flight» width="fill_container" layout="vertical" gap=4
+          - text «Last Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Dernier vol · hier
+          - frame «Last Row» width="fill_container" alignItems="center" justifyContent="space_between"
+            - text «Last Route» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: LFLL → LFMN
+            - text «Last Gain» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: +12 480 €
+          - frame «Last Status» gap=6 alignItems="center"
+            - icon «Ok» width=13 height=13 fill="$success" icon="shield-check"
+            - text «Last Status Text» fill="$success" fontFamily="$font-ui" fontSize=13  TEXT: Vérifié
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

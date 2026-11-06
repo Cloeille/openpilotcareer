@@ -1,0 +1,89 @@
+# Onboarding · 6 récapitulatif & premier job
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Onboarding · 6 récapitulatif & premier job» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-2.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" padding=[44, 64, 36, 64] justifyContent="space_between"
+    - frame «Title Block» layout="vertical" gap=6
+      - text «Overline» fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Tout est prêt
+      - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=52 fontWeight="600"  TEXT: Bienvenue chez Azur Régional
+      - text «Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=16  TEXT: Ton A320neo t'attend à Nice. Voici un premier job choisi pour bien démarrer.
+    - frame «Bottom Row» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «First Job» width=720 layout="vertical" gap=20 padding=[26, 30, 28, 30] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 28}
+        - frame «Head» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Head Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Ton premier job
+          - text «Head Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Réservé pour toi pendant 2 h
+        - frame «Title» layout="vertical" gap=6
+          - text «Route Title» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="600"  TEXT: Nice → Paris-Charles de Gaulle
+          - text «Job Meta» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: Passagers · 168 pax · A320neo F-HAZA
+        - frame «Route» width="fill_container" gap=14 alignItems="center"
+          - instance «Dep» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=14 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+          - frame «Track» width="fill_container" alignItems="center"
+            - rectangle «Line» width="fill_container" height=1 fill="$border-strong"
+          - instance «Arr» of «Sign/Direction»
+            - text «Code» fill="$on-accent" fontFamily="$font-mono" fontSize=14 fontWeight="700" letterSpacing=0.5  TEXT: LFPG
+            - icon «Arrow» width=16 height=16 fill="$on-accent" icon="arrow-up-right"
+        - frame «Facts» width="fill_container" gap=40
+          - frame «Fact · Distance» layout="vertical" gap=4
+            - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Distance
+            - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="500"  TEXT: 372 NM
+          - frame «Fact · Départ conseillé» layout="vertical" gap=4
+            - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Départ conseillé
+            - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="500"  TEXT: avant 18:30Z
+          - frame «Fact · Gain estimé» layout="vertical" gap=4
+            - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Gain estimé
+            - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="500"  TEXT: ≈ 21 400 €
+        - frame «What Happens» width="fill_container" layout="vertical" gap=10 padding=[16, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+          - text «Steps Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Ce qui va se passer
+          - frame «Step 1» width="fill_container" gap=12 alignItems="center"
+            - frame «Index» width=22 height=22 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=11
+              - text «Number» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 1
+            - text «Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Accepte le job : il est verrouillé pour toi.
+          - frame «Step 2» width="fill_container" gap=12 alignItems="center"
+            - frame «Index» width=22 height=22 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=11
+              - text «Number» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 2
+            - text «Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Lance MSFS et prépare l'A320neo à LFMN, poste 14.
+          - frame «Step 3» width="fill_container" gap=12 alignItems="center"
+            - frame «Index» width=22 height=22 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=11
+              - text «Number» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 3
+            - text «Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Le pont suit le vol et calcule ton gain à l'arrivée.
+        - frame «Actions» gap=12 padding=[4, 0, 0, 0] alignItems="center"
+          - instance «Accept» of «Button/Primary»
+            - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Accepter le premier job
+            - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+              - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+          - instance «All Jobs» of «Button/Secondary»
+            - icon «Icon» width=16 height=16 fill="$text-secondary" icon="clipboard-list"
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Voir tous les jobs
+      - frame «Summary» width=360 layout="vertical" gap=14 padding=[24, 26] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 28}
+        - frame «Summary Head» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Summary Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Ta compagnie
+          - instance «Edit» of «Button/Ghost»
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Modifier
+            - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+        - frame «Row · Départ» width="fill_container" layout="vertical" gap=2 padding=[10, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Départ
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Directement en airliner
+        - frame «Row · Compagnie» width="fill_container" layout="vertical" gap=2 padding=[10, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Compagnie
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Azur Régional · AZR
+        - frame «Row · Hub» width="fill_container" layout="vertical" gap=2 padding=[10, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Hub
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: LFMN · Nice Côte d'Azur
+        - frame «Row · Premier avion» width="fill_container" layout="vertical" gap=2 padding=[10, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Premier avion
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: A320neo en location
+        - frame «Row · Réalisme» width="fill_container" layout="vertical" gap=2 padding=[10, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Réalisme
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Équilibré
+        - frame «Row · Pont simulateur» width="fill_container" layout="vertical" gap=2 padding=[10, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Pont simulateur
+          - text «Value» fill="$success" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Connecté · MSFS 2024
+        - frame «Row · Solde» width="fill_container" layout="vertical" gap=2 padding=[10, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Solde
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 2 405 000 €
+  - [instance «HUD/Onboarding» — see screens-resolved/hud-onboarding.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

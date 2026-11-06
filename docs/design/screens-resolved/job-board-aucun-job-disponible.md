@@ -1,0 +1,78 @@
+# Job board · aucun job disponible
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Job board · aucun job disponible» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-3.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 gap=20 padding=[28, 32, 24, 32]
+    - frame «Board Column» width=1000 height="fill_container" layout="vertical" gap=28
+      - frame «Title Row» width="fill_container" alignItems="end" justifyContent="space_between"
+        - frame «Title Block» layout="vertical" gap=6
+          - frame «Status» gap=8 alignItems="center"
+            - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Au départ de LFKC · mis à jour il y a 12 s
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Jobs disponibles
+        - frame «SimBrief Entry» gap=10 padding=[0, 0, 4, 0] alignItems="center"
+          - instance «Key» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: I
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Importer un plan SimBrief
+      - instance «Jobs Panel» of «Panel»
+        - frame «Content» width="fill_container" height="fit_content" layout="vertical" gap=0 padding=0
+          - frame «Filter Bar» width="fill_container" padding=[20, 24, 12, 24] alignItems="center" justifyContent="space_between"
+            - frame «Segments» gap=4 alignItems="center"
+              - frame «Seg · Tous» height=32 gap=7 padding=[0, 12] alignItems="center" fill="$surface-hover" cornerRadius=3
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Tous
+                - text «Count» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 0
+              - frame «Seg · Passagers» height=32 gap=7 padding=[0, 12] alignItems="center" cornerRadius=3
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Passagers
+                - text «Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 0
+              - frame «Seg · Fret» height=32 gap=7 padding=[0, 12] alignItems="center" cornerRadius=3
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Fret
+                - text «Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 0
+            - frame «Filters» gap=8 alignItems="center"
+              - frame «Filter · Départ» height=32 gap=6 padding=[0, 10, 0, 12] alignItems="center" stroke="$border" strokeWidth=1 cornerRadius=3
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Départ
+                - text «Value» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: LFKC
+                - icon «Chevron» width=14 height=14 fill="$text-tertiary" icon="chevron-down"
+              - frame «Filter · Distance» height=32 gap=6 padding=[0, 10, 0, 12] alignItems="center" stroke="$border" strokeWidth=1 cornerRadius=3
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Distance
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 100–450 NM
+                - icon «Chevron» width=14 height=14 fill="$text-tertiary" icon="chevron-down"
+              - frame «Filter · Gain» height=32 gap=6 padding=[0, 10, 0, 12] alignItems="center" stroke="$border" strokeWidth=1 cornerRadius=3
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Gain
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: ≥ 3 000 €
+                - icon «Chevron» width=14 height=14 fill="$text-tertiary" icon="chevron-down"
+              - frame «Filter · Appareil» height=32 gap=6 padding=[0, 10, 0, 12] alignItems="center" stroke="$border" strokeWidth=1 cornerRadius=3
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Appareil
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Ma flotte
+                - icon «Chevron» width=14 height=14 fill="$text-tertiary" icon="chevron-down"
+          - frame «Empty State» width="fill_container" layout="vertical" gap=32 padding=[28, 36, 32, 36]
+            - frame «Message» width="fill_container" layout="vertical" gap=10
+              - text «Headline» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="600"  TEXT: Aucun job ne part de Calvi avec ces filtres
+              - text «Reason» width=660 fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal" lineHeight=1.45  TEXT: Les 42 offres du serveur partent d'autres aéroports, ou sortent de ta plage de 100 à 450 NM. Calvi est un petit terrain : les compagnies y publient peu de jobs.
+            - frame «Next Actions» width="fill_container" layout="vertical" stroke="$border" strokeWidth={"bottom": 1}
+              - frame «Action · Élargir la distance» width="fill_container" gap=32 padding=[18, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Text» width="fill_container" layout="vertical" gap=4
+                  - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Élargir la distance à 800 NM
+                  - text «Sub» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 9 offres de plus au départ de Calvi, dont 4 compatibles avec ton ATR 72-600.
+                - instance «Widen Button» of «Button/Primary»
+                  - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Élargir
+                  - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                    - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+              - frame «Action · Changer de départ» width="fill_container" gap=32 padding=[18, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Text» width="fill_container" layout="vertical" gap=4
+                  - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Partir d'un autre aéroport
+                  - text «Sub» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Bastia (LFKB) à 44 NM propose 6 offres, Ajaccio (LFKJ) à 52 NM en propose 11. Le convoyage à vide n'est pas rémunéré.
+                - instance «Departure Button» of «Button/Secondary»
+                  - icon «Icon» width=16 height=16 fill="$text-secondary" icon="map-pin"
+                  - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Changer de départ
+              - frame «Action · Importer SimBrief» width="fill_container" gap=32 padding=[18, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Text» width="fill_container" layout="vertical" gap=4
+                  - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Importer un plan SimBrief
+                  - text «Sub» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Crée un job privé à partir de ton dernier plan de vol au départ de Calvi.
+                - instance «SimBrief Button» of «Button/Secondary»
+                  - icon «Icon» width=16 height=16 fill="$text-secondary" icon="file-down"
+                  - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Importer un plan
+            - text «Next Wave» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Nouvelle vague d'offres à 19:00Z, dans 18 min.
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

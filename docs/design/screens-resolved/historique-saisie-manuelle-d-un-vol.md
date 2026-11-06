@@ -1,0 +1,140 @@
+# Historique · saisie manuelle d'un vol
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Historique · saisie manuelle d'un vol» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-7.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=24 padding=[28, 32, 24, 32]
+    - frame «Header» width="fill_container" layout="vertical" gap=12
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Carnet de vol · nouveau vol
+        - frame «Title Row» gap=16 alignItems="center"
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Saisir un vol à la main
+          - frame «Verdict» gap=8 alignItems="center"
+            - ellipse «Dot» width=7 height=7 stroke="$text-secondary" strokeWidth=1.5
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: Non vérifié
+      - text «Intro» width=600 fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal" lineHeight=1.4  TEXT: Pour un vol fait sans le pont SimConnect. Rien n'est mesuré : le vol est enregistré comme non vérifié et payé à 60 % de son gain net.
+    - frame «Body» width="fill_container" justifyContent="space_between"
+      - instance «Flight Form» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Vol à déclarer
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Heures en UTC
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[6, 22, 10, 22]
+          - frame «Row · Route et appareil» width="fill_container" gap=32 padding=[20, 0] stroke="$border" strokeWidth={"bottom": 1}
+            - frame «Section» width=200 layout="vertical" gap=4 padding=[2, 0, 0, 0]
+              - text «Section Title» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Route et appareil
+              - text «Section Note» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 125 NM entre les deux terrains
+            - frame «Fields» gap=16
+              - instance «Input · Départ» of «Input»
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Départ
+                - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="plane-takeoff"
+                  - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: LFKJ · Ajaccio
+              - instance «Input · Arrivée» of «Input»
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Arrivée
+                - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="plane-landing"
+                  - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: LFMN · Nice
+              - instance «Input · Appareil» of «Input»
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Appareil
+                - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="plane"
+                  - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: ATR 42-600 · F-HAZD
+                  - icon «Chevron» width=14 height=14 fill="$text-tertiary" icon="chevron-down"
+          - frame «Row · Horaires bloc» width="fill_container" gap=32 padding=[20, 0] stroke="$border" strokeWidth={"bottom": 1}
+            - frame «Section» width=200 layout="vertical" gap=4 padding=[2, 0, 0, 0]
+              - text «Section Title» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Horaires bloc
+              - text «Section Note» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Durée calculée : 0 h 58
+            - frame «Fields» gap=16
+              - instance «Input · Date» of «Input»
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Date
+                - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="calendar"
+                  - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 2 nov. 2026
+              - instance «Input · Départ du bloc» of «Input»
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Départ du bloc
+                - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="clock"
+                  - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 17:32Z
+              - instance «Input · Arrivée au bloc» of «Input»
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Arrivée au bloc
+                - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="clock"
+                  - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 18:30Z
+          - frame «Row · Carburant» width="fill_container" gap=32 padding=[20, 0] stroke="$border" strokeWidth={"bottom": 1}
+            - frame «Section» width=200 layout="vertical" gap=4 padding=[2, 0, 0, 0]
+              - text «Section Title» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Carburant
+              - text «Section Note» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Consommé : 640 kg
+            - frame «Fields» gap=16
+              - instance «Input · Au départ du bloc» of «Input»
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Au départ du bloc
+                - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="fuel"
+                  - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 1 900 kg
+              - instance «Input · À l'arrivée au bloc» of «Input»
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: À l'arrivée au bloc
+                - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="fuel"
+                  - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 1 260 kg
+          - frame «Row · Atterrissage» width="fill_container" gap=32 padding=[20, 0]
+            - frame «Section» width=200 layout="vertical" gap=4 padding=[2, 0, 0, 0]
+              - text «Section Title» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Atterrissage
+              - text «Section Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Optionnel
+            - frame «Fields» gap=16
+              - instance «Input · Taux de chute au toucher» of «Input»
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Taux de chute au toucher
+                - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="gauge"
+                  - text «Value» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: ex. −180 fpm
+                - text «Hint» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Indicatif, sans effet sur la paie
+              - instance «Input · Motif de la saisie» of «Input»
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Motif de la saisie
+                - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="unplug"
+                  - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Pont déconnecté pendant le vol
+                  - icon «Chevron» width=14 height=14 fill="$text-tertiary" icon="chevron-down"
+                - text «Hint» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Repris dans le carnet de vol
+      - instance «Pay Preview» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Aperçu de la paie
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Estimation
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=18 padding=[12, 22, 22, 22]
+          - frame «Lines» width="fill_container" layout="vertical" gap=2
+            - frame «Line · Revenu estimé» width="fill_container" gap=16 padding=[8, 0]
+              - frame «Text» width="fill_container" layout="vertical" gap=3
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Revenu estimé
+                - text «Basis» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Tarif de la route pour un ATR 42-600
+              - text «Amount» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: +4 228 €
+            - frame «Line · Charges» width="fill_container" gap=16 padding=[8, 0]
+              - frame «Text» width="fill_container" layout="vertical" gap=3
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Charges
+                - text «Basis» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 640 kg de carburant, taxes, 0 h 58 de maintenance
+              - text «Amount» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: −2 078 €
+            - frame «Line · Primes» width="fill_container" gap=16 padding=[8, 0]
+              - frame «Text» width="fill_container" layout="vertical" gap=3
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Primes
+                - text «Basis» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Ponctualité et atterrissage non prouvables
+              - text «Amount» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 0 €
+            - frame «Line · Coefficient de vérification» width="fill_container" gap=16 padding=[8, 0]
+              - frame «Text» width="fill_container" layout="vertical" gap=3
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Coefficient de vérification
+                - text «Basis» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Non vérifié : saisie manuelle, sans télémétrie
+              - text «Amount» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: ×0,60
+          - rectangle «Divider» width="fill_container" height=1 fill="$border"
+          - frame «Net Block» width="fill_container" layout="vertical" gap=6
+            - frame «Net Head» width="fill_container" alignItems="end" justifyContent="space_between"
+              - frame «Net Label» layout="vertical" gap=4
+                - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Gain net
+                - text «Formula» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: (4 228 € − 2 078 €) × 0,60
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=44 fontWeight="600" lineHeight=1  TEXT: +1 290 €
+            - text «Shortfall» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: Soit 860 € de moins qu'un vol vérifié
+          - frame «Save Block» width="fill_container" layout="vertical" gap=14 padding=[8, 0, 0, 0]
+            - instance «Save Button» of «Button/Primary»
+              - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Enregistrer le vol
+              - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+            - text «Server Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Un vol aux horaires incohérents peut encore être rejeté.
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

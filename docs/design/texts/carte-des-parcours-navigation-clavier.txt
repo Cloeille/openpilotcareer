@@ -1,0 +1,231 @@
+Carte des parcours & navigation clavier
+Chaque écran se pilote entièrement au clavier ou à la manette. Les flèches indiquent la touche qui mène à l'écran suivant ; les touches exactes figurent aussi dans le HUD du bas de chaque écran.
+Écran
+État ou cas limite
+Entrée
+Touche qui déclenche la transition
+Navigation globale · HUD
+Q
+Tableau de bord
+Vol en cours
+Jobs
+Flotte
+Historique
+Classement
+E
+Réglages : icône engrenage du HUD, hors du cycle Q / E
+Règles clavier communes
+Q
+E
+Onglet précédent / suivant
+Échap
+Revenir à l'écran parent ; depuis un onglet, ouvrir le menu
+Entrée
+Action principale de l'écran (bouton blanc)
+Tab
+Filtres ou sous-vue (saison / carrière…)
+↑
+↓
+Parcourir une liste
+V
+Changer de vue dans Vol en cours
+F1
+Aide contextuelle
+Manette
+A = Entrée · B = Échap · LB / RB = Q / E
+01
+Accès & réglages
+Connexion
+Choix du serveur, identifiants
+Entrée
+Se connecter
+Chargement
+Synchronisation avec le serveur
+Automatique
+Tableau de bord
+Accueil de la compagnie
+Réglages
+Clés API du pont
+Tab
+Section suivante
+Compte & données
+Export, suppression, confidentialité
+États et cas limites
+Échec du sondage
+URL invalide ou serveur non OpenHangar, avant connexion
+Serveur injoignable
+Perte de connexion depuis n'importe quel écran ; données en lecture seule
+02
+Onboarding
+Chargement
+Premier lancement détecté
+Automatique
+1 · Choix du départ
+Airliner ou hardcore
+Entrée
+Continuer
+2 · Compagnie & hub
+Nom, code ICAO, hub
+Entrée
+Continuer
+3a · Premier avion
+Airliner en location
+3b · Premier avion
+Cessna à l'heure, location ou occasion
+Entrée
+Continuer
+4 · Réalisme
+Préréglage puis réglages fins
+Entrée
+Continuer
+5 · Pont simulateur
+Connexion SimConnect
+Entrée
+Continuer
+6 · C'est parti
+Récapitulatif et premier job
+6 · C'est parti
+Entrée
+Accepter le premier job
+Détail d'un job
+Job verrouillé
+Échap
+Plus tard
+Tableau de bord
+Compagnie prête
+États et cas limites
+Le chemin choisi décide l'étape 3
+Airliner → 3a (location) ; hardcore → 3b (aéroclub)
+Code compagnie déjà pris
+Le code ICAO à 3 lettres est unique par serveur
+Pont passé
+Possible ; les vols seront « non vérifiés » et payés moins
+Configuration personnalisée
+Capital, avion et réalisme choisis librement
+03
+Tableau de bord & vol
+Tableau de bord
+Vol en cours, chiffres clés
+Entrée
+Suivre le vol
+Vue en coupe
+Schéma généré, annotations
+V
+Vue suivante
+Cabine & charge
+Plan de cabine, masse et centrage
+V
+Vue suivante
+Systèmes
+Moteurs, carburant, usure
+EFB · en vol
+Panneau dans MSFS
+Avion parqué
+EFB · vol terminé
+Résultat et vérification
+Entrée
+Clôturer
+Détail d'un vol
+Rapport de télémétrie
+États et cas limites
+Aucun vol en cours
+Tableau de bord sans vol actif : jobs suggérés
+Pont SimConnect perdu
+Plus de télémétrie pendant le vol ; reconnexion automatique
+Vol rejeté (EFB)
+Anti-triche déclenché à la clôture du vol
+04
+Jobs
+Job board
+Liste filtrable partagée
+Entrée
+Ouvrir
+Détail d'un job
+Briefing complet
+Entrée
+Accepter
+Job verrouillé
+Réservé pour toi
+Départ dans le sim
+Vol en cours
+Suivi en direct
+Job board
+S
+Importer
+Import SimBrief
+Plan de vol → job personnalisé
+Entrée
+Créer le job
+Détail d'un job
+États et cas limites
+Aucun job disponible
+Filtres trop stricts ou aéroport sans job
+Pris par une IA
+Une compagnie IA prend le job pendant la lecture du briefing
+05
+Flotte
+Flotte
+Avions de la compagnie
+A
+Acheter un avion
+Catalogue d'avions
+2 500+ types ICAO
+Entrée
+Acheter
+Achat · confirmation
+Hub, financement, solde
+Entrée
+Confirmer
+Flotte
+Avion ajouté
+Catalogue d'avions
+L
+Louer
+Location · contrat
+Loyer, dépôt, durée, option d'achat
+Entrée
+Signer
+Flotte
+Avion loué ajouté
+États et cas limites
+Fonds insuffisants
+Solde trop bas à la confirmation d'achat
+Nouvelle compagnie
+Premier lancement sans avion : location proposée en premier, puis achat
+06
+Historique des vols
+Historique
+Journal et totaux de saison
+Entrée
+Ouvrir
+Détail d'un vol
+Télémétrie, contrôles
+G
+Gain
+Calcul du gain
+Ligne par ligne
+Historique
+N
+Nouveau vol manuel
+Saisie manuelle
+Marqué non vérifié, payé moins
+États et cas limites
+Vol rejeté
+Anti-triche : motif, preuve sur la chronologie, contestation
+07
+Compétition IA
+Classement
+Saison mensuelle
+Entrée
+Comparer
+Comparaison IA
+Face-à-face
+F
+Fiche
+Fiche compagnie IA
+Personnalité, mouvements
+États et cas limites
+Fin de saison
+Le dernier jour du mois : récapitulatif et récompenses
+Nouvelle saison
+Le 1er du mois : compteurs à zéro, stats à vie conservées

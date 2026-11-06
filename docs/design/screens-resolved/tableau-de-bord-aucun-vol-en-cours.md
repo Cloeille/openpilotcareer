@@ -1,0 +1,92 @@
+# Tableau de bord · aucun vol en cours
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Tableau de bord · aucun vol en cours» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-2.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" padding=[44, 64, 36, 64] justifyContent="space_between"
+    - frame «Company Title» layout="vertical" gap=6
+      - text «Overline» fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Ta compagnie
+      - text «Company Name» fill="$text-primary" fontFamily="$font-display" fontSize=56 fontWeight="600"  TEXT: Azur Régional
+      - text «Company Line» fill="$text-secondary" fontFamily="$font-ui" fontSize=16  TEXT: 7e sur 24 cette saison · valeur nette 8,42 M€
+    - frame «Bottom Row» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Next Departure» width=700 layout="vertical" gap=20 padding=[26, 30, 28, 30] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 28}
+        - frame «Head» width="fill_container" alignItems="center" justifyContent="space_between"
+          - frame «Status» gap=8 alignItems="center"
+            - ellipse «Idle Dot» width=7 height=7 fill="$text-tertiary"
+            - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Aucun vol en cours
+          - frame «Bridge» gap=7 alignItems="center"
+            - icon «Bridge Icon» width=14 height=14 fill="$text-tertiary" icon="cable"
+            - text «Bridge Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Pont SimConnect prêt
+        - frame «Title» layout="vertical" gap=6
+          - text «Title Text» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="600"  TEXT: Prêt pour le prochain départ
+          - text «Title Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: F-HAZA attend à Nice · 1 800 kg de carburant · équipage reposé
+        - frame «Suggested Jobs» width="fill_container" layout="vertical"
+          - text «List Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Jobs au départ de LFMN adaptés à ta flotte
+          - frame «Job · LFMN-LFLL» width="fill_container" gap=14 padding=[13, 0] alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+            - instance «Dep» of «Sign/Location»
+              - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=13 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+            - icon «To» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+            - instance «Arr» of «Sign/Direction»
+              - text «Code» fill="$on-accent" fontFamily="$font-mono" fontSize=13 fontWeight="700" letterSpacing=0.5  TEXT: LFLL
+              - icon «Arrow» width=16 height=16 fill="$on-accent" icon="arrow-up-right"
+            - text «Job Type» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Passagers · 64 pax
+            - text «Distance» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 205 NM
+            - text «Gain» width=96 fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500" textAlign="right"  TEXT: ≈ 9 400 €
+          - frame «Job · LFMN-LIMC» width="fill_container" gap=14 padding=[13, 0] alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+            - instance «Dep» of «Sign/Location»
+              - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=13 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+            - icon «To» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+            - instance «Arr» of «Sign/Direction»
+              - text «Code» fill="$on-accent" fontFamily="$font-mono" fontSize=13 fontWeight="700" letterSpacing=0.5  TEXT: LIMC
+              - icon «Arrow» width=16 height=16 fill="$on-accent" icon="arrow-up-right"
+            - text «Job Type» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Passagers · 58 pax
+            - instance «Contested» of «Badge/Contesté»
+              - icon «Icon» width=12 height=12 fill="$warning" icon="swords"
+              - text «Label» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Contesté
+            - text «Distance» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 133 NM
+            - text «Gain» width=96 fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500" textAlign="right"  TEXT: ≈ 6 900 €
+          - frame «Job · LFMN-LFKJ» width="fill_container" gap=14 padding=[13, 0] alignItems="center"
+            - instance «Dep» of «Sign/Location»
+              - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=13 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+            - icon «To» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+            - instance «Arr» of «Sign/Direction»
+              - text «Code» fill="$on-accent" fontFamily="$font-mono" fontSize=13 fontWeight="700" letterSpacing=0.5  TEXT: LFKJ
+              - icon «Arrow» width=16 height=16 fill="$on-accent" icon="arrow-up-right"
+            - text «Job Type» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Fret · 2,1 t
+            - text «Distance» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 129 NM
+            - text «Gain» width=96 fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500" textAlign="right"  TEXT: ≈ 5 200 €
+        - frame «Actions» gap=12 alignItems="center"
+          - instance «Open Jobs» of «Button/Primary»
+            - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Ouvrir le tableau de jobs
+            - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+              - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+          - instance «SimBrief» of «Button/Secondary»
+            - icon «Icon» width=16 height=16 fill="$text-secondary" icon="file-down"
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Importer de SimBrief
+      - frame «Key Figures» width=320 layout="vertical" gap=20 padding=[24, 26] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 28}
+        - frame «Figure · Solde» width="fill_container" layout="vertical" gap=3
+          - text «Figure Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Solde
+          - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 1 284 560 €
+          - text «Figure Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: +48 210 € cette semaine
+        - frame «Figure · Réputation» width="fill_container" layout="vertical" gap=3
+          - text «Figure Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Réputation
+          - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 4,6 sur 5
+        - frame «Figure · Rang» width="fill_container" layout="vertical" gap=3
+          - text «Figure Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Rang
+          - text «Figure Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: Commandant
+          - frame «Rank Progress» width="fill_container" height=2 fill="$border-strong"
+            - rectangle «Rank Fill» width=193 height=2 fill="$text-primary"
+          - text «Rank Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: 72 % vers commandant senior
+        - rectangle «Divider» width="fill_container" height=1 fill="$border"
+        - frame «Last Flight» width="fill_container" layout="vertical" gap=4
+          - text «Last Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Dernier vol · hier
+          - frame «Last Row» width="fill_container" alignItems="center" justifyContent="space_between"
+            - text «Last Route» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: LFLL → LFMN
+            - text «Last Gain» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: +12 480 €
+          - frame «Last Status» gap=6 alignItems="center"
+            - icon «Ok» width=13 height=13 fill="$success" icon="shield-check"
+            - text «Last Status Text» fill="$success" fontFamily="$font-ui" fontSize=13  TEXT: Vérifié
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

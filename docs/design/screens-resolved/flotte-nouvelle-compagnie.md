@@ -1,0 +1,162 @@
+# Flotte · nouvelle compagnie
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Flotte · nouvelle compagnie» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-6.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 padding=[28, 32, 24, 32] justifyContent="space_between"
+    - frame «Choice Column» width=780 height="fill_container" layout="vertical" gap=28
+      - frame «Title Block» width="fill_container" layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Azur Régional · AZR · nouvelle compagnie
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Choisis ton premier avion
+        - text «Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Ta flotte est vide. La location te permet de démarrer sans entamer ton capital de 1 500 000 €.
+      - instance «Starter Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Avions de départ
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 3 dans ton budget
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[8, 0, 12, 0]
+          - frame «Column Header» width="fill_container" height=30 gap=16 padding=[0, 10, 0, 22] alignItems="center"
+            - text «Header · Avion» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Avion
+            - frame «Header · Options» gap=4
+              - frame «Header · Louer» width=188 padding=[0, 0, 0, 38]
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Louer
+              - frame «Header · Acheter» width=188 padding=[0, 0, 0, 38]
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Acheter
+          - frame «Starter · De Havilland DHC-2 Beaver» width="fill_container" height=76 gap=16 padding=[0, 10, 0, 22] alignItems="center"
+            - text «Code» width=56 fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="normal"  TEXT: DHC2
+            - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: De Havilland DHC-2 Beaver
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Piston · 7 sièges · 395 NM · pistes courtes
+            - frame «Options» gap=4 alignItems="center"
+              - frame «Option · Louer» width=188 height=58 gap=10 padding=[0, 12] alignItems="center" cornerRadius="$radius-md"
+                - frame «Radio» width=16 height=16 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=8
+                - frame «Terms» layout="vertical" gap=3
+                  - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 9 600 € / mois
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Caution 19 200 €
+              - frame «Option · Acheter» width=188 height=58 gap=10 padding=[0, 12] alignItems="center" cornerRadius="$radius-md"
+                - frame «Radio» width=16 height=16 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=8
+                - frame «Terms» layout="vertical" gap=3
+                  - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 640 000 €
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Solde après 854 000 €
+          - frame «Starter · Britten-Norman BN-2 Islander» width="fill_container" height=76 gap=16 padding=[0, 10, 0, 22] alignItems="center"
+            - text «Code» width=56 fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="normal"  TEXT: BN2P
+            - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Britten-Norman BN-2 Islander
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Piston bimoteur · 9 sièges · 755 NM
+            - frame «Options» gap=4 alignItems="center"
+              - frame «Option · Louer» width=188 height=58 gap=10 padding=[0, 12] alignItems="center" cornerRadius="$radius-md"
+                - frame «Radio» width=16 height=16 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=8
+                - frame «Terms» layout="vertical" gap=3
+                  - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 13 400 € / mois
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Caution 26 800 €
+              - frame «Option · Acheter» width=188 height=58 gap=10 padding=[0, 12] alignItems="center" cornerRadius="$radius-md"
+                - frame «Radio» width=16 height=16 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=8
+                - frame «Terms» layout="vertical" gap=3
+                  - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 890 000 €
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Solde après 603 000 €
+          - frame «Starter · Cessna 208B Grand Caravan EX» width="fill_container" height=76 gap=16 padding=[0, 10, 0, 22] alignItems="center" fill="$surface-hover"
+            - text «Code» width=56 fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="normal"  TEXT: C208
+            - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Cessna 208B Grand Caravan EX
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Turbopropulseur · 12 sièges · 960 NM
+            - frame «Options» gap=4 alignItems="center"
+              - frame «Option · Louer» width=188 height=58 gap=10 padding=[0, 12] alignItems="center" fill="$surface-selected" cornerRadius="$radius-md"
+                - frame «Radio» width=16 height=16 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=8
+                  - ellipse «Radio Dot» width=8 height=8 fill="$text-primary"
+                - frame «Terms» layout="vertical" gap=3
+                  - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 18 500 € / mois
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Caution 37 000 €
+              - frame «Option · Acheter» width=188 height=58 gap=10 padding=[0, 12] alignItems="center" cornerRadius="$radius-md"
+                - frame «Radio» width=16 height=16 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=8
+                - frame «Terms» layout="vertical" gap=3
+                  - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 1 320 000 €
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Solde après 170 500 €
+          - frame «Louer ou acheter» width="fill_container" gap=32 padding=[16, 22, 4, 22] stroke="$border" strokeWidth={"top": 1}
+            - frame «Explain · Louer» width="fill_container" layout="vertical" gap=4
+              - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Louer, conseillé pour démarrer
+              - text «Description» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Un loyer par mois et une caution rendue à la fin. Maintenance incluse, ta trésorerie reste libre.
+            - frame «Explain · Acheter» width="fill_container" layout="vertical" gap=4
+              - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Acheter
+              - text «Description» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Tout se paie aujourd'hui et l'avion t'appartient. Il se revend, mais l'entretien est pour toi.
+      - instance «Hub Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Base d'attache
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Le premier hub est offert
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="horizontal" gap=4 padding=[8, 10, 14, 10]
+          - frame «Hub · LFMN» width="fill_container" layout="vertical" gap=8 padding=12 fill="$surface-hover" cornerRadius="$radius-md"
+            - frame «Head» gap=10 alignItems="center"
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=9
+                - ellipse «Radio Dot» width=8 height=8 fill="$text-primary"
+              - text «Code» fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="normal"  TEXT: LFMN
+            - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+              - text «Name» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Nice Côte d'Azur
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 14 jobs adaptés
+          - frame «Hub · LFML» width="fill_container" layout="vertical" gap=8 padding=12 cornerRadius="$radius-md"
+            - frame «Head» gap=10 alignItems="center"
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+              - text «Code» fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="normal"  TEXT: LFML
+            - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+              - text «Name» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Marseille Provence
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 11 jobs adaptés
+          - frame «Hub · LFLL» width="fill_container" layout="vertical" gap=8 padding=12 cornerRadius="$radius-md"
+            - frame «Head» gap=10 alignItems="center"
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+              - text «Code» fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="normal"  TEXT: LFLL
+            - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+              - text «Name» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Lyon Saint-Exupéry
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 9 jobs adaptés
+          - frame «Hub · LFBO» width="fill_container" layout="vertical" gap=8 padding=12 cornerRadius="$radius-md"
+            - frame «Head» gap=10 alignItems="center"
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+              - text «Code» fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="normal"  TEXT: LFBO
+            - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+              - text «Name» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Toulouse Blagnac
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 8 jobs adaptés
+    - frame «Summary Column» width=420 height="fill_container" layout="vertical"
+      - instance «Summary Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Récapitulatif
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Avant le premier vol
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=22 padding=[16, 24, 24, 24]
+          - frame «Lines» width="fill_container" layout="vertical" gap=12
+            - frame «Line · Capital de départ» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Capital de départ
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 1 500 000 €
+            - frame «Line · Caution, rendue en fin de contrat» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Caution, rendue en fin de contrat
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: − 37 000 €
+            - frame «Line · Premier loyer» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Premier loyer
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: − 18 500 €
+            - frame «Line · Convoyage jusqu'à Nice» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Convoyage jusqu'à Nice
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: − 9 500 €
+            - frame «Line · Base d'attache LFMN» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Base d'attache LFMN
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Offerte
+          - rectangle «Divider» width="fill_container" height=1 fill="$border"
+          - frame «Remaining» width="fill_container" layout="vertical" gap=2
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Solde après signature
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=38 fontWeight="600"  TEXT: 1 435 000 €
+          - frame «Outlook» width="fill_container" layout="vertical" gap=8
+            - frame «Line · Loyer mensuel» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Loyer mensuel
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 18 500 € / mois
+            - frame «Line · Engagement» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Engagement
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 24 mois, sortie dès 6 mois
+            - frame «Line · Livraison à Nice» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Livraison à Nice
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Demain, 09:00Z
+            - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1 264 500 € de plus en caisse qu'avec l'achat.
+          - frame «Actions» width="fill_container" gap=10 padding=[6, 0, 0, 0]
+            - instance «Btn · Plus tard» of «Button/Secondary»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Plus tard
+            - instance «Btn · Louer et commencer» of «Button/Primary»
+              - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Louer et commencer
+              - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

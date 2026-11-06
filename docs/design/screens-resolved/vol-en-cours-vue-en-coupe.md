@@ -1,0 +1,43 @@
+# Vol en cours · vue en coupe
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Vol en cours · vue en coupe» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Backdrop» width=1600 height=900 fill=["#07090C", {"type": "gradient", "gradientType": "radial", "enabled": true, "rotation":...
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=12 padding=[28, 32, 24, 32]
+    - frame «Main» width="fill_container" height="fill_container" layout="vertical" gap=12
+      - frame «Live Header» width="fill_container" alignItems="end" justifyContent="space_between"
+        - frame «Title Block» layout="vertical" gap=6
+          - frame «Status» gap=8 alignItems="center"
+            - ellipse «Live Dot» width=7 height=7 fill="$route"
+            - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: AZR 4127 · en croisière
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Nice → Paris-Charles de Gaulle
+        - instance «View Switcher» of «View Switcher»
+          - frame «View · Vue en coupe» padding=[8, 16] fill="#FFFFFF1A" cornerRadius=4
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Vue en coupe
+          - frame «View · Cabine & charge» padding=[8, 16] cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Cabine & charge
+          - frame «View · Systèmes» padding=[8, 16] cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Systèmes
+      - frame «Cutaway Area» width="fill_container" height="fill_container" layout="none"
+        - script «Aircraft Schematic» width=1536 height=588
+      - frame «Facts» width="fill_container" gap=56 padding=[0, 0, 4, 0] alignItems="end"
+        - frame «Fact · Altitude» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Altitude
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: FL240
+        - frame «Fact · Vitesse sol» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Vitesse sol
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 412 kt
+        - frame «Fact · Arrivée prévue» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Arrivée prévue
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 18:42Z
+        - frame «Fact · Carburant» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Carburant
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 2 140 kg
+        - frame «Facts Spacer» width="fill_container" height=1
+        - frame «Verification» gap=8 alignItems="center"
+          - icon «Verif Icon» width=15 height=15 fill="$text-tertiary" icon="scan-line"
+          - text «Verif Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Vérification en cours · aucune anomalie
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

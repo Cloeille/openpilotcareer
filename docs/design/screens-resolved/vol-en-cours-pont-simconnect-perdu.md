@@ -1,0 +1,72 @@
+# Vol en cours · pont SimConnect perdu
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Vol en cours · pont SimConnect perdu» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Backdrop» width=1600 height=900 fill=["#07090C", {"type": "gradient", "gradientType": "radial", "enabled": true, "rotation":...
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=12 padding=[28, 32, 24, 32]
+    - frame «Main» width="fill_container" height="fill_container" layout="vertical" gap=12
+      - frame «Live Header» width="fill_container" alignItems="end" justifyContent="space_between"
+        - frame «Title Block» layout="vertical" gap=6
+          - frame «Status» gap=8 alignItems="center"
+            - ellipse «Live Dot» width=7 height=7 fill="$warning"
+            - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: AZR 4127 · télémétrie interrompue
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Nice → Paris-Charles de Gaulle
+        - instance «View Switcher» of «View Switcher»
+          - frame «View · Vue en coupe» padding=[8, 16] fill="#FFFFFF1A" cornerRadius=4
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Vue en coupe
+          - frame «View · Cabine & charge» padding=[8, 16] cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Cabine & charge
+          - frame «View · Systèmes» padding=[8, 16] cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Systèmes
+      - frame «Cutaway Area» width="fill_container" height="fill_container" layout="none"
+        - script «Aircraft Schematic» width=1536 height=588 opacity=0.28
+      - frame «Facts» width="fill_container" gap=56 padding=[0, 0, 4, 0] alignItems="end"
+        - frame «Fact · Altitude» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Altitude
+          - text «Fact Value» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: FL240
+        - frame «Fact · Vitesse sol» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Vitesse sol
+          - text «Fact Value» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 412 kt
+        - frame «Fact · Arrivée prévue» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Arrivée prévue
+          - text «Fact Value» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 18:42Z
+        - frame «Fact · Carburant» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Carburant
+          - text «Fact Value» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 2 140 kg
+        - frame «Facts Spacer» width="fill_container" height=1
+        - frame «Verification» gap=8 alignItems="center"
+          - icon «Verif Icon» width=15 height=15 fill="$warning" icon="pause"
+          - text «Verif Text» fill="$warning" fontFamily="$font-ui" fontSize=14  TEXT: Vérification en pause · dernières valeurs à 17:58Z
+  - frame «Bridge Lost Alert» width=600 layout="vertical" gap=22 padding=[28, 32, 30, 32] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=8 effect=[{"type": "background_blur", "radius": 30}, {"type": "shadow", "shadowType": "outer", "...
+    - frame «Alert Head» gap=14 alignItems="center"
+      - frame «Alert Icon» width=44 height=44 alignItems="center" justifyContent="center" fill="$warning-soft" cornerRadius=6
+        - icon «Unplug» width=22 height=22 fill="$warning" icon="unplug"
+      - frame «Alert Title» layout="vertical" gap=3
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="600"  TEXT: Pont SimConnect perdu
+        - text «Since» fill="$warning" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Aucune donnée reçue depuis 42 s
+    - text «Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=15 lineHeight=1.45  TEXT: Ton vol continue normalement dans le simulateur. La vérification reprendra dès que le pont se reconnectera, et les données manquantes seront complétées à partir du simulateur si possible.
+    - frame «Status List» width="fill_container" layout="vertical" gap=12 padding=[16, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+      - frame «Status · Dernier paquet reçu» width="fill_container" gap=10 alignItems="center"
+        - icon «Icon» width=15 height=15 fill="$text-tertiary" icon="timer"
+        - text «Label» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Dernier paquet reçu
+        - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 17:58:12Z
+      - frame «Status · Reconnexion automatique» width="fill_container" gap=10 alignItems="center"
+        - icon «Icon» width=15 height=15 fill="$text-tertiary" icon="refresh-cw"
+        - text «Label» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Reconnexion automatique
+        - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: tentative 3 sur 10
+      - frame «Status · Au-delà de 10 min de coupure» width="fill_container" gap=10 alignItems="center"
+        - icon «Icon» width=15 height=15 fill="$text-tertiary" icon="shield-alert"
+        - text «Label» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Au-delà de 10 min de coupure
+        - text «Value» fill="$warning" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: le vol passera en « non vérifié »
+    - frame «Actions» gap=12 padding=[4, 0, 0, 0] alignItems="center"
+      - instance «Restart Bridge» of «Button/Primary»
+        - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Relancer le pont
+        - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+          - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+      - instance «Diagnostic» of «Button/Secondary»
+        - icon «Icon» width=16 height=16 fill="$text-secondary" icon="stethoscope"
+        - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Diagnostic
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

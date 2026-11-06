@@ -1,0 +1,58 @@
+# État · chargement de la session
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «État · chargement de la session» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-2.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=900 layout="vertical" gap=91 padding=[28, 32, 24, 32]
+    - frame «Brand» gap=12 alignItems="center"
+      - frame «Logo Mark» width=36 height=36 alignItems="center" justifyContent="center" fill="$text-primary" cornerRadius=2
+        - icon «Logo Icon» width=20 height=20 fill="$on-btn-primary" icon="plane-takeoff"
+      - frame «Brand Stack» layout="vertical" gap=3
+        - text «Brand Name» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: OpenHangar
+        - text «Brand Tagline» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Carrière et économie pour Microsoft Flight Simulator
+    - frame «Loading Column» width=460 layout="vertical" gap=36
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Étape 2 sur 2 · serveur global
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Chargement de ta session
+      - frame «Sync Steps» width="fill_container" layout="vertical" gap=24
+        - frame «Step · Authentification» width="fill_container" gap=14
+          - icon «Step Icon» width=20 height=20 fill="$success" icon="circle-check"
+          - frame «Stack» width="fill_container" layout="vertical" gap=4
+            - text «Step Label» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Authentification
+            - text «Step Detail» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Connecté en tant que lmoreau
+        - frame «Step · Profil» width="fill_container" gap=14
+          - icon «Step Icon» width=20 height=20 fill="$success" icon="circle-check"
+          - frame «Stack» width="fill_container" layout="vertical" gap=4
+            - text «Step Label» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Profil
+            - text «Step Detail» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Cdt. L. Moreau · Azur Régional (AZR)
+        - frame «Step · Jobs» width="fill_container" gap=14
+          - icon «Step Icon» width=20 height=20 fill="$text-primary" icon="loader-circle"
+          - frame «Stack» width="fill_container" layout="vertical" gap=8
+            - text «Step Label» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Jobs
+            - text «Step Detail» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 18 offres reçues sur 42
+            - frame «Step Progress» width="fill_container" height=2 layout="none" fill="$border-strong"
+              - rectangle «Progress Fill» width=183 height=2 fill="$text-primary"
+        - frame «Step · Flotte» width="fill_container" gap=14
+          - icon «Step Icon» width=20 height=20 fill="$text-tertiary" icon="circle-dashed"
+          - frame «Stack» width="fill_container" layout="vertical" gap=4
+            - text «Step Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Flotte
+            - text «Step Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: En attente
+    - frame «Flex Spacer» width="fill_container" height="fill_container"
+    - frame «Footer» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Gameplay Tip» width=460 layout="vertical" gap=6
+        - frame «Tip Label» gap=8 alignItems="center"
+          - icon «Tip Icon» width=14 height=14 fill="$text-tertiary" icon="lightbulb"
+          - text «Tip Title» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Astuce
+        - text «Tip Text» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal" lineHeight=1.45  TEXT: Un vol suivi par le pont SimConnect est vérifié automatiquement. Saisi à la main, il reste non vérifié et rapporte moins.
+      - frame «Hints» gap=22 alignItems="center"
+        - frame «Hint · Annuler» gap=8 alignItems="center"
+          - instance «Key» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Échap
+          - text «Hint Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Annuler
+        - frame «Hint · Astuce suivante» gap=8 alignItems="center"
+          - instance «Key» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Tab
+          - text «Hint Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Astuce suivante

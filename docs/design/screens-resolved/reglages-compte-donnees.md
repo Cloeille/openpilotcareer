@@ -1,0 +1,104 @@
+# Réglages · compte & données
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Réglages · compte & données» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-1.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 gap=64 padding=[28, 32, 24, 32]
+    - frame «Settings Nav» width=220 layout="vertical" gap=28
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Compte lmoreau · serveur global
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Réglages
+      - frame «Nav List» width="fill_container" layout="vertical"
+        - frame «Nav · Clés API» width="fill_container" padding=[11, 16] stroke="$border-strong" strokeWidth={"left": 2}
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Clés API
+        - frame «Nav · Compte et données» width="fill_container" padding=[11, 16] stroke="$text-primary" strokeWidth={"left": 2}
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Compte et données
+    - frame «Center Column» width=620 height="fill_container" layout="vertical" justifyContent="space_between"
+      - instance «Panel · Export» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[26, 28, 0, 28] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Exporter tes données
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[12, 28, 26, 28]
+          - text «Intro» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.45  TEXT: Une copie de tout ce que ce serveur conserve sur toi, à garder ou à réimporter ailleurs.
+          - frame «Export · Export complet» width="fill_container" layout="vertical" padding=[22, 0, 18, 0] stroke="$border" strokeWidth={"bottom": 1}
+            - frame «Row» width="fill_container" gap=20 alignItems="center"
+              - text «Format» width=44 fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: JSON
+              - frame «Stack» width="fill_container" layout="vertical" gap=3
+                - frame «Title Row» gap=8 alignItems="center"
+                  - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Export complet
+                  - text «Size» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 4,2 Mo
+                - text «Desc» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Profil, compagnie, flotte, vols, transactions et réglages.
+              - instance «Button · Tout exporter» of «Button/Primary»
+                - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Exporter
+                - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                  - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: E
+          - frame «Export · Vols» width="fill_container" layout="vertical" padding=[18, 0] stroke="$border" strokeWidth={"bottom": 1}
+            - frame «Row» width="fill_container" gap=20 alignItems="center"
+              - text «Format» width=44 fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: CSV
+              - frame «Stack» width="fill_container" layout="vertical" gap=3
+                - frame «Title Row» gap=8 alignItems="center"
+                  - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Vols
+                  - text «Size» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 86 Ko
+                - text «Desc» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: 312 vols, du 14/03 au 04/11/2026.
+              - instance «Button · Exporter Vols» of «Button/Secondary»
+                - icon «Icon» width=14 height=14 fill="$text-secondary" icon="download"
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Exporter
+          - frame «Export · Transactions» width="fill_container" layout="vertical" padding=[18, 0] stroke="$border"
+            - frame «Row» width="fill_container" gap=20 alignItems="center"
+              - text «Format» width=44 fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: CSV
+              - frame «Stack» width="fill_container" layout="vertical" gap=3
+                - frame «Title Row» gap=8 alignItems="center"
+                  - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Transactions
+                  - text «Size» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 212 Ko
+                - text «Desc» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: 2 847 lignes, du 14/03 au 04/11/2026.
+              - instance «Button · Exporter Transactions» of «Button/Secondary»
+                - icon «Icon» width=14 height=14 fill="$text-secondary" icon="download"
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Exporter
+          - frame «Last Export» width="fill_container" gap=8 padding=[16, 0, 0, 0] alignItems="center"
+            - text «Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Dernier export le 21/10/2026
+      - instance «Panel · Suppression du compte» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[26, 28, 0, 28] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Supprimer le compte
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=20 padding=[12, 28, 28, 28]
+          - text «Consequences» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.45  TEXT: Efface de ce serveur ton pilote, la compagnie Azur Régional (AZR), sa flotte, tes vols et tes transactions, et révoque tes clés API. Rien ne pourra être restauré : exporte tes données avant.
+          - frame «Confirm Row» width="fill_container" gap=12 alignItems="end"
+            - instance «Input · Mot de passe» of «Input»
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Confirme avec ton mot de passe
+              - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="lock"
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal" letterSpacing=1  TEXT: ••••••••••
+            - instance «Button · Supprimer le compte» of «Button/Danger»
+              - icon «Icon» width=16 height=16 fill="$danger" icon="trash-2"
+              - text «Label» fill="$danger" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Supprimer mon compte
+    - frame «Account Column» width=400 height="fill_container" layout="vertical"
+      - instance «Panel · Serveur» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[26, 28, 0, 28] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Serveur
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Changer
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=24 padding=[16, 28, 28, 28]
+          - frame «Server Head» width="fill_container" layout="vertical" gap=6
+            - frame «Name Row» width="fill_container" gap=8 alignItems="center"
+              - ellipse «Status Dot» width=6 height=6 fill="$success"
+              - text «Server Name» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: Serveur global OpenHangar
+            - text «URL» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: https://global.openhangar.org
+          - frame «Details» width="fill_container" layout="vertical" gap=12
+            - frame «Row · Version» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Version
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 1.4.0, à jour
+            - frame «Row · Hébergeur» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Hébergeur
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Association OpenHangar
+            - frame «Row · Données hébergées à» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Données hébergées à
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Francfort (UE)
+            - frame «Row · Ton compte» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Ton compte
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: lmoreau, depuis le 14/03/2026
+          - frame «Privacy Note» width="fill_container" gap=10 padding=[20, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+            - frame «Stack» width="fill_container" layout="vertical" gap=6
+              - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="600"  TEXT: L'hébergeur voit tes données.
+              - text «Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.45  TEXT: Profil, vols, traces de position et transactions sont stockés en clair sur ce serveur et lisibles par son administrateur. Les clés API ne sont conservées que hachées.
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

@@ -1,0 +1,107 @@
+# Saison · récapitulatif de fin
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Saison · récapitulatif de fin» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-9.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 gap=56 padding=[28, 32, 24, 32] alignItems="end" justifyContent="space_between"
+    - frame «Recap Column» width=760 height="fill_container" layout="vertical" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Classement · saison terminée le 30 novembre à 23:59Z
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Fin de la saison de novembre
+      - frame «Final Rank» layout="vertical" gap=22
+        - frame «Rank Row» gap=28 alignItems="end"
+          - frame «Rank Figure» gap=4
+            - text «Rank Number» fill="$text-primary" fontFamily="$font-display" fontSize=184 fontWeight="600" lineHeight=0.9  TEXT: 7
+            - frame «Rank Suffix Wrap» padding=[14, 0, 0, 0]
+              - text «Rank Suffix» fill="$text-primary" fontFamily="$font-display" fontSize=64 fontWeight="600" lineHeight=1  TEXT: e
+          - frame «Rank Context» layout="vertical" gap=6 padding=[0, 0, 10, 0]
+            - text «Rank Of» fill="$text-secondary" fontFamily="$font-display" fontSize=28 fontWeight="500"  TEXT: sur 24 compagnies
+            - text «Rank Path» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Meilleur rang 6e le 18 novembre · 9e en octobre
+        - text «Reset Note» width=520 fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal" lineHeight=1.45  TEXT: Le classement de saison repart à zéro le 1er décembre pour toutes les compagnies. Ton solde, ta flotte, ta réputation et tes statistiques carrière restent acquis.
+      - frame «Season Facts» gap=56
+        - frame «Fact · Gain de saison» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Gain de saison
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: +1 486 200 €
+          - text «Fact Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Carrière : 7 940 300 €
+        - frame «Fact · Vols de saison» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Vols de saison
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 268
+          - text «Fact Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Carrière : 1 412
+        - frame «Fact · Ponctualité» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Ponctualité
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 95 %
+          - text «Fact Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Carrière : 92 %
+        - frame «Fact · Réputation» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Réputation
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 4,7 sur 5
+          - text «Fact Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: +0,1 cette saison
+    - frame «Outcome Column» width=380 layout="vertical" gap=16
+      - instance «Final Standings» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Podium de novembre
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Gain de saison
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[8, 8, 10, 8]
+          - frame «Standing · Transalpine Express» width="fill_container" height=42 gap=14 padding=[0, 14] alignItems="center" cornerRadius=4
+            - frame «Cell · Rang» width=24
+              - text «Rank» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 1
+            - frame «Cell · Compagnie» width="fill_container" gap=10 alignItems="center"
+              - text «Company» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Transalpine Express
+              - text «Kind» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: IA
+            - text «Season Gain» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: +2 914 000 €
+          - frame «Standing · Ibérica Sol» width="fill_container" height=42 gap=14 padding=[0, 14] alignItems="center" cornerRadius=4
+            - frame «Cell · Rang» width=24
+              - text «Rank» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 2
+            - frame «Cell · Compagnie» width="fill_container" gap=10 alignItems="center"
+              - text «Company» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Ibérica Sol
+              - text «Kind» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: IA
+            - text «Season Gain» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: +2 377 500 €
+          - frame «Standing · Aéro Provence» width="fill_container" height=42 gap=14 padding=[0, 14] alignItems="center" cornerRadius=4
+            - frame «Cell · Rang» width=24
+              - text «Rank» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 3
+            - frame «Cell · Compagnie» width="fill_container" gap=10 alignItems="center"
+              - text «Company» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Aéro Provence
+              - text «Kind» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Joueur
+            - text «Season Gain» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: +1 902 300 €
+          - frame «Divider Wrap» width="fill_container" padding=[6, 14]
+            - rectangle «Line» width="fill_container" height=1 fill="$border"
+          - frame «Standing · Azur Régional» width="fill_container" height=42 gap=14 padding=[0, 14] alignItems="center" fill="$neutral-soft" cornerRadius=4
+            - frame «Cell · Rang» width=24
+              - text «Rank» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 7
+            - frame «Cell · Compagnie» width="fill_container" gap=10 alignItems="center"
+              - text «Company» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Azur Régional
+              - text «Kind» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Toi
+            - text «Season Gain» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: +1 486 200 €
+      - instance «Rewards» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Récompenses
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 3 gains
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[4, 22, 22, 22]
+          - frame «Reward · Prime de classement» width="fill_container" gap=16 padding=[12, 0] alignItems="center" justifyContent="space_between" stroke="$border" strokeWidth={"bottom": 1}
+            - frame «Reward Text» layout="vertical" gap=3
+              - text «Reward Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Prime de classement
+              - text «Reward Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 7e sur 24 · tranche 5e à 8e
+            - text «Reward Amount» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="500"  TEXT: +180 000 €
+          - frame «Reward · Bonus ponctualité» width="fill_container" gap=16 padding=[12, 0] alignItems="center" justifyContent="space_between" stroke="$border" strokeWidth={"bottom": 1}
+            - frame «Reward Text» layout="vertical" gap=3
+              - text «Reward Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Bonus ponctualité
+              - text «Reward Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 95 % des vols à l'heure
+            - text «Reward Amount» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="500"  TEXT: +40 000 €
+          - frame «Reward · Expérience pilote» width="fill_container" gap=16 padding=[12, 0] alignItems="center" justifyContent="space_between" stroke="$border" strokeWidth={"bottom": 1}
+            - frame «Reward Text» layout="vertical" gap=3
+              - text «Reward Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Expérience pilote
+              - text «Reward Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Rang 4 · de 72 % à 88 %
+            - text «Reward Amount» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="500"  TEXT: +2 400 XP
+          - frame «Total» width="fill_container" padding=[16, 0, 18, 0] alignItems="end" justifyContent="space_between"
+            - frame «Total Text» layout="vertical" gap=3
+              - text «Total Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Crédité sur ton solde
+              - text «Total Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1er décembre à 00:00Z
+            - text «Total Amount» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: +220 000 €
+          - instance «Start Season Button» of «Button/Primary»
+            - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Lancer la saison de décembre
+            - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+              - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

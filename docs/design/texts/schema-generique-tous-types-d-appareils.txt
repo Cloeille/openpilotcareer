@@ -1,0 +1,21 @@
+Un seul schéma, tous les appareils
+Nuage de points généré à partir de la catégorie, du nombre de moteurs et de sièges. Aucun modèle 3D par avion : la même brique sert pour un Cessna, un A320 ou un hélicoptère.
+Points 3D
+Maillage 3D
+Profil 2D
+Turbopropulseur
+ATR 72-600 · 68 sièges
+Jet régional
+E175 · 76 sièges
+Monocouloir
+A320neo · 180 sièges
+Gros-porteur
+B747-8 · 4 moteurs
+Jet d'affaires
+Citation Latitude · 9 sièges
+Monomoteur à pistons
+Cessna 172 · 4 sièges
+Bimoteur à pistons
+Beechcraft Baron 58 · 6 sièges
+Hélicoptère
+H135 · 6 sièges

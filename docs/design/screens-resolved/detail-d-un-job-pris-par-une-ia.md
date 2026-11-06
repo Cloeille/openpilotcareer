@@ -1,0 +1,67 @@
+# Détail d'un job · pris par une IA
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Détail d'un job · pris par une IA» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-4.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 gap=20 padding=[28, 32, 24, 32]
+    - frame «Briefing Column» width=620 height="fill_container" layout="vertical" gap=32
+      - frame «Job Header» width="fill_container" layout="vertical" gap=12
+        - frame «Title Block» layout="vertical" gap=6
+          - frame «Status» gap=8 alignItems="center"
+            - ellipse «Status Dot» width=7 height=7 fill="$danger"
+            - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Job passagers · J-20915 · plus disponible
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Nice → Rome-Fiumicino
+        - text «Route Line» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: LFMN → LIRF · 254 NM · 46 passagers · 11 380 €
+      - frame «Taken Notice» width="fill_container" layout="vertical" gap=10
+        - text «Lead» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Méridia Cargo a pris ce job il y a 2 min.
+        - text «Explanation» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal" lineHeight=1.45  TEXT: Pendant que tu lisais le briefing, cette compagnie IA l'a accepté à 18:40Z. Un job accepté quitte le tableau : il n'est plus disponible pour personne. Ton ATR 42-600 F-HAZT reste libre à Nice.
+        - instance «AI Company Link» of «Button/Ghost»
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Voir la fiche de Méridia Cargo
+          - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+      - instance «Similar Jobs Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[24, 28, 4, 28] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Jobs similaires
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Au départ de LFMN · pour ton ATR 42-600
+        - frame «Content» width="fill_container" layout="vertical" gap=2 padding=[12, 12, 20, 12]
+          - frame «Job · LFMN-LIRQ (sélection)» width="fill_container" height=64 gap=16 padding=[0, 16] alignItems="center" fill="$surface-hover" cornerRadius=4
+            - frame «Route» width="fill_container" layout="vertical" gap=4
+              - frame «Codes Row» gap=10 alignItems="center"
+                - text «Codes» fill="$text-primary" fontFamily="$font-mono" fontSize=15 fontWeight="700"  TEXT: LFMN → LIRQ
+              - text «Meta» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Florence-Peretola · 216 NM · 44 passagers
+            - frame «Gain» width=84 justifyContent="end"
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: 9 120 €
+            - frame «Action» width=153 alignItems="center" justifyContent="end"
+              - instance «Accept Button» of «Button/Primary»
+                - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Accepter
+                - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                  - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+          - frame «Job · LFMN-LIMC» width="fill_container" height=64 gap=16 padding=[0, 16] alignItems="center" cornerRadius=4
+            - frame «Route» width="fill_container" layout="vertical" gap=4
+              - frame «Codes Row» gap=10 alignItems="center"
+                - text «Codes» fill="$text-primary" fontFamily="$font-mono" fontSize=15 fontWeight="700"  TEXT: LFMN → LIMC
+              - text «Meta» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Milan-Malpensa · 178 NM · 48 passagers
+            - frame «Gain» width=84 justifyContent="end"
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: 8 460 €
+            - frame «Action» width=153 height="fit_content(0)" alignItems="center" justifyContent="end"
+          - frame «Job · LFMN-LIRN» width="fill_container" height=64 gap=16 padding=[0, 16] alignItems="center" cornerRadius=4
+            - frame «Route» width="fill_container" layout="vertical" gap=4
+              - frame «Codes Row» gap=10 alignItems="center"
+                - text «Codes» fill="$text-primary" fontFamily="$font-mono" fontSize=15 fontWeight="700"  TEXT: LFMN → LIRN
+                - instance «Contesté» of «Badge/Contesté»
+                  - icon «Icon» width=12 height=12 fill="$warning" icon="swords"
+                  - text «Label» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Contesté
+              - text «Meta» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Naples-Capodichino · 370 NM · 46 passagers
+            - frame «Gain» width=84 justifyContent="end"
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: 13 900 €
+            - frame «Action» width=153 height="fit_content(0)" alignItems="center" justifyContent="end"
+          - frame «List Footer» width="fill_container" padding=[12, 16, 0, 16]
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Même départ, même appareil et une charge proche de celle du job perdu.
+      - frame «Board Return» width="fill_container" gap=16 alignItems="center"
+        - instance «Back to Board Button» of «Button/Secondary»
+          - icon «Icon» width=16 height=16 fill="$text-secondary" icon="arrow-left"
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Retour aux jobs
+        - text «Board Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 42 offres au départ de Nice
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

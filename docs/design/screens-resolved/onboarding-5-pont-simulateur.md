@@ -1,0 +1,122 @@
+# Onboarding · 5 pont simulateur
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Onboarding · 5 pont simulateur» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-13.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - rectangle «Readability Scrim» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" padding=[40, 64, 36, 64] justifyContent="space_between"
+    - frame «Body» width="fill_container" gap=72
+      - frame «Left Column» width=600 layout="vertical" gap=40
+        - frame «Title Block» width="fill_container" layout="vertical" gap=8
+          - text «Overline» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Microsoft Flight Simulator 2020 ou 2024
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=52 fontWeight="600"  TEXT: Relie ton simulateur
+          - text «Sub» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal" lineHeight=1.45  TEXT: OpenHangar Bridge lit tes vols dans MSFS via SimConnect et les envoie au serveur. C'est ce qui les rend vérifiés, donc payés au tarif plein.
+        - frame «Steps» width="fill_container" layout="vertical" gap=28
+          - frame «Step · Installer le pont» width="fill_container" gap=16
+            - frame «Index» width=26 height=26 alignItems="center" justifyContent="center" fill="$surface-selected" cornerRadius=13
+              - icon «Check» width=13 height=13 fill="$text-primary" icon="check"
+            - frame «Step Body» width="fill_container" layout="vertical" gap=12
+              - frame «Step Head» width="fill_container" layout="vertical" gap=4
+                - text «Step Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Installe OpenHangar Bridge
+                - text «Step Detail» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.4  TEXT: Application compagnon pour Windows 10 ou 11, à lancer avant ton simulateur.
+              - frame «Download Row» gap=16 alignItems="center"
+                - instance «Button · Télécharger» of «Button/Secondary»
+                  - icon «Icon» width=16 height=16 fill="$text-secondary" icon="download"
+                  - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Télécharger pour Windows
+                - text «File Info» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Version 0.6.2 · 18 Mo
+          - frame «Step · Clé API» width="fill_container" gap=16
+            - frame «Index» width=26 height=26 alignItems="center" justifyContent="center" fill="$surface-selected" cornerRadius=13
+              - icon «Check» width=13 height=13 fill="$text-primary" icon="check"
+            - frame «Step Body» width="fill_container" layout="vertical" gap=12
+              - frame «Step Head» width="fill_container" layout="vertical" gap=4
+                - text «Step Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Colle ta clé dans le pont
+                - text «Step Detail» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.4  TEXT: On l'a créée pour toi. Dans OpenHangar Bridge, ouvre Compte › Clé API et colle-la.
+              - frame «Reveal · Clé créée» width="fill_container" layout="vertical" gap=12 padding=[16, 18, 14, 18] fill="$surface-sunken" cornerRadius=4
+                - frame «Reveal Header» width="fill_container" gap=8 alignItems="center"
+                  - text «Status» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="600"  TEXT: Clé « PC principal » créée automatiquement
+                  - text «Once» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Affichée une seule fois
+                - frame «Key Row» width="fill_container" gap=8 alignItems="center"
+                  - frame «Key Box» width="fill_container" height=42 padding=[0, 12] alignItems="center" fill="$bg" stroke="$border" strokeWidth=1 cornerRadius=3
+                    - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="normal"  TEXT: oh_sk_7Hq2Lm9RtV4xKc8NwP3aZe5JyB6dF1
+                  - instance «Button · Copier» of «Button/Primary»
+                    - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Copier
+                    - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                      - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: C
+                - frame «Warning Row» width="fill_container" gap=10 alignItems="center"
+                  - text «Message» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Perdue ? Révoque-la et crées-en une autre dans Réglages › Clés API.
+                  - instance «Button · J'ai copié» of «Button/Ghost»
+                    - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: J'ai copié
+                    - icon «Icon» width=14 height=14 fill="$text-secondary" icon="check"
+      - frame «Right Column» width="fill_container" layout="vertical" gap=16
+        - instance «Panel · Test de connexion» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[24, 28, 14, 28] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Test de connexion
+            - instance «Badge · En direct» of «Badge/Info»
+              - icon «Icon» width=12 height=12 fill="$info" icon="radio"
+              - text «Label» fill="$info" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: En direct
+          - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=22 padding=[18, 28, 26, 28]
+            - frame «State · En attente» width="fill_container" gap=16 alignItems="center"
+              - frame «State Icon» width=48 height=48 alignItems="center" justifyContent="center" fill="$info-soft" cornerRadius=6
+                - icon «Loader» width=24 height=24 fill="$info" icon="loader-circle"
+              - frame «State Text» width="fill_container" layout="vertical" gap=4
+                - text «State Title» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="600"  TEXT: En attente du simulateur
+                - text «State Message» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.4  TEXT: Lance MSFS 2020 ou 2024 et charge un vol : le test continue tout seul.
+              - text «Elapsed» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: depuis 24 s
+            - frame «Checks» width="fill_container" layout="vertical"
+              - frame «Check · OpenHangar Bridge répond» width="fill_container" gap=12 padding=[13, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - icon «Icon» width=17 height=17 fill="$success" icon="circle-check"
+                - text «Label» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: OpenHangar Bridge répond
+                - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: version 0.6.2 · PC-BUREAU
+              - frame «Check · Clé API acceptée» width="fill_container" gap=12 padding=[13, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - icon «Icon» width=17 height=17 fill="$success" icon="circle-check"
+                - text «Label» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Clé API acceptée
+                - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: par le serveur global
+              - frame «Check · MSFS détecté via SimConnect» width="fill_container" gap=12 padding=[13, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - icon «Icon» width=17 height=17 fill="$info" icon="loader-circle"
+                - text «Label» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: MSFS détecté via SimConnect
+                - text «Value» fill="$info" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: en attente…
+              - frame «Check · Premières données de vol» width="fill_container" gap=12 padding=[13, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - icon «Icon» width=17 height=17 fill="$text-tertiary" icon="circle-dashed"
+                - text «Label» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Premières données de vol
+                - text «Value» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: au chargement d'un vol
+            - frame «Actions» gap=12 alignItems="center"
+              - instance «Button · Relancer le test» of «Button/Secondary»
+                - icon «Icon» width=16 height=16 fill="$text-secondary" icon="refresh-cw"
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Relancer le test
+              - instance «Button · Diagnostic» of «Button/Ghost»
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Diagnostic
+                - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+        - frame «Other States» width="fill_container" gap=16
+          - frame «State · Connecté» width="fill_container" layout="vertical" gap=8 padding=[16, 20, 18, 20] fill="$surface-sunken" stroke="$border" strokeWidth=1 cornerRadius=6
+            - frame «When» gap=8 alignItems="center"
+              - icon «Icon» width=15 height=15 fill="$success" icon="circle-check"
+              - text «When Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Si le test réussit
+            - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Connecté à MSFS 2024
+            - text «Message» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Tes vols sont vérifiés automatiquement et « Continuer » s'active.
+          - frame «State · Échec» width="fill_container" layout="vertical" gap=8 padding=[16, 20, 18, 20] fill="$surface-sunken" stroke="$border" strokeWidth=1 cornerRadius=6
+            - frame «When» gap=8 alignItems="center"
+              - icon «Icon» width=15 height=15 fill="$danger" icon="circle-x"
+              - text «When Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Si le test échoue
+            - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Pont injoignable
+            - text «Message» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Aucune réponse en 60 s. Vérifie que l'app est lancée et autorisée par le pare-feu Windows.
+    - frame «Footer» width="fill_container" alignItems="center" justifyContent="space_between"
+      - frame «Skip» gap=20 alignItems="center"
+        - instance «Button · Passer» of «Button/Ghost»
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Passer, je connecterai plus tard
+          - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+        - frame «Skip Note» gap=8 alignItems="center"
+          - text «Note Start» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Tes vols seront
+          - instance «Badge · Non vérifié» of «Badge/Non vérifié»
+            - icon «Icon» width=12 height=12 fill="$text-secondary" icon="circle-dashed"
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Non vérifié
+          - text «Note End» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: et payés à 60 % de leur gain net.
+      - frame «Continue Group» gap=16 alignItems="center"
+        - text «Continue Hint» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Disponible une fois connecté
+        - instance «Continue · indisponible» of «Button/Primary»
+          - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Continuer
+          - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+            - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+  - [instance «HUD/Onboarding» — see screens-resolved/hud-onboarding.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

@@ -1,0 +1,32 @@
+Bienvenue sur OpenHangar
+Comment veux-tu commencer ?
+Choisis ton point de départ. Tu pourras toujours faire grandir ta compagnie, louer d'autres avions ou durcir le réalisme plus tard.
+Sélectionné
+Le plus rapide
+Directement en airliner
+Tu diriges une compagnie établie dès le premier vol : un avion de ligne en location, un grand hub et des vols passagers tout de suite.
+Capital de départ
+2 500 000 €
+Premier avion
+A320neo, 737-800 ou E195-E2 en location
+Hub
+Grand aéroport (LFMN, LFPG, LFLL…)
+Réalisme
+Équilibré, modifiable
+Exigence
+Le plus exigeant
+Hardcore, petit Cessna
+Tu pars de presque rien sur un petit aérodrome. Chaque heure de vol compte, et c'est toi qui gagnes ta place jusqu'à l'airliner.
+Capital de départ
+45 000 €
+Premier avion
+Cessna 172 loué à l'heure à l'aéroclub
+Hub
+Petit aérodrome (LFMD, LFKC, LFNH…)
+Réalisme
+Hardcore : usure, pannes, carburant réel
+Exigence
+Configuration personnalisée
+Tu peux changer d'avis jusqu'à la fin de l'onboarding.
+Continuer avec ce départ
+Entrée

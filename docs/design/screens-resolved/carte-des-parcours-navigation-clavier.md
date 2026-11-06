@@ -1,0 +1,532 @@
+# Carte des parcours & navigation clavier
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Carte des parcours & navigation clavier» width=2900 layout="vertical" gap=40 padding=[56, 64, 64, 64] fill=["#07090C", {"type": "gradient", "gradientType": "radial", "enabled": true, "rotation":...
+  - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+    - frame «Header Text» layout="vertical" gap=8
+      - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=36 fontWeight="600"  TEXT: Carte des parcours & navigation clavier
+      - text «Sub» width=980 fill="$text-secondary" fontFamily="$font-ui" fontSize=15 lineHeight=1.45  TEXT: Chaque écran se pilote entièrement au clavier ou à la manette. Les flèches indiquent la touche qui mène à l'écran suivant ; les touches exactes figurent aussi dans le HUD du bas de chaque écran.
+    - frame «Legend» gap=28 alignItems="center"
+      - frame «Legend · Écran» gap=8 alignItems="center"
+        - rectangle «Swatch» width=18 height=12 fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+        - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Écran
+      - frame «Legend · État» gap=8 alignItems="center"
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: État ou cas limite
+      - frame «Legend · Touche» gap=8 alignItems="center"
+        - instance «Key · Entrée» of «Keycap»
+          - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+        - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Touche qui déclenche la transition
+  - frame «Global Navigation» width="fill_container" gap=80 padding=[28, 32] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=8
+    - frame «Tabs Chain» layout="vertical" gap=16
+      - text «Block Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Navigation globale · HUD
+      - frame «Chain» gap=10 alignItems="center"
+        - instance «Key · Q» of «Keycap»
+          - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Q
+        - frame «Tab · Tableau de bord» padding=[8, 14] stroke="$border-strong" strokeWidth=1 cornerRadius=4
+          - text «Tab» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Tableau de bord
+        - icon «Sep» width=14 height=14 fill="$text-tertiary" icon="chevrons-left-right"
+        - frame «Tab · Vol en cours» padding=[8, 14] stroke="$border-strong" strokeWidth=1 cornerRadius=4
+          - text «Tab» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Vol en cours
+        - icon «Sep» width=14 height=14 fill="$text-tertiary" icon="chevrons-left-right"
+        - frame «Tab · Jobs» padding=[8, 14] stroke="$border-strong" strokeWidth=1 cornerRadius=4
+          - text «Tab» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Jobs
+        - icon «Sep» width=14 height=14 fill="$text-tertiary" icon="chevrons-left-right"
+        - frame «Tab · Flotte» padding=[8, 14] stroke="$border-strong" strokeWidth=1 cornerRadius=4
+          - text «Tab» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Flotte
+        - icon «Sep» width=14 height=14 fill="$text-tertiary" icon="chevrons-left-right"
+        - frame «Tab · Historique» padding=[8, 14] stroke="$border-strong" strokeWidth=1 cornerRadius=4
+          - text «Tab» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Historique
+        - icon «Sep» width=14 height=14 fill="$text-tertiary" icon="chevrons-left-right"
+        - frame «Tab · Classement» padding=[8, 14] stroke="$border-strong" strokeWidth=1 cornerRadius=4
+          - text «Tab» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Classement
+        - instance «Key · E» of «Keycap»
+          - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: E
+      - frame «Settings Access» gap=10 alignItems="center"
+        - icon «Gear» width=16 height=16 fill="$text-secondary" icon="settings"
+        - text «Settings Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Réglages : icône engrenage du HUD, hors du cycle Q / E
+    - frame «Keyboard Rules» width="fill_container" layout="vertical" gap=12
+      - text «Block Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Règles clavier communes
+      - frame «Rules Columns» width="fill_container" gap=56
+        - frame «Rules Col 1» width="fill_container" layout="vertical" gap=10
+          - frame «Rule · Q/E» width="fill_container" gap=8 alignItems="center"
+            - frame «Keys» width=120 gap=4
+              - instance «Key · Q» of «Keycap»
+                - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Q
+              - instance «Key · E» of «Keycap»
+                - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: E
+            - text «Rule» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Onglet précédent / suivant
+          - frame «Rule · Échap» width="fill_container" gap=8 alignItems="center"
+            - frame «Keys» width=120 gap=4
+              - instance «Key · Échap» of «Keycap»
+                - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Échap
+            - text «Rule» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Revenir à l'écran parent ; depuis un onglet, ouvrir le menu
+          - frame «Rule · Entrée» width="fill_container" gap=8 alignItems="center"
+            - frame «Keys» width=120 gap=4
+              - instance «Key · Entrée» of «Keycap»
+                - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+            - text «Rule» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Action principale de l'écran (bouton blanc)
+          - frame «Rule · Tab» width="fill_container" gap=8 alignItems="center"
+            - frame «Keys» width=120 gap=4
+              - instance «Key · Tab» of «Keycap»
+                - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Tab
+            - text «Rule» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Filtres ou sous-vue (saison / carrière…)
+        - frame «Rules Col 2» width="fill_container" layout="vertical" gap=10
+          - frame «Rule · ↑/↓» width="fill_container" gap=8 alignItems="center"
+            - frame «Keys» width=120 gap=4
+              - instance «Key · ↑» of «Keycap»
+                - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: ↑
+              - instance «Key · ↓» of «Keycap»
+                - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: ↓
+            - text «Rule» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Parcourir une liste
+          - frame «Rule · V» width="fill_container" gap=8 alignItems="center"
+            - frame «Keys» width=120 gap=4
+              - instance «Key · V» of «Keycap»
+                - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: V
+            - text «Rule» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Changer de vue dans Vol en cours
+          - frame «Rule · F1» width="fill_container" gap=8 alignItems="center"
+            - frame «Keys» width=120 gap=4
+              - instance «Key · F1» of «Keycap»
+                - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: F1
+            - text «Rule» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Aide contextuelle
+          - frame «Rule · Manette» width="fill_container" gap=8 alignItems="center"
+            - frame «Keys» width=120 gap=4
+              - instance «Key · Manette» of «Keycap»
+                - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Manette
+            - text «Rule» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: A = Entrée · B = Échap · LB / RB = Q / E
+  - frame «Lane · Accès & réglages» width="fill_container" gap=40 padding=[28, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+    - frame «Lane Label» width=190 layout="vertical" gap=2
+      - text «Num» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 01
+      - text «Lane Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Accès & réglages
+    - frame «Flows» width="fill_container" layout="vertical" gap=16
+      - frame «Flow» alignItems="center"
+        - frame «Node · Connexion» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Connexion
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Choix du serveur, identifiants
+        - frame «Edge · Se connecter» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Entrée» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Se connecter
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Chargement» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Chargement
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Synchronisation avec le serveur
+        - frame «Edge · Automatique» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Automatique
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Tableau de bord» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Tableau de bord
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Accueil de la compagnie
+      - frame «Flow» alignItems="center"
+        - frame «Node · Réglages» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Réglages
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Clés API du pont
+        - frame «Edge · Section suivante» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Tab» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Tab
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Section suivante
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Compte & données» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Compte & données
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Export, suppression, confidentialité
+    - frame «States» width=660 layout="vertical" gap=8
+      - text «States Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: États et cas limites
+      - frame «State · Échec du sondage» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Échec du sondage
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: URL invalide ou serveur non OpenHangar, avant connexion
+      - frame «State · Serveur injoignable» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Serveur injoignable
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Perte de connexion depuis n'importe quel écran ; données en lecture seule
+  - frame «Lane · Onboarding» width="fill_container" gap=40 padding=[28, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+    - frame «Lane Label» width=190 layout="vertical" gap=2
+      - text «Num» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 02
+      - text «Lane Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Onboarding
+    - frame «Flows» width="fill_container" layout="vertical" gap=16
+      - frame «Flow» alignItems="center"
+        - frame «Node · Chargement» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Chargement
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Premier lancement détecté
+        - frame «Edge · Automatique» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Automatique
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · 1 · Choix du départ» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 1 · Choix du départ
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Airliner ou hardcore
+        - frame «Edge · Continuer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Entrée» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Continuer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · 2 · Compagnie & hub» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 2 · Compagnie & hub
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Nom, code ICAO, hub
+        - frame «Edge · Continuer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Entrée» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Continuer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · 3a · Premier avion» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 3a · Premier avion
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Airliner en location
+      - frame «Flow» alignItems="center"
+        - frame «Node · 3b · Premier avion» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 3b · Premier avion
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Cessna à l'heure, location ou occasion
+        - frame «Edge · Continuer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Entrée» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Continuer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · 4 · Réalisme» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 4 · Réalisme
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Préréglage puis réglages fins
+        - frame «Edge · Continuer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Entrée» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Continuer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · 5 · Pont simulateur» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 5 · Pont simulateur
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Connexion SimConnect
+        - frame «Edge · Continuer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Entrée» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Continuer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · 6 · C'est parti» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 6 · C'est parti
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Récapitulatif et premier job
+      - frame «Flow» alignItems="center"
+        - frame «Node · 6 · C'est parti» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 6 · C'est parti
+        - frame «Edge · Accepter le premier job» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Entrée» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Accepter le premier job
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Détail d'un job» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Détail d'un job
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Job verrouillé
+        - frame «Edge · Plus tard» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Échap» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Échap
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Plus tard
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Tableau de bord» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Tableau de bord
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Compagnie prête
+    - frame «States» width=660 layout="vertical" gap=8
+      - text «States Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: États et cas limites
+      - frame «State · Le chemin choisi décide l'étape 3» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Le chemin choisi décide l'étape 3
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Airliner → 3a (location) ; hardcore → 3b (aéroclub)
+      - frame «State · Code compagnie déjà pris» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Code compagnie déjà pris
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Le code ICAO à 3 lettres est unique par serveur
+      - frame «State · Pont passé» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Pont passé
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Possible ; les vols seront « non vérifiés » et payés moins
+      - frame «State · Configuration personnalisée» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Configuration personnalisée
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Capital, avion et réalisme choisis librement
+  - frame «Lane · Tableau de bord & vol» width="fill_container" gap=40 padding=[28, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+    - frame «Lane Label» width=190 layout="vertical" gap=2
+      - text «Num» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 03
+      - text «Lane Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Tableau de bord & vol
+    - frame «Flows» width="fill_container" layout="vertical" gap=16
+      - frame «Flow» alignItems="center"
+        - frame «Node · Tableau de bord» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Tableau de bord
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Vol en cours, chiffres clés
+        - frame «Edge · Suivre le vol» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Entrée» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Suivre le vol
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Vue en coupe» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Vue en coupe
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Schéma généré, annotations
+        - frame «Edge · Vue suivante» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · V» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: V
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Vue suivante
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Cabine & charge» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Cabine & charge
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Plan de cabine, masse et centrage
+        - frame «Edge · Vue suivante» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · V» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: V
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Vue suivante
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Systèmes» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Systèmes
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Moteurs, carburant, usure
+      - frame «Flow» alignItems="center"
+        - frame «Node · EFB · en vol» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: EFB · en vol
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Panneau dans MSFS
+        - frame «Edge · Avion parqué» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Avion parqué
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · EFB · vol terminé» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: EFB · vol terminé
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Résultat et vérification
+        - frame «Edge · Clôturer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Entrée» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Clôturer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Détail d'un vol» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Détail d'un vol
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Rapport de télémétrie
+    - frame «States» width=660 layout="vertical" gap=8
+      - text «States Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: États et cas limites
+      - frame «State · Aucun vol en cours» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Aucun vol en cours
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Tableau de bord sans vol actif : jobs suggérés
+      - frame «State · Pont SimConnect perdu» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Pont SimConnect perdu
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Plus de télémétrie pendant le vol ; reconnexion automatique
+      - frame «State · Vol rejeté (EFB)» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Vol rejeté (EFB)
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Anti-triche déclenché à la clôture du vol
+  - frame «Lane · Jobs» width="fill_container" gap=40 padding=[28, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+    - frame «Lane Label» width=190 layout="vertical" gap=2
+      - text «Num» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 04
+      - text «Lane Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Jobs
+    - frame «Flows» width="fill_container" layout="vertical" gap=16
+      - frame «Flow» alignItems="center"
+        - frame «Node · Job board» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Job board
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Liste filtrable partagée
+        - frame «Edge · Ouvrir» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Entrée» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Ouvrir
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Détail d'un job» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Détail d'un job
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Briefing complet
+        - frame «Edge · Accepter» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Entrée» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Accepter
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Job verrouillé» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Job verrouillé
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Réservé pour toi
+        - frame «Edge · Départ dans le sim» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Départ dans le sim
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Vol en cours» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Vol en cours
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Suivi en direct
+      - frame «Flow» alignItems="center"
+        - frame «Node · Job board» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Job board
+        - frame «Edge · Importer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · S» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: S
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Importer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Import SimBrief» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Import SimBrief
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Plan de vol → job personnalisé
+        - frame «Edge · Créer le job» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Entrée» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Créer le job
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Détail d'un job» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Détail d'un job
+    - frame «States» width=660 layout="vertical" gap=8
+      - text «States Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: États et cas limites
+      - frame «State · Aucun job disponible» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Aucun job disponible
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Filtres trop stricts ou aéroport sans job
+      - frame «State · Pris par une IA» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Pris par une IA
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Une compagnie IA prend le job pendant la lecture du briefing
+  - frame «Lane · Flotte» width="fill_container" gap=40 padding=[28, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+    - frame «Lane Label» width=190 layout="vertical" gap=2
+      - text «Num» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 05
+      - text «Lane Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Flotte
+    - frame «Flows» width="fill_container" layout="vertical" gap=16
+      - frame «Flow» alignItems="center"
+        - frame «Node · Flotte» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Flotte
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Avions de la compagnie
+        - frame «Edge · Acheter un avion» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · A» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: A
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Acheter un avion
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Catalogue d'avions» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Catalogue d'avions
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: 2 500+ types ICAO
+        - frame «Edge · Acheter» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Entrée» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Acheter
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Achat · confirmation» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Achat · confirmation
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Hub, financement, solde
+        - frame «Edge · Confirmer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Entrée» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Confirmer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Flotte» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Flotte
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Avion ajouté
+      - frame «Flow» alignItems="center"
+        - frame «Node · Catalogue d'avions» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Catalogue d'avions
+        - frame «Edge · Louer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · L» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: L
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Louer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Location · contrat» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Location · contrat
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Loyer, dépôt, durée, option d'achat
+        - frame «Edge · Signer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Entrée» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Signer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Flotte» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Flotte
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Avion loué ajouté
+    - frame «States» width=660 layout="vertical" gap=8
+      - text «States Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: États et cas limites
+      - frame «State · Fonds insuffisants» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Fonds insuffisants
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Solde trop bas à la confirmation d'achat
+      - frame «State · Nouvelle compagnie» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Nouvelle compagnie
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Premier lancement sans avion : location proposée en premier, puis achat
+  - frame «Lane · Historique des vols» width="fill_container" gap=40 padding=[28, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+    - frame «Lane Label» width=190 layout="vertical" gap=2
+      - text «Num» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 06
+      - text «Lane Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Historique des vols
+    - frame «Flows» width="fill_container" layout="vertical" gap=16
+      - frame «Flow» alignItems="center"
+        - frame «Node · Historique» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Historique
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Journal et totaux de saison
+        - frame «Edge · Ouvrir» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Entrée» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Ouvrir
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Détail d'un vol» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Détail d'un vol
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Télémétrie, contrôles
+        - frame «Edge · Gain» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · G» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: G
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Gain
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Calcul du gain» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Calcul du gain
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Ligne par ligne
+      - frame «Flow» alignItems="center"
+        - frame «Node · Historique» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Historique
+        - frame «Edge · Nouveau vol manuel» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · N» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: N
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Nouveau vol manuel
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Saisie manuelle» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Saisie manuelle
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Marqué non vérifié, payé moins
+    - frame «States» width=660 layout="vertical" gap=8
+      - text «States Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: États et cas limites
+      - frame «State · Vol rejeté» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Vol rejeté
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Anti-triche : motif, preuve sur la chronologie, contestation
+  - frame «Lane · Compétition IA» width="fill_container" gap=40 padding=[28, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+    - frame «Lane Label» width=190 layout="vertical" gap=2
+      - text «Num» fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 07
+      - text «Lane Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Compétition IA
+    - frame «Flows» width="fill_container" layout="vertical" gap=16
+      - frame «Flow» alignItems="center"
+        - frame «Node · Classement» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Classement
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Saison mensuelle
+        - frame «Edge · Comparer» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · Entrée» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Entrée
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Comparer
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Comparaison IA» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Comparaison IA
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Face-à-face
+        - frame «Edge · Fiche» gap=6 padding=[0, 8] alignItems="center"
+          - rectangle «Line» width=14 height=1.5 fill="$border-strong"
+          - instance «Key · F» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: F
+          - text «Edge Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12  TEXT: Fiche
+          - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+        - frame «Node · Fiche compagnie IA» width=200 layout="vertical" gap=4 padding=[12, 14] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=6
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Fiche compagnie IA
+          - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Personnalité, mouvements
+    - frame «States» width=660 layout="vertical" gap=8
+      - text «States Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: États et cas limites
+      - frame «State · Fin de saison» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Fin de saison
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Le dernier jour du mois : récapitulatif et récompenses
+      - frame «State · Nouvelle saison» width="fill_container" gap=12 padding=[10, 14] alignItems="center" fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+        - ellipse «Pip» width=7 height=7 fill="$warning"
+        - text «State Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Nouvelle saison
+        - text «Trigger» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Le 1er du mois : compteurs à zéro, stats à vie conservées

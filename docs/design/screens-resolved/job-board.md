@@ -1,0 +1,145 @@
+# Job board
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Job board» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-3.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 gap=20 padding=[28, 32, 24, 32]
+    - frame «Board Column» width=1000 height="fill_container" layout="vertical" gap=28
+      - frame «Title Row» width="fill_container" alignItems="end" justifyContent="space_between"
+        - frame «Title Block» layout="vertical" gap=6
+          - frame «Status» gap=8 alignItems="center"
+            - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 18 offres au départ de LFMN · mis à jour il y a 12 s
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Jobs disponibles
+        - frame «SimBrief Entry» gap=10 padding=[0, 0, 4, 0] alignItems="center"
+          - instance «Key» of «Keycap»
+            - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: I
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Importer un plan SimBrief
+      - instance «Jobs Panel» of «Panel»
+        - frame «Content» width="fill_container" height="fit_content" layout="vertical" gap=0 padding=0
+          - frame «Filter Bar» width="fill_container" padding=[20, 24, 12, 24] alignItems="center" justifyContent="space_between"
+            - frame «Segments» gap=4 alignItems="center"
+              - frame «Seg · Tous» height=32 gap=7 padding=[0, 12] alignItems="center" fill="$surface-hover" cornerRadius=3
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Tous
+                - text «Count» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 18
+              - frame «Seg · Passagers» height=32 gap=7 padding=[0, 12] alignItems="center" cornerRadius=3
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Passagers
+                - text «Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 11
+              - frame «Seg · Fret» height=32 gap=7 padding=[0, 12] alignItems="center" cornerRadius=3
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Fret
+                - text «Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 7
+            - frame «Filters» gap=8 alignItems="center"
+              - frame «Filter · Départ» height=32 gap=6 padding=[0, 10, 0, 12] alignItems="center" stroke="$border" strokeWidth=1 cornerRadius=3
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Départ
+                - text «Value» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: LFMN
+                - icon «Chevron» width=14 height=14 fill="$text-tertiary" icon="chevron-down"
+              - frame «Filter · Distance» height=32 gap=6 padding=[0, 10, 0, 12] alignItems="center" stroke="$border" strokeWidth=1 cornerRadius=3
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Distance
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 100–450 NM
+                - icon «Chevron» width=14 height=14 fill="$text-tertiary" icon="chevron-down"
+              - frame «Filter · Gain» height=32 gap=6 padding=[0, 10, 0, 12] alignItems="center" stroke="$border" strokeWidth=1 cornerRadius=3
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Gain
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: ≥ 3 000 €
+                - icon «Chevron» width=14 height=14 fill="$text-tertiary" icon="chevron-down"
+              - frame «Filter · Appareil» height=32 gap=6 padding=[0, 10, 0, 12] alignItems="center" stroke="$border" strokeWidth=1 cornerRadius=3
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Appareil
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Ma flotte
+                - icon «Chevron» width=14 height=14 fill="$text-tertiary" icon="chevron-down"
+          - frame «Jobs List» width="fill_container" layout="vertical" gap=2 padding=[4, 12, 8, 12]
+            - frame «List Header» width="fill_container" height=40 gap=20 padding=[0, 12] alignItems="center"
+              - frame «Col · Route» width=240
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Route
+              - frame «Col · Distance» width=90
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Distance
+              - frame «Col · Charge» width=130
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Charge
+              - frame «Col · Appareil requis» width=130
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Appareil requis
+              - frame «Col · Gain estimé ↓» width=100 justifyContent="end"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Gain estimé ↓
+              - frame «Col · Action» width="fill_container" height=1
+            - frame «Job · LFMN-LIRF (sélection)» width="fill_container" height=72 gap=20 padding=[0, 12] alignItems="center" fill="$surface-hover" cornerRadius=4
+              - frame «Route» width=240 layout="vertical" gap=5
+                - frame «Codes Row» gap=10 alignItems="center"
+                  - text «Codes» fill="$text-primary" fontFamily="$font-mono" fontSize=15 fontWeight="700"  TEXT: LFMN → LIRF
+                  - instance «Contesté» of «Badge/Contesté»
+                    - icon «Icon» width=12 height=12 fill="$warning" icon="swords"
+                    - text «Label» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Contesté
+                - text «City» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Rome-Fiumicino
+              - frame «Distance» width=90
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 254 NM
+              - frame «Charge» width=130
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 46 passagers
+              - frame «Appareil» width=130
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: ATR 42 / 72
+              - frame «Gain» width=100 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: 11 380 €
+              - frame «Action» width="fill_container" alignItems="center" justifyContent="end"
+                - instance «Accept Button» of «Button/Primary»
+                  - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Accepter
+                  - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                    - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+            - frame «Job · LFMN-LSGG» width="fill_container" height=72 gap=20 padding=[0, 12] alignItems="center" cornerRadius=4
+              - frame «Route» width=240 layout="vertical" gap=5
+                - frame «Codes Row» gap=10 alignItems="center"
+                  - text «Codes» fill="$text-primary" fontFamily="$font-mono" fontSize=15 fontWeight="700"  TEXT: LFMN → LSGG
+                - text «City» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Genève
+              - frame «Distance» width=90
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 161 NM
+              - frame «Charge» width=130
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 44 passagers
+              - frame «Appareil» width=130
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: ATR 42-600
+              - frame «Gain» width=100 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: 7 860 €
+              - frame «Action» width="fill_container" height=42 alignItems="center" justifyContent="end"
+            - frame «Job · LFMN-LEBL» width="fill_container" height=72 gap=20 padding=[0, 12] alignItems="center" cornerRadius=4
+              - frame «Route» width=240 layout="vertical" gap=5
+                - frame «Codes Row» gap=10 alignItems="center"
+                  - text «Codes» fill="$text-primary" fontFamily="$font-mono" fontSize=15 fontWeight="700"  TEXT: LFMN → LEBL
+                  - instance «Contesté» of «Badge/Contesté»
+                    - icon «Icon» width=12 height=12 fill="$warning" icon="swords"
+                    - text «Label» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Contesté
+                - text «City» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Barcelone-El Prat
+              - frame «Distance» width=90
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 282 NM
+              - frame «Charge» width=130
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 1 300 kg de fret
+              - frame «Appareil» width=130
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: C208B Cargo
+              - frame «Gain» width=100 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: 6 940 €
+              - frame «Action» width="fill_container" height=42 alignItems="center" justifyContent="end"
+            - frame «Job · LFMN-LFKJ» width="fill_container" height=72 gap=20 padding=[0, 12] alignItems="center" cornerRadius=4
+              - frame «Route» width=240 layout="vertical" gap=5
+                - frame «Codes Row» gap=10 alignItems="center"
+                  - text «Codes» fill="$text-primary" fontFamily="$font-mono" fontSize=15 fontWeight="700"  TEXT: LFMN → LFKJ
+                - text «City» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Ajaccio
+              - frame «Distance» width=90
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 116 NM
+              - frame «Charge» width=130
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 9 passagers
+              - frame «Appareil» width=130
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: C208B ou ATR
+              - frame «Gain» width=100 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: 3 640 €
+              - frame «Action» width="fill_container" height=42 alignItems="center" justifyContent="end"
+            - frame «Job · LFMN-LFLL» width="fill_container" height=72 gap=20 padding=[0, 12] alignItems="center" cornerRadius=4
+              - frame «Route» width=240 layout="vertical" gap=5
+                - frame «Codes Row» gap=10 alignItems="center"
+                  - text «Codes» fill="$text-primary" fontFamily="$font-mono" fontSize=15 fontWeight="700"  TEXT: LFMN → LFLL
+                - text «City» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Lyon-Saint-Exupéry
+              - frame «Distance» width=90
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 165 NM
+              - frame «Charge» width=130
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 1 200 kg de fret
+              - frame «Appareil» width=130
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: C208B Cargo
+              - frame «Gain» width=100 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: 3 480 €
+              - frame «Action» width="fill_container" height=42 alignItems="center" justifyContent="end"
+            - frame «List Footer» width="fill_container" padding=[14, 12, 8, 12]
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 5 offres sur 18 · fais défiler pour voir la suite
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

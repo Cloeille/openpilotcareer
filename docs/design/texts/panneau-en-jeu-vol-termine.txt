@@ -1,0 +1,27 @@
+Panneau en jeu
+MSFS 2024 · dossier Community · openhangar-panel 0.3
+OpenHangar
+PONT CONNECTÉ
+17:56Z
+Vol
+Job
+SimBrief
+Cabine
+Parqué · poste F12 · 18:39Z
+Vol terminé
+AZR 4127 · LFMN → LFPG · 1 h 41
+Taux d'atterrissage
+−142 ft/min
+Atterrissage en douceur
+Facteur de charge
+1,18 g
+Carburant restant
+1 310 kg
++30 kg vs SimBrief
+Vol vérifié par le pont SimConnect
+Aucune anomalie : ni slew, ni accélération du temps, ni pause, ni saut de position.
+Gain net
++14 820 €
+Voir le rapport complet
+Clôturer le vol
+Entrée

@@ -1,0 +1,10 @@
+Un plan de cabine pour chaque configuration
+Le plan est généré depuis la configuration de l'appareil : ponts, classes, portes, toilettes, galleys, escaliers et PNC. Les équipements usés apparaissent en ambre, hors service en rouge.
+Airbus A380 · deux ponts
+Première, affaires et économique · 12 toilettes
+Boeing 747-8 · pont supérieur partiel
+Cockpit et cabine affaires à l'étage · 9 toilettes
+Boeing 777-300ER · trois classes
+Affaires 1-2-1, premium 2-4-2, économique 3-4-3
+Airbus A320 · deux classes
+Affaires 2-2, économique 3-3 · toilettes arrière à réviser

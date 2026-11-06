@@ -1,0 +1,130 @@
+# Onboarding · 3a premier avion (airliner)
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Onboarding · 3a premier avion (airliner)» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-6.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=36 padding=[40, 64, 36, 64]
+    - frame «Title Block» layout="vertical" gap=8
+      - text «Overline» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Parcours airliner · premier avion
+      - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=52 fontWeight="600"  TEXT: Loue ton premier avion
+      - text «Sub» width=720 fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal" lineHeight=1.45  TEXT: Trois loueurs peuvent livrer un appareil à ton hub sous 48 h. Tu paies un loyer chaque mois au lieu d'acheter : ton capital reste disponible pour le carburant, les équipages et les imprévus.
+    - frame «Main Row» width="fill_container" height="fill_container" gap=24
+      - instance «Panel · Offres de location» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[22, 26, 6, 26] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Offres de location
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 3 offres · loyers 2026
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[10, 26, 22, 26]
+          - frame «Table Head» width="fill_container" gap=16 padding=[0, 16, 10, 16] alignItems="center"
+            - frame «Radio Spacer» width=18 height=1
+            - text «Col · Avion» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Avion
+            - text «Col · Loyer mensuel» width=128 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Loyer mensuel
+            - text «Col · Dépôt» width=112 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Dépôt
+            - text «Col · Durée min.» width=88 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Durée min.
+            - text «Col · Sièges» width=60 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Sièges
+            - text «Col · Rayon» width=84 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Rayon
+            - text «Col · Maintenance» width=112 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Maintenance
+          - frame «Offers List» width="fill_container" layout="vertical" gap=6
+            - frame «Offer · Airbus A320neo (sélection)» width="fill_container" gap=16 padding=[20, 16] alignItems="center" fill="$surface-selected" cornerRadius=4
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=9
+                - ellipse «Radio Dot» width=8 height=8 fill="$text-primary"
+              - frame «Aircraft Cell» width="fill_container" layout="vertical" gap=4
+                - frame «Name Row» gap=10 alignItems="center"
+                  - text «Model» fill="$text-primary" fontFamily="$font-display" fontSize=19 fontWeight="600"  TEXT: Airbus A320neo
+                  - text «ICAO» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12 fontWeight="normal"  TEXT: A20N
+                - text «Lessor» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: AerCap · neuf, livré en 2024
+              - text «Loyer mensuel» width=128 fill="$text-primary" fontFamily="$font-display" fontSize=19 fontWeight="500"  TEXT: 320 000 €
+              - text «Dépôt» width=112 fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 640 000 €
+              - text «Durée min.» width=88 fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 24 mois
+              - text «Sièges» width=60 fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 186
+              - text «Rayon» width=84 fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 3 400 NM
+              - frame «Maintenance Cell» width=112 layout="vertical" gap=3
+                - text «Maintenance» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Incluse
+            - frame «Offer · Boeing 737-800» width="fill_container" gap=16 padding=[20, 16] alignItems="center" stroke="$border" strokeWidth={"top": 1} cornerRadius=4
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+              - frame «Aircraft Cell» width="fill_container" layout="vertical" gap=4
+                - frame «Name Row» gap=10 alignItems="center"
+                  - text «Model» fill="$text-primary" fontFamily="$font-display" fontSize=19 fontWeight="600"  TEXT: Boeing 737-800
+                  - text «ICAO» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12 fontWeight="normal"  TEXT: B738
+                - text «Lessor» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: SMBC Aviation · 2016, 38 400 h de vol
+              - text «Loyer mensuel» width=128 fill="$text-primary" fontFamily="$font-display" fontSize=19 fontWeight="500"  TEXT: 235 000 €
+              - text «Dépôt» width=112 fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 470 000 €
+              - text «Durée min.» width=88 fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 12 mois
+              - text «Sièges» width=60 fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 189
+              - text «Rayon» width=84 fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 2 935 NM
+              - frame «Maintenance Cell» width=112 layout="vertical" gap=3
+                - text «Maintenance» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: À ta charge
+                - text «Maintenance Cost» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: ≈ 34 000 € / mois
+            - frame «Offer · Embraer E195-E2» width="fill_container" gap=16 padding=[20, 16] alignItems="center" stroke="$border" strokeWidth={"top": 1} cornerRadius=4
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+              - frame «Aircraft Cell» width="fill_container" layout="vertical" gap=4
+                - frame «Name Row» gap=10 alignItems="center"
+                  - text «Model» fill="$text-primary" fontFamily="$font-display" fontSize=19 fontWeight="600"  TEXT: Embraer E195-E2
+                  - text «ICAO» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12 fontWeight="normal"  TEXT: E295
+                - text «Lessor» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Azorra · 2022, 9 100 h de vol
+              - text «Loyer mensuel» width=128 fill="$text-primary" fontFamily="$font-display" fontSize=19 fontWeight="500"  TEXT: 205 000 €
+              - text «Dépôt» width=112 fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 410 000 €
+              - text «Durée min.» width=88 fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 18 mois
+              - text «Sièges» width=60 fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 132
+              - text «Rayon» width=84 fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 2 600 NM
+              - frame «Maintenance Cell» width=112 layout="vertical" gap=3
+                - text «Maintenance» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Incluse
+          - frame «Spacer» width="fill_container" height="fill_container"
+          - text «Terms Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Loyer fixe pendant toute la durée du contrat · assurance coque comprise · dépôt rendu en fin de contrat si l'avion est restitué en bon état.
+      - instance «Panel · Offre sélectionnée» of «Panel»
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=22 padding=[26, 28]
+          - frame «Identity» width="fill_container" layout="vertical" gap=6
+            - text «Offer Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Airbus A320neo · AerCap
+            - frame «Rent Row» gap=8 alignItems="end"
+              - text «Rent Value» fill="$text-primary" fontFamily="$font-display" fontSize=44 fontWeight="600" lineHeight=1  TEXT: 320 000 €
+              - text «Rent Unit» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: par mois
+            - text «Rent Terms» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 24 mois minimum, maintenance incluse
+          - frame «Capital Breakdown» width="fill_container" layout="vertical" gap=12
+            - frame «Capital Head» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Capital Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Ton capital de départ
+              - text «Capital Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 2 500 000 €
+            - frame «Capital Bar» width="fill_container" height=8 gap=2
+              - rectangle «Seg · Dépôt de garantie» width=101 height="fill_container" fill="$text-secondary" cornerRadius=1
+              - rectangle «Seg · Premier loyer» width=50 height="fill_container" fill="$text-primary" cornerRadius=1
+              - rectangle «Seg · Reste pour opérer» width="fill_container" height="fill_container" fill="$border-strong" cornerRadius=1
+            - frame «Legend» width="fill_container" layout="vertical" gap=10 padding=[4, 0, 0, 0]
+              - frame «Legend · Dépôt de garantie» width="fill_container" gap=10 alignItems="center"
+                - rectangle «Swatch» width=8 height=8 fill="$text-secondary" cornerRadius=1
+                - frame «Legend Text» width="fill_container" gap=6 alignItems="center"
+                  - text «Legend Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Dépôt de garantie
+                  - text «Legend Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: rendu en fin de contrat
+                - text «Legend Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 640 000 €
+              - frame «Legend · Premier loyer» width="fill_container" gap=10 alignItems="center"
+                - rectangle «Swatch» width=8 height=8 fill="$text-primary" cornerRadius=1
+                - frame «Legend Text» width="fill_container" gap=6 alignItems="center"
+                  - text «Legend Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Premier loyer
+                  - text «Legend Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: prélevé à la livraison
+                - text «Legend Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 320 000 €
+              - frame «Legend · Reste pour opérer» width="fill_container" gap=10 alignItems="center"
+                - rectangle «Swatch» width=8 height=8 fill="$border-strong" cornerRadius=1
+                - frame «Legend Text» width="fill_container" gap=6 alignItems="center"
+                  - text «Legend Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Reste pour opérer
+                  - text «Legend Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: carburant, équipages, imprévus
+                - text «Legend Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 1 540 000 €
+          - rectangle «Divider» width="fill_container" height=1 fill="$border"
+          - frame «Meaning Facts» width="fill_container" gap=32
+            - frame «Fact · Autonomie sans revenu» width="fill_container" layout="vertical" gap=4
+              - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Autonomie sans revenu
+              - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 4,8 mois de loyer
+            - frame «Fact · Pour couvrir le loyer» width="fill_container" layout="vertical" gap=4
+              - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Pour couvrir le loyer
+              - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: ≈ 8 vols par mois
+          - text «Meaning Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Estimé sur un gain moyen de 42 000 € par vol en A320neo au départ de ton hub, avant carburant et taxes.
+    - frame «Footer» width="fill_container" alignItems="center" justifyContent="space_between"
+      - frame «Footer Left» gap=24 alignItems="center"
+        - instance «Buy On Credit» of «Button/Ghost»
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Acheter à crédit plutôt
+          - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+        - text «Footer Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: La location peut être arrêtée après la durée minimum, ou convertie en achat plus tard.
+      - instance «Lease Aircraft» of «Button/Primary»
+        - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Louer l'A320neo
+        - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+          - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+  - [instance «HUD/Onboarding» — see screens-resolved/hud-onboarding.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

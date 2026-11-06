@@ -2,7 +2,7 @@
 
 Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
 
-- frame «HUD/Top» width=1600 height=76 padding=[0, 32] alignItems="center" justifyContent="space_between" fill={"type": "gradient", "gradientType": "linear", "enabled": true, "rotation": 180, "size": {"height": 1}, "colors": [{"color": "#000000F0",... reusable=true x=0 y=-1100
+- frame «HUD/Top» width=1600 height=76 padding=[0, 32] alignItems="center" justifyContent="space_between" fill={"type": "gradient", "gradientType": "linear", "enabled": true, "rotation": 180, "size": {"height": 1}, "colors": [{"color": "#000000F0",... reusable=true
   - frame «Brand» width=250 gap=12 alignItems="center"
     - frame «Logo Mark» width=36 height=36 alignItems="center" justifyContent="center" fill="$text-primary" cornerRadius=2
       - icon «Logo Icon» width=20 height=20 fill="$on-btn-primary" icon="plane-takeoff"
@@ -44,9 +44,9 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
     - rectangle «Res Divider» width=1 height=30 fill="$border-strong"
     - frame «Pilot» gap=10 alignItems="center"
       - frame «Rank Ring» width=40 height=40 layout="none"
-        - ellipse «Ring Track» width=40 height=40 fill="#FFFFFF1F" x=0 y=0
-        - ellipse «Ring Progress» width=40 height=40 fill="$text-primary" x=0 y=0
-        - frame «Rank Center» width=40 height=40 alignItems="center" justifyContent="center" x=0 y=0
+        - ellipse «Ring Track» width=40 height=40 fill="#FFFFFF1F"
+        - ellipse «Ring Progress» width=40 height=40 fill="$text-primary"
+        - frame «Rank Center» width=40 height=40 alignItems="center" justifyContent="center"
           - text «Rank» fill="$text-primary" fontFamily="$font-display" fontSize=14 fontWeight="600"  TEXT: R4
       - frame «Pilot Stack» layout="vertical" gap=2
         - text «Pilot Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="600"  TEXT: Cdt. L. Moreau

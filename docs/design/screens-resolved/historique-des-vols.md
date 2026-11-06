@@ -1,0 +1,251 @@
+# Historique des vols
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Historique des vols» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-7.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=20 padding=[28, 32, 24, 32]
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Carnet de vol · Azur Régional
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Historique des vols
+      - frame «Season Facts» gap=56 alignItems="end"
+        - frame «Fact · Gain net de la saison» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Gain net de la saison
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 33 850 €
+        - frame «Fact · Heures de vol» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Heures de vol
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 7 h 37
+        - frame «Fact · Vols vérifiés» layout="vertical" gap=4
+          - text «Fact Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Vols vérifiés
+          - text «Fact Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 7 sur 11
+    - frame «Filters» width="fill_container" alignItems="center" justifyContent="space_between"
+      - frame «Status Tabs» gap=32
+        - frame «Tab · Tous» gap=8 padding=[0, 0, 10, 0] alignItems="center" stroke="$text-primary" strokeWidth={"bottom": 2}
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Tous
+          - text «Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 11
+        - frame «Tab · Vérifiés» gap=8 padding=[0, 0, 10, 0] alignItems="center" stroke={"type": "color", "color": "$text-primary", "enabled": false} strokeWidth={"bottom": 2}
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Vérifiés
+          - text «Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 7
+        - frame «Tab · Non vérifiés» gap=8 padding=[0, 0, 10, 0] alignItems="center" stroke={"type": "color", "color": "$text-primary", "enabled": false} strokeWidth={"bottom": 2}
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Non vérifiés
+          - text «Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 2
+        - frame «Tab · Rejetés» gap=8 padding=[0, 0, 10, 0] alignItems="center" stroke={"type": "color", "color": "$text-primary", "enabled": false} strokeWidth={"bottom": 2}
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Rejetés
+          - text «Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 2
+      - frame «Selects» gap=32 padding=[0, 0, 10, 0] alignItems="center"
+        - frame «Select · Toute la flotte» gap=6 alignItems="center"
+          - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Toute la flotte
+          - icon «Chevron» width=14 height=14 fill="$text-tertiary" icon="chevron-down"
+        - frame «Select · Saison de novembre» gap=6 alignItems="center"
+          - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Saison de novembre
+          - icon «Chevron» width=14 height=14 fill="$text-tertiary" icon="chevron-down"
+    - instance «Flight Log» of «Panel»
+      - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[4, 0, 0, 0]
+        - frame «Column Header» width="fill_container" height=40 gap=28 padding=[0, 28] alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+          - frame «Col · Date» width=120
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Date
+          - frame «Col · Route» width=190
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Route
+          - frame «Col · Appareil» width=160
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Appareil
+          - frame «Col · Durée» width=70 justifyContent="end"
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Durée
+          - frame «Col · Atterrissage» width=120 justifyContent="end"
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Atterrissage
+          - frame «Col · Carburant» width=110 justifyContent="end"
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Carburant
+          - frame «Col · Gain» width=130 justifyContent="end"
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Gain
+          - frame «Col · Vérification» width="fill_container" padding=[0, 0, 0, 20]
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Vérification
+        - frame «Row · AZR 4122» width="fill_container" height=64 gap=28 padding=[0, 28] alignItems="center" fill="$surface-hover" stroke="$border" strokeWidth={"bottom": 1}
+          - frame «Cell · Date» width=120 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 4 nov.
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 21:14Z
+          - frame «Cell · Route» width=190 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: LFLL → LFMN
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: AZR 4122
+          - frame «Cell · Appareil» width=160 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: ATR 72-600
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZR
+          - frame «Cell · Durée» width=70 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 1 h 04
+          - frame «Cell · Atterrissage» width=120 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: −142 fpm
+          - frame «Cell · Carburant» width=110 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 1 180 kg
+          - frame «Cell · Gain» width=130 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: +12 480 €
+          - frame «Cell · Vérification» width="fill_container" layout="vertical" gap=3 padding=[0, 0, 0, 20]
+            - frame «Status» gap=8 alignItems="center"
+              - ellipse «Dot» width=7 height=7 fill="$success"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Vérifié
+        - frame «Row · AZR 4118» width="fill_container" height=64 gap=28 padding=[0, 28] alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+          - frame «Cell · Date» width=120 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 3 nov.
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 16:20Z
+          - frame «Cell · Route» width=190 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: LFMN → LIRF
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: AZR 4118
+          - frame «Cell · Appareil» width=160 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: ATR 72-600
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZB
+          - frame «Cell · Durée» width=70 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 1 h 28
+          - frame «Cell · Atterrissage» width=120 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: −218 fpm
+          - frame «Cell · Carburant» width=110 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 1 420 kg
+          - frame «Cell · Gain» width=130 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: +9 760 €
+          - frame «Cell · Vérification» width="fill_container" layout="vertical" gap=3 padding=[0, 0, 0, 20]
+            - frame «Status» gap=8 alignItems="center"
+              - ellipse «Dot» width=7 height=7 fill="$success"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Vérifié
+        - frame «Row · AZR 4115» width="fill_container" height=64 gap=28 padding=[0, 28] alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+          - frame «Cell · Date» width=120 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 3 nov.
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 07:45Z
+          - frame «Cell · Route» width=190 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: LFMN → LFKJ
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: AZR 4115
+          - frame «Cell · Appareil» width=160 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: ATR 42-600
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZD
+          - frame «Cell · Durée» width=70 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 0 h 23
+          - frame «Cell · Atterrissage» width=120 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: −264 fpm
+          - frame «Cell · Carburant» width=110 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 610 kg
+          - frame «Cell · Gain» width=130 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 0 €
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 7 940 € annulés
+          - frame «Cell · Vérification» width="fill_container" layout="vertical" gap=3 padding=[0, 0, 0, 20]
+            - frame «Status» gap=8 alignItems="center"
+              - ellipse «Dot» width=7 height=7 fill="$danger"
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Rejeté
+            - text «Reason» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Mode slew activé en croisière
+        - frame «Row · AZR 4111» width="fill_container" height=64 gap=28 padding=[0, 28] alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+          - frame «Cell · Date» width=120 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 2 nov.
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 18:30Z
+          - frame «Cell · Route» width=190 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: LFKJ → LFMN
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: AZR 4111
+          - frame «Cell · Appareil» width=160 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: ATR 42-600
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZD
+          - frame «Cell · Durée» width=70 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 0 h 58
+          - frame «Cell · Atterrissage» width=120 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: —
+          - frame «Cell · Carburant» width=110 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: ≈ 640 kg
+          - frame «Cell · Gain» width=130 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: +1 290 €
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: payé ×0,60
+          - frame «Cell · Vérification» width="fill_container" layout="vertical" gap=3 padding=[0, 0, 0, 20]
+            - frame «Status» gap=8 alignItems="center"
+              - ellipse «Dot» width=7 height=7 stroke="$text-secondary" strokeWidth=1.5
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Non vérifié
+            - text «Reason» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Saisie manuelle, pont déconnecté
+        - frame «Row · AZR 7307» width="fill_container" height=64 gap=28 padding=[0, 28] alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+          - frame «Cell · Date» width=120 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 1 nov.
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 15:10Z
+          - frame «Cell · Route» width=190 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: LFML → LFMN
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: AZR 7307
+          - frame «Cell · Appareil» width=160 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: C208B Caravan
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZC
+          - frame «Cell · Durée» width=70 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 0 h 52
+          - frame «Cell · Atterrissage» width=120 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: −176 fpm
+          - frame «Cell · Carburant» width=110 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 154 kg
+          - frame «Cell · Gain» width=130 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: +3 310 €
+          - frame «Cell · Vérification» width="fill_container" layout="vertical" gap=3 padding=[0, 0, 0, 20]
+            - frame «Status» gap=8 alignItems="center"
+              - ellipse «Dot» width=7 height=7 fill="$success"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Vérifié
+        - frame «Row · AZR 7306» width="fill_container" height=64 gap=28 padding=[0, 28] alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+          - frame «Cell · Date» width=120 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 1 nov.
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 13:30Z
+          - frame «Cell · Route» width=190 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: LFTH → LFML
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: AZR 7306
+          - frame «Cell · Appareil» width=160 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: C208B Caravan
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZC
+          - frame «Cell · Durée» width=70 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 0 h 24
+          - frame «Cell · Atterrissage» width=120 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: −312 fpm
+          - frame «Cell · Carburant» width=110 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 74 kg
+          - frame «Cell · Gain» width=130 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: +1 340 €
+          - frame «Cell · Vérification» width="fill_container" layout="vertical" gap=3 padding=[0, 0, 0, 20]
+            - frame «Status» gap=8 alignItems="center"
+              - ellipse «Dot» width=7 height=7 fill="$success"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Vérifié
+        - frame «Row · AZR 7305» width="fill_container" height=64 gap=28 padding=[0, 28] alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+          - frame «Cell · Date» width=120 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 1 nov.
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 12:15Z
+          - frame «Cell · Route» width=190 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: LFMV → LFTH
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: AZR 7305
+          - frame «Cell · Appareil» width=160 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: C208B Caravan
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZC
+          - frame «Cell · Durée» width=70 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 0 h 41
+          - frame «Cell · Atterrissage» width=120 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: —
+          - frame «Cell · Carburant» width=110 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: ≈ 120 kg
+          - frame «Cell · Gain» width=130 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: +1 010 €
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: payé ×0,60
+          - frame «Cell · Vérification» width="fill_container" layout="vertical" gap=3 padding=[0, 0, 0, 20]
+            - frame «Status» gap=8 alignItems="center"
+              - ellipse «Dot» width=7 height=7 stroke="$text-secondary" strokeWidth=1.5
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Non vérifié
+            - text «Reason» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Saisie manuelle, vol hors pont
+        - frame «Row · AZR 7304» width="fill_container" height=64 gap=28 padding=[0, 28] alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+          - frame «Cell · Date» width=120 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 1 nov.
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 10:50Z
+          - frame «Cell · Route» width=190 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: LFML → LFMV
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: AZR 7304
+          - frame «Cell · Appareil» width=160 layout="vertical" gap=3
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: C208B Caravan
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZC
+          - frame «Cell · Durée» width=70 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 0 h 31
+          - frame «Cell · Atterrissage» width=120 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: −204 fpm
+          - frame «Cell · Carburant» width=110 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: 96 kg
+          - frame «Cell · Gain» width=130 layout="vertical" gap=3 alignItems="end"
+            - text «Main» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: +1 120 €
+          - frame «Cell · Vérification» width="fill_container" layout="vertical" gap=3 padding=[0, 0, 0, 20]
+            - frame «Status» gap=8 alignItems="center"
+              - ellipse «Dot» width=7 height=7 fill="$success"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Vérifié
+        - frame «Push» width="fill_container" height="fill_container"
+        - frame «Footer» width="fill_container" height=40 padding=[0, 28] alignItems="center" justifyContent="space_between"
+          - text «Count» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 8 vols sur 11 · défiler pour voir les plus anciens
+          - text «Pay Rule» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Vols non vérifiés payés à 60 % · vols rejetés non payés
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

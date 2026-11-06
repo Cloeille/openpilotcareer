@@ -1,0 +1,103 @@
+# Réglages
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Réglages» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-1.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 gap=64 padding=[28, 32, 24, 32]
+    - frame «Settings Nav» width=220 layout="vertical" gap=28
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Compte lmoreau · serveur global
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Réglages
+      - frame «Nav List» width="fill_container" layout="vertical"
+        - frame «Nav · Clés API» width="fill_container" padding=[11, 16] stroke="$text-primary" strokeWidth={"left": 2}
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Clés API
+        - frame «Nav · Compte et données» width="fill_container" padding=[11, 16] stroke="$border-strong" strokeWidth={"left": 2}
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Compte et données
+    - frame «Keys Column» width=760 height="fill_container" layout="vertical"
+      - instance «Panel · Clés API» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[26, 28, 0, 28] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Clés API du pont simulateur
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500" letterSpacing=0  TEXT: 4 sur 10
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=24 padding=[14, 28, 28, 28]
+          - text «Intro» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.45  TEXT: OpenHangar Bridge utilise une clé pour envoyer tes vols à ce serveur. Crées-en une par installation du simulateur : tu pourras la révoquer seule si la machine est perdue.
+          - frame «Create Row» width="fill_container" gap=12 alignItems="end"
+            - instance «Input · Nom de la clé» of «Input»
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Nom de la nouvelle clé
+              - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="tag"
+                - text «Value» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: ex. PC bureau — MSFS 2024
+            - instance «Button · Créer la clé» of «Button/Secondary»
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="plus"
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Créer la clé
+          - frame «Reveal · Clé créée» width="fill_container" layout="vertical" gap=12 padding=[16, 18, 14, 18] fill="$surface-sunken" cornerRadius=4
+            - frame «Reveal Header» width="fill_container" gap=8 alignItems="center"
+              - text «Status» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="600"  TEXT: Clé « Portable ROG — MSFS 2020 » créée
+              - text «Once» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Affichée une seule fois
+            - frame «Key Row» width="fill_container" gap=8 alignItems="center"
+              - frame «Key Box» width="fill_container" height=42 padding=[0, 12] alignItems="center" fill="$bg" stroke="$border" strokeWidth=1 cornerRadius=3
+                - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="normal"  TEXT: oh_sk_9fK2mQ7vXa4LtR8pWc3NzE6hYb1JdU5s
+              - instance «Button · Copier» of «Button/Primary»
+                - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Copier
+                - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                  - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: C
+            - frame «Warning Row» width="fill_container" gap=10 alignItems="center"
+              - text «Message» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Colle-la dans OpenHangar Bridge › Compte › Clé API. Perdue ? Révoque-la et crées-en une autre.
+              - instance «Button · J'ai copié» of «Button/Ghost»
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: J'ai copié
+                - icon «Icon» width=14 height=14 fill="$text-secondary" icon="check"
+          - frame «Keys List» width="fill_container" layout="vertical"
+            - frame «Key · Portable ROG — MSFS 2020» width="fill_container" layout="vertical" stroke="$border" strokeWidth={"top": 1}
+              - frame «Row» width="fill_container" gap=16 padding=[14, 0, 14, 2] alignItems="center"
+                - frame «Name Cell» width="fill_container" layout="vertical" gap=3
+                  - frame «Name Row» gap=8 alignItems="center"
+                    - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Portable ROG — MSFS 2020
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Créée à l'instant
+                - text «Prefix» width=104 fill="$text-tertiary" fontFamily="$font-mono" fontSize=12 fontWeight="normal"  TEXT: oh_sk_9fK2…
+                - frame «Last Used» width=180 gap=6 alignItems="center"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Jamais utilisée
+                - frame «Action Cell» width=84 alignItems="center" justifyContent="end"
+                  - instance «Button · Révoquer» of «Button/Ghost»
+                    - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Révoquer
+            - frame «Key · PC bureau — MSFS 2024» width="fill_container" layout="vertical" stroke="$border" strokeWidth={"top": 1}
+              - frame «Row» width="fill_container" gap=16 padding=[14, 0, 14, 2] alignItems="center"
+                - frame «Name Cell» width="fill_container" layout="vertical" gap=3
+                  - frame «Name Row» gap=8 alignItems="center"
+                    - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: PC bureau — MSFS 2024
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Bridge 0.6.1 · Windows 11
+                - text «Prefix» width=104 fill="$text-tertiary" fontFamily="$font-mono" fontSize=12 fontWeight="normal"  TEXT: oh_sk_Q4wd…
+                - frame «Last Used» width=180 gap=6 alignItems="center"
+                  - ellipse «Live Dot» width=6 height=6 fill="$success"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Utilisée en ce moment
+                - frame «Action Cell» width=84 alignItems="center" justifyContent="end"
+                  - instance «Button · Révoquer» of «Button/Ghost»
+                    - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Révoquer
+            - frame «Key · Cockpit A320 — MSFS 2020» width="fill_container" layout="vertical" stroke="$border" strokeWidth={"top": 1}
+              - frame «Row» width="fill_container" gap=16 padding=[14, 0, 14, 2] alignItems="center"
+                - frame «Name Cell» width="fill_container" layout="vertical" gap=3
+                  - frame «Name Row» gap=8 alignItems="center"
+                    - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Cockpit A320 — MSFS 2020
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Bridge 0.5.8 · Windows 10
+                - text «Prefix» width=104 fill="$text-tertiary" fontFamily="$font-mono" fontSize=12 fontWeight="normal"  TEXT: oh_sk_mT8c…
+                - frame «Last Used» width=180 gap=6 alignItems="center"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Utilisée le 18/10/2026
+                - frame «Action Cell» width=84 alignItems="center" justifyContent="end"
+                  - instance «Button · Révoquer» of «Button/Ghost»
+                    - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Révoquer
+            - frame «Key · Ancien PC — Windows 10» width="fill_container" layout="vertical" stroke="$border" strokeWidth={"top": 1}
+              - frame «Row» width="fill_container" gap=16 padding=[14, 0, 14, 2] alignItems="center"
+                - frame «Name Cell» width="fill_container" layout="vertical" gap=3
+                  - frame «Name Row» gap=8 alignItems="center"
+                    - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Ancien PC — Windows 10
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Bridge 0.4.2 · Windows 10
+                - text «Prefix» width=104 fill="$text-tertiary" fontFamily="$font-mono" fontSize=12 fontWeight="normal"  TEXT: oh_sk_2bTe…
+                - frame «Last Used» width=180 gap=6 alignItems="center"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Inutilisée depuis 7 mois
+                - frame «Action Cell» width=84 alignItems="center" justifyContent="end"
+                  - instance «Button · Révoquer» of «Button/Ghost»
+                    - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Révoquer
+          - text «Quota» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Jusqu'à 10 clés par compte. Il t'en reste 6.
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]
