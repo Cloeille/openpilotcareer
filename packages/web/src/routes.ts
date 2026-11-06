@@ -18,11 +18,13 @@ import { newCompany } from './screens/new-company.ts';
 import { jobs } from './screens/jobs.ts';
 import { settings } from './screens/settings.ts';
 import { lease } from './screens/lease.ts';
+import { live } from './screens/live.ts';
 import { simbrief } from './screens/simbrief.ts';
 import { realism } from './screens/ob-realism.ts';
 
 export const routes: Record<string, ScreenFn> = {
   dashboard,
+  live,
   jobs,
   job: jobDetail,
   simbrief,

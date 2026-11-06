@@ -13,4 +13,4 @@ export type RealismPreset = Exclude<RealismPresetId, 'custom'>;
 export type NewCompanyBody = { name: string; hub: string; code: string; callsign: string; liveryColor?: string; startMode: 'airliner' | 'hardcore' };
 
 /** GET http://127.0.0.1:7878/status of the bridge on the player's PC (`sim` and `version` come with lot LIVE; older bridges lack them). */
-export type BridgeStatus = { version?: string; sim?: 'connected' | 'waiting' | 'unavailable'; phase?: string; flight?: unknown; serverUrl?: string };
+export type BridgeStatus = { version?: string; sim?: 'connected' | 'waiting' | 'unavailable'; phase?: string; flags?: string[]; flight?: unknown; serverUrl?: string };

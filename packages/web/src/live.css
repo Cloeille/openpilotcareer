@@ -1,0 +1,138 @@
+/* ---------------------------------------------------------------- live flight (Vol en cours): cutaway, cabin & load, systems */
+.live-view { position: relative; display: flex; flex-direction: column; gap: 12px; width: 100%; min-height: 0; }
+.live-view > .live-cutaway-view, .live-view > .cabin-stage, .live-view > .systems-view { flex: 1; }
+.live-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
+.live-header .title { font: 600 30px/1.1 var(--display); margin: 0; }
+.live-header .status-line { gap: 8px; }
+.live-view.view-cabin { justify-content: space-between; }
+.live-view.view-systems { gap: 22px; }
+
+.live-empty { margin: auto; max-width: 520px; padding: 32px 36px; display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+.live-empty-title { font: 600 28px/1.1 var(--display); margin: 0; }
+
+.live-cutaway-view { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; }
+.cutaway-area { flex: 1; min-height: 0; position: relative; display: grid; place-items: center; }
+.cutaway { position: relative; width: 1536px; height: 588px; max-width: 100%; max-height: 100%; touch-action: none; cursor: grab; border-radius: 4px; }
+.cutaway:active { cursor: grabbing; }
+.cutaway svg { position: absolute; inset: 0; }
+.sch-tags { position: absolute; inset: 0; pointer-events: none; }
+.sch-tag { position: absolute; display: flex; flex-direction: column; gap: 3px; justify-content: center; padding: 0 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; backdrop-filter: blur(16px); white-space: nowrap; }
+.sch-tag-label { font-size: 13px; color: var(--text-secondary); }
+.sch-tag-value { font-size: 15px; font-weight: 500; }
+.live-facts { display: flex; align-items: flex-end; gap: 56px; padding-bottom: 4px; }
+.live-fact { display: flex; flex-direction: column; gap: 4px; }
+.live-fact-label { font-size: 13px; color: var(--text-tertiary); }
+.live-fact-value { font: 500 26px var(--display); font-variant-numeric: tabular-nums; }
+.live-facts .grow { flex: 1; }
+.live-verif { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-secondary); }
+.live-verif .icon { color: var(--text-tertiary); }
+.live-verif.warn, .live-verif.warn .icon { color: var(--warning); }
+
+/* bridge lost: the drawing and figures go quiet, the alert sits over the middle */
+.live-view.lost .cutaway { opacity: .28; }
+.live-view.lost .live-fact-value { color: var(--text-tertiary); }
+.bridge-alert { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); width: 600px; display: flex; flex-direction: column; gap: 22px; padding: 28px 32px 30px; background: var(--surface-raised); border: 1px solid var(--border-strong); border-radius: 8px; backdrop-filter: blur(30px); box-shadow: 0 24px 60px #000000A6; }
+.alert-head { display: flex; align-items: center; gap: 14px; }
+.alert-icon { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 6px; background: var(--warning-soft); color: var(--warning); flex: none; }
+.alert-title { font: 600 26px/1.1 var(--display); margin: 0; }
+.alert-since { font-size: 14px; font-weight: 500; color: var(--warning); }
+.alert-body { margin: 0; font-size: 15px; line-height: 1.45; color: var(--text-secondary); }
+.alert-list { display: flex; flex-direction: column; gap: 12px; padding-top: 16px; border-top: 1px solid var(--border); }
+.alert-row { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.alert-row .icon { color: var(--text-tertiary); }
+.alert-label { flex: 1; color: var(--text-secondary); }
+.alert-val { font-weight: 500; text-align: right; }
+.alert-diag { display: flex; flex-direction: column; gap: 10px; padding: 14px 0 0; border-top: 1px solid var(--border); }
+.alert-diag[hidden] { display: none; }
+
+/* cabin & load */
+.cabin-stage { display: flex; flex-direction: column; gap: 26px; flex: 1; min-height: 0; justify-content: center; }
+.cabin-plan { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.cabin-plan svg { max-width: 100%; height: auto; }
+.cabin-plan text { font-family: var(--ui); }
+.cabin-legend { display: flex; gap: 24px; align-items: center; font-size: 13px; color: var(--text-secondary); }
+.legend-item { display: inline-flex; align-items: center; gap: 7px; }
+.swatch { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+.cabin-note { margin: 0; }
+.cabin-equipment { display: flex; gap: 56px; padding-left: 23px; }
+.equip { display: flex; flex-direction: column; gap: 3px; }
+.equip-head { display: flex; align-items: flex-end; gap: 8px; }
+.equip-value { font: 500 22px var(--display); }
+.equip-label { font-size: 14px; color: var(--text-secondary); }
+.equip-sub { font-size: 13px; color: var(--text-tertiary); }
+.weight-balance { display: flex; gap: 56px; align-items: flex-start; }
+.mass { display: flex; flex-direction: column; gap: 4px; }
+.mass-sub { font-size: 13px; color: var(--text-secondary); }
+.cg { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.cg-head { display: flex; justify-content: space-between; align-items: flex-end; }
+.cg-value { font-size: 14px; font-weight: 500; color: var(--text-tertiary); }
+
+/* systems */
+.systems-view { display: flex; flex-direction: column; gap: 22px; flex: 1; min-height: 0; }
+.sys-body { display: flex; flex-direction: column; gap: 34px; padding: 28px 40px; backdrop-filter: blur(28px); }
+.sys-row { display: flex; gap: 96px; }
+.sys-row.condition { padding-top: 28px; border-top: 1px solid var(--border); }
+.sys-row > .sys-group:first-child { min-width: 470px; }
+.sys-row > .sys-group:last-child { flex: 1; }
+.sys-group { display: flex; flex-direction: column; gap: 22px; }
+.sys-group-head { display: flex; flex-direction: column; gap: 4px; }
+.sys-group-title { font: 600 20px/1.2 var(--display); margin: 0; }
+.engine-dials { display: flex; gap: 56px; }
+.engine { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.dial { position: relative; width: 160px; height: 160px; }
+.dial svg { position: absolute; inset: 0; }
+.dial-track { stroke: #FFFFFF1A; }
+.dial-redline { stroke: var(--danger); opacity: .5; }
+.dial-value { stroke: var(--text-primary); }
+.dial-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.dial-num { font: 500 40px var(--display); font-variant-numeric: tabular-nums; }
+.dial-unit { font-size: 13px; color: var(--text-tertiary); }
+.engine-name { font-size: 15px; font-weight: 600; }
+.readouts { display: flex; gap: 26px; }
+.readout { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.readout-label { font-size: 12px; color: var(--text-tertiary); }
+.readout-value { font: 500 17px var(--display); font-variant-numeric: tabular-nums; }
+.fuel-gauges { display: flex; gap: 40px; align-items: flex-end; }
+.tank { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.tank-body { width: 52px; padding: 4px; display: flex; flex-direction: column; justify-content: flex-end; border: 1px solid var(--border-strong); border-radius: 6px; }
+.tank-level { width: 100%; background: var(--text-primary); border-radius: 3px; opacity: .85; }
+.fuel-total { display: flex; flex-direction: column; gap: 6px; padding: 0 0 6px 24px; }
+.fuel-big { font: 500 44px var(--display); font-variant-numeric: tabular-nums; }
+.sim-grid { display: grid; grid-template-columns: repeat(4, auto); gap: 14px 40px; }
+.sim-row { display: flex; flex-direction: column; gap: 2px; }
+.sim-val { font: 500 17px var(--display); font-variant-numeric: tabular-nums; }
+.wear-rings { display: flex; gap: 40px; }
+.wear { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.ring { position: relative; width: 78px; height: 78px; }
+.ring svg { position: absolute; inset: 0; }
+.ring-track { stroke: #FFFFFF1A; }
+.ring-value { stroke: var(--text-primary); stroke-linecap: round; }
+.ring-num { position: absolute; inset: 0; display: grid; place-items: center; font: 500 18px var(--display); }
+.wear-part { font-size: 13px; color: var(--text-secondary); }
+.wear-warn .ring-value { stroke: var(--warning); }
+.wear-warn .ring-num, .wear-warn .wear-part { color: var(--warning); }
+.wear-danger .ring-value { stroke: var(--danger); }
+.wear-danger .ring-num, .wear-danger .wear-part { color: var(--danger); }
+.checks { display: flex; align-items: center; gap: 36px; }
+.checks-label { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+.check { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; }
+.check.ok .icon { color: var(--success); }
+.check.flagged { color: var(--danger); }
+.check.flagged .icon { color: var(--danger); }
+.check.unknown { color: var(--text-tertiary); }
+.check.unknown .icon { color: var(--text-tertiary); }
+
+/* dashboard: the open flight's live figures */
+.live-chip { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text-tertiary); }
+.live-chip.warn { color: var(--warning); }
+.route-line .track { position: relative; }
+.route-line .track .remaining { display: block; height: 1px; background: var(--route); }
+.route-line .track .plane-dot { position: absolute; top: -4px; width: 9px; height: 9px; margin-left: -4px; border-radius: 50%; background: var(--text-primary); }
+
+/* six tabs now share the HUD: labels stay on one line and the bar keeps a gap between its three parts */
+.hud-top { gap: 16px; }
+.hud-top .brand { width: 240px; }
+.hud-tabs { flex: none; }
+.hud-tabs a { white-space: nowrap; padding: 0 9px; }
+.hud-tabs a .dot { margin-left: -1px; }
+.hud-tabs a .dot[hidden] { display: none; }
