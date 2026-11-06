@@ -47,7 +47,9 @@ test('migration 2 lets a user own several companies and loses no row, id or rela
   assert.equal(get<{ user_version: number }>(db, 'PRAGMA user_version')!.user_version, MIGRATIONS.length);
   assert.equal(get<{ foreign_keys: number }>(db, 'PRAGMA foreign_keys')!.foreign_keys, 1, 'foreign keys are enforced again after migrating');
   assert.deepEqual(all(db, 'PRAGMA foreign_key_check'), []);
-  for (const t of TABLES) assert.deepEqual(all(db, `SELECT * FROM ${t} ORDER BY rowid`), before[t], `${t} unchanged`);
+  // columns added by later migrations (v3+) are new data, not loss: compare the v1 columns only
+  const v1Columns = (t: string) => Object.keys((before[t] as object[])[0] ?? {}).join(', ') || '*';
+  for (const t of TABLES) assert.deepEqual(all(db, `SELECT ${v1Columns(t)} FROM ${t} ORDER BY rowid`), before[t], `${t} unchanged`);
 
   // the old one-company-per-user constraint is gone ...
   db.exec("INSERT INTO companies (user_id, name, balance, reputation, created_at) VALUES (1, 'Alice Cargo', 1, 50, 99)");
@@ -69,4 +71,11 @@ test('migrating is idempotent: reopening a migrated database changes nothing', (
   const db = openDb(file);
   assert.equal(get<{ n: number }>(db, 'SELECT COUNT(*) n FROM companies')!.n, 3);
   assert.equal(get<{ user_version: number }>(db, 'PRAGMA user_version')!.user_version, MIGRATIONS.length);
+});
+
+test('migration 5 (live) adds flights.last_live_at, empty for existing flights', () => {
+  const db = openDb(v1Database());
+  assert.equal(get<{ last_live_at: number | null }>(db, 'SELECT last_live_at FROM flights WHERE id = 1')!.last_live_at, null);
+  db.exec('UPDATE flights SET last_live_at = 123 WHERE id = 1');
+  assert.equal(get<{ last_live_at: number }>(db, 'SELECT last_live_at FROM flights WHERE id = 1')!.last_live_at, 123);
 });

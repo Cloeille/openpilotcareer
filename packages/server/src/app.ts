@@ -16,6 +16,7 @@ import {
   deleteCustomAircraft, finishFlight, flightView, flightsOf, importJob, leaderboard, meView, openBoard, pendingImports, renameCompany, transactionsOf, typeFor,
 } from './game.ts';
 import { HttpError, Limiter, NUMERIC_ID, parse } from './http.ts';
+import { registerLive } from './routes-live.ts';
 import { fetchLatestOfp, type Fetch } from './simbrief.ts';
 
 const MAX_API_KEYS = 10;
@@ -308,6 +309,8 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
       return { verification: 'verified', reason: null, flight: flightView(finishFlight(db, f, 'verified', at, { telemetry: report, blockHours: check.blockHours })) };
     });
   });
+
+  registerLive(app, { db, now }); // lot live
 
   return app;
 }

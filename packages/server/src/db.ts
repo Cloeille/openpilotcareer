@@ -66,8 +66,15 @@ ALTER TABLE companies_new RENAME TO companies;
 CREATE INDEX companies_user ON companies(user_id);
 `;
 
+// Numbers 3 and 4 belong to lots START and FINANCE (fixed numbering, see docs/v2-contract.md): empty here until they merge.
+const SCHEMA_V3 = '';
+const SCHEMA_V4 = '';
+
+// Lot LIVE: when the last live sample of a flight arrived (the sample itself lives in memory only).
+const SCHEMA_V5 = `ALTER TABLE flights ADD COLUMN last_live_at INTEGER;`;
+
 /** Append-only; `PRAGMA user_version` records how many ran. */
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2];
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);
