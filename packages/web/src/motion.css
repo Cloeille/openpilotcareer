@@ -6,7 +6,7 @@
 /* ---------------------------------------------------------------- structure */
 .scenes { position: absolute; inset: 0; }
 .hud-tabs { position: relative; }
-.tab-underline { position: absolute; left: 0; bottom: 0; width: 1px; height: 2px; background: var(--text-primary); transform-origin: 0 0; pointer-events: none; }
+.tab-underline { position: absolute; left: 0; bottom: 0; width: 1px; height: 2px; background: var(--text-primary); transform: scaleX(0); transform-origin: 0 0; pointer-events: none; }
 .tab-underline.off { opacity: 0; }
 nav.hud-tabs a[aria-current='page'] { border-bottom-color: transparent; }
 .dot.route { position: relative; }
