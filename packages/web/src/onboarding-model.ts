@@ -40,10 +40,11 @@ export const modifiersOf = (toggles: Record<RealismToggle, boolean>): { pay: num
   REALISM_TOGGLES.reduce((sum, k) => (toggles[k] ? { pay: sum.pay + TOGGLE_FX[k].pay, rep: sum.rep + TOGGLE_FX[k].rep } : sum), { pay: 0, rep: 0 });
 
 /** The realism of a preset, as the server would return it before knowing which toggles it can enforce. */
-export function presetRealism(preset: RealismPreset, enforced?: Realism['enforced']): Realism {
+export const ENFORCED_DEFAULT: Realism['enforced'] = { wearAndFailures: true, realFuelPrice: true, delayPenalties: false, realWeatherRequired: false, bankruptcyBailout: true, pauseTolerance: true };
+export function presetRealism(preset: RealismPreset, enforced: Realism['enforced'] = ENFORCED_DEFAULT): Realism {
   const toggles = { ...PRESET_TOGGLES[preset] };
   const m = modifiersOf(toggles);
-  return { preset, toggles, payModifierPct: m.pay, repModifierPct: m.rep, enforced: enforced ?? (Object.fromEntries(REALISM_TOGGLES.map((k) => [k, true])) as Realism['enforced']) };
+  return { preset, toggles, payModifierPct: m.pay, repModifierPct: m.rep, enforced };
 }
 
 /** Changing one toggle moves the preset to "custom"; the modifiers are the sum of the active toggles. */
@@ -170,9 +171,23 @@ export function cheapestBelow(chosen: HardcoreOption, others: HardcoreOption[]):
   return Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : null;
 }
 
-/** Rank thresholds of the progression preview (frame 3b): real values of the game's rank ladder. */
+/** Hours per month above which `chosen` is the cheapest of the options, or null when it never is. */
+export function cheapestAbove(chosen: HardcoreOption, others: HardcoreOption[]): number | null {
+  let from = 0;
+  for (const o of others) {
+    if (o.hourly < chosen.hourly) return null; // a cheaper hour wins whenever you fly enough
+    if (o.hourly === chosen.hourly) { if (chosen.monthly > o.monthly) return null; continue; }
+    if (chosen.monthly > o.monthly) from = Math.max(from, (chosen.monthly - o.monthly) / (o.hourly - chosen.hourly));
+  }
+  return Math.ceil(from);
+}
+
+/** Rank thresholds of the progression preview (frame 3b): the real values of the game's rank ladder (rank n = index + 1). */
 export const LADDER = [
-  { id: 'single', rank: 0 }, { id: 'twin', rank: 1 }, { id: 'turboprop', rank: 2 }, { id: 'regional', rank: 3 },
+  { id: 'single', rank: 0, models: '' },
+  { id: 'twin', rank: 3, models: 'Diamond DA62, Beechcraft Baron 58' },
+  { id: 'turboprop', rank: 4, models: 'Pilatus PC-12, King Air 350' },
+  { id: 'regional', rank: 5, models: 'Embraer E175, Bombardier CRJ700' },
 ] as const;
 export const ladderRank = (rank: number): { name: string; hours: number; flights: number } => RANKS[Math.min(rank, RANKS.length - 1)]!;
 
@@ -192,7 +207,8 @@ export function bridgeVerdict(probe: BridgeProbe | null, keyUsed: boolean, elaps
   const key: CheckState = keyUsed ? 'ok' : 'wait';
   const sim: CheckState = !reachable ? 'idle' : probe?.sim === undefined ? 'unknown' : probe.sim === 'connected' ? 'ok' : 'wait';
   const data: CheckState = reachable && probe?.hasFlight ? 'ok' : 'idle';
-  const connected = bridge === 'ok' && key === 'ok' && (sim === 'ok' || sim === 'unknown');
+  // The server having seen the key is the strongest proof; a bridge that runs on another PC than this browser cannot be probed from here.
+  const connected = key === 'ok' && (bridge !== 'ok' || sim === 'ok' || sim === 'unknown');
   const failed = !connected && !reachable && elapsedMs >= BRIDGE_TIMEOUT_MS;
   return { overall: connected ? 'connected' : failed ? 'failed' : 'waiting', bridge, key, sim, data };
 }

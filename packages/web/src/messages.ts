@@ -522,6 +522,10 @@ const table = {
   'man.gap': ['Declaring a free-form flight (route, times, fuel) is not supported by the server: only an accepted job can be completed.', 'Déclarer un vol libre (route, horaires, carburant) n’est pas géré par le serveur : seul un job accepté peut être clos.'],
   // @@ units append below
   // ---- fe-onboarding
+  'ob.s2.note.balanced': ['Balanced to get started', 'Équilibré pour débuter'],
+  'ob.s2.note.most_jobs': ['The most jobs, the dearest', 'Le plus de jobs, le plus cher'],
+  'ob.s2.note.cheapest': ['The cheapest of the three', 'Le moins cher des trois'],
+  'ob.s2.note.least_competition': ['The least competition', 'Le moins de concurrence'],
   'ob.newCompany': ['new company', 'nouvelle compagnie'],
   'ob.step.depart': ['Start', 'Départ'],
   'ob.step.company': ['Company', 'Compagnie'],
@@ -590,6 +594,7 @@ const table = {
   'ob.s1.hardcoreRealism': ['Hardcore: wear, failures, real fuel', 'Hardcore : usure, pannes, carburant réel'],
   'ob.s1.custom': ['Custom setup', 'Configuration personnalisée'],
   'ob.s1.change': ['You can change your mind until the end of onboarding.', "Tu peux changer d'avis jusqu'à la fin de l'onboarding."],
+  'ob.s1.replace': ['Changing the start replaces the company you already founded.', 'Changer de départ remplace la compagnie que tu as déjà fondée.'],
   'ob.s1.locked': ['Your company already exists: the start cannot change any more.', 'Ta compagnie existe déjà : le départ ne peut plus changer.'],
   'ob.s1.continue': ['Continue with this start', 'Continuer avec ce départ'],
   'ob.s2.overAirliner': ['Airliner path · company and hub', 'Parcours airliner · compagnie et hub'],
@@ -763,6 +768,7 @@ const table = {
   'ob.s3b.rung.turboprop': ['Turboprop', 'Turbopropulseur'],
   'ob.s3b.rung.regional': ['Regional jet', 'Jet régional'],
   'ob.s3b.rungSingle': ['Single piston, Cessna 152 included', 'Monomoteur à pistons, Cessna 152 compris'],
+  'ob.s3b.unlock': ['Rank {n} · {hours} h of flight · {flights} flights', 'Rang {n} · {hours} h de vol · {flights} vols'],
   'ob.s3b.start': ['Your starting point', 'Ton point de départ'],
   'ob.s3b.from': ['From {price} to buy', "À partir de {price} à l'achat"],
   'ob.s3b.rule': ['Rule of thumb: below {n} flight hours a month, the selected plan stays the cheapest.', 'Repère : sous {n} h de vol par mois, la formule choisie reste la moins chère.'],

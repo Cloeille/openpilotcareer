@@ -18,7 +18,7 @@ export type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
 export type Onboarding = { completed: boolean; step: OnboardingStep; startMode: StartMode | null; companyId: number | null; draft: Record<string, unknown> };
 export type HubSuggestion = {
   icao: string; name: string; city: string; size: 'large' | 'medium' | 'small';
-  parkingMonthly: number; jobsNearby: number; aiCompaniesBased: number; note: string;
+  parkingMonthly: number; jobsNearby: number; aiCompaniesBased: number; note: string; noteKey?: 'most_jobs' | 'cheapest' | 'least_competition' | 'balanced';
 };
 export type LeaseOffer = {
   id: number | string; lessor: string; icao: string; typeName: string; year: number; airframeHours: number; maintenanceIncluded: boolean;
@@ -35,3 +35,6 @@ export type MeV2 = Omit<Me, 'company' | 'companies' | 'fleet'> & { company: Comp
 
 
 export type NewCompanyBody = { name: string; hub: string; code: string; callsign: string; liveryColor?: string; startMode: StartMode };
+
+/** GET http://127.0.0.1:7878/status of the bridge on the player's PC (`sim` and `version` come with lot LIVE; older bridges lack them). */
+export type BridgeStatus = { version?: string; sim?: 'connected' | 'waiting' | 'unavailable'; phase?: string; flight?: unknown; serverUrl?: string };

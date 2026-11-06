@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  CLUB, MONTHLY_RENTAL, PRESET_TOGGLES, bridgeVerdict, cheapestBelow, clampStep, hardcoreOptions, keyUsed, leaseRecap, listedTerm, modifiersOf, normalizeCallsign, normalizeCode,
+  CLUB, MONTHLY_RENTAL, cheapestAbove, LADDER, ladderRank, PRESET_TOGGLES, bridgeVerdict, cheapestBelow, clampStep, hardcoreOptions, keyUsed, leaseRecap, listedTerm, modifiersOf, normalizeCallsign, normalizeCode,
   pickLoan, presetRealism, readDraft, resumeStep, signedPct, stepPreset, suggestCallsign, suggestCode, toDraft, typicalGain, withToggle, monthlyCost, activeToggles, fuelPerHour, liveryIdOf, DRAFT_MAX_BYTES, emptyForm,
 } from './onboarding-model.ts';
 
@@ -123,6 +123,8 @@ test('bridge verdict: waiting, connected, failed after 60 s', () => {
   assert.equal(bridgeVerdict({ ...up, sim: 'connected' }, true, 30_000).overall, 'connected');
   assert.equal(bridgeVerdict({ ...up, sim: 'connected' }, false, 30_000).overall, 'waiting', 'the server has not seen the key yet');
   assert.equal(bridgeVerdict({ reachable: true }, true, 1_000).overall, 'connected', 'a bridge without a sim field counts as connected once the key was used');
+  assert.equal(bridgeVerdict(null, true, 1_000).overall, 'connected', 'the server saw the key: the bridge may run on another PC');
+  assert.equal(bridgeVerdict(up, true, 10_000).overall, 'waiting', 'key used but the simulator is not connected yet');
   assert.equal(bridgeVerdict(up, false, 90_000).overall, 'waiting', 'a reachable bridge never times out into failure');
 });
 
@@ -156,4 +158,16 @@ test('the wizard resumes where the saved state allows', () => {
   assert.equal(resumeStep({ step: 5, startMode: 'hardcore', companyId: 7 }), 5);
   assert.equal(clampStep(9), 6);
   assert.equal(clampStep(0), 1);
+});
+
+test('the credit plan becomes the cheapest above a number of flight hours', () => {
+  const opts = hardcoreOptions({ cash: 62_000, loans: [{ downPct: 25, months: 60, monthly: 1_510, total: 0 }], leaseOffers: 0 }, 100);
+  assert.equal(cheapestAbove(opts[2]!, opts.slice(0, 2)), 14, 'vs the club: 1510 / (210 - 100) = 13.7 h; vs the monthly rental it is cheaper at every volume');
+  assert.equal(cheapestAbove(opts[0]!, opts.slice(1)), null, 'the club has the dearest hour: never cheapest at high volume');
+});
+
+test('the progression ladder uses the real rank thresholds', () => {
+  assert.equal(ladderRank(LADDER[1]!.rank).hours, 150);
+  assert.equal(ladderRank(LADDER[2]!.rank).hours, 500);
+  assert.equal(ladderRank(LADDER[3]!.rank).hours, 1500);
 });

@@ -11,18 +11,23 @@ import { RETRY_EVERY_S, offlineView, type OfflineState } from './screens/offline
 import type { Screen } from './screen.ts';
 import { fitStage, hudStage } from './shell.ts';
 import { loadSnapshot, type BootStep, type Snapshot } from './snapshot.ts';
+import { freshOnboarding, onboardingState, runOnboarding, type OnboardingRun } from './onboarding.ts';
+import type { Onboarding } from './onboarding-types.ts';
 import { h, notify } from './ui.ts';
 
 const root = document.getElementById('app')!;
 let snap: Snapshot | null = null;
 let nav: NavState = null;
 let offline: (OfflineState & { timer: number; tick: (now: number) => void }) | null = null;
+let wizard: OnboardingRun | null = null;
+let obSupported = false;
 
 installInput({ state: () => nav, go: (hash) => { location.hash = hash; } });
 fitStage();
 window.addEventListener('resize', fitStage);
 
 function signedOut(): void {
+  stopOnboarding();
   stopOffline();
   snap = null;
   nav = null;
@@ -37,12 +42,39 @@ async function boot(): Promise<void> {
   const draw = (partial: Partial<Snapshot>): void => root.replaceChildren(bootStage(bootView(partial, seen)));
   draw({});
   try {
+    const ob = await onboardingState();
+    obSupported = ob.supported;
+    if (ob.pending) return beginOnboarding(ob.pending, false);
     snap = await loadSnapshot((step, partial) => { seen.add(step); draw(partial); });
   } catch (e) {
+    if (e instanceof ApiError && e.code === 'no_company') return beginOnboarding(freshOnboarding(), false);
     if (!(e instanceof ApiError && (e.status === 401 || e.code === 'network'))) notify(errorText(e), 'error');
     return signedOut();
   }
   await show();
+}
+
+// ------------------------------------------------------------------ onboarding (lot fe-onboarding): the six-step wizard replaces the HUD screens while it runs
+
+function stopOnboarding(): void {
+  wizard?.stop();
+  wizard = null;
+}
+
+function beginOnboarding(ob: Onboarding, additional: boolean): void {
+  stopOnboarding();
+  const before = session.company;
+  stopOffline();
+  nav = null;
+  wizard = runOnboarding({
+    root,
+    setNav: (n) => { nav = n; },
+    onDone: (dest) => { stopOnboarding(); history.replaceState(null, '', dest); void refresh().catch((e) => { notify(errorText(e), 'error'); signedOut(); }); },
+    onQuit: (add) => {
+      stopOnboarding();
+      if (add && snap) { session.company = before; history.replaceState(null, '', '#dashboard'); void refresh().catch((e) => notify(errorText(e), 'error')); } else { session.set(session.server, null); signedOut(); }
+    },
+  }, ob, additional);
 }
 
 async function refresh(): Promise<void> {
@@ -67,10 +99,12 @@ async function logout(remote: boolean): Promise<void> {
 }
 
 async function show(): Promise<void> {
+  if (wizard) return;
   if (!snap) return signedOut();
   if (offline) return showOffline();
   const current = snap;
   const { name, arg } = resolve(location.hash);
+  if (name === 'company' && obSupported) { beginOnboarding(freshOnboarding(), true); return; }
   let screen: Screen;
   try {
     screen = await routes[name]!({ snap: current, arg, refresh, go: (hash) => { location.hash = hash; } });
@@ -151,7 +185,7 @@ window.addEventListener('opc:redraw', () => {
   const id = document.activeElement?.id;
   void show().then(() => { if (id) document.getElementById(id)?.focus(); });
 });
-window.addEventListener('opc:lang', () => { if (snap) void show(); else signedOut(); });
+window.addEventListener('opc:lang', () => { if (wizard) wizard.redraw(); else if (snap) void show(); else signedOut(); });
 
 if (session.token) void boot();
 else signedOut();

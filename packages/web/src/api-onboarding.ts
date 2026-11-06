@@ -1,7 +1,7 @@
 import type { AircraftType, ApiKeyInfo } from '@opc/shared';
 import { api, session } from './api.ts';
 import { ApiError } from './errors.ts';
-import type { FleetAircraftV2, FirstJob, FleetQuote, HubSuggestion, LeaseOffer, MeV2, NewCompanyBody, Onboarding, OnboardingStep, Realism, RealismPreset, RealismToggle, StartMode } from './onboarding-types.ts';
+import type { BridgeStatus, FleetAircraftV2, FirstJob, FleetQuote, HubSuggestion, LeaseOffer, MeV2, NewCompanyBody, Onboarding, OnboardingStep, Realism, RealismPreset, RealismToggle, StartMode } from './onboarding-types.ts';
 
 // Typed client for the START / FINANCE sections of docs/v2-contract.md. The shapes are mirrored here (not imported)
 // so this lot builds before lots be-start / be-finance are merged; after the merge they can be swapped for the shared types.
@@ -55,7 +55,6 @@ export function aircraftType(icao: string): Promise<AircraftType | null> {
 // ---------------------------------------------------------------- simulator bridge
 
 export const BRIDGE_STATUS_URL = 'http://127.0.0.1:7878/status';
-export type BridgeStatus = { version?: string; sim?: 'connected' | 'waiting' | 'unavailable'; phase?: string; flight?: unknown; serverUrl?: string };
 /** The bridge on the player's own PC (loopback, CORS *). null = nothing answered. */
 export async function bridgeStatus(): Promise<BridgeStatus | null> {
   try {
@@ -66,6 +65,7 @@ export async function bridgeStatus(): Promise<BridgeStatus | null> {
 
 export const apiKeys = (): Promise<ApiKeyInfo[]> => api<ApiKeyInfo[]>('/me/api-keys');
 export const createApiKey = (label: string): Promise<ApiKeyInfo & { key: string }> => api('/me/api-keys', { method: 'POST', body: { label } });
+export const deleteApiKey = (id: number): Promise<void> => api<void>(`/me/api-keys/${id}`, { method: 'DELETE' });
 export const downloadUrl = (): string => `${session.server}/downloads/opc-bridge-win-x64.exe`;
 /** Size in bytes of the bridge installer, or null when the server does not host it. */
 export async function downloadSize(): Promise<number | null> {
