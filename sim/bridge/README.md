@@ -24,7 +24,7 @@ fixture file ───────▶ fixture.ts ───┴▶ SimSample ▶ t
   ATC MODEL (the accepted flight's aircraft when ATC MODEL is not a valid designator), payload = total − empty − fuel at takeoff,
   fuel used, touchdown rate, great-circle distance, `source: "simconnect"`.
 - Anti-cheat flags, always sent with the report: `slew_detected`, `time_acceleration_above_1x`, `teleport_jump_over_50nm`,
-  `long_pause`. The server rejects any flagged flight and tells the pilot why. The client never decides; it only reports.
+  `long_pause`. The server rejects any flagged flight and tells the pilot why, unless its owner turned anti-cheat off (`antiCheat: false` in `/api/v1/info`; `flights` and `fly` print a note then). The client never decides; it only reports.
 - `deliver.ts` writes the report to `outbox/` in the config directory **before** the first send, then retries with exponential
   backoff (1 s … 5 min). One file per (server, flight), so re-sending is idempotent; a `409` means an earlier send got through.
   Reports left by a previous run are sent when `fly` starts.

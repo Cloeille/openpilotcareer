@@ -26,7 +26,7 @@ export function loginView(root: HTMLElement, done: () => void): void {
   async function check(): Promise<string> {
     const server = chosen();
     const info = await fetchInfo(server);
-    serverState.textContent = `${info.name} v${info.version} - ${info.registrationOpen ? 'registration open' : 'registration closed'}`;
+    serverState.textContent = `${info.name} v${info.version} - ${info.registrationOpen ? 'registration open' : 'registration closed'}${info.antiCheat ? '' : ' - anti-cheat off'}`;
     register.disabled = !info.registrationOpen;
     return server;
   }
