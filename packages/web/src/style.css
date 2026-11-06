@@ -1,6 +1,7 @@
 @import './design/tokens.css';
 @import './fonts.css';
 @import './legacy.css';
+@import './motion.css';
 
 :root {
   color-scheme: dark;
@@ -172,7 +173,6 @@ table.data tbody td, table.data tbody th { border-bottom: 1px solid var(--border
 .toast { position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%); z-index: 50; max-width: min(34rem, calc(100% - 2rem)); padding: 10px 16px; border-radius: 4px; background: var(--surface-raised); border: 1px solid var(--success); backdrop-filter: blur(12px); font-size: 14px; }
 .toast:empty { display: none; }
 .toast.error { border-color: var(--danger); }
-@media (prefers-reduced-motion: no-preference) { .btn, .seg, .hud-tabs a { transition: background-color .12s, color .12s, filter .12s; } }
 .link-btn { background: none; border: 0; padding: 0; font-size: 12px; font-weight: 500; color: var(--text-primary); cursor: pointer; }
 .link-btn:hover { text-decoration: underline; }
 .pilot-name { font-weight: 600; font-size: 14px; white-space: nowrap; }

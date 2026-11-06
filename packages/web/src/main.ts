@@ -8,24 +8,31 @@ import { loginView } from './login.ts';
 import { resolve, routes } from './routes.ts';
 import { bootStage, bootView } from './screens/boot.ts';
 import { RETRY_EVERY_S, offlineView, type OfflineState } from './screens/offline.ts';
-import type { Screen } from './screen.ts';
-import { fitStage, hudStage } from './shell.ts';
+import { slideDirection } from './motion.ts';
+import { preloadScenes } from './scenes.ts';
+import { TABS, type Screen } from './screen.ts';
+import { fitStage, mount, showScreen, withLoading } from './shell.ts';
 import { loadSnapshot, type BootStep, type Snapshot } from './snapshot.ts';
 import { h, notify } from './ui.ts';
 
 const root = document.getElementById('app')!;
 let snap: Snapshot | null = null;
 let nav: NavState = null;
+/** What is on screen (its tab and whether it is the offline screen), to pick the enter animation; null = no HUD screen (login, loading). */
+let shown: { tab: Screen['tab']; offline: boolean } | null = null;
+let showSeq = 0;
 let offline: (OfflineState & { timer: number; tick: (now: number) => void }) | null = null;
 
 installInput({ state: () => nav, go: (hash) => { location.hash = hash; } });
 fitStage();
+void preloadScenes();
 window.addEventListener('resize', fitStage);
 
 function signedOut(): void {
   stopOffline();
   snap = null;
   nav = null;
+  shown = null;
   loginView(root, () => { location.hash = '#dashboard'; void boot(); });
 }
 setUnauthorizedHandler(() => { session.set(session.server, null); signedOut(); notify(t('session.ended'), 'error'); });
@@ -34,7 +41,7 @@ setNetworkLostHandler(() => { if (snap && !offline) startOffline(); });
 /** Load the account and what the shell needs, showing progress; if the server cannot be reached, fall back to the login screen, whose server check explains why and offers a retry. */
 async function boot(): Promise<void> {
   const seen = new Set<BootStep>();
-  const draw = (partial: Partial<Snapshot>): void => root.replaceChildren(bootStage(bootView(partial, seen)));
+  const draw = (partial: Partial<Snapshot>): void => { shown = null; mount(root, bootStage(bootView(partial, seen))); };
   draw({});
   try {
     snap = await loadSnapshot((step, partial) => { seen.add(step); draw(partial); });
@@ -42,7 +49,7 @@ async function boot(): Promise<void> {
     if (!(e instanceof ApiError && (e.status === 401 || e.code === 'network'))) notify(errorText(e), 'error');
     return signedOut();
   }
-  await show();
+  await show(true);
 }
 
 async function refresh(): Promise<void> {
@@ -66,27 +73,32 @@ async function logout(remote: boolean): Promise<void> {
   signedOut();
 }
 
-async function show(): Promise<void> {
+/** Draw the screen of the current hash. `navigate` = the player moved here (enter animation, skeleton while it loads); otherwise it is a redraw of the screen already shown, which keeps the old one up until the new is ready and does not animate. */
+async function show(navigate = false): Promise<void> {
   if (!snap) return signedOut();
   if (offline) return showOffline();
   const current = snap;
+  const seq = ++showSeq;
   const { name, arg } = resolve(location.hash);
   let screen: Screen;
   try {
-    screen = await routes[name]!({ snap: current, arg, refresh, go: (hash) => { location.hash = hash; } });
+    const load = routes[name]!({ snap: current, arg, refresh, go: (hash) => { location.hash = hash; } });
+    screen = navigate ? await withLoading(load, () => seq === showSeq) : await load;
   } catch (e) {
     if (offline) return; // the connection dropped under us: the offline screen is already up
     screen = { title: t('error.title'), scene: 'dashboard', tab: null, hints: [], back: '#dashboard', view: h('p', { class: 'error-text', role: 'alert' }, errorText(e)) };
   }
-  if (snap !== current) return; // signed out or reloaded while this screen was loading
-  draw(screen, current, false);
+  if (snap !== current || seq !== showSeq) return; // signed out, reloaded or navigated elsewhere while this screen was loading
+  draw(screen, current, false, navigate);
 }
 
-function draw(screen: Screen, s: Snapshot, isOffline: boolean): void {
+function draw(screen: Screen, s: Snapshot, isOffline: boolean, animate: boolean): void {
   nav = { tab: screen.tab, back: screen.back, keys: screen.keys };
   const view = h('main', { id: 'main', class: `view${screen.wide ? ' wide' : ''}`, tabindex: -1 }, screen.view);
-  root.replaceChildren(hudStage(screen.scene, view,
-    { me: s.me, tab: screen.tab, antiCheat: s.antiCheat, offline: isOffline, jobCount: s.board.jobs.length, onCompany: (id) => void switchCompany(id), onChangeServer: () => void logout(!isOffline) }, screen.hints));
+  const enter = animate ? slideDirection(shown?.tab ?? null, screen.tab, TABS) : null;
+  showScreen(root, screen.scene, view,
+    { me: s.me, tab: screen.tab, antiCheat: s.antiCheat, offline: isOffline, jobCount: s.board.jobs.length, onCompany: (id) => void switchCompany(id), onChangeServer: () => void logout(!isOffline) }, screen.hints, enter);
+  shown = { tab: screen.tab, offline: isOffline };
   document.title = `${screen.title} - ${PRODUCT_NAME}`;
 }
 
@@ -113,7 +125,7 @@ function showOffline(): void {
     title: t('offline.title'), scene: 'dashboard', tab: 'dashboard', back: null, wide: true, view,
     hints: [{ key: t('key.enter'), label: t('hint.retryNow') }, { key: 'S', label: t('hint.changeServer') }],
     keys: { s: () => void logout(false) },
-  }, snap, true);
+  }, snap, true, !shown?.offline);
 }
 
 async function offlineTick(): Promise<void> {
@@ -145,7 +157,7 @@ async function retry(): Promise<void> {
   }
 }
 
-window.addEventListener('hashchange', () => { void show().then(() => document.getElementById('main')?.focus()); });
+window.addEventListener('hashchange', () => { void show(true).then(() => document.getElementById('main')?.focus()); });
 /** Redraw the current screen in place (filters, language) and put the focus back where it was. */
 window.addEventListener('opc:redraw', () => {
   const id = document.activeElement?.id;

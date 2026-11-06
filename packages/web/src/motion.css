@@ -1,0 +1,53 @@
+/* Motion for the OpenHangar shell. Structure (stacked backdrop layers, the tab underline element) is always on; every animation and transition lives in
+   `prefers-reduced-motion: no-preference`, so with reduced motion screens swap instantly and nothing moves.
+   Only transform and opacity are animated, and the elements that carry a backdrop blur (.panel) are faded individually: fading <main> itself would
+   make it a backdrop root and strip the blur from every panel for the length of the fade. */
+
+/* ---------------------------------------------------------------- structure */
+.scenes { position: absolute; inset: 0; }
+.hud-tabs { position: relative; }
+.tab-underline { position: absolute; left: 0; bottom: 0; width: 1px; height: 2px; background: var(--text-primary); transform-origin: 0 0; pointer-events: none; }
+.tab-underline.off { opacity: 0; }
+nav.hud-tabs a[aria-current='page'] { border-bottom-color: transparent; }
+.dot.route { position: relative; }
+.skeleton { position: relative; overflow: hidden; border-radius: 3px; background: #FFFFFF0D; }
+.skeleton.title { width: 260px; height: 28px; }
+.skeleton.row { width: 100%; height: 44px; }
+.view.loading { align-items: flex-start; }
+.panel.skeleton-panel { flex: 1; max-height: 420px; max-width: 1040px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ---------------------------------------------------------------- backdrop: cross-fade between scenes, very slow drift */
+  .scene { animation: drift 40s ease-in-out infinite alternate; }
+  .scene.fade-in { animation: scene-in .45s ease-out backwards, drift 40s ease-in-out infinite alternate; }
+  @keyframes scene-in { from { opacity: 0; } }
+  @keyframes drift { to { transform: scale(1.04); } }
+
+  /* ---------------------------------------------------------------- screen enter: fade and rise 8 px; Q / E slide in from the side they point to */
+  [data-enter] { --dx: 0px; --dy: 8px; }
+  [data-enter='left'] { --dx: -32px; --dy: 0px; }
+  [data-enter='right'] { --dx: 32px; --dy: 0px; }
+  [data-enter] :is(.title-block, .panel) { animation: enter .18s ease-out backwards; animation-delay: calc(var(--i, 0) * 30ms); }
+  [data-enter] [data-row] { animation: enter .18s ease-out backwards; animation-delay: calc(60ms + var(--r, 0) * 30ms); }
+  @keyframes enter { from { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
+
+  /* ---------------------------------------------------------------- HUD */
+  .tab-underline { transition: transform .22s cubic-bezier(.2, .8, .2, 1), opacity .15s; }
+  .btn, .seg, .view-opt, .icon-btn, .suggest { transition: background-color .12s, color .12s, filter .12s, transform .12s; }
+  .hud-tabs a { transition: color .12s; }
+
+  /* ---------------------------------------------------------------- hover / focus lift */
+  .btn:hover:not(:disabled), .btn:focus-visible:not(:disabled), .seg:hover, .seg:focus-visible, .view-opt:hover, .view-opt:focus-visible, .icon-btn:hover, .icon-btn:focus-visible { transform: translateY(-1px); }
+  .btn:active:not(:disabled), .seg:active { transform: none; }
+  table.data tbody tr[data-row] { transition: background-color .12s; }
+  table.data tbody tr[data-row] > :first-child { transition: box-shadow .12s; }
+  table.data tbody tr[data-row]:hover > :first-child, table.data tbody tr[data-row]:focus-visible > :first-child { box-shadow: inset 2px 0 0 var(--text-primary); }
+
+  /* ---------------------------------------------------------------- live / route dot pulses */
+  .dot.route::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--route); animation: pulse 2s ease-out infinite; }
+  @keyframes pulse { from { transform: scale(1); opacity: .6; } to { transform: scale(3.2); opacity: 0; } }
+
+  /* ---------------------------------------------------------------- loading skeleton */
+  .skeleton::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, #FFFFFF14, transparent); transform: translateX(-100%); animation: shimmer 1.3s ease-in-out infinite; }
+  @keyframes shimmer { to { transform: translateX(100%); } }
+}
