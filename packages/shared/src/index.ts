@@ -324,3 +324,6 @@ export type CompanyProfile = Company & {
   hubs: string[]; fleet: { icao: string; count: number }[]; personality: Personality | null;
   seasons: { season: string; netWorth: number; flights: number; reputation: number }[];
 };
+
+// ---- lot live
+export * from './live.ts';

@@ -81,3 +81,10 @@ test('migration 4 backfills registrations (country prefix, unique), ownership, b
   assert.ok(rows.every((r) => r.ownership === 'owned' && r.wear_pct === 0 && r.status === 'available'));
   assert.throws(() => db.exec("UPDATE aircraft SET registration = 'F-HAZA' WHERE id = 2"), /UNIQUE/);
 });
+
+test('migration 5 (live) adds flights.last_live_at, empty for existing flights', () => {
+  const db = openDb(v1Database());
+  assert.equal(get<{ last_live_at: number | null }>(db, 'SELECT last_live_at FROM flights WHERE id = 1')!.last_live_at, null);
+  db.exec('UPDATE flights SET last_live_at = 123 WHERE id = 1');
+  assert.equal(get<{ last_live_at: number }>(db, 'SELECT last_live_at FROM flights WHERE id = 1')!.last_live_at, 123);
+});

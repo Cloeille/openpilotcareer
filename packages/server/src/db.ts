@@ -120,8 +120,11 @@ CREATE TABLE billing_runs (
 INSERT INTO billing_runs (company_id, month, at) SELECT id, strftime('%Y-%m', 'now'), CAST(strftime('%s', 'now') AS INTEGER) * 1000 FROM companies WHERE user_id IS NOT NULL;
 `;
 
+// Lot LIVE: when the last live sample of a flight arrived (the sample itself lives in memory only).
+const SCHEMA_V5 = `ALTER TABLE flights ADD COLUMN last_live_at INTEGER;`;
+
 /** Append-only; `PRAGMA user_version` records how many ran. */
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4];
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);

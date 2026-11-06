@@ -29,6 +29,55 @@ const FIELDS: readonly (readonly [key: keyof Reading, simVar: string, units: str
   ['simRate', 'SIMULATION RATE', 'number', 'f64'],
 ];
 
+/** Live-only readings, on a SECOND data definition: if this SimVar list is refused (an unknown name on some aircraft or sim build),
+ *  the flight tracker's own definition above is untouched and only the live view loses altitude, heading and engines. */
+export const MAX_ENGINES = 4;
+const GAUGES = ['torquePct', 'n1Pct', 'ittC', 'oilPsi'] as const;
+type Gauge = (typeof GAUGES)[number];
+const GAUGE_VARS: Record<Gauge, readonly [simVar: string, units: string]> = {
+  torquePct: ['TURB ENG MAX TORQUE PERCENT', 'percent'],   // percent of max rated torque: turboprops and turbine helicopters
+  n1Pct: ['TURB ENG N1', 'percent'],
+  ittC: ['TURB ENG ITT', 'celsius'],
+  oilPsi: ['GENERAL ENG OIL PRESSURE', 'psi'],
+};
+export const EXTRA_FIELDS: readonly (readonly [simVar: string, units: string, kind: 'f64' | 'i32'])[] = [
+  ['PLANE ALTITUDE', 'feet', 'f64'],
+  ['PLANE HEADING DEGREES TRUE', 'degrees', 'f64'],
+  ['NUMBER OF ENGINES', 'number', 'i32'],
+  ...Array.from({ length: MAX_ENGINES }, (_, i) => GAUGES.map((g) => [`${GAUGE_VARS[g][0]}:${i + 1}`, GAUGE_VARS[g][1], 'f64'] as const)).flat(),
+];
+export type ExtrasReading = { altFt: number; headingDeg: number; engineCount: number; engines: Record<Gauge, number>[] };
+
+export function decodeExtras(buf: Pick<RawBuffer, 'readFloat64' | 'readInt32'>): ExtrasReading {
+  const altFt = buf.readFloat64();
+  const headingDeg = buf.readFloat64();
+  const engineCount = buf.readInt32();
+  const engines = Array.from({ length: MAX_ENGINES }, () => Object.fromEntries(GAUGES.map((g) => [g, buf.readFloat64()])) as Record<Gauge, number>);
+  return { altFt, headingDeg, engineCount, engines };
+}
+
+/** Which gauges an engine kind really has. A gauge that does not apply is omitted rather than reported as 0. */
+const GAUGES_OF: Record<EngineKind, readonly Gauge[]> = {
+  piston: ['oilPsi'],
+  turboprop: ['torquePct', 'n1Pct', 'ittC', 'oilPsi'],
+  jet: ['n1Pct', 'ittC', 'oilPsi'],
+  helicopter: ['torquePct', 'n1Pct', 'ittC', 'oilPsi'],
+  other: [],
+};
+
+/** The optional SimSample fields for one extras reading. Only finite numbers pass (a SimVar can answer NaN), so these never invalidate a sample. */
+export function liveFields(r: ExtrasReading, kind: EngineKind): Pick<SimSample, 'altFt' | 'headingDeg' | 'engines'> {
+  const fields: Pick<SimSample, 'altFt' | 'headingDeg' | 'engines'> = {};
+  if (Number.isFinite(r.altFt)) fields.altFt = r.altFt;
+  if (Number.isFinite(r.headingDeg)) fields.headingDeg = r.headingDeg;
+  const count = Math.max(0, Math.min(MAX_ENGINES, Number.isFinite(r.engineCount) ? Math.trunc(r.engineCount) : 0));
+  const wanted = GAUGES_OF[kind];
+  if (count > 0 && wanted.length > 0) {
+    fields.engines = r.engines.slice(0, count).map((e) => Object.fromEntries(wanted.filter((g) => Number.isFinite(e[g])).map((g) => [g, e[g]])));
+  }
+  return fields;
+}
+
 export function decode(buf: Pick<RawBuffer, 'readFloat64' | 'readInt32' | 'readString32' | 'readString64' | 'readString256'>): Reading {
   const out: Record<string, number | string> = {};
   for (const [key, , , kind] of FIELDS) {
@@ -47,7 +96,7 @@ export class SampleMapper {
   #unreported: number | undefined;
 
   /** Null when the reading is not a valid SimSample (the SimVar returned garbage); `why` then says which field. */
-  map(r: Reading, t: number, paused: boolean): { sample: SimSample } | { why: string } {
+  map(r: Reading, t: number, paused: boolean, extras?: ExtrasReading): { sample: SimSample } | { why: string } {
     // the first reading only sets the baseline: the latched value belongs to some earlier landing
     if (this.#lastTouchdown !== undefined && r.touchdownFpm !== this.#lastTouchdown) this.#unreported = r.touchdownFpm;
     this.#lastTouchdown = r.touchdownFpm;
@@ -61,6 +110,7 @@ export class SampleMapper {
       // MSFS reports 0 for an aircraft without a usable empty weight: unknown, not "weightless"
       ...(r.emptyWeightKg > 0 ? { emptyWeightKg: r.emptyWeightKg } : {}),
       simRate: r.simRate, slew: r.slew !== 0, paused, atcModel: r.atcModel, title: r.title, engineKind: engineKind(r),
+      ...(extras ? liveFields(extras, engineKind(r)) : {}),
     });
     return parsed.success ? { sample: parsed.data } : { why: `${parsed.error.issues[0]?.path.join('.')} ${parsed.error.issues[0]?.message}` };
   }
@@ -71,14 +121,27 @@ export type WatchOptions = {
   /** Where to find SimConnect; default: node-simconnect's own discovery (SimConnect.cfg, Windows registry). */
   connection?: ConnectionOptions;
   retryMs?: number;
+  /** Told whenever the link to the simulator changes: connected, waiting (not running yet, or it quit), unavailable (no SimConnect client on this machine). */
+  onState?: (s: SimLink) => void;
 };
 
-const DEFINITION = 0, REQUEST = 0, PAUSE_EVENT = 0;
+/** What `GET /status` reports as `sim`. */
+export type SimLink = 'connected' | 'waiting' | 'unavailable';
+
+const DEFINITION = 0, REQUEST = 0, PAUSE_EVENT = 0, EXTRAS_DEFINITION = 1, EXTRAS_REQUEST = 1;
 
 /** Connect to MSFS (waiting for it to start, reconnecting if it quits) and call `onSample` about once a second. Returns a stop function. */
 export async function watchSim(onSample: (s: SimSample) => void, o: WatchOptions): Promise<() => void> {
-  const sc = await import('node-simconnect'); // lazy: see the header
   const { retryMs = 5_000 } = o;
+  let sc: typeof import('node-simconnect');
+  try {
+    sc = await import('node-simconnect'); // lazy: see the header
+  } catch (e) {
+    o.onState?.('unavailable');
+    o.log(`no SimConnect client on this machine (${(e as Error).message}); the bridge keeps running so its status can say so`);
+    return () => {};
+  }
+  o.onState?.('waiting');
   const units = { f64: sc.SimConnectDataType.FLOAT64, i32: sc.SimConnectDataType.INT32, s32: sc.SimConnectDataType.STRING32, s64: sc.SimConnectDataType.STRING64, s256: sc.SimConnectDataType.STRING256 };
   let stopped = false;
   let handle: ConnectionHandle | null = null;
@@ -86,10 +149,13 @@ export async function watchSim(onSample: (s: SimSample) => void, o: WatchOptions
   let paused = false;
   let mapper = new SampleMapper();
   let rejected = 0;
+  let extras: ExtrasReading | undefined;
 
   const retry = (why: string): void => {
     handle?.close();
     handle = null;
+    extras = undefined;
+    o.onState?.('waiting');
     if (stopped || timer) return;
     o.log(`${why}; trying again in ${Math.round(retryMs / 1000)} s`);
     timer = setTimeout(() => { timer = null; void connect(); }, retryMs);
@@ -105,17 +171,21 @@ export async function watchSim(onSample: (s: SimSample) => void, o: WatchOptions
     if (stopped) return void opened.handle.close();
     const h = (handle = opened.handle);
     o.log(`connected to ${opened.recvOpen.applicationName}`);
+    o.onState?.('connected');
     mapper = new SampleMapper();
     paused = false;
     for (const [, simVar, unit, kind] of FIELDS) h.addToDataDefinition(DEFINITION, simVar, unit, units[kind]);
     h.requestDataOnSimObject(REQUEST, DEFINITION, sc.SimConnectConstants.OBJECT_ID_USER, sc.SimConnectPeriod.SECOND);
+    for (const [simVar, unit, kind] of EXTRA_FIELDS) h.addToDataDefinition(EXTRAS_DEFINITION, simVar, unit, units[kind]);
+    h.requestDataOnSimObject(EXTRAS_REQUEST, EXTRAS_DEFINITION, sc.SimConnectConstants.OBJECT_ID_USER, sc.SimConnectPeriod.SECOND);
     // ponytail: the 'Pause' system event (1 = paused) stands in for the SIMULATION PAUSED the brief lists, which the SDK does not document as a SimVar.
     // MSFS 2024 builds have been reported to mis-report it; while paused no SimVar data arrives either, so a long pause also shows up as a time gap (long_pause).
     h.subscribeToSystemEvent(PAUSE_EVENT, 'Pause');
     h.on('event', (e) => { if (e.clientEventId === PAUSE_EVENT) paused = e.data === 1; });
     h.on('simObjectData', (d) => {
+      if (d.requestID === EXTRAS_REQUEST) { extras = decodeExtras(d.data); return; }
       if (d.requestID !== REQUEST) return;
-      const r = mapper.map(decode(d.data), Date.now(), paused);
+      const r = mapper.map(decode(d.data), Date.now(), paused, extras);
       if ('sample' in r) return onSample(r.sample);
       if (rejected++ === 0) o.log(`ignoring a reading the simulator sent that is not valid (${r.why})`);
     });

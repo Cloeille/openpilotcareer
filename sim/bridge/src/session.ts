@@ -3,6 +3,7 @@ import type { Flag, Phase, SimSample, TrackerOptions } from './types.ts';
 import type { ServerClient } from './client.ts';
 import { deliver, pendingFor, type DeliverOptions, type Delivery } from './deliver.ts';
 import type { Outbox } from './outbox.ts';
+import type { LiveReporter } from './live.ts';
 import { FlightTracker } from './tracker.ts';
 
 export type FlightInfo = { id: number; from: string; to: string; aircraftIcao: string };
@@ -26,6 +27,8 @@ export type SessionOptions = {
   deliver?: Omit<DeliverOptions, 'onRetry'>;
   /** Called for every state change worth telling the pilot (phase change, retry, final verdict). */
   log?: (line: string) => void;
+  /** Posts the live position to the server. Best effort: it can never delay or fail the tracker. */
+  live?: LiveReporter;
 };
 
 type Verdict = { verification: 'verified' | 'rejected'; reason: string | null };
@@ -53,6 +56,7 @@ export class Session {
     this.#tracker.feed(s);
     const phase = this.#tracker.phase;
     if (phase !== this.#lastPhase) { this.#lastPhase = phase; this.#o.log?.(`phase: ${phase}`); }
+    this.#o.live?.push(s, phase, this.#tracker.flags);
     const outcome = this.#tracker.outcome;
     if (!outcome || this.#sending || this.#verdict) return;
     if (!outcome.ok) {

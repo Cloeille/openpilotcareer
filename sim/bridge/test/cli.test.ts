@@ -13,8 +13,9 @@ const KEY = 'opc_testkey-0123456789';
 
 type Ctx = { after: (f: () => void) => void };
 /** A server that knows one active flight (LFPN -> LFAQ, C172, id 7) and answers every report with `verdict`. `antiCheat` is left out of /info unless given (older servers). */
-async function stub(t: Ctx, verdict: { verification: string; reason: string | null }, antiCheat?: boolean) {
+async function stub(t: Ctx, verdict: { verification: string; reason: string | null }, antiCheat?: boolean, live: 'ok' | 'missing' | 'hang' = 'ok') {
   const seen: { auth: string | undefined; body: unknown }[] = [];
+  const liveSeen: { auth: string | undefined; body: Record<string, any> }[] = [];
   const s = createServer((req, res) => {
     let raw = '';
     req.on('data', (c) => { raw += c; });
@@ -23,13 +24,19 @@ async function stub(t: Ctx, verdict: { verification: string; reason: string | nu
       if (req.url === '/api/v1/info') return json(200, { name: 'Stub', version: '0', apiVersion: 1, registrationOpen: true, ...(antiCheat === undefined ? {} : { antiCheat }) });
       if (req.headers.authorization !== `Bearer ${KEY}`) return json(401, { error: 'unauthorized', message: 'bad key' });
       if (req.url === '/api/v1/flights/active') return json(200, [{ id: 7, aircraftIcao: 'C172', acceptedAt: Date.now() - 60_000, job: { origin: 'LFPN', destination: 'LFAQ', distanceNm: 50, payloadKg: 100 } }]);
+      if (req.method === 'POST' && req.url === '/api/v1/flights/7/live') {
+        if (live === 'missing') return json(404, { error: 'not_found', message: 'not found' });
+        if (live === 'hang') return; // never answers
+        liveSeen.push({ auth: req.headers.authorization, body: JSON.parse(raw) });
+        return void res.writeHead(204).end();
+      }
       if (req.method === 'POST' && req.url === '/api/v1/flights/7/telemetry-verify') { seen.push({ auth: req.headers.authorization, body: JSON.parse(raw) }); return json(200, verdict); }
       json(404, { error: 'not_found', message: 'not found' });
     });
   });
   await new Promise<void>((r) => s.listen(0, '127.0.0.1', r));
   t.after(() => { s.closeAllConnections(); s.close(); });
-  return { url: `http://127.0.0.1:${(s.address() as { port: number }).port}`, seen };
+  return { url: `http://127.0.0.1:${(s.address() as { port: number }).port}`, seen, liveSeen };
 }
 
 function run(t: Ctx, args: string[], stdin?: string) {
@@ -108,4 +115,39 @@ test('flights tells the pilot when the server has anti-cheat off, and stays quie
     const on = await stub(t, { verification: 'verified', reason: null }, antiCheat);
     assert.doesNotMatch((await run(t, ['flights', '--server', on.url, '--key', KEY])).out, /anti-cheat/);
   }
+});
+
+test('replay posts live samples to POST /flights/:id/live while the flight is reported as before', async (t) => {
+  const srv = await stub(t, { verification: 'verified', reason: null });
+  const r = await run(t, ['replay', fixture('ga-c172-lfpn-lfaq'), '--server', srv.url, '--key', KEY, '--speed', '1000']);
+  assert.equal(r.code, 0, r.out);
+  assert.equal(srv.seen.length, 1, 'the telemetry report is still sent exactly once');
+  assert.ok(srv.liveSeen.length >= 5, `live samples received: ${srv.liveSeen.length}`);
+  assert.ok(srv.liveSeen.every((l) => l.auth === `Bearer ${KEY}`));
+  const phases = new Set(srv.liveSeen.map((l) => l.body.phase));
+  assert.ok(phases.has('airborne'), [...phases].join());
+  const air = srv.liveSeen.filter((l) => l.body.phase === 'airborne');
+  assert.ok(air.some((l) => l.body.gsKts > 100 && l.body.altFt > 0), 'airborne samples carry speed and an estimated altitude');
+  const lons = srv.liveSeen.map((l) => l.body.lon as number);
+  assert.ok(lons[lons.length - 1]! !== lons[0], 'the position moves along the route');
+  const b = srv.liveSeen[0]!.body;
+  assert.deepEqual(Object.keys(b).sort(), ['altFt', 'engines', 'flags', 'fuelKg', 'gsKts', 'headingDeg', 'lat', 'lon', 'paused', 'phase', 'simRate', 't', 'vsFpm']);
+  assert.ok(!r.out.includes(KEY));
+});
+
+test('replay against a server without the live route (older server): the flight is still verified and the pilot is told once', async (t) => {
+  const srv = await stub(t, { verification: 'verified', reason: null }, undefined, 'missing');
+  const r = await run(t, ['replay', fixture('ga-c172-lfpn-lfaq'), '--server', srv.url, '--key', KEY, '--speed', '1000']);
+  assert.equal(r.code, 0, r.out);
+  assert.equal(srv.seen.length, 1);
+  assert.equal((r.out.match(/live position stopped/g) ?? []).length, 1, r.out);
+});
+
+test('replay with a live endpoint that never answers: the report is not delayed', async (t) => {
+  const srv = await stub(t, { verification: 'verified', reason: null }, undefined, 'hang');
+  const started = Date.now();
+  const r = await run(t, ['replay', fixture('ga-c172-lfpn-lfaq'), '--server', srv.url, '--key', KEY, '--speed', '100000']);
+  assert.equal(r.code, 0, r.out);
+  assert.equal(srv.seen.length, 1);
+  assert.ok(Date.now() - started < 8_000, 'finished well before the live request timeout would matter');
 });

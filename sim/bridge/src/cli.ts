@@ -8,10 +8,11 @@ import { ServerClient } from './client.ts';
 import { configSchema, defaultConfigDir, loadConfig, normalizeServerUrl, saveConfig, sendsKeyInClear } from './config.ts';
 import { readSamples, rebaseToStart } from './fixture.ts';
 import { flushOutbox } from './deliver.ts';
+import { LiveReporter } from './live.ts';
 import { Outbox } from './outbox.ts';
 import { Session } from './session.ts';
-import { watchSim } from './simconnect.ts';
-import { serveStatus, STATUS_PORT } from './status.ts';
+import { watchSim, type SimLink } from './simconnect.ts';
+import { BRIDGE_VERSION, serveStatus, STATUS_PORT } from './status.ts';
 import { FlightTracker } from './tracker.ts';
 
 const USAGE = `usage: opc-bridge <command>
@@ -116,13 +117,14 @@ async function fly(id: string | undefined, f: Flags): Promise<number> {
   const outbox = new Outbox(dir);
   const session = new Session({
     flight: { id: flight.id, from: flight.job.origin, to: flight.job.destination, aircraftIcao: flight.aircraftIcao },
-    serverUrl, client, outbox, log,
+    serverUrl, client, outbox, log, live: new LiveReporter({ client, flightId: flight.id, log }),
   });
-  const status = await serveStatus(() => session.status);
+  let sim: SimLink = 'waiting';
+  const status = await serveStatus(() => session.status, STATUS_PORT, { sim: () => sim, version: BRIDGE_VERSION });
   log(`flight ${flight.id}: ${flight.job.origin} -> ${flight.job.destination} in a ${flight.aircraftIcao}; status at http://127.0.0.1:${STATUS_PORT}/status`);
   // reports an earlier run could not deliver (sim closed while the server was down) go out in the background
   void flushOutbox(client, outbox, serverUrl, { onRetry: (e) => log(`earlier report: ${e.message}`) }).then((ds) => ds.forEach((d) => log(`earlier report: ${d.state}`)));
-  const stop = await watchSim((s) => session.feed(s), { log });
+  const stop = await watchSim((s) => session.feed(s), { log, onState: (state) => { sim = state; } });
   void session.done.then(() => log('flight settled; Ctrl+C quits (the panel keeps showing the result until then)'));
   await new Promise<void>((resolve) => process.once('SIGINT', resolve));
   stop();
@@ -152,7 +154,7 @@ async function replay(path: string, f: Flags & { flight?: string | undefined; sp
   log(`replaying ${path} (${samples.length} samples, x${speed}) as flight ${flight.id}: ${flight.job.origin} -> ${flight.job.destination}`);
   const session = new Session({
     flight: { id: flight.id, from: flight.job.origin, to: flight.job.destination, aircraftIcao: flight.aircraftIcao },
-    serverUrl, client, outbox: new Outbox(dir), log,
+    serverUrl, client, outbox: new Outbox(dir), log, live: new LiveReporter({ client, flightId: flight.id, log }),
     deliver: { maxAttempts: 5 }, // headless: give up after a few tries; the report stays in the outbox
   });
   // the recording is old but the server judges against its own clock: play it as if the flight started when the job was accepted

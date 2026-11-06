@@ -32,6 +32,11 @@ export const simSampleSchema = z.object({
   atcModel: z.string().max(200),
   title: z.string().max(200),
   engineKind: z.enum(ENGINE_KINDS),
+  /** Live telemetry only (never used by the tracker): absent in recordings that predate it, and when the SimVar is garbage. */
+  altFt: finite.optional(),
+  headingDeg: finite.optional(),
+  /** One entry per engine; a gauge the aircraft does not have is left out, never zero-filled. */
+  engines: z.array(z.object({ torquePct: finite.optional(), n1Pct: finite.optional(), ittC: finite.optional(), oilPsi: finite.optional() })).max(8).optional(),
 });
 export type SimSample = z.infer<typeof simSampleSchema>;
 

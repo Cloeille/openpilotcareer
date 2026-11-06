@@ -28,8 +28,9 @@ fixture file ───────▶ fixture.ts ───┴▶ SimSample ▶ t
 - `deliver.ts` writes the report to `outbox/` in the config directory **before** the first send, then retries with exponential
   backoff (1 s … 5 min). One file per (server, flight), so re-sending is idempotent; a `409` means an earlier send got through.
   Reports left by a previous run are sent when `fly` starts.
+- `live.ts` posts a live position (`POST /api/v1/flights/:id/live`, see [docs/telemetry-api.md](../../docs/telemetry-api.md)) every 2 s while `fly` or `replay` runs, so the web app can show the flight in progress. It is best effort: one request at a time, a 4 s timeout, every failure is logged once and swallowed, and the flight tracker never waits for it. Altitude, heading and engine gauges (`PLANE ALTITUDE`, `PLANE HEADING DEGREES TRUE`, `TURB ENG MAX TORQUE PERCENT`, `TURB ENG N1`, `TURB ENG ITT`, `GENERAL ENG OIL PRESSURE`, per engine) come from a second SimConnect data definition, so a SimVar the sim refuses cannot touch the tracker's own readings; a gauge the aircraft does not have is omitted. A replay of a recording carries neither, so the heading is the track between samples and the altitude the integrated vertical speed (relative to the field). **Like the rest of `simconnect.ts`, these SimVars have not met a running MSFS.**
 - `status.ts` serves the fixed panel contract on `127.0.0.1:7878` only (Host header checked against DNS rebinding), with
-  `Access-Control-Allow-Origin: *`. It is read-only and contains no secrets.
+  `Access-Control-Allow-Origin: *`. Besides the panel fields it reports `sim` (`connected | waiting | unavailable`: SimConnect link, or no SimConnect client on this machine) and `version` (the bridge's version) for the web app's onboarding; the panel ignores them. It is read-only and contains no secrets.
 
 ## Install and use
 

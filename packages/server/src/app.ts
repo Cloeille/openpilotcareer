@@ -17,6 +17,7 @@ import {
 } from './game.ts';
 import { HttpError, Limiter, NUMERIC_ID, parse } from './http.ts';
 import { registerStart } from './routes-start.ts';
+import { registerLive } from './routes-live.ts';
 import { fetchLatestOfp, type Fetch } from './simbrief.ts';
 import { maintenanceTick } from './finance.ts';
 import { registerFinance } from './routes-finance.ts';
@@ -318,6 +319,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
 
   registerStart(app, { db, now });
   registerFinance(app, { db, now });
+  registerLive(app, { db, now });
 
   return app;
 }

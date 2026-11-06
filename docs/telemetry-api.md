@@ -100,6 +100,37 @@ Every non-2xx response is `{ "error": "<code>", "message": "<text>" }`.
 | 409 | `flight_closed` | Flight is no longer `active` |
 | 429 | `rate_limited` | Too many credential attempts from one IP |
 
+## Live position (optional)
+
+While the player flies, the client may also push its position so the web app can show the flight in progress. It is best effort: a client that never sends it still gets its flight verified exactly as above.
+
+```
+POST /api/v1/flights/:id/live        (API key; the flight must be active and yours)
+→ 204 No Content
+```
+
+Body (every field required, validated; units are feet, knots, feet/minute, degrees, kilograms, °C, psi):
+
+```json
+{ "t": 1793782805000, "lat": 48.75, "lon": 2.1, "altFt": 3500, "gsKts": 110, "vsFpm": 0, "headingDeg": 45, "fuelKg": 90,
+  "phase": "airborne", "paused": false, "simRate": 1, "flags": [], "engines": [ { "n1Pct": 88.5, "ittC": 640, "oilPsi": 62 } ] }
+```
+
+`phase` is `preflight | taxiOut | airborne | landed | parked`. An engine gauge the aircraft does not have is left out (`engines: []` when it has none); it is never sent as 0.
+
+- At most **one sample per second per flight**: a faster one gets `429 rate_limited` and is simply dropped. The bridge sends one every 2 s.
+- `404 flight_not_found` (not your flight, or unknown), `409 flight_closed` (verified, cancelled, ...), `400 invalid_request` (the body), `401` (not an API key). Stop sending after a 404 or 409.
+- The server keeps only the **latest** sample per flight, in memory, plus `last_live_at` on the flight. A restart forgets the sample, not the time.
+
+The web app reads it back with the player's session:
+
+```
+GET /api/v1/flights/:id/live
+→ 200 { "sample": LiveSample | null, "receivedAt": 1793782806000 | null, "bridgeLost": false, "remainingNm": 23.4 | null, "etaAt": 1793784210000 | null }
+```
+
+`bridgeLost` is true when the flight is active, has reported before, and nothing arrived for more than 30 s (a flight whose bridge never started is not "lost", it has `sample: null`). `remainingNm` is the great-circle distance to the destination airport; `etaAt` (epoch ms) is that distance at the current ground speed and sim rate, only while airborne, not paused and above 30 kt.
+
 ## Manual completion without a client
 
 The web app offers **Complete manually** on an active flight. It is equivalent to a `manual` report: `unverified`, 60 % pay, estimated costs, and only allowed once the fastest believable flight time (distance ÷ 1.25 × cruise speed) has elapsed (no wait when anti-cheat is off).
