@@ -66,8 +66,22 @@ ALTER TABLE companies_new RENAME TO companies;
 CREATE INDEX companies_user ON companies(user_id);
 `;
 
+// Numbers 3 to 5 belong to lots START, FINANCE and LIVE (fixed numbering, see docs/v2-contract.md): empty here until they merge.
+const SCHEMA_V3 = '';
+const SCHEMA_V4 = '';
+const SCHEMA_V5 = '';
+
+// Lot SIMBRIEF-LINK: the saved SimBrief identifier of an account (public, not a secret) and the SimBrief side of a flight.
+const SCHEMA_V6 = `
+ALTER TABLE users ADD COLUMN simbrief_username TEXT;
+ALTER TABLE users ADD COLUMN simbrief_pilot_id INTEGER;
+ALTER TABLE users ADD COLUMN simbrief_verified_at INTEGER;
+ALTER TABLE flights ADD COLUMN simbrief_static_id TEXT;
+ALTER TABLE flights ADD COLUMN simbrief_ofp_id TEXT;
+`;
+
 /** Append-only; `PRAGMA user_version` records how many ran. */
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2];
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V6];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);
