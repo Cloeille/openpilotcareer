@@ -1,4 +1,4 @@
-import type { Me } from '@opc/shared';
+import type { Snapshot } from './snapshot.ts';
 import type { SceneId } from './scenes.ts';
 
 /** The tabs of the Q / E cycle, in HUD order. Settings is reached from the gear and is outside the cycle. */
@@ -14,13 +14,16 @@ export type Screen = {
   /** Highlighted HUD tab; 'settings' lights the gear. */
   tab: Tab | 'settings' | null;
   hints: Hint[];
-  /** Hash that Esc navigates to; null = Esc does nothing here. */
-  back: string | null;
+  /** Where Esc leads: a hash, an action, or null (a tab: Esc returns to the dashboard). */
+  back: string | (() => void) | null;
+  /** Single-key shortcuts of this screen (lower-case letter -> action), matching the key hints. They win over Q / E. */
+  keys?: Record<string, () => void>;
   view: HTMLElement;
 };
 
 export type Ctx = {
-  me: Me;
+  /** Everything loaded at the last refresh: the account (`snap.me`), the job board and the last flight. */
+  snap: Snapshot;
   /** Route argument: `#job/J-1` -> 'J-1'. */
   arg: string | null;
   /** Reload `me` and redraw the current screen. */

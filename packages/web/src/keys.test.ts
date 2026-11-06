@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cycleTab, hashFor, keyAction, parseHash, stepRow } from './keys.ts';
+import { cycleTab, hashFor, keyAction, parseHash, shortcutOf, stepRow } from './keys.ts';
 
 const press = (key: string, mods: Partial<{ ctrlKey: boolean; metaKey: boolean; altKey: boolean }> = {}) => ({ key, ctrlKey: false, metaKey: false, altKey: false, ...mods });
 const TABS = ['dashboard', 'jobs', 'fleet', 'history', 'leaderboard'];
@@ -55,4 +55,13 @@ test('hash routes round-trip their argument', () => {
   assert.deepEqual(parseHash(hashFor('job', 'a/b c')), { name: 'job', arg: 'a/b c' });
   assert.deepEqual(parseHash(''), { name: '', arg: null });
   assert.equal(parseHash('#job/%E0%A4%A').arg, null);
+});
+
+test('shortcuts are single letters or digits outside fields, lower-cased, never with modifiers', () => {
+  assert.equal(shortcutOf(press('A'), false), 'a');
+  assert.equal(shortcutOf(press('1'), false), '1');
+  assert.equal(shortcutOf(press('a'), true), null);
+  assert.equal(shortcutOf(press('a', { ctrlKey: true }), false), null);
+  assert.equal(shortcutOf(press('Enter'), false), null);
+  assert.equal(shortcutOf(press(' '), false), null);
 });

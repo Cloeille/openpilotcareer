@@ -9,7 +9,7 @@ import type { SceneId } from './scenes.ts';
 function legacy(page: keyof typeof pages, scene: SceneId, tab: Tab | 'settings'): ScreenFn {
   return async (ctx: Ctx): Promise<Screen> => {
     const p = pages[page]!;
-    const view = h('div', { class: 'legacy' }, await p.render({ me: ctx.me, refresh: ctx.refresh, go: (name) => ctx.go(`#${name}`) }));
+    const view = h('div', { class: 'legacy' }, await p.render({ me: ctx.snap.me, refresh: ctx.refresh, go: (name) => ctx.go(`#${name}`) }));
     return { title: p.title, scene, tab, hints: [{ key: t('key.esc'), label: t('hint.back') }], back: null, view };
   };
 }

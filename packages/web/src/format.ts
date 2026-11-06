@@ -10,6 +10,7 @@ export function makeFormat(lang: Lang) {
   const eur = new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
   const zulu = new Intl.DateTimeFormat(locale, { timeZone: 'UTC', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
   const day = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' });
+  const rel = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
   const num = (n: number, digits = 0): string => nbsp(n.toLocaleString(locale, { maximumFractionDigits: digits, minimumFractionDigits: digits }));
   return {
     num,
@@ -30,6 +31,16 @@ export function makeFormat(lang: Lang) {
       const d = new Date(now);
       const end = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1);
       return { month: new Intl.DateTimeFormat(locale, { timeZone: 'UTC', month: 'long' }).format(now), daysLeft: Math.floor((end - now) / 86_400_000) };
+    },
+    /** Elapsed time, coarse: `12 s`, `3 min`, `2 h`. */
+    elapsed: (ms: number): string => {
+      const s = Math.max(0, Math.round(ms / 1000));
+      return s < 60 ? `${s}${NBSP}s` : s < 3600 ? `${Math.floor(s / 60)}${NBSP}min` : `${Math.floor(s / 3600)}${NBSP}h`;
+    },
+    /** Whole calendar days (UTC) between `ms` and `now` in words: `hier`, `3 days ago`. */
+    ago: (ms: number, now: number): string => {
+      const days = Math.floor(now / 86_400_000) - Math.floor(ms / 86_400_000);
+      return days < 0 ? '' : rel.format(-days, 'day');
     },
     /** Flight duration from hours: `1 h 30`. */
     duration: (hours: number): string => {

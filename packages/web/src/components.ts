@@ -16,6 +16,10 @@ export function icon(name: IconName, size = 16): SVGSVGElement {
   return svg;
 }
 
+/** The logo square beside the product name; `sub` is the line under the name (tagline or server). */
+export const brandBlock = (name: string, sub: Child): HTMLElement =>
+  h('div', { class: 'brand' }, h('div', { class: 'logo' }, icon('plane-takeoff', 20)), h('div', { class: 'brand-stack' }, h('span', { class: 'brand-name' }, name), sub));
+
 // ------------------------------------------------------------------ Keycap, Button
 
 /** A key legend: `Q`, `Entrée`, `Tab`. */
@@ -57,7 +61,7 @@ export const signDirection = (code: string): HTMLElement => h('span', { class: '
 
 // ------------------------------------------------------------------ Input, Stat, Panel
 
-type InputOpts = { label: string; control?: HTMLElement; icon?: IconName; hint?: string; id?: string };
+type InputOpts = { label: string; control?: HTMLElement; icon?: IconName; hint?: string; id?: string; trailing?: HTMLElement };
 let uid = 0;
 /** Input: a labelled field. Pass the control (input/select) to wrap, or props to build a text input. */
 export function inputField(o: InputOpts, props?: Record<string, unknown>): { root: HTMLElement; control: HTMLInputElement } {
@@ -68,7 +72,7 @@ export function inputField(o: InputOpts, props?: Record<string, unknown>): { roo
   if (hintId) control.setAttribute('aria-describedby', hintId);
   const root = h('div', { class: 'input' },
     h('label', { class: 'input-label', for: id }, o.label),
-    h('div', { class: 'input-field' }, o.icon ? icon(o.icon) : null, control),
+    h('div', { class: 'input-field' }, o.icon ? icon(o.icon) : null, control, o.trailing ?? null),
     o.hint ? h('small', { id: hintId }, o.hint) : null);
   return { root, control };
 }
@@ -80,8 +84,8 @@ export const stat = (label: string, value: Child, delta?: Child): HTMLElement =>
 type PanelOpts = { title: string; action?: Child; tick?: boolean; danger?: boolean; class?: string; id?: string; headless?: boolean };
 /** Panel: the translucent card every screen is made of. Content is a flat list of children. */
 export function panel(o: PanelOpts, ...content: Child[]): HTMLElement {
-  const headingId = o.id ? `${o.id}-title` : null;
-  return h('section', { class: `panel ${o.danger ? 'danger' : ''} ${o.class ?? ''}`.trim(), id: o.id, 'aria-labelledby': headingId },
+  const headingId = o.id && !o.headless ? `${o.id}-title` : null;
+  return h('section', { class: `panel ${o.danger ? 'danger' : ''} ${o.class ?? ''}`.trim(), id: o.id, 'aria-labelledby': headingId, 'aria-label': o.headless ? o.title : null },
     o.headless ? null : h('header', { class: 'panel-head' }, o.tick ? h('span', { class: 'tick' }) : null, h('h2', { id: headingId }, o.title), o.action ? h('div', { class: 'panel-action' }, o.action) : null),
     h('div', { class: 'panel-body' }, content));
 }

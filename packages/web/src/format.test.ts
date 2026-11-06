@@ -45,3 +45,19 @@ test('season: month name and whole days left in the UTC month', () => {
   assert.equal(fr.season(Date.UTC(2026, 10, 30, 23)).daysLeft, 0);
   assert.equal(en.season(Date.UTC(2026, 11, 30, 12)).daysLeft, 1);
 });
+
+test('ago: calendar days in words', () => {
+  const now = Date.UTC(2026, 10, 5, 9);
+  assert.equal(fr.ago(Date.UTC(2026, 10, 5, 1), now), "aujourd’hui");
+  assert.equal(fr.ago(Date.UTC(2026, 10, 4, 23), now), 'hier');
+  assert.equal(en.ago(Date.UTC(2026, 10, 4, 23), now), 'yesterday');
+  assert.equal(en.ago(Date.UTC(2026, 10, 2, 8), now), '3 days ago');
+});
+
+test('elapsed: seconds, minutes, hours', () => {
+  assert.equal(fr.elapsed(12_400), `12${NBSP}s`);
+  assert.equal(fr.elapsed(59_000), `59${NBSP}s`);
+  assert.equal(fr.elapsed(3 * 60_000 + 5000), `3${NBSP}min`);
+  assert.equal(fr.elapsed(2 * 3_600_000), `2${NBSP}h`);
+  assert.equal(fr.elapsed(-5), `0${NBSP}s`);
+});

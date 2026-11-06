@@ -41,7 +41,15 @@ export const session = {
 let onUnauthorized: () => void = () => {};
 export const setUnauthorizedHandler = (fn: () => void): void => { onUnauthorized = fn; };
 
-type Opts = { method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'; body?: unknown; server?: string; auth?: boolean };
+/** Called when a signed-in request cannot reach the server at all (the screen then switches to the read-only offline state). */
+let onNetworkLost: () => void = () => {};
+export const setNetworkLostHandler = (fn: () => void): void => { onNetworkLost = fn; };
+
+let lastSync: number | null = null;
+/** When the server last answered a signed-in request (ms), or null if it has not yet. */
+export const lastSyncAt = (): number | null => lastSync;
+
+type Opts = { method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'; body?: unknown; server?: string; auth?: boolean; timeoutMs?: number };
 
 async function request(path: string, o: Opts): Promise<Response> {
   const headers: Record<string, string> = {};
@@ -50,14 +58,16 @@ async function request(path: string, o: Opts): Promise<Response> {
   if (o.auth !== false && company !== null) headers['x-opc-company'] = String(company);
   try {
     return await fetch(`${o.server ?? state.server}/api/v1${path}`, {
-      method: o.method ?? (o.body === undefined ? 'GET' : 'POST'), headers, ...(o.body !== undefined ? { body: JSON.stringify(o.body) } : {}), signal: AbortSignal.timeout(20_000),
+      method: o.method ?? (o.body === undefined ? 'GET' : 'POST'), headers, ...(o.body !== undefined ? { body: JSON.stringify(o.body) } : {}), signal: AbortSignal.timeout(o.timeoutMs ?? 20_000),
     });
   } catch {
+    if (o.auth !== false && state.token) onNetworkLost();
     throw new ApiError(0, 'network', `cannot reach ${o.server ?? state.server}`);
   }
 }
 
 async function fail(res: Response, auth: boolean): Promise<never> {
+  if (auth) lastSync = Date.now();
   const data = (await res.json().catch(() => null)) as { error?: string; message?: string } | null;
   if (res.status === 401 && auth && state.token) onUnauthorized();
   throw new ApiError(res.status, data?.error ?? 'error', data?.message ?? `${res.status} ${res.statusText}`);
@@ -66,12 +76,13 @@ async function fail(res: Response, auth: boolean): Promise<never> {
 export async function api<T>(path: string, o: Opts = {}): Promise<T> {
   const res = await request(path, o);
   if (!res.ok) return fail(res, o.auth !== false);
+  if (o.auth !== false) lastSync = Date.now();
   return (res.status === 204 ? undefined : await res.json()) as T;
 }
 
 /** Validate that `server` speaks OPC: GET /api/v1/info must return the documented shape. */
 export async function fetchInfo(server: string): Promise<ServerInfo> {
-  const res = await request('/info', { server, auth: false });
+  const res = await request('/info', { server, auth: false, timeoutMs: 5000 });
   if (!res.ok) throw new ApiError(res.status, 'not_opc', 'that address answered, but it is not an OpenPilotCareer server');
   const parsed = infoSchema.safeParse(await res.json().catch(() => null));
   if (!parsed.success) throw new ApiError(res.status, 'not_opc', 'that address answered, but it is not an OpenPilotCareer server');

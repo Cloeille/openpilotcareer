@@ -1,5 +1,5 @@
 import type { Me } from '@opc/shared';
-import { icon, keycap } from './components.ts';
+import { brandBlock, icon, keycap } from './components.ts';
 import { fmt } from './format.ts';
 import { t, tp } from './i18n.ts';
 import { PRODUCT_NAME } from './brand.ts';
@@ -8,7 +8,7 @@ import { TABS, type Hint, type Tab } from './screen.ts';
 import { h } from './ui.ts';
 import { session, GLOBAL_URL } from './api.ts';
 
-export type HudData = { me: Me; tab: Tab | 'settings' | null; antiCheat: boolean; onCompany: (id: number) => void; onChangeServer: () => void };
+export type HudData = { me: Me; tab: Tab | 'settings' | null; antiCheat: boolean; offline?: boolean; jobCount: number; onCompany: (id: number) => void; onChangeServer: () => void };
 
 const RING_R = 18;
 function rankRing(fraction: number, label: string): HTMLElement {
@@ -37,17 +37,14 @@ export function hudTop(d: HudData): HTMLElement {
   const f = fmt();
   const prog = rankProgress(me.pilot);
   const switcher = h('select', {
-    id: 'company-switch', class: 'company-switch', name: 'company', 'aria-label': t('hud.company'),
+    id: 'company-switch', class: 'company-switch', name: 'company', disabled: d.offline,
     onchange: (e: Event) => d.onCompany(Number((e.target as HTMLSelectElement).value)),
   }, me.companies.map((c) => h('option', { value: c.id, selected: c.id === me.company.id }, c.name)));
-  const tabLink = (tab: Tab): HTMLElement => h('a', { href: `#${tab}`, 'aria-current': tab === d.tab ? 'page' : null }, t(`tab.${tab}`));
+  const tabLink = (tab: Tab): HTMLElement => h('a', { href: `#${tab}`, 'aria-current': tab === d.tab ? 'page' : null }, t(`tab.${tab}`), tab === 'jobs' ? h('span', { class: 'tab-count' }, d.jobCount) : null);
   return h('header', { class: 'hud-top' },
-    h('div', { class: 'brand' },
-      h('div', { class: 'logo' }, icon('plane-takeoff', 20)),
-      h('div', { class: 'brand-stack' },
-        h('span', { class: 'brand-name' }, PRODUCT_NAME),
-        h('div', { class: 'server-line' }, h('span', { class: 'dot' }), serverName(), h('span', { class: 'dim', 'aria-hidden': 'true' }, '·'),
-          h('button', { type: 'button', class: 'link-btn', title: t('hud.changeHint'), onclick: d.onChangeServer }, t('hud.change'))))),
+    brandBlock(PRODUCT_NAME, h('div', { class: 'server-line' + (d.offline ? ' off' : '') },
+      h('span', { class: d.offline ? 'dot off' : 'dot' }), d.offline ? t('offline.server', { server: serverName() }) : serverName(), h('span', { class: 'dim', 'aria-hidden': 'true' }, '·'),
+      h('button', { type: 'button', class: 'link-btn', title: t('hud.changeHint'), onclick: d.onChangeServer }, t('hud.change')))),
     h('nav', { class: 'hud-tabs', 'aria-label': t('nav.main') },
       h('span', { title: t('hud.prevTab') }, keycap('Q')), TABS.map(tabLink), h('span', { title: t('hud.nextTab') }, keycap('E'))),
     h('div', { class: 'resources' },

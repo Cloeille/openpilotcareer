@@ -1,8 +1,8 @@
-import { PAD_BUTTONS, cycleTab, keyAction, stepRow, type Action } from './keys.ts';
-import { TABS, type Tab } from './screen.ts';
+import { PAD_BUTTONS, cycleTab, keyAction, shortcutOf, stepRow, type Action } from './keys.ts';
+import { TABS, type Screen, type Tab } from './screen.ts';
 
 /** What the input layer needs to know about the screen on display. `null` = no HUD (login, loading). */
-export type NavState = { tab: Tab | 'settings' | null; back: string | null } | null;
+export type NavState = (Pick<Screen, 'back' | 'keys'> & { tab: Tab | 'settings' | null }) | null;
 export type Nav = { state: () => NavState; go: (hash: string) => void };
 
 const TYPING = 'input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]), textarea, select, [contenteditable=true]';
@@ -25,6 +25,7 @@ function run(action: Action, nav: Nav, target: Element | null): boolean {
     }
     case 'back': {
       if (!state) return false;
+      if (typeof state.back === 'function') { state.back(); return true; }
       const to = state.back ?? (state.tab !== 'dashboard' ? '#dashboard' : null);
       if (to === null) return false;
       nav.go(to);
@@ -54,7 +55,10 @@ export function installInput(nav: Nav): void {
   document.addEventListener('keydown', (e) => {
     if (e.defaultPrevented || e.repeat && (e.key === 'q' || e.key === 'e')) return;
     const target = e.target instanceof Element ? e.target : null;
-    const action = keyAction(e, !!target?.matches(TYPING));
+    const typing = !!target?.matches(TYPING);
+    const shortcut = nav.state()?.keys?.[shortcutOf(e, typing) ?? ''];
+    if (shortcut) { e.preventDefault(); shortcut(); return; }
+    const action = keyAction(e, typing);
     if (action && run(action, nav, target)) e.preventDefault();
   });
 
