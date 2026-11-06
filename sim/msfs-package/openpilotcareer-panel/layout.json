@@ -1,0 +1,34 @@
+{
+  "content": [
+    {
+      "path": "html_ui/InGamePanels/OpenPilotCareer/OpenPilotCareer.css",
+      "size": 4193,
+      "date": 134383689008623900
+    },
+    {
+      "path": "html_ui/InGamePanels/OpenPilotCareer/OpenPilotCareer.html",
+      "size": 1608,
+      "date": 134383685828350984
+    },
+    {
+      "path": "html_ui/InGamePanels/OpenPilotCareer/OpenPilotCareer.js",
+      "size": 1175,
+      "date": 134383687373490986
+    },
+    {
+      "path": "html_ui/InGamePanels/OpenPilotCareer/panel.js",
+      "size": 7471,
+      "date": 134383686339399560
+    },
+    {
+      "path": "html_ui/InGamePanels/OpenPilotCareer/view-model.js",
+      "size": 6036,
+      "date": 134383689100063963
+    },
+    {
+      "path": "html_ui/Textures/Menu/toolbar/ICON_TOOLBAR_OPENPILOTCAREER_PANEL.svg",
+      "size": 392,
+      "date": 134383685828410985
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+# layout.json records exact byte sizes; keep package files byte-identical on every OS.
+openpilotcareer-panel/** -text
