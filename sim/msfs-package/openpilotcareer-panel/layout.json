@@ -2,33 +2,73 @@
   "content": [
     {
       "path": "html_ui/InGamePanels/OpenPilotCareer/OpenPilotCareer.css",
-      "size": 4193,
-      "date": 134383689008623900
+      "size": 12041,
+      "date": 134384619305517444
     },
     {
       "path": "html_ui/InGamePanels/OpenPilotCareer/OpenPilotCareer.html",
       "size": 1608,
-      "date": 134383685828350984
+      "date": 134384621376016939
     },
     {
       "path": "html_ui/InGamePanels/OpenPilotCareer/OpenPilotCareer.js",
       "size": 1175,
-      "date": 134383687373490986
+      "date": 134384531458013970
+    },
+    {
+      "path": "html_ui/InGamePanels/OpenPilotCareer/fonts/b612-mono-latin-400-normal.woff2",
+      "size": 19048,
+      "date": 134384610297540095
+    },
+    {
+      "path": "html_ui/InGamePanels/OpenPilotCareer/fonts/b612-mono-latin-700-normal.woff2",
+      "size": 18984,
+      "date": 134384610297540095
+    },
+    {
+      "path": "html_ui/InGamePanels/OpenPilotCareer/fonts/barlow-latin-400-normal.woff2",
+      "size": 22196,
+      "date": 134384610297530095
+    },
+    {
+      "path": "html_ui/InGamePanels/OpenPilotCareer/fonts/barlow-latin-500-normal.woff2",
+      "size": 22008,
+      "date": 134384610297530095
+    },
+    {
+      "path": "html_ui/InGamePanels/OpenPilotCareer/fonts/barlow-latin-600-normal.woff2",
+      "size": 22772,
+      "date": 134384610297540095
+    },
+    {
+      "path": "html_ui/InGamePanels/OpenPilotCareer/fonts/barlow-latin-700-normal.woff2",
+      "size": 22788,
+      "date": 134384610297540095
+    },
+    {
+      "path": "html_ui/InGamePanels/OpenPilotCareer/fonts/barlow-semi-condensed-latin-500-normal.woff2",
+      "size": 22428,
+      "date": 134384610297540095
+    },
+    {
+      "path": "html_ui/InGamePanels/OpenPilotCareer/fonts/barlow-semi-condensed-latin-600-normal.woff2",
+      "size": 22984,
+      "date": 134384610297540095
     },
     {
       "path": "html_ui/InGamePanels/OpenPilotCareer/panel.js",
-      "size": 7471,
-      "date": 134383686339399560
+      "size": 20351,
+      "date": 134384619305508698
     },
     {
       "path": "html_ui/InGamePanels/OpenPilotCareer/view-model.js",
-      "size": 6036,
-      "date": 134383689100063963
+      "size": 38052,
+      "date": 134384618962504860
     },
     {
       "path": "html_ui/Textures/Menu/toolbar/ICON_TOOLBAR_OPENPILOTCAREER_PANEL.svg",
       "size": 392,
-      "date": 134383685828410985
+      "date": 134384531458016972
     }
   ]
 }
