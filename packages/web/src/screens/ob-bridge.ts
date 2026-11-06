@@ -42,6 +42,7 @@ export async function step5(w: Wizard): Promise<StepResult> {
 
   const keyBox = h('div', { class: 'ob-keybox', tabindex: 0, 'aria-label': t('ob.s5.keyCreated', { label: KEY_LABEL }) }, w.key?.secret ?? '');
   const copyBtn = button(t('ob.s5.copy'), { variant: 'primary', key: 'C' });
+  copyBtn.removeAttribute('data-primary'); // looks primary (the mockup), but Enter must go to "Continuer", not copy
   const copyLabel = copyBtn.querySelector('span')!;
   const copyKey = async (): Promise<void> => {
     if (!w.key?.secret) return;
@@ -74,7 +75,9 @@ export async function step5(w: Wizard): Promise<StepResult> {
   // ---- 2. the download
   const size = await downloadSize();
   const dlInfo = h('small', null, size === null ? t('ob.s5.fileMissing') : size > 0 ? t('ob.s5.fileSize', { size: fm.num(size / 1_000_000, 1) }) : '');
-  const dl = h('a', { class: 'btn secondary', href: downloadUrl(), download: 'opc-bridge-win-x64.exe', rel: 'noopener' }, icon('download'), h('span', null, t('ob.s5.download')));
+  const dl = size === null
+    ? button(t('ob.s5.download'), { variant: 'secondary', icon: 'download', disabled: true })
+    : h('a', { class: 'btn secondary', href: downloadUrl(), download: 'opc-bridge-win-x64.exe', rel: 'noopener' }, icon('download'), h('span', null, t('ob.s5.download')));
 
   // ---- 3. the live test: the bridge on this PC, and the server seeing the key
   const started = Date.now();
@@ -89,6 +92,9 @@ export async function step5(w: Wizard): Promise<StepResult> {
   let diagOpen = false;
   let lastVerdict = bridgeVerdict(null, keyOk, 0);
 
+  const installIndex = h('span', { class: 'ob-howto-index' }, '1');
+  const keyIndex = h('span', { class: 'ob-howto-index' }, '2');
+  const mark = (el: HTMLElement, done: boolean, n: string): void => { el.classList.toggle('done', done); el.replaceChildren(...(done ? [icon('check', 13)] : [n])); };
   const check = (state: CheckState, label: string, value: string): HTMLElement =>
     h('li', { class: `ob-check ${state}` }, icon(CHECK_ICON[state], 17), h('b', null, label), h('span', null, value));
 
@@ -126,6 +132,8 @@ export async function step5(w: Wizard): Promise<StepResult> {
       h('div', null, t('ob.s5.diagKey', { state: keyOk ? t('ob.s5.yes') : t('ob.s5.no') })),
       h('div', null, t('ob.s5.diagHint')))] : []));
     paintContinue(v.overall === 'connected');
+    mark(installIndex, v.bridge === 'ok', '1');
+    mark(keyIndex, v.key === 'ok', '2');
     w.bridgeSeen(probe);
   };
 
@@ -159,9 +167,9 @@ export async function step5(w: Wizard): Promise<StepResult> {
   const left = h('div', { class: 'ob-bridge-left' },
     titleArea(t('ob.s5.over'), t('ob.s5.title'), t('ob.s5.sub', { product: PRODUCT_NAME })),
     h('div', { class: 'ob-howto' },
-      h('div', { class: 'ob-howto-step' }, h('span', { class: 'ob-howto-index' }, icon('check', 13)),
+      h('div', { class: 'ob-howto-step' }, installIndex,
         h('div', { class: 'ob-howto-body' }, h('h2', null, t('ob.s5.install', { product: PRODUCT_NAME })), h('p', null, t('ob.s5.installSub')), h('div', { class: 'ob-dl' }, dl, dlInfo))),
-      h('div', { class: 'ob-howto-step' }, h('span', { class: 'ob-howto-index' }, icon('check', 13)), keyBlock)));
+      h('div', { class: 'ob-howto-step' }, keyIndex, keyBlock)));
   const view = h('div', { class: 'ob-page' },
     h('div', { class: 'ob-body' }, left, h('div', { class: 'ob-test' }, testPanel,
       h('div', { class: 'ob-others' }, other(true, 'ob.s5.okWhen', 'ob.s5.okTitle', 'ob.s5.okMsg'), other(false, 'ob.s5.failWhen', 'ob.s5.failTitle', 'ob.s5.failMsg')))),

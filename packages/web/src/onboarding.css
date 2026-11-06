@@ -287,8 +287,9 @@
 .ob-reveal-head b { flex: 1; font-size: 14px; font-weight: 600; }
 .ob-reveal-head span { font-size: 13px; font-weight: 500; color: var(--warning); }
 .ob-keyrow { display: flex; gap: 8px; align-items: center; }
-.ob-keybox { flex: 1; min-width: 0; height: 42px; padding: 0 12px; display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 3px; font: 400 14px var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; user-select: all; }
-.ob-reveal-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ob-keybox { flex: 1; min-width: 0; min-height: 42px; padding: 8px 12px; display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 3px; font: 400 13px/1.35 var(--mono); white-space: normal; overflow-wrap: anywhere; user-select: all; }
+.ob-reveal-foot { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.ob-reveal-foot small { flex: 1; }
 .ob-reveal-foot small { font-size: 13px; line-height: 1.4; color: var(--text-tertiary); }
 .ob-reveal-foot .btn.ghost { color: var(--text-primary); font-size: 13px; }
 .ob-test { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; min-height: 0; }
@@ -369,3 +370,8 @@
 .ob-thead .c-rent.hd { font-size: 13px; font-weight: 400; }
 .ob-recap { align-self: stretch; }
 .ob-recap .panel-body { justify-content: space-between; }
+
+/* 5: the render lays a readability scrim over the cockpit photo behind the left column */
+.stage:has(.ob-bridge-left) .scrim { background: linear-gradient(to right, #000000E6 0%, #000000B3 42%, #00000059 100%), radial-gradient(circle at 60% 45%, #00000000 0%, #000000A6 100%); }
+.ob-howto-index { font: 600 12px var(--ui); color: var(--text-secondary); }
+.ob-howto-index.done { color: var(--success); }

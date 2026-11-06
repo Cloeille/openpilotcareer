@@ -66,12 +66,19 @@ function realismEditor(companyId: number, initial: Realism, o: { suggested: Real
   };
 
   const paint = (): void => {
+    // Rebuilding the rows must not drop the keyboard focus: put it back on the same switch or preset.
+    const a = document.activeElement;
+    const focusKey = a instanceof HTMLElement && (a.id.startsWith('rz-') || (a instanceof HTMLInputElement && a.name === 'preset')) ? (a.id || `preset:${(a as HTMLInputElement).value}`) : null;
     cards.replaceChildren(...PRESETS.map(presetCard));
     const custom = cur.preset === 'custom';
     settingsPanel.replaceChildren(panel({
       title: custom ? t('ob.s4.panelCustom') : t('ob.s4.panel', { preset: presetName(cur.preset) }),
       action: t('ob.s4.count', { n: activeToggles(cur) }), class: 'ob-settings', id: 'ob-settings',
     }, REALISM_TOGGLES.map(settingRow)));
+    if (focusKey) {
+      const el = focusKey.startsWith('preset:') ? cards.querySelector<HTMLElement>(`input[value="${focusKey.slice(7)}"]`) : document.getElementById(focusKey) ?? settingsPanel.querySelector<HTMLElement>(`#${focusKey}`);
+      el?.focus({ preventScroll: true });
+    }
   };
   paint();
   const body = h('div', { class: 'ob-main' },
