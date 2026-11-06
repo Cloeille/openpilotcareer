@@ -35,19 +35,21 @@ function v1Database(): string {
   return file;
 }
 
+/** Migration 4 adds columns to `aircraft`: compare only the columns that existed before. */
+const V1_COLUMNS: Record<string, string> = { aircraft: 'id, company_id, icao, location, value, available_at' };
 const TABLES = ['users', 'sessions', 'api_keys', 'companies', 'hubs', 'custom_aircraft', 'aircraft', 'custom_jobs', 'flights', 'job_claims', 'transactions', 'season_stats', 'ai_ticks', 'meta'];
 
 test('migration 2 lets a user own several companies and loses no row, id or relation', () => {
   const file = v1Database();
   const raw = new DatabaseSync(file);
-  const before = Object.fromEntries(TABLES.map((t) => [t, raw.prepare(`SELECT * FROM ${t} ORDER BY rowid`).all()]));
+  const before = Object.fromEntries(TABLES.map((t) => [t, raw.prepare(`SELECT ${V1_COLUMNS[t] ?? '*'} FROM ${t} ORDER BY rowid`).all()]));
   raw.close();
 
   const db = openDb(file);
   assert.equal(get<{ user_version: number }>(db, 'PRAGMA user_version')!.user_version, MIGRATIONS.length);
   assert.equal(get<{ foreign_keys: number }>(db, 'PRAGMA foreign_keys')!.foreign_keys, 1, 'foreign keys are enforced again after migrating');
   assert.deepEqual(all(db, 'PRAGMA foreign_key_check'), []);
-  for (const t of TABLES) assert.deepEqual(all(db, `SELECT * FROM ${t} ORDER BY rowid`), before[t], `${t} unchanged`);
+  for (const t of TABLES) assert.deepEqual(all(db, `SELECT ${V1_COLUMNS[t] ?? '*'} FROM ${t} ORDER BY rowid`), before[t], `${t} unchanged`);
 
   // the old one-company-per-user constraint is gone ...
   db.exec("INSERT INTO companies (user_id, name, balance, reputation, created_at) VALUES (1, 'Alice Cargo', 1, 50, 99)");
@@ -69,4 +71,13 @@ test('migrating is idempotent: reopening a migrated database changes nothing', (
   const db = openDb(file);
   assert.equal(get<{ n: number }>(db, 'SELECT COUNT(*) n FROM companies')!.n, 3);
   assert.equal(get<{ user_version: number }>(db, 'PRAGMA user_version')!.user_version, MIGRATIONS.length);
+});
+
+test('migration 4 backfills registrations (country prefix, unique), ownership, base and wear on existing aircraft', () => {
+  const db = openDb(v1Database());
+  const rows = all<{ id: number; registration: string; ownership: string; base: string; wear_pct: number; status: string }>(db, 'SELECT id, registration, ownership, base, wear_pct, status FROM aircraft ORDER BY id');
+  assert.deepEqual(rows.map((r) => r.registration), ['F-HAZA', 'G-HAZA', 'N100AA']);
+  assert.deepEqual(rows.map((r) => r.base), ['LFPG', 'EGLL', 'KJFK']);
+  assert.ok(rows.every((r) => r.ownership === 'owned' && r.wear_pct === 0 && r.status === 'available'));
+  assert.throws(() => db.exec("UPDATE aircraft SET registration = 'F-HAZA' WHERE id = 2"), /UNIQUE/);
 });

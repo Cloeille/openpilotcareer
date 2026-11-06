@@ -17,6 +17,8 @@ import {
 } from './game.ts';
 import { HttpError, Limiter, NUMERIC_ID, parse } from './http.ts';
 import { fetchLatestOfp, type Fetch } from './simbrief.ts';
+import { maintenanceTick } from './finance.ts';
+import { registerFinance } from './routes-finance.ts';
 
 const MAX_API_KEYS = 10;
 const AUTH_ATTEMPTS_PER_MINUTE = 20;
@@ -66,6 +68,9 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
 
   // AI companies play lazily: any API request first plays the ticks that are due (cheap no-op otherwise).
   if (o.ai !== false) app.addHook('onRequest', async (req) => { if (req.url.startsWith('/api/')) catchUp(db, now()); });
+
+  // Lot FINANCE: free aircraft whose workshop visit is over and bill the months that are due (cheap no-op otherwise).
+  app.addHook('onRequest', async (req) => { if (req.url.startsWith('/api/')) maintenanceTick(db, now()); });
 
   // Clients pick their server at runtime, so the API is cross-origin by design. Auth is a Bearer header, never a cookie,
   // so a wildcard origin exposes nothing a script could not already do with a token it was given.
@@ -308,6 +313,8 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
       return { verification: 'verified', reason: null, flight: flightView(finishFlight(db, f, 'verified', at, { telemetry: report, blockHours: check.blockHours })) };
     });
   });
+
+  registerFinance(app, { db, now });
 
   return app;
 }

@@ -4,7 +4,7 @@ import type { AircraftType, Job, Me } from '@opc/shared';
 import { DEFAULT_FILTERS, boardRows, candidates, flyable, jobsAtIdleAirports, lookupJob, matchesFilters, nextBoardWave, remember } from './board.ts';
 
 const type = (o: Partial<AircraftType> = {}): AircraftType => ({ icao: 'C208', name: 'Caravan', category: 'turboprop-single', engines: 1, wtc: 'L', seats: 9, cargoKg: 1000, cruiseKts: 180, rangeNm: 900, derived: false, ...o });
-const plane = (id: number, location: string, busy = false, t = type()): Me['fleet'][number] => ({ id, icao: t.icao, type: t, location, busy, value: 1 });
+const plane = (id: number, location: string, busy = false, t = type()): Me['fleet'][number] => ({ id, icao: t.icao, type: t, location, busy, value: 1, registration: `F-HT${id}`, ownership: 'owned', wearPct: 0, status: busy ? 'flying' : 'available', maintenanceUntil: null, contract: null });
 const job = (id: string, origin: string, payout: number, o: Partial<Job> = {}): Job => ({ id, source: 'board', kind: 'pax', origin, destination: 'LFLL', distanceNm: 200, payloadKg: 500, pax: 5, payout, ...o });
 const me = (fleet: Me['fleet']): Me => ({ fleet } as Me);
 
