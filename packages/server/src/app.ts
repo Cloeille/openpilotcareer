@@ -75,7 +75,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     if (!req.url.startsWith('/api/')) return;
     reply.header('access-control-allow-origin', '*').header('access-control-expose-headers', 'content-disposition');
     if (req.method === 'OPTIONS') {
-      return reply.header('access-control-allow-methods', 'GET,POST,PATCH,DELETE,OPTIONS').header('access-control-allow-headers', `authorization,content-type,${COMPANY_HEADER}`).header('access-control-max-age', '600').status(204).send();
+      return reply.header('access-control-allow-methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS').header('access-control-allow-headers', `authorization,content-type,${COMPANY_HEADER}`).header('access-control-max-age', '600').status(204).send();
     }
   });
 
@@ -162,6 +162,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   app.patch('/api/v1/companies/:id', async (req) => {
     const p = account(req);
     const id = ownedCompany(db, p.userId, idParam(req));
+    if (req.body && typeof req.body === 'object' && ('code' in req.body || 'callsign' in req.body)) throw new HttpError(409, 'immutable', 'the airline code and callsign cannot be changed once set');
     const b = parse(renameCompanySchema, req.body);
     return tx(db, () => renameCompany(db, id, b.name));
   });
