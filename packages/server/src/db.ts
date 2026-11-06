@@ -66,8 +66,27 @@ ALTER TABLE companies_new RENAME TO companies;
 CREATE INDEX companies_user ON companies(user_id);
 `;
 
+// OpenHangar v2, lot START: company identity, start mode, realism (JSON, NULL = neutral), onboarding state per user,
+// first-job reservations (one per company) and the once-per-season bankruptcy bailouts.
+const SCHEMA_V3 = `
+ALTER TABLE companies ADD COLUMN code TEXT;
+ALTER TABLE companies ADD COLUMN callsign TEXT;
+ALTER TABLE companies ADD COLUMN livery_color TEXT;
+ALTER TABLE companies ADD COLUMN start_mode TEXT;
+ALTER TABLE companies ADD COLUMN realism TEXT;
+CREATE UNIQUE INDEX companies_code ON companies(code) WHERE code IS NOT NULL;
+CREATE TABLE onboarding (
+  user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, completed INTEGER NOT NULL DEFAULT 0, step INTEGER NOT NULL DEFAULT 1,
+  start_mode TEXT, company_id INTEGER REFERENCES companies(id) ON DELETE SET NULL, draft TEXT NOT NULL DEFAULT '{}', updated_at INTEGER NOT NULL);
+CREATE TABLE job_reservations (
+  job_id TEXT PRIMARY KEY, company_id INTEGER NOT NULL UNIQUE REFERENCES companies(id) ON DELETE CASCADE, reserved_until INTEGER NOT NULL);
+CREATE TABLE bailouts (
+  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, season TEXT NOT NULL, at INTEGER NOT NULL, amount INTEGER NOT NULL,
+  PRIMARY KEY (company_id, season));
+`;
+
 /** Append-only; `PRAGMA user_version` records how many ran. */
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2];
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);
