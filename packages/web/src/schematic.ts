@@ -300,16 +300,20 @@ export function project(m: Model, v: View): Projection {
 }
 
 export type TagBox = { key: AnchorKey; x: number; y: number; w: number; ax: number; ay: number; lx: number; ly: number; side: 'top' | 'bottom' };
-/** Callout boxes in a row along the top or the bottom edge, left to right in anchor order, never overlapping and kept inside the view box; `lx, ly` is where the leader line leaves the box. */
+const TAG_GAP = 14;
+/** Callout boxes in a row along the top or the bottom edge, in anchor order, kept inside the view box and apart from each other (as far as the width allows); `lx, ly` is where the leader line leaves the box. */
 export function placeTags(items: { key: AnchorKey; ax: number; ay: number; side: 'top' | 'bottom'; w: number }[], w: number, h: number): TagBox[] {
-  const rows: Record<'top' | 'bottom', { x: number; w: number }[]> = { top: [], bottom: [] };
-  return [...items].sort((a, b) => a.ax - b.ax).map((it) => {
-    const row = rows[it.side];
-    let x = Math.max(0, it.ax - 14);
-    const prev = row[row.length - 1];
-    if (prev) x = Math.max(x, prev.x + prev.w + 14);
-    x = Math.min(x, w - it.w);
-    row.push({ x, w: it.w });
-    return { ...it, x, y: it.side === 'top' ? 0 : h - TAG_HEIGHT, lx: x + 14, ly: it.side === 'top' ? TAG_HEIGHT : h - TAG_HEIGHT };
-  });
+  const sorted = [...items].sort((a, b) => a.ax - b.ax);
+  const out: TagBox[] = [];
+  for (const side of ['top', 'bottom'] as const) {
+    const row = sorted.filter((it) => it.side === side).map((it) => ({ ...it, x: Math.max(0, it.ax - TAG_GAP) }));
+    row.forEach((it, i) => { const prev = row[i - 1]; if (prev) it.x = Math.max(it.x, prev.x + prev.w + TAG_GAP); });
+    for (let i = row.length - 1; i >= 0; i--) {
+      const it = row[i]!;
+      const next = row[i + 1];
+      it.x = Math.max(0, Math.min(it.x, (next ? next.x - TAG_GAP : w) - it.w));
+    }
+    for (const it of row) out.push({ ...it, y: side === 'top' ? 0 : h - TAG_HEIGHT, lx: it.x + TAG_GAP, ly: side === 'top' ? TAG_HEIGHT : h - TAG_HEIGHT });
+  }
+  return out;
 }
