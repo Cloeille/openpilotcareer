@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// opc-bridge command line: setup, flights, replay.
+// opc-bridge command line: setup, flights, fly (live sim), replay (recorded stream).
 import { createInterface } from 'node:readline/promises';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { Writable } from 'node:stream';
@@ -7,14 +7,19 @@ import { parseArgs } from 'node:util';
 import { ServerClient } from './client.ts';
 import { configSchema, defaultConfigDir, loadConfig, normalizeServerUrl, saveConfig, sendsKeyInClear } from './config.ts';
 import { readSamples, rebaseToStart } from './fixture.ts';
+import { flushOutbox } from './deliver.ts';
 import { Outbox } from './outbox.ts';
 import { Session } from './session.ts';
+import { watchSim } from './simconnect.ts';
+import { serveStatus, STATUS_PORT } from './status.ts';
 import { FlightTracker } from './tracker.ts';
 
 const USAGE = `usage: opc-bridge <command>
 
   setup [--server URL] [--key KEY]    save the server and your API key (asked for what is missing; the key is typed hidden)
   flights                             list the active flights you can report on
+  fly <flightId>                      follow MSFS (Windows, SimConnect) and report that flight when you park; leave it running.
+                                      The in-sim panel reads http://127.0.0.1:${STATUS_PORT}/status. Ctrl+C quits.
   replay <fixture.json> [--flight ID] [--speed N]
                                       feed a recorded sample stream through the bridge and report it to the server, without a simulator.
                                       The flight is the active one that flies the same route in the same aircraft, unless --flight is given.
@@ -93,6 +98,29 @@ async function flights(f: Flags): Promise<void> {
   for (const x of list) console.log(`${String(x.id).padStart(6)}  ${x.job.origin} -> ${x.job.destination}  ${x.aircraftIcao.padEnd(5)} ${Math.round(x.job.distanceNm)} nm  ${Math.round(x.job.payloadKg)} kg`);
 }
 
+/** Runs until Ctrl+C: the status endpoint stays up after the verdict so the panel can keep showing it. */
+async function fly(id: string | undefined, f: Flags): Promise<number> {
+  if (!id || !/^\d+$/.test(id)) throw new Error('fly needs a flight id (see `opc-bridge flights`)');
+  const { client, serverUrl, dir } = connect(f);
+  const flight = (await client.activeFlights()).find((x) => x.id === Number(id));
+  if (!flight) throw new Error(`flight ${id} is not among your active flights (see \`opc-bridge flights\`)`);
+  const outbox = new Outbox(dir);
+  const session = new Session({
+    flight: { id: flight.id, from: flight.job.origin, to: flight.job.destination, aircraftIcao: flight.aircraftIcao },
+    serverUrl, client, outbox, log,
+  });
+  const status = await serveStatus(() => session.status);
+  log(`flight ${flight.id}: ${flight.job.origin} -> ${flight.job.destination} in a ${flight.aircraftIcao}; status at http://127.0.0.1:${STATUS_PORT}/status`);
+  // reports an earlier run could not deliver (sim closed while the server was down) go out in the background
+  void flushOutbox(client, outbox, serverUrl, { onRetry: (e) => log(`earlier report: ${e.message}`) }).then((ds) => ds.forEach((d) => log(`earlier report: ${d.state}`)));
+  const stop = await watchSim((s) => session.feed(s), { log });
+  void session.done.then(() => log('flight settled; Ctrl+C quits (the panel keeps showing the result until then)'));
+  await new Promise<void>((resolve) => process.once('SIGINT', resolve));
+  stop();
+  status.close();
+  return 0;
+}
+
 /** Exit code: 0 verified, 2 rejected, 1 nothing was reported (or it is still queued). */
 async function replay(path: string, f: Flags & { flight?: string | undefined; speed?: string | undefined }): Promise<number> {
   const speed = Number(f.speed ?? 1);
@@ -147,6 +175,7 @@ async function main(argv: string[]): Promise<number> {
   switch (command) {
     case 'setup': await setup(values); return 0;
     case 'flights': await flights(values); return 0;
+    case 'fly': return fly(arg, values);
     case 'replay':
       if (!arg) throw new Error('replay needs a fixture file');
       return replay(arg, values);
