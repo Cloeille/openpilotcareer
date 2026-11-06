@@ -1,6 +1,6 @@
 # Design index (OpenHangar mockup v2, pen.dev snapshot of 6 Nov 2026, etag cb9180b7)
 
-Source: docs/design/openhangar.pen. v2 adds row 02 Onboarding (6 steps + HUD/Onboarding), the Location · contrat (lease contract) screen and the Switch component, and changes Catalogue d'avions and Flotte · nouvelle compagnie (lease-first). Backdrops: docs/design/assets/*.webp. Scripts: docs/design/scripts/{aircraft-schematic,cabin-layout}.js.
+Source: docs/design/openhangar.pen. v2 adds row 02 Onboarding (6 steps + HUD/Onboarding), the Location · contrat (lease contract) screen and the Switch component, and changes Catalogue d'avions and Flotte · nouvelle compagnie (lease-first). Rendered screens (what each 1600x900 frame actually looks like, captured from the pen.dev viewer): docs/design/renders/<same-slug>.webp. Backdrops: docs/design/assets/*.webp. Scripts: docs/design/scripts/{aircraft-schematic,cabin-layout}.js.
 
 | Frame | Extract | Size |
 |---|---|---|
