@@ -40,7 +40,7 @@ export class Session {
   #sending: Promise<void> | null = null;
   #waiting: string | null = null;      // why the report is not delivered yet (server unreachable...)
   #verdict: Verdict | null = null;
-  #done: Promise<void> = Promise.resolve();
+  readonly #done = Promise.withResolvers<void>();
 
   constructor(o: SessionOptions) {
     this.#o = o;
@@ -49,8 +49,14 @@ export class Session {
     this.#tracker = new FlightTracker(opts);
   }
 
-  /** Resolves once the flight has a final verdict (or will never have one: nothing reportable, or the server refused it). */
-  get done(): Promise<void> { return this.#done; }
+  /** Pending until there is an outcome: a verdict (verified, rejected, closed, dropped), a report left queued on disk, or nothing reportable (`end()`).
+   *  Never resolved by merely starting: a flight that is still being flown has no outcome yet. */
+  get done(): Promise<void> { return this.#done.promise; }
+
+  /** The stream of samples is over (recording exhausted). If nothing was or will be reported, `done` resolves now; a report in flight still settles first. */
+  end(): void {
+    if (!this.#sending && !this.#verdict) this.#done.resolve();
+  }
 
   feed(s: SimSample): void {
     this.#tracker.feed(s);
@@ -62,6 +68,7 @@ export class Session {
     if (!outcome.ok) {
       this.#verdict = { verification: 'rejected', reason: outcome.reason }; // never sent: the server still has this flight active
       this.#o.log?.(`not reported: ${outcome.reason}`);
+      this.#done.resolve();
       return;
     }
     const flags = this.#tracker.flags;
@@ -70,8 +77,7 @@ export class Session {
     this.#sending = deliver(this.#o.client, this.#o.outbox, p, {
       ...this.#o.deliver,
       onRetry: (e, ms) => { this.#waiting = `server unavailable (${e.message}), retrying in ${Math.round(ms / 1000)} s`; this.#o.log?.(this.#waiting); },
-    }).then((d) => this.#settle(d));
-    this.#done = this.#sending;
+    }).then((d) => { this.#settle(d); this.#done.resolve(); }, (e: unknown) => this.#done.reject(e));
   }
 
   #settle(d: Delivery): void {

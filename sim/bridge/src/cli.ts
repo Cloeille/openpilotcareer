@@ -217,6 +217,7 @@ async function replay(path: string, f: Flags & { flight?: string | undefined; sp
     if (wait >= 1) await sleep(wait);
     session.feed(s);
   }
+  session.end(); // the recording is exhausted: an unfinished flight will not be reported
   await session.done;
   const { verification, reason } = session.status;
   if (verification === 'verified') return 0;

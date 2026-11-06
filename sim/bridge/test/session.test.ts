@@ -59,6 +59,53 @@ test('verified flight: status walks pending -> parked/verified and matches the p
   assert.ok(seen.has('preflight/null') && seen.has('airborne/pending') && seen.has('parked/pending'), [...seen].join(' '));
 });
 
+/** True when `p` has not settled yet (a settled promise wins the race against a macrotask tick). */
+const pending = async (p: Promise<void>): Promise<boolean> => (await Promise.race([p.then(() => false), new Promise<boolean>((r) => setImmediate(() => r(true)))]));
+
+test('done is not resolved by starting: no verdict before the aircraft is parked, then it resolves with the verdict', async (t) => {
+  const base = await stub(t, () => ({ status: 200, body: { verification: 'verified', reason: null, flight: {} } }));
+  const s = make(base, tmp(t));
+  assert.equal(await pending(s.done), true, 'fresh session: nothing has happened yet');
+  const samples = fixture('ga-c172-lfpn-lfaq');
+  const parkedAt = samples.findIndex((_, i) => { s.feed(samples[i]!); return s.status.phase === 'parked'; });
+  assert.ok(parkedAt > 0);
+  await s.done;
+  assert.equal(s.status.verification, 'verified');
+});
+
+test('done stays pending while the flight is being flown (preflight, taxi, airborne)', async (t) => {
+  const base = await stub(t, () => ({ status: 200, body: { verification: 'verified', reason: null, flight: {} } }));
+  const s = make(base, tmp(t));
+  for (const sample of fixture('ga-c172-lfpn-lfaq')) {
+    if (s.status.phase === 'parked') break;
+    s.feed(sample);
+    if (s.status.phase === 'airborne') break;
+  }
+  assert.equal(s.status.phase, 'airborne');
+  assert.equal(await pending(s.done), true);
+});
+
+test('a recording that ends before the aircraft parks: end() says nothing will be reported, and done resolves', async (t) => {
+  let posts = 0;
+  const base = await stub(t, () => { posts++; return { status: 200, body: { verification: 'verified', reason: null } }; });
+  const s = make(base, tmp(t));
+  for (const sample of fixture('ga-c172-lfpn-lfaq').slice(0, 120)) s.feed(sample);
+  assert.equal(await pending(s.done), true);
+  s.end();
+  await s.done;
+  assert.equal(posts, 0);
+  assert.equal(s.status.verification, 'pending');
+});
+
+test('end() does not cut short a report that is being delivered: done resolves with the verdict', async (t) => {
+  const base = await stub(t, () => ({ status: 200, body: { verification: 'verified', reason: null, flight: {} } }));
+  const s = make(base, tmp(t));
+  for (const sample of fixture('ga-c172-lfpn-lfaq')) s.feed(sample);
+  s.end();
+  await s.done;
+  assert.equal(s.status.verification, 'verified');
+});
+
 test('cheat flight: flags show while flying, the server rejection reason reaches the panel', async (t) => {
   const reason = 'the simulator client flagged this flight: time_acceleration_above_1x';
   const base = await stub(t, () => ({ status: 200, body: { verification: 'rejected', reason, flight: {} } }));
