@@ -12,8 +12,9 @@ export function readSamples(path: string): SimSample[] {
 export const writeSamples = (path: string, samples: SimSample[]): void =>
   writeFileSync(path, `[\n${samples.map((s) => JSON.stringify(s)).join(',\n')}\n]\n`);
 
-/** Shift a recorded stream in time so that its last sample is at `endAt` (replays must land "now": the server rejects future landings). */
-export function rebaseToEnd(samples: SimSample[], endAt: number): SimSample[] {
-  const shift = endAt - samples[samples.length - 1]!.t;
+/** Shift a recorded stream in time so that its first sample is at `startAt`. A replay starts when the job was accepted:
+ *  the server rejects a takeoff that predates the acceptance. */
+export function rebaseToStart(samples: SimSample[], startAt: number): SimSample[] {
+  const shift = startAt - samples[0]!.t;
   return samples.map((s) => ({ ...s, t: s.t + shift }));
 }
