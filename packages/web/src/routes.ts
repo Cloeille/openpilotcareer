@@ -3,7 +3,13 @@ import { t } from './i18n.ts';
 import type { Ctx, Screen, ScreenFn, Tab } from './screen.ts';
 import { pages } from './pages.ts';
 import { dashboard } from './screens/dashboard.ts';
+import { buy } from './screens/buy.ts';
+import { catalogue } from './screens/catalogue.ts';
+import { custom } from './screens/custom.ts';
+import { fleet } from './screens/fleet.ts';
+import { hubs } from './screens/hubs.ts';
 import { jobDetail } from './screens/job.ts';
+import { newCompany } from './screens/new-company.ts';
 import { jobs } from './screens/jobs.ts';
 import { simbrief } from './screens/simbrief.ts';
 import { h } from './ui.ts';
@@ -23,7 +29,7 @@ export const routes: Record<string, ScreenFn> = {
   jobs,
   job: jobDetail,
   simbrief,
-  fleet: legacy('fleet', 'fleet', 'fleet'),
+  fleet, catalogue, buy, hubs, custom, company: newCompany,
   history: legacy('flights', 'history', 'history'),
   leaderboard: legacy('leaderboard', 'leaderboard', 'leaderboard'),
   settings: legacy('settings', 'settings', 'settings'),

@@ -11,6 +11,7 @@ import { session, GLOBAL_URL } from './api.ts';
 export type HudData = { me: Me; tab: Tab | 'settings' | null; antiCheat: boolean; offline?: boolean; jobCount: number; onCompany: (id: number) => void; onChangeServer: () => void };
 
 const RING_R = 18;
+const NEW_COMPANY = 'new';
 function rankRing(fraction: number, label: string): HTMLElement {
   const c = 2 * Math.PI * RING_R;
   const circle = (cls: string, extra: Record<string, string>): SVGElement => {
@@ -38,8 +39,11 @@ export function hudTop(d: HudData): HTMLElement {
   const prog = rankProgress(me.pilot);
   const switcher = h('select', {
     id: 'company-switch', class: 'company-switch', name: 'company', disabled: d.offline,
-    onchange: (e: Event) => d.onCompany(Number((e.target as HTMLSelectElement).value)),
-  }, me.companies.map((c) => h('option', { value: c.id, selected: c.id === me.company.id }, c.name)));
+    onchange: (e: Event) => {
+      const v = (e.target as HTMLSelectElement).value;
+      if (v === NEW_COMPANY) { (e.target as HTMLSelectElement).value = String(me.company.id); location.hash = '#company'; } else d.onCompany(Number(v));
+    },
+  }, [...me.companies.map((c) => h('option', { value: c.id, selected: c.id === me.company.id }, c.name)), h('option', { value: NEW_COMPANY }, t('nc.menu'))]);
   const tabLink = (tab: Tab): HTMLElement => h('a', { href: `#${tab}`, 'aria-current': tab === d.tab ? 'page' : null }, t(`tab.${tab}`), tab === 'jobs' ? h('span', { class: 'tab-count' }, d.jobCount) : null);
   return h('header', { class: 'hud-top' },
     brandBlock(PRODUCT_NAME, h('div', { class: 'server-line' + (d.offline ? ' off' : '') },

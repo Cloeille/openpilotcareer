@@ -318,3 +318,49 @@ table.data tbody td, table.data tbody th { border-bottom: 1px solid var(--border
 .user-row .input { flex: 1; }
 .intro { font-size: 16px; }
 .big-code { font-size: 22px; }
+
+/* ---------------------------------------------------------------- fleet, catalogue, purchase */
+.fleet-layout { display: flex; gap: 20px; width: 100%; min-height: 0; }
+.fleet-left { width: 720px; display: flex; flex-direction: column; gap: 22px; min-height: 0; }
+.panel.grow { flex: 0 1 auto; min-height: 0; }
+.detail-panel { width: 410px; flex: none; align-self: flex-start; }
+.detail-panel .panel-body { padding-top: 22px; gap: 26px; }
+.reg { font: 600 32px/1.1 var(--display); }
+.reg-sm { font: 600 18px var(--display); }
+.spacer { flex: 1; }
+.catalogue-column { width: 1000px; display: flex; flex-direction: column; gap: 22px; min-height: 0; }
+.toolbar { padding: 14px 22px 4px; display: flex; flex-direction: column; gap: 12px; }
+.search-row .input-field { height: 44px; }
+.search-row input { font-size: 15px; }
+.category-row { display: flex; align-items: center; gap: 10px; }
+.icao-chip { font: 700 11px var(--mono); padding: 2px 6px; border: 1px solid var(--border-strong); border-radius: 2px; color: var(--text-secondary); }
+.checkout { display: flex; gap: 40px; width: 100%; align-items: flex-start; padding-top: 4px; }
+.checkout .panel.summary { margin-top: 3px; }
+.col-wide { width: 620px; display: flex; flex-direction: column; gap: 24px; }
+.panel.summary { width: 420px; flex: none; }
+.panel.summary .panel-body { gap: 18px; padding: 16px 24px 24px; }
+.missing { display: flex; justify-content: space-between; align-items: baseline; }
+.big-money { font: 500 28px var(--display); }
+.coverage { height: 4px; border-radius: 2px; background: var(--neutral-soft); }
+.coverage span { display: block; height: 100%; border-radius: 2px; background: var(--text-secondary); }
+.status-line.warn { color: var(--warning); }
+.hub-list { display: flex; flex-direction: column; gap: 4px; }
+.hub-option { display: flex; align-items: center; gap: 14px; padding: 10px 12px; border-radius: 4px; cursor: pointer; }
+.hub-option:hover { background: var(--surface-hover); }
+.hub-option:has(input:checked) { background: var(--surface-selected); }
+.hub-option:has(input:focus-visible) { outline: 2px solid var(--text-primary); outline-offset: 1px; }
+.hub-option input { accent-color: var(--text-primary); width: 16px; height: 16px; }
+.hub-rows { gap: 0; }
+.hub-row { display: flex; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.hub-row .col { flex: 1; }
+.custom-column { width: 760px; display: flex; flex-direction: column; gap: 18px; min-height: 0; overflow: auto; padding-right: 6px; }
+.custom-form { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px 16px; }
+.custom-form .row.end { grid-column: 1 / -1; justify-content: flex-end; }
+.airport-found { min-height: 20px; font-size: 13px; }
+.ok-line, .bad-line { display: flex; align-items: center; gap: 6px; }
+.ok-line { color: var(--text-secondary); } .ok-line .icon { color: var(--success); }
+.bad-line { color: var(--danger); }
+input.upper { text-transform: uppercase; }
+
+.detail-panel .line { padding: 2px 0; }
+.detail-host { display: flex; flex-direction: column; gap: 26px; }

@@ -18,10 +18,10 @@ export function keyAction(e: KeyLike, typing: boolean): Action | null {
   }
 }
 
-/** A bare letter or digit pressed outside a field: the screen-specific shortcut (A = buy, I = import, S = change server...). Lower-cased; Q and E stay with the tab cycle unless a screen claims them. */
+/** A bare letter, digit or `/` pressed outside a field: the screen-specific shortcut (A = buy, I = import, S = change server...). Lower-cased; Q and E stay with the tab cycle unless a screen claims them. */
 export function shortcutOf(e: KeyLike, typing: boolean): string | null {
   if (typing || e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1) return null;
-  return /^[a-z0-9]$/i.test(e.key) ? e.key.toLowerCase() : null;
+  return /^[a-z0-9/]$/i.test(e.key) ? e.key.toLowerCase() : null;
 }
 
 /** Standard-mapping gamepad: A = Enter, B = Esc, LB / RB = Q / E, d-pad = arrows. */

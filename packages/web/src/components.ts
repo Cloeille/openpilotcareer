@@ -104,7 +104,7 @@ export function segments<V extends string>(name: string, options: Seg<V>[], curr
 }
 
 type Col = { label: string; align?: 'end' | 'center' };
-type Row = { cells: Child[]; onOpen?: () => void; label?: string; selected?: boolean };
+type Row = { cells: Child[]; onOpen?: () => void; /** Runs when the row takes focus (arrow keys, click): lets a list drive a detail panel. */ onFocus?: () => void; label?: string; selected?: boolean };
 /** Data table whose rows are reachable with the arrow keys and open with Enter (see keyboard.ts). */
 export function dataTable(caption: string, cols: Col[], rows: Row[], empty?: HTMLElement): HTMLElement {
   if (rows.length === 0 && empty) return empty;
@@ -114,6 +114,7 @@ export function dataTable(caption: string, cols: Col[], rows: Row[], empty?: HTM
       h('thead', null, h('tr', null, cols.map((c) => h('th', { scope: 'col', class: c.align ?? '' }, c.label)))),
       h('tbody', null, rows.map((r) => h('tr', {
         'data-row': '', tabindex: r.onOpen ? 0 : null, 'aria-label': r.label, 'aria-selected': r.selected ? 'true' : null,
+        onfocus: r.onFocus ?? null,
         onclick: r.onOpen ? (e: Event) => { if (!(e.target as Element).closest('button, a, input, select')) r.onOpen!(); } : null,
       }, r.cells.map((c, i) => h(i === 0 ? 'th' : 'td', i === 0 ? { scope: 'row', class: cols[i]?.align ?? '' } : { class: cols[i]?.align ?? '' }, c)))))));
 }
