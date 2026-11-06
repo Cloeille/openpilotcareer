@@ -11,7 +11,7 @@ import { RETRY_EVERY_S, offlineView, type OfflineState } from './screens/offline
 import type { Screen } from './screen.ts';
 import { fitStage, hudStage } from './shell.ts';
 import { loadSnapshot, type BootStep, type Snapshot } from './snapshot.ts';
-import { freshOnboarding, onboardingState, runOnboarding, type OnboardingRun } from './onboarding.ts';
+import { additionalOnboarding, freshOnboarding, onboardingState, runOnboarding, type OnboardingRun } from './onboarding.ts';
 import type { Onboarding } from './onboarding-types.ts';
 import { h, notify } from './ui.ts';
 
@@ -104,7 +104,7 @@ async function show(): Promise<void> {
   if (offline) return showOffline();
   const current = snap;
   const { name, arg } = resolve(location.hash);
-  if (name === 'company' && obSupported) { beginOnboarding(freshOnboarding(), true); return; }
+  if (name === 'company' && obSupported) { void additionalOnboarding().then((ob) => { if (!wizard) beginOnboarding(ob, true); }); return; }
   let screen: Screen;
   try {
     screen = await routes[name]!({ snap: current, arg, refresh, go: (hash) => { location.hash = hash; } });

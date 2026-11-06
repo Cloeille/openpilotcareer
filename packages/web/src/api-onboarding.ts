@@ -25,6 +25,8 @@ export const hubSuggestions = (mode: StartMode, q: string): Promise<HubSuggestio
 export const codeAvailable = async (code: string): Promise<boolean> => (await api<{ available: boolean }>(`/airlines/code/${encodeURIComponent(code)}`)).available;
 
 export const createOnboardingCompany = (body: NewCompanyBody): Promise<MeV2> => api<MeV2>('/me/companies', { method: 'POST', body });
+/** Ids of the player's companies (account-level route: works before the first company exists). */
+export const myCompanyIds = async (): Promise<number[]> => (await api<{ id: number }[]>('/me/companies')).map((c) => c.id);
 export const getMe = (): Promise<MeV2> => api<MeV2>('/me');
 export const setRealism = (companyId: number, body: { preset: RealismPreset } | { toggles: Partial<Record<RealismToggle, boolean>> }): Promise<Realism> =>
   api<Realism>(`/companies/${companyId}/realism`, { method: 'PUT', body });

@@ -1,5 +1,5 @@
 import { session } from './api.ts';
-import { getMe, getOnboarding, putOnboarding } from './api-onboarding.ts';
+import { getMe, getOnboarding, myCompanyIds, putOnboarding } from './api-onboarding.ts';
 import { errorText } from './error-text.ts';
 import { ApiError } from './errors.ts';
 import type { NavState } from './input.ts';
@@ -27,10 +27,19 @@ export type OnboardingHost = {
   onQuit: (additional: boolean) => void;
 };
 
-/** What to do right after sign-in: `supported` = the server knows onboarding; `pending` = it is not finished (null otherwise). */
+/** What to do right after sign-in: `supported` = the server knows onboarding; `pending` = the wizard must run now. A player who already has another, working company is never forced into a saved "new company" wizard: they pick it up again from the company switcher. */
 export async function onboardingState(): Promise<{ supported: boolean; pending: Onboarding | null }> {
   const ob = await getOnboarding();
-  return { supported: ob !== null, pending: ob && !ob.completed ? ob : null };
+  if (!ob) return { supported: false, pending: null };
+  if (ob.completed) return { supported: true, pending: null };
+  const others = (await myCompanyIds().catch(() => [])).filter((id) => id !== ob.companyId);
+  return { supported: true, pending: others.length > 0 ? null : ob };
+}
+
+/** The wizard behind "+ New company": a saved, unfinished run resumes; otherwise a fresh one starts. */
+export async function additionalOnboarding(): Promise<Onboarding> {
+  const ob = await getOnboarding().catch(() => null);
+  return ob && !ob.completed ? ob : freshOnboarding();
 }
 /** Used for a player who has no company yet and no onboarding record. */
 export const freshOnboarding = (): Onboarding => ({ completed: false, step: 1, startMode: null, companyId: null, draft: {} });
@@ -45,11 +54,11 @@ export function runOnboarding(host: OnboardingHost, initial: Onboarding, additio
   let cleanup: (() => void) | null = null;
   let bottom: BottomBar | null = null;
   let current: OnboardingStep = 1;
-  const draft: Draft = readDraft(additional ? {} : initial.draft);
-  if (!additional && initial.startMode === null) draft.form = emptyForm();
+  const draft: Draft = readDraft(initial.draft);
+  if (initial.startMode === null) draft.form = emptyForm();
 
   const w: Wizard = {
-    ob: additional ? freshOnboarding() : { ...initial },
+    ob: { ...initial },
     form: draft.form,
     bridge: draft.bridge,
     additional,
@@ -136,8 +145,8 @@ export function runOnboarding(host: OnboardingHost, initial: Onboarding, additio
 
   void (async () => {
     // A saved run resumes where it was; for a new additional company it starts at the top.
-    const first = additional ? 1 : resumeStep(initial);
-    if (!additional && initial.companyId !== null) session.company = initial.companyId;
+    const first = resumeStep(initial);
+    if (initial.companyId !== null) session.company = initial.companyId;
     await render(first);
   })();
   return { stop: () => { alive = false; rendering++; cleanup?.(); }, redraw: () => { if (alive) void render(current); } };
