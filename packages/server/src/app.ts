@@ -17,6 +17,7 @@ import {
 } from './game.ts';
 import { HttpError, Limiter, NUMERIC_ID, parse } from './http.ts';
 import { fetchLatestOfp, type Fetch } from './simbrief.ts';
+import { registerDownloads } from './routes-downloads.ts';
 
 const MAX_API_KEYS = 10;
 const AUTH_ATTEMPTS_PER_MINUTE = 20;
@@ -39,6 +40,8 @@ export type AppOptions = {
   ai?: boolean;
   /** Behind a reverse proxy: take the client IP (rate limiting) from X-Forwarded-For. */
   trustProxy?: boolean;
+  /** Directory holding the Windows bridge exe and the panel zip, served at /downloads/:file (omit: 404). */
+  downloads?: string;
 };
 
 const idParam = (req: FastifyRequest): number => {
@@ -85,6 +88,8 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     o.webRoot && req.method === 'GET' && !req.url.startsWith('/api/')
       ? reply.sendFile('index.html')
       : reply.status(404).send({ error: 'not_found', message: 'not found' }));
+
+  registerDownloads(app, { downloads: o.downloads });
 
   const user = (req: FastifyRequest): Principal & { token: string } => sessionAuth(db, req, now());
 
