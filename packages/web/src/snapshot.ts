@@ -1,7 +1,7 @@
 import type { Flight, Leaderboard, Me } from '@opc/shared';
 import { api, fetchInfo, session } from './api.ts';
 import { ApiError } from './errors.ts';
-import type { Board } from './board.ts';
+import { remember, type Board } from './board.ts';
 
 /** Everything the shell needs on every screen, loaded together at sign-in and after every action: the account, the job board (the HUD counts its jobs) and the last flight. Also what the offline screen shows, as it was at the last exchange. */
 /** `position` of the active company in this month's leaderboard, out of `of` companies; null when it is not listed (the board shows the top 100). */
@@ -29,7 +29,7 @@ export async function loadSnapshot(onStep?: (step: BootStep, snap: Partial<Snaps
   const me = await loadMe();
   onStep?.('profile', { me });
   const [board, flights, leaderboard, antiCheat] = await Promise.all([
-    api<Board>('/jobs'),
+    api<Board>('/jobs').then(remember),
     api<Flight[]>('/me/flights?limit=1'),
     api<Leaderboard>('/leaderboard'),
     // the badge is a courtesy: an unreachable /info must not break the page

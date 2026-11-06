@@ -146,6 +146,11 @@ async function retry(): Promise<void> {
 }
 
 window.addEventListener('hashchange', () => { void show().then(() => document.getElementById('main')?.focus()); });
+/** Redraw the current screen in place (filters, language) and put the focus back where it was. */
+window.addEventListener('opc:redraw', () => {
+  const id = document.activeElement?.id;
+  void show().then(() => { if (id) document.getElementById(id)?.focus(); });
+});
 window.addEventListener('opc:lang', () => { if (snap) void show(); else signedOut(); });
 
 if (session.token) void boot();

@@ -282,3 +282,39 @@ table.data tbody td, table.data tbody th { border-bottom: 1px solid var(--border
 .suggest-type { flex: 1; font-size: 14px; }
 .suggest-gain { font-weight: 600; font-size: 14px; min-width: 90px; text-align: right; }
 .btn.secondary .btn-key, .btn.danger .btn-key { background: #FFFFFF0F; border-color: #FFFFFF4D; color: var(--text-primary); }
+
+/* ---------------------------------------------------------------- jobs */
+.jobs-view { width: 1000px; display: flex; flex-direction: column; gap: 28px; min-height: 0; }
+.title-row { display: flex; justify-content: space-between; align-items: flex-end; }
+.panel.jobs-panel { min-height: 0; flex: 0 1 auto; }
+.panel.jobs-panel .panel-head { display: none; }
+.filter-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px 12px; gap: 12px; }
+.filters { display: flex; gap: 8px; }
+.filter { display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 8px 0 12px; border: 1px solid var(--border); border-radius: 3px; font-size: 13px; }
+.filter-label { color: var(--text-tertiary); }
+.filter select { background: transparent; border: 0; outline: none; font-size: 13px; font-weight: 500; max-width: 120px; cursor: pointer; }
+.filter select option { background: #171A1E; }
+.filter:focus-within { border-color: var(--text-primary); }
+.panel-fill { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+.list-footer { padding: 12px 24px 16px; font-size: 13px; color: var(--text-tertiary); }
+.row.tight { gap: 10px; }
+.city { font-size: 14px; color: var(--text-secondary); }
+.pay { font-size: 16px; font-weight: 600; }
+.empty-state { display: flex; flex-direction: column; gap: 22px; padding: 28px 28px 24px; }
+.empty-title { font: 600 22px var(--display); }
+.next-action { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 14px 0; border-top: 1px solid var(--border); }
+.briefing-column { width: 620px; display: flex; flex-direction: column; gap: 28px; min-height: 0; }
+.route-line-text { font-size: 16px; color: var(--text-secondary); }
+.facts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 26px 28px; }
+.fact.big .fact-value { font-size: 28px; }
+.fact-sub { font-size: 13px; color: var(--text-tertiary); }
+.accept-block { display: flex; flex-direction: column; gap: 12px; padding-top: 6px; }
+.input-field.inline { height: 42px; width: 170px; }
+.input-field.inline select { color: var(--text-primary); }
+.taken-notice { display: flex; flex-direction: column; gap: 10px; }
+.taken-lead { font: 600 22px var(--display); }
+.user-row { display: flex; gap: 12px; align-items: flex-end; }
+.user-row .btn { height: 44px; }
+.user-row .input { flex: 1; }
+.intro { font-size: 16px; }
+.big-code { font-size: 22px; }

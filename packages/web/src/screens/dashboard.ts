@@ -1,7 +1,7 @@
 import { blockHours, type Flight, type Job } from '@opc/shared';
+import { act } from '../actions.ts';
 import { api } from '../api.ts';
 import { button, icon, signDirection, signLocation, unknownValue } from '../components.ts';
-import { errorText } from '../error-text.ts';
 import { companyTitle, keyFigures } from '../figures.ts';
 import { fmt } from '../format.ts';
 import { jobsAtIdleAirports, flyable } from '../board.ts';
@@ -9,17 +9,7 @@ import { t, tp } from '../i18n.ts';
 import { loadLabel } from '../job-view.ts';
 import { hashFor } from '../keys.ts';
 import type { Ctx, Screen } from '../screen.ts';
-import { h, notify } from '../ui.ts';
-
-async function act(label: string, fn: () => Promise<unknown>, refresh: () => Promise<void>): Promise<void> {
-  try {
-    await fn();
-    notify(label);
-    await refresh();
-  } catch (e) {
-    notify(errorText(e), 'error');
-  }
-}
+import { h } from '../ui.ts';
 
 function flightActions(f: Flight, refresh: () => Promise<void>): HTMLElement {
   return h('div', { class: 'row' },

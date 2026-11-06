@@ -3,6 +3,9 @@ import { t } from './i18n.ts';
 import type { Ctx, Screen, ScreenFn, Tab } from './screen.ts';
 import { pages } from './pages.ts';
 import { dashboard } from './screens/dashboard.ts';
+import { jobDetail } from './screens/job.ts';
+import { jobs } from './screens/jobs.ts';
+import { simbrief } from './screens/simbrief.ts';
 import { h } from './ui.ts';
 import type { SceneId } from './scenes.ts';
 
@@ -17,7 +20,9 @@ function legacy(page: keyof typeof pages, scene: SceneId, tab: Tab | 'settings')
 
 export const routes: Record<string, ScreenFn> = {
   dashboard,
-  jobs: legacy('jobs', 'jobs', 'jobs'),
+  jobs,
+  job: jobDetail,
+  simbrief,
   fleet: legacy('fleet', 'fleet', 'fleet'),
   history: legacy('flights', 'history', 'history'),
   leaderboard: legacy('leaderboard', 'leaderboard', 'leaderboard'),
