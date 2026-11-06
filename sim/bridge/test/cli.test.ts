@@ -139,7 +139,7 @@ async function freePort(): Promise<number> {
 }
 
 /** Starts the CLI with `args`, lets `until` watch the output (it may also act), and stops the CLI once it returns. */
-async function runUntil(t: Ctx, args: string[], o: { home?: string; stdin?: string; until: (out: () => string) => Promise<void> }) {
+async function runUntil(t: Ctx, args: string[], o: { home?: string; answers?: [RegExp, string][]; until: (out: () => string) => Promise<void> }) {
   const home = o.home ?? mkdtempSync(join(tmpdir(), 'opc-cli-'));
   if (!o.home) t.after(() => rmSync(home, { recursive: true, force: true }));
   const port = await freePort();
@@ -148,7 +148,9 @@ async function runUntil(t: Ctx, args: string[], o: { home?: string; stdin?: stri
   let out = '';
   p.stdout.on('data', (c) => { out += c; });
   p.stderr.on('data', (c) => { out += c; });
-  p.stdin.end(o.stdin ?? '');
+  // a person types each answer after its question; piping both lines at once would lose the second one
+  const answers = [...(o.answers ?? [])];
+  p.stdout.on('data', () => { while (answers[0] && answers[0][0].test(out)) p.stdin.write(answers.shift()![1]); });
   const exited = new Promise<number | null>((resolve) => p.on('close', resolve));
   await Promise.race([o.until(() => out), new Promise((_, rej) => setTimeout(() => rej(new Error(`timeout; output so far:\n${out}`)), 15_000))]);
   const statusBody = await fetch(`http://127.0.0.1:${port}/status`).then((r) => r.json(), () => null);
@@ -206,7 +208,7 @@ test('no command and no active flight: the panel gets a "no job" status while wa
 
 test('no command and never set up: runs setup interactively, then follows the flight', async (t) => {
   const url = await flightsStub(t, { list: [{ id: 7, acceptedAt: 1_000, origin: 'LFPN', destination: 'LFAQ' }] });
-  const r = await runUntil(t, [], { stdin: `${url}\n${KEY}\n`, until: until(/flight 7: LFPN -> LFAQ/) });
+  const r = await runUntil(t, [], { answers: [[/Server URL/, `${url}\n`], [/API key/, `${KEY}\n`]], until: until(/flight 7: LFPN -> LFAQ/) });
   assert.match(r.out, /key accepted, 1 active flight/);
   assert.ok(!r.out.includes(KEY));
   assert.equal(statSync(join(r.home, 'openpilotcareer', 'config.json')).mode & 0o777, 0o600);

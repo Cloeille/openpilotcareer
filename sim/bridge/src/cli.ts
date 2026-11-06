@@ -164,8 +164,8 @@ async function auto(f: Flags): Promise<number> {
   let idle: Awaited<ReturnType<typeof serveStatus>> | null = null;
   let flight = pickFlight(await conn.client.activeFlights());
   while (!flight) {
-    log('waiting for a job accepted in the web app');
     idle ??= await serveStatus((): Status => ({ phase: 'parked', flight: null, verification: null, flags: [], serverUrl: conn.serverUrl }), statusPort());
+    log('waiting for a job accepted in the web app');
     try {
       await sleep(pollMs, undefined, { signal: quit.signal });
     } catch {
