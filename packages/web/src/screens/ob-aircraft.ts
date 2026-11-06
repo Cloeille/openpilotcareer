@@ -133,18 +133,21 @@ export async function step3a(w: Wizard): Promise<StepResult> {
   paintRecap();
 
   // ---- "Acheter à crédit plutôt": the loan quote of the selected type
+  let inCredit = false;
   const showCredit = async (): Promise<void> => {
     const r = rows[sel];
     if (!r) return;
     error.textContent = '';
     let quote: FleetQuote;
     try { quote = await fleetQuote(r.offer.icao, hub); } catch (e) { error.textContent = e instanceof Error ? e.message : String(e); return; }
+    inCredit = true;
     const creditView = creditPanel(w, r, quote, capital, hub, () => w.go(3));
     root.replaceChildren(...creditView.view.childNodes);
   };
   const root = view;
+  // Esc leaves the credit quote for the lease offers first (the footer says so), the previous step only from the offers.
   return {
-    scene: 'fleet', view, back: () => w.prev(), keys: { c: () => void showCredit() },
+    scene: 'fleet', view, back: () => { if (inCredit) w.go(3); else w.prev(); }, keys: { c: () => void showCredit() },
     hints: hintsOf([t('key.esc'), t('ob.hint.prevStep')], [arrows('ud'), t('ob.hint.changeOffer')], [t('key.enter'), t('ob.hint.leaseThis')]),
   };
 }
