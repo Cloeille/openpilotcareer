@@ -96,7 +96,7 @@ table.data tbody tr.est td, table.data tbody tr.est .model { color: var(--text-t
 .status-cell .status-line { font-size: 14px; font-weight: 400; color: var(--text-primary); }
 .status-sub { font-size: 12px; color: var(--text-tertiary); }
 .dot.maint { background: var(--warning); }
-.fleet-note { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; flex: none; white-space: nowrap; }
+.fleet-note { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; flex: none; white-space: nowrap; padding: 6px 10px; border-radius: 4px; background: var(--surface); backdrop-filter: blur(12px); }
 .fleet-note .l { font-size: 12px; color: var(--text-tertiary); }
 .fleet-note .v { font-size: 14px; color: var(--text-secondary); }
 .fin-panel-list { display: flex; flex-direction: column; gap: 10px; }
