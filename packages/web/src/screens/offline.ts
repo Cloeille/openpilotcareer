@@ -1,7 +1,7 @@
 import { button, icon } from '../components.ts';
 import { fmt } from '../format.ts';
 import { t } from '../i18n.ts';
-import { keyFigures } from '../figures.ts';
+import { companyTitle, keyFigures } from '../figures.ts';
 import { h } from '../ui.ts';
 import type { Snapshot } from '../snapshot.ts';
 
@@ -25,7 +25,7 @@ export function offlineView(snap: Snapshot, st: OfflineState, now: number, retry
   tick(now);
   const rule = (label: string, value: string): HTMLElement => h('div', { class: 'rule' }, h('span', { class: 'line-label' }, label), h('span', { class: 'strong' }, value));
   const sync = st.lastSync ?? snap.at;
-  const view = h('div', { class: 'offline-row' },
+  const view = h('div', { class: 'wide-layout' }, companyTitle(snap), h('div', { class: 'offline-row' },
     h('section', { class: 'panel offline', 'aria-labelledby': 'offline-title' },
       h('div', { class: 'offline-head' }, h('span', { class: 'status-line danger' }, icon('cloud-off', 15), since)),
       h('div', { class: 'col tight' }, h('h1', { id: 'offline-title', class: 'title big' }, t('offline.title')), h('p', { class: 'muted' }, t('offline.sub'))),
@@ -36,8 +36,6 @@ export function offlineView(snap: Snapshot, st: OfflineState, now: number, retry
       h('div', { class: 'row' },
         button(t('offline.retryNow'), { variant: 'primary', key: t('key.enter'), onclick: retryNow }),
         button(t('offline.changeServer'), { variant: 'ghost', onclick: changeServer }))),
-    h('div', { class: 'col', style: 'align-items:stretch' },
-      h('p', { class: 'snapshot-note' }, icon('lock', 13), t('offline.snapshot', { time: f.zulu(sync) })),
-      keyFigures(snap.me, snap.lastFlight, now)));
+    keyFigures(snap.me, snap.lastFlight, now, h('p', { class: 'snapshot-note' }, icon('lock', 13), t('offline.snapshot', { time: f.zulu(sync) })))));
   return { view, tick };
 }

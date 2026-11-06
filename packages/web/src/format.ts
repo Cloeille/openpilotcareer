@@ -15,6 +15,14 @@ export function makeFormat(lang: Lang) {
   return {
     num,
     money: (n: number): string => nbsp(eur.format(n)),
+    /** Millions with two decimals above 1 M (`8,42 M€`), the full amount below. */
+    moneyShort: (n: number): string => (Math.abs(n) >= 1_000_000 ? `${num(n / 1_000_000, 2)}${NBSP}M€` : nbsp(eur.format(n))),
+    /** Ordinal: `7e` / `7th`, `1er` / `1st`. */
+    ordinal: (n: number): string => {
+      if (lang === 'fr') return n === 1 ? '1er' : `${n}e`;
+      const r = new Intl.PluralRules('en', { type: 'ordinal' }).select(n);
+      return `${n}${r === 'one' ? 'st' : r === 'two' ? 'nd' : r === 'few' ? 'rd' : 'th'}`;
+    },
     /** Signed amount for deltas and flight results: `+12 480 €`. */
     signedMoney: (n: number): string => `${n > 0 ? '+' : ''}${nbsp(eur.format(n))}`,
     /** `18:42Z`: UTC clock time. */

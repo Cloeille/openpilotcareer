@@ -61,3 +61,14 @@ test('elapsed: seconds, minutes, hours', () => {
   assert.equal(fr.elapsed(2 * 3_600_000), `2${NBSP}h`);
   assert.equal(fr.elapsed(-5), `0${NBSP}s`);
 });
+
+test('moneyShort: millions with two decimals, full amount below one million', () => {
+  assert.equal(fr.moneyShort(8_420_000), `8,42${NBSP}M€`);
+  assert.equal(en.moneyShort(8_420_000), `8.42${NBSP}M€`);
+  assert.equal(fr.moneyShort(439_040), `439${NBSP}040${NBSP}€`);
+});
+
+test('ordinal: French 1er / 7e, English 1st 2nd 3rd 4th 11th 22nd', () => {
+  assert.deepEqual([1, 7, 24].map(fr.ordinal), ['1er', '7e', '24e']);
+  assert.deepEqual([1, 2, 3, 4, 11, 22].map(en.ordinal), ['1st', '2nd', '3rd', '4th', '11th', '22nd']);
+});

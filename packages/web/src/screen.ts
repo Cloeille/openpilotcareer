@@ -18,6 +18,8 @@ export type Screen = {
   back: string | (() => void) | null;
   /** Single-key shortcuts of this screen (lower-case letter -> action), matching the key hints. They win over Q / E. */
   keys?: Record<string, () => void>;
+  /** Full-width layout with the generous margins of the dashboard (64 px) instead of the 32 px content margins. */
+  wide?: boolean;
   view: HTMLElement;
 };
 

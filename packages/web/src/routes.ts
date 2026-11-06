@@ -2,6 +2,7 @@ import { parseHash } from './keys.ts';
 import { t } from './i18n.ts';
 import type { Ctx, Screen, ScreenFn, Tab } from './screen.ts';
 import { pages } from './pages.ts';
+import { dashboard } from './screens/dashboard.ts';
 import { h } from './ui.ts';
 import type { SceneId } from './scenes.ts';
 
@@ -15,7 +16,7 @@ function legacy(page: keyof typeof pages, scene: SceneId, tab: Tab | 'settings')
 }
 
 export const routes: Record<string, ScreenFn> = {
-  dashboard: legacy('dashboard', 'dashboard', 'dashboard'),
+  dashboard,
   jobs: legacy('jobs', 'jobs', 'jobs'),
   fleet: legacy('fleet', 'fleet', 'fleet'),
   history: legacy('flights', 'history', 'history'),

@@ -4,20 +4,33 @@ import { fmt } from './format.ts';
 import { t } from './i18n.ts';
 import type { Key } from './messages.ts';
 import { rankProgress } from './pilot.ts';
+import type { Snapshot } from './snapshot.ts';
 import { h } from './ui.ts';
 
 const figure = (label: string, value: string, sub?: Node | string | null): HTMLElement =>
   h('div', { class: 'figure' }, h('span', { class: 'figure-label' }, label), h('span', { class: 'figure-value' }, value), sub ?? null);
 
+/** The company headline of the dashboard and the offline screen. */
+export function companyTitle(snap: Snapshot): HTMLElement {
+  const f = fmt();
+  const worth = f.moneyShort(snap.me.company.netWorth);
+  const r = snap.seasonRank;
+  return h('div', { class: 'company-title' },
+    h('span', { class: 'overline' }, t('company.overline')),
+    h('h1', { class: 'company-name' }, snap.me.company.name),
+    h('span', { class: 'company-line' }, r ? t('company.line', { rank: f.ordinal(r.position), of: r.of, worth }) : t('company.lineNoRank', { worth })));
+}
+
 export const rankName = (index: number): string => t(`rank.${index}` as Key);
 
 /** The side panel of the dashboard and of the offline screen: balance, reputation, rank, last flight. Balance has no weekly delta and reputation no "out of 5" because the API provides neither. */
-export function keyFigures(me: Me, lastFlight: Flight | null, now = Date.now()): HTMLElement {
+export function keyFigures(me: Me, lastFlight: Flight | null, now = Date.now(), note?: Node): HTMLElement {
   const f = fmt();
   const prog = rankProgress(me.pilot);
   const next = RANKS[prog.index + 1];
   const last = lastFlight;
   return h('aside', { class: 'panel figures', 'aria-label': t('fig.keyFigures') },
+    note ?? null,
     figure(t('fig.balance'), f.money(me.company.balance)),
     figure(t('fig.reputation'), `${f.num(me.company.reputation, 1)} / 100`),
     figure(t('fig.rank'), rankName(prog.index),

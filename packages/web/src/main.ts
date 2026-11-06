@@ -84,7 +84,7 @@ async function show(): Promise<void> {
 
 function draw(screen: Screen, s: Snapshot, isOffline: boolean): void {
   nav = { tab: screen.tab, back: screen.back, keys: screen.keys };
-  const view = h('main', { id: 'main', class: 'view', tabindex: -1 }, screen.view);
+  const view = h('main', { id: 'main', class: `view${screen.wide ? ' wide' : ''}`, tabindex: -1 }, screen.view);
   root.replaceChildren(hudStage(screen.scene, view,
     { me: s.me, tab: screen.tab, antiCheat: s.antiCheat, offline: isOffline, jobCount: s.board.jobs.length, onCompany: (id) => void switchCompany(id), onChangeServer: () => void logout(!isOffline) }, screen.hints));
   document.title = `${screen.title} - ${PRODUCT_NAME}`;
@@ -110,7 +110,7 @@ function showOffline(): void {
   const { view, tick } = offlineView(snap, o, Date.now(), () => void retry(), () => void logout(false));
   o.tick = tick;
   draw({
-    title: t('offline.title'), scene: 'dashboard', tab: 'dashboard', back: null, view,
+    title: t('offline.title'), scene: 'dashboard', tab: 'dashboard', back: null, wide: true, view,
     hints: [{ key: t('key.enter'), label: t('hint.retryNow') }, { key: 'S', label: t('hint.changeServer') }],
     keys: { s: () => void logout(false) },
   }, snap, true);
