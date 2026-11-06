@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { resolveCatalogEntry, type AircraftType } from '@opc/shared';
 import { buildModel, placeTags, project, schematicCategory, SCHEMATIC_CATEGORIES, DEPTH_LEVELS } from './schematic.ts';
-import { cabinItems, deriveCabin, layoutCabin, occupiedSeats } from './cabin.ts';
+import { cabinItems, deriveCabin, doorCount, layoutCabin, occupiedSeats } from './cabin.ts';
 import { aircraftExtras, altitudeOf, arcDash, callsignLabel, checksOf, engineVm, enginesRunning, flightLevelLabel, fuelVm, liveFacts, loadVm, nextView, phaseOf, progressOf, ringDash, wearLevel, zuluSeconds } from './live-view.ts';
 import type { LiveResponse, LiveSample } from './api-live.ts';
 
@@ -83,11 +83,13 @@ test('cabin configuration is derived from seats and category', () => {
   assert.equal(atr.rows, 18);
   assert.equal(atr.lastRow, 2);
   assert.equal(atr.rows * 4 - (4 - atr.lastRow), 70);
-  assert.ok(atr.cockpit && atr.lavs >= 1 && atr.galleys >= 1 && atr.doors >= 2);
+  assert.ok(atr.cockpit && atr.lavs >= 1 && atr.galleys >= 1);
+  assert.equal(doorCount(atr), 2);
+  assert.equal(doorCount(deriveCabin(type('jet-airliner', 180))), 4);
   assert.equal(deriveCabin(type('jet-airliner', 180)).pattern, '3-3');
   assert.equal(deriveCabin(type('jet-widebody', 300)).pattern, '3-4-3');
   const c172 = deriveCabin(type('piston-single', 4, 1));
-  assert.deepEqual([c172.pattern, c172.lavs, c172.galleys, c172.cockpit, c172.doors], ['2', 0, 0, false, 1]);
+  assert.deepEqual([c172.pattern, c172.lavs, c172.galleys, c172.cockpit, doorCount(c172)], ['2', 0, 0, false, 2]);
 });
 
 test('seat occupancy is deterministic per flight and has exactly the requested count', () => {
@@ -105,6 +107,7 @@ test('cabin layout draws every seat once, inside the box, with doors, services a
   assert.equal(lay.seats.length, 70);
   assert.equal(lay.seats.filter((s) => s.taken).length, 50);
   for (const s of lay.seats) assert.ok(s.x >= 0 && s.x + s.w <= 1536 && s.y >= 0 && s.y + s.h <= 330);
+  assert.equal(lay.doors.length * 2, doorCount(cfg));
   assert.equal(lay.doors.length, cabinItems(cfg, false).filter((i) => i.t === 'door').length);
   assert.equal(lay.pilots.length, 2);
   assert.equal(lay.hold, null);

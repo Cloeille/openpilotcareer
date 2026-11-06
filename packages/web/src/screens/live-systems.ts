@@ -2,7 +2,7 @@ import { h } from '../ui.ts';
 import { svg } from '../svg.ts';
 import { icon } from '../components.ts';
 import { fmt } from '../format.ts';
-import { t } from '../i18n.ts';
+import { t, tp } from '../i18n.ts';
 import { DIAL_MAX, DIAL_REDLINE, aircraftExtras, arcDash, fuelVm, ringDash, wearLevel, type Body, type CheckId, type EngineVm, type LiveCtx, type LiveFacts } from '../live-view.ts';
 
 const DIAL_R = 76;
@@ -82,7 +82,7 @@ export function systemsBody(c: LiveCtx): Body {
   const el = h('div', { class: 'systems-view' },
     h('div', { class: 'sys-body panel' },
       h('div', { class: 'sys-row' },
-        group(t('live.sys.engines'), t('live.sys.enginesSub', { type: c.type.name, n: c.type.engines }), enginesBox),
+        group(t('live.sys.engines'), tp('live.sys.enginesSub', c.type.engines, { type: c.type.name }), enginesBox),
         group(t('live.sys.fuel'), t('live.sys.fuelSub'), fuelBox)),
       h('div', { class: 'sys-row condition' },
         group(t('live.sys.sim'), t('live.sys.simSub'), simBox),

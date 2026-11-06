@@ -1,17 +1,18 @@
 /* ---------------------------------------------------------------- live flight (Vol en cours): cutaway, cabin & load, systems */
 .live-view { position: relative; display: flex; flex-direction: column; gap: 12px; width: 100%; min-height: 0; }
+.live-view > .live-cutaway-view, .live-view > .cabin-stage, .live-view > .systems-view { flex: 1; }
 .live-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
 .live-header .title { font: 600 30px/1.1 var(--display); margin: 0; }
 .live-header .status-line { gap: 8px; }
-.live-view.cabin { justify-content: space-between; }
-.live-view.systems { gap: 22px; }
+.live-view.view-cabin { justify-content: space-between; }
+.live-view.view-systems { gap: 22px; }
 
 .live-empty { margin: auto; max-width: 520px; padding: 32px 36px; display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
 .live-empty-title { font: 600 28px/1.1 var(--display); margin: 0; }
 
 .live-cutaway-view { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; }
 .cutaway-area { flex: 1; min-height: 0; position: relative; display: grid; place-items: center; }
-.cutaway { position: relative; width: 1536px; height: 588px; max-width: 100%; touch-action: none; cursor: grab; border-radius: 4px; }
+.cutaway { position: relative; width: 1536px; height: 588px; max-width: 100%; max-height: 100%; touch-action: none; cursor: grab; border-radius: 4px; }
 .cutaway:active { cursor: grabbing; }
 .cutaway svg { position: absolute; inset: 0; }
 .sch-tags { position: absolute; inset: 0; pointer-events: none; }
@@ -65,14 +66,13 @@
 .cg { flex: 1; display: flex; flex-direction: column; gap: 8px; }
 .cg-head { display: flex; justify-content: space-between; align-items: flex-end; }
 .cg-value { font-size: 14px; font-weight: 500; color: var(--text-tertiary); }
-.cg-track { position: relative; height: 10px; }
-.cg-line { position: absolute; left: 0; right: 0; top: 4px; height: 2px; background: var(--border-strong); }
 
 /* systems */
 .systems-view { display: flex; flex-direction: column; gap: 22px; flex: 1; min-height: 0; }
 .sys-body { display: flex; flex-direction: column; gap: 34px; padding: 28px 40px; backdrop-filter: blur(28px); }
 .sys-row { display: flex; gap: 96px; }
 .sys-row.condition { padding-top: 28px; border-top: 1px solid var(--border); }
+.sys-row > .sys-group:first-child { min-width: 470px; }
 .sys-row > .sys-group:last-child { flex: 1; }
 .sys-group { display: flex; flex-direction: column; gap: 22px; }
 .sys-group-head { display: flex; flex-direction: column; gap: 4px; }
@@ -128,3 +128,10 @@
 .route-line .track { position: relative; }
 .route-line .track .remaining { display: block; height: 1px; background: var(--route); }
 .route-line .track .plane-dot { position: absolute; top: -4px; width: 9px; height: 9px; margin-left: -4px; border-radius: 50%; background: var(--text-primary); }
+
+/* six tabs now share the HUD: labels stay on one line and the bar keeps a gap between its three parts */
+.hud-top { gap: 16px; }
+.hud-top .brand { width: 240px; }
+.hud-tabs { flex: none; }
+.hud-tabs a { white-space: nowrap; padding: 0 9px; }
+.hud-tabs a .dot { margin-left: -1px; }

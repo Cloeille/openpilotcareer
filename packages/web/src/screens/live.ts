@@ -116,7 +116,7 @@ export async function live(ctx: Ctx): Promise<Screen> {
     LIVE_VIEWS.map((v) => h('button', { type: 'button', class: 'view-opt', 'aria-pressed': String(v === id), onclick: () => ctx.go(`#live/${v}`) }, t(`live.view.${v}` as 'live.view.cutaway'))));
 
   const alert = lostShown ? bridgeAlert(facts, () => void tick()) : null;
-  const root = h('div', { class: `live-view ${id}${facts.lost ? ' lost' : ''}` },
+  const root = h('div', { class: `live-view view-${id}${facts.lost ? ' lost' : ''}` },
     h('div', { class: 'live-header' },
       h('div', { class: 'title-block' },
         h('div', { class: 'status-line' }, dot, status, flightBadge(flight)),

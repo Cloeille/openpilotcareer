@@ -2,8 +2,8 @@ import { capacityKg } from '@opc/shared';
 import { h } from '../ui.ts';
 import { svg } from '../svg.ts';
 import { fmt } from '../format.ts';
-import { t } from '../i18n.ts';
-import { deriveCabin, layoutCabin, occupiedSeats, type Rect } from '../cabin.ts';
+import { t, tp } from '../i18n.ts';
+import { deriveCabin, doorCount, layoutCabin, occupiedSeats, type Rect } from '../cabin.ts';
 import { fuelVm, loadVm, type Body, type LiveCtx, type LiveFacts } from '../live-view.ts';
 
 const PLAN_W = 1536;
@@ -45,15 +45,16 @@ export function cabinBody(c: LiveCtx): Body {
   const sw = (style: string): HTMLElement => h('span', { class: 'swatch', style, 'aria-hidden': 'true' });
   const legendRow = h('div', { class: 'cabin-legend' },
     legend(sw(`background:${SEAT_TAKEN}`), t('live.cabin.legend.taken')), legend(sw('border:1.2px solid #FFFFFF4D'), t('live.cabin.legend.free')),
-    legend(sw('background:var(--info)'), t('live.cabin.legend.crew')), legend(sw('background:var(--text-primary)'), t('live.cabin.legend.pilots')),
-    legend(sw('border:1.5px solid var(--border-strong)'), t('live.cabin.legend.service')));
+    lay.crew.length > 0 ? legend(sw('background:var(--info)'), t('live.cabin.legend.crew')) : null,
+    lay.pilots.length > 0 ? legend(sw('background:var(--text-primary)'), t('live.cabin.legend.pilots')) : null,
+    lay.services.length > 0 ? legend(sw('border:1.5px solid var(--border-strong)'), t('live.cabin.legend.service')) : null);
 
   const est = t('live.cabin.estimated');
   const nTaken = lay.seats.filter((s) => s.taken).length;
   const equip = h('div', { class: 'cabin-equipment' },
     equipment(String(cfg.lavs), t('live.cabin.lav'), est), equipment(String(cfg.galleys), t('live.cabin.galley'), est),
-    equipment(fm.num(cfg.seats), t('live.cabin.seats'), freight ? est : `${t('live.cabin.taken', { n: fm.num(nTaken) })} · ${est}`),
-    equipment(String(cfg.doors), t('live.cabin.doors'), est));
+    equipment(fm.num(cfg.seats), t('live.cabin.seats'), freight ? est : `${tp('live.cabin.taken', nTaken)} · ${est}`),
+    equipment(String(doorCount(cfg)), t('live.cabin.doors'), est));
 
   const cap = capacityKg(c.type);
   const carried = h('span', { class: 'live-fact-value' });
@@ -74,7 +75,7 @@ export function cabinBody(c: LiveCtx): Body {
     h('div', { class: 'mass' }, h('span', { class: 'live-fact-label' }, t('live.mass.fuel')), fuelV, fuelSub),
     h('div', { class: 'cg' },
       h('div', { class: 'cg-head' }, h('span', { class: 'live-fact-label' }, t('live.mass.cg')), h('span', { class: 'cg-value' }, t('live.mass.cgNone'))),
-      h('div', { class: 'cg-track', 'aria-hidden': 'true' }, h('span', { class: 'cg-line' }))));
+      h('span', { class: 'mass-sub' }, t('live.mass.cgSub'))));
   update({ sample: null, receivedAt: null, lost: false, silentMs: null, phase: 'unknown', altitude: null, gsKts: null, fuelKg: null, remainingNm: null, etaAt: null, checks: [], engines: [] });
 
   const el = h('div', { class: 'cabin-stage' }, h('div', { class: 'cabin-plan' }, plan, legendRow, h('p', { class: 'dim small cabin-note' }, t('live.cabin.note'))), equip, strip);

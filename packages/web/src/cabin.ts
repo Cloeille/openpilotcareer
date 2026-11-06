@@ -12,7 +12,8 @@ export type CabinConfig = {
   lastRow: number;
   lavs: number;
   galleys: number;
-  doors: number;
+  /** Door positions along the cabin; each is drawn on both walls, so the cabin has twice as many doors. */
+  doorPairs: number;
   /** Cabin crew drawn at the doors. */
   crew: number;
   cockpit: boolean;
@@ -21,6 +22,10 @@ export type CabinConfig = {
 const SMALL_CABIN_SEATS = 10;
 const SERVICE_MIN_SEATS = 30;
 const REGIONAL_MAX_SEATS = 110;
+const DOOR_PAIR_SEATS = 90;
+
+/** Doors of the cabin: one per drawn wall mark. */
+export const doorCount = (c: Pick<CabinConfig, 'doorPairs'>): number => c.doorPairs * 2;
 
 const sum = (pattern: string): number => pattern.split('-').reduce((a, n) => a + Number(n), 0);
 
@@ -44,7 +49,7 @@ export function deriveCabin(a: Pick<AircraftType, 'category' | 'seats'>): CabinC
     seats, pattern, rows, lastRow: seats - (rows - 1) * perRow,
     lavs: service ? Math.max(1, Math.round(seats / 70)) : 0,
     galleys: service ? (seats <= 120 ? 1 : seats <= 220 ? 2 : 3) : 0,
-    doors: !service ? 1 : seats <= 100 ? 2 : seats <= 250 ? 4 : 6,
+    doorPairs: seats <= DOOR_PAIR_SEATS ? 1 : seats <= 250 ? 2 : 4,
     crew: service ? Math.min(2, Math.ceil(seats / 60)) : 0,
     cockpit: service,
   };
@@ -92,10 +97,10 @@ export function cabinItems(c: CabinConfig, freight: boolean): Item[] {
   const items: Item[] = [];
   if (c.cockpit) items.push({ t: 'cockpit' });
   if (freight) items.push({ t: 'hold' });
-  if (c.doors > 0) items.push({ t: 'door' });
+  items.push({ t: 'door' });
   if (c.crew > 0) items.push({ t: 'crew', n: c.crew });
   if (c.galleys > 0 || c.lavs > 0) items.push({ t: 'service', lav: c.lavs > 0, galley: c.galleys > 0 });
-  const blocks = Math.max(1, Math.min(c.doors - 1, 3));
+  const blocks = Math.max(1, Math.min(c.doorPairs, 3));
   let left = c.rows;
   for (let b = 0; b < blocks; b++) {
     const take = b === blocks - 1 ? left : Math.ceil(left / (blocks - b));
@@ -106,7 +111,7 @@ export function cabinItems(c: CabinConfig, freight: boolean): Item[] {
   }
   const extra = Math.max(0, c.lavs - 1);
   if (extra > 0 || c.galleys > 1) items.push({ t: 'service', lav: extra > 0, galley: c.galleys > 1 });
-  if (c.doors > 1) items.push({ t: 'door' });
+  if (c.doorPairs > 1) items.push({ t: 'door' });
   return items;
 }
 

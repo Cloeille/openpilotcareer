@@ -31,7 +31,7 @@ function tagSpecs(c: LiveCtx, f: LiveFacts | null): TagSpec[] {
   if (job.kind === 'pax') specs.push({ key: 'cabin', label: t('live.tag.cabin'), text: t('job.pax', { n: job.pax }) });
   if (job.kind === 'cargo') specs.push({ key: 'cargo', label: t('live.tag.cargo'), text: t('job.cargoKg', { kg: fm.kg(job.payloadKg) }) });
   const running = f ? enginesRunning(f.engines) : 0;
-  specs.push({ key: 'engines', label: t('live.tag.engines'), text: running > 0 ? t('live.tag.running', { n: running }) : t('live.tag.engineCount', { n: c.type.engines }) });
+  specs.push({ key: 'engines', label: t('live.tag.engines'), text: running > 0 ? t('live.tag.running', { n: running }) : tp('live.tag.engineCount', c.type.engines) });
   return specs;
 }
 
