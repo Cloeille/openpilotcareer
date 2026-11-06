@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import type { FleetQuote, HubUsage, LeaseOffer, LoanQuote } from './api-finance.ts';
 import {
   aircraftName, byRegistration, cheapestRent, defaultDuration, defaultLoan, deliveryAt, downPayment, findLoan, freeSpots, fundingOptions, inBudget, lastRentMonth, leaseQuote,
-  loanBreakdown, loanDownPcts, loanMonths, nextCharges, parkingSummary, starterRow, starterSummary, statusOf, wearOf,
+  loanBreakdown, loanDownPcts, purchaseFees, loanMonths, nextCharges, parkingSummary, starterRow, starterSummary, statusOf, wearOf,
 } from './finance-view.ts';
 
 const offer = (o: Partial<LeaseOffer> = {}): LeaseOffer => ({
@@ -98,9 +98,20 @@ test('loan: 20 % of 4 200 000 down, as in the mockup', () => {
   assert.equal(b.down, 840_000);
   assert.equal(b.financed, 3_360_000);
   assert.equal(b.balanceAfter, 444_560);
+  assert.equal(b.fees, 0);
   assert.equal(b.affordable, true);
   assert.equal(b.interest, 47_450 * 84 - 3_360_000);
   assert.equal(loanBreakdown(4_200_000, loans[1]!, 100_000).affordable, false);
+});
+
+test('loan with fees: down payment 852 500 and balance after 432 060, as in the mockup', () => {
+  const b = loanBreakdown(4_200_000, loans[1]!, 1_284_560, 12_500);
+  assert.equal(b.down, 852_500);
+  assert.equal(b.balanceAfter, 432_060);
+  assert.equal(b.financed, 3_360_000);
+  assert.equal(purchaseFees(4_200_000, { cash: 4_212_500 }), 12_500);
+  assert.equal(purchaseFees(4_200_000, { cash: 4_200_000 }), 0);
+  assert.equal(purchaseFees(4_200_000, null), 0);
 });
 
 test('default loan: 20 % / 84 months when quoted, else the nearest', () => {
@@ -153,4 +164,12 @@ test('starter list: counts what fits the budget, buy disabled when it does not',
   assert.equal(rows[1]!.leaseAffordable, false);
   assert.equal(inBudget(rows), 2);
   assert.equal(starterSummary(rows[0]!, 'lease', 1_500_000)!.saved, 90_000_000 - 126_500);
+});
+
+test('month labels follow the language, year only on request', async () => {
+  const { monthLabel } = await import('./finance-view.ts');
+  const ms = Date.UTC(2028, 9, 1);
+  assert.equal(monthLabel('fr-FR', ms, false), 'octobre');
+  assert.equal(monthLabel('fr-FR', ms, true), 'octobre 2028');
+  assert.equal(monthLabel('en-GB', ms, true), 'October 2028');
 });

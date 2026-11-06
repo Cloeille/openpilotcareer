@@ -669,7 +669,6 @@ const table = {
   'fin.loan.months': ['Length', 'Durée'],
   'fin.loan.interest': ['Interest over the whole loan: {amount}', 'Intérêts sur toute la durée : {amount}'],
   'err.hub_full': ['That hub has no free parking space left.', 'Ce hub n’a plus de parking libre.'],
-  'err.no_company': ['This account has no company yet.', 'Ce compte n’a pas encore de compagnie.'],
   'fin.start.owned': ['Already yours', 'Déjà à toi'],
 
   'fin.start.status': ['{company} · new company', '{company} · nouvelle compagnie'],
@@ -692,6 +691,7 @@ const table = {
   'fin.start.ferryTo': ['Ferry to {city}', 'Convoyage jusqu’à {city}'],
   'fin.start.hubLine': ['Home base {icao}', 'Base d’attache {icao}'],
   'fin.start.free': ['Free', 'Offerte'],
+  'fin.start.firstRent': ['First rent', 'Premier loyer'],
   'fin.start.afterSign': ['Balance after signing', 'Solde après signature'],
   'fin.start.afterBuy': ['Balance after the purchase', 'Solde après l’achat'],
   'fin.start.rent': ['Monthly rent', 'Loyer mensuel'],

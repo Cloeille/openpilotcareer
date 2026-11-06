@@ -92,18 +92,24 @@ export const findLoan = (loans: LoanQuote[], downPct: number, months: number): L
 export const loanDownPcts = (loans: LoanQuote[]): number[] => [...new Set(loans.map((l) => l.downPct))].sort((a, b) => a - b);
 export const loanMonths = (loans: LoanQuote[], downPct: number): number[] => [...new Set(loans.filter((l) => l.downPct === downPct).map((l) => l.months))].sort((a, b) => a - b);
 
-export type LoanBreakdown = { down: number; financed: number; monthly: number; months: number; downPct: number; balanceAfter: number; affordable: boolean; interest: number };
-export function loanBreakdown(price: number, loan: LoanQuote, balance: number): LoanBreakdown {
-  const down = downPayment(price, loan);
-  return { down, financed: price - down, monthly: loan.monthly, months: loan.months, downPct: loan.downPct, balanceAfter: balance - down, affordable: down <= balance, interest: Math.max(0, loan.monthly * loan.months - (price - down)) };
+/** Fees added to a cash purchase (ferry and registration): the quote's `cash` total minus the catalogue price, 0 when the server quotes the price alone. */
+export const purchaseFees = (price: number, quote: Pick<FleetQuote, 'cash'> | null): number => (quote && quote.cash > price ? quote.cash - price : 0);
+
+export type LoanBreakdown = { down: number; financed: number; monthly: number; months: number; downPct: number; fees: number; balanceAfter: number; affordable: boolean; interest: number };
+/** The down payment is `downPct` of the price plus the fees, which the loan never finances (mockup: 20 % of 4 200 000 + 12 500 = 852 500). */
+export function loanBreakdown(price: number, loan: LoanQuote, balance: number, fees = 0): LoanBreakdown {
+  const part = downPayment(price, loan);
+  const down = part + fees;
+  return { down, financed: price - part, monthly: loan.monthly, months: loan.months, downPct: loan.downPct, fees, balanceAfter: balance - down, affordable: down <= balance, interest: Math.max(0, loan.monthly * loan.months - (price - part)) };
 }
 
 export type FundingOption = { kind: 'loan'; loan: LoanBreakdown } | { kind: 'lease'; rent: number; deposit: number; balanceAfter: number };
 /** The ways out of a cash shortfall, loan first. A lease only when the server has an offer for the type (`leaseOffers > 0`) and the model of it is known. */
 export function fundingOptions(price: number, quote: FleetQuote | null, balance: number, lease: LeaseOffer | null): FundingOption[] {
+  const fees = purchaseFees(price, quote);
   const out: FundingOption[] = [];
   const loan = quote ? defaultLoan(quote.loans) : null;
-  if (loan) out.push({ kind: 'loan', loan: loanBreakdown(price, loan, balance) });
+  if (loan) out.push({ kind: 'loan', loan: loanBreakdown(price, loan, balance, fees) });
   if (lease && (quote?.leaseOffers ?? 1) > 0) {
     const d = defaultDuration(lease);
     const q = d ? leaseQuote(lease, d.months, balance) : null;
@@ -137,4 +143,11 @@ export function starterSummary(row: StarterRow, mode: 'lease' | 'buy', balance: 
   const q = leaseQuote(row.offer, row.months, balance);
   if (!q) return null;
   return { balanceAfter: q.balanceAfter, today: q.firstPayment, saved: row.price !== null && row.price > q.firstPayment ? row.price - q.firstPayment : null };
+}
+
+// ------------------------------------------------------------------ labels
+
+/** `novembre` / `octobre 2028` (UTC): the month a rent falls in. */
+export function monthLabel(locale: string, ms: number, withYear: boolean): string {
+  return new Intl.DateTimeFormat(locale, { timeZone: 'UTC', month: 'long', ...(withYear ? { year: 'numeric' } : {}) }).format(ms);
 }
