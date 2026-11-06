@@ -25,7 +25,7 @@ export const saveRealism = (db: Db, companyId: number, s: RealismSetting): void 
   run(db, 'UPDATE companies SET realism = ? WHERE id = ?', JSON.stringify(s), companyId);
 };
 
-/** Lot FINANCE reads this: do aircraft of this company wear out? (The `wearAndFailures` toggle. Off for companies that never chose realism.) */
+/** Do aircraft of this company wear out? (The `wearAndFailures` toggle. Off for companies that never chose realism.) */
 export const wearEnabled = (db: Db, companyId: number): boolean => realismSettingOf(db, companyId).toggles.wearAndFailures;
 
 /** Telemetry flags the company's realism tolerates: with `pauseTolerance` the bridge's `long_pause` does not fail verification. */

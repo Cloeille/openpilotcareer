@@ -32,8 +32,7 @@ async function founded(h: H, name: string, o: { hub?: string; code?: string; mod
 
 test('migration 3: identity, onboarding, reservations and bailout tables exist and the version advances', () => {
   const db = openDb(':memory:');
-  assert.equal(MIGRATIONS.length, 3);
-  assert.equal(get<{ user_version: number }>(db, 'PRAGMA user_version')!.user_version, 3);
+  assert.equal(get<{ user_version: number }>(db, 'PRAGMA user_version')!.user_version, MIGRATIONS.length);
   const cols = all<{ name: string }>(db, 'PRAGMA table_info(companies)').map((c) => c.name);
   for (const c of ['code', 'callsign', 'livery_color', 'start_mode', 'realism']) assert.ok(cols.includes(c), c);
   for (const t of ['onboarding', 'job_reservations', 'bailouts']) assert.ok(get(db, 'SELECT 1 AS x FROM sqlite_master WHERE name = ?', t), t);

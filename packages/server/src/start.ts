@@ -142,6 +142,10 @@ export function hubSuggestions(db: Db, mode: StartMode, q: string | undefined, n
 
 // ---------------------------------------------------------------- realism
 
+/** The mode the company was founded with; null for companies that predate v2 and for AI companies. */
+export const startModeOf = (db: Db, companyId: number): StartMode | null =>
+  get<{ start_mode: StartMode | null }>(db, 'SELECT start_mode FROM companies WHERE id = ?', companyId)?.start_mode ?? null;
+
 export function setRealism(db: Db, companyId: number, u: { preset: 'relaxed' | 'balanced' | 'hardcore' } | { toggles: Partial<RealismToggles> }): Realism {
   const cur = realismSettingOf(db, companyId);
   const next = 'preset' in u ? presetSetting(u.preset) : withToggles(cur, Object.fromEntries(Object.entries(u.toggles).filter(([, v]) => v !== undefined)));
@@ -149,7 +153,7 @@ export function setRealism(db: Db, companyId: number, u: { preset: 'relaxed' | '
   return realismOf(db, companyId);
 }
 
-/** Lot FINANCE calls this when the monthly billing runs: with `bankruptcyBailout` on, a negative balance is cleared once per season.
+/** Monthly billing calls this once per billed month: with `bankruptcyBailout` on, a negative balance is cleared once per season.
  *  Returns the amount written off (0: nothing to do). Posts a `bailout` ledger line; the caller wraps it in its transaction. */
 export function applyBailout(db: Db, companyId: number, at: number): number {
   if (!realismSettingOf(db, companyId).toggles.bankruptcyBailout) return 0;

@@ -18,6 +18,8 @@ import {
 import { HttpError, Limiter, NUMERIC_ID, parse } from './http.ts';
 import { registerStart } from './routes-start.ts';
 import { fetchLatestOfp, type Fetch } from './simbrief.ts';
+import { maintenanceTick } from './finance.ts';
+import { registerFinance } from './routes-finance.ts';
 import { onboardingOf, toleratedFlags } from './start.ts';
 
 const MAX_API_KEYS = 10;
@@ -59,7 +61,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   if (o.ai !== false) seedAi(db, now());
 
   app.setErrorHandler((err, _req, reply) => {
-    if (err instanceof HttpError) return reply.status(err.status).send({ error: err.code, message: err.message });
+    if (err instanceof HttpError) return reply.status(err.status).send({ ...err.extra, error: err.code, message: err.message });
     const status = (err as { statusCode?: number }).statusCode;
     if (typeof status === 'number' && status >= 400 && status < 500) return reply.status(status).send({ error: 'bad_request', message: (err as Error).message });
     console.error(err);
@@ -68,6 +70,9 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
 
   // AI companies play lazily: any API request first plays the ticks that are due (cheap no-op otherwise).
   if (o.ai !== false) app.addHook('onRequest', async (req) => { if (req.url.startsWith('/api/')) catchUp(db, now()); });
+
+  // Lot FINANCE: free aircraft whose workshop visit is over and bill the months that are due (cheap no-op otherwise).
+  app.addHook('onRequest', async (req) => { if (req.url.startsWith('/api/')) maintenanceTick(db, now()); });
 
   // Clients pick their server at runtime, so the API is cross-origin by design. Auth is a Bearer header, never a cookie,
   // so a wildcard origin exposes nothing a script could not already do with a token it was given.
@@ -228,7 +233,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   app.post('/api/v1/me/fleet', async (req, reply) => {
     const p = user(req);
     const b = parse(buyAircraftSchema, req.body);
-    tx(db, () => buyAircraft(db, p.companyId, b.icao, b.hub, now()));
+    tx(db, () => buyAircraft(db, p.companyId, b.icao, b.hub, now(), b.financing));
     return reply.status(201).send(meView(db, p.userId, p.companyId));
   });
 
@@ -250,7 +255,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   app.get('/api/v1/jobs', async (req) => {
     const p = user(req);
     const q = parse(z.object({ airport: icaoAirportSchema.optional() }), req.query);
-    const airportCodes = q.airport ? [q.airport] : all<{ location: string }>(db, 'SELECT DISTINCT location FROM aircraft WHERE company_id = ? ORDER BY location', p.companyId).map((a) => a.location);
+    const airportCodes = q.airport ? [q.airport] : all<{ location: string }>(db, 'SELECT DISTINCT location FROM aircraft WHERE company_id = ? AND returned_at IS NULL ORDER BY location', p.companyId).map((a) => a.location);
     const at = now();
     return { jobs: airportCodes.flatMap((icao) => openBoard(db, icao, at, p.companyId)), imported: pendingImports(db, p.companyId, at) };
   });
@@ -312,6 +317,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   });
 
   registerStart(app, { db, now });
+  registerFinance(app, { db, now });
 
   return app;
 }

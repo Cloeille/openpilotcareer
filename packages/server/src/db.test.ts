@@ -72,3 +72,12 @@ test('migrating is idempotent: reopening a migrated database changes nothing', (
   assert.equal(get<{ n: number }>(db, 'SELECT COUNT(*) n FROM companies')!.n, 3);
   assert.equal(get<{ user_version: number }>(db, 'PRAGMA user_version')!.user_version, MIGRATIONS.length);
 });
+
+test('migration 4 backfills registrations (country prefix, unique), ownership, base and wear on existing aircraft', () => {
+  const db = openDb(v1Database());
+  const rows = all<{ id: number; registration: string; ownership: string; base: string; wear_pct: number; status: string }>(db, 'SELECT id, registration, ownership, base, wear_pct, status FROM aircraft ORDER BY id');
+  assert.deepEqual(rows.map((r) => r.registration), ['F-HAZA', 'G-HAZA', 'N100AA']);
+  assert.deepEqual(rows.map((r) => r.base), ['LFPG', 'EGLL', 'KJFK']);
+  assert.ok(rows.every((r) => r.ownership === 'owned' && r.wear_pct === 0 && r.status === 'available'));
+  assert.throws(() => db.exec("UPDATE aircraft SET registration = 'F-HAZA' WHERE id = 2"), /UNIQUE/);
+});
