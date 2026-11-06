@@ -61,9 +61,9 @@ function exportSection(ctx: Ctx): HTMLElement {
   const last = readLastExport(localStorage, session.server);
   const size = (f: ExportFormat): string | null => (last?.bytes[f] === undefined ? null : formatBytes(last.bytes[f]!, lang));
   const describe = (span: Span | null | undefined, one: 'set.export.flightsDesc' | 'set.export.txDesc', none: 'set.export.noFlights' | 'set.export.noTx'): string => {
-    if (span === undefined) return t('set.export.forCompany', { company });
-    if (span === null) return t(none, { company });
-    const text = tp(one, span.count, { company, from: numericDate(span.from, lang), to: numericDate(span.to, lang) });
+    if (span === undefined) return t('set.export.counting');
+    if (span === null) return t(none);
+    const text = tp(one, span.count, { from: numericDate(span.from, lang), to: numericDate(span.to, lang) });
     return span.capped ? `${text} ${t('set.export.atLeast')}` : text;
   };
 
@@ -75,7 +75,7 @@ function exportSection(ctx: Ctx): HTMLElement {
     return b;
   };
   const section = panel({ title: t('set.export.title'), id: 'export-panel' },
-    h('p', { class: 'muted intro-text' }, t('set.export.intro')),
+    h('p', { class: 'muted intro-text' }, t('set.export.intro', { company })),
     h('ul', { class: 'plain export-list' },
       exportRow({ format: 'JSON', title: t('set.export.full'), size: size('json'), desc: t('set.export.fullDesc'), id: 'export-json-desc', action: all }),
       exportRow({ format: 'CSV', title: t('set.export.flights'), size: size('flights.csv'), desc: describe(undefined, 'set.export.flightsDesc', 'set.export.noFlights'), id: 'export-flights-desc', action: csv('flights.csv', t('set.export.flights'), 'export-flights-desc') }),

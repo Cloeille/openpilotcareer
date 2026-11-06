@@ -14,11 +14,11 @@ let revealed: Revealed | null = null;
 
 const redraw = (): void => { window.dispatchEvent(new Event('opc:redraw')); };
 
-/** Focus an element that does not exist yet (the screen is being redrawn): retry for about a second. */
-export function focusSoon(id: string, tries = 20): void {
+/** Focus the element `id` of the screen that is about to replace this one: wait for a node other than the one on display now (the old screen may have an element with the same id), for about a second. */
+export function focusSoon(id: string, stale: HTMLElement | null = document.getElementById(id), tries = 20): void {
   const el = document.getElementById(id);
-  if (el) el.focus();
-  else if (tries > 0) setTimeout(() => focusSoon(id, tries - 1), 50);
+  if (el && el !== stale) el.focus();
+  else if (tries > 0) setTimeout(() => focusSoon(id, stale, tries - 1), 50);
 }
 
 export async function copyRevealedKey(): Promise<void> {
@@ -89,7 +89,12 @@ export async function keysSection(ctx: Ctx): Promise<{ panel: HTMLElement; focus
     void act(t('set.keys.createdToast'), async () => {
       const k = await api<ApiKeyInfo & { key: string }>('/me/api-keys', { method: 'POST', body: { label } });
       revealed = { user: me.username, server: session.server, id: k.id, name: k.label, key: k.key };
-    }, async () => { redraw(); focusSoon('key-copy'); });
+    }, async () => {
+      // Redraw puts the focus back on the field that had it; let go of it so the new Copy button can take it.
+      (document.activeElement as HTMLElement | null)?.blur();
+      focusSoon('key-copy');
+      redraw();
+    });
   } }, name.root, create);
 
   const list = keys.length === 0
