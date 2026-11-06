@@ -17,11 +17,10 @@ nav.hud-tabs a[aria-current='page'] { border-bottom-color: transparent; }
 .panel.skeleton-panel { flex: 1; max-height: 420px; max-width: 1040px; }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* ---------------------------------------------------------------- backdrop: cross-fade between scenes, very slow drift */
-  .scene { animation: drift 40s ease-in-out infinite alternate; }
-  .scene.fade-in { animation: scene-in .45s ease-out backwards, drift 40s ease-in-out infinite alternate; }
+  /* ---------------------------------------------------------------- backdrop: cross-fade between scenes.
+     No ken-burns drift: an animated layer behind the backdrop-filter panels re-blurs them every frame, and measured 60 -> 30 fps here (software GL). */
+  .scene.fade-in { animation: scene-in .45s ease-out backwards; }
   @keyframes scene-in { from { opacity: 0; } }
-  @keyframes drift { to { transform: scale(1.04); } }
 
   /* ---------------------------------------------------------------- screen enter: fade and rise 8 px; Q / E slide in from the side they point to */
   [data-enter] { --dx: 0px; --dy: 8px; }
