@@ -6,10 +6,11 @@ const LOCALE: Record<Lang, string> = { en: 'en-GB', fr: 'fr-FR' };
 /** Number, money, time and unit formats of the mockup (`1 284 560 €`, `18:42Z`, `1 070 kg`, `412 kt`), per language. Group separators are no-break spaces so a figure never wraps. */
 export function makeFormat(lang: Lang) {
   const locale = LOCALE[lang];
-  const nbsp = (s: string): string => s.replace(/[\u202f\u00a0]/g, NBSP);
+  /** No-break group separators, and the typographic minus (U+2212) the mockup uses for negatives. */
+  const nbsp = (s: string): string => s.replace(/[\u202f\u00a0]/g, NBSP).replace(/^-/, '\u2212');
   const eur = new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
   const zulu = new Intl.DateTimeFormat(locale, { timeZone: 'UTC', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
-  const day = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' });
+  const day = new Intl.DateTimeFormat(locale, { timeZone: 'UTC', day: 'numeric', month: 'short' });
   const rel = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
   const num = (n: number, digits = 0): string => nbsp(n.toLocaleString(locale, { maximumFractionDigits: digits, minimumFractionDigits: digits }));
   return {

@@ -21,9 +21,10 @@ test('en: same shape, English separators', () => {
   assert.equal(en.num(4.6, 1), '4.6');
 });
 
-test('signed money shows + for gains and the minus sign for losses', () => {
+test('signed money shows + for gains and the true minus sign (U+2212) for losses', () => {
   assert.equal(fr.signedMoney(12480), `+12${NBSP}480${NBSP}€`);
-  assert.equal(fr.signedMoney(-50), `-50${NBSP}€`);
+  assert.equal(fr.signedMoney(-50), `\u221250${NBSP}€`);
+  assert.equal(fr.num(-2, 1), '\u22122,0');
   assert.equal(fr.signedMoney(0), `0${NBSP}€`);
 });
 
@@ -71,4 +72,11 @@ test('moneyShort: millions with two decimals, full amount below one million', ()
 test('ordinal: French 1er / 7e, English 1st 2nd 3rd 4th 11th 22nd', () => {
   assert.deepEqual([1, 7, 24].map(fr.ordinal), ['1er', '7e', '24e']);
   assert.deepEqual([1, 2, 3, 4, 11, 22].map(en.ordinal), ['1st', '2nd', '3rd', '4th', '11th', '22nd']);
+});
+
+test('dates are UTC like the clock beside them: 23:18Z stays on its own day', () => {
+  const late = Date.UTC(2026, 10, 4, 23, 18);
+  assert.equal(fr.date(late), '4 nov.');
+  assert.equal(fr.dateTime(late), '4 nov. · 23:18Z');
+  assert.equal(en.date(late), '4 Nov');
 });

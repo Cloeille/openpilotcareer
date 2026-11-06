@@ -364,3 +364,33 @@ input.upper { text-transform: uppercase; }
 
 .detail-panel .line { padding: 2px 0; }
 .detail-host { display: flex; flex-direction: column; gap: 26px; }
+
+/* ---------------------------------------------------------------- history, flight detail */
+.history-view { width: 1260px; display: flex; flex-direction: column; gap: 18px; min-height: 0; }
+.history-view .facts { gap: 40px; }
+.history-view .fact-value { font-size: 24px; }
+.flight-view { width: 1100px; display: flex; flex-direction: column; gap: 22px; min-height: 0; }
+.flight-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+.view-switcher { display: flex; gap: 2px; padding: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; backdrop-filter: blur(20px); }
+.view-opt { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border: 0; border-radius: 4px; background: transparent; color: var(--text-secondary); font-size: 14px; font-weight: 500; cursor: pointer; }
+.view-opt[aria-pressed='true'] { background: var(--surface-selected); color: var(--text-primary); }
+.flight-middle { display: flex; gap: 20px; align-items: flex-start; }
+.flight-middle > .panel { flex: 1; }
+.panel.verdict { padding: 22px 26px; gap: 14px; }
+.verdict-head { display: flex; gap: 14px; align-items: center; }
+.verdict-icon { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 4px; background: var(--neutral-soft); color: var(--text-secondary); }
+.verdict-icon.verified { background: var(--success-soft); color: var(--success); }
+.verdict-icon.rejected { background: var(--danger-soft); color: var(--danger); }
+.verdict-title { font: 600 22px var(--display); }
+.reason { font-size: 15px; }
+.consequences { display: flex; flex-direction: column; gap: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+.cons { display: flex; justify-content: space-between; gap: 16px; }
+.panel.statement { max-width: 620px; }
+.stmt-section { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 0 6px; font: 600 16px var(--display); border-bottom: 1px solid var(--border); }
+.stmt-line { display: grid; grid-template-columns: 1fr 1.4fr auto; gap: 14px; align-items: baseline; padding: 6px 0; }
+.stmt-basis { font-size: 13px; color: var(--text-tertiary); }
+.stmt-amount { font-variant-numeric: tabular-nums; text-align: right; }
+.stmt-net { display: flex; justify-content: space-between; align-items: baseline; padding-top: 16px; margin-top: 8px; border-top: 1px solid var(--border-strong); }
+.manual-card { display: flex; flex-direction: column; gap: 14px; padding: 6px 0 18px; border-bottom: 1px solid var(--border); }
+.manual-card:last-of-type { border-bottom: 0; }
+.history-view .filter select { max-width: none; }

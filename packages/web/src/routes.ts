@@ -7,7 +7,10 @@ import { buy } from './screens/buy.ts';
 import { catalogue } from './screens/catalogue.ts';
 import { custom } from './screens/custom.ts';
 import { fleet } from './screens/fleet.ts';
+import { flightDetail } from './screens/flight.ts';
+import { history } from './screens/history.ts';
 import { hubs } from './screens/hubs.ts';
+import { manual } from './screens/manual.ts';
 import { jobDetail } from './screens/job.ts';
 import { newCompany } from './screens/new-company.ts';
 import { jobs } from './screens/jobs.ts';
@@ -30,7 +33,7 @@ export const routes: Record<string, ScreenFn> = {
   job: jobDetail,
   simbrief,
   fleet, catalogue, buy, hubs, custom, company: newCompany,
-  history: legacy('flights', 'history', 'history'),
+  history, flight: flightDetail, manual,
   leaderboard: legacy('leaderboard', 'leaderboard', 'leaderboard'),
   settings: legacy('settings', 'settings', 'settings'),
 };
