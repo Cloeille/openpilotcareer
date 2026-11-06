@@ -686,7 +686,6 @@ const table = {
   'ob.s2.note.match': ['Matches your search', 'Correspond à ta recherche'],
   'ob.s2.note.balanced': ['Balanced to get started', 'Équilibré pour débuter'],
   'ob.s2.note.most_jobs': ['The most jobs, the dearest', 'Le plus de jobs, le plus cher'],
-  'ob.s2.note.cheapest': ['The cheapest of the three', 'Le moins cher des trois'],
   'ob.s2.note.least_competition': ['The least competition', 'Le moins de concurrence'],
   'ob.newCompany': ['new company', 'nouvelle compagnie'],
   'ob.step.depart': ['Start', 'Départ'],

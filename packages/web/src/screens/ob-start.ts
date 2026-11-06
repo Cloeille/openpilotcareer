@@ -5,6 +5,7 @@ import {
   LIVERY_COLORS, START_FACTS, isValidCallsign, isValidCode, isValidName, liveryIdOf, normalizeCallsign, normalizeCode, otherMode, suggestCallsign, suggestCode,
 } from '../onboarding-model.ts';
 import { codeAvailable, createOnboardingCompany, hubSuggestions, putOnboarding } from '../api-onboarding.ts';
+import type { HubNoteKey } from '@opc/shared';
 import type { HubSuggestion, StartMode } from '../onboarding-types.ts';
 import { session } from '../api.ts';
 import { PRODUCT_NAME } from '../brand.ts';
@@ -69,8 +70,8 @@ export function step1(w: Wizard): StepResult {
 // ------------------------------------------------------------------ step 2: compagnie & hub
 
 const sizeKey = { large: 'ob.s2.sizeLarge', medium: 'ob.s2.sizeMedium', small: 'ob.s2.sizeSmall' } as const;
-const NOTE_KEYS: Record<string, Key> = { match: 'ob.s2.note.match', balanced: 'ob.s2.note.balanced', most_jobs: 'ob.s2.note.most_jobs', cheapest: 'ob.s2.note.cheapest', least_competition: 'ob.s2.note.least_competition' };
-const noteOf = (s: HubSuggestion): string => (s.noteKey && NOTE_KEYS[s.noteKey] ? t(NOTE_KEYS[s.noteKey]!) : s.note);
+const NOTE_KEYS: Record<HubNoteKey, Key> = { match: 'ob.s2.note.match', balanced: 'ob.s2.note.balanced', most_jobs: 'ob.s2.note.most_jobs', least_competition: 'ob.s2.note.least_competition' };
+const noteOf = (s: HubSuggestion): string => t(NOTE_KEYS[s.noteKey]);
 
 function implications(s: HubSuggestion | null): HTMLElement {
   if (!s) return h('div', { class: 'ob-hub-impl' }, h('p', { class: 'dim' }, t('ob.s2.pickHub')));

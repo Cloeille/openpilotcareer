@@ -4,7 +4,7 @@ import type { RealismPresetId } from '@opc/shared';
 // and adds the two shapes that never cross the server: the bridge's own status and the new-company form body.
 export { REALISM_TOGGLES } from '@opc/shared';
 export type {
-  FirstJob, FleetQuote, HubSuggestion, LeaseOffer, LoanOption, Me, Onboarding, OnboardingStep, Realism, RealismToggle, StartMode,
+  FirstJob, FleetQuote, HubNoteKey, HubSuggestion, LeaseOffer, LoanOption, Me, Onboarding, OnboardingStep, Realism, RealismToggle, StartMode,
 } from '@opc/shared';
 
 /** The three named presets (`custom` is what any hand-set toggle turns the preset into). */
