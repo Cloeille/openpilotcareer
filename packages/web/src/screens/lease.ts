@@ -124,7 +124,7 @@ export async function lease(ctx: Ctx): Promise<Screen> {
   enterConfirms(view, confirm);
   return {
     title: offer.typeName, scene: 'catalogue', tab: 'fleet', view, back: BACK,
-    hints: [{ key: t('key.esc'), label: t('hint.back') }, { key: '← →', label: t('fin.hint.duration') }, { key: t('key.tab'), label: t('fin.hint.base') }, { key: t('key.enter'), label: t('fin.hint.confirmLease') }],
+    hints: [{ key: t('key.esc'), label: t('hint.back') }, { key: '← →', label: t('fin.hint.duration') }, { key: 'B', label: t('fin.hint.base') }, { key: t('key.enter'), label: t('fin.hint.confirmLease') }],
     keys: { b: cycleBase },
   };
 }
