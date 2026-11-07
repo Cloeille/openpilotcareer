@@ -2451,6 +2451,9 @@ const table = {
   'st.ov.empty': ['Your company has no employees. Lines need pilots and cabin crew to fly: recruit a first crew.', 'Ta compagnie n’a aucun employé. Les lignes ont besoin de pilotes et de personnel de cabine pour voler : recrute un premier équipage.'],
   'st.ov.emptyBaseTitle': ['No staff at {base}', 'Personne n’est basé à {base}'],
   'st.ov.emptyBase': ['Nobody is based at this airport. Pick another base below, or recruit here.', 'Personne n’est basé sur cet aéroport. Choisis une autre base ci-dessous, ou recrute ici.'],
+  // ---- parts (S5: the ledger kinds the finance screen shows)
+  'fin.kind.parts_order': ['Spare parts ordered', 'Pièces de rechange commandées'], 'fin.kind.parts_emergency': ['Part for a breakdown', 'Pièce pour une panne'],
+  'fin.kind.parts_sale': ['Spare parts sold back', 'Pièces de rechange revendues'], 'fin.kind.refurbish': ['Refurbishment', 'Remise à neuf'],
 } as const satisfies Record<string, readonly [string, string]>;
 
 export type Key = keyof typeof table;

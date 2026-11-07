@@ -224,6 +224,16 @@ const rented = await call('POST', `/facilities/${hangar.facilityId}/lease`, { to
 const spotsAfter = (await call('GET', '/me/hubs', { token: lineTok })).body[0].spots;
 expect(rented.status === 201 && rented.body.due === preview.due.today && spotsAfter === spotsBefore + 2, `hangar rented: ${rented.body.due} paid, parking ${spotsBefore} -> ${spotsAfter}`, rented);
 expect((await call('POST', `/facilities/${hangar.facilityId}/lease`, { token: lineTok, body: {} })).body.error === 'occupied', 'the same hangar cannot be rented twice');
+// v3 parts: the warehouse of the hub, a stock policy for the aircraft based there (kit parts bought, none of the shelf yet), one part by hand, and the wear screen of the aircraft
+const lineAircraft = (await call('GET', '/me', { token: lineTok })).body.fleet[0];
+const wh = (await call('GET', '/warehouse/LFPG', { token: lineTok })).body;
+expect(wh.hub === 'LFPG' && wh.facility === null && Array.isArray(wh.policies) && wh.policies.some((p) => p.icao === lineAircraft.icao), `warehouse ${wh.hub}: ${wh.policies.length} type(s), ${wh.capital} tied up, ${wh.expectedGroundDays} ground days a year`, wh);
+const pol = await call('PUT', '/warehouse/LFPG/policy', { token: lineTok, body: { icao: lineAircraft.icao, policy: 'critical' } });
+expect(pol.status === 200 && pol.body.policy === 'critical' && pol.body.deltaGroundDays <= 0, `critical kit for ${lineAircraft.icao}: ${pol.body.capital} tied up, ${pol.body.deltaGroundDays} ground days a year`, pol);
+const ord = await call('POST', '/warehouse/LFPG/order', { token: lineTok, body: { partId: 'piston.wheel', qty: 1 } });
+expect(ord.status === 201 && ord.body.order.eta > ord.body.order.orderedAt, `a part ordered by hand, delivery in ${Math.round((ord.body.order.eta - ord.body.order.orderedAt) / 86_400_000)} day(s)`, ord);
+const wearView = await call('GET', `/me/fleet/${lineAircraft.id}/wear`, { token: lineTok });
+expect(wearView.status === 200 && wearView.body.components.length >= 5 && wearView.body.totals.cashCurve.length > 0, `wear screen: ${wearView.body.components.map((c) => `${c.component} ${c.wearPct}%`).join(', ')}`, wearView);
 const off = await call('PUT', '/network/enabled', { token: lp.body.token, body: { enabled: false } });
 expect(off.body.enabled === false && (await call('GET', '/network', { token: lp.body.token })).body.enabled === false, 'the network switch turns the lines off');
 await call('DELETE', '/me', { token: lp.body.token, body: { password } });

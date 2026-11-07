@@ -57,8 +57,11 @@ export function loadComponents(db: Db, aircraftId: number, category: AircraftCat
 }
 /** The same, with the missing rows stored: components are written the first time an aircraft wears or is worked on, never by a read. */
 export function ensureComponents(db: Db, aircraftId: number, category: AircraftCategory): ComponentRow[] {
+  const stored = componentRows(db, aircraftId);
+  if (stored.length >= componentsOf(category).length) return stored;
+  const have = new Set(stored.map((r) => r.component));
   const rows = loadComponents(db, aircraftId, category);
-  for (const r of rows) run(db, 'INSERT INTO aircraft_components (aircraft_id, component, wear_pct) VALUES (?, ?, ?) ON CONFLICT DO NOTHING', aircraftId, r.component, r.wear_pct);
+  for (const r of rows) if (!have.has(r.component)) run(db, 'INSERT INTO aircraft_components (aircraft_id, component, wear_pct) VALUES (?, ?, ?) ON CONFLICT DO NOTHING', aircraftId, r.component, r.wear_pct);
   return rows;
 }
 
