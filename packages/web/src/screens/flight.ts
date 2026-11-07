@@ -3,7 +3,7 @@ import { airportInfo } from '../airports.ts';
 import { saveBlob } from '../api.ts';
 import { button, icon, line, panel } from '../components.ts';
 import { loadFlight, loadFlights } from '../flights-data.ts';
-import { flightBadge } from '../flight-view.ts';
+import { flightBadge, interruptionLabel } from '../flight-view.ts';
 import { fmt } from '../format.ts';
 import { flightNeighbours, statement, statementCsv } from '../history.ts';
 import { hashFor } from '../keys.ts';
@@ -85,6 +85,7 @@ function reportBody(f: Flight): HTMLElement {
       line(t('fl.load'), loadLabel(f.job)),
       line(t('fl.distance'), fm.nm(f.job.distanceNm)),
       line(t('fl.aircraft'), `${f.aircraftIcao} #${f.aircraftId}`),
+      f.interruptions ? line(t('fl.interruptions'), interruptionLabel(f.interruptions)) : null,
       line(t('fl.payout'), fm.money(f.job.payout)),
       f.status === 'verified' || f.status === 'unverified' ? line(t('fl.net'), h('span', { class: 'strong' }, fm.signedMoney(f.net))) : null,
       f.job.route ? h('div', { class: 'col tight' }, h('span', { class: 'fact-label' }, t('fl.route.label')), h('span', { class: 'mono small route-text' }, f.job.route)) : null,

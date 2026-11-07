@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   aircraftPrice, aircraftValue, blockHours, cannotFly, checkTelemetry, customAircraftSchema, infoSchema, deriveAircraft, distanceNm,
-  fallbackAircraft, fuelBurnKg, jobPayout, minFlightHours, landingFee, rankFor, resolveCatalogEntry, seasonOf, settle, telemetrySchema,
+  fallbackAircraft, fuelBurnKg, interruptionsSchema, jobPayout, minFlightHours, landingFee, rankFor, resolveCatalogEntry, seasonOf, settle, telemetrySchema,
   MANUAL_PAY_FACTOR, registerSchema,
   type AircraftType, type Telemetry,
 } from './index.ts';
@@ -188,4 +188,25 @@ test('register schema bounds username and password', () => {
   assert.ok(registerSchema.safeParse({ username: 'abc', password: '12345678' }).success);
   assert.ok(!registerSchema.safeParse({ username: 'a b', password: '12345678' }).success);
   assert.ok(!registerSchema.safeParse({ username: 'abc', password: 'short' }).success);
+});
+
+test('interruptions: optional in the report, bounded, and the downtime is excused from the too-long check only', () => {
+  const MIN = 60_000;
+  const slow = { landedAt: '2026-11-04T13:59:00Z' }; // 3.48 h for 200 nm: above maxHours (1 + 200 / (cruise * 0.4))
+  const interruptions = { reloads: 1, simRestarts: 1, downtimeMs: 90 * MIN };
+  assert.ok(telemetrySchema.safeParse({ ...report, interruptions }).success);
+  assert.ok(telemetrySchema.safeParse(report).success, 'old bridges omit it');
+  for (const bad of [{ ...interruptions, downtimeMs: -1 }, { ...interruptions, reloads: 1.5 }, { ...interruptions, simRestarts: 1_001 }, { ...interruptions, downtimeMs: 8 * 24 * 3_600_000 }, { reloads: 1 }, 'crash']) {
+    assert.ok(!telemetrySchema.safeParse({ ...report, interruptions: bad }).success, JSON.stringify(bad));
+  }
+  assert.ok(interruptionsSchema.safeParse({ reloads: 0, simRestarts: 0, downtimeMs: 0 }).success);
+  const without = checkTelemetry({ ...report, ...slow }, flight);
+  assert.ok(!without.ok && /too long/.test(without.reason));
+  assert.equal(checkTelemetry({ ...report, ...slow, interruptions }, flight).ok, true, 'a crash and restart is not a slow flight');
+  assert.equal(checkTelemetry({ ...report, ...slow, interruptions: { ...interruptions, downtimeMs: 30 * MIN } }, flight).ok, false, 'only the downtime reported is excused');
+  const fast = { landedAt: '2026-11-04T11:00:00Z', takeoffAt: '2026-11-04T10:59:00Z' };
+  assert.equal(checkTelemetry({ ...report, ...fast, interruptions }, flight).ok, false, 'downtime never excuses a flight that is too short');
+  assert.deepEqual(checkTelemetry({ ...report, interruptions }, flight), { ok: true, blockHours: 0.75 }, 'the paid block time is the real one');
+  const r = checkTelemetry({ ...report, flags: ['reload_after_crash'], interruptions }, flight);
+  assert.ok(!r.ok && /flagged.*reload_after_crash/.test(r.reason), 'the interruptions never tolerate the flag');
 });

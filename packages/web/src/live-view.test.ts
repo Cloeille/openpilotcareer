@@ -138,8 +138,9 @@ test('altitude is a flight level from 18 000 ft and feet below', () => {
 });
 
 test('anti-cheat checks: unknown without data, flagged by bridge flags and by a sim rate above 1x', () => {
-  assert.deepEqual(checksOf(null).map((c) => c.state), ['unknown', 'unknown', 'unknown', 'unknown']);
-  assert.deepEqual(checksOf(sample()).map((c) => c.state), ['ok', 'ok', 'ok', 'ok']);
+  assert.deepEqual(checksOf(null).map((c) => c.state), ['unknown', 'unknown', 'unknown', 'unknown', 'unknown']);
+  assert.deepEqual(checksOf(sample()).map((c) => c.state), ['ok', 'ok', 'ok', 'ok', 'ok']);
+  assert.equal(checksOf(sample({ flags: ['reload_after_crash'] })).find((c) => c.id === 'reload')!.state, 'flagged');
   const flagged = checksOf(sample({ flags: ['slew_detected', 'weird_flag'] }));
   assert.equal(flagged.find((c) => c.id === 'slew')!.state, 'flagged');
   assert.equal(flagged.find((c) => c.id === 'pause')!.state, 'ok');
