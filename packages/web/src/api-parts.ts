@@ -40,9 +40,10 @@ export const COMPONENTS = ['engines', 'gear', 'propellers', 'avionics', 'interio
 export type ComponentId = (typeof COMPONENTS)[number];
 export const WEAR_ACTIONS = ['leave', 'overhaul', 'replace'] as const;
 export type WearAction = (typeof WEAR_ACTIONS)[number];
-/** What a worn component costs: `value` is points of performance (%), of reliability (points) or of satisfaction (stars); `fuelPct` and `loadPct` are the side effects. */
+/** What a worn component costs: `value` is a magnitude, in points of performance (%), of reliability (points) or of satisfaction (stars); `fuelPct` (more fuel) and `loadPct` (fewer passengers) are the side effects. */
 export type WearEffect = { kind: 'performance' | 'reliability' | 'satisfaction'; value: number; fuelPct?: number; loadPct?: number };
-export type ComponentWear = { component: ComponentId; wearPct: number; effect: WearEffect; refurbUntil: number | null; suggested: WearAction };
+/** `detail` is the server's own line on the component ("2 910 h since overhaul, of 3 600"), shown as sent when there is one (asked of S5, optional). */
+export type ComponentWear = { component: ComponentId; wearPct: number; effect: WearEffect; refurbUntil: number | null; suggested: WearAction; detail?: string };
 /** One choice for one component. `monthlyGain` is what it earns a month against leaving the component as it is; `netReturn` and `netBuy` are over the months left, handing the aircraft back or taking the purchase option. */
 export type ChoiceOption = { cost: number; monthlyGain: number; paybackMonths: number | null; downDays: number; netReturn: number; netBuy: number };
 export type ChoiceTable = Record<ComponentId, Record<WearAction, ChoiceOption>>;
