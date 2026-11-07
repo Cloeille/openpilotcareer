@@ -127,7 +127,7 @@ function policyPanel(data: LeaveView, redraw: () => void): HTMLElement {
   const seg = h('div', { class: 'segments st-policy', role: 'group', 'aria-label': t('st.p.title') });
   const paint = (): void => {
     const o = optionOf(chosen);
-    const preview = policyPreview(data.policy, o, data.avgFatigue);
+    const preview = policyPreview(optionOf(data.policy), o, data.avgFatigue);
     seg.replaceChildren(...data.policies.map((p) => h('button', { type: 'button', class: 'seg', 'aria-pressed': String(p.policy === chosen), onclick: () => { chosen = p.policy; paint(); } }, t(`st.p.${p.policy}` as Key))));
     const line = (label: string, value: string, tone = ''): HTMLElement => h('div', { class: 'ln-fact' }, h('span', { class: 'muted' }, label), h('span', { class: `ln-fact-value ${tone}` }, value));
     fill(body,

@@ -1771,6 +1771,8 @@ const table = {
   'st.ov.company': ['{company}', '{company}'],
   'st.avail.free': ['{n} available', '{n} disponibles'],
   'st.side.title': ['Detail', 'Détail'],
+  'st.side.noCrewBody': ['No crew is free for {type}: its flights today cannot leave. Recruit or qualify someone.', 'Aucun équipage libre pour {type} : ses vols du jour ne peuvent pas partir. Recrute ou qualifie quelqu’un.'],
+  'st.side.dutyBody': ['Everyone qualified on {type} is at a duty limit: some flights today are cancelled until they have rested.', 'Tous les qualifiés {type} sont à une limite de service : des vols du jour sont annulés tant qu’ils n’ont pas récupéré.'],
   'st.side.row': ['Selected family', 'Famille choisie'],
   'st.side.noCrew': ['No {what} available', 'Aucun {what} disponible'],
   'st.side.dutyLimit': ['{what}: duty limit reached', '{what} : limite de service atteinte'],

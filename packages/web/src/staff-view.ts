@@ -30,6 +30,8 @@ export const TRAINING_COURSE: Record<AircraftCategory, { days: number; cost: num
   'turboprop-airliner': { days: 21, cost: 18_000 }, 'jet-business': { days: 21, cost: 20_000 }, 'jet-airliner': { days: 21, cost: 24_000 }, 'jet-widebody': { days: 28, cost: 36_000 },
   helicopter: { days: 14, cost: 12_000 }, other: { days: 14, cost: 8_000 },
 };
+/** The rest policies' promised effects (S2's `REST_POLICIES`): the factor on today's mean fatigue and on the incident risk. The server sends the risk factor too and it wins; fatigue has no wire field. */
+export const FATIGUE_FACTOR: Record<RestPolicy, number> = { legal: 1, standard: 0.8, generous: 0.63 };
 /** What a temp costs for `days` (S2's `interimPrice`): 1.2 x the daily salary x 1.5. */
 export const interimPrice = (monthlySalary: number, days: number): number => Math.round((monthlySalary / 30) * 1.2 * 1.5 * days);
 
@@ -56,8 +58,10 @@ export function loadMeter(used: number, limit: number): { fraction: number; tone
 
 export const rowKey = (r: Pick<FamilyRow, 'family' | 'type'>): string => (r.type ? `${r.family}:${r.type}` : r.family);
 
-/** A blocker names a family and a pilot type: a family row is blocked by any blocker of its family, a type row only by its own type. */
-export const blocksRow = (b: Pick<Blocker, 'family' | 'type'>, row: Pick<FamilyRow, 'family' | 'type'>): boolean => b.family === row.family && (row.type === undefined || b.type === row.type);
+/** The family a blocker is about; S2 sends null when it does not know, and only pilots are ever short of a type, so that reads as pilots. */
+export const blockerFamily = (b: Pick<Blocker, 'family'>): FamilyRow['family'] => b.family ?? 'pilot';
+/** A blocker names a family and an aircraft type: a family row is blocked by any blocker of its family, a type row only by its own type. */
+export const blocksRow = (b: Pick<Blocker, 'family' | 'type'>, row: Pick<FamilyRow, 'family' | 'type'>): boolean => blockerFamily(b) === row.family && (row.type === undefined || b.type === row.type);
 export const blockerOf = (blockers: readonly Blocker[], row: Pick<FamilyRow, 'family' | 'type'>): Blocker | null => blockers.find((b) => blocksRow(b, row)) ?? null;
 
 export type RowBadge =
@@ -115,7 +119,7 @@ export function defaultRow(rows: readonly VisibleRow[], blockers: readonly Block
 
 /** What the recruit button and the `R` key open: the family of the row, and the type of a pilot row. */
 export const presetFor = (row: Pick<FamilyRow, 'family' | 'type'> | null, blocker: Pick<Blocker, 'family' | 'type'> | null): { family: Candidate['family']; qual: string | null } => ({
-  family: (row?.family ?? blocker?.family) ?? 'pilot', qual: row?.type ?? (blocker?.type || null),
+  family: row?.family ?? (blocker ? blockerFamily(blocker) : 'pilot'), qual: row?.type ?? (blocker && blockerFamily(blocker) === 'pilot' ? blocker.type || null : null),
 });
 
 /** Pilots in the order the member sheet steps through them. Empty while the server does not send `members`. */
@@ -139,7 +143,7 @@ export const keepSelection = (list: readonly Pick<Candidate, 'id'>[], id: string
 export const startsAt = (now: number, c: Pick<Candidate, 'noticeDays'>): number => now + c.noticeDays * DAY_MS;
 /** Flights that stay cancelled for want of this family (and, for a pilot, this type): what hiring the candidate may unblock. 0 when nothing is blocked. */
 export const unblocks = (blockers: readonly Blocker[], c: Pick<Candidate, 'family' | 'qual'>): number =>
-  blockers.filter((b) => b.family === c.family && (c.family !== 'pilot' || c.qual === b.type)).reduce((n, b) => n + b.flights, 0);
+  blockers.filter((b) => blockerFamily(b) === c.family && (c.family !== 'pilot' || c.qual === b.type)).reduce((n, b) => n + b.flights, 0);
 
 // ---------------------------------------------------------------- member sheet
 
@@ -319,10 +323,14 @@ export function requestImpact(r: Pick<LeaveRequest, 'impact'>): RequestImpact {
 export const pendingRequests = <T extends { status: string }>(requests: readonly T[]): T[] => requests.filter((r) => r.status === 'pending');
 
 export type PolicyPreview = { extraHeadcount: number; payrollDelta: number; fatigueFrom: number; fatigueTo: number; riskPct: number };
-/** What switching to `chosen` promises (S2's figures: the policy's fatigue factor applied to today's mean, its incident-risk change); null when it is the policy in force. */
-export function policyPreview(current: RestPolicy, chosen: PolicyOption, avgFatigue: number): PolicyPreview | null {
-  if (chosen.policy === current) return null;
-  return { extraHeadcount: chosen.extraHeadcount, payrollDelta: chosen.payrollDelta, fatigueFrom: Math.round(avgFatigue), fatigueTo: Math.round(avgFatigue * chosen.fatigueFactor), riskPct: Math.round(chosen.riskPct) };
+/** What switching from the policy in force to `chosen` changes. S2 gives head count and payroll against the legal minimum, so the change is the difference of the two; fatigue is today's mean scaled by the ratio of the policies' factors, the risk is the ratio of their risk factors. Null when `chosen` is the policy in force. */
+export function policyPreview(current: PolicyOption, chosen: PolicyOption, avgFatigue: number): PolicyPreview | null {
+  if (chosen.policy === current.policy) return null;
+  return {
+    extraHeadcount: chosen.extraHeadcount - current.extraHeadcount, payrollDelta: chosen.payrollDelta - current.payrollDelta,
+    fatigueFrom: Math.round(avgFatigue), fatigueTo: Math.round(avgFatigue * (FATIGUE_FACTOR[chosen.policy] / FATIGUE_FACTOR[current.policy])),
+    riskPct: Math.round((chosen.riskFactor / current.riskFactor - 1) * 100),
+  };
 }
 
 /** The mean monthly salary of a family, for pricing a temp. Null when the family has nobody. */

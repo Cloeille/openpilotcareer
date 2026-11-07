@@ -15,7 +15,7 @@ const crj = row({ type: 'CRJ7', label: 'CRJ', headcount: 2, need: 4, availabilit
 const pilots = row({ label: 'Pilotes', headcount: 23, need: 26, children: [atr, a220, crj] });
 const cabin = row({ family: 'cabin', label: 'Personnel de cabine', headcount: 18, need: 18 });
 const ground = row({ family: 'ground', label: 'Personnel au sol', headcount: 14, need: 16 });
-const crjBlock: Blocker = { kind: 'no_crew', family: 'pilot', type: 'CRJ7', flights: 2, detail: 'AZR 7345 · AZR 7346' };
+const crjBlock: Blocker = { kind: 'no_crew', family: 'pilot', type: 'CRJ7', flights: 2 };
 
 test('a row is blocked by its own blocker; the family by any blocker of its types; other types are not', () => {
   assert.equal(blockerOf([crjBlock], crj), crjBlock);
@@ -104,7 +104,8 @@ test('morale words, hiring start and the flights a hire unblocks come from numbe
   assert.equal(unblocks([crjBlock], { family: 'pilot', qual: 'CRJ7' }), 2);
   assert.equal(unblocks([crjBlock], { family: 'pilot', qual: 'AT76' }), 0);
   assert.equal(unblocks([crjBlock], { family: 'cabin', qual: null }), 0);
-  assert.equal(unblocks([{ ...crjBlock, family: 'ground', type: '' }], { family: 'ground', qual: null }), 2);
+  assert.equal(unblocks([{ ...crjBlock, family: 'cabin', type: 'AT76' }], { family: 'cabin', qual: null }), 2);
+  assert.equal(unblocks([{ ...crjBlock, family: null }], { family: 'pilot', qual: 'CRJ7' }), 2, 'an unknown family is the pilots');
 });
 
 const H = 3_600_000;
@@ -245,10 +246,14 @@ test('a request is a problem only when granting it leaves someone missing that i
   assert.deepEqual(pendingRequests([{ status: 'pending', id: 1 }, { status: 'granted', id: 2 }, { status: 'refused', id: 3 }]).map((r) => r.id), [1]);
 });
 
-const policy = (o: Partial<PolicyOption>): PolicyOption => ({ policy: 'standard', restBaseH: 13, restAwayH: 11, extraHeadcount: 0, payrollDelta: 0, fatigueFactor: 0.8, riskPct: -10, ...o });
-test('policy preview: nothing for the policy in force; otherwise the server\'s figures, fatigue is today\'s mean times the factor', () => {
-  assert.equal(policyPreview('standard', policy({}), 38.2), null);
-  assert.deepEqual(policyPreview('standard', policy({ policy: 'generous', extraHeadcount: 5, payrollDelta: 21_600, fatigueFactor: 0.63, riskPct: -30 }), 38.2), { extraHeadcount: 5, payrollDelta: 21_600, fatigueFrom: 38, fatigueTo: 24, riskPct: -30 });
+const policy = (o: Partial<PolicyOption>): PolicyOption => ({ policy: 'standard', restBaseH: 13, restAwayH: 11, extraHeadcount: 2, payrollDelta: 9_000, riskFactor: 0.9, ...o });
+test('policy preview: nothing for the policy in force; otherwise the difference of the two policies (the server counts against the legal minimum)', () => {
+  assert.equal(policyPreview(policy({}), policy({}), 38.2), null);
+  const generous = policy({ policy: 'generous', extraHeadcount: 5, payrollDelta: 21_600, riskFactor: 0.7 });
+  assert.deepEqual(policyPreview(policy({ policy: 'legal', extraHeadcount: 0, payrollDelta: 0, riskFactor: 1 }), generous, 38.2), { extraHeadcount: 5, payrollDelta: 21_600, fatigueFrom: 38, fatigueTo: 24, riskPct: -30 });
+  const fromStandard = policyPreview(policy({}), generous, 38.2)!;
+  assert.deepEqual([fromStandard.extraHeadcount, fromStandard.payrollDelta, fromStandard.fatigueTo, fromStandard.riskPct], [3, 12_600, 30, -22]);
+  assert.equal(policyPreview(policy({}), policy({ policy: 'legal', extraHeadcount: 0, payrollDelta: 0, riskFactor: 1 }), 30)!.riskPct, 11);
 });
 
 test('a temp is priced like S2 prices it: 1.2 x the daily salary x 1.5 x days', () => {

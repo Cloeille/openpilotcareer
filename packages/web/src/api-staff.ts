@@ -21,6 +21,8 @@ export type StaffMember = {
   /** Flight hours for a pilot, years for the others. */
   experience: number;
   contract: 'cdi' | 'cdd'; noticeDays: number; state: StaffState; quals: string[];
+  /** People the row stands for: 1 for a pilot or a member of cabin crew, the headcount of a pool (ground, admin, maintenance, kitchen). */
+  poolCount: number;
 };
 export type Qualification = { type: string; name: string; validFrom: number; validUntil: number | null; inTraining: boolean };
 /** Minutes everywhere except `restHours` and `medicalDays`. `endsAt`: the latest the current duty period may end (null when not on duty). */
@@ -40,7 +42,8 @@ export type FamilyRow = {
   /** Asked of S2: the named people of a row (a pilot type), in the order the member sheet steps through them. */
   members?: MemberRef[];
 };
-export type Blocker = { kind: 'no_crew' | 'duty_limit'; family: StaffFamily; type: string; flights: number; detail: string };
+/** Today's flights cancelled for want of crew: `family` is what ran short (null when unknown), `type` the aircraft type. */
+export type Blocker = { kind: 'no_crew' | 'duty_limit'; family: 'pilot' | 'cabin' | null; type: string; flights: number };
 export type WatchItem = { staffId: number; name: string; family: StaffFamily; reason: 'fatigue' | 'duty'; value: number; detail: string };
 export type StaffOverview = { people: number; positions: number; payroll: number; policy: RestPolicy; families: FamilyRow[]; blockers: Blocker[]; watch: WatchItem[] };
 
@@ -51,7 +54,7 @@ export type StaffDetail = {
   contract: { kind: 'cdi' | 'cdd'; salary: number; noticeDays: number; firingCost: number; endsAt: number | null };
   nextLeave: { from: string; to: string } | null;
   /** The next flight the person could not fly under the duty rules; null while there is none. `overBy` is minutes (days for a `streak`). */
-  alert: { flightNo: string; overBy: number; detail: { rule: DutyRule; overBy: number } } | null;
+  alert: { flightNo: string; overBy: number; rule: DutyRule } | null;
 };
 
 export type Candidate = {
@@ -69,7 +72,8 @@ export type LeaveRequest = {
   /** Pending requests only: the coverage of the person's family on the worst day of the request, before and after granting it. */
   impact: { before: Coverage; after: Coverage; worstDay: string } | null;
 };
-export type PolicyOption = { policy: RestPolicy; restBaseH: number; restAwayH: number; extraHeadcount: number; payrollDelta: number; fatigueFactor: number; riskPct: number };
+/** `extraHeadcount` and `payrollDelta` are against the legal minimum, for this company's timetable. */
+export type PolicyOption = { policy: RestPolicy; restBaseH: number; restAwayH: number; extraHeadcount: number; payrollDelta: number; riskFactor: number };
 /** `type`: asked of S2 for the rows of the pilots ("Pilotes ATR"), so that a temp can be hired for the right aircraft. */
 export type CoverageRow = { family: StaffFamily; label: string; type?: string; headcount: number; perDay: number; days: Coverage[] };
 export type LeaveView = {

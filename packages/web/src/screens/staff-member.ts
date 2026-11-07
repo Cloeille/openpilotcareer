@@ -98,7 +98,7 @@ async function sheet(ctx: Ctx, d: StaffDetail, overview: Awaited<ReturnType<type
 
   const al = d.alert;
   const alertBox = al ? h('div', { class: 'st-alert', role: 'status' }, icon('triangle-alert', 18),
-    h('div', { class: 'col tight' }, h('span', { class: 'strong' }, al.detail.rule === 'streak' ? t('st.al.streak', { no: al.flightNo }) : t('st.al.title', { no: al.flightNo, n: Math.round(al.overBy) })), h('span', { class: 'muted small' }, t(`st.al.rule.${al.detail.rule}` as Key))),
+    h('div', { class: 'col tight' }, h('span', { class: 'strong' }, al.rule === 'streak' ? t('st.al.streak', { no: al.flightNo }) : t('st.al.title', { no: al.flightNo, n: Math.round(al.overBy) })), h('span', { class: 'muted small' }, t(`st.al.rule.${al.rule}` as Key))),
     h('div', { class: 'row tight' }, button(t('st.al.find'), { variant: 'secondary', icon: 'user', key: t('key.enter'), onclick: () => void replacement() }))) : null;
   async function replacement(): Promise<void> {
     const price = overview ? (overview.families.find((f) => f.family === m.family)?.salaries ?? 0) / Math.max(1, overview.families.find((f) => f.family === m.family)?.headcount ?? 1) : m.salary;

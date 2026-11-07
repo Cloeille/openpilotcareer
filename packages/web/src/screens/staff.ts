@@ -5,7 +5,7 @@ import { t, tp } from '../i18n.ts';
 import { hashFor } from '../keys.ts';
 import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
-import { availabilitySegments, blockerOf, defaultExpanded, defaultRow, presetFor, rowBadge, toggleAll, visibleRows, type RowBadge, type VisibleRow } from '../staff-view.ts';
+import { availabilitySegments, blockerFamily, blockerOf, defaultExpanded, defaultRow, presetFor, rowBadge, toggleAll, visibleRows, type RowBadge, type VisibleRow } from '../staff-view.ts';
 import { famLabel, famSub, hireFilter, staffOff, toneIcon, viewSwitch } from '../staff-ui.ts';
 import { h } from '../ui.ts';
 
@@ -123,7 +123,7 @@ function sidePanel(data: StaffOverview, v: VisibleRow | null, goHire: (v: Visibl
   const recruitLabel = row?.type ? t('st.side.recruitType', { type: row.label }) : row ? t('st.side.recruitFamily', { family: famLabel(row.family) }) : t('st.side.recruit');
 
   const heading = blocker
-    ? [h('span', { class: 'st-eyebrow bad' }, icon('ban', 14), t('st.side.blocks')), h('h2', { class: 'st-side-title' }, blocker.kind === 'no_crew' ? t('st.side.noCrew', { what: row?.type ? row.label : famLabel(blocker.family) }) : t('st.side.dutyLimit', { what: row?.type ? row.label : famLabel(blocker.family) })), h('p', { class: 'muted' }, blocker.detail),
+    ? [h('span', { class: 'st-eyebrow bad' }, icon('ban', 14), t('st.side.blocks')), h('h2', { class: 'st-side-title' }, blocker.kind === 'no_crew' ? t('st.side.noCrew', { what: row?.type ? row.label : famLabel(blockerFamily(blocker)) }) : t('st.side.dutyLimit', { what: row?.type ? row.label : famLabel(blockerFamily(blocker)) })), h('p', { class: 'muted' }, t(blocker.kind === 'no_crew' ? 'st.side.noCrewBody' : 'st.side.dutyBody', { type: row?.type ? row.label : blocker.type, n: blocker.flights })),
       h('dl', { class: 'st-facts' }, h('dt', null, t('st.side.cancelled')), h('dd', null, tp('st.side.flights', blocker.flights)))]
     : row
       ? [h('span', { class: 'st-eyebrow' }, icon('users', 14), t('st.side.row')), h('h2', { class: 'st-side-title' }, rowLabel(row)),
