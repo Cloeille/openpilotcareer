@@ -22,8 +22,8 @@ export const reportNav = (current: FinanceScreen, go: (hash: string) => void): H
 export const reportKeys = (current: FinanceScreen, go: (hash: string) => void): Record<string, () => void> =>
   Object.fromEntries(FINANCE_SCREENS.filter((s) => s !== current).map((s) => [screenKey(s), () => go(SCREEN_HASH[s])]));
 
-/** The hint at the bottom of every report: Esc leads to the company, the digits to the other reports. */
-export const reportHints = (...own: Hint[]): Hint[] => [{ key: t('key.esc'), label: t('st.hint.company') }, ...own, { key: '1 – 4', label: t('rp.hint.reports') }];
+/** The hints at the bottom of every report: Esc leads back (to the company from the cash screen, to the cash screen from the others), the digits to the other reports. */
+export const reportHints = (current: FinanceScreen, ...own: Hint[]): Hint[] => [{ key: t('key.esc'), label: current === 'cash' ? t('st.hint.company') : t('rp.nav.cash') }, ...own, { key: '1 – 4', label: t('rp.hint.reports') }];
 
 /** A signed amount that reads green or red. */
 export const signedMoney = (n: number): HTMLElement => h('span', { class: n > 0 ? 'rp-pos' : n < 0 ? 'rp-neg' : '' }, fmt().signedMoney(n));

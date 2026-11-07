@@ -74,7 +74,7 @@ export async function financeLines(ctx: Ctx): Promise<Screen> {
   const flip = (): void => { setBy(state.by === 'line' ? 'aircraft' : 'line'); };
   return {
     title: t('rp.l.title'), scene: 'finance', tab: 'hubs', view, back, wide: false,
-    hints: reportHints({ key: 'T', label: t('rp.l.hint.by') }, { key: '← →', label: t('rp.hint.month') }, { key: '↑ ↓', label: t('rp.l.hint.row') }),
+    hints: reportHints('lines', { key: 'T', label: t('rp.l.hint.by') }, { key: '← →', label: t('rp.hint.month') }, { key: '↑ ↓', label: t('rp.l.hint.row') }),
     keys: { t: flip, left: stepMonthBy(-1), right: stepMonthBy(1), ...reportKeys('lines', go) },
   };
 }

@@ -70,7 +70,7 @@ export async function financeCash(ctx: Ctx): Promise<Screen> {
     h('div', { class: 'rp-pair' }, side('in'), side('out')));
   return {
     title: t('rp.c.title'), scene: 'finance', tab: 'hubs', view, back, wide: false,
-    hints: reportHints({ key: '← →', label: t('rp.hint.month') }),
+    hints: reportHints('cash', { key: '← →', label: t('rp.hint.month') }),
     keys: { left: step(-1), right: step(1), ...reportKeys('cash', go) },
   };
 }

@@ -84,7 +84,7 @@ export async function financeLedger(ctx: Ctx): Promise<Screen> {
   const view = h('div', { class: 'rp-screen' }, header, reportNav('ledger', go), toolbar, h('div', { class: 'rp-body' }, list, h('div', { class: 'rp-side' }, sums)));
   return {
     title: t('rp.s.title'), scene: 'finance', tab: 'hubs', view, back, wide: false,
-    hints: reportHints({ key: 'T', label: t('rp.s.hint.period') }, { key: 'C', label: t('rp.s.hint.category') }, { key: '↑ ↓', label: t('hint.browse') }, { key: 'X', label: t('rp.s.hint.export') }),
+    hints: reportHints('ledger', { key: 'T', label: t('rp.s.hint.period') }, { key: 'C', label: t('rp.s.hint.category') }, { key: '↑ ↓', label: t('hint.browse') }, { key: 'X', label: t('rp.s.hint.export') }),
     keys: { t: nextPeriod, c: nextCategory, x: exportCsv, ...reportKeys('ledger', go) },
   };
 }

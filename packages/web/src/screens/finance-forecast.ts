@@ -73,12 +73,13 @@ export async function financeForecast(ctx: Ctx): Promise<Screen> {
   const decide = (d: DecisionView): void => {
     void act(t('rp.f.d.tried'), async () => { state.tried = await testDecision(d.id); }, async () => { redraw(); });
   };
+  const firstOpen = data.decisions.find((d) => d.available)?.id;
   const decision = (d: DecisionView): HTMLElement => {
     const what = d.id === 'pause_line' && d.line ? `${d.line.a} – ${d.line.b}` : d.icao ?? '';
     const on = tried?.decision === d.id;
     return h('li', { class: `rp-decision${on ? ' on' : ''}` },
       h('div', { class: 'col tight' }, h('strong', null, t(DECISION_KEY[d.id], { what })), h('span', { class: 'dim small' }, t(DECISION_NOTE_KEY[d.id], { amount: fm.money(d.upfront) })), effectLine(d)),
-      d.available ? button(on ? t('rp.f.d.clear') : t('rp.f.d.try'), { variant: 'secondary', onclick: () => { if (on) { state.tried = null; redraw(); } else decide(d); }, label: `${t(DECISION_KEY[d.id], { what })}: ${on ? t('rp.f.d.clear') : t('rp.f.d.try')}` })
+      d.available ? button(on ? t('rp.f.d.clear') : t('rp.f.d.try'), { variant: d.id === firstOpen ? 'primary' : 'secondary', onclick: () => { if (on) { state.tried = null; redraw(); } else decide(d); }, label: `${t(DECISION_KEY[d.id], { what })}: ${on ? t('rp.f.d.clear') : t('rp.f.d.try')}` })
         : h('span', { class: 'dim small' }, t('rp.f.d.unavailable')));
   };
   const trialNote = tried && trial ? h('p', { class: 'rp-trial' }, icon('info', 16), ' ', t('rp.f.d.result', { low: fm.money(trial.lowest.balance), end: fm.money(trial.end) })) : null;
@@ -87,7 +88,7 @@ export async function financeForecast(ctx: Ctx): Promise<Screen> {
   const view = h('div', { class: 'rp-screen' }, header, reportNav('forecast', go), h('div', { class: 'rp-body' }, main, h('div', { class: 'rp-side' }, side)));
   return {
     title: t('rp.f.title'), scene: 'finance', tab: 'hubs', view, back, wide: false,
-    hints: reportHints({ key: '← →', label: t('rp.f.hint.scenario') }, { key: t('key.enter'), label: t('rp.f.hint.try') }),
+    hints: reportHints('forecast', { key: '← →', label: t('rp.f.hint.scenario') }, { key: t('key.enter'), label: t('rp.f.hint.try') }),
     keys: { left: () => pick(stepScenario(state.scenario, -1)), right: () => pick(stepScenario(state.scenario, 1)), ...reportKeys('forecast', go) },
   };
 }
