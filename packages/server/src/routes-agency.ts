@@ -18,8 +18,7 @@ export function registerAgency(app: FastifyInstance, ctx: AgencyCtx): void {
   };
 
   app.get('/api/v1/agency/options', async (req) => {
-    const p = user(req);
-    return tx(db, () => agencyView(db, p.companyId, parse(agencyQuerySchema, req.query), now()));
+    return agencyView(db, user(req).companyId, parse(agencyQuerySchema, req.query), now());
   });
 
   app.post('/api/v1/agency/missions', async (req, reply) => {
