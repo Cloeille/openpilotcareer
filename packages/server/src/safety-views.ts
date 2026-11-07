@@ -52,6 +52,8 @@ const expiringRatings = (db: Db, companyId: number, now: number): number =>
     AND q.valid_from <= ? AND q.valid_until > ? AND q.valid_until <= ?`, companyId, now, now, now, now, now + TRAINING_WARN_DAYS * DAY_MS)!.n;
 
 const READING_KEEP_DAYS = 30;
+/** Legs of the next 24 h the preview chains crews through: a bound on the cost of a read (6 lines of 48 round trips would otherwise be 576). */
+const PREVIEW_MAX_LEGS = 120;
 /** Today's reading is the index the first time the day is asked for; the delta is against the earliest reading of the last 7 days (0 on the very first answer). */
 function deltaOf(db: Db, companyId: number, now: number, index: number): number {
   const today = dayNo(now);
@@ -80,7 +82,7 @@ function rolledBack<T>(db: Db, fn: () => T): T {
 function preview(db: Db, companyId: number, now: number, riskFactor: number): Preview[] {
   const code = companyCode(db, companyId);
   const legs = all<PreviewLeg>(db, `SELECT f.*, a.icao, a.wear_pct AS wear, a.status AS ac_status, a.maintenance_until, a.returned_at AS ac_returned
-    FROM scheduled_flights f JOIN aircraft a ON a.id = f.aircraft_id WHERE f.company_id = ? AND f.status = 'scheduled' AND f.dep_at >= ? AND f.dep_at < ? ORDER BY f.dep_at, f.id`, companyId, now, now + DAY_MS);
+    FROM scheduled_flights f JOIN aircraft a ON a.id = f.aircraft_id WHERE f.company_id = ? AND f.status = 'scheduled' AND f.dep_at >= ? AND f.dep_at < ? ORDER BY f.dep_at, f.id LIMIT ?`, companyId, now, now + DAY_MS, PREVIEW_MAX_LEGS);
   return rolledBack(db, () => legs.flatMap((l): Preview[] => {
     if (l.ac_returned !== null || (l.ac_status === 'maintenance' && (l.maintenance_until ?? 0) > l.dep_at)) return [];
     if (crewLeg(db, { id: l.id, companyId, flightNo: l.flight_no, dep: l.dep_at, arr: l.arr_at, origin: l.origin, dest: l.dest, icao: l.icao })) return [];
