@@ -90,7 +90,6 @@ test('migration 5 (live) adds flights.last_live_at, empty for existing flights',
 });
 
 test('SCHEMA_SIMBRIEF runs after V7 (position 7) on a database that already ran V7, and gives flights in the air a static id', () => {
-  assert.equal(MIGRATIONS.length, 7);
   assert.ok(MIGRATIONS[5]!.includes('line_ticks') && MIGRATIONS[6]!.includes('simbrief_static_id'));
   const file = join(mkdtempSync(join(tmpdir(), 'opc-sb-')), 'v7.sqlite');
   const raw = new DatabaseSync(file);
@@ -103,7 +102,7 @@ test('SCHEMA_SIMBRIEF runs after V7 (position 7) on a database that already ran 
       VALUES (1, 1, 1, 'C172', 'J1', 'board', 'pax', 'LFPG', 'EGLL', 195, 300, 3, 3000, 'active', 40), (2, 1, 1, 'C172', 'J2', 'board', 'pax', 'LFPG', 'EGLL', 195, 300, 3, 3000, 'verified', 41);`);
   raw.close();
   const db = openDb(file);
-  assert.equal(get<{ user_version: number }>(db, 'PRAGMA user_version')!.user_version, 7);
+  assert.equal(get<{ user_version: number }>(db, 'PRAGMA user_version')!.user_version, MIGRATIONS.length);
   const rows = all<{ id: number; sid: string | null }>(db, 'SELECT id, simbrief_static_id AS sid FROM flights ORDER BY id');
   assert.match(rows[0]!.sid!, /^opc_1_[0-9a-f]{12}$/);
   assert.equal(rows[1]!.sid, null, 'closed flights have nothing to fetch');
