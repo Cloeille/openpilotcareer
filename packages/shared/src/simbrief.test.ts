@@ -36,8 +36,8 @@ test('dispatch URL: values are percent-encoded and cannot add parameters or chan
 });
 
 test('only SimBrief\'s documented dispatch parameters are ever written', () => {
-  const all = dispatchUrl({ type: 'A320', orig: 'LFPG', dest: 'EGLL', airline: 'AZR', fltnum: '12', callsign: 'AZUR', reg: 'F-HAZR', pax: 1, staticId: 's' });
-  const allowed = new Set(['type', 'orig', 'dest', 'airline', 'fltnum', 'callsign', 'reg', 'pax', 'cargo', 'units', 'static_id']);
+  const all = dispatchUrl({ type: 'A320', orig: 'LFPG', dest: 'EGLL', airline: 'AZR', callsign: 'AZUR', reg: 'F-HAZR', pax: 1, staticId: 's' });
+  const allowed = new Set(['type', 'orig', 'dest', 'airline', 'callsign', 'reg', 'pax', 'cargo', 'units', 'static_id']);
   for (const k of Object.keys(params(all))) assert.ok(allowed.has(k), k);
 });
 
