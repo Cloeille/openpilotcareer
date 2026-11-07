@@ -8,7 +8,7 @@ import { hashFor } from '../keys.ts';
 import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { kindOf } from '../standings.ts';
-import { h } from '../ui.ts';
+import { h, notify } from '../ui.ts';
 
 /** Public sheet of one company: who it is, its hubs and fleet, the seasons on record and the open jobs it could take. */
 export async function companySheet(ctx: Ctx): Promise<Screen> {
@@ -69,7 +69,7 @@ export async function companySheet(ctx: Ctx): Promise<Screen> {
       panel({ title: t('sheet.seasons'), action: t('sheet.seasonsSub') }, history)));
   return {
     title: profile.name, scene: 'ai', tab: 'leaderboard', view, back,
-    hints: [{ key: t('key.esc'), label: t('hint.leaderboard') }, { key: '← →', label: t('hint.companies') }, ...(reachable.length > 0 ? [{ key: 'J', label: t('hint.openJobs') }] : [])],
-    keys: { left: () => step(-1), right: () => step(1), ...(reachable.length > 0 ? { j: () => go(hashFor('job', reachable[0]!.id)) } : {}) },
+    hints: [{ key: t('key.esc'), label: t('hint.leaderboard') }, { key: '← →', label: t('hint.companies') }, ...(reachable.length > 0 ? [{ key: 'J', label: t('hint.rivalJobs') }] : []), ...(profile.isAI ? [{ key: 'A', label: t('hint.rivalAlert') }] : [])],
+    keys: { left: () => step(-1), right: () => step(1), ...(profile.isAI ? { a: () => notify(t('sheet.noAlert')) } : {}), ...(reachable.length > 0 ? { j: () => go(hashFor('job', reachable[0]!.id)) } : {}) },
   };
 }

@@ -45,6 +45,20 @@ export function statement(f: Flight): Statement {
   };
 }
 
+/** The closed flights either side of `id` in the log (newest first). Null at the ends, and for a flight the list does not hold (an open one, or older than the page the list was loaded with). */
+export function flightNeighbours(flights: Flight[], id: number): { older: Flight | null; newer: Flight | null } {
+  const log = filterFlights(flights, NO_FILTER);
+  const i = log.findIndex((f) => f.id === id);
+  return i === -1 ? { older: null, newer: null } : { older: log[i + 1] ?? null, newer: log[i - 1] ?? null };
+}
+
+/** The earnings statement of a flight as a two-column CSV (stable English item names, plain numbers in euros, the coefficient as a fraction), for a spreadsheet. */
+export function statementCsv(f: Flight): string {
+  const s = statement(f);
+  const rows: [string, number][] = [['payout', s.payout], ['coefficient', s.factor], ['revenue', s.revenue], ['fuel', -s.fuel], ['landing_fee', -s.landing], ['maintenance', -s.maintenance], ['net', s.net]];
+  return ['item,amount', ...rows.map(([item, amount]) => `${item},${amount}`)].join('\r\n') + '\r\n';
+}
+
 /** What completing an open flight without telemetry will settle to (the server runs the same formula; fuel and block time are estimated from the type). */
 export function manualEstimate(f: Pick<Flight, 'job'>, aircraft: AircraftType, destSize: AirportSize, destIsHub: boolean): Settlement {
   return settle({ payout: f.job.payout, distanceNm: f.job.distanceNm, aircraft, destSize, destIsHub, status: 'unverified' });

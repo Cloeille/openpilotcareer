@@ -1426,6 +1426,18 @@ const table = {
   // ---- v3 hud
   'tab.network': ['Network', 'Réseau'],
   'tab.hubs': ['Company', 'Compagnie'],
+  'hint.olderFlight': ['Older flight', 'Vol plus ancien'],
+  'hint.newerFlight': ['Newer flight', 'Vol plus récent'],
+  'hint.exportStatement': ['Export the statement', 'Exporter le relevé'],
+  'fl.export': ['Export the statement', 'Exporter le relevé'],
+  'fl.exported': ['Statement exported', 'Relevé exporté'],
+  'hint.replayTouchdown': ['Review the touchdown', 'Revoir le toucher'],
+  'hint.seeProof': ['See the proof', 'Voir la preuve'],
+  'fl.noTouchdown': ['This server does not record the touchdown yet.', 'Ce serveur n’enregistre pas encore le toucher.'],
+  'fl.noProof': ['This server does not keep the proof of a rejection yet.', 'Ce serveur ne conserve pas encore la preuve d’un rejet.'],
+  'hint.rivalAlert': ['Rival alert', 'Alerte rival'],
+  'sheet.noAlert': ['This server cannot send rival alerts yet.', 'Ce serveur ne sait pas encore envoyer d’alertes rival.'],
+  'hint.rivalJobs': ['Jobs on its routes', 'Jobs sur ses routes'],
   'soon.title': ['Not available yet', 'Pas encore disponible'],
   'soon.network': ['Autonomous lines and the network map are not available on this server yet.', 'Les lignes autonomes et la carte du réseau ne sont pas encore disponibles sur ce serveur.'],
 } as const satisfies Record<string, readonly [string, string]>;

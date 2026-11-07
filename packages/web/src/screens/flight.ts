@@ -1,24 +1,27 @@
 import { MANUAL_PAY_FACTOR, type Flight } from '@opc/shared';
 import { airportInfo } from '../airports.ts';
-import { icon, line, panel } from '../components.ts';
-import { loadFlight } from '../flights-data.ts';
+import { saveBlob } from '../api.ts';
+import { button, icon, line, panel } from '../components.ts';
+import { loadFlight, loadFlights } from '../flights-data.ts';
 import { flightBadge } from '../flight-view.ts';
 import { fmt } from '../format.ts';
-import { statement } from '../history.ts';
+import { flightNeighbours, statement, statementCsv } from '../history.ts';
+import { hashFor } from '../keys.ts';
 import { t } from '../i18n.ts';
 import { loadLabel } from '../job-view.ts';
 import type { Ctx, Screen } from '../screen.ts';
-import { h } from '../ui.ts';
+import { h, notify } from '../ui.ts';
 
 let tab: 'report' | 'gain' = 'report';
 
 const verdictIcon = { verified: 'shield-check', unverified: 'circle-dashed', rejected: 'shield-x', cancelled: 'circle-x', active: 'route' } as const;
 
 export async function flightDetail(ctx: Ctx): Promise<Screen> {
-  const { arg } = ctx;
+  const { arg, go } = ctx;
   const back = '#history';
   const id = arg ? Number(arg) : NaN;
-  const f = Number.isInteger(id) ? await loadFlight(id) : null;
+  const recent = Number.isInteger(id) ? await loadFlights() : [];
+  const f = recent.find((x) => x.id === id) ?? (Number.isInteger(id) ? await loadFlight(id) : null);
   if (!f) return { title: t('fl.notFound'), scene: 'flight', tab: 'history', back, hints: [{ key: t('key.esc'), label: t('fl.back') }], view: h('p', { class: 'error-text', role: 'alert' }, t('fl.notFound')) };
   const fm = fmt();
   const at = f.completedAt ?? f.acceptedAt;
@@ -34,12 +37,29 @@ export async function flightDetail(ctx: Ctx): Promise<Screen> {
       h('p', { class: 'route-line-text' }, `${names} · ${t('fl.subline', { from: f.job.origin, to: f.job.destination, aircraft: f.aircraftIcao, id: f.aircraftId })}`)),
     switcher);
 
-  const body = tab === 'gain' ? gainBody(f) : reportBody(f);
+  const exportStatement = (): void => { saveBlob(new Blob([statementCsv(f)], { type: 'text/csv' }), `opc-flight-${f.id}-statement.csv`); notify(t('fl.exported')); };
+  const body = tab === 'gain' ? gainBody(f, exportStatement) : reportBody(f);
   const view = h('div', { class: 'flight-view' }, header, body);
+  const { older, newer } = flightNeighbours(recent, f.id);
+  const step = (to: Flight | null): (() => void) | null => (to ? () => go(hashFor('flight', to.id)) : null);
+  const stepOlder = step(older), stepNewer = step(newer);
   return {
     title: `${f.job.origin} → ${f.job.destination}`, scene: 'flight', tab: 'history', view, back,
-    hints: [{ key: t('key.esc'), label: t('fl.back') }, { key: 'G', label: tab === 'gain' ? t('hint.telemetry') : t('hint.gain') }],
-    keys: { g: () => setTab(tab === 'gain' ? 'report' : 'gain') },
+    hints: [
+      { key: t('key.esc'), label: t('fl.back') },
+      { key: 'G', label: tab === 'gain' ? t('hint.telemetry') : t('hint.gain') },
+      ...(tab === 'report' ? [{ key: 'R', label: t('hint.replayTouchdown') }] : []),
+      ...(tab === 'report' && f.status === 'rejected' ? [{ key: 'T', label: t('hint.seeProof') }] : []),
+      ...(stepOlder ? [{ key: 'Z', label: t('hint.olderFlight') }] : []),
+      ...(stepNewer ? [{ key: 'C', label: t('hint.newerFlight') }] : []),
+      ...(tab === 'gain' ? [{ key: 'X', label: t('hint.exportStatement') }] : []),
+    ],
+    keys: {
+      g: () => setTab(tab === 'gain' ? 'report' : 'gain'),
+      ...(tab === 'report' ? { r: () => notify(t('fl.noTouchdown')) } : {}),
+      ...(tab === 'report' && f.status === 'rejected' ? { t: () => notify(t('fl.noProof')) } : {}),
+      ...(stepOlder ? { z: stepOlder } : {}), ...(stepNewer ? { c: stepNewer } : {}), ...(tab === 'gain' ? { x: exportStatement } : {}),
+    },
   };
 }
 
@@ -71,7 +91,7 @@ function reportBody(f: Flight): HTMLElement {
       h('p', { class: 'dim small' }, t('fl.gap'))));
 }
 
-function gainBody(f: Flight): HTMLElement {
+function gainBody(f: Flight, onExport: () => void): HTMLElement {
   const fm = fmt();
   const s = statement(f);
   const paid = f.status === 'verified' || f.status === 'unverified';
@@ -85,5 +105,6 @@ function gainBody(f: Flight): HTMLElement {
     row(t('fl.gain.fuel'), f.aircraftIcao, fm.signedMoney(-s.fuel)),
     row(t('fl.gain.landing'), f.job.destination, fm.signedMoney(-s.landing)),
     row(t('fl.gain.maintenance'), f.aircraftIcao, fm.signedMoney(-s.maintenance)),
-    h('div', { class: 'stmt-net' }, h('span', null, t('fl.gain.net')), h('span', { class: 'big-money' }, fm.signedMoney(s.net)))));
+    h('div', { class: 'stmt-net' }, h('span', null, t('fl.gain.net')), h('span', { class: 'big-money' }, fm.signedMoney(s.net))),
+    h('div', { class: 'row' }, button(t('fl.export'), { variant: 'secondary', icon: 'download', key: 'X', onclick: onExport }))));
 }

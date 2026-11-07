@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { MANUAL_PAY_FACTOR, REJECT_REPUTATION_PENALTY, type AircraftType, type Flight } from '@opc/shared';
-import { NO_FILTER, filterFlights, manualEstimate, manualWaitMs, payFactor, seasonTotals, seasonsOf, statement, statusCounts } from './history.ts';
+import { NO_FILTER, filterFlights, flightNeighbours, manualEstimate, manualWaitMs, payFactor, seasonTotals, seasonsOf, statement, statementCsv, statusCounts } from './history.ts';
 
 const D = (m: number, d: number, h = 12): number => Date.UTC(2026, m - 1, d, h);
 const flight = (id: number, status: Flight['status'], at: number, o: Partial<Flight> = {}): Flight => ({
@@ -67,4 +67,19 @@ test('manual completion waits for the fastest believable flight time while anti-
   assert.equal(Math.round(manualWaitMs(f, type, D(11, 4, 10), true)), Math.round(min));
   assert.equal(manualWaitMs(f, type, D(11, 4, 10) + min + 1, true), 0);
   assert.equal(manualWaitMs(f, type, D(11, 4, 10), false), 0);
+});
+
+test('the neighbours of a flight are the closed flights either side of it in the log, none at the ends or for an unknown flight', () => {
+  const near = (id: number) => { const n = flightNeighbours(flights, id); return [n.older?.id ?? null, n.newer?.id ?? null]; };
+  assert.deepEqual(near(2), [1, 3]);
+  assert.deepEqual(near(3), [2, null]);
+  assert.deepEqual(near(4), [null, 6]);
+  assert.deepEqual(near(5), [null, null]);
+  assert.deepEqual(near(99), [null, null]);
+});
+
+test('the statement exports as CSV: costs negative, a rejected flight pays nothing', () => {
+  const paid = flight(1, 'verified', D(11, 4), { revenue: 5000, fuelCost: 900, landingFee: 40, maintenance: 300, net: 3760, job: { ...flights[0]!.job, payout: 5000 } });
+  assert.equal(statementCsv(paid), 'item,amount\r\npayout,5000\r\ncoefficient,1\r\nrevenue,5000\r\nfuel,-900\r\nlanding_fee,-40\r\nmaintenance,-300\r\nnet,3760\r\n');
+  assert.match(statementCsv(flight(3, 'rejected', D(11, 6))), /\ncoefficient,0\r\n/);
 });

@@ -95,11 +95,16 @@ export async function downloadExport(format: 'json' | 'flights.csv' | 'transacti
   const res = await request(`/me/export?format=${format}`, {});
   if (!res.ok) return fail(res, true);
   const blob = await res.blob();
+  saveBlob(blob, exportFileName(res.headers.get('content-disposition'), format));
+  return blob.size;
+}
+
+/** Hand a file to the browser as a download. */
+export function saveBlob(blob: Blob, name: string): void {
   const url = URL.createObjectURL(blob);
-  const a = Object.assign(document.createElement('a'), { href: url, download: exportFileName(res.headers.get('content-disposition'), format) });
+  const a = Object.assign(document.createElement('a'), { href: url, download: name });
   document.body.append(a);
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
-  return blob.size;
 }
