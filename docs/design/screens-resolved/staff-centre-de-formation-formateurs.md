@@ -1,0 +1,340 @@
+# Staff · centre de formation & formateurs
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Staff · centre de formation & formateurs» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-13.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=24 padding=[28, 32, 24, 32]
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Identity» layout="vertical" gap=8
+        - frame «Breadcrumb» gap=10 alignItems="center"
+          - instance «Base Sign» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+          - text «Crumb Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Staff  ›  Centre de formation
+        - frame «Status» gap=8 padding=[6, 0, 0, 0] alignItems="center"
+          - ellipse «Status Dot» width=7 height=7 fill="$warning"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Aucun formateur CRJ700 · la qualification de Camille Lefèvre devra être achetée dehors
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600" lineHeight=1.05  TEXT: Centre de formation
+        - text «Subtitle» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Qui forme qui, sur quoi, et ce que ça coûte de le faire chez toi plutôt que dehors
+      - frame «Key Stats» gap=44 padding=[0, 0, 4, 0]
+        - instance «Stat · Stagiaires en cours» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Stagiaires en cours
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 8
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: 2 pilotes · 6 PNC
+        - instance «Stat · Simulateur ATR» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Simulateur ATR cette semaine
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 68 %
+          - text «Delta» fill="$warning" fontFamily="$font-ui" fontSize=12  TEXT: 112 % la semaine du 30 nov.
+        - instance «Stat · Économisé en 2026» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Économisé en 2026
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 238 000 €
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: face à la formation achetée dehors
+    - frame «Body» width="fill_container" height="fill_container" gap=20
+      - instance «Panel · Planning de formation» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Planning de formation
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Vue par formateur
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=10 padding=[14, 22, 22, 22]
+          - frame «Summary» width="fill_container" padding=[0, 0, 8, 0] alignItems="end" justifyContent="space_between"
+            - frame «Lead» layout="vertical" gap=2
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Novembre et décembre
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 6 formations en cours ou prévues
+            - frame «Facts» gap=40
+              - frame «Fact · Fin de stage la plus proche» layout="vertical" gap=2
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Fin de stage la plus proche
+                - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: OPL Roux · 20 nov.
+              - frame «Fact · Semaine la plus chargée» layout="vertical" gap=2
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Semaine la plus chargée
+                - text «Value» fill="$warning" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: du 30 nov. au 6 déc.
+          - frame «Ruler Row» width="fill_container" gap=16 alignItems="end"
+            - frame «Spacer» width=216 height=16
+            - frame «Week Ruler» width=840 height=16 layout="none"
+              - rectangle «Tick» width=1 height=12 fill="$border-strong"
+              - text «Week 2 nov.» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 2 nov.
+              - rectangle «Tick» width=1 height=12 fill="$border-strong"
+              - text «Week 9 nov.» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 9 nov.
+              - rectangle «Tick» width=1 height=12 fill="$border-strong"
+              - text «Week 16 nov.» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 16 nov.
+              - rectangle «Tick» width=1 height=12 fill="$border-strong"
+              - text «Week 23 nov.» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 23 nov.
+              - rectangle «Tick» width=1 height=12 fill="$border-strong"
+              - text «Week 30 nov.» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 30 nov.
+              - rectangle «Tick» width=1 height=12 fill="$border-strong"
+              - text «Week 7 déc.» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 7 déc.
+              - rectangle «Tick» width=1 height=12 fill="$border-strong"
+              - text «Week 14 déc.» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 14 déc.
+              - rectangle «Tick» width=1 height=12 fill="$border-strong"
+              - text «Week 21 déc.» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 21 déc.
+              - rectangle «Now Cursor» width=2 height=10 fill="$text-primary"
+          - frame «Rows» width="fill_container" layout="vertical"
+            - frame «Course · Qualification A220» width="fill_container" gap=16 alignItems="center" stroke="$border-strong" strokeWidth={"top": 1}
+              - frame «Label» width=216 layout="vertical" gap=2
+                - text «Course» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Qualification A220
+                - text «Who» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: OPL Roux · Cdt. Aubry
+              - frame «Track» width=840 height=46 layout="none"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Now Line» width=2 height=46 fill="$text-primary"
+                - frame «Seg · Simulateur loué» width=133 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" fill="$surface-raised" stroke="$text-primary" strokeWidth=1 cornerRadius=2
+                  - rectangle «Elapsed» width=69 height=36 fill="#FFFFFF24"
+                  - text «Phase» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: Simulateur loué
+                  - text «Detail» fill="$text-secondary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: Toulouse · Aubry
+                - frame «Seg · Vols d'entraînement» width=148 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                  - text «Phase» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: Vols d'entraînement
+                  - text «Detail» fill="$warning" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: Cdt. Vidal · à confirmer
+                - text «End» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 62 % · fin le 20 nov.
+            - frame «Course · Qualification CRJ700» width="fill_container" gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Label» width=216 layout="vertical" gap=2
+                - text «Course» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Qualification CRJ700
+                - text «Who» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: OPL Lefèvre · aucun formateur
+              - frame «Track» width=840 height=46 layout="none"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Now Line» width=2 height=46 fill="$text-primary"
+                - frame «Seg · Proposée · centre externe» width=268 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" fill="#FFFFFF05" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                  - text «Phase» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: Proposée · centre externe
+                  - text «Detail» fill="$text-secondary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 18 jours · 42 000 €
+                - text «End» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: pas encore planifiée
+            - frame «Course · Passage commandant» width="fill_container" gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Label» width=216 layout="vertical" gap=2
+                - text «Course» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Passage commandant
+                - text «Who» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: OPL Benali · Cdt. Garnier
+              - frame «Track» width=840 height=46 layout="none"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Now Line» width=2 height=46 fill="$text-primary"
+                - frame «Seg · Simulateur ATR» width=178 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" fill="$surface-raised" stroke="$text-primary" strokeWidth=1 cornerRadius=2
+                  - rectangle «Elapsed» width=69 height=36 fill="#FFFFFF24"
+                  - text «Phase» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: Simulateur ATR
+                  - text «Detail» fill="$text-secondary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: LFMN · Garnier
+                - frame «Seg · Vols d'entraînement sur ATR 72» width=373 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                  - text «Phase» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: Vols d'entraînement sur ATR 72
+                  - text «Detail» fill="$text-secondary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: vols d'école · Garnier
+                - text «End» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 28 % · fin le 8 déc.
+            - frame «Course · Contrôles périodiques» width="fill_container" gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Label» width=216 layout="vertical" gap=2
+                - text «Course» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Contrôles périodiques
+                - text «Who» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 8 pilotes ATR · Cdt. Garnier
+              - frame «Track» width=840 height=46 layout="none"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Now Line» width=2 height=46 fill="$text-primary"
+                - frame «Seg · bloc» width=28 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" fill="$surface-selected" cornerRadius=2
+                - frame «Seg · bloc» width=28 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                - frame «Seg · bloc» width=28 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                - frame «Seg · bloc» width=28 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                - frame «Seg · bloc» width=28 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                - frame «Seg · bloc» width=28 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                - frame «Seg · bloc» width=28 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                - frame «Seg · bloc» width=28 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                - frame «Seg · bloc» width=28 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                - text «End» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 5 en décembre
+            - frame «Course · Stage PNC initial» width="fill_container" gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Label» width=216 layout="vertical" gap=2
+                - text «Course» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Stage PNC initial
+                - text «Who» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 6 recrues · Sylvie Marchand
+              - frame «Track» width=840 height=46 layout="none"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Now Line» width=2 height=46 fill="$text-primary"
+                - frame «Seg · Salle de cours» width=178 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" fill="$surface-raised" stroke="$text-primary" strokeWidth=1 cornerRadius=2
+                  - rectangle «Elapsed» width=69 height=36 fill="#FFFFFF24"
+                  - text «Phase» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: Salle de cours
+                  - text «Detail» fill="$text-secondary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: sécurité et secourisme
+                - frame «Seg · Cabine école» width=103 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                  - text «Phase» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: Cabine école
+                  - text «Detail» fill="$text-secondary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: évacuation, service
+                - text «End» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 25 % · fin le 20 nov.
+            - frame «Course · Recyclage sécurité PNC» width="fill_container" gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Label» width=216 layout="vertical" gap=2
+                - text «Course» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Recyclage sécurité PNC
+                - text «Who» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 14 PNC · Sylvie Marchand
+              - frame «Track» width=840 height=46 layout="none"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Week Line» width=1 height=46 fill="#FFFFFF0A"
+                - rectangle «Now Line» width=2 height=46 fill="$text-primary"
+                - frame «Seg · bloc» width=28 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                - frame «Seg · bloc» width=28 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                - frame «Seg · bloc» width=28 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                - frame «Seg · bloc» width=28 height=36 layout="vertical" gap=1 padding=[0, 7] justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+          - frame «Capacity» width="fill_container" layout="vertical" gap=10 padding=[14, 0, 0, 0] stroke="$border-strong" strokeWidth={"top": 1}
+            - frame «Capacity · Simulateur ATR» width="fill_container" gap=16 alignItems="center"
+              - frame «Label» width=216 layout="vertical" gap=2
+                - text «Resource» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Simulateur ATR
+                - text «Capacity» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 60 h par semaine
+              - frame «Weeks» width=840
+                - frame «Week 1» width="fill_container" layout="vertical" gap=6 padding=[0, 12, 0, 6]
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 41 h
+                  - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                    - rectangle «Bar Fill» width=59 height=4 fill="$text-tertiary" cornerRadius=2
+                - frame «Week 2» width="fill_container" layout="vertical" gap=6 padding=[0, 12, 0, 6]
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 52 h
+                  - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                    - rectangle «Bar Fill» width=75 height=4 fill="$text-tertiary" cornerRadius=2
+                - frame «Week 3» width="fill_container" layout="vertical" gap=6 padding=[0, 12, 0, 6]
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 49 h
+                  - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                    - rectangle «Bar Fill» width=71 height=4 fill="$text-tertiary" cornerRadius=2
+                - frame «Week 4» width="fill_container" layout="vertical" gap=6 padding=[0, 12, 0, 6]
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 55 h
+                  - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                    - rectangle «Bar Fill» width=80 height=4 fill="$text-tertiary" cornerRadius=2
+                - frame «Week 5» width="fill_container" layout="vertical" gap=6 padding=[0, 12, 0, 6]
+                  - text «Value» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 67 h · 112 %
+                  - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                    - rectangle «Bar Fill» width=87 height=4 fill="$warning" cornerRadius=2
+                - frame «Week 6» width="fill_container" layout="vertical" gap=6 padding=[0, 12, 0, 6]
+                  - text «Value» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 64 h · 107 %
+                  - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                    - rectangle «Bar Fill» width=87 height=4 fill="$warning" cornerRadius=2
+                - frame «Week 7» width="fill_container" layout="vertical" gap=6 padding=[0, 12, 0, 6]
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 38 h
+                  - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                    - rectangle «Bar Fill» width=55 height=4 fill="$text-tertiary" cornerRadius=2
+                - frame «Week 8» width="fill_container" layout="vertical" gap=6 padding=[0, 12, 0, 6]
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 12 h
+                  - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                    - rectangle «Bar Fill» width=17 height=4 fill="$text-tertiary" cornerRadius=2
+            - frame «Capacity · Formateurs» width="fill_container" gap=16 alignItems="center"
+              - frame «Label» width=216 layout="vertical" gap=2
+                - text «Resource» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Formateurs
+                - text «Capacity» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 105 h par semaine
+              - frame «Weeks» width=840
+                - frame «Week 1» width="fill_container" layout="vertical" gap=6 padding=[0, 12, 0, 6]
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 92 h
+                  - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                    - rectangle «Bar Fill» width=76 height=4 fill="$text-tertiary" cornerRadius=2
+                - frame «Week 2» width="fill_container" layout="vertical" gap=6 padding=[0, 12, 0, 6]
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 96 h
+                  - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                    - rectangle «Bar Fill» width=80 height=4 fill="$text-tertiary" cornerRadius=2
+                - frame «Week 3» width="fill_container" layout="vertical" gap=6 padding=[0, 12, 0, 6]
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 92 h
+                  - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                    - rectangle «Bar Fill» width=76 height=4 fill="$text-tertiary" cornerRadius=2
+                - frame «Week 4» width="fill_container" layout="vertical" gap=6 padding=[0, 12, 0, 6]
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 99 h
+                  - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                    - rectangle «Bar Fill» width=82 height=4 fill="$text-tertiary" cornerRadius=2
+                - frame «Week 5» width="fill_container" layout="vertical" gap=6 padding=[0, 12, 0, 6]
+                  - text «Value» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 110 h · 105 %
+                  - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                    - rectangle «Bar Fill» width=87 height=4 fill="$warning" cornerRadius=2
+                - frame «Week 6» width="fill_container" layout="vertical" gap=6 padding=[0, 12, 0, 6]
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 104 h
+                  - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                    - rectangle «Bar Fill» width=86 height=4 fill="$text-tertiary" cornerRadius=2
+                - frame «Week 7» width="fill_container" layout="vertical" gap=6 padding=[0, 12, 0, 6]
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 70 h
+                  - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                    - rectangle «Bar Fill» width=58 height=4 fill="$text-tertiary" cornerRadius=2
+                - frame «Week 8» width="fill_container" layout="vertical" gap=6 padding=[0, 12, 0, 6]
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 20 h
+                  - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                    - rectangle «Bar Fill» width=17 height=4 fill="$text-tertiary" cornerRadius=2
+          - frame «Legend» gap=20 padding=[8, 0, 0, 232] alignItems="center"
+            - frame «Legend · Terminé» gap=7 alignItems="center"
+              - rectangle «Swatch» width=14 height=10 fill="$surface-selected" cornerRadius=1
+              - text «Legend Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Terminé
+            - frame «Legend · En cours» gap=7 alignItems="center"
+              - rectangle «Swatch» width=14 height=10 fill="#FFFFFF24" stroke="$text-primary" strokeWidth=1 cornerRadius=1
+              - text «Legend Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: En cours
+            - frame «Legend · Prévu» gap=7 alignItems="center"
+              - rectangle «Swatch» width=14 height=10 stroke="$border-strong" strokeWidth=1 cornerRadius=1
+              - text «Legend Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Prévu
+            - frame «Legend · Proposé, à acheter dehors» gap=7 alignItems="center"
+              - rectangle «Swatch» width=14 height=10 fill="#FFFFFF05" stroke="$border-strong" strokeWidth=1 cornerRadius=1
+              - text «Legend Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Proposé, à acheter dehors
+            - frame «Legend · Aujourd'hui, ven. 6 nov.» gap=7 alignItems="center"
+              - rectangle «Swatch» width=2 height=12 fill="$text-primary"
+              - text «Legend Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Aujourd'hui, ven. 6 nov.
+      - frame «Side Column» width=400 height="fill_container" layout="vertical" gap=20
+        - instance «Panel · Formateurs» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Formateurs
+            - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Recruter
+          - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[4, 22, 16, 22]
+            - frame «Trainer · Cdt. Hélène Garnier» width="fill_container" layout="vertical" gap=3 padding=[8, 0]
+              - frame «Top» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Cdt. Hélène Garnier
+                - text «Load» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 31 h sur 35
+              - text «Teaches» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Simulateur et vols d'entraînement · ATR 72-600
+              - text «Why» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 61 ans · plus de classe 1 depuis mars, classe 2 valide
+            - frame «Trainer · Cdt. Bernard Aubry» width="fill_container" layout="vertical" gap=3 padding=[8, 0] stroke="$border" strokeWidth={"top": 1}
+              - frame «Top» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Cdt. Bernard Aubry
+                - text «Load» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 28 h sur 35
+              - text «Teaches» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Théorie et simulateur · ATR 72-600, A220-300
+              - text «Why» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 65 ans · limite d'âge atteinte en juin
+            - frame «Trainer · Sylvie Marchand» width="fill_container" layout="vertical" gap=3 padding=[8, 0] stroke="$border" strokeWidth={"top": 1}
+              - frame «Top» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Sylvie Marchand
+                - text «Load» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 33 h sur 35
+              - text «Teaches» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Sécurité, secourisme et service · PNC
+              - text «Why» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Ancienne cheffe de cabine · inapte au vol depuis 2024
+            - frame «Candidate · Vidal» width="fill_container" gap=12 padding=[10, 0, 0, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="user-round-plus"
+              - frame «Text» width="fill_container" layout="vertical" gap=2
+                - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Cdt. Vidal pourrait les rejoindre
+                - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Classe 1 refusée le 4 nov. · qualifié ATR 72 et A220
+              - instance «See» of «Button/Ghost»
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Voir
+                - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+        - instance «Panel · Chez toi ou dehors» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Chez toi ou dehors
+            - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: par stagiaire
+          - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[14, 22, 22, 22]
+            - frame «Table Head» width="fill_container" gap=12 padding=[0, 0, 6, 0]
+              - text «Course» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Formation
+              - text «Inside» width=76 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: Chez toi
+              - text «Outside» width=76 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: Dehors
+            - frame «Row · Qualification ATR 72» width="fill_container" gap=12 padding=[6, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - text «Course» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Qualification ATR 72
+              - text «Inside» width=76 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500" textAlign="right"  TEXT: 16 800 €
+              - text «Outside» width=76 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 31 000 €
+            - frame «Row · Qualification A220» width="fill_container" gap=12 padding=[6, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - text «Course» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Qualification A220
+              - text «Inside» width=76 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500" textAlign="right"  TEXT: 27 500 €
+              - text «Outside» width=76 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 46 000 €
+            - frame «Row · Qualification CRJ700» width="fill_container" gap=12 padding=[6, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - text «Course» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Qualification CRJ700
+              - text «Inside» width=76 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500" textAlign="right"  TEXT: —
+              - text «Outside» width=76 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 42 000 €
+            - frame «Spacer» width="fill_container" height="fill_container"
+            - frame «Summary» width="fill_container" layout="vertical" gap=2 padding=[10, 0, 0, 0] stroke="$border-strong" strokeWidth={"top": 1}
+              - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Le centre coûte 24 600 € par mois
+              - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Rentable dès 2 qualifications ATR par mois
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

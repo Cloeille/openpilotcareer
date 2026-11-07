@@ -1,0 +1,132 @@
+LFMN
+Finance  ›  Rentabilité par ligne & avion
+Rentabilité d'octobre
+Ce que rapporte chaque ligne une fois payés son carburant, ses redevances, son équipage, son catering et sa maintenance.
+Octobre 2026 · mois clos
+Par ligne
+Par avion
+Marge de contribution, de la plus rentable à la plus déficitaire
+Trier par marge %
+Ligne
+Avion
+Vols
+Recettes
+Coûts
+Marge
+Marge %
+Lignes rentables
+6 lignes · +233 200 €
+1
+Nice – Paris Orly
+LFMN → LFPO
+A220-300
+62
+612 400 €
+526 000 €
++86 400 €
+14,1 %
+2
+Nice – Calvi
+LFMN → LFKC
+ATR 72-600
+48
+168 200 €
+118 900 €
++49 300 €
+29,3 %
+3
+Nice – Bastia
+LFMN → LFKB
+ATR 72-600
+44
+152 600 €
+110 400 €
++42 200 €
+27,7 %
+4
+Nice – Genève
+LFMN → LSGG
+A220-300
+30
+228 900 €
+192 300 €
++36 600 €
+16,0 %
+5
+Nice – Lyon
+LFMN → LFLL
+CRJ700
+34
+118 600 €
+105 200 €
++13 400 €
+11,3 %
+6
+Nice – Bordeaux
+LFMN → LFBD
+CRJ700
+22
+96 400 €
+91 100 €
++5 300 €
+5,5 %
+Lignes déficitaires
+3 lignes · −52 400 €
+7
+Nice – Figari
+LFMN → LFKF
+ATR 72-600
+18
+41 200 €
+47 800 €
+−6 600 €
+−16,0 %
+8
+Nice – Strasbourg
+LFMN → LFST
+CRJ700
+20
+88 300 €
+102 900 €
+−14 600 €
+−16,5 %
+9
+Lyon – Marseille
+LFLL → LFML
+CRJ700
+28
+54 800 €
+86 000 €
+−31 200 €
+−56,9 %
+Marge totale du réseau
++180 800 € sur 9 lignes
+Hors frais de siège, crédits et loyers
+Pourquoi Lyon–Marseille perd de l'argent
+LFLL
+→
+LFML
+CRJ700
+28 vols en octobre · 52 % de remplissage
+Marge de contribution
+−31 200 €
+54 800 € de recettes pour 86 000 € de coûts
+Où part l'argent
+86 000 €
+Équipage
+38 400 €
+Intérim : 2,6 × le coût d'un équipage interne
+Carburant
+18 600 €
+Redevances
+12 900 €
+Leasing
+8 900 €
+Maintenance
+7 200 €
+À retenir
+Sans pilotes CRJ basés à Lyon, chaque rotation passe en intérim.
+Marge avec un équipage basé à Lyon
+≈ −7 600 € / mois
+Et avec 70 % de remplissage
+≈ +9 800 € / mois

@@ -6,4 +6,4 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
   - text «Section Number» fill="$text-tertiary" fontFamily="$font-display" fontSize=44 fontWeight="500"  TEXT: 07
   - frame «Section Text» layout="vertical" gap=4 padding=[0, 0, 6, 0]
     - text «Section Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Compagnie · hubs, facilities & staff
-    - text «Section Description» fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Plan 3D de l'aéroport, bâtiments, hubs, staff, congés et sécurité, entrepôt de pièces, service à bord et cuisine
+    - text «Section Description» fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Plan 3D de l'aéroport, bâtiments, hubs, staff, formation et reconversion, politique RH, recrutement, sécurité, entrepôt, service à bord et cuisine

@@ -1,0 +1,294 @@
+# Finance · crédits en cours
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Finance · crédits en cours» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-11.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=24 padding=[28, 32, 24, 32]
+    - frame «Credit Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Identity» layout="vertical" gap=8
+        - frame «Breadcrumb» gap=10 alignItems="center"
+          - instance «Base Sign» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+          - text «Crumb Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Compagnie  ›  Finance
+        - frame «Status» gap=8 padding=[6, 0, 0, 0] alignItems="center"
+          - ellipse «Status Dot» width=7 height=7 fill="$success"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Échéances à jour · prochain prélèvement de 125 100 € le 15 novembre
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600" lineHeight=1.05  TEXT: Crédits en cours
+        - text «Subtitle» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Azur Régional · 8 126 000 € restant dû sur 10 000 000 € empruntés
+      - frame «Key Stats» gap=44 padding=[0, 0, 4, 0]
+        - instance «Stat · Mensualités» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Mensualités
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 125 100 €
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: par mois, deux crédits
+        - instance «Stat · Endettement» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Endettement
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 6,1 %
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: des 2 049 600 € reçus en octobre
+        - instance «Stat · Encore empruntable» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Encore empruntable
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 940 000 €
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: en crédit conso, sans garantie
+        - instance «Stat · Note de crédit» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Note de crédit
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: A−
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: stable depuis août
+    - frame «Credit Body» width="fill_container" height="fill_container" gap=20
+      - instance «Panel · Échéancier» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Échéancier jusqu'en 2033
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Simuler un remboursement anticipé
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=22 padding=[14, 22, 22, 22]
+          - frame «Summary» width="fill_container" alignItems="end" justifyContent="space_between"
+            - frame «Figures» gap=56
+              - frame «Figure · Remboursé» layout="vertical" gap=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Remboursé depuis janvier
+                - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="600"  TEXT: 1 251 000 €
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: dont 346 800 € d'intérêts
+              - frame «Figure · Restant fin 2027» layout="vertical" gap=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Restant dû fin 2027
+                - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="600"  TEXT: 6 624 200 €
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: puis 112 400 € par mois jusqu'en juillet 2033
+            - frame «Legend» gap=20 padding=[0, 0, 2, 0]
+              - frame «Legend · Capital» gap=8 alignItems="center"
+                - rectangle «Swatch» width=10 height=10 fill="$text-secondary" cornerRadius=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Capital
+              - frame «Legend · Intérêts» gap=8 alignItems="center"
+                - rectangle «Swatch» width=10 height=10 fill="#FFFFFF33" cornerRadius=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Intérêts
+              - frame «Legend · Remboursement anticipé» gap=8 alignItems="center"
+                - rectangle «Swatch» width=10 height=10 fill="$text-primary" cornerRadius=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Remboursement anticipé
+          - frame «Chart» width="fill_container" height="fill_container" layout="vertical" gap=6
+            - frame «Plot Area» width="fill_container" height="fill_container" layout="vertical"
+              - frame «Plot» width="fill_container" height="fill_container" gap=10 alignItems="end"
+                - frame «Month · janvier 2026» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2 opacity=0.4
+                    - rectangle «Interest» width="fill_container" height=24 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=58 fill="$text-secondary"
+                - frame «Month · février 2026» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2 opacity=0.4
+                    - rectangle «Interest» width="fill_container" height=24 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=59 fill="$text-secondary"
+                - frame «Month · mars 2026» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2 opacity=0.4
+                    - rectangle «Interest» width="fill_container" height=23 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=59 fill="$text-secondary"
+                - frame «Month · avril 2026» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2 opacity=0.4
+                    - rectangle «Interest» width="fill_container" height=23 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=59 fill="$text-secondary"
+                - frame «Month · mai 2026» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2 opacity=0.4
+                    - rectangle «Interest» width="fill_container" height=23 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=59 fill="$text-secondary"
+                - frame «Month · juin 2026» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2 opacity=0.4
+                    - rectangle «Interest» width="fill_container" height=23 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=60 fill="$text-secondary"
+                - frame «Month · juillet 2026» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2 opacity=0.4
+                    - rectangle «Interest» width="fill_container" height=22 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=60 fill="$text-secondary"
+                - frame «Month · août 2026» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2 opacity=0.4
+                    - rectangle «Interest» width="fill_container" height=22 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=60 fill="$text-secondary"
+                - frame «Month · septembre 2026» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2 opacity=0.4
+                    - rectangle «Interest» width="fill_container" height=22 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=60 fill="$text-secondary"
+                - frame «Month · octobre 2026» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2 opacity=0.4
+                    - rectangle «Interest» width="fill_container" height=22 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=61 fill="$text-secondary"
+                - frame «Month · novembre 2026» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - text «Note» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: 15 nov.
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2
+                    - rectangle «Interest» width="fill_container" height=21 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=61 fill="$text-secondary"
+                - frame «Month · décembre 2026» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2
+                    - rectangle «Interest» width="fill_container" height=21 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=61 fill="$text-secondary"
+                - frame «Month · janvier 2027» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2
+                    - rectangle «Interest» width="fill_container" height=21 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=62 fill="$text-secondary"
+                - frame «Month · février 2027» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2
+                    - rectangle «Interest» width="fill_container" height=21 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=62 fill="$text-secondary"
+                - frame «Month · mars 2027» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2
+                    - rectangle «Interest» width="fill_container" height=20 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=62 fill="$text-secondary"
+                - frame «Month · avril 2027» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2
+                    - rectangle «Interest» width="fill_container" height=20 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=62 fill="$text-secondary"
+                - frame «Month · mai 2027» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2
+                    - rectangle «Interest» width="fill_container" height=20 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=63 fill="$text-secondary"
+                - frame «Month · juin 2027» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2
+                    - rectangle «Interest» width="fill_container" height=20 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=63 fill="$text-secondary"
+                - frame «Month · juillet 2027» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - text «Note» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: +224 000 €
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2
+                    - rectangle «Early Repayment» width="fill_container" height=148 fill="$text-primary" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Interest» width="fill_container" height=19 fill="#FFFFFF33"
+                    - rectangle «Principal» width="fill_container" height=63 fill="$text-secondary"
+                - frame «Month · août 2027» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2
+                    - rectangle «Interest» width="fill_container" height=18 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=56 fill="$text-secondary"
+                - frame «Month · septembre 2027» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2
+                    - rectangle «Interest» width="fill_container" height=18 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=56 fill="$text-secondary"
+                - frame «Month · octobre 2027» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2
+                    - rectangle «Interest» width="fill_container" height=17 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=57 fill="$text-secondary"
+                - frame «Month · novembre 2027» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2
+                    - rectangle «Interest» width="fill_container" height=17 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=57 fill="$text-secondary"
+                - frame «Month · décembre 2027» width="fill_container" height="fill_container" layout="vertical" gap=6 alignItems="center" justifyContent="end"
+                  - frame «Stack» width="fill_container" layout="vertical" gap=2
+                    - rectangle «Interest» width="fill_container" height=17 fill="#FFFFFF33" cornerRadius=[2, 2, 0, 0]
+                    - rectangle «Principal» width="fill_container" height=57 fill="$text-secondary"
+              - rectangle «Axis» width="fill_container" height=1 fill="$border-strong"
+            - frame «Month Labels» width="fill_container" gap=10 padding=[4, 0, 0, 0]
+              - frame «Label · janvier 2026» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: J
+              - frame «Label · février 2026» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: F
+              - frame «Label · mars 2026» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: M
+              - frame «Label · avril 2026» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: A
+              - frame «Label · mai 2026» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: M
+              - frame «Label · juin 2026» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: J
+              - frame «Label · juillet 2026» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: J
+              - frame «Label · août 2026» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: A
+              - frame «Label · septembre 2026» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: S
+              - frame «Label · octobre 2026» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: O
+              - frame «Label · novembre 2026» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: N
+              - frame «Label · décembre 2026» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: D
+              - frame «Label · janvier 2027» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: J
+              - frame «Label · février 2027» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: F
+              - frame «Label · mars 2027» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: M
+              - frame «Label · avril 2027» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: A
+              - frame «Label · mai 2027» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: M
+              - frame «Label · juin 2027» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: J
+              - frame «Label · juillet 2027» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: J
+              - frame «Label · août 2027» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: A
+              - frame «Label · septembre 2027» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: S
+              - frame «Label · octobre 2027» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: O
+              - frame «Label · novembre 2027» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: N
+              - frame «Label · décembre 2027» width="fill_container" justifyContent="center"
+                - text «Initial» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: D
+            - frame «Year Labels» width="fill_container" gap=10
+              - frame «Year · 2026» width="fill_container" gap=8
+                - text «Year» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: 2026
+                - text «Hint» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: payé jusqu'en octobre
+              - frame «Year · 2027» width="fill_container"
+                - text «Year» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: 2027
+          - frame «Early Repayment» width="fill_container" gap=16 padding=[16, 0, 0, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Text» width="fill_container" layout="vertical" gap=4
+              - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Juillet 2027 · remboursement anticipé du crédit conso
+              - text «Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: 224 000 € versés après le pic d'été, sans pénalité. Tu économises 30 000 € d'intérêts et les mensualités passent à 112 400 € dès août.
+            - instance «Btn · Changer la date» of «Button/Ghost»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Changer la date
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+      - instance «Panel · Détail par crédit» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Détail par crédit
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Voir les contrats
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=14 padding=[2, 22, 14, 22]
+          - frame «Loan · Prêt avion A220-300» width="fill_container" layout="vertical" gap=12 padding=[16, 0]
+            - frame «Head» width="fill_container" gap=16
+              - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Prêt avion A220-300
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Banque Riviera · garanti par F-HAZD
+              - frame «Remaining» layout="vertical" gap=3 alignItems="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="600"  TEXT: 7 808 000 €
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: restant dû sur 9 400 000 €
+            - frame «Progress» width="fill_container" height=4 fill="$border-strong" cornerRadius=2
+              - rectangle «Repaid» width=81 height=4 fill="$text-secondary" cornerRadius=2
+            - frame «Terms» width="fill_container" gap=16 padding=[4, 0, 0, 0]
+              - frame «Term · Taux» width="fill_container" layout="vertical" gap=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Taux
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 4,6 % fixe
+              - frame «Term · Mensualité» width="fill_container" layout="vertical" gap=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Mensualité
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 112 400 €
+              - frame «Term · Fin» width="fill_container" layout="vertical" gap=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Fin
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: juillet 2033
+              - frame «Term · Remboursé» width="fill_container" layout="vertical" gap=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Remboursé
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 17 %
+            - text «Note» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Le marché est à 4,1 % : renégocier baisserait la mensualité de 1 900 €.
+            - frame «Actions» gap=10 padding=[2, 0, 0, 0]
+              - instance «Btn · Renégocier» of «Button/Secondary»
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Renégocier
+              - instance «Btn · Rembourser par anticipation» of «Button/Ghost»
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Rembourser par anticipation
+                - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+          - frame «Loan · Crédit conso» width="fill_container" layout="vertical" gap=12 padding=[16, 0] stroke="$border" strokeWidth={"top": 1}
+            - frame «Head» width="fill_container" gap=16
+              - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="500"  TEXT: Crédit conso
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Banque des Alpes · sans garantie
+              - frame «Remaining» layout="vertical" gap=3 alignItems="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="600"  TEXT: 318 000 €
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: restant dû sur 600 000 €
+            - frame «Progress» width="fill_container" height=4 fill="$border-strong" cornerRadius=2
+              - rectangle «Repaid» width=224 height=4 fill="$text-secondary" cornerRadius=2
+            - frame «Terms» width="fill_container" gap=16 padding=[4, 0, 0, 0]
+              - frame «Term · Taux» width="fill_container" layout="vertical" gap=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Taux
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 9,8 % fixe
+              - frame «Term · Mensualité» width="fill_container" layout="vertical" gap=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Mensualité
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 12 700 €
+              - frame «Term · Fin» width="fill_container" layout="vertical" gap=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Fin
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: juillet 2027
+              - frame «Term · Remboursé» width="fill_container" layout="vertical" gap=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Remboursé
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 47 %
+            - text «Note» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Soldé par anticipation le 15 juillet 2027, au lieu de mars 2029.
+            - frame «Actions» gap=10 padding=[2, 0, 0, 0]
+              - instance «Btn · Rembourser maintenant» of «Button/Secondary»
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Rembourser maintenant
+              - instance «Btn · Renégocier» of «Button/Ghost»
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Renégocier
+                - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

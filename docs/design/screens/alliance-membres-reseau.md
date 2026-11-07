@@ -1,0 +1,69 @@
+# Alliance · membres & réseau
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Alliance · membres & réseau» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-9.png", "mode": "cover"}
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"...
+  - frame «Content» width=1600 height=778 layout="vertical" gap=16 padding=[28, 32, 24, 32]
+    - script «Carte · Alliance Méditerranée» width=1600 height=778
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - ellipse «Live Dot» width=7 height=7 fill="$success"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 2 joueurs en ligne sur 4 · 37 avions · 11 lignes
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Alliance Méditerranée
+        - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Fondée par m.tournier · tu en fais partie depuis 3 mois
+      - ref «View Switcher · alliance» ref="a7ZUZ" descendants={"NWATU": {"content": "Membres & réseau"}, "JvCPs": {"content": "Installations partagées"}, "c3qjnT": {"content": "Votes · 1 en cours"}}  (instance of «View Switcher»)
+    - frame «Body» width="fill_container" height="fill_container" gap=40
+      - frame «Map Column» width="fill_container" height="fill_container" layout="vertical" gap=28 justifyContent="end"
+        - frame «Alliance Facilities» width="fill_container" layout="vertical" gap=12
+          - frame «Facilities Header» gap=10 alignItems="center"
+            - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Installations de l'alliance
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: payées par les cotisations, louées aux membres comme le font les compagnies IA
+          - frame «Facilities Row» width="fill_container"
+            - frame «Facility · Comptoir de correspondances» width="fill_container" layout="vertical" gap=4 padding=[2, 20, 2, 0]
+              - frame «Top» gap=8 alignItems="center"
+                - ref «Airport» stroke="$text-tertiary" ref="pirBQ" descendants={"OYKAu": {"content": "LFMN", "fontSize": 11, "fill": "$text-secondary"}}  (instance of «Sign/Location»)
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Comptoir de correspondances
+              - text «Price» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 3 100 € / mois
+              - text «Who» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Loué à Azur Régional, Tirrenia Air
+            - frame «Facility · Entrepôt de pièces» width="fill_container" layout="vertical" gap=4 padding=[2, 20] stroke="$border-strong" strokeWidth={"left": 1}
+              - frame «Top» gap=8 alignItems="center"
+                - ref «Airport» stroke="$text-tertiary" ref="pirBQ" descendants={"OYKAu": {"content": "LEBL", "fontSize": 11, "fill": "$text-secondary"}}  (instance of «Sign/Location»)
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Entrepôt de pièces
+              - text «Price» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 4 200 € / mois
+              - text «Who» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Loué à Brisa Catalana
+            - frame «Facility · Salon & cuisine» width="fill_container" layout="vertical" gap=4 padding=[2, 20] stroke="$border-strong" strokeWidth={"left": 1}
+              - frame «Top» gap=8 alignItems="center"
+                - ref «Airport» stroke="$text-tertiary" ref="pirBQ" descendants={"OYKAu": {"content": "LIRF", "fontSize": 11, "fill": "$text-secondary"}}  (instance of «Sign/Location»)
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Salon & cuisine
+              - text «Price» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 6 500 € / mois
+              - text «Who» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Libre · offre de Méridia Cargo (IA)
+        - frame «Legend» gap=22 alignItems="center"
+          - frame «Legend · Sélection» gap=8 alignItems="center"
+            - rectangle «Swatch» width=18 height=2 fill="#ECEAE5" opacity=0.85
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Membre sélectionné
+          - frame «Legend · Autres membres» gap=8 alignItems="center"
+            - rectangle «Swatch» width=18 height=2 fill="#A9ACB0" opacity=0.6
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Autres lignes de l'alliance
+          - frame «Legend · Partage de code» gap=8 alignItems="center"
+            - frame «Swatch» layout="vertical" gap=3
+              - rectangle «Strand» width=18 height=2 fill="#A9ACB0"
+              - rectangle «Strand» width=18 height=1.5 fill="#A9ACB0" opacity=0.6
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Partage de code
+          - frame «Legend · Apport IA» gap=8 alignItems="center"
+            - frame «Swatch» gap=3 alignItems="center"
+              - rectangle «Dot» width=2 height=2 fill="#A9ACB0"
+              - rectangle «Dot» width=2 height=2 fill="#A9ACB0"
+              - rectangle «Dot» width=2 height=2 fill="#A9ACB0"
+              - rectangle «Dot» width=2 height=2 fill="#A9ACB0"
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Apport d'une compagnie IA
+          - frame «Legend · Correspondances» gap=8 alignItems="center"
+            - ellipse «Swatch» width=18 height=9 stroke="#FFFFFF80" strokeWidth=1
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Correspondances garanties
+      - frame «Right Column» width=420 height="fill_container" layout="vertical" gap=16
+        - ref «Panel · Membres» width="fill_container" ref="bibzm" descendants={"e0veVE": {"content": "Membres"}, "A9Tx2K": {"content": "Part du trafic de l'alliance", "fill": "$text-tertiary"}, "q5ftx0": {"gap": 0, ...  (instance of «Panel»)
+        - ref «Panel · Règles» width="fill_container" height="fill_container" ref="bibzm" descendants={"e0veVE": {"content": "Règles"}, "A9Tx2K": {"content": "Statuts complets"}, "q5ftx0": {"height": "fill_container", "gap": 12, "padding":...  (instance of «Panel»)
+  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": "#00000000"}, "Ely3m": {"fill": "$text-tertiary"}, "daIvj": {"stroke": "$text-primary"}, "cXwn0": {"fill": "$text-pr...  (instance of «HUD/Top»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"XuZbG": {"content": "Retour"}, "msx5l/Mw53t": {"content": "↑ ↓"}, "sA5qV": {"content": "Membre suivant"}, "EYYNz/Mw53t": {"content": "T...  (instance of «HUD/Bottom»)

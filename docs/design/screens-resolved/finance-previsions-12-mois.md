@@ -1,0 +1,277 @@
+# Finance · prévisions 12 mois
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Finance · prévisions 12 mois» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-11.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=24 padding=[28, 32, 24, 32]
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Identity» layout="vertical" gap=8
+        - frame «Breadcrumb» gap=10 alignItems="center"
+          - instance «Base Sign» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+          - text «Crumb Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Finance  ›  Prévisions 12 mois
+        - frame «Status» gap=8 padding=[6, 0, 0, 0] alignItems="center"
+          - ellipse «Status Dot» width=7 height=7 fill="$warning"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: En scénario prudent, le compte passe à découvert du 9 janvier au 22 février
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600" lineHeight=1.05  TEXT: Prévisions 12 mois
+        - text «Subtitle» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Ton solde au plus bas de chaque mois jusqu'en octobre 2027, et ce qui le fait bouger
+      - frame «Key Stats» gap=44 padding=[0, 0, 4, 0]
+        - instance «Stat · Solde aujourd'hui» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Solde aujourd'hui
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 1 284 560 €
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: ven. 6 novembre
+        - instance «Stat · Point bas, central» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Point bas, central
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 96 000 €
+          - text «Delta» fill="$warning" fontFamily="$font-ui" fontSize=12  TEXT: mi-janvier · prudent −148 000 €
+        - instance «Stat · Fin octobre 2027, central» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Fin octobre 2027, central
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 2 350 000 €
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: prudent 1,24 M€ · optimiste 3,04 M€
+    - frame «Body» width="fill_container" height="fill_container" gap=20
+      - instance «Panel · Projection» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Solde au plus bas de chaque mois
+          - frame «Legend» gap=20 alignItems="center" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"
+            - frame «Legend · Central» gap=7 alignItems="center"
+              - rectangle «Swatch» width=10 height=12 fill="$text-secondary" cornerRadius=1
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Central
+            - frame «Legend · Prudent à optimiste» gap=7 alignItems="center"
+              - rectangle «Swatch» width=16 height=12 fill="#FFFFFF12" stroke="#FFFFFF38" strokeWidth=1
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Prudent à optimiste
+            - frame «Legend · Découvert» gap=7 alignItems="center"
+              - rectangle «Swatch» width=16 height=12 fill="#E5625B4D" stroke="$danger" strokeWidth=1
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Découvert
+            - frame «Legend · Aperçu de la décision» gap=7 alignItems="center"
+              - rectangle «Swatch» width=16 height=2 fill="$info"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Aperçu de la décision
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=8 padding=[18, 22]
+          - frame «Plot» width="fill_container" height=356
+            - rectangle «Winter Tint» width=240 height=324 fill="#FFFFFF08"
+            - rectangle «Summer Tint» width=240 height=324 fill="#FFFFFF08"
+            - text «Winter Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Saison d'hiver · recettes −22 %
+            - text «Summer Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Pic d'été · recettes +30 %
+            - rectangle «Grid 3 M€» width=960 height=1 fill="#FFFFFF12"
+            - text «Axis 3 M€» width=52 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: 3 M€
+            - rectangle «Grid 2 M€» width=960 height=1 fill="#FFFFFF12"
+            - text «Axis 2 M€» width=52 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: 2 M€
+            - rectangle «Grid 1 M€» width=960 height=1 fill="#FFFFFF12"
+            - text «Axis 1 M€» width=52 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: 1 M€
+            - rectangle «Overdraft Zone» width=960 height=25 fill="#E5625B14"
+            - rectangle «Overdraft Limit» width=960 height=1 fill="#E5625B8C"
+            - text «Axis 0» width=52 fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: 0
+            - text «Axis Overdraft» width=52 fill="$danger" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: −250 k€
+            - frame «Axis Spacer» width=64 height="fill_container"
+            - frame «Months» width="fill_container" height="fill_container"
+              - frame «Month · nov.» width="fill_container" height="fill_container" layout="vertical"
+                - frame «Above Zero» width="fill_container" height=324 layout="vertical" alignItems="center" justifyContent="end"
+                  - frame «Scenario Band» width=44 height=8 layout="vertical" alignItems="center" justifyContent="end" fill="#FFFFFF12" stroke="#FFFFFF38" strokeWidth=1
+                    - rectangle «Central Bar» width=20 height=5 fill="$text-secondary"
+                  - rectangle «Central Bar Base» width=20 height=119 fill="$text-secondary"
+                - frame «Below Zero» width="fill_container" height="fill_container" layout="vertical" alignItems="center"
+              - frame «Month · déc.» width="fill_container" height="fill_container" layout="vertical"
+                - frame «Above Zero» width="fill_container" height=324 layout="vertical" alignItems="center" justifyContent="end"
+                  - frame «Scenario Band» width=44 height=20 layout="vertical" alignItems="center" justifyContent="end" fill="#FFFFFF12" stroke="#FFFFFF38" strokeWidth=1
+                    - rectangle «Central Bar» width=20 height=13 fill="$text-secondary"
+                  - rectangle «Central Bar Base» width=20 height=82 fill="$text-secondary"
+                - frame «Below Zero» width="fill_container" height="fill_container" layout="vertical" alignItems="center"
+              - frame «Month · janv. 2027» width="fill_container" height="fill_container" layout="vertical"
+                - frame «Above Zero» width="fill_container" height=324 layout="vertical" alignItems="center" justifyContent="end"
+                  - frame «Scenario Band» width=44 height=31 layout="vertical" alignItems="center" justifyContent="end" fill="#FFFFFF12" stroke="#FFFFFF38" strokeWidth=1
+                    - rectangle «Central Bar» width=20 height=10 fill="$warning"
+                - frame «Below Zero» width="fill_container" height="fill_container" layout="vertical" alignItems="center"
+                  - rectangle «Overdraft Band» width=44 height=15 fill="#E5625B4D" stroke="$danger" strokeWidth=1
+                - rectangle «Decision Preview» width=48 height=2 fill="$info"
+              - frame «Month · févr.» width="fill_container" height="fill_container" layout="vertical"
+                - frame «Above Zero» width="fill_container" height=324 layout="vertical" alignItems="center" justifyContent="end"
+                  - frame «Scenario Band» width=44 height=42 layout="vertical" alignItems="center" justifyContent="end" fill="#FFFFFF12" stroke="#FFFFFF38" strokeWidth=1
+                    - rectangle «Central Bar» width=20 height=15 fill="$text-secondary"
+                - frame «Below Zero» width="fill_container" height="fill_container" layout="vertical" alignItems="center"
+                  - rectangle «Overdraft Band» width=44 height=10 fill="#E5625B4D" stroke="$danger" strokeWidth=1
+                - rectangle «Decision Preview» width=48 height=2 fill="$info"
+              - frame «Month · mars» width="fill_container" height="fill_container" layout="vertical"
+                - frame «Above Zero» width="fill_container" height=324 layout="vertical" alignItems="center" justifyContent="end"
+                  - frame «Scenario Band» width=44 height=53 layout="vertical" alignItems="center" justifyContent="end" fill="#FFFFFF12" stroke="#FFFFFF38" strokeWidth=1
+                    - rectangle «Central Bar» width=20 height=18 fill="$text-secondary"
+                  - rectangle «Central Bar Base» width=20 height=2 fill="$text-secondary"
+                - frame «Below Zero» width="fill_container" height="fill_container" layout="vertical" alignItems="center"
+                - rectangle «Decision Preview» width=48 height=2 fill="$info"
+              - frame «Month · avr.» width="fill_container" height="fill_container" layout="vertical"
+                - frame «Above Zero» width="fill_container" height=324 layout="vertical" alignItems="center" justifyContent="end"
+                  - frame «Scenario Band» width=44 height=68 layout="vertical" alignItems="center" justifyContent="end" fill="#FFFFFF12" stroke="#FFFFFF38" strokeWidth=1
+                    - rectangle «Central Bar» width=20 height=26 fill="$text-secondary"
+                  - rectangle «Central Bar Base» width=20 height=12 fill="$text-secondary"
+                - frame «Below Zero» width="fill_container" height="fill_container" layout="vertical" alignItems="center"
+                - rectangle «Decision Preview» width=48 height=2 fill="$info"
+              - frame «Month · mai» width="fill_container" height="fill_container" layout="vertical"
+                - frame «Above Zero» width="fill_container" height=324 layout="vertical" alignItems="center" justifyContent="end"
+                  - frame «Scenario Band» width=44 height=84 layout="vertical" alignItems="center" justifyContent="end" fill="#FFFFFF12" stroke="#FFFFFF38" strokeWidth=1
+                    - rectangle «Central Bar» width=20 height=34 fill="$text-secondary"
+                  - rectangle «Central Bar Base» width=20 height=24 fill="$text-secondary"
+                - frame «Below Zero» width="fill_container" height="fill_container" layout="vertical" alignItems="center"
+                - rectangle «Decision Preview» width=48 height=2 fill="$info"
+              - frame «Month · juin» width="fill_container" height="fill_container" layout="vertical"
+                - frame «Above Zero» width="fill_container" height=324 layout="vertical" alignItems="center" justifyContent="end"
+                  - frame «Scenario Band» width=44 height=102 layout="vertical" alignItems="center" justifyContent="end" fill="#FFFFFF12" stroke="#FFFFFF38" strokeWidth=1
+                    - rectangle «Central Bar» width=20 height=44 fill="$text-secondary"
+                  - rectangle «Central Bar Base» width=20 height=36 fill="$text-secondary"
+                - frame «Below Zero» width="fill_container" height="fill_container" layout="vertical" alignItems="center"
+                - rectangle «Decision Preview» width=48 height=2 fill="$info"
+              - frame «Month · juil.» width="fill_container" height="fill_container" layout="vertical"
+                - frame «Above Zero» width="fill_container" height=324 layout="vertical" alignItems="center" justifyContent="end"
+                  - frame «Scenario Band» width=44 height=124 layout="vertical" alignItems="center" justifyContent="end" fill="#FFFFFF12" stroke="#FFFFFF38" strokeWidth=1
+                    - rectangle «Central Bar» width=20 height=58 fill="$text-secondary"
+                  - rectangle «Central Bar Base» width=20 height=62 fill="$text-secondary"
+                - frame «Below Zero» width="fill_container" height="fill_container" layout="vertical" alignItems="center"
+                - rectangle «Decision Preview» width=48 height=2 fill="$info"
+              - frame «Month · août» width="fill_container" height="fill_container" layout="vertical"
+                - frame «Above Zero» width="fill_container" height=324 layout="vertical" alignItems="center" justifyContent="end"
+                  - frame «Scenario Band» width=44 height=148 layout="vertical" alignItems="center" justifyContent="end" fill="#FFFFFF12" stroke="#FFFFFF38" strokeWidth=1
+                    - rectangle «Central Bar» width=20 height=72 fill="$text-secondary"
+                  - rectangle «Central Bar Base» width=20 height=88 fill="$text-secondary"
+                - frame «Below Zero» width="fill_container" height="fill_container" layout="vertical" alignItems="center"
+                - rectangle «Decision Preview» width=48 height=2 fill="$info"
+              - frame «Month · sept.» width="fill_container" height="fill_container" layout="vertical"
+                - frame «Above Zero» width="fill_container" height=324 layout="vertical" alignItems="center" justifyContent="end"
+                  - frame «Scenario Band» width=44 height=164 layout="vertical" alignItems="center" justifyContent="end" fill="#FFFFFF12" stroke="#FFFFFF38" strokeWidth=1
+                    - rectangle «Central Bar» width=20 height=100 fill="$text-secondary"
+                  - rectangle «Central Bar Base» width=20 height=98 fill="$text-secondary"
+                - frame «Below Zero» width="fill_container" height="fill_container" layout="vertical" alignItems="center"
+                - rectangle «Decision Preview» width=48 height=2 fill="$info"
+              - frame «Month · oct.» width="fill_container" height="fill_container" layout="vertical"
+                - frame «Above Zero» width="fill_container" height=324 layout="vertical" alignItems="center" justifyContent="end"
+                  - frame «Scenario Band» width=44 height=178 layout="vertical" alignItems="center" justifyContent="end" fill="#FFFFFF12" stroke="#FFFFFF38" strokeWidth=1
+                    - rectangle «Central Bar» width=20 height=112 fill="$text-secondary"
+                  - rectangle «Central Bar Base» width=20 height=106 fill="$text-secondary"
+                - frame «Below Zero» width="fill_container" height="fill_container" layout="vertical" alignItems="center"
+                - rectangle «Decision Preview» width=48 height=2 fill="$info"
+            - rectangle «Zero Line» width=960 height=1 fill="#FFFFFF66"
+            - frame «Low Point Callout» layout="vertical" gap=3 padding=[2, 0, 2, 14] stroke="#FFFFFF59" strokeWidth={"left": 1}
+              - text «Caption» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Point bas vers le 14 janvier
+              - text «Value» fill="$warning" fontFamily="$font-display" fontSize=30 fontWeight="600" lineHeight=1.1  TEXT: 96 000 €
+              - text «Prudent» fill="$danger" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: En prudent, −148 000 € : 44 jours à découvert
+              - frame «Causes» layout="vertical" gap=3 padding=[8, 0, 0, 0]
+                - frame «Cause · Check C de F-HAZD, 9 jours au sol» width=300 justifyContent="space_between"
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Check C de F-HAZD, 9 jours au sol
+                  - text «Amount» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: −420 000 €
+                - frame «Cause · Redevances aéroport annuelles» width=300 justifyContent="space_between"
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Redevances aéroport annuelles
+                  - text «Amount» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: −180 000 €
+                - frame «Cause · Assurance renouvelée le 1er décembre» width=300 justifyContent="space_between"
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Assurance renouvelée le 1er décembre
+                  - text «Amount» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: −280 000 €
+          - frame «Month Labels» width="fill_container"
+            - frame «Axis Spacer» width=64 height=1
+            - frame «Label · nov.» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «Month» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: nov.
+              - text «Event» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: aujourd'hui
+            - frame «Label · déc.» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «Month» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: déc.
+              - text «Event» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: assurance
+            - frame «Label · janv. 2027» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «Month» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: janv. 2027
+              - text «Event» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: check C
+            - frame «Label · févr.» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «Month» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: févr.
+            - frame «Label · mars» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «Month» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: mars
+            - frame «Label · avr.» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «Month» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: avr.
+            - frame «Label · mai» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «Month» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: mai
+            - frame «Label · juin» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «Month» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: juin
+            - frame «Label · juil.» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «Month» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: juil.
+            - frame «Label · août» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «Month» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: août
+            - frame «Label · sept.» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «Month» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: sept.
+              - text «Event» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: fin leasing
+            - frame «Label · oct.» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «Month» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: oct.
+          - frame «Spacer» width="fill_container" height="fill_container"
+          - frame «Scenario Notes» width="fill_container" gap=28 padding=[12, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+            - frame «Note · Prudent» gap=6
+              - text «Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Prudent
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: remplissage −8 %, carburant +12 %
+            - frame «Note · Central» gap=6
+              - text «Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Central
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: tendance des 90 derniers jours
+            - frame «Note · Optimiste» gap=6
+              - text «Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Optimiste
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: remplissage +6 %, carburant stable
+      - instance «Panel · Décisions» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Tester une décision
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Effet sur le point bas
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=16 padding=[8, 22, 22, 22]
+          - frame «Decisions» width="fill_container" layout="vertical" gap=2
+            - frame «Decision · Reporter le check C de F-HAZD» width="fill_container" layout="vertical" gap=4 padding=[12, 14] fill="$surface-hover" cornerRadius=4
+              - frame «Title Row» width="fill_container" gap=10 alignItems="center"
+                - rectangle «Preview Swatch» width=16 height=2 fill="$info"
+                - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Reporter le check C de F-HAZD
+                - instance «Switch · on» of «Switch»
+                  - ellipse «Knob» width=16 height=16 fill="$on-btn-primary"
+              - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: De janvier à avril, il lui reste 180 h de potentiel
+              - frame «Effects» width="fill_container" gap=22 padding=[4, 0, 0, 0]
+                - frame «Effect · Point bas» gap=6 alignItems="center"
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Point bas
+                  - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: +420 000 €
+                - frame «Effect · Découvert prudent» gap=6 alignItems="center"
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Découvert prudent
+                  - text «Value» fill="$success" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 44 → 0 jour
+            - frame «Decision · Louer un ATR 72-600 dès février» width="fill_container" layout="vertical" gap=4 padding=[12, 14] stroke="$border" strokeWidth={"bottom": 1}
+              - frame «Title Row» width="fill_container" gap=10 alignItems="center"
+                - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Louer un ATR 72-600 dès février
+                - instance «Switch · off» of «Switch»
+                  - ellipse «Knob» width=16 height=16 fill="$text-secondary"
+              - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Dépôt de 180 000 €, puis 58 000 € par mois
+              - frame «Effects» width="fill_container" gap=22 padding=[4, 0, 0, 0]
+                - frame «Effect · Point bas» gap=6 alignItems="center"
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Point bas
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: −238 000 €
+                - frame «Effect · Découvert prudent» gap=6 alignItems="center"
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Découvert prudent
+                  - text «Value» fill="$danger" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 44 → 71 jours
+            - frame «Decision · Ouvrir Nice – Rome en décembre» width="fill_container" layout="vertical" gap=4 padding=[12, 14] stroke="$border" strokeWidth={"bottom": 1}
+              - frame «Title Row» width="fill_container" gap=10 alignItems="center"
+                - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Ouvrir Nice – Rome en décembre
+                - instance «Switch · off» of «Switch»
+                  - ellipse «Knob» width=16 height=16 fill="$text-secondary"
+              - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Lancement 65 000 €, rentable à partir de mars
+              - frame «Effects» width="fill_container" gap=22 padding=[4, 0, 0, 0]
+                - frame «Effect · Point bas» gap=6 alignItems="center"
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Point bas
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: −65 000 €
+                - frame «Effect · Découvert prudent» gap=6 alignItems="center"
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Découvert prudent
+                  - text «Value» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 44 → 52 jours
+            - frame «Decision · Ouvrir une ligne de crédit de 300 000 €» width="fill_container" layout="vertical" gap=4 padding=[12, 14] stroke="#00000000" strokeWidth={"bottom": 1}
+              - frame «Title Row» width="fill_container" gap=10 alignItems="center"
+                - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Ouvrir une ligne de crédit de 300 000 €
+                - instance «Switch · off» of «Switch»
+                  - ellipse «Knob» width=16 height=16 fill="$text-secondary"
+              - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Frais de 1,5 %, intérêts seulement si tu l'utilises
+              - frame «Effects» width="fill_container" gap=22 padding=[4, 0, 0, 0]
+                - frame «Effect · Point bas» gap=6 alignItems="center"
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Point bas
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: −4 500 €
+                - frame «Effect · Découvert prudent» gap=6 alignItems="center"
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Découvert prudent
+                  - text «Value» fill="$success" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: couvert par le crédit
+          - frame «Spacer» width="fill_container" height="fill_container"
+          - frame «Summary» width="fill_container" layout="vertical" gap=14 padding=[16, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+            - frame «Result» width="fill_container" alignItems="end" justifyContent="space_between"
+              - frame «Result Text» layout="vertical" gap=4
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Nouveau point bas, central
+                - text «Was» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: au lieu de 96 000 € mi-janvier
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="600"  TEXT: 516 000 €
+            - instance «Apply Button» of «Button/Primary»
+              - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Appliquer le report
+              - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

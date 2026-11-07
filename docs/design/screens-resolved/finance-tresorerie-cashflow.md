@@ -1,0 +1,348 @@
+# Finance · trésorerie & cashflow
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Finance · trésorerie & cashflow» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-11.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=24 padding=[28, 32, 24, 32]
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Identity» layout="vertical" gap=8
+        - frame «Breadcrumb» gap=10 alignItems="center"
+          - instance «Base Sign» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: AZR
+          - text «Crumb Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Compagnie  ›  Finance
+        - frame «Status» gap=8 padding=[6, 0, 0, 0] alignItems="center"
+          - ellipse «Status Dot» width=7 height=7 fill="$success"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Cashflow positif depuis 7 mois · prochain gros débit le 28 nov., salaires
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600" lineHeight=1.05  TEXT: Trésorerie & cashflow
+        - text «Subtitle» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Ce qui entre, ce qui sort, et combien de temps ta compagnie tient sans recettes
+      - frame «Key Stats» gap=44 padding=[0, 0, 4, 0]
+        - instance «Stat · Solde» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Solde
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 1 284 560 €
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: au 6 nov. · 17:58Z
+        - instance «Stat · Cashflow d'octobre» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Cashflow d'octobre
+          - text «Value» fill="$success" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: +221 200 €
+          - text «Delta» fill="$success" fontFamily="$font-ui" fontSize=12  TEXT: +38 400 € sur septembre
+        - instance «Stat · Autonomie» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Autonomie
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 21 jours
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: de dépenses sans recettes
+        - instance «Stat · Dette restante» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Dette restante
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 8 126 000 €
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: 2 crédits · 125 100 € / mois
+    - frame «Body» width="fill_container" height="fill_container" gap=20
+      - instance «Panel · Flux de trésorerie» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Flux de trésorerie
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: nov. 2025 → oct. 2026
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=16 padding=[10, 22, 18, 22]
+          - frame «Month Summary» width="fill_container" gap=48 alignItems="end"
+            - frame «Selected Month» width="fill_container" layout="vertical" gap=2
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Mois sélectionné
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="600"  TEXT: Octobre 2026
+            - frame «Fact · Recettes» layout="vertical" gap=2
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Recettes
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 2 049 600 €
+            - frame «Fact · Dépenses» layout="vertical" gap=2
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Dépenses
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 1 828 400 €
+            - frame «Fact · Net» layout="vertical" gap=2
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Net
+              - text «Value» fill="$success" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: +221 200 €
+            - frame «Fact · Solde fin de mois» layout="vertical" gap=2
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Solde fin de mois
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500"  TEXT: 1 262 000 €
+          - frame «Chart» width="fill_container"
+            - frame «Row Labels» width=118 layout="vertical"
+              - frame «Label · Recettes» width="fill_container" height=110 layout="vertical" gap=2 justifyContent="center"
+                - frame «Key» gap=7 alignItems="center"
+                  - rectangle «Swatch» width=10 height=10 fill="$text-secondary" cornerRadius=1
+                  - text «Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Recettes
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: billets, jobs, fret
+              - frame «Gap Axis» width=1 height=1
+              - frame «Label · Dépenses» width="fill_container" height=100 layout="vertical" gap=2 justifyContent="center"
+                - frame «Key» gap=7 alignItems="center"
+                  - rectangle «Swatch» width=10 height=10 fill="#FFFFFF33" cornerRadius=1
+                  - text «Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Dépenses
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: tout compris
+              - frame «Gap Net» width=1 height=40
+              - frame «Label · Solde» width="fill_container" height=43 layout="vertical" gap=2 justifyContent="center"
+                - frame «Key» gap=7 alignItems="center"
+                  - rectangle «Swatch» width=10 height=10 fill="$surface-selected" cornerRadius=1
+                  - text «Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Solde fin de mois
+              - frame «Gap Bal» width=1 height=16
+            - frame «Month · nov.» width="fill_container" layout="vertical" alignItems="center"
+              - frame «In Area» width="fill_container" height=110 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «In Bar» width=30 height=62 fill="$text-secondary" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Axis» width="fill_container" height=1 fill="$border-strong"
+              - frame «Out Area» width="fill_container" height=100 layout="vertical" alignItems="center"
+                - rectangle «Out Bar» width=30 height=54 fill="#FFFFFF33" cornerRadius=[0, 0, 2, 2]
+              - frame «Net» width="fill_container" height=22 alignItems="end" justifyContent="center"
+                - text «Net Value» fill="$success" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: +60 k
+              - frame «Month» width="fill_container" height=18 alignItems="center" justifyContent="center"
+                - text «Month Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: nov.
+              - frame «Balance Pos» width="fill_container" height=34 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «Bal Bar» width=30 height=15 fill="$surface-selected" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Zero» width="fill_container" height=1 fill="$border"
+              - frame «Balance Neg» width="fill_container" height=8 layout="vertical" alignItems="center"
+              - frame «Balance Value» width="fill_container" height=16 alignItems="center" justifyContent="center"
+                - text «Bal Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 541 k
+            - frame «Month · déc.» width="fill_container" layout="vertical" alignItems="center"
+              - frame «In Area» width="fill_container" height=110 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «In Bar» width=30 height=52 fill="$text-secondary" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Axis» width="fill_container" height=1 fill="$border-strong"
+              - frame «Out Area» width="fill_container" height=100 layout="vertical" alignItems="center"
+                - rectangle «Out Bar» width=30 height=51 fill="#FFFFFF33" cornerRadius=[0, 0, 2, 2]
+              - frame «Net» width="fill_container" height=22 alignItems="end" justifyContent="center"
+                - text «Net Value» fill="$danger" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: −110 k
+              - frame «Month» width="fill_container" height=18 alignItems="center" justifyContent="center"
+                - text «Month Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: déc.
+              - frame «Balance Pos» width="fill_container" height=34 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «Bal Bar» width=30 height=12 fill="$surface-selected" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Zero» width="fill_container" height=1 fill="$border"
+              - frame «Balance Neg» width="fill_container" height=8 layout="vertical" alignItems="center"
+              - frame «Balance Value» width="fill_container" height=16 alignItems="center" justifyContent="center"
+                - text «Bal Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 431 k
+            - frame «Month · janv.» width="fill_container" layout="vertical" alignItems="center"
+              - frame «In Area» width="fill_container" height=110 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «In Bar» width=30 height=48 fill="$text-secondary" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Axis» width="fill_container" height=1 fill="$border-strong"
+              - frame «Out Area» width="fill_container" height=100 layout="vertical" alignItems="center"
+                - rectangle «Out Bar» width=30 height=60 fill="#FFFFFF33" cornerRadius=[0, 0, 2, 2]
+              - frame «Net» width="fill_container" height=22 alignItems="end" justifyContent="center"
+                - text «Net Value» fill="$danger" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: −420 k
+              - frame «Month» width="fill_container" height=18 alignItems="center" justifyContent="center"
+                - text «Month Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: janv.
+              - frame «Balance Pos» width="fill_container" height=34 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «Bal Bar» width=30 height=2 fill="$surface-selected" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Zero» width="fill_container" height=1 fill="$border"
+              - frame «Balance Neg» width="fill_container" height=8 layout="vertical" alignItems="center"
+              - frame «Balance Value» width="fill_container" height=16 alignItems="center" justifyContent="center"
+                - text «Bal Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 11 k
+            - frame «Month · févr.» width="fill_container" layout="vertical" alignItems="center"
+              - frame «In Area» width="fill_container" height=110 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «In Bar» width=30 height=50 fill="$text-secondary" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Axis» width="fill_container" height=1 fill="$border-strong"
+              - frame «Out Area» width="fill_container" height=100 layout="vertical" alignItems="center"
+                - rectangle «Out Bar» width=30 height=49 fill="#FFFFFF33" cornerRadius=[0, 0, 2, 2]
+              - frame «Net» width="fill_container" height=22 alignItems="end" justifyContent="center"
+                - text «Net Value» fill="$danger" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: −90 k
+              - frame «Month» width="fill_container" height=18 alignItems="center" justifyContent="center"
+                - text «Month Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: févr.
+              - frame «Balance Pos» width="fill_container" height=34 layout="vertical" alignItems="center" justifyContent="end"
+              - rectangle «Zero» width="fill_container" height=1 fill="$border"
+              - frame «Balance Neg» width="fill_container" height=8 layout="vertical" alignItems="center"
+                - rectangle «Bal Bar» width=30 height=6 fill="$danger" cornerRadius=[0, 0, 2, 2]
+              - frame «Balance Value» width="fill_container" height=16 alignItems="center" justifyContent="center"
+                - text «Bal Label» fill="$danger" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: −79 k
+            - frame «Month · mars» width="fill_container" layout="vertical" alignItems="center"
+              - frame «In Area» width="fill_container" height=110 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «In Bar» width=30 height=60 fill="$text-secondary" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Axis» width="fill_container" height=1 fill="$border-strong"
+              - frame «Out Area» width="fill_container" height=100 layout="vertical" alignItems="center"
+                - rectangle «Out Bar» width=30 height=53 fill="#FFFFFF33" cornerRadius=[0, 0, 2, 2]
+              - frame «Net» width="fill_container" height=22 alignItems="end" justifyContent="center"
+                - text «Net Value» fill="$success" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: +50 k
+              - frame «Month» width="fill_container" height=18 alignItems="center" justifyContent="center"
+                - text «Month Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: mars
+              - frame «Balance Pos» width="fill_container" height=34 layout="vertical" alignItems="center" justifyContent="end"
+              - rectangle «Zero» width="fill_container" height=1 fill="$border"
+              - frame «Balance Neg» width="fill_container" height=8 layout="vertical" alignItems="center"
+                - rectangle «Bal Bar» width=30 height=3 fill="$danger" cornerRadius=[0, 0, 2, 2]
+              - frame «Balance Value» width="fill_container" height=16 alignItems="center" justifyContent="center"
+                - text «Bal Label» fill="$danger" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: −29 k
+            - frame «Month · avr.» width="fill_container" layout="vertical" alignItems="center"
+              - frame «In Area» width="fill_container" height=110 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «In Bar» width=30 height=68 fill="$text-secondary" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Axis» width="fill_container" height=1 fill="$border-strong"
+              - frame «Out Area» width="fill_container" height=100 layout="vertical" alignItems="center"
+                - rectangle «Out Bar» width=30 height=59 fill="#FFFFFF33" cornerRadius=[0, 0, 2, 2]
+              - frame «Net» width="fill_container" height=22 alignItems="end" justifyContent="center"
+                - text «Net Value» fill="$success" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: +90 k
+              - frame «Month» width="fill_container" height=18 alignItems="center" justifyContent="center"
+                - text «Month Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: avr.
+              - frame «Balance Pos» width="fill_container" height=34 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «Bal Bar» width=30 height=2 fill="$surface-selected" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Zero» width="fill_container" height=1 fill="$border"
+              - frame «Balance Neg» width="fill_container" height=8 layout="vertical" alignItems="center"
+              - frame «Balance Value» width="fill_container" height=16 alignItems="center" justifyContent="center"
+                - text «Bal Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 61 k
+            - frame «Month · mai» width="fill_container" layout="vertical" alignItems="center"
+              - frame «In Area» width="fill_container" height=110 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «In Bar» width=30 height=75 fill="$text-secondary" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Axis» width="fill_container" height=1 fill="$border-strong"
+              - frame «Out Area» width="fill_container" height=100 layout="vertical" alignItems="center"
+                - rectangle «Out Bar» width=30 height=63 fill="#FFFFFF33" cornerRadius=[0, 0, 2, 2]
+              - frame «Net» width="fill_container" height=22 alignItems="end" justifyContent="center"
+                - text «Net Value» fill="$success" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: +130 k
+              - frame «Month» width="fill_container" height=18 alignItems="center" justifyContent="center"
+                - text «Month Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: mai
+              - frame «Balance Pos» width="fill_container" height=34 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «Bal Bar» width=30 height=5 fill="$surface-selected" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Zero» width="fill_container" height=1 fill="$border"
+              - frame «Balance Neg» width="fill_container" height=8 layout="vertical" alignItems="center"
+              - frame «Balance Value» width="fill_container" height=16 alignItems="center" justifyContent="center"
+                - text «Bal Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 191 k
+            - frame «Month · juin» width="fill_container" layout="vertical" alignItems="center"
+              - frame «In Area» width="fill_container" height=110 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «In Bar» width=30 height=87 fill="$text-secondary" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Axis» width="fill_container" height=1 fill="$border-strong"
+              - frame «Out Area» width="fill_container" height=100 layout="vertical" alignItems="center"
+                - rectangle «Out Bar» width=30 height=71 fill="#FFFFFF33" cornerRadius=[0, 0, 2, 2]
+              - frame «Net» width="fill_container" height=22 alignItems="end" justifyContent="center"
+                - text «Net Value» fill="$success" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: +200 k
+              - frame «Month» width="fill_container" height=18 alignItems="center" justifyContent="center"
+                - text «Month Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: juin
+              - frame «Balance Pos» width="fill_container" height=34 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «Bal Bar» width=30 height=11 fill="$surface-selected" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Zero» width="fill_container" height=1 fill="$border"
+              - frame «Balance Neg» width="fill_container" height=8 layout="vertical" alignItems="center"
+              - frame «Balance Value» width="fill_container" height=16 alignItems="center" justifyContent="center"
+                - text «Bal Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 391 k
+            - frame «Month · juil.» width="fill_container" layout="vertical" alignItems="center"
+              - frame «In Area» width="fill_container" height=110 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «In Bar» width=30 height=99 fill="$text-secondary" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Axis» width="fill_container" height=1 fill="$border-strong"
+              - frame «Out Area» width="fill_container" height=100 layout="vertical" alignItems="center"
+                - rectangle «Out Bar» width=30 height=79 fill="#FFFFFF33" cornerRadius=[0, 0, 2, 2]
+              - frame «Net» width="fill_container" height=22 alignItems="end" justifyContent="center"
+                - text «Net Value» fill="$success" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: +270 k
+              - frame «Month» width="fill_container" height=18 alignItems="center" justifyContent="center"
+                - text «Month Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: juil.
+              - frame «Balance Pos» width="fill_container" height=34 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «Bal Bar» width=30 height=18 fill="$surface-selected" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Zero» width="fill_container" height=1 fill="$border"
+              - frame «Balance Neg» width="fill_container" height=8 layout="vertical" alignItems="center"
+              - frame «Balance Value» width="fill_container" height=16 alignItems="center" justifyContent="center"
+                - text «Bal Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 661 k
+            - frame «Month · août» width="fill_container" layout="vertical" alignItems="center"
+              - frame «In Area» width="fill_container" height=110 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «In Bar» width=30 height=101 fill="$text-secondary" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Axis» width="fill_container" height=1 fill="$border-strong"
+              - frame «Out Area» width="fill_container" height=100 layout="vertical" alignItems="center"
+                - rectangle «Out Bar» width=30 height=84 fill="#FFFFFF33" cornerRadius=[0, 0, 2, 2]
+              - frame «Net» width="fill_container" height=22 alignItems="end" justifyContent="center"
+                - text «Net Value» fill="$success" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: +200 k
+              - frame «Month» width="fill_container" height=18 alignItems="center" justifyContent="center"
+                - text «Month Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: août
+              - frame «Balance Pos» width="fill_container" height=34 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «Bal Bar» width=30 height=23 fill="$surface-selected" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Zero» width="fill_container" height=1 fill="$border"
+              - frame «Balance Neg» width="fill_container" height=8 layout="vertical" alignItems="center"
+              - frame «Balance Value» width="fill_container" height=16 alignItems="center" justifyContent="center"
+                - text «Bal Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 861 k
+            - frame «Month · sept.» width="fill_container" layout="vertical" alignItems="center"
+              - frame «In Area» width="fill_container" height=110 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «In Bar» width=30 height=93 fill="$text-secondary" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Axis» width="fill_container" height=1 fill="$border-strong"
+              - frame «Out Area» width="fill_container" height=100 layout="vertical" alignItems="center"
+                - rectangle «Out Bar» width=30 height=77 fill="#FFFFFF33" cornerRadius=[0, 0, 2, 2]
+              - frame «Net» width="fill_container" height=22 alignItems="end" justifyContent="center"
+                - text «Net Value» fill="$success" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: +180 k
+              - frame «Month» width="fill_container" height=18 alignItems="center" justifyContent="center"
+                - text «Month Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: sept.
+              - frame «Balance Pos» width="fill_container" height=34 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «Bal Bar» width=30 height=28 fill="$surface-selected" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Zero» width="fill_container" height=1 fill="$border"
+              - frame «Balance Neg» width="fill_container" height=8 layout="vertical" alignItems="center"
+              - frame «Balance Value» width="fill_container" height=16 alignItems="center" justifyContent="center"
+                - text «Bal Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 1,04 M
+            - frame «Month · oct.» width="fill_container" layout="vertical" alignItems="center" fill="$surface-hover" cornerRadius="$radius-md"
+              - frame «In Area» width="fill_container" height=110 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «In Bar» width=30 height=90 fill="$text-primary" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Axis» width="fill_container" height=1 fill="$border-strong"
+              - frame «Out Area» width="fill_container" height=100 layout="vertical" alignItems="center"
+                - rectangle «Out Bar» width=30 height=73 fill="#FFFFFF59" cornerRadius=[0, 0, 2, 2]
+              - frame «Net» width="fill_container" height=22 alignItems="end" justifyContent="center"
+                - text «Net Value» fill="$success" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: +222 k
+              - frame «Month» width="fill_container" height=18 alignItems="center" justifyContent="center"
+                - text «Month Label» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: oct.
+              - frame «Balance Pos» width="fill_container" height=34 layout="vertical" alignItems="center" justifyContent="end"
+                - rectangle «Bal Bar» width=30 height=34 fill="$text-primary" cornerRadius=[2, 2, 0, 0]
+              - rectangle «Zero» width="fill_container" height=1 fill="$border"
+              - frame «Balance Neg» width="fill_container" height=8 layout="vertical" alignItems="center"
+              - frame «Balance Value» width="fill_container" height=16 alignItems="center" justifyContent="center"
+                - text «Bal Label» fill="$text-primary" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: 1,26 M
+          - frame «October Breakdown» width="fill_container" gap=48 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+            - frame «Income Split» width=500 layout="vertical" gap=10
+              - frame «Head» width="fill_container" alignItems="end" justifyContent="space_between"
+                - text «Title» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: D'où vient l'argent en octobre
+                - text «Total» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: 2 049 600 €
+              - frame «Bar» width="fill_container" height=8 gap=2 cornerRadius=2
+                - rectangle «Seg · Billets» width=366 height="fill_container" fill="#D9D7D2"
+                - rectangle «Seg · Jobs» width=101 height="fill_container" fill="#9C9EA1"
+                - rectangle «Seg · Fret» width=29 height="fill_container" fill="#5E6164"
+              - frame «Legend» layout="vertical" gap=6
+                - frame «Legend Row» gap=22
+                  - frame «Item · Billets» gap=6 alignItems="center"
+                    - rectangle «Swatch» width=8 height=8 fill="#D9D7D2" cornerRadius=1
+                    - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Billets
+                    - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: 1 512 k
+                  - frame «Item · Jobs» gap=6 alignItems="center"
+                    - rectangle «Swatch» width=8 height=8 fill="#9C9EA1" cornerRadius=1
+                    - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Jobs
+                    - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: 419 k
+                  - frame «Item · Fret» gap=6 alignItems="center"
+                    - rectangle «Swatch» width=8 height=8 fill="#5E6164" cornerRadius=1
+                    - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Fret
+                    - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: 119 k
+            - frame «Expense Split» width=500 layout="vertical" gap=10
+              - frame «Head» width="fill_container" alignItems="end" justifyContent="space_between"
+                - text «Title» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Où il est parti
+                - text «Total» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: 1 828 400 €
+              - frame «Bar» width="fill_container" height=8 gap=2 cornerRadius=2
+                - rectangle «Seg · Carburant» width=172 height="fill_container" fill="#FFFFFFB3"
+                - rectangle «Seg · Salaires» width=130 height="fill_container" fill="#FFFFFF8C"
+                - rectangle «Seg · Maintenance» width=67 height="fill_container" fill="#FFFFFF66"
+                - rectangle «Seg · Redevances» width=60 height="fill_container" fill="#FFFFFF47"
+                - rectangle «Seg · Crédits» width=34 height="fill_container" fill="#FFFFFF33"
+                - rectangle «Seg · Leasing» width=27 height="fill_container" fill="#FFFFFF24"
+              - frame «Legend» layout="vertical" gap=6
+                - frame «Legend Row» gap=22
+                  - frame «Item · Carburant» gap=6 alignItems="center"
+                    - rectangle «Swatch» width=8 height=8 fill="#FFFFFFB3" cornerRadius=1
+                    - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Carburant
+                    - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: 642 k
+                  - frame «Item · Salaires» gap=6 alignItems="center"
+                    - rectangle «Swatch» width=8 height=8 fill="#FFFFFF8C" cornerRadius=1
+                    - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Salaires
+                    - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: 486 k
+                  - frame «Item · Maintenance» gap=6 alignItems="center"
+                    - rectangle «Swatch» width=8 height=8 fill="#FFFFFF66" cornerRadius=1
+                    - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Maintenance
+                    - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: 252 k
+                - frame «Legend Row» gap=22
+                  - frame «Item · Redevances» gap=6 alignItems="center"
+                    - rectangle «Swatch» width=8 height=8 fill="#FFFFFF47" cornerRadius=1
+                    - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Redevances
+                    - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: 223 k
+                  - frame «Item · Crédits» gap=6 alignItems="center"
+                    - rectangle «Swatch» width=8 height=8 fill="#FFFFFF33" cornerRadius=1
+                    - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Crédits
+                    - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: 125 k
+                  - frame «Item · Leasing» gap=6 alignItems="center"
+                    - rectangle «Swatch» width=8 height=8 fill="#FFFFFF24" cornerRadius=1
+                    - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Leasing
+                    - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: 100 k
+            - frame «Upcoming Debits» width="fill_container" layout="vertical" gap=8
+              - frame «Head» width="fill_container" alignItems="end" justifyContent="space_between"
+                - text «Title» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Prochains gros débits
+                - text «Total» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: −897 100 €
+              - frame «Debit · Salaires de novembre» width="fill_container" gap=12 alignItems="center"
+                - text «Date» width=52 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 28 nov.
+                - text «Label» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Salaires de novembre
+                - text «Amount» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: −492 000 €
+              - frame «Debit · Assurance flotte, renouvellement» width="fill_container" gap=12 alignItems="center"
+                - text «Date» width=52 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 1er déc.
+                - text «Label» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Assurance flotte, renouvellement
+                - text «Amount» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: −280 000 €
+              - frame «Debit · Mensualités des 2 crédits» width="fill_container" gap=12 alignItems="center"
+                - text «Date» width=52 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 5 déc.
+                - text «Label» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Mensualités des 2 crédits
+                - text «Amount» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: −125 100 €
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]
