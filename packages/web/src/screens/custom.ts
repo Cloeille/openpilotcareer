@@ -5,7 +5,6 @@ import { isIcaoType } from '../catalogue.ts';
 import { button, dataTable, inputField, panel, titleBlock } from '../components.ts';
 import { fmt } from '../format.ts';
 import { t } from '../i18n.ts';
-import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
 
@@ -16,8 +15,8 @@ export function custom(ctx: Ctx): Screen {
   const num = (label: string, props: Record<string, unknown>) => inputField({ label }, { type: 'number', required: true, ...props });
   const icao = text(t('custom.icao'), { name: 'c-icao', maxlength: 4, pattern: '[A-Za-z0-9]{2,4}', class: 'upper', spellcheck: 'false' });
   const name = text(t('custom.name'), { name: 'c-name', maxlength: 80 });
-  const category = inputField({ label: t('custom.category'), control: h('select', { name: 'c-cat' }, AIRCRAFT_CATEGORIES.map((c) => h('option', { value: c }, t(`cat.${c}` as Key)))) });
-  const wtc = inputField({ label: t('custom.wtc'), control: h('select', { name: 'c-wtc' }, WTCS.map((w) => h('option', { value: w }, t(`wtc.${w}` as Key)))) });
+  const category = inputField({ label: t('custom.category'), control: h('select', { name: 'c-cat' }, AIRCRAFT_CATEGORIES.map((c) => h('option', { value: c }, t(`cat.${c}`)))) });
+  const wtc = inputField({ label: t('custom.wtc'), control: h('select', { name: 'c-wtc' }, WTCS.map((w) => h('option', { value: w }, t(`wtc.${w}`)))) });
   const engines = num(t('custom.engines'), { name: 'c-eng', min: 1, max: 8, value: 1 });
   const seats = num(t('custom.seats'), { name: 'c-seats', min: 0, max: 1000, value: 2 });
   const cargo = num(t('custom.cargo'), { name: 'c-cargo', min: 0, max: 500000, value: 0 });

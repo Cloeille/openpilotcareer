@@ -1151,7 +1151,7 @@ const table = {
   'fin.money.title': ['Finances', 'Finances'],
   'fin.money.sub': ['Upcoming charges', 'Prochaines échéances'],
   'fin.money.none': ['No charge is scheduled.', 'Aucune échéance prévue.'],
-  'fin.kind.lease_rent': ['Rent', 'Loyer'], 'fin.kind.loan_installment': ['Loan instalment', 'Mensualité de crédit'], 'fin.kind.parking': ['Parking', 'Parking'],
+  'fin.kind.lease_rent': ['Rent', 'Loyer'], 'fin.kind.loan_installment': ['Loan instalment', 'Mensualité de crédit'], 'fin.kind.parking': ['Parking', 'Parking'], 'fin.kind.payroll': ['Payroll', 'Masse salariale'],
   'fin.kind.insurance': ['Insurance', 'Assurance'], 'fin.kind.club_hours': ['Club hours', 'Heures club'], 'fin.kind.deposit': ['Deposit', 'Caution'], 'fin.kind.ferry': ['Ferry', 'Convoyage'],
   'fin.lease.terminate': ['End the lease', 'Résilier le contrat'],
   'fin.lease.terminateAsk': ['Ending early costs the penalty set in the contract.', 'Une sortie anticipée coûte la pénalité prévue au contrat.'],
@@ -1804,7 +1804,8 @@ const table = {
   'st.ov.sub.other': ['{n} people for {positions} positions planned by the line timetable · payroll {payroll} / month', '{n} personnes pour {positions} postes prévus par le planning des lignes · masse salariale {payroll} / mois'],
   'st.ov.panel': ['By family', 'Par famille'],
   'st.ov.company': ['{company}', '{company}'],
-  'st.avail.free': ['{n} available', '{n} disponibles'],
+  'st.avail.free.one': ['{n} available', '{n} disponible'],
+  'st.avail.free.other': ['{n} available', '{n} disponibles'],
   'st.side.title': ['Detail', 'Détail'],
   'st.side.noCrewBody': ['No crew is free for {type}: its flights today cannot leave. Recruit or qualify someone.', 'Aucun équipage libre pour {type} : ses vols du jour ne peuvent pas partir. Recrute ou qualifie quelqu’un.'],
   'st.side.dutyBody': ['Everyone qualified on {type} is at a duty limit: some flights today are cancelled until they have rested.', 'Tous les qualifiés {type} sont à une limite de service : des vols du jour sont annulés tant qu’ils n’ont pas récupéré.'],
@@ -1882,7 +1883,8 @@ const table = {
   'st.avail.rest': ['{n} resting', '{n} au repos'],
   'st.avail.leave': ['{n} on leave', '{n} en congé'],
   'st.avail.training': ['{n} in training', '{n} en formation'],
-  'st.avail.vacant': ['{n} vacant', '{n} vacants'],
+  'st.avail.vacant.one': ['{n} vacant', '{n} vacant'],
+  'st.avail.vacant.other': ['{n} vacant', '{n} vacants'],
   'st.leg.duty': ['On duty', 'En service'],
   'st.leg.rest': ['Resting', 'Au repos'],
   'st.leg.leave': ['Leave', 'Congé'],
@@ -1930,10 +1932,18 @@ const table = {
   'st.hire.row': ['{name}, {role}, asks {pay} a month', '{name}, {role}, demande {pay} par mois'],
   'st.role.captain': ['Capt', 'Cdt'],
   'st.role.fo': ['FO', 'OPL'],
-  'st.role.chief': ['Chief', 'Chef'],
+  'st.role.attendant': ['FA', 'PNC'],
+  'st.role.agent': ['Agent', 'Agent'],
+  'st.role.clerk': ['Admin', 'Adm.'],
   'st.role.technician': ['Technician', 'Technicien'],
+  'st.role.cook': ['Cook', 'Cuisinier'],
   'st.role.captainFull': ['Captain', 'Commandant de bord'],
   'st.role.foFull': ['First officer', 'Officier pilote de ligne'],
+  'st.role.attendantFull': ['Flight attendant', 'Personnel navigant commercial'],
+  'st.role.agentFull': ['Ground agent', 'Agent d’escale'],
+  'st.role.clerkFull': ['Administrative clerk', 'Employé administratif'],
+  'st.role.technicianFull': ['Maintenance technician', 'Technicien de maintenance'],
+  'st.role.cookFull': ['Cook', 'Cuisinier'],
   'st.level.high': ['High', 'Haut'],
   'st.level.medium': ['Medium', 'Moyen'],
   'st.level.low': ['Low', 'Bas'],
@@ -2144,7 +2154,8 @@ const table = {
   'fc.hub.none': ['No facility here yet. The plan shows what you can take.', 'Aucune installation ici pour l’instant. Le plan montre ce que tu peux prendre.'],
   'fc.hub.parking': ['Parking stands', 'Postes de stationnement'],
   'fc.hub.parkingDetail': ['{n} stands · billed per aircraft based', '{n} postes · facturés par avion basé'],
-  'fc.hub.parkingUsed': ['{used} used of {spots}', '{used} occupés sur {spots}'],
+  'fc.hub.parkingUsed.one': ['{used} used of {spots}', '{used} occupé sur {spots}'],
+  'fc.hub.parkingUsed.other': ['{used} used of {spots}', '{used} occupés sur {spots}'],
   'fc.hub.detail': ['{area} m² · level {level}', '{area} m² · niveau {level}'],
   'fc.hub.works': ['works until {date}', 'travaux jusqu’au {date}'],
   'fc.hub.understaffed': ['understaffed, effect halved', 'sous-effectif, effet réduit de moitié'],
@@ -2454,6 +2465,8 @@ const table = {
 } as const satisfies Record<string, readonly [string, string]>;
 
 export type Key = keyof typeof table;
+/** The `x` of every `x.other` message: what `tp` accepts. */
+export type PluralBase = Key extends infer K ? (K extends `${infer B}.other` ? B : never) : never;
 /** `key` when it names a message, else null (for keys built from server codes). */
 export const messageFor = (key: string): Key | null => (key in table ? (key as Key) : null);
 const pick = (i: 0 | 1): Record<Key, string> => Object.fromEntries(Object.entries(table).map(([k, v]) => [k, v[i]])) as Record<Key, string>;

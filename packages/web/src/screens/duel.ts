@@ -4,7 +4,6 @@ import { loadProfile, loadSeason } from '../competition-data.ts';
 import { fmt } from '../format.ts';
 import { t } from '../i18n.ts';
 import { hashFor } from '../keys.ts';
-import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { duel, duelScore, kindOf, type DuelKey, type DuelRow, type Standing } from '../standings.ts';
 import { h } from '../ui.ts';
@@ -45,14 +44,14 @@ export async function duelScreen(ctx: Ctx): Promise<Screen> {
   const line = (r: DuelRow): HTMLElement => h('div', { class: 'duel-line' },
     h('span', { class: `duel-value ${r.winner === 'a' ? 'win' : ''}`.trim() }, money(r.key, r.a)),
     h('div', { class: 'duel-bar left', 'aria-hidden': 'true' }, h('span', { class: r.winner === 'a' ? 'win' : '', style: `width:${Math.round(r.aShare * 100)}%` })),
-    h('span', { class: 'duel-label' }, t(`duel.${r.key}` as Key), r.winner === 'a' || r.winner === 'b' ? h('span', { class: 'sr' }, ` · ${t('duel.winner')}: ${r.winner === 'a' ? me.company.name : rivalRow.name}`) : null),
+    h('span', { class: 'duel-label' }, t(`duel.${r.key}`), r.winner === 'a' || r.winner === 'b' ? h('span', { class: 'sr' }, ` · ${t('duel.winner')}: ${r.winner === 'a' ? me.company.name : rivalRow.name}`) : null),
     h('div', { class: 'duel-bar right', 'aria-hidden': 'true' }, h('span', { class: r.winner === 'b' ? 'win' : '', style: `width:${Math.round(r.bShare * 100)}%` })),
     h('span', { class: `duel-value ${r.winner === 'b' ? 'win' : ''}`.trim() }, money(r.key, r.b)));
 
   const verdict = score.a === score.b ? t('duel.tie', { a: score.a, b: score.b }) : t('duel.lead', { name: score.a > score.b ? me.company.name : rivalRow.name, a: Math.max(score.a, score.b), b: Math.min(score.a, score.b) });
   const kind = (s: Standing, p: CompanyProfile): string => {
     const k = kindOf(s, me.company.id, p);
-    return t(k === null ? 'lb.kind.ai' : (`lb.kind.${k}` as Key));
+    return t(k === null ? 'lb.kind.ai' : (`lb.kind.${k}`));
   };
   const ids = data.standings.filter((r) => r.companyId !== me.company.id).map((r) => r.companyId);
   const step = (d: 1 | -1): void => { const i = ids.indexOf(rivalRow.companyId); go(hashFor('duel', ids[(i + d + ids.length) % ids.length]!)); };

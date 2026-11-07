@@ -3,7 +3,6 @@ import { fetchCandidates, fetchStaff, hireCandidate, type Candidate, type Candid
 import { button, icon, panel, titleBlock } from '../components.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
-import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { famLabel, hireFilter, meterBar, roleFull, roleShort, shortDate, staffOff, viewSwitch } from '../staff-ui.ts';
 import { keepSelection, moraleLevel, reliabilityTone, startsAt, unblocks } from '../staff-view.ts';
@@ -62,7 +61,7 @@ export async function staffHire(ctx: Ctx): Promise<Screen> {
     h('td', { class: 'mono' }, c.family === 'pilot' ? `${roleShort(c.role)}${c.qual ? ` ${c.qual}` : ''}` : roleShort(c.role)),
     h('td', { class: 'mono' }, expOf(c)), h('td', { class: 'mono' }, c.base),
     h('td', null, h('span', { class: 'st-rel' }, meterBar(c.reliability / 100, reliabilityTone(c.reliability), `${c.reliability} %`), h('span', { class: reliabilityTone(c.reliability) === 'warn' ? 'st-warn' : '' }, fm.percent(c.reliability / 100)))),
-    h('td', null, t(`st.level.${moraleLevel(c.morale)}` as Key)),
+    h('td', null, t(`st.level.${moraleLevel(c.morale)}`)),
     h('td', { class: 'end' }, h('span', { class: 'strong' }, fm.money(c.askingSalary)), ' ', h('span', { class: 'dim small' }, t('st.perMonth'))));
   const cols = [t('st.hire.col.who'), t('st.hire.col.role'), t('st.hire.col.exp'), t('st.hire.col.base'), t('st.hire.col.rel'), t('st.hire.col.morale'), t('st.hire.col.pay')];
   const table = list.candidates.length === 0 ? h('p', { class: 'dim st-empty' }, t('st.hire.empty'))
@@ -85,7 +84,7 @@ export async function staffHire(ctx: Ctx): Promise<Screen> {
       h('div', { class: 'col tight st-facts-list' },
         fact(t('st.d.exp'), c.family === 'pilot' ? `${fm.num(c.experience)} h` : tp('st.hire.years', c.experience)),
         fact(t('st.d.avail'), t('st.d.availVal', { date: fm.date(startsAt(Date.now(), c)), n: c.noticeDays })),
-        fact(t('st.d.relMorale'), `${fm.percent(c.reliability / 100)} · ${t(`st.level.${moraleLevel(c.morale)}` as Key).toLowerCase()}`),
+        fact(t('st.d.relMorale'), `${fm.percent(c.reliability / 100)} · ${t(`st.level.${moraleLevel(c.morale)}`).toLowerCase()}`),
         fact(t('st.d.base'), c.base),
         fact(t('st.d.premium'), fm.money(c.premium))),
       h('div', { class: 'st-price' }, h('span', { class: 'strong' }, t('st.d.hireSub', { name: c.name, date: fm.date(startsAt(Date.now(), c)) })), h('span', { class: 'strong' }, t('st.d.hirePay', { amount: fm.money(c.askingSalary) }))),

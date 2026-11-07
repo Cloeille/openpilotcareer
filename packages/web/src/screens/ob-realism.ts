@@ -5,10 +5,9 @@ import {
 } from '../onboarding-model.ts';
 import { REALISM_TOGGLES, type Realism, type RealismPreset, type RealismToggle, type StartMode } from '../onboarding-types.ts';
 import { getMe, setRealism } from '../api-onboarding.ts';
-import { arrows, guarded, hintsOf, obError, titleArea, tk, type StepResult, type Wizard } from '../onboarding-shell.ts';
+import { arrows, guarded, hintsOf, obError, titleArea, type StepResult, type Wizard } from '../onboarding-shell.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
-import type { Key } from '../messages.ts';
 
 type RealismEditor = {
   body: HTMLElement;
@@ -17,7 +16,7 @@ type RealismEditor = {
   error: HTMLElement;
 };
 
-const presetName = (p: Realism['preset']): string => t(`ob.s4.${p}` as Key);
+const presetName = (p: Realism['preset']): string => t(`ob.s4.${p}`);
 
 /** The shared part of step 4 and the `#realism` screen: three presets, six switches, modifiers that follow. Every change is sent to the server and the answer is what is shown. */
 function realismEditor(companyId: number, initial: Realism, o: { suggested: RealismPreset | null; startOnCustom: boolean; onChange: (r: Realism) => void; compactTitle?: boolean }): RealismEditor {
@@ -50,7 +49,7 @@ function realismEditor(companyId: number, initial: Realism, o: { suggested: Real
         h('div', { class: 'ob-preset-name' }, h('b', null, presetName(p)),
           h('span', { class: 'ob-sel' }, icon('check', 13), t('ob.selected')),
           o.suggested === p ? h('span', { class: 'ob-tag' }, t('ob.s4.suggested')) : null),
-        h('p', { class: 'ob-preset-desc', id: `preset-${p}-d` }, t(`ob.s4.${p}Desc` as Key))),
+        h('p', { class: 'ob-preset-desc', id: `preset-${p}-d` }, t(`ob.s4.${p}Desc`))),
       h('div', { class: 'ob-impact' }, h('div', null, t('ob.s4.pay'), h('b', null, signedPct(m.pay))), h('div', null, t('ob.s4.rep'), h('b', null, signedPct(m.rep)))));
   };
 
@@ -60,7 +59,7 @@ function realismEditor(companyId: number, initial: Realism, o: { suggested: Real
     const lines = [fx.pay !== 0 ? t('ob.s4.pctPay', { pct: signedPct(fx.pay) }) : null, fx.rep !== 0 ? t('ob.s4.pctRep', { pct: signedPct(fx.rep) }) : null].filter((x): x is string => x !== null);
     const sw = switchControl({ checked: on, labelledBy: `rz-${k}-t`, describedBy: `rz-${k}-d`, id: `rz-${k}`, onchange: (v) => void send({ toggles: { [k]: v } }, withToggle(cur, k, v)) });
     return h('div', { class: `ob-setting${on ? '' : ' off'}` },
-      h('div', { class: 'ob-setting-text' }, h('b', { id: `rz-${k}-t` }, tk(`ob.s4.t.${k}`)), h('small', { id: `rz-${k}-d` }, tk(`ob.s4.d.${k}`)),
+      h('div', { class: 'ob-setting-text' }, h('b', { id: `rz-${k}-t` }, t(`ob.s4.t.${k}`)), h('small', { id: `rz-${k}-d` }, t(`ob.s4.d.${k}`)),
         cur.enforced[k] ? null : h('span', { class: 'pending' }, icon('circle-dashed', 12), t('ob.s4.notApplied'))),
       h('div', { class: 'ob-setting-fx' }, lines.map((l) => h('span', null, l))), sw);
   };

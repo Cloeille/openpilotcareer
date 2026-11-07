@@ -11,7 +11,6 @@ import { facilitiesOff, holdingText, planFocus } from '../facilities-ui.ts';
 import { contractsOf, HOLDING_TONE, holdingOf, KIND_ICON, shown, stepOf, teamRows } from '../facilities-view.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
-import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { safetyEntry } from '../safety-ui.ts';
 import { famLabel, staffEntry } from '../staff-ui.ts';
@@ -97,7 +96,7 @@ export async function hubsOverview(ctx: Ctx): Promise<Screen> {
     return h('li', { class: 'fc-fac mine', 'data-row': '', tabindex: 0, 'aria-label': t('fc.hub.parking'), onclick: () => openPlan(hub.icao) },
       icon('square-parking', 16),
       h('span', { class: 'col tight fc-fac-name' }, h('span', { class: 'fc-fac-title' }, t('fc.hub.parking')), h('span', { class: 'dim small' }, t('fc.hub.parkingDetail', { n: p.spots }))),
-      h('span', { class: 'fc-fac-status' }, t('fc.hub.parkingUsed', { used: p.used, spots: p.spots })),
+      h('span', { class: 'fc-fac-status' }, tp('fc.hub.parkingUsed', p.used, { used: p.used, spots: p.spots })),
       h('span', { class: 'fc-fac-cost' }, fm.money(p.monthly)));
   };
 

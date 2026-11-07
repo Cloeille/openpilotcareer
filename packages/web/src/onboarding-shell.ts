@@ -47,7 +47,6 @@ export type StepResult = {
   cleanup?: () => void;
 };
 
-export const tk = (key: string): string => t(key as Key);
 const NBSP = '\u00a0';
 
 /** Server code -> ob.err.<code> when this lot has a text for it, else the app's own error text. */

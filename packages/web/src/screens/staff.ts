@@ -6,7 +6,7 @@ import { hashFor } from '../keys.ts';
 import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { availabilitySegments, blockerFamily, blockerOf, defaultExpanded, defaultRow, presetFor, rowBadge, toggleAll, visibleRows, type RowBadge, type VisibleRow } from '../staff-view.ts';
-import { famLabel, famSub, hireFilter, staffOff, toneIcon, viewSwitch } from '../staff-ui.ts';
+import { famLabel, famSub, hireFilter, roleShort, staffOff, toneIcon, viewSwitch } from '../staff-ui.ts';
 import { h } from '../ui.ts';
 
 /** The families the player has opened and the base filter survive a redraw (a poll or a language change), not a new visit. */
@@ -57,7 +57,7 @@ export async function staff(ctx: Ctx): Promise<Screen> {
   };
   const availabilityText = (r: FamilyRow): string => {
     const a = r.availability;
-    return [a.onDuty && t('st.avail.duty', { n: a.onDuty }), a.free && t('st.avail.free', { n: a.free }), a.resting && t('st.avail.rest', { n: a.resting }), a.leave && t('st.avail.leave', { n: a.leave }), a.training && t('st.avail.training', { n: a.training }), a.vacant && t('st.avail.vacant', { n: a.vacant })].filter(Boolean).join(' · ');
+    return [a.onDuty && t('st.avail.duty', { n: a.onDuty }), a.free && tp('st.avail.free', a.free), a.resting && t('st.avail.rest', { n: a.resting }), a.leave && t('st.avail.leave', { n: a.leave }), a.training && t('st.avail.training', { n: a.training }), a.vacant && tp('st.avail.vacant', a.vacant)].filter(Boolean).join(' · ');
   };
   const line = (v: VisibleRow): HTMLElement => {
     const r = v.row;
@@ -142,7 +142,7 @@ function sidePanel(data: StaffOverview, v: VisibleRow | null, goHire: (v: Visibl
         w.staffId ? h('button', { type: 'button', class: 'link-btn', onclick: () => go(hashFor('staff', w.staffId)) }, t('st.side.sheet', { name: w.name })) : null)))));
 
   const people = members.length > 0 ? h('section', { 'aria-labelledby': 'st-members' }, h('h3', { class: 'ln-sub-title', id: 'st-members' }, t('st.side.members', { type: row?.label ?? '' })),
-    h('ul', { class: 'plain st-members' }, members.map((m) => h('li', null, h('button', { type: 'button', class: 'link-btn', onclick: () => go(hashFor('staff', m.id)) }, `${m.name} · ${t(`st.role.${m.role}` as Key)}`))))) : null;
+    h('ul', { class: 'plain st-members' }, members.map((m) => h('li', null, h('button', { type: 'button', class: 'link-btn', onclick: () => go(hashFor('staff', m.id)) }, `${m.name} · ${roleShort(m.role)}`))))) : null;
 
   return [panel({ title: t('st.side.title'), headless: true, id: 'st-side', class: 'st-side' },
     ...heading, people, watchBlock,

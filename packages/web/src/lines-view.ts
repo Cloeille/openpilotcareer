@@ -1,6 +1,7 @@
 import { blockHours, type AircraftType } from '@opc/shared';
 import type { CancelCause, ProjectionStatus, ScheduledFlightStatus, FlyingRow, Line, NetworkView, OpsRow, LineBody, ScheduledFlight } from './api-lines.ts';
 import type { MapAirport, MapFlight, MapLine } from './network-map.ts';
+import type { Key } from './messages.ts';
 import type { Screen } from './screen.ts';
 
 /**
@@ -285,9 +286,8 @@ export function filterOps(rows: readonly OpsRow[], f: OpsFilter): OpsRow[] {
 export type OpsBadge = 'ontime' | 'delayed' | 'cancelled' | 'mine';
 export const opsBadge = (r: Pick<OpsRow, 'status' | 'delayMin' | 'own'>): OpsBadge => (r.own ? 'mine' : r.status === 'cancelled' ? 'cancelled' : r.delayMin > 0 || r.status === 'delayed' ? 'delayed' : 'ontime');
 
-/** The cause of a cancellation as a message key suffix; the screen translates it. `note` from the server is plain words and only a fallback. */
-export const CAUSE_KEYS: Record<CancelCause, string> = { aircraft_unavailable: 'aircraft', no_crew: 'crew', duty_limit: 'duty', line_paused: 'paused' };
-export const causeKey = (c: CancelCause | null): string | null => (c ? CAUSE_KEYS[c] : null);
+/** The message of a cancellation cause; `note` from the server is plain words and only a fallback. */
+export const CAUSE_KEYS: Record<CancelCause, Key> = { aircraft_unavailable: 'ln.cause.aircraft', no_crew: 'ln.cause.crew', duty_limit: 'ln.cause.duty', line_paused: 'ln.cause.paused' };
 
 /** The phase an in-flight row shows when the server gives no distance: derived from the progress. */
 export type Phase = 'climb' | 'cruise' | 'descent';

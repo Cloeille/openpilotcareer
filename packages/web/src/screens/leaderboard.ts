@@ -5,7 +5,6 @@ import { aiRivals } from '../competition.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import { hashFor } from '../keys.ts';
-import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { SORT_KEYS, isFreshSeason, kindOf, seasonDay, sortStandings, type Kind, type SortKey, type Standing } from '../standings.ts';
 import { h } from '../ui.ts';
@@ -16,7 +15,7 @@ let scope: Scope = 'season';
 let season: string | undefined;
 let selected: number | null = null;
 
-const kindLabel = (kind: Kind | null): string => (kind === null ? t('lb.kind.ai') : t(`lb.kind.${kind}` as Key));
+const kindLabel = (kind: Kind | null): string => (kind === null ? t('lb.kind.ai') : t(`lb.kind.${kind}`));
 
 export async function leaderboard(ctx: Ctx): Promise<Screen> {
   const { snap, go } = ctx;
@@ -80,7 +79,7 @@ export async function leaderboard(ctx: Ctx): Promise<Screen> {
   }), h('p', { class: 'dim', style: 'padding:22px' }, t('lb.empty')));
 
   const sorts = h('div', { class: 'segments', role: 'group', 'aria-label': t('lb.title') }, SORT_KEYS.map((k, i) =>
-    h('button', { type: 'button', class: 'seg', 'aria-pressed': String(!career && sort === k), disabled: career, onclick: () => { sort = k; redraw(); } }, keycap(String(i + 1)), h('span', null, t(`lb.sort.${k}` as Key)))));
+    h('button', { type: 'button', class: 'seg', 'aria-pressed': String(!career && sort === k), disabled: career, onclick: () => { sort = k; redraw(); } }, keycap(String(i + 1)), h('span', null, t(`lb.sort.${k}`)))));
   const monthLabel = fm.seasonMonth(data.season);
   const now = Date.now();
   const day = seasonDay(now);

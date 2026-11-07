@@ -5,9 +5,8 @@ import { fmt } from '../format.ts';
 import { t } from '../i18n.ts';
 import { hashFor } from '../keys.ts';
 import { clockGroup, featureOff } from '../lines-ui.ts';
-import { causeKey, clockNow, filterOps, firstAlert, inService, nextFilter, NETWORK_TAB, opsBadge, phaseOf, progressPct, OPS_FILTERS, type OpsBadge, type OpsFilter } from '../lines-view.ts';
+import { CAUSE_KEYS, clockNow, filterOps, firstAlert, inService, nextFilter, NETWORK_TAB, opsBadge, phaseOf, progressPct, OPS_FILTERS, type OpsBadge, type OpsFilter } from '../lines-view.ts';
 import { pollWhileShown } from '../live-poll.ts';
-import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
 
@@ -16,12 +15,11 @@ let filter: OpsFilter = 'all';
 let selected: number | null = null;
 
 const BADGE_ICON = { ontime: 'circle-check', delayed: 'clock', cancelled: 'circle-x', mine: 'user' } as const;
-const badge = (b: OpsBadge, delayMin: number): HTMLElement => h('span', { class: `ln-badge ${b}` }, icon(BADGE_ICON[b], 12), t(`ln.ops.b.${b}` as Key, { n: delayMin }));
+const badge = (b: OpsBadge, delayMin: number): HTMLElement => h('span', { class: `ln-badge ${b}` }, icon(BADGE_ICON[b], 12), t(`ln.ops.b.${b}`, { n: delayMin }));
 
 /** The cause of a row in plain words: the translated cause for a cancellation, the server's note otherwise. */
 const noteOf = (r: OpsRow): string | null => {
-  const key = causeKey(r.cancelCause);
-  if (r.status === 'cancelled' && key) return r.note ?? t(`ln.cause.${key}` as Key);
+  if (r.status === 'cancelled' && r.cancelCause) return r.note ?? t(CAUSE_KEYS[r.cancelCause]);
   return r.note;
 };
 
@@ -52,7 +50,7 @@ export async function ops(ctx: Ctx): Promise<Screen> {
     const note = noteOf(r);
     const id = `ln-ops-${r.id}`;
     const pct = progressPct(r, clockNow(current.now, at, Date.now()));
-    const progress = h('span', { class: 'ln-prog' }, h('span', { class: 'ln-prog-track', style: `--p:${pct}%` }, h('i', { class: r.own ? 'mine' : '' })), h('span', { class: 'dim small' }, r.own && r.note ? r.note : t(`ln.ops.phase.${phaseOf(pct / 100)}` as Key)));
+    const progress = h('span', { class: 'ln-prog' }, h('span', { class: 'ln-prog-track', style: `--p:${pct}%` }, h('i', { class: r.own ? 'mine' : '' })), h('span', { class: 'dim small' }, r.own && r.note ? r.note : t(`ln.ops.phase.${phaseOf(pct / 100)}`)));
     return h('tr', { id, class: `ln-ops-row${r.status === 'cancelled' ? ' cancelled' : ''}${selected === r.id ? ' picked' : ''}`, 'data-row': '', tabindex: 0, 'aria-label': `${r.flightNo} ${r.origin} → ${r.dest}`,
       onfocus: () => { selected = r.id; }, onclick: () => { selected = r.id; if (r.lineId) go(hashFor('line', r.lineId)); }, onkeydown: (e: KeyboardEvent) => { if (e.key === 'Enter' && r.lineId) { e.preventDefault(); go(hashFor('line', r.lineId)); } } },
     h('th', { scope: 'row', class: 'mono' }, fm.zulu(r.dep + r.delayMin * 60_000)),
@@ -72,7 +70,7 @@ export async function ops(ctx: Ctx): Promise<Screen> {
     const flying = filterOps(current.flying, filter), upcoming = filterOps(current.upcoming, filter);
     const c = current.counts;
     counts.textContent = t('ln.ops.counts', { flying: c.flying, upcoming: c.upcoming, delayed: c.delayed, cancelled: c.cancelled });
-    filterBar.replaceChildren(...OPS_FILTERS.map((f) => h('button', { type: 'button', class: 'seg', 'aria-pressed': String(f === filter), onclick: () => { filter = f; paint(); } }, t(`ln.ops.f.${f}` as Key))));
+    filterBar.replaceChildren(...OPS_FILTERS.map((f) => h('button', { type: 'button', class: 'seg', 'aria-pressed': String(f === filter), onclick: () => { filter = f; paint(); } }, t(`ln.ops.f.${f}`))));
     body.replaceChildren(
       section(t('ln.ops.flying'), t('ln.ops.col.progress'), flying, 'flying', t('ln.ops.noFlying')),
       section(t('ln.ops.upcoming'), t('ln.ops.col.crew'), upcoming, 'upcoming', current.upcoming.length === 0 ? t('ln.ops.noUpcoming') : t('ln.ops.noMatch')));

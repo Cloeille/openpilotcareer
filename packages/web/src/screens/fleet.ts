@@ -1,4 +1,4 @@
-import type { Flight } from '@opc/shared';
+import type { AircraftCategory, Flight } from '@opc/shared';
 import { api } from '../api.ts';
 import type { FinanceOverview, FleetAircraft, HubSpots } from '@opc/shared';
 import { buyoutLease, financeOverview, hubUsage, terminateLease } from '../api-finance.ts';
@@ -9,14 +9,13 @@ import { aircraftName, byRegistration, monthLabel, nextCharges, parkingSummary, 
 import { chargeKind, locale, perform, tidyCity } from '../finance-ui.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
-import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
 import { starter } from './starter.ts';
 
 let selected: number | null = null;
 
-export const categoryName = (c: string): string => t(`cat.${c}` as Key);
+export const categoryName = (c: AircraftCategory): string => t(`cat.${c}`);
 const companyCode = (c: object): string | null => (c as { code?: string | null }).code || null;
 
 const statusCell = (a: FleetAircraft, flights: Map<number, ActiveFlightInfo>, code: string | null, now: number): HTMLElement => {
@@ -59,7 +58,7 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
     const v = statusOf(a, now, flights.get(a.id) ?? null);
     const wear = wearOf(a);
     const c = a.contract ?? null;
-    const own = a.ownership ? t(`fin.own.${a.ownership}` as Key) : null;
+    const own = a.ownership ? t(`fin.own.${a.ownership}`) : null;
     const contractText = c === null ? (a.ownership === 'owned' ? t('fin.fleet.noContract') : null)
       : [c.monthly > 0 ? t('fin.contract.monthly', { amount: fm.money(c.monthly) }) : null, c.hourly ? t('fin.contract.hourly', { amount: fm.money(c.hourly) }) : null,
         c.endsAt ? t('fin.contract.until', { date: monthLabel(locale(), c.endsAt, true) }) : null].filter(Boolean).join(' · ');

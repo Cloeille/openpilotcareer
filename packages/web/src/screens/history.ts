@@ -12,7 +12,7 @@ import type { Ctx, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
 
 const TX_KIND: Record<string, Key> = { grant: 'tx.kind.grant', payout: 'tx.kind.payout', fuel: 'tx.kind.fuel', landing_fee: 'tx.kind.landing_fee', maintenance: 'tx.kind.maintenance', purchase_aircraft: 'tx.kind.purchase_aircraft', purchase_hub: 'tx.kind.purchase_hub' };
-const txKind = (kind: string): string => (TX_KIND[kind] ? t(TX_KIND[kind]!) : kind.replace('_', ' '));
+const txKind = (kind: string): string => (TX_KIND[kind] ? t(TX_KIND[kind]!) : kind.replaceAll('_', ' '));
 
 let filter: FlightFilter = { ...NO_FILTER };
 let view: 'flights' | 'ledger' = 'flights';
@@ -75,7 +75,7 @@ export async function history(ctx: Ctx): Promise<Screen> {
     h('section', { class: 'panel jobs-panel', 'aria-label': t('hist.title') },
       h('div', { class: 'filter-bar' },
         view === 'flights'
-          ? segments(t('hist.title'), STATUS_FILTERS.map((s) => ({ value: s, label: t(`hist.tab.${s}` as Key), count: counts[s] })), filter.status, (status: StatusFilter) => set({ status }))
+          ? segments(t('hist.title'), STATUS_FILTERS.map((s) => ({ value: s, label: t(`hist.tab.${s}`), count: counts[s] })), filter.status, (status: StatusFilter) => set({ status }))
           : h('span', { class: 'strong' }, t('hist.ledger')),
         h('div', { class: 'filters' },
           segments(t('hist.views'), [{ value: 'flights', label: t('hist.view.flights') }, { value: 'ledger', label: t('hist.view.ledger') }], view, (v) => { view = v; window.dispatchEvent(new Event('opc:redraw')); }),

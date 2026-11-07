@@ -34,10 +34,10 @@ export function tidyCity(a: Airport): string {
 }
 export const hubCity = (a: Airport | null, icao: string): string => (a ? tidyCity(a) : icao);
 
-/** Localised label of a ledger kind, falling back to the raw kind. */
+/** Localised label of a ledger kind (`kind` is free server text). A kind with no message reads as words (`line_fee` -> `line fee`), never as a key. */
 export function chargeKind(kind: string): string {
   const key = messageFor(`fin.kind.${kind}`);
-  return key ? t(key) : kind;
+  return key ? t(key) : kind.replaceAll('_', ' ');
 }
 
 const RELOAD_ON = new Set(['hub_full', 'insufficient_funds', 'aircraft_busy']);

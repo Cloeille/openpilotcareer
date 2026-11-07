@@ -6,7 +6,7 @@ import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import { dayMedium, dayShort, dayTime, fill, typeNames } from '../lines-ui.ts';
 import {
-  causeKey, causesOf, dayKind, meterFraction, daysBetween, ganttLanes, isoDay, minuteOfDay, MINUTES_PER_DAY, NETWORK_TAB, pnlParts, progressPct, assuredDays, RULER_HOURS, stepDay, type Lane, type Segment,
+  CAUSE_KEYS, causesOf, dayKind, meterFraction, daysBetween, ganttLanes, isoDay, minuteOfDay, MINUTES_PER_DAY, NETWORK_TAB, pnlParts, progressPct, assuredDays, RULER_HOURS, stepDay, type Lane, type Segment,
 } from '../lines-view.ts';
 import type { Key } from '../messages.ts';
 import { pollWhileShown } from '../live-poll.ts';
@@ -89,14 +89,14 @@ function planning(d: LineDetail, fleet: FleetAircraft[], code: string): Screen {
       h('span', { class: 'strong' }, f.flightNo), h('span', { class: 'mono' }, `${f.origin} → ${f.dest}`), h('span', { class: 'muted' }, `${fm.zulu(f.dep)} – ${fm.zulu(f.arr)}`),
       f.delayMin > 0 ? h('span', { class: 'ln-late' }, t('ln.state.delayed', { n: f.delayMin })) : null,
       f.takenByPlayer ? h('span', { class: 'ln-mine' }, icon('user', 12), t('ln.rot.taken')) : null,
-      f.status === 'cancelled' && f.cancelCause ? h('span', { class: 'ln-down' }, t(`ln.cause.${causeKey(f.cancelCause)}` as Key)) : null,
+      f.status === 'cancelled' && f.cancelCause ? h('span', { class: 'ln-down' }, t(CAUSE_KEYS[f.cancelCause])) : null,
       f.status === 'flying' ? h('span', { class: 'muted' }, t('ln.rot.progress', { pct: progressPct(f, Date.now()) })) : null,
       canTake(f) ? button(t('ln.rot.take'), { variant: 'secondary', onclick: () => take(f) }) : null);
   };
   const seg = (s: Segment): HTMLElement => {
     const f = d.day.find((x) => x.id === s.id)!;
     return h('button', { type: 'button', class: `ln-seg ${s.kind}${s.takenByPlayer ? ' mine' : ''}${f === rotation.selected ? ' picked' : ''}`, style: `left:${s.left}%;width:${s.width}%`, 'data-row': '', 'data-flight': s.id,
-      'aria-label': t('ln.seg.label', { no: s.flightNo, to: s.to, status: t(`ln.fs.${s.status}` as Key) }),
+      'aria-label': t('ln.seg.label', { no: s.flightNo, to: s.to, status: t(`ln.fs.${s.status}`) }),
       // Enter on a segment selects it and moves to the button that takes it: taking cancels a scheduled flight, so it takes a second press.
       onclick: (e: MouseEvent) => { pickRotation(f); if (e.detail === 0) detailPanel.querySelector<HTMLElement>('button')?.focus(); }, onfocus: () => pickRotation(f), onmouseenter: () => pickRotation(f) },
     h('span', { class: 'ln-seg-no' }, s.flightNo), h('span', { class: 'ln-seg-to' }, `→ ${s.to}`));
@@ -118,7 +118,7 @@ function planning(d: LineDetail, fleet: FleetAircraft[], code: string): Screen {
       h('div', { class: 'ln-track' }, nowPct === null ? null : h('span', { class: 'ln-now-line', style: `left:${nowPct}%` }), lane.segments.flatMap((s) => [s.delay > 0 ? h('span', { class: 'ln-delay', style: `left:${s.delayLeft}%;width:${s.delay}%`, 'aria-hidden': 'true' }) : null, seg(s)]),
         lane.segments.length === 0 ? h('span', { class: 'ln-track-empty dim small' }, t('ln.lane.idle')) : null));
   };
-  const legend = h('div', { class: 'ln-gantt-legend' }, (['done', 'flying', 'scheduled', 'delayed', 'cancelled'] as const).map((k) => h('span', { class: 'ln-legend-item' }, h('span', { class: `ln-legend-seg ${k}`, 'aria-hidden': 'true' }), t(`ln.fs.${k}` as Key))));
+  const legend = h('div', { class: 'ln-gantt-legend' }, (['done', 'flying', 'scheduled', 'delayed', 'cancelled'] as const).map((k) => h('span', { class: 'ln-legend-item' }, h('span', { class: `ln-legend-seg ${k}`, 'aria-hidden': 'true' }), t(`ln.fs.${k}`))));
 
   const timeline = h('div', { class: 'ln-timeline' },
     h('div', { class: 'ln-ruler-row' }, h('span', { class: 'ln-lane-caption dim small' }, t('ln.hourUtc')), ruler), lanes.map(laneRow), legend);
@@ -130,7 +130,7 @@ function planning(d: LineDetail, fleet: FleetAircraft[], code: string): Screen {
   const econ = h('div', { class: 'ln-econ' },
     h('div', { class: 'ln-econ-head' }, h('h3', { class: 'ln-sub-title' }, t('ln.econ.title')), h('span', { class: 'dim small' }, t('ln.econ.note', { flights: d.pnl.flights, pax: fm.num(d.pnl.pax) }))),
     h('div', { class: 'ln-econ-bar', role: 'img', 'aria-label': t('ln.econ.title') }, parts.map((p) => h('span', { class: `ln-part ${p.part}`, style: `width:${p.share}%` }))),
-    h('div', { class: 'ln-econ-legend' }, parts.map((p) => h('div', { class: 'ln-econ-item' }, h('span', { class: 'dim small' }, t(`ln.part.${p.part}` as Key)), h('span', { class: p.part === 'margin' ? 'strong' : 'muted' }, fm.money(p.value))))));
+    h('div', { class: 'ln-econ-legend' }, parts.map((p) => h('div', { class: 'ln-econ-item' }, h('span', { class: 'dim small' }, t(`ln.part.${p.part}`)), h('span', { class: p.part === 'margin' ? 'strong' : 'muted' }, fm.money(p.value))))));
   const deps = h('div', { class: 'ln-deps' },
     h('div', { class: 'ln-econ-head' }, h('h3', { class: 'ln-sub-title' }, t('ln.deps.title')), h('span', { class: 'dim small' }, t('ln.deps.note'))),
     d.depends.length ? h('ul', { class: 'plain ln-meters' }, d.depends.map((m) => {
@@ -183,7 +183,7 @@ function interrupted(ctx: Ctx, d: LineDetail, p: LineProblemView): Screen {
     const item = p.problem.find((x) => x.kind === kind);
     const left = item?.until != null ? Math.max(0, daysBetween(now, item.until)) : null;
     return h('div', { class: 'ln-cause' }, icon(kind === 'aircraft' ? 'wrench' : 'user', 18),
-      h('div', { class: 'col tight' }, h('span', { class: 'strong' }, t(`ln.why.${kind}` as Key)), h('span', { class: 'muted small' }, item?.detail ?? ''),
+      h('div', { class: 'col tight' }, h('span', { class: 'strong' }, t(`ln.why.${kind}`)), h('span', { class: 'muted small' }, item?.detail ?? ''),
         left !== null && !item?.ready ? h('span', { class: 'dim small' }, t('ln.why.left', { n: left })) : item?.ready ? h('span', { class: 'ln-ok small' }, t('ln.why.ready')) : null));
   };
   const cost = p.cost;
@@ -215,7 +215,7 @@ function interrupted(ctx: Ctx, d: LineDetail, p: LineProblemView): Screen {
   async function apply(): Promise<void> {
     const c = chosen();
     if (c.disabled) return;
-    const ok = await act(t(`ln.applied.${c.id}` as Key), () => resolveLine(line.id, c.id, c.id === 'reassign' ? candidate?.id : undefined), async () => { redraw(); });
+    const ok = await act(t(`ln.applied.${c.id}`), () => resolveLine(line.id, c.id, c.id === 'reassign' ? candidate?.id : undefined), async () => { redraw(); });
     if (ok && c.id === 'recruit') go('#staff/hire');
   }
   const select = (id: ResolveOption): void => {
@@ -238,7 +238,7 @@ function interrupted(ctx: Ctx, d: LineDetail, p: LineProblemView): Screen {
     projectionHost.replaceChildren(
       h('div', { class: 'ln-econ-head' }, h('h3', { class: 'ln-sub-title' }, t('ln.proj.title')), h('span', { class: 'strong' }, t('ln.proj.assured', { n: flying, total: p.projection.length }))),
       h('div', { class: 'ln-proj-days' }, p.projection.map((x) => {
-        return h('div', { class: `ln-proj ${x.status}` }, h('span', { class: 'muted small' }, dayShort(x.date)), h('span', { class: 'ln-proj-bar' }), h('span', { class: x.status === 'stopped' ? 'ln-down small' : 'dim small' }, t(`ln.proj.day.${x.status}` as Key)));
+        return h('div', { class: `ln-proj ${x.status}` }, h('span', { class: 'muted small' }, dayShort(x.date)), h('span', { class: 'ln-proj-bar' }), h('span', { class: x.status === 'stopped' ? 'ln-down small' : 'dim small' }, t(`ln.proj.day.${x.status}`)));
       })));
   };
   paintApply();

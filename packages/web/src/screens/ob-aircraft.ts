@@ -273,7 +273,7 @@ export async function step3b(w: Wizard): Promise<StepResult> {
       const r = ladderRank(rung.rank);
       return h('div', { class: `ob-rung${i === 0 ? ' now' : ''}` },
         h('div', { class: 'ob-rail', 'aria-hidden': 'true' }, h('i'), i < LADDER.length - 1 ? h('u') : null),
-        h('div', { class: 'ob-rung-text' }, h('b', null, t(`ob.s3b.rung.${rung.id}` as Key)),
+        h('div', { class: 'ob-rung-text' }, h('b', null, t(`ob.s3b.rung.${rung.id}`)),
           h('small', null, i === 0 ? t('ob.s3b.rungSingle') : rung.models),
           h('em', null, i === 0 ? t('ob.s3b.start') : t('ob.s3b.unlock', { n: rung.rank + 1, hours: fm.num(r.hours), flights: fm.num(r.flights) }))));
     }));

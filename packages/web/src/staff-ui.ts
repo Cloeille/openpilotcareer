@@ -2,17 +2,17 @@ import { button, icon, panel } from './components.ts';
 import { fmt } from './format.ts';
 import { t } from './i18n.ts';
 import type { StaffFamily, StaffRole } from './api-staff.ts';
-import type { Key } from './messages.ts';
 import type { Tone } from './staff-view.ts';
 import { h } from './ui.ts';
 
 /** DOM pieces shared by the STAFF screens. The logic they show lives in staff-view.ts. */
 
-export const famLabel = (f: StaffFamily): string => t(`st.fam.${f}` as Key);
-export const famSub = (f: StaffFamily): string => t(`st.fam.sub.${f}` as Key);
-export const famShort = (f: StaffFamily): string => t(`st.fam.short.${f}` as Key);
-export const roleShort = (role: StaffRole): string => t(`st.role.${role}` as Key);
-export const roleFull = (role: StaffRole): string => t(`st.role.${role}Full` as Key);
+export const famLabel = (f: StaffFamily): string => t(`st.fam.${f}`);
+export const famSub = (f: StaffFamily): string => t(`st.fam.sub.${f}`);
+export const famShort = (f: StaffFamily): string => t(`st.fam.short.${f}`);
+/** The template literal is checked against `Key` for every member of the union: a StaffRole without a short and a Full message does not typecheck. */
+export const roleShort = (role: StaffRole): string => t(`st.role.${role}`);
+export const roleFull = (role: StaffRole): string => t(`st.role.${role}Full`);
 
 /** Shown when the server has no staff routes yet (404): the screen says so instead of failing. */
 export const staffOff = (): HTMLElement => h('div', { class: 'ln-off st-off panel' }, h('div', { class: 'panel-body' }, icon('users', 20), h('h1', { class: 'ln-off-title' }, t('st.off.title')), h('p', { class: 'muted' }, t('st.off.body'))));
@@ -20,7 +20,7 @@ export const staffOff = (): HTMLElement => h('div', { class: 'ln-off st-off pane
 /** The Effectifs / Recrutement switch at the top right of the staffing screens. */
 export function viewSwitch(current: 'staff' | 'hire', go: (hash: string) => void): HTMLElement {
   const opt = (id: 'staff' | 'hire', hash: string): HTMLElement =>
-    h('button', { type: 'button', class: 'view-opt', 'aria-pressed': String(id === current), onclick: () => go(hash) }, t(`st.view.${id}` as Key), id === 'hire' ? h('kbd', { class: 'keycap' }, 'R') : null);
+    h('button', { type: 'button', class: 'view-opt', 'aria-pressed': String(id === current), onclick: () => go(hash) }, t(`st.view.${id}`), id === 'hire' ? h('kbd', { class: 'keycap' }, 'R') : null);
   return h('div', { class: 'view-switcher', role: 'group', 'aria-label': t('st.views') }, opt('staff', '#staff'), opt('hire', '#staff/hire'));
 }
 
