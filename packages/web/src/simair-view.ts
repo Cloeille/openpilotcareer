@@ -37,20 +37,25 @@ export const titlesLabel = (titles: readonly string[]): string => (titles.length
 
 /** What the settings tab says about one entry of the list. */
 export type RowState = 'offered' | 'hidden' | 'noType';
-export type SimRow = { title: string; detail: string; source: SimAircraftView['source']; liveries: number; type: AircraftType | null; estimated: boolean; hidden: boolean; state: RowState };
+/** `manual`: the player picked `type` by hand (a rescan keeps it). */
+export type SimRow = { title: string; detail: string; source: SimAircraftView['source']; liveries: number; type: AircraftType | null; estimated: boolean; manual: boolean; hidden: boolean; state: RowState };
 
 export function rowsOf(list: SimAircraftList, custom: readonly AircraftType[] = []): SimRow[] {
   return list.aircraft.map((a) => {
     const type = a.icao === null ? null : (custom.find((c) => c.icao === a.icao) ?? list.types.find((x) => x.icao === a.icao) ?? null);
     return {
-      title: a.title, detail: [a.manufacturer, a.model].filter((s) => s !== '').join(' '), source: a.source, liveries: a.liveries, type, estimated: type?.derived ?? false,
+      title: a.title, detail: [a.manufacturer, a.model].filter((s) => s !== '').join(' '), source: a.source, liveries: a.liveries, type, estimated: type?.derived ?? false, manual: a.manual,
       hidden: a.hidden, state: type === null ? 'noType' : a.hidden ? 'hidden' : 'offered',
     };
   });
 }
 
-export type Summary = { total: number; offered: number; hidden: number; official: number; community: number };
+/** The settings tab's filter: every entry, or only those the player still has to give a type. */
+export type RowFilter = 'all' | 'noType';
+export const filterRows = (rows: readonly SimRow[], filter: RowFilter): SimRow[] => (filter === 'noType' ? rows.filter((r) => r.state === 'noType') : [...rows]);
+
+export type Summary = { total: number; offered: number; hidden: number; noType: number; official: number; community: number };
 export const summaryOf = (rows: readonly SimRow[]): Summary => ({
-  total: rows.length, offered: rows.filter((r) => r.state === 'offered').length, hidden: rows.filter((r) => r.state === 'hidden').length,
+  total: rows.length, noType: rows.filter((r) => r.state === 'noType').length, offered: rows.filter((r) => r.state === 'offered').length, hidden: rows.filter((r) => r.state === 'hidden').length,
   official: rows.filter((r) => r.source === 'official').length, community: rows.filter((r) => r.source === 'community').length,
 });

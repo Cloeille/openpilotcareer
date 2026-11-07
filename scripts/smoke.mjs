@@ -140,6 +140,10 @@ const scan = await call('PUT', '/me/sim-aircraft', { token: apiKey, body: { airc
 const simList = await call('GET', '/me/sim-aircraft', { token });
 expect(scan.status === 200 && simList.body.aircraft.length === 2 && simList.body.types.length === 1 && simList.body.types[0].icao === 'C172', 'simulator aircraft: the key PUTs the scan, the session reads it with the catalogue type', simList);
 expect((await call('GET', '/me/sim-aircraft', { token: apiKey })).status === 401 && (await call('PUT', '/me/sim-aircraft', { token, body: { aircraft: [] } })).status === 401, 'simulator aircraft: a key cannot read and a session cannot write');
+const remap = await call('PATCH', '/me/sim-aircraft', { token, body: { title: 'Mod Without Designator', icao: 'A320' } });
+await call('PUT', '/me/sim-aircraft', { token: apiKey, body: { aircraft: [{ title: 'Mod Without Designator', icao: null, manufacturer: '', model: '', source: 'community', liveries: 1 }] } });
+const rescanned = (await call('GET', '/me/sim-aircraft', { token })).body.aircraft[0];
+expect(remap.status === 200 && rescanned.icao === 'A320' && rescanned.manual === true && (await call('PATCH', '/me/sim-aircraft', { token, body: { title: 'Mod Without Designator', icao: 'ZZZ9' } })).status === 422, 'simulator aircraft: the type picked by hand survives a rescan and only a catalogue type is accepted', rescanned);
 
 expect((await call('DELETE', `/me/api-keys/${key.body.id}`, { token })).status === 204 && (await call('GET', '/flights/active', { token: apiKey })).status === 401, 'revoking the key stops it working immediately');
 

@@ -1,10 +1,10 @@
-// Lot SIM-AIRCRAFT: the aircraft of the player's simulator. The bridge PUTs the scan with an API key; the web app reads it and hides or shows entries with the session.
+// Lot SIM-AIRCRAFT: the aircraft of the player's simulator. The bridge PUTs the scan with an API key; the web app reads it with the session, hides or shows entries and sets the type of the ones the scan could not type.
 import type { FastifyInstance } from 'fastify';
-import { simAircraftHideSchema, simAircraftPutSchema } from '@opc/shared';
+import { simAircraftPatchSchema, simAircraftPutSchema } from '@opc/shared';
 import { apiKeyAuth, sessionUser } from './auth.ts';
 import type { Db } from './db.ts';
 import { HttpError, parse } from './http.ts';
-import { saveSimAircraft, setSimAircraftHidden, simAircraftOf } from './simair.ts';
+import { patchSimAircraft, saveSimAircraft, simAircraftOf } from './simair.ts';
 
 /** 2 000 entries of up to ~400 bytes: above the server's default 64 KiB body limit. */
 const PUT_BODY_LIMIT = 1024 * 1024;
@@ -19,8 +19,7 @@ export function registerSimAircraft(app: FastifyInstance, { db, now }: { db: Db;
 
   app.patch('/api/v1/me/sim-aircraft', async (req) => {
     const p = sessionUser(db, req, now());
-    const b = parse(simAircraftHideSchema, req.body);
-    if (!setSimAircraftHidden(db, p.userId, b.title, b.hidden)) throw new HttpError(404, 'sim_aircraft_not_found', 'that aircraft is not in your simulator list');
+    if (!patchSimAircraft(db, p.userId, parse(simAircraftPatchSchema, req.body))) throw new HttpError(404, 'sim_aircraft_not_found', 'that aircraft is not in your simulator list');
     return simAircraftOf(db, p.userId);
   });
 }
