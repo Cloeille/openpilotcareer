@@ -138,7 +138,7 @@ test('fetching the plan: needs a connection, asks for exactly this flight\'s pla
   const wrong = await fetchPlan();
   assert.equal(wrong.status, 422);
   assert.equal(wrong.body.error, 'ofp_mismatch');
-  assert.match(wrong.body.message, /LFPO/);
+  assert.match(wrong.body.message, /^SimBrief LFPO → \w{4} \(C172\), flight /);
 
   answer = () => plan({ origin: { icao_code: job.origin }, destination: { icao_code: job.destination }, aircraft: { icaocode: 'C172' }, fuel: { plan_ramp: '110' }, general: { route: 'DCT ABC DCT' } }, staticId);
   const ok = await fetchPlan();

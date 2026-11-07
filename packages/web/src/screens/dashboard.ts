@@ -1,7 +1,8 @@
-import { blockHours, type Flight, type Job } from '@opc/shared';
+import { blockHours, type Flight, type Job, type SimbriefLink } from '@opc/shared';
 import { act } from '../actions.ts';
 import { api } from '../api.ts';
 import { fetchLive } from '../api-live.ts';
+import { getLink } from '../api-simbrief.ts';
 import { button, icon, signDirection, signLocation, unknownValue } from '../components.ts';
 import { companyTitle, keyFigures } from '../figures.ts';
 import { fmt } from '../format.ts';
@@ -10,6 +11,7 @@ import { t, tp } from '../i18n.ts';
 import { loadLabel } from '../job-view.ts';
 import { pollWhileShown } from '../live-poll.ts';
 import { liveFacts, progressOf, type LiveFacts } from '../live-view.ts';
+import { simbriefBlock } from '../simbrief-card.ts';
 import { hashFor } from '../keys.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
@@ -20,7 +22,8 @@ function flightActions(f: Flight, refresh: () => Promise<void>): HTMLElement {
     button(t('dash.cancel'), { variant: 'ghost', icon: 'x', onclick: () => { if (confirm(t('dash.cancelConfirm'))) void act(t('dash.cancelled'), () => api(`/flights/${f.id}/cancel`, { method: 'POST' }), refresh); } }));
 }
 
-function currentFlight(f: Flight, ctx: Ctx, others: Flight[], first: LiveFacts): HTMLElement {
+/** `sb` is the SimBrief block of this flight (null when SimBrief cannot be asked, or the flight has no SimBrief id). */
+function currentFlight(f: Flight, ctx: Ctx, others: Flight[], first: LiveFacts, sb: HTMLElement | null): HTMLElement {
   const { snap, refresh } = ctx;
   const fm = fmt();
   const aircraft = snap.me.fleet.find((a) => a.id === f.aircraftId);
@@ -53,6 +56,7 @@ function currentFlight(f: Flight, ctx: Ctx, others: Flight[], first: LiveFacts):
       h('span', { class: 'mono dim small' }, t('dash.flightMeta', { id: f.id, aircraft: f.aircraftIcao, aircraftId: f.aircraftId }), ' · ', loadLabel(f.job), ' · ', fm.nm(f.job.distanceNm), aircraft ? ` · ${fm.duration(blockHours(aircraft.type, f.job.distanceNm))}` : '')),
     h('div', { class: 'route-line' }, signLocation(f.job.origin), track, signDirection(f.job.destination)),
     f.job.route ? h('span', { class: 'mono dim small route-text' }, f.job.route) : null,
+    sb,
     h('div', { class: 'facts' },
       fact(t('dash.eta'), eta), fact(t('dash.remaining'), remaining), fact(t('dash.payout'), fm.money(f.job.payout))),
     h('div', { class: 'row' },
@@ -96,15 +100,16 @@ function nextDeparture(ctx: Ctx): HTMLElement {
 
 export async function dashboard(ctx: Ctx): Promise<Screen> {
   const { snap } = ctx;
-  const active = await api<Flight[]>('/me/flights?status=active&limit=50');
+  const [active, link] = await Promise.all([api<Flight[]>('/me/flights?status=active&limit=50'), getLink().catch((): SimbriefLink | null => null)]);
   const oldestFirst = [...active].sort((a, b) => a.acceptedAt - b.acceptedAt);
   const main = oldestFirst[0];
   const first = main ? liveFacts(await fetchLive(main.id).catch(() => null), Date.now()) : null;
+  const sb = main && link ? simbriefBlock(main, link, ctx, snap.me.fleet.find((a) => a.id === main.aircraftId)?.registration) : null;
   const view = h('div', { class: 'wide-layout' }, companyTitle(snap),
-    h('div', { class: 'offline-row' }, main && first ? currentFlight(main, ctx, oldestFirst.slice(1), first) : nextDeparture(ctx), keyFigures(snap.me, snap.lastFlight)));
+    h('div', { class: 'offline-row' }, main && first ? currentFlight(main, ctx, oldestFirst.slice(1), first, sb?.node ?? null) : nextDeparture(ctx), keyFigures(snap.me, snap.lastFlight)));
   return {
     title: t('tab.dashboard'), scene: 'dashboard', tab: 'dashboard', wide: true, view, back: null,
-    hints: main ? [{ key: t('key.enter'), label: t('hint.follow') }, { key: 'C', label: t('hint.cutaway') }] : [{ key: t('key.enter'), label: t('hint.openJobs') }, { key: 'I', label: t('hint.simbrief') }],
-    keys: main ? { c: () => ctx.go('#live/cutaway') } : { i: () => ctx.go('#simbrief') },
+    hints: main ? [{ key: t('key.enter'), label: t('hint.follow') }, { key: 'C', label: t('hint.cutaway') }, ...(sb ? [{ key: 'B', label: t('sb.hint.generate') }] : [])] : [{ key: t('key.enter'), label: t('hint.openJobs') }, { key: 'I', label: t('hint.simbrief') }],
+    keys: main ? { c: () => ctx.go('#live/cutaway'), ...(sb ? { b: sb.open } : {}) } : { i: () => ctx.go('#simbrief') },
   };
 }

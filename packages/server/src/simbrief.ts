@@ -109,10 +109,11 @@ export async function lookupAccount(q: OfpQuery, doFetch: Fetch): Promise<{ pilo
   return { pilotId: r.pilotId ?? ('pilotId' in q ? q.pilotId : null) };
 }
 
-/** Why a plan is not for this flight, or null when origin, destination and aircraft type all match. */
+/** Why a plan is not for this flight, or null when origin, destination and aircraft type all match. Language-neutral on purpose: the web app puts it inside its own sentence. */
 export function ofpMismatch(ofp: Pick<Ofp, 'origin' | 'destination' | 'aircraftIcao'>, flight: { origin: string; destination: string; aircraftIcao: string }): string | null {
   if (ofp.origin === flight.origin && ofp.destination === flight.destination && ofp.aircraftIcao === flight.aircraftIcao) return null;
-  return `the SimBrief plan is ${ofp.origin} → ${ofp.destination} in a ${ofp.aircraftIcao}, this flight is ${flight.origin} → ${flight.destination} in a ${flight.aircraftIcao}`;
+  const route = (r: { origin: string; destination: string; aircraftIcao: string }): string => `${r.origin} → ${r.destination} (${r.aircraftIcao})`;
+  return `SimBrief ${route(ofp)}, flight ${route(flight)}`;
 }
 
 /** The SimBrief identifier saved on an account: all null while nothing is connected. */

@@ -1,0 +1,3 @@
+/* Lot SIMBRIEF-LINK: the SimBrief block of the current-flight card. */
+.sb-card { display: flex; flex-direction: column; gap: 8px; padding: 14px 0 2px; border-top: 1px solid var(--border); }
+.sb-card .row { flex-wrap: wrap; }

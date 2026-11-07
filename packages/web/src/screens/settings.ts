@@ -5,12 +5,13 @@ import { hashFor } from '../keys.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
 import { accountSection, runExport } from './settings-account.ts';
+import { simbriefSection } from './settings-simbrief.ts';
 import { copyRevealedKey, focusSoon, hasRevealedKey, keysSection } from './settings-keys.ts';
 
-const SECTIONS = ['keys', 'account'] as const;
+const SECTIONS = ['keys', 'simbrief', 'account'] as const;
 type Section = (typeof SECTIONS)[number];
-const sectionOf = (arg: string | null): Section => (arg === 'account' ? 'account' : 'keys');
-const hashOf = (s: Section): string => (s === 'keys' ? '#settings' : hashFor('settings', 'account'));
+const sectionOf = (arg: string | null): Section => (arg === 'account' || arg === 'simbrief' ? arg : 'keys');
+const hashOf = (s: Section): string => (s === 'keys' ? '#settings' : hashFor('settings', s));
 
 /** Réglages: the bridge API keys, and the account and its data. The section is the route argument (`#settings`, `#settings/account`). */
 export async function settings(ctx: Ctx): Promise<Screen> {
@@ -19,11 +20,11 @@ export async function settings(ctx: Ctx): Promise<Screen> {
   const server = session.server === GLOBAL_URL ? t('set.serverGlobal') : new URL(session.server).host;
 
   const nav = h('nav', { class: 'settings-nav-list', 'aria-label': t('set.nav.label') }, SECTIONS.map((s) =>
-    h('a', { href: hashOf(s), 'aria-current': s === section ? 'page' : null }, t(s === 'keys' ? 'set.nav.keys' : 'set.nav.account'))));
+    h('a', { href: hashOf(s), 'aria-current': s === section ? 'page' : null }, t(`set.nav.${s}` as 'set.nav.keys'))));
   const head = h('div', { class: 'settings-nav' }, titleBlock(t('set.status', { user: me.username, server }), t('set.title')), nav);
 
-  const step = (): void => ctx.go(hashOf(section === 'keys' ? 'account' : 'keys'));
-  const common = { back: '#dashboard', keys: { left: step, right: step } };
+  const step = (by: number): (() => void) => () => ctx.go(hashOf(SECTIONS[(SECTIONS.indexOf(section) + by + SECTIONS.length) % SECTIONS.length]!));
+  const common = { back: '#dashboard', keys: { left: step(-1), right: step(1) } };
 
   if (section === 'keys') {
     const { panel, focusName } = await keysSection(ctx);
@@ -34,6 +35,14 @@ export async function settings(ctx: Ctx): Promise<Screen> {
       hints: [{ key: t('key.esc'), label: t('hint.back') }, { key: '← →', label: t('hint.section') }, { key: 'N', label: t('hint.newKey') }, ...(revealed ? [{ key: 'C', label: t('hint.copyKey') }] : [])],
       back: common.back,
       keys: { ...common.keys, n: focusName, c: () => void copyRevealedKey() },
+    };
+  }
+  if (section === 'simbrief') {
+    return {
+      title: t('set.title'), scene: 'settings', tab: 'settings',
+      view: h('div', { class: 'settings-layout' }, head, h('div', { class: 'settings-keys-col' }, await simbriefSection())),
+      hints: [{ key: t('key.esc'), label: t('hint.back') }, { key: '← →', label: t('hint.section') }, { key: t('key.enter'), label: t('sb.hint.connect') }],
+      back: common.back, keys: common.keys,
     };
   }
   const body = await accountSection(ctx);

@@ -82,7 +82,7 @@ test('ofpMismatch names what differs, null when origin, destination and type all
   const flight = { origin: 'LFPG', destination: 'EGLL', aircraftIcao: 'A320' };
   assert.equal(ofpMismatch({ origin: 'LFPG', destination: 'EGLL', aircraftIcao: 'A320' }, flight), null);
   for (const other of [{ origin: 'LFPO' }, { destination: 'EGKK' }, { aircraftIcao: 'B738' }]) {
-    assert.match(ofpMismatch({ ...flight, ...other }, flight)!, /SimBrief plan is/);
+    assert.match(ofpMismatch({ ...flight, ...other }, flight)!, /^SimBrief \w{4} → \w{4} \(\w+\), flight LFPG → EGLL \(A320\)$/);
   }
 });
 
