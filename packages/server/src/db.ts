@@ -237,8 +237,28 @@ CREATE TABLE safety_readings (
   company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, day INTEGER NOT NULL, idx INTEGER NOT NULL, PRIMARY KEY (company_id, day));
 `;
 
+// OpenHangar v3, lot PARTS: the wear of each component of an aircraft (rows are made the first time an aircraft wears or is looked at: seeded from the lease offer's airframe hours, else new),
+// the spare parts a company keeps at a hub, the orders on their way, and the stock policy per aircraft type. A part's catalogue (names, prices, kits) is code in shared/src/parts.ts.
+// `parts_orders` also records a breakdown: a row with an `aircraft_id` is the part a failed component needed (cost 0 and received when it was on the shelf, else ordered with its delivery date as `eta`).
+const SCHEMA_V11 = `
+CREATE TABLE aircraft_components (
+  aircraft_id INTEGER NOT NULL REFERENCES aircraft(id) ON DELETE CASCADE,
+  component TEXT NOT NULL CHECK (component IN ('engines','gear','propellers','avionics','interior','paint')),
+  wear_pct REAL NOT NULL, refurb_until INTEGER, PRIMARY KEY (aircraft_id, component));
+CREATE TABLE parts_stock (
+  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, hub TEXT NOT NULL, part TEXT NOT NULL, qty INTEGER NOT NULL CHECK (qty >= 0), PRIMARY KEY (company_id, hub, part));
+CREATE TABLE parts_orders (
+  id INTEGER PRIMARY KEY, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, hub TEXT NOT NULL, part TEXT NOT NULL, qty INTEGER NOT NULL,
+  ordered_at INTEGER NOT NULL, eta INTEGER NOT NULL, cost INTEGER NOT NULL, express INTEGER NOT NULL DEFAULT 0,
+  aircraft_id INTEGER REFERENCES aircraft(id) ON DELETE CASCADE, component TEXT, received INTEGER NOT NULL DEFAULT 0);
+CREATE INDEX parts_orders_open ON parts_orders(company_id, received, eta);
+CREATE TABLE parts_policy (
+  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, hub TEXT NOT NULL, icao TEXT NOT NULL, cls TEXT NOT NULL,
+  policy TEXT NOT NULL CHECK (policy IN ('none','critical','full')), PRIMARY KEY (company_id, hub, icao));
+`;
+
 /** Append-only; `PRAGMA user_version` records how many ran. */
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10];
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);
