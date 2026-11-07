@@ -80,6 +80,12 @@ const [first, second] = [flyable.at(-1), flyable[0]];
 const acc = await call('POST', `/jobs/${first.id}/accept`, { token, body: { aircraftId: plane.id } });
 expect(acc.status === 201 && acc.body.status === 'active', `accepted ${first.origin}-${first.destination} (${first.distanceNm} nm, pays ${first.payout}) -> flight ${acc.body.id} active`, acc);
 const rival = await call('POST', '/auth/register', { body: { username: `${username}r`, password, hub: 'LFPG' } });
+// --- SimBrief link: the accepted flight carries the static id of its dispatch; nothing is connected, and fetching a plan says so (no call to simbrief.com here)
+expect(/^opc_\d+_[0-9a-f]{12}$/.test(acc.body.simbrief?.staticId ?? ''), 'the flight carries the static id of its SimBrief dispatch', acc.body.simbrief);
+const sbNone = await call('GET', '/me/simbrief', { token });
+expect(sbNone.status === 200 && sbNone.body.username === null && sbNone.body.pilotId === null, 'no SimBrief connection yet');
+const sbFetch = await call('POST', `/flights/${acc.body.id}/simbrief/fetch`, { token });
+expect(sbFetch.status === 409 && sbFetch.body.error === 'simbrief_not_connected', 'fetching a plan without a connection is refused plainly', sbFetch);
 const steal = await call('POST', `/jobs/${first.id}/accept`, { token: rival.body.token, body: { aircraftId: rival.body.fleet[0].id } });
 expect(steal.status === 409 && steal.body.error === 'job_taken', `a second pilot cannot take the same job (${steal.status} ${steal.body.error})`, steal);
 const boardAfter = (await call('GET', '/jobs?airport=LFPG', { token: rival.body.token })).body.jobs;
@@ -167,7 +173,7 @@ const exp = await call('GET', '/me/export', { token, raw: true });
 const doc = JSON.parse(exp.text);
 expect(exp.status === 200 && doc.schemaVersion === 2 && doc.companies.length === 2 && doc.companies[0].flights.length === 2 && doc.companies[0].transactions.length === ledger.length && doc.profile.username === username && doc.companies[0].flights[0].telemetry.source === 'simconnect',
   `export JSON: schemaVersion ${doc.schemaVersion}, profile + ${doc.companies.length} companies (first: ${doc.companies[0].hubs.length} hub, ${doc.companies[0].fleet.length} aircraft, ${doc.companies[0].flights.length} flights, ${doc.companies[0].transactions.length} transactions; ${exp.text.length} bytes)`);
-expect(!/pass_hash|key_hash|opc_/.test(exp.text), 'the export contains no credentials');
+expect(!/pass_hash|key_hash|opc_[\w-]{43}/.test(exp.text), 'the export contains no credentials');
 const fcsv = await call('GET', '/me/export?format=flights.csv', { token, raw: true });
 expect(fcsv.status === 200 && fcsv.text.trim().split('\r\n').length === 3 && /^text\/csv/.test(fcsv.headers.get('content-type')), 'flights.csv: header + 2 rows');
 const tcsv = await call('GET', '/me/export?format=transactions.csv', { token, raw: true });
