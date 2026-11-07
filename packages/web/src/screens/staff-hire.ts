@@ -1,3 +1,4 @@
+import { START_NOW_FEE } from '@opc/shared';
 import { act } from '../actions.ts';
 import { fetchCandidates, fetchStaff, hireCandidate, type Candidate, type CandidatesView, type StaffFamily, type StaffOverview } from '../api-staff.ts';
 import { button, icon, panel, titleBlock } from '../components.ts';
@@ -72,8 +73,9 @@ export async function staffHire(ctx: Ctx): Promise<Screen> {
   const main = panel({ title: t('st.hire.panel'), action: t('st.hire.count', { n: list.candidates.length }), id: 'st-cands', class: 'st-panel' }, table, suggestion);
 
   // ------------------------------------------------------------ the offer
-  async function hire(c: Candidate): Promise<void> {
-    const ok = await act(t('st.hired', { name: c.name, date: fm.date(startsAt(Date.now(), c)) }), () => hireCandidate(c.id), ctx.refresh);
+  async function hire(c: Candidate, startNow = false): Promise<void> {
+    const done = startNow ? t('st.hiredNow', { name: c.name }) : t('st.hired', { name: c.name, date: fm.date(startsAt(Date.now(), c)) });
+    const ok = await act(done, () => hireCandidate(c.id, startNow), ctx.refresh);
     if (ok) { selected = null; redraw(); }
   }
   const offer = (c: Candidate): HTMLElement => {
@@ -90,7 +92,9 @@ export async function staffHire(ctx: Ctx): Promise<Screen> {
         fact(t('st.d.premium'), fm.money(c.premium))),
       h('div', { class: 'st-price' }, h('span', { class: 'strong' }, t('st.d.hireSub', { name: c.name, date: fm.date(startsAt(Date.now(), c)) })), h('span', { class: 'strong' }, t('st.d.hirePay', { amount: fm.money(c.askingSalary) }))),
       h('p', { class: 'dim small' }, t('st.d.after', { amount: fm.money(me.company.balance - c.premium) })),
-      h('div', { class: 'st-actions' }, button(t('st.d.hireBtn', { name: c.name }), { variant: 'primary', key: t('key.enter'), disabled: me.company.balance < c.premium, onclick: () => void hire(c) })));
+      h('p', { class: 'dim small' }, t('st.d.afterNow', { amount: fm.money(me.company.balance - c.premium - START_NOW_FEE) })),
+      h('div', { class: 'st-actions' }, button(t('st.d.hireBtn', { name: c.name }), { variant: 'primary', key: t('key.enter'), disabled: me.company.balance < c.premium, onclick: () => void hire(c) }),
+        button(t('st.d.hireNowBtn', { amount: fm.money(START_NOW_FEE) }), { variant: 'secondary', disabled: me.company.balance < c.premium + START_NOW_FEE, onclick: () => void hire(c, true) })));
   };
   const current = list.candidates.find((c) => c.id === selected) ?? null;
   sidePanel.append(current ? offer(current) : panel({ title: t('st.hire.title'), headless: true, id: 'st-offer', class: 'st-side' }, h('p', { class: 'dim' }, t('st.hire.pick'))));

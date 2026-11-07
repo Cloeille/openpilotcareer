@@ -1,5 +1,5 @@
-import { blockHours, type AircraftType } from '@opc/shared';
-import type { CancelCause, ProjectionStatus, ScheduledFlightStatus, FlyingRow, Line, NetworkView, OpsRow, LineBody, ScheduledFlight } from './api-lines.ts';
+import { blockHours, type AircraftType, type LineBridgeSlot } from '@opc/shared';
+import type { CancelCause, LineProblemView, ProjectionStatus, ResolveOption, ScheduledFlightStatus, FlyingRow, Line, NetworkView, OpsRow, LineBody, ScheduledFlight } from './api-lines.ts';
 import type { MapAirport, MapFlight, MapLine } from './network-map.ts';
 import type { Screen } from './screen.ts';
 
@@ -267,6 +267,27 @@ export const daysBetween = (from: number, to: number): number => Math.floor(to /
 
 /** Days of the projection that fly: `assured` ones (`stopped` and `off` days do not). */
 export const assuredDays = (projection: readonly { status: ProjectionStatus }[]): number => projection.filter((x) => x.status === 'assured').length;
+
+/** What the panel lists for a bridge: the slots that leave together, counted and priced as one row. */
+export type SlotGroup = { family: 'pilot' | 'cabin'; type: string | null; until: number; defaulted: boolean; people: number; cost: number };
+export function groupSlots(slots: readonly LineBridgeSlot[]): SlotGroup[] {
+  const out = new Map<string, SlotGroup>();
+  for (const s of slots) {
+    const key = `${s.family}:${s.type ?? ''}:${s.until}:${s.defaulted}`;
+    const g = out.get(key) ?? { family: s.family, type: s.type, until: s.until, defaulted: s.defaulted, people: 0, cost: 0 };
+    g.people++; g.cost += s.cost;
+    out.set(key, g);
+  }
+  return [...out.values()];
+}
+
+/** The cheaper way to be back in service now, as the server priced them; null when only one is on offer or they cost the same. */
+export const cheaperRemedy = (o: Pick<LineProblemView['options'], 'interim' | 'startNow'>): 'interim' | 'start_now' | null =>
+  !o.interim || !o.startNow || o.interim.cost === o.startNow.cost ? null : o.interim.cost < o.startNow.cost ? 'interim' : 'start_now';
+
+/** The remedy selected when the panel opens: the cheapest way to fly now when the crew is short, else the first one that can be applied. */
+export const defaultRemedy = (o: LineProblemView['options']): ResolveOption =>
+  cheaperRemedy(o) ?? (o.interim ? 'interim' : o.startNow ? 'start_now' : o.reassign ? 'reassign' : o.recruit ? 'recruit' : 'pause');
 
 // ---------------------------------------------------------------- operations board
 
