@@ -31,10 +31,10 @@ export const outOf5 = (n: number): string => t('sv.stat.of5', { n: fmt().num(n, 
 export const priceLine = (price: number): string => t('sv.meals.perMeal', { price: money2(price) });
 
 /** The Compagnie tab's door to the on-board service (C8). Null while the server has no service routes or cannot be asked: no dead button. */
-export function serviceEntry(view: { satisfaction: number } | null, go: (hash: string) => void): HTMLElement | null {
+export function serviceEntry(view: { satisfaction: { value: number | null } } | null, go: (hash: string) => void): HTMLElement | null {
   if (!view) return null;
+  const sat = view.satisfaction.value;
   return panel({ title: t('sv.entry.title'), action: t('sv.entry.tag'), id: 'sv-entry' },
-    h('p', { class: 'muted' }, t('sv.entry.body', { sat: fmt().num(view.satisfaction, 1) })),
+    h('p', { class: 'muted' }, sat === null ? t('sv.entry.bodyNone') : t('sv.entry.body', { sat: fmt().num(sat, 1) })),
     h('div', { class: 'row' }, button(t('sv.entry.open'), { variant: 'secondary', icon: 'chef-hat', key: 'B', onclick: () => go('#service') })));
 }
-

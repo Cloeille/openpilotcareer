@@ -1,13 +1,12 @@
 import { act } from '../actions.ts';
-import { fetchQualityPreview, fetchService, setMealQuality, setPolicy, type HaulClass, type MealQuality, type QualityPreview, type ServiceItem, type ServiceView } from '../api-service.ts';
-import { fetchStaff } from '../api-staff.ts';
-import { button, icon, panel, signLocation, stat } from '../components.ts';
+import { fetchQualityPreview, fetchService, setMealQuality, setPolicy, type HaulClass, type HaulView, type MealQuality, type ServiceItem, type ServicePreview } from '../api-service.ts';
+import { button, icon, panel, signLocation, stat, unknownValue } from '../components.ts';
 import { stepOf } from '../facilities-view.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
-import { cabinRows, candidateOf, cellFacts, cellOf, comfortOf, defaultHaul, effectsOf, GROUPS, HAULS, MEAL_QUALITIES, nextMode, operated } from '../service-view.ts';
+import { candidateOf, cellFacts, cellOf, comfortOf, defaultHaul, effectsOf, GROUPS, HAULS, MEAL_QUALITIES, nextMode, operated } from '../service-view.ts';
 import { kitchenTrail, outOf5, priceLine, qualityName, serviceOff, signed } from '../service-ui.ts';
 import { h, notify } from '../ui.ts';
 
@@ -18,37 +17,40 @@ let looked: MealQuality | null = null;
 
 const redraw = async (): Promise<void> => { window.dispatchEvent(new Event('opc:redraw')); };
 
-/** `#service`: what is free or paid on board by haul class, the quality of the meals and the cabin crew they need. */
+/** `#service`: what is free or paid on board by haul class, the quality of the meals and the cabin crew they need. A change applies from the next UTC day, as the server says. */
 export async function service(ctx: Ctx): Promise<Screen> {
   const { snap, go } = ctx;
   const { me } = snap;
   const back = '#hubs';
-  const [view, people] = await Promise.all([fetchService(), fetchStaff().catch(() => null)]);
+  const view = await fetchService();
   if (!view) return { title: t('sv.title'), scene: 'bridge', tab: 'hubs', back, hints: [{ key: t('key.esc'), label: t('st.hint.company') }], view: serviceOff() };
 
   const fm = fmt();
   kitchenTrail.fromService = false;
   if (col === null || !HAULS.includes(col)) col = defaultHaul(view.hauls);
-  if (looked === view.mealQuality) looked = null;
-  const rowItems = GROUPS.flatMap((g) => g.items.filter((i) => view.hauls.some((v) => v.cells[i] !== undefined)));
+  const current = view.quality.current;
+  if (looked === current) looked = null;
+  const rowItems = GROUPS.flatMap((g) => g.items.filter((i) => view.hauls.some((v) => v.cells.some((c) => c.item === i))));
   if (cursor === null || !rowItems.includes(cursor)) cursor = rowItems[0] ?? null;
-  const hub = me.hubs[0] ?? null;
+  const hub = view.kitchens[0]?.hub ?? me.hubs[0] ?? null;
   const kitchenHash = hub ? `#kitchen/${hub}` : null;
   const toKitchen = (): void => { if (kitchenHash) { kitchenTrail.fromService = true; go(kitchenHash); } };
 
   // ------------------------------------------------------------ header
-  const statusText = view.lines === 0 ? t('sv.status.none') : `${tp('sv.status.lines', view.lines)} · ${tp('sv.status.flights', view.flightsPerDay)}`;
-  const trend = view.satisfactionTrend;
+  const { lines, flightsPerDay } = view.network;
+  const statusText = lines === 0 ? t('sv.status.none') : `${tp('sv.status.lines', lines)} · ${tp('sv.status.flights', flightsPerDay)}`;
+  const sat = view.satisfaction;
+  const satCaption = sat.value === null ? h('span', { class: 'dim' }, t('sv.stat.noCabin')) : sat.estimated ? h('span', { class: 'dim' }, t('sv.stat.estimated')) : sat.trend === null ? null : h('span', { class: sat.trend < 0 ? 'sv-neg' : sat.trend === 0 ? 'dim' : '' }, t('sv.stat.trend', { n: signed(sat.trend, 1) }));
   const header = h('div', { class: 'ln-header sv-header' },
     h('div', { class: 'title-block' },
       h('div', { class: 'row tight' }, hub ? signLocation(hub) : null, h('span', { class: 'sv-crumb' }, t('sv.crumb'))),
-      h('div', { class: 'status-line sv-status' }, h('span', { class: `dot${view.lines === 0 ? ' warn' : ''}` }), h('span', null, statusText)),
+      h('div', { class: 'status-line sv-status' }, h('span', { class: `dot${lines === 0 ? ' warn' : ''}` }), h('span', null, statusText)),
       h('h1', { class: 'title sv-title' }, t('sv.title')),
       h('p', { class: 'sv-sub' }, t('sv.sub'))),
     h('div', { class: 'sv-stats' },
-      stat(t('sv.stat.sat'), outOf5(view.satisfaction), trend === null ? null : h('span', { class: trend < 0 ? 'sv-neg' : trend === 0 ? 'dim' : '' }, t('sv.stat.trend', { n: signed(trend, 1) }))),
-      stat(t('sv.stat.sales'), fm.money(view.salesPerDay), h('span', { class: 'dim' }, t('sv.stat.perDay'))),
-      stat(t('sv.stat.cost'), fm.money(view.costPerDay), h('span', { class: 'dim' }, t('sv.stat.perDay')))));
+      stat(t('sv.stat.sat'), sat.value === null ? unknownValue() : outOf5(sat.value), satCaption),
+      stat(t('sv.stat.sales'), fm.money(view.perDay.sales), h('span', { class: 'dim' }, t('sv.stat.perDay'))),
+      stat(t('sv.stat.cost'), fm.money(view.perDay.cost), h('span', { class: 'dim' }, t('sv.stat.cost.sub')))));
 
   // ------------------------------------------------------------ the matrix
   const haulName = (c: HaulClass): string => t(`sv.haul.${c}` as Key);
@@ -66,30 +68,33 @@ export async function service(ctx: Ctx): Promise<Screen> {
     document.querySelectorAll<HTMLElement>('.sv-row').forEach((r) => { const on = r.dataset.item === item; r.classList.toggle('cur', on); if (on) r.setAttribute('data-primary', ''); else r.removeAttribute('data-primary'); });
   };
 
+  const modeName = (m: string): string => t(`sv.mode.${m}` as Key);
   const cellText = (item: ServiceItem, haul: HaulClass): { state: string; detail: string | null; mode: string } => {
     const cell = cellOf(view.hauls, haul, item);
-    if (!cell) return { state: t('sv.mode.none'), detail: null, mode: 'none' };
-    const f = cellFacts(item, cell, view.mealQuality);
+    if (!cell) return { state: modeName('none'), detail: null, mode: 'none' };
+    const f = cellFacts(item, haul, cell, current);
     const parts = [
       f.price === null ? null : f.perFlight ? t('sv.cell.perFlight', { price: fm.money(f.price) }) : fm.money(f.price),
       f.quality ? qualityName(f.quality).toLowerCase() : null,
-      f.mode === 'unavailable' ? t('sv.cell.noEquip') : null,
+      f.catalogue ? t(`sv.cell.catalogue.${f.catalogue}` as Key) : null,
+      f.state === 'unavailable' ? t('sv.cell.noEquip') : null,
+      f.next ? t('sv.cell.next', { mode: modeName(f.next).toLowerCase() }) : null,
     ].filter((x): x is string => x !== null);
-    return { state: t(`sv.mode.${f.mode}` as Key), detail: parts.length === 0 ? null : `· ${parts.join(' · ')}`, mode: f.mode };
+    return { state: modeName(f.state), detail: parts.length === 0 ? null : `· ${parts.join(' · ')}`, mode: f.state };
   };
 
   const cycle = (item: ServiceItem, haul: HaulClass): void => {
     const cell = cellOf(view.hauls, haul, item);
-    const next = cell ? nextMode(cell.mode) : null;
+    const next = cell ? nextMode(cell) : null;
     const names = { item: t(`sv.item.${item}` as Key), haul: t(`sv.haul.on.${haul}` as Key) };
-    if (next === null) { notify(t('sv.unavailable', names), 'error'); return; }
-    void act(t('sv.saved', { ...names, mode: t(`sv.mode.${next}` as Key).toLowerCase() }), () => setPolicy({ haul, item, mode: next }), redraw);
+    if (next === null) { notify(t(cell?.unavailable ? 'sv.unavailable' : 'sv.fixed', names), 'error'); return; }
+    void act(t('sv.saved', { ...names, mode: modeName(next).toLowerCase() }), () => setPolicy({ haul, item, mode: next }), redraw);
   };
 
-  const head = (v: ServiceView['hauls'][number]): HTMLElement => {
+  const head = (v: HaulView): HTMLElement => {
     const c = comfortOf(v.satisfaction);
     const word = t(`sv.comfort.${c.level}` as Key);
-    const sub = `${t(`sv.haul.sub.${v.haul}` as Key)} · ${operated(v) ? v.aircraft.join(', ') : t('sv.haul.notOperated')}`.replace(/ · $/, '');
+    const sub = `${t(`sv.haul.sub.${v.haul}` as Key)} · ${operated(v) ? v.operated.map((x) => x.name).join(', ') : t('sv.haul.notOperated')}`;
     return h('th', { scope: 'col', class: `sv-th${operated(v) ? '' : ' idle'}`, 'data-haul': v.haul },
       h('button', { type: 'button', class: 'sv-head', 'data-haul': v.haul, 'aria-pressed': String(v.haul === col), onclick: () => pickColumn(v.haul) },
         h('span', { class: 'sv-head-name' }, haulName(v.haul)),
@@ -114,7 +119,7 @@ export async function service(ctx: Ctx): Promise<Screen> {
 
   const rows = GROUPS.flatMap((g) => [
     h('tr', { class: 'sv-group' }, h('th', { scope: 'rowgroup', colspan: 4 }, t(`sv.group.${g.id}` as Key))),
-    ...g.items.filter((i) => view.hauls.some((v) => v.cells[i] !== undefined)).map(itemRow),
+    ...g.items.filter((i) => rowItems.includes(i)).map(itemRow),
   ]);
   const matrix = h('table', { class: 'sv-table' },
     h('caption', { class: 'sr' }, t('sv.offer.title')),
@@ -127,8 +132,8 @@ export async function service(ctx: Ctx): Promise<Screen> {
   let tradeSeq = 0;
   const paintTrade = async (q: MealQuality): Promise<void> => {
     const seq = ++tradeSeq;
-    if (q === view.mealQuality) { tradeHost.replaceChildren(h('p', { class: 'dim small' }, t('sv.trade.same'))); return; }
-    const preview: QualityPreview | null = await fetchQualityPreview(q).catch(() => null);
+    if (q === current) { tradeHost.replaceChildren(h('p', { class: 'dim small' }, t(view.quality.next ? 'sv.trade.pending' : 'sv.trade.same', view.quality.next ? { quality: qualityName(view.quality.next).toLowerCase() } : undefined))); return; }
+    const preview: ServicePreview | null = await fetchQualityPreview(q).catch(() => null);
     if (seq !== tradeSeq) return;
     const effect = (e: ReturnType<typeof effectsOf>[number]): HTMLElement => h('div', { class: 'line' }, h('span', { class: 'line-label' }, t(`sv.trade.${e.label}` as Key)),
       h('span', { class: `sv-effect ${e.tone}` }, e.value.kind === 'move' ? t('sv.trade.move', { from: fm.num(e.value.from), to: fm.num(e.value.to) }) : e.value.unit === 'sat' ? signed(e.value.n, 1) : tp('sv.trade.points', Math.abs(e.value.n), { n: signed(e.value.n) })));
@@ -138,32 +143,32 @@ export async function service(ctx: Ctx): Promise<Screen> {
         button(t('sv.trade.apply'), { variant: 'secondary', icon: 'chef-hat', onclick: () => void act(t('sv.meals.saved', { quality: qualityName(q).toLowerCase() }), () => setMealQuality(q), async () => { looked = null; await redraw(); }) })),
       ...(preview ? effectsOf(preview).map(effect) : []));
   };
-  const shownQuality = looked ?? candidateOf(view.tiers, view.mealQuality) ?? view.mealQuality;
+  const shownQuality = looked ?? candidateOf(view.qualities, current) ?? current;
   const tierCard = (q: MealQuality): HTMLElement | null => {
-    const x = view.tiers.find((y) => y.quality === q);
+    const x = view.qualities.find((y) => y.quality === q);
     if (!x) return null;
-    const now = q === view.mealQuality;
+    const now = q === current;
+    const tomorrow = q === view.quality.next;
     return h('button', { type: 'button', class: `sv-tier${now ? ' sel' : ''}${q === shownQuality ? ' look' : ''}`, 'aria-pressed': String(q === shownQuality), 'data-q': q,
       onclick: () => { looked = q; document.querySelectorAll<HTMLElement>('.sv-tier').forEach((el) => { const on = el.dataset.q === q; el.classList.toggle('look', on); el.setAttribute('aria-pressed', String(on)); }); void paintTrade(q); } },
-      h('span', { class: 'sv-tier-name' }, qualityName(q), now ? h('span', { class: 'sv-now', title: t('sv.meals.current') }, icon('check', 13), h('span', { class: 'sr' }, t('sv.meals.current'))) : null),
+      h('span', { class: 'sv-tier-name' }, qualityName(q),
+        now ? h('span', { class: 'sv-now', title: t('sv.meals.current') }, icon('check', 13), h('span', { class: 'sr' }, t('sv.meals.current'))) : null,
+        tomorrow ? h('span', { class: 'sv-soon' }, t('sv.meals.tomorrow')) : null),
       h('span', { class: 'sv-tier-cost' }, priceLine(x.price)),
-      h('span', { class: 'sv-tier-fact' }, icon('smile', 12), outOf5(x.satisfaction)),
+      h('span', { class: 'sv-tier-fact' }, icon('smile', 12), outOf5(x.rating)),
       h('span', { class: 'sv-tier-fact' }, icon('percent', 12), t('sv.meals.margin', { pct: fm.percent(x.margin) })));
   };
   const mealsPanel = panel({ title: t('sv.meals.title'), id: 'sv-meals', class: 'sv-side',
-    action: kitchenHash ? h('button', { type: 'button', class: 'link-btn sv-link', onclick: toKitchen }, t('sv.meals.kitchen'), h('kbd', { class: 'keycap' }, 'K')) : null },
+    action: kitchenHash ? h('button', { type: 'button', class: 'link-btn sv-link', onclick: toKitchen }, t('sv.meals.kitchen')) : null },
     h('div', { class: 'sv-tiers' }, MEAL_QUALITIES.map(tierCard)),
     tradeHost);
   void paintTrade(shownQuality);
 
   // ------------------------------------------------------------ cabin crew
-  const cabin = people?.families.find((f) => f.family === 'cabin') ?? null;
-  const types = cabinRows(me.fleet);
-  const term = (label: string, value: string, warn = false): HTMLElement => h('div', { class: 'line' }, h('span', { class: 'line-label' }, label), h('span', { class: `line-value strong${warn ? ' sv-neg' : ''}` }, value));
+  const term = (label: string, value: string): HTMLElement => h('div', { class: 'line' }, h('span', { class: 'line-label' }, label), h('span', { class: 'line-value strong' }, value));
   const cabinPanel = panel({ title: t('sv.cabin.title'), id: 'sv-cabin', class: 'sv-side' },
-    types.length === 0 ? h('p', { class: 'dim small' }, t('sv.cabin.none')) : types.map((x) => term(t('sv.cabin.perFlight', { type: x.name }), fm.num(x.crew))),
-    cabin ? term(t('sv.cabin.employed'), t('sv.cabin.of', { n: fm.num(cabin.headcount), need: fm.num(cabin.need) }), cabin.headcount < cabin.need) : null,
-    h('p', { class: 'dim small' }, t('sv.cabin.rule')));
+    view.crew.length === 0 ? h('p', { class: 'dim small' }, t('sv.cabin.none')) : view.crew.map((x) => term(t('sv.cabin.perFlight', { type: x.name }), t('sv.cabin.minimum', { n: fm.num(x.cabin), min: fm.num(x.legalMinimum) }))),
+    term(t('sv.cabin.bonus'), t('sv.cabin.bonusValue', { pct: fm.percent(view.crewBonusPct / 100) })));
 
   const viewEl = h('div', { class: 'sv-screen' }, header, h('div', { class: 'sv-body' }, offer, h('div', { class: 'sv-col' }, mealsPanel, cabinPanel)));
   return {

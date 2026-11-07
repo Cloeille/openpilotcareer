@@ -7,6 +7,7 @@
 .sv-status { padding-top: 6px; }
 .sv-header .sv-title { font-size: 40px; line-height: 1.05; }
 .sv-sub { margin: 0; font-size: 15px; color: var(--text-secondary); }
+.sv-header { line-height: 1.2; }
 .sv-header .title-block { gap: 8px; }
 .sv-stats { display: flex; gap: 44px; padding-bottom: 4px; }
 .sv-stats .stat-value { font-size: 32px; white-space: nowrap; }
@@ -16,6 +17,9 @@
 .sv-warn { color: var(--warning); }
 .sv-chips { display: flex; gap: 4px; margin-left: 6px; }
 .sv-link { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); }
+
+/* The mockup's backdrop is about half as bright as the shared scrim leaves it (measured against the render: 0.5 of the raw photo against 0.85), which is what makes the header's grey text readable over the cockpit photo. Scoped to these screens, as the onboarding bridge step does. */
+.stage:has(.sv-screen) .scrim { background: linear-gradient(#00000066, #00000066), radial-gradient(circle at 60% 45%, #00000000 0%, #000000A6 100%); }
 
 /* ---- body: the main panel and a side column */
 .sv-body { display: flex; gap: 20px; flex: 1; min-height: 0; }
@@ -64,7 +68,7 @@
 .sv-tier { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px; line-height: 1.25; text-align: left; background: transparent; border: 1px solid transparent; border-radius: var(--radius-md); cursor: pointer; }
 .sv-tier:hover { background: var(--surface-hover); }
 .sv-tier.sel { background: var(--surface-selected); border-color: var(--text-primary); }
-.sv-tier.look:not(.sel) { border-color: var(--border-strong); }
+.sv-tier.look:not(.sel) { background: #FFFFFF0A; }
 .sv-tier-name { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; }
 .sv-tier.sel .sv-tier-name { font-weight: 600; }
 .sv-now { display: inline-flex; color: var(--text-secondary); }
