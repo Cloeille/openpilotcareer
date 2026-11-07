@@ -1,4 +1,4 @@
-import type { AircraftStatus, Financing, LoanOption, StaffFamily } from '@opc/shared';
+import type { Financing, LoanOption, StaffFamily } from '@opc/shared';
 import { api } from './api.ts';
 import { ApiError } from './errors.ts';
 import { previewQuery } from './facilities-view.ts';
@@ -71,7 +71,7 @@ export type HubOverview = {
   /** Buildings plus the stand fees of the aircraft based there: what the hub costs a month. */
   monthlyCost: number;
   team: { total: number; byFamily: Partial<Record<StaffFamily, number>> };
-  aircraft: { id: number; reg: string; icao: string; typeName: string; status: AircraftStatus; location: string; maintenanceUntil: number | null }[];
+  aircraft: { id: number; reg: string; icao: string; typeName: string; status: string; location: string; maintenanceUntil: number | null }[];
   renewals: { facilityId: number; name: string; before: number }[];
   parking: HubParking;
 };
