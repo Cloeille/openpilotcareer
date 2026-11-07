@@ -205,8 +205,26 @@ ALTER TABLE scheduled_flights ADD COLUMN crew_family TEXT;
 INSERT INTO staff_company (company_id, starter_pending) SELECT DISTINCT l.company_id, 1 FROM lines l JOIN companies c ON c.id = l.company_id WHERE c.user_id IS NOT NULL;
 `;
 
+// OpenHangar v3, lot FACILITIES: buildings at hubs. `facilities` is only the id of a slot at an airport (the catalogue itself, names, areas, rents, who holds what at the start,
+// is code in shared/src/facilities.ts, so retuning it never needs a migration); rows are created the first time a hub's plan is read. What a company holds is a contract:
+// a lease (36 months, a deposit) or a purchase (cash or credit). The partial unique index is the guard that nobody else can hold a building at the same time.
+// `level` is the level in force, `works_to` / `works_until` an upgrade in progress (folded into `level` by the request hook when it is over), `level_since` when the level began.
+// `value` is what the building would resell for (net worth), `principal` the credit left. Nothing is billed retroactively: a contract starts paying on the 1st after it was signed.
+const SCHEMA_V9 = `
+CREATE TABLE facilities (id INTEGER PRIMARY KEY, hub_icao TEXT NOT NULL, slot TEXT NOT NULL, UNIQUE (hub_icao, slot));
+CREATE TABLE facility_contracts (
+  id INTEGER PRIMARY KEY, facility_id INTEGER NOT NULL REFERENCES facilities(id) ON DELETE CASCADE, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  kind TEXT NOT NULL CHECK (kind IN ('lease','purchase')), status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','ended')),
+  started_at INTEGER NOT NULL, ended_at INTEGER, months INTEGER, months_paid INTEGER NOT NULL DEFAULT 0,
+  monthly INTEGER NOT NULL, upkeep INTEGER NOT NULL DEFAULT 0, deposit INTEGER NOT NULL DEFAULT 0, price INTEGER NOT NULL DEFAULT 0,
+  principal INTEGER NOT NULL DEFAULT 0, value INTEGER NOT NULL DEFAULT 0, notice_months INTEGER NOT NULL DEFAULT 0,
+  level INTEGER NOT NULL DEFAULT 1, level_since INTEGER NOT NULL, works_to INTEGER, works_until INTEGER);
+CREATE UNIQUE INDEX facility_contract_active ON facility_contracts(facility_id) WHERE status = 'active';
+CREATE INDEX facility_contract_company ON facility_contracts(company_id, status);
+`;
+
 /** Append-only; `PRAGMA user_version` records how many ran. */
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8];
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);

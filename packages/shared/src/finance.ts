@@ -20,6 +20,14 @@ export function loanPayment(principal: number, months: number, rate: number = LO
   return Math.round((principal * r) / (1 - (1 + r) ** -months));
 }
 
+/** One month of an amortising loan: the instalment paid, the principal left, and whether it was the last one (which also clears the rounding residue). */
+export function loanStep(principal: number, monthly: number, monthsPaid: number, months: number): { pay: number; interest: number; principal: number; last: boolean } {
+  const interest = Math.round((principal * LOAN_RATE) / 12);
+  const last = monthsPaid + 1 === months;
+  const pay = last ? principal + interest : monthly;
+  return { pay, interest, principal: last ? 0 : Math.max(0, principal - (pay - interest)), last };
+}
+
 export type LoanOption = {
   downPct: number; months: number; monthly: number;
   /** Down payment + all instalments + the convoy fee: what the aircraft costs in the end when financed this way. */
