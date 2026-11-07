@@ -198,6 +198,14 @@ export const seasonOf = (ms: number): string => new Date(ms).toISOString().slice
 // ---------------------------------------------------------------- telemetry verification
 
 export const TELEMETRY_SOURCES = ['simconnect', 'manual'] as const;
+/** What the bridge saw break the flight without it being a cheat: flight reloads, sim restarts (game crashes), and the time the sim was away.
+ *  Reported so the pilot can see them; `downtimeMs` is the only part that changes a verdict (see checkTelemetry). */
+export const interruptionsSchema = z.object({
+  reloads: z.number().int().min(0).max(1_000),
+  simRestarts: z.number().int().min(0).max(1_000),
+  downtimeMs: z.number().int().min(0).max(7 * 24 * 3_600_000),
+});
+export type Interruptions = z.infer<typeof interruptionsSchema>;
 export const telemetrySchema = z.object({
   takeoffAt: z.iso.datetime({ offset: true }),
   landedAt: z.iso.datetime({ offset: true }),
@@ -211,6 +219,8 @@ export const telemetrySchema = z.object({
   source: z.enum(TELEMETRY_SOURCES),
   /** Anti-cheat flags raised by the client (slew, time acceleration, teleport...). Any flag fails the check, unless the server has anti-cheat off. */
   flags: z.array(z.string().regex(/^[a-z0-9_]{1,40}$/)).max(16).optional(),
+  /** Absent from bridges that predate it, and from flights that were never interrupted. */
+  interruptions: interruptionsSchema.optional(),
 });
 export type Telemetry = z.infer<typeof telemetrySchema>;
 
@@ -242,8 +252,10 @@ export function checkTelemetry(t: Telemetry, f: {
   if (!f.antiCheat) return { ok: true, blockHours: hours };
   const minHours = minFlightHours(f.aircraft, f.distanceNm);
   const maxHours = 1 + f.distanceNm / (f.aircraft.cruiseKts * 0.4);
+  // time the sim was closed or loading is not slow flying; it only counts for this check, never for the too-short one or for pay
+  const flownHours = hours - Math.min(t.interruptions?.downtimeMs ?? 0, landed - takeoff) / 3_600_000;
   if (hours < minHours) return no(`flight too short: ${hours.toFixed(2)} h for ${Math.round(f.distanceNm)} nm at ${f.aircraft.cruiseKts} kts`);
-  if (hours > maxHours) return no(`flight too long: ${hours.toFixed(2)} h for ${Math.round(f.distanceNm)} nm`);
+  if (flownHours > maxHours) return no(`flight too long: ${flownHours.toFixed(2)} h for ${Math.round(f.distanceNm)} nm`);
   if (t.distanceNm < f.distanceNm * 0.85 || t.distanceNm > f.distanceNm * 2 + 20) return no(`flown distance ${Math.round(t.distanceNm)} nm is implausible for a ${Math.round(f.distanceNm)} nm job`);
   if (t.payloadKg < f.payloadKg * 0.9) return no(`payload ${Math.round(t.payloadKg)} kg is below the job payload ${f.payloadKg} kg`);
   const expected = fuelBurnKg(f.aircraft, f.distanceNm);
