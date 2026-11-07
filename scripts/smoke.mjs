@@ -260,6 +260,17 @@ expect(kitchen.status === 200 && kitchen.body.hall?.facilityId === kitchenHall?.
 expect((await call('PUT', '/kitchen/LFPG', { token: lineTok, body: { provider: 'own' } })).body.error === 'no_kitchen_hall', 'an own kitchen needs the hall');
 const lineService = (await call('GET', '/me/transactions', { token: lp.body.token })).body.filter((x) => x.kind.startsWith('service_'));
 expect(lineService.length === 0 && service.body.satisfaction.value === null, 'the smoke line flies a C172 (no cabin crew): nothing is served, nothing is booked, no satisfaction term', lineService);
+// v4 agency: a mission is free until the signature, hides its shortlist until the search is over, and refuses the signature before; an API key cannot manage it
+const agencyBalance = (await call('GET', '/me', { token: lineTok })).body.company.balance;
+const agencyOptions = await call('GET', '/agency/options?base=LFPG&qual=C172&count=1', { token: lineTok });
+expect(agencyOptions.status === 200 && agencyOptions.body.options.map((o) => o.id).join() === 'agency,train,classic' && agencyOptions.body.options.every((o) => o.total === o.fees + o.stopped), `agency: three options, the agency back on ${new Date(agencyOptions.body.options[0].resumeAt).toISOString().slice(0, 10)} for ${agencyOptions.body.options[0].total}`, agencyOptions);
+const mission = await call('POST', '/agency/missions', { token: lineTok, body: { base: 'LFPG', qual: 'C172', count: 1 } });
+expect(mission.status === 201 && mission.body.ready === false && mission.body.shortlist === null, 'a mission is opened, the shortlist is hidden while the agency searches', mission);
+expect((await call('GET', '/me', { token: lineTok })).body.company.balance === agencyBalance, 'opening a mission paid nothing');
+expect((await call('POST', `/agency/missions/${mission.body.id}/sign`, { token: lineTok, body: { candidateIds: ['a0.LFPG.C172.0'] } })).body.error === 'mission_not_ready', 'signing before the search is over is refused');
+expect((await call('POST', '/agency/missions', { token: lineTok, body: { base: 'LFPG', qual: 'C172', count: 1 } })).body.error === 'mission_open', 'one open mission per post');
+expect((await call('GET', '/agency/options', { token: (await call('POST', '/me/api-keys', { token: lineTok, body: { label: 'agency' } })).body.key })).status === 401, 'an API key cannot read the agency');
+expect((await call('DELETE', `/agency/missions/${mission.body.id}`, { token: lineTok })).status === 204, 'the mission is cancelled, nothing owed');
 const off = await call('PUT', '/network/enabled', { token: lp.body.token, body: { enabled: false } });
 expect(off.body.enabled === false && (await call('GET', '/network', { token: lp.body.token })).body.enabled === false, 'the network switch turns the lines off');
 await call('DELETE', '/me', { token: lp.body.token, body: { password } });

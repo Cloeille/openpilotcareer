@@ -10,23 +10,25 @@ import type { Ctx, Screen } from '../screen.ts';
 import { hireFilter, roleShort, viewSwitch } from '../staff-ui.ts';
 import { h } from '../ui.ts';
 
-/** The post the player is looking at and the candidates she holds survive a redraw (a toggle, a language change), not a new visit. */
+/** The post the player chose and the candidates she holds survive a redraw (a toggle, a language change). Both are dropped as soon as they stop matching the server (post no longer short, mission over). */
 let requested: AgencyRequest | null = null;
 let held: { mission: number; ids: string[] } | null = null;
 
 const same = (a: Pick<AgencyRequest, 'base' | 'qual'>, b: Pick<AgencyRequest, 'base' | 'qual'>): boolean => a.base === b.base && a.qual === b.qual;
 
-/** The server answers 422 for a post the company no longer has (a base closed, a type sold): the screen falls back to the post that costs the most. */
+/** The view for the post the player chose. The server answers 422 for a post the company no longer has (a base closed, a type sold) and prices any post asked for,
+ *  so a choice that is no longer short and has no mission is dropped here, as are held candidates of another mission: the screen then shows the post that costs the most. */
 async function load(): Promise<AgencyView | null> {
   try {
     const view = await fetchAgency(requested, held?.ids);
-    if (view?.mission && held && held.mission !== view.mission.id) { held = null; return await fetchAgency(requested); }
-    return view;
+    const stale = requested !== null && view !== null && view.mission === null && !view.gaps.some((g) => same(g, requested!));
+    const foreign = held !== null && view?.mission != null && held.mission !== view.mission.id;
+    if (!stale && !foreign) return view;
   } catch (e) {
     if (!(e instanceof ApiError && e.status === 422 && requested)) throw e;
-    requested = null; held = null;
-    return fetchAgency();
   }
+  requested = null; held = null;
+  return fetchAgency();
 }
 
 const off = (): HTMLElement => h('div', { class: 'ln-off st-off panel' }, h('div', { class: 'panel-body' }, icon('users', 20), h('h1', { class: 'ln-off-title' }, t('ag.off.title')), h('p', { class: 'muted' }, t('ag.off.body'))));
@@ -66,8 +68,13 @@ export async function staffAgency(ctx: Ctx): Promise<Screen> {
   }
 
   // ------------------------------------------------------------ the three options
+  const launch = async (): Promise<void> => {
+    const ok = await act(t('ag.pos.launched', { n: agency?.phases[0] ?? 0 }), () => openMission(request), ctx.refresh);
+    if (ok) redraw();
+  };
+  /** The agency is this screen: choosing it entrusts the mission (free, and cancellable), or moves to the signature when the mission is under way (signing pays, so it takes a second press). The other two are the staff screens that already do them. */
   const pickOption = (o: AgencyOption): void => {
-    if (o.id === 'agency') { document.querySelector<HTMLElement>('[data-primary]:not(:disabled)')?.focus(); return; }
+    if (o.id === 'agency') { if (mission) document.querySelector<HTMLElement>('[data-primary]:not(:disabled)')?.focus(); else if (o.available) void launch(); return; }
     if (o.id === 'classic') Object.assign(hireFilter, { family: 'pilot', base: request.base, qual: request.qual });
     go(OPTION_HASH[o.id]);
   };
@@ -88,10 +95,6 @@ export async function staffAgency(ctx: Ctx): Promise<Screen> {
     sv.days > 0 ? h('div', { class: 'ag-saved' }, h('span', { class: 'ag-saved-value' }, tp('ag.saved.days', sv.days)), h('span', { class: 'strong small' }, t('ag.saved.days.sub')), h('span', { class: 'dim small' }, t(SAVED_AGAINST[sv.against]))) : null,
     h('div', { class: 'ag-saved' }, h('span', { class: 'ag-saved-value' }, fm.money(sv.amount)), h('span', { class: 'strong small' }, t('ag.saved.amount.sub')), h('span', { class: 'dim small' }, t(SAVED_AGAINST[sv.against])))] : [];
 
-  const launch = async (): Promise<void> => {
-    const ok = await act(t('ag.pos.launched', { n: agency?.phases[0] ?? 0 }), () => openMission(request), ctx.refresh);
-    if (ok) redraw();
-  };
   const options = panel({ title: tp('ag.opts.title', request.count, { qual: request.qual, count: request.count }), action: t('ag.opts.asOf', { date: fm.date(Date.now()) }), id: 'ag-options', class: 'st-panel ag-options' },
     h('ul', { class: 'plain ag-opts', 'aria-label': t('ag.opts.cols.option') }, view.options.map(optionRow)),
     h('div', { class: 'ag-foot' }, h('div', { class: 'ag-saveds' }, savedBlocks),
@@ -128,7 +131,7 @@ export async function staffAgency(ctx: Ctx): Promise<Screen> {
   };
   const candidate = (c: AgencyCandidate, i: number, m: MissionView): HTMLElement => {
     const on = m.quote!.picked.includes(c.id);
-    return h('button', { type: 'button', id: `ag-cand-${i}`, class: 'ag-cand', 'aria-pressed': String(on), 'aria-label': t('ag.cand.hold', { name: c.name }),
+    return h('button', { type: 'button', id: `ag-cand-${i}`, class: 'ag-cand', 'data-row': '', 'aria-pressed': String(on), 'aria-label': t('ag.cand.hold', { name: c.name }),
       onclick: () => { held = { mission: m.id, ids: toggle(m.quote!.picked, c.id, m.count) }; redraw(); } },
       icon(on ? 'circle-check' : 'circle-dashed', 16),
       h('span', { class: 'ag-cand-who' },

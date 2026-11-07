@@ -11,7 +11,9 @@ import type { ProjectionStatus, ResolveOption, ScheduledFlightStatus } from './a
 import type { AddonCategory } from './finance-view.ts';
 import type { EffectLines } from './parts-view.ts';
 import type { Comfort, Effect } from './service-view.ts';
+import { OPTION_HASH, OPTION_NOTE, OPTION_PHASES, OPTION_SUB, OPTION_TITLE, OPTION_UNAVAILABLE, SAVED_AGAINST } from './agency-view.ts';
 import type { KitchenDeparture } from './api-service.ts';
+import type { AgencyOptionId } from './api-agency.ts';
 import { METRICS } from './kitchen-view.ts';
 import { GROUPS } from './catalogue.ts';
 import { GROUPS as SERVICE_GROUPS } from './service-view.ts';
@@ -53,12 +55,13 @@ const COMFORTS = every<Comfort['level']>({ basic: 0, comfort: 0, premium: 0 });
 const TRADES = every<Effect['label']>({ sat: 0, margin: 0, meals: 0, cooks: 0 });
 const DEPARTURES = every<KitchenDeparture['status']>({ scheduled: 0, done: 0 });
 const CATALOGUES = every<'reduced' | 'full'>({ reduced: 0, full: 0 });
+const AGENCY_OPTIONS = every<AgencyOptionId>({ agency: 0, train: 0, classic: 0 });
 
 /** [message prefix, the values it is followed by, an optional suffix]. */
 const LOOKUPS: readonly (readonly [string, readonly (string | number)[], string?])[] = [
   ['st.fam.', STAFF_FAMILIES], ['st.fam.sub.', STAFF_FAMILIES], ['st.fam.short.', STAFF_FAMILIES],
   ['st.role.', ROLES], ['st.role.', ROLES, 'Full'],
-  ['st.view.', ['staff', 'hire']], ['st.level.', LEVELS], ['st.m.state.', STAFF_STATES], ['st.contract.', ['cdi', 'cdd']],
+  ['st.view.', ['staff', 'hire', 'agency']], ['st.level.', LEVELS], ['st.m.state.', STAFF_STATES], ['st.contract.', ['cdi', 'cdd']],
   ['st.al.rule.', DUTY_RULES], ['st.lim.', METERS], ['st.l.c.', COVERAGES], ['st.l.d.', COVERAGES], ['st.du.l.', ['done', 'flying', 'planned', 'over']],
   ['st.p.', REST_POLICY_NAMES], ['st.p.btn.', REST_POLICY_NAMES],
   ['ln.wd.', WEEKDAYS], ['ln.fs.', FLIGHT_STATUSES], ['ln.part.', PARTS], ['ln.why.', ['aircraft', 'crew']], ['ln.applied.', OPTIONS], ['ln.proj.day.', PROJECTIONS],
@@ -89,6 +92,13 @@ test('every value of every closed set a message is looked up by has a message in
     }
   }
   assert.deepEqual(missing, []);
+});
+
+test('every agency option has its title, sub, note, phases, unavailable reason, and a place to go; the keys are typed, so a new option breaks the Record before it reaches here', () => {
+  const keys = [OPTION_TITLE, OPTION_SUB, OPTION_NOTE, OPTION_PHASES, OPTION_UNAVAILABLE].flatMap((m) => AGENCY_OPTIONS.map((o) => m[o]));
+  keys.push(...(Object.values(SAVED_AGAINST)));
+  for (const key of keys) for (const lang of ['en', 'fr'] as const) assert.notEqual((lang === 'en' ? en : fr)[key].trim(), '', `${key} (${lang})`);
+  assert.deepEqual(Object.keys(OPTION_HASH).sort(), AGENCY_OPTIONS.filter((o) => o !== 'agency').sort());
 });
 
 test('a cancellation cause maps to a message in both languages', () => {
