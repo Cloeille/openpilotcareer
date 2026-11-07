@@ -1,0 +1,141 @@
+# Groupe · transferts entre sociétés
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Groupe · transferts entre sociétés» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-6.png", "mode": "cover"}
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"...
+  - frame «Content» width=1600 height=778 layout="vertical" gap=20 padding=[16, 32]
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=6
+        - text «Crumb» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Compagnie  ›  Groupe Azur
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=36 fontWeight="600"  TEXT: Transferts entre sociétés
+        - text «Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Azur Régional détient 100 % d'Azur Cargo. Ces mouvements restent internes : la trésorerie du groupe ne change pas.
+      - ref «Transfer Type» ref="a7ZUZ" descendants={"wmERV": {"name": "View · Argent", "fill": "#00000000"}, "NWATU": {"content": "Argent", "fill": "$text-secondary"}, "z8pczc": {"name": "...  (instance of «View Switcher»)
+    - frame «Transfer» width="fill_container" height=322 fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 24} clip=true
+      - frame «Side · Azur Régional» width="fill_container" height="fill_container" layout="vertical" gap=20 padding=[22, 28, 24, 28]
+        - frame «Company» width="fill_container" gap=12 alignItems="center"
+          - ref «Base Sign» ref="pirBQ" descendants={"OYKAu": {"content": "LFMN"}}  (instance of «Sign/Location»)
+          - frame «Identity» width="fill_container" layout="vertical" gap=1
+            - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Azur Régional
+            - text «Role» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Société mère · AZR
+          - text «Direction» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Donne
+        - frame «Balance» layout="vertical" gap=2
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Solde
+          - frame «Before After» gap=12 alignItems="center"
+            - text «Before» fill="$text-tertiary" fontFamily="$font-ui" fontSize=17 fontWeight="normal"  TEXT: 1 284 560 €
+            - icon «Arrow» width=18 height=18 fill="$text-tertiary" icon="arrow-right"
+            - text «After» fill="$text-primary" fontFamily="$font-display" fontSize=34 fontWeight="600"  TEXT: 1 034 560 €
+        - frame «Details» width="fill_container" gap=32
+          - frame «Fleet» width="fill_container" layout="vertical" gap=4
+            - frame «Fleet Head» width="fill_container" padding=[0, 0, 4, 0] alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Flotte exploitée
+              - frame «Count» gap=6 alignItems="center"
+                - text «Before» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 6
+                - icon «Arrow» width=12 height=12 fill="$text-tertiary" icon="arrow-right"
+                - text «After» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 5
+            - frame «Row · ATR 72-600» width="fill_container" height=24 gap=8 alignItems="center"
+              - text «Type» width=104 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72-600
+              - text «Reg F-HAZA» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZA
+              - text «Reg F-HAZB» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZB
+              - frame «Moving F-HAZR» gap=6 padding=[2, 7] alignItems="center" fill="$surface-selected" cornerRadius=3
+                - text «Reg» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: F-HAZR
+                - text «Note» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: prêté
+            - frame «Row · A220-300» width="fill_container" height=24 gap=8 alignItems="center"
+              - text «Type» width=104 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: A220-300
+              - text «Reg F-HAZD» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZD
+            - frame «Row · CRJ700» width="fill_container" height=24 gap=8 alignItems="center"
+              - text «Type» width=104 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: CRJ700
+              - text «Reg F-HAZC» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZC
+            - frame «Row · Twin Otter» width="fill_container" height=24 gap=8 alignItems="center"
+              - text «Type» width=104 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Twin Otter
+              - text «Reg F-HAZG» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZG
+          - frame «Stats» width=150 layout="vertical" gap=16
+            - frame «Stat · Personnel» layout="vertical" gap=3
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Personnel
+              - frame «Value» gap=6 alignItems="center"
+                - text «Before» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 142
+                - icon «Arrow» width=12 height=12 fill="$text-tertiary" icon="arrow-right"
+                - text «After» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 140
+            - frame «Stat · Flux interne / mois» layout="vertical" gap=3
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Flux interne / mois
+              - frame «Value» gap=6 alignItems="center"
+                - text «After» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: +36 925 €
+      - frame «Exchange» width=440 height="fill_container" layout="vertical" gap=6 padding=[18, 20] fill="#00000033" stroke="$border" strokeWidth={"right": 1, "left": 1}
+        - frame «Route» width="fill_container" gap=10 padding=[0, 0, 6, 0] alignItems="center"
+          - rectangle «Line» width="fill_container" height=1 fill="$border-strong"
+          - ref «Direction Sign» ref="B3YF1" descendants={"gljan": {"content": "LFML"}, "pPhv6": {"icon": "arrow-right"}}  (instance of «Sign/Direction»)
+          - rectangle «Line» width="fill_container" height=1 fill="$border-strong"
+        - frame «Item · Prêt intra-groupe» width="fill_container" gap=12 padding=[9, 12] alignItems="center" cornerRadius=4
+          - icon «Icon» width=18 height=18 fill="$text-secondary" icon="banknote"
+          - frame «Text» width="fill_container" layout="vertical" gap=2
+            - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Prêt intra-groupe
+            - text «Sub» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 3,5 % sur 36 mois, soit 7 325 € par mois, plutôt qu'un apport en capital
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 250 000 €
+        - frame «Item · 2 pilotes ATR» width="fill_container" gap=12 padding=[9, 12] alignItems="center" cornerRadius=4
+          - icon «Icon» width=18 height=18 fill="$text-secondary" icon="users"
+          - frame «Text» width="fill_container" layout="vertical" gap=2
+            - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 2 pilotes ATR
+            - text «Sub» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Accord donné · ancienneté reprise, base LFML
+          - text «Value» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Moral −3 %
+        - frame «Item · ATR 72-600 F-HAZR» width="fill_container" gap=12 padding=[9, 12] alignItems="center" fill="$surface-selected" cornerRadius=4
+          - icon «Icon» width=18 height=18 fill="$text-primary" icon="plane"
+          - frame «Text» width="fill_container" layout="vertical" gap=2
+            - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: ATR 72-600 F-HAZR
+            - text «Sub» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Prêté, Azur Régional en reste propriétaire
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 26 500 € / mois
+        - frame «Item · Hangar de maintenance 2» width="fill_container" gap=12 padding=[9, 12] alignItems="center" cornerRadius=4
+          - icon «Icon» width=18 height=18 fill="$text-secondary" icon="warehouse"
+          - frame «Text» width="fill_container" layout="vertical" gap=2
+            - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Hangar de maintenance 2
+            - text «Sub» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Droit d'usage à LFMN, quote-part de 30 %
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 3 100 € / mois
+      - frame «Side · Azur Cargo» width="fill_container" height="fill_container" layout="vertical" gap=20 padding=[22, 28, 24, 28]
+        - frame «Company» width="fill_container" gap=12 alignItems="center"
+          - ref «Base Sign» ref="pirBQ" descendants={"OYKAu": {"content": "LFML"}}  (instance of «Sign/Location»)
+          - frame «Identity» width="fill_container" layout="vertical" gap=1
+            - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Azur Cargo
+            - text «Role» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Filiale à 100 % · AZC
+          - text «Direction» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Reçoit
+        - frame «Balance» layout="vertical" gap=2
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Solde
+          - frame «Before After» gap=12 alignItems="center"
+            - text «Before» fill="$text-tertiary" fontFamily="$font-ui" fontSize=17 fontWeight="normal"  TEXT: 48 200 €
+            - icon «Arrow» width=18 height=18 fill="$text-tertiary" icon="arrow-right"
+            - text «After» fill="$text-primary" fontFamily="$font-display" fontSize=34 fontWeight="600"  TEXT: 298 200 €
+        - frame «Details» width="fill_container" gap=32
+          - frame «Fleet» width="fill_container" layout="vertical" gap=4
+            - frame «Fleet Head» width="fill_container" padding=[0, 0, 4, 0] alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Flotte exploitée
+              - frame «Count» gap=6 alignItems="center"
+                - text «Before» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 2
+                - icon «Arrow» width=12 height=12 fill="$text-tertiary" icon="arrow-right"
+                - text «After» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 3
+            - frame «Row · PC-12» width="fill_container" height=24 gap=8 alignItems="center"
+              - text «Type» width=104 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: PC-12
+              - text «Reg F-HAZE» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZE
+            - frame «Row · Grand Caravan» width="fill_container" height=24 gap=8 alignItems="center"
+              - text «Type» width=104 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Grand Caravan
+              - text «Reg F-HAZF» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZF
+            - frame «Row · ATR 72-600» width="fill_container" height=24 gap=8 alignItems="center"
+              - text «Type» width=104 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72-600
+              - frame «Moving F-HAZR» gap=6 padding=[2, 7] alignItems="center" fill="$surface-selected" cornerRadius=3
+                - text «Reg» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: F-HAZR
+                - text «Note» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: arrive
+          - frame «Stats» width=150 layout="vertical" gap=16
+            - frame «Stat · Personnel» layout="vertical" gap=3
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Personnel
+              - frame «Value» gap=6 alignItems="center"
+                - text «Before» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 6
+                - icon «Arrow» width=12 height=12 fill="$text-tertiary" icon="arrow-right"
+                - text «After» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 8
+            - frame «Stat · Flux interne / mois» layout="vertical" gap=3
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Flux interne / mois
+              - frame «Value» gap=6 alignItems="center"
+                - text «After» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: −36 925 €
+    - frame «Detail» width="fill_container" height="fill_container" gap=20
+      - ref «Panel · Prêter ou céder» width="fill_container" height="fill_container" ref="bibzm" descendants={"e0veVE": {"content": "Prêter ou céder F-HAZR"}, "A9Tx2K": {"content": "ATR 72-600 · 2019 · 11 240 h", "fill": "$text-tertiary"}, "q5ftx...  (instance of «Panel»)
+      - frame «Summary Column» width=440 height="fill_container" layout="vertical"
+        - ref «Panel · Note fiscale» width="fill_container" height="fill_container" ref="bibzm" descendants={"e0veVE": {"content": "Note fiscale et comptable"}, "A9Tx2K": {"content": "Régime de groupe", "fill": "$text-tertiary"}, "q5ftx0": {"typ...  (instance of «Panel»)
+  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": "#00000000"}, "Ely3m": {"fill": "$text-tertiary"}, "daIvj": {"stroke": "$text-primary"}, "cXwn0": {"fill": "$text-pr...  (instance of «HUD/Top»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"vdllS": {"type": "frame", "id": "yZipy", "name": "Hints", "gap": 22, "alignItems": "center", "children": [{"type": "frame", "id": "lmco...  (instance of «HUD/Bottom»)

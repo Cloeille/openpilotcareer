@@ -1,0 +1,345 @@
+# Finance · rentabilité par ligne & avion
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Finance · rentabilité par ligne & avion» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-11.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=22 padding=[24, 32, 20, 32]
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Identity» layout="vertical" gap=8
+        - frame «Breadcrumb» gap=10 alignItems="center"
+          - instance «Base Sign» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+          - text «Crumb Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Finance  ›  Rentabilité par ligne & avion
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600" lineHeight=1.05  TEXT: Rentabilité d'octobre
+        - text «Subtitle» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Ce que rapporte chaque ligne une fois payés son carburant, ses redevances, son équipage, son catering et sa maintenance.
+      - frame «View Controls» layout="vertical" gap=10 padding=[0, 0, 2, 0] alignItems="end"
+        - text «Period» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Octobre 2026 · mois clos
+        - instance «View Switcher» of «View Switcher»
+          - frame «View · Vue en coupe» padding=[8, 16] fill="#FFFFFF1A" cornerRadius=4
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Par ligne
+          - frame «View · Cabine & charge» padding=[8, 16] cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Par avion
+    - frame «Body» width="fill_container" height="fill_container" gap=20
+      - instance «Panel · Classement» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Marge de contribution, de la plus rentable à la plus déficitaire
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Trier par marge %
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=14 padding=[12, 12, 18, 12]
+          - frame «Column Head» width="fill_container" gap=14 padding=[0, 10, 8, 10] alignItems="end"
+            - frame «Col · Rang» width=28 height=14
+            - frame «Col · Ligne» width="fill_container" alignItems="center"
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Ligne
+            - frame «Col · Avion» width=96 alignItems="center"
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Avion
+            - frame «Col · Vols» width=48 alignItems="center" justifyContent="end"
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Vols
+            - frame «Col · Recettes» width=104 alignItems="center" justifyContent="end"
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Recettes
+            - frame «Col · Coûts» width=104 alignItems="center" justifyContent="end"
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Coûts
+            - frame «Col · Barre» width=200 height=14
+            - frame «Col · Marge» width=104 alignItems="center" justifyContent="end"
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Marge
+            - frame «Col · Marge %» width=60 alignItems="center" justifyContent="end"
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Marge %
+          - frame «Group · Lignes rentables» width="fill_container" height=36 padding=[0, 10] alignItems="end" justifyContent="space_between"
+            - frame «Group Title» padding=[0, 0, 8, 0]
+              - text «Group Label» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: Lignes rentables
+            - frame «Group Total» padding=[0, 0, 8, 0]
+              - text «Group Total Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 6 lignes · +233 200 €
+          - frame «Row · Nice – Paris Orly» width="fill_container" height=40 gap=14 padding=[0, 10] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Rank» width=28 alignItems="center"
+              - text «Rank» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 1
+            - frame «Route» width="fill_container" gap=10 alignItems="center"
+              - text «Route Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Nice – Paris Orly
+              - text «Route Codes» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN → LFPO
+            - frame «Aircraft» width=96 alignItems="center"
+              - text «Aircraft» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: A220-300
+            - frame «Flights» width=48 alignItems="center" justifyContent="end"
+              - text «Flights» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 62
+            - frame «Revenue» width=104 alignItems="center" justifyContent="end"
+              - text «Revenue» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 612 400 €
+            - frame «Costs» width=104 alignItems="center" justifyContent="end"
+              - text «Costs» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 526 000 €
+            - frame «Margin Bar» width=200 height="fill_container" alignItems="center"
+              - frame «Loss Side» width=60 height="fill_container" alignItems="center" justifyContent="end"
+              - rectangle «Zero Axis» width=1 height="fill_container" fill="$border-strong"
+              - frame «Gain Side» width="fill_container" height="fill_container" alignItems="center"
+                - rectangle «Bar» width=136 height=6 fill="$text-tertiary" cornerRadius=1
+            - frame «Margin» width=104 alignItems="center" justifyContent="end"
+              - text «Margin» fill="$success" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: +86 400 €
+            - frame «Margin Pct» width=60 alignItems="center" justifyContent="end"
+              - text «Margin Pct» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 14,1 %
+          - frame «Row · Nice – Calvi» width="fill_container" height=40 gap=14 padding=[0, 10] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Rank» width=28 alignItems="center"
+              - text «Rank» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 2
+            - frame «Route» width="fill_container" gap=10 alignItems="center"
+              - text «Route Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Nice – Calvi
+              - text «Route Codes» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN → LFKC
+            - frame «Aircraft» width=96 alignItems="center"
+              - text «Aircraft» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72-600
+            - frame «Flights» width=48 alignItems="center" justifyContent="end"
+              - text «Flights» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 48
+            - frame «Revenue» width=104 alignItems="center" justifyContent="end"
+              - text «Revenue» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 168 200 €
+            - frame «Costs» width=104 alignItems="center" justifyContent="end"
+              - text «Costs» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 118 900 €
+            - frame «Margin Bar» width=200 height="fill_container" alignItems="center"
+              - frame «Loss Side» width=60 height="fill_container" alignItems="center" justifyContent="end"
+              - rectangle «Zero Axis» width=1 height="fill_container" fill="$border-strong"
+              - frame «Gain Side» width="fill_container" height="fill_container" alignItems="center"
+                - rectangle «Bar» width=78 height=6 fill="$text-tertiary" cornerRadius=1
+            - frame «Margin» width=104 alignItems="center" justifyContent="end"
+              - text «Margin» fill="$success" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: +49 300 €
+            - frame «Margin Pct» width=60 alignItems="center" justifyContent="end"
+              - text «Margin Pct» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 29,3 %
+          - frame «Row · Nice – Bastia» width="fill_container" height=40 gap=14 padding=[0, 10] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Rank» width=28 alignItems="center"
+              - text «Rank» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 3
+            - frame «Route» width="fill_container" gap=10 alignItems="center"
+              - text «Route Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Nice – Bastia
+              - text «Route Codes» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN → LFKB
+            - frame «Aircraft» width=96 alignItems="center"
+              - text «Aircraft» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72-600
+            - frame «Flights» width=48 alignItems="center" justifyContent="end"
+              - text «Flights» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 44
+            - frame «Revenue» width=104 alignItems="center" justifyContent="end"
+              - text «Revenue» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 152 600 €
+            - frame «Costs» width=104 alignItems="center" justifyContent="end"
+              - text «Costs» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 110 400 €
+            - frame «Margin Bar» width=200 height="fill_container" alignItems="center"
+              - frame «Loss Side» width=60 height="fill_container" alignItems="center" justifyContent="end"
+              - rectangle «Zero Axis» width=1 height="fill_container" fill="$border-strong"
+              - frame «Gain Side» width="fill_container" height="fill_container" alignItems="center"
+                - rectangle «Bar» width=66 height=6 fill="$text-tertiary" cornerRadius=1
+            - frame «Margin» width=104 alignItems="center" justifyContent="end"
+              - text «Margin» fill="$success" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: +42 200 €
+            - frame «Margin Pct» width=60 alignItems="center" justifyContent="end"
+              - text «Margin Pct» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 27,7 %
+          - frame «Row · Nice – Genève» width="fill_container" height=40 gap=14 padding=[0, 10] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Rank» width=28 alignItems="center"
+              - text «Rank» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 4
+            - frame «Route» width="fill_container" gap=10 alignItems="center"
+              - text «Route Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Nice – Genève
+              - text «Route Codes» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN → LSGG
+            - frame «Aircraft» width=96 alignItems="center"
+              - text «Aircraft» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: A220-300
+            - frame «Flights» width=48 alignItems="center" justifyContent="end"
+              - text «Flights» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 30
+            - frame «Revenue» width=104 alignItems="center" justifyContent="end"
+              - text «Revenue» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 228 900 €
+            - frame «Costs» width=104 alignItems="center" justifyContent="end"
+              - text «Costs» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 192 300 €
+            - frame «Margin Bar» width=200 height="fill_container" alignItems="center"
+              - frame «Loss Side» width=60 height="fill_container" alignItems="center" justifyContent="end"
+              - rectangle «Zero Axis» width=1 height="fill_container" fill="$border-strong"
+              - frame «Gain Side» width="fill_container" height="fill_container" alignItems="center"
+                - rectangle «Bar» width=58 height=6 fill="$text-tertiary" cornerRadius=1
+            - frame «Margin» width=104 alignItems="center" justifyContent="end"
+              - text «Margin» fill="$success" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: +36 600 €
+            - frame «Margin Pct» width=60 alignItems="center" justifyContent="end"
+              - text «Margin Pct» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 16,0 %
+          - frame «Row · Nice – Lyon» width="fill_container" height=40 gap=14 padding=[0, 10] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Rank» width=28 alignItems="center"
+              - text «Rank» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 5
+            - frame «Route» width="fill_container" gap=10 alignItems="center"
+              - text «Route Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Nice – Lyon
+              - text «Route Codes» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN → LFLL
+            - frame «Aircraft» width=96 alignItems="center"
+              - text «Aircraft» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: CRJ700
+            - frame «Flights» width=48 alignItems="center" justifyContent="end"
+              - text «Flights» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 34
+            - frame «Revenue» width=104 alignItems="center" justifyContent="end"
+              - text «Revenue» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 118 600 €
+            - frame «Costs» width=104 alignItems="center" justifyContent="end"
+              - text «Costs» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 105 200 €
+            - frame «Margin Bar» width=200 height="fill_container" alignItems="center"
+              - frame «Loss Side» width=60 height="fill_container" alignItems="center" justifyContent="end"
+              - rectangle «Zero Axis» width=1 height="fill_container" fill="$border-strong"
+              - frame «Gain Side» width="fill_container" height="fill_container" alignItems="center"
+                - rectangle «Bar» width=21 height=6 fill="$text-tertiary" cornerRadius=1
+            - frame «Margin» width=104 alignItems="center" justifyContent="end"
+              - text «Margin» fill="$success" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: +13 400 €
+            - frame «Margin Pct» width=60 alignItems="center" justifyContent="end"
+              - text «Margin Pct» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 11,3 %
+          - frame «Row · Nice – Bordeaux» width="fill_container" height=40 gap=14 padding=[0, 10] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Rank» width=28 alignItems="center"
+              - text «Rank» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 6
+            - frame «Route» width="fill_container" gap=10 alignItems="center"
+              - text «Route Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Nice – Bordeaux
+              - text «Route Codes» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN → LFBD
+            - frame «Aircraft» width=96 alignItems="center"
+              - text «Aircraft» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: CRJ700
+            - frame «Flights» width=48 alignItems="center" justifyContent="end"
+              - text «Flights» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 22
+            - frame «Revenue» width=104 alignItems="center" justifyContent="end"
+              - text «Revenue» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 96 400 €
+            - frame «Costs» width=104 alignItems="center" justifyContent="end"
+              - text «Costs» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 91 100 €
+            - frame «Margin Bar» width=200 height="fill_container" alignItems="center"
+              - frame «Loss Side» width=60 height="fill_container" alignItems="center" justifyContent="end"
+              - rectangle «Zero Axis» width=1 height="fill_container" fill="$border-strong"
+              - frame «Gain Side» width="fill_container" height="fill_container" alignItems="center"
+                - rectangle «Bar» width=8 height=6 fill="$text-tertiary" cornerRadius=1
+            - frame «Margin» width=104 alignItems="center" justifyContent="end"
+              - text «Margin» fill="$success" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: +5 300 €
+            - frame «Margin Pct» width=60 alignItems="center" justifyContent="end"
+              - text «Margin Pct» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 5,5 %
+          - frame «Group · Lignes déficitaires» width="fill_container" height=36 padding=[0, 10] alignItems="end" justifyContent="space_between"
+            - frame «Group Title» padding=[0, 0, 8, 0]
+              - text «Group Label» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: Lignes déficitaires
+            - frame «Group Total» padding=[0, 0, 8, 0]
+              - text «Group Total Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 3 lignes · −52 400 €
+          - frame «Row · Nice – Figari» width="fill_container" height=40 gap=14 padding=[0, 10] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Rank» width=28 alignItems="center"
+              - text «Rank» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 7
+            - frame «Route» width="fill_container" gap=10 alignItems="center"
+              - text «Route Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Nice – Figari
+              - text «Route Codes» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN → LFKF
+            - frame «Aircraft» width=96 alignItems="center"
+              - text «Aircraft» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72-600
+            - frame «Flights» width=48 alignItems="center" justifyContent="end"
+              - text «Flights» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 18
+            - frame «Revenue» width=104 alignItems="center" justifyContent="end"
+              - text «Revenue» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 41 200 €
+            - frame «Costs» width=104 alignItems="center" justifyContent="end"
+              - text «Costs» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 47 800 €
+            - frame «Margin Bar» width=200 height="fill_container" alignItems="center"
+              - frame «Loss Side» width=60 height="fill_container" alignItems="center" justifyContent="end"
+                - rectangle «Bar» width=10 height=6 fill="$danger" cornerRadius=1
+              - rectangle «Zero Axis» width=1 height="fill_container" fill="$border-strong"
+              - frame «Gain Side» width="fill_container" height="fill_container" alignItems="center"
+            - frame «Margin» width=104 alignItems="center" justifyContent="end"
+              - text «Margin» fill="$danger" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: −6 600 €
+            - frame «Margin Pct» width=60 alignItems="center" justifyContent="end"
+              - text «Margin Pct» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: −16,0 %
+          - frame «Row · Nice – Strasbourg» width="fill_container" height=40 gap=14 padding=[0, 10] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Rank» width=28 alignItems="center"
+              - text «Rank» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 8
+            - frame «Route» width="fill_container" gap=10 alignItems="center"
+              - text «Route Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Nice – Strasbourg
+              - text «Route Codes» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN → LFST
+            - frame «Aircraft» width=96 alignItems="center"
+              - text «Aircraft» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: CRJ700
+            - frame «Flights» width=48 alignItems="center" justifyContent="end"
+              - text «Flights» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 20
+            - frame «Revenue» width=104 alignItems="center" justifyContent="end"
+              - text «Revenue» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 88 300 €
+            - frame «Costs» width=104 alignItems="center" justifyContent="end"
+              - text «Costs» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 102 900 €
+            - frame «Margin Bar» width=200 height="fill_container" alignItems="center"
+              - frame «Loss Side» width=60 height="fill_container" alignItems="center" justifyContent="end"
+                - rectangle «Bar» width=23 height=6 fill="$danger" cornerRadius=1
+              - rectangle «Zero Axis» width=1 height="fill_container" fill="$border-strong"
+              - frame «Gain Side» width="fill_container" height="fill_container" alignItems="center"
+            - frame «Margin» width=104 alignItems="center" justifyContent="end"
+              - text «Margin» fill="$danger" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: −14 600 €
+            - frame «Margin Pct» width=60 alignItems="center" justifyContent="end"
+              - text «Margin Pct» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: −16,5 %
+          - frame «Row · Lyon – Marseille» width="fill_container" height=40 gap=14 padding=[0, 10] alignItems="center" fill="$surface-hover" stroke="$border" strokeWidth={"top": 1}
+            - rectangle «Focus Bar» width=2 height=40 fill="$text-primary"
+            - frame «Rank» width=28 alignItems="center"
+              - text «Rank» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 9
+            - frame «Route» width="fill_container" gap=10 alignItems="center"
+              - text «Route Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Lyon – Marseille
+              - text «Route Codes» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFLL → LFML
+            - frame «Aircraft» width=96 alignItems="center"
+              - text «Aircraft» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: CRJ700
+            - frame «Flights» width=48 alignItems="center" justifyContent="end"
+              - text «Flights» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 28
+            - frame «Revenue» width=104 alignItems="center" justifyContent="end"
+              - text «Revenue» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 54 800 €
+            - frame «Costs» width=104 alignItems="center" justifyContent="end"
+              - text «Costs» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 86 000 €
+            - frame «Margin Bar» width=200 height="fill_container" alignItems="center"
+              - frame «Loss Side» width=60 height="fill_container" alignItems="center" justifyContent="end"
+                - rectangle «Bar» width=49 height=6 fill="$danger" cornerRadius=1
+              - rectangle «Zero Axis» width=1 height="fill_container" fill="$border-strong"
+              - frame «Gain Side» width="fill_container" height="fill_container" alignItems="center"
+            - frame «Margin» width=104 alignItems="center" justifyContent="end"
+              - text «Margin» fill="$danger" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: −31 200 €
+            - frame «Margin Pct» width=60 alignItems="center" justifyContent="end"
+              - text «Margin Pct» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: −56,9 %
+          - frame «Spacer» width="fill_container" height="fill_container"
+          - frame «List Footer» width="fill_container" padding=[14, 10, 0, 10] alignItems="center" justifyContent="space_between" stroke="$border" strokeWidth={"top": 1}
+            - frame «Total» gap=10 alignItems="center"
+              - icon «Icon» width=15 height=15 fill="$text-tertiary" icon="wallet"
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Marge totale du réseau
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: +180 800 € sur 9 lignes
+            - text «Scope Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Hors frais de siège, crédits et loyers
+      - instance «Panel · Analyse» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Pourquoi Lyon–Marseille perd de l'argent
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=16 padding=[14, 22, 22, 22]
+          - frame «Route Identity» width="fill_container" layout="vertical" gap=8
+            - frame «Route Signs» gap=8 alignItems="center"
+              - instance «Airport Sign · LFLL» of «Sign/Location»
+                - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=12 fontWeight="700" letterSpacing=0.5  TEXT: LFLL
+              - text «Arrow» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: →
+              - instance «Airport Sign · LFML» of «Sign/Location»
+                - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=12 fontWeight="700" letterSpacing=0.5  TEXT: LFML
+              - frame «Aircraft Box» padding=[0, 0, 0, 4]
+                - text «Aircraft» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: CRJ700
+            - text «Route Facts» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 28 vols en octobre · 52 % de remplissage
+          - frame «Net» width="fill_container" layout="vertical" gap=2
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Marge de contribution
+            - text «Value» fill="$danger" fontFamily="$font-display" fontSize=34 fontWeight="500"  TEXT: −31 200 €
+            - frame «Note Box» width="fill_container" padding=[2, 0, 0, 0]
+              - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 54 800 € de recettes pour 86 000 € de coûts
+          - rectangle «Divider» width="fill_container" height=1 fill="$border"
+          - frame «Group · Où part l'argent» width="fill_container" layout="vertical" gap=10
+            - frame «Group Head» width="fill_container" padding=[0, 0, 2, 0] alignItems="end" justifyContent="space_between"
+              - text «Group Title» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: Où part l'argent
+              - text «Group Total» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 86 000 €
+            - frame «Crew Block» width="fill_container" layout="vertical" gap=4
+              - frame «Cost · Équipage» width="fill_container" gap=12 alignItems="center"
+                - frame «Label Box» width=96
+                  - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Équipage
+                - frame «Track» width="fill_container" height=3 layout="none" fill="$neutral-soft" cornerRadius=2
+                  - rectangle «Level» width=104 height=3 fill="$danger" cornerRadius=2
+                - frame «Value Box» width=88 justifyContent="end"
+                  - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 38 400 €
+              - text «Crew Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Intérim : 2,6 × le coût d'un équipage interne
+            - frame «Cost · Carburant» width="fill_container" gap=12 alignItems="center"
+              - frame «Label Box» width=96
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Carburant
+              - frame «Track» width="fill_container" height=3 layout="none" fill="$neutral-soft" cornerRadius=2
+                - rectangle «Level» width=50 height=3 fill="$text-tertiary" cornerRadius=2
+              - frame «Value Box» width=88 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 18 600 €
+            - frame «Cost · Redevances» width="fill_container" gap=12 alignItems="center"
+              - frame «Label Box» width=96
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Redevances
+              - frame «Track» width="fill_container" height=3 layout="none" fill="$neutral-soft" cornerRadius=2
+                - rectangle «Level» width=35 height=3 fill="$text-tertiary" cornerRadius=2
+              - frame «Value Box» width=88 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 12 900 €
+            - frame «Cost · Leasing» width="fill_container" gap=12 alignItems="center"
+              - frame «Label Box» width=96
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Leasing
+              - frame «Track» width="fill_container" height=3 layout="none" fill="$neutral-soft" cornerRadius=2
+                - rectangle «Level» width=24 height=3 fill="$text-tertiary" cornerRadius=2
+              - frame «Value Box» width=88 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 8 900 €
+            - frame «Cost · Maintenance» width="fill_container" gap=12 alignItems="center"
+              - frame «Label Box» width=96
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Maintenance
+              - frame «Track» width="fill_container" height=3 layout="none" fill="$neutral-soft" cornerRadius=2
+                - rectangle «Level» width=19 height=3 fill="$text-tertiary" cornerRadius=2
+              - frame «Value Box» width=88 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 7 200 €
+          - frame «Spacer» width="fill_container" height="fill_container"
+          - frame «Takeaway» width="fill_container" layout="vertical" gap=8
+            - text «Takeaway Title» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: À retenir
+            - text «Takeaway Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.45  TEXT: Sans pilotes CRJ basés à Lyon, chaque rotation passe en intérim.
+            - frame «Levers» width="fill_container" layout="vertical" gap=8 padding=[2, 0, 0, 0]
+              - frame «Lever · Avec un équipage CRJ basé à Lyon» width="fill_container" padding=[10, 0, 0, 0] alignItems="center" justifyContent="space_between" stroke="$border" strokeWidth={"top": 1}
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Marge avec un équipage basé à Lyon
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: ≈ −7 600 € / mois
+              - frame «Lever · Et 70 % de remplissage» width="fill_container" padding=[10, 0, 0, 0] alignItems="center" justifyContent="space_between" stroke="$border" strokeWidth={"top": 1}
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Et avec 70 % de remplissage
+                - text «Value» fill="$success" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: ≈ +9 800 € / mois
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

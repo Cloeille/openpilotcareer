@@ -87,11 +87,11 @@ The viewer capture does not execute Pen `script` nodes, so the drawing area is e
 | Section · 05 Flotte | screens/section-05-flotte.md | 5 lines |
 | Section · 08 Historique des vols | screens/section-08-historique-des-vols.md | 5 lines |
 | Section · 09 Compétition IA | screens/section-09-competition-ia.md | 5 lines |
-| Section · 10 Références pour les devs | screens/section-10-references-pour-les-devs.md | 5 lines |
+| Section · 12 Références pour les devs | screens/section-12-references-pour-les-devs.md | 5 lines |
 | Carte des parcours & navigation clavier | screens/carte-des-parcours-navigation-clavier.md | 629 lines |
 | Section · 00 Lisez-moi | screens/section-00-lisez-moi.md | 5 lines |
 | Section · — Composants | screens/section-composants.md | 5 lines |
-| Lisez-moi · maquette OpenHangar | screens/lisez-moi-maquette-openhangar.md | 86 lines |
+| Lisez-moi · maquette OpenHangar | screens/lisez-moi-maquette-openhangar.md | 92 lines |
 | Section · 02 Onboarding | screens/section-02-onboarding.md | 5 lines |
 | HUD/Onboarding | screens/hud-onboarding.md | 46 lines |
 | Onboarding · 1 choix du départ | screens/onboarding-1-choix-du-depart.md | 81 lines |
@@ -123,3 +123,22 @@ The viewer capture does not execute Pen `script` nodes, so the drawing area is e
 | Service à bord · confort & repas | screens/service-a-bord-confort-repas.md | 25 lines |
 | Cuisine · production des repas | screens/cuisine-production-des-repas.md | 25 lines |
 | Location · usure & remise à neuf | screens/location-usure-remise-a-neuf.md | 20 lines |
+| Section · 10 Finance & trésorerie | screens/section-10-finance-tresorerie.md | 5 lines |
+| Finance · trésorerie & cashflow | screens/finance-tresorerie-cashflow.md | 23 lines |
+| Finance · rentabilité par ligne & avion | screens/finance-rentabilite-par-ligne-avion.md | 19 lines |
+| Finance · crédits en cours | screens/finance-credits-en-cours.md | 24 lines |
+| Finance · nouveau crédit conso | screens/finance-nouveau-credit-conso.md | 15 lines |
+| Finance · prévisions 12 mois | screens/finance-previsions-12-mois.md | 23 lines |
+| Finance · relevé des opérations | screens/finance-releve-des-operations.md | 34 lines |
+| Finance · échéance impayée & découvert | screens/finance-echeance-impayee-decouvert.md | 6 lines |
+| Section · 11 Groupe, filiales & alliances | screens/section-11-groupe-filiales-alliances.md | 5 lines |
+| Staff · centre de formation & formateurs | screens/staff-centre-de-formation-formateurs.md | 25 lines |
+| Staff · reconversion en formateur | screens/staff-reconversion-en-formateur.md | 25 lines |
+| Staff · politique RH & climat social | screens/staff-politique-rh-climat-social.md | 25 lines |
+| Staff · cabinet de recrutement | screens/staff-cabinet-de-recrutement.md | 25 lines |
+| Groupe · société mère & filiales | screens/groupe-societe-mere-filiales.md | 14 lines |
+| Groupe · créer une filiale | screens/groupe-creer-une-filiale.md | 16 lines |
+| Groupe · transferts entre sociétés | screens/groupe-transferts-entre-societes.md | 137 lines |
+| Alliance · membres & réseau | screens/alliance-membres-reseau.md | 65 lines |
+| Alliance · installations partagées | screens/alliance-installations-partagees.md | 18 lines |
+| Réglages · avions du simulateur | screens/reglages-avions-du-simulateur.md | 23 lines |

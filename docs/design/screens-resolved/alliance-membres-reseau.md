@@ -1,0 +1,147 @@
+# Alliance · membres & réseau
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Alliance · membres & réseau» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-9.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=16 padding=[28, 32, 24, 32]
+    - script «Carte · Alliance Méditerranée» width=1600 height=778
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - ellipse «Live Dot» width=7 height=7 fill="$success"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 2 joueurs en ligne sur 4 · 37 avions · 11 lignes
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Alliance Méditerranée
+        - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Fondée par m.tournier · tu en fais partie depuis 3 mois
+      - instance «View Switcher · alliance» of «View Switcher»
+        - frame «View · Vue en coupe» padding=[8, 16] fill="#FFFFFF1A" cornerRadius=4
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Membres & réseau
+        - frame «View · Cabine & charge» padding=[8, 16] cornerRadius=4
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Installations partagées
+        - frame «View · Systèmes» padding=[8, 16] cornerRadius=4
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Votes · 1 en cours
+    - frame «Body» width="fill_container" height="fill_container" gap=40
+      - frame «Map Column» width="fill_container" height="fill_container" layout="vertical" gap=28 justifyContent="end"
+        - frame «Alliance Facilities» width="fill_container" layout="vertical" gap=12
+          - frame «Facilities Header» gap=10 alignItems="center"
+            - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Installations de l'alliance
+            - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: payées par les cotisations, louées aux membres comme le font les compagnies IA
+          - frame «Facilities Row» width="fill_container"
+            - frame «Facility · Comptoir de correspondances» width="fill_container" layout="vertical" gap=4 padding=[2, 20, 2, 0]
+              - frame «Top» gap=8 alignItems="center"
+                - instance «Airport» of «Sign/Location»
+                  - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Comptoir de correspondances
+              - text «Price» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 3 100 € / mois
+              - text «Who» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Loué à Azur Régional, Tirrenia Air
+            - frame «Facility · Entrepôt de pièces» width="fill_container" layout="vertical" gap=4 padding=[2, 20] stroke="$border-strong" strokeWidth={"left": 1}
+              - frame «Top» gap=8 alignItems="center"
+                - instance «Airport» of «Sign/Location»
+                  - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="700" letterSpacing=0.5  TEXT: LEBL
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Entrepôt de pièces
+              - text «Price» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 4 200 € / mois
+              - text «Who» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Loué à Brisa Catalana
+            - frame «Facility · Salon & cuisine» width="fill_container" layout="vertical" gap=4 padding=[2, 20] stroke="$border-strong" strokeWidth={"left": 1}
+              - frame «Top» gap=8 alignItems="center"
+                - instance «Airport» of «Sign/Location»
+                  - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="700" letterSpacing=0.5  TEXT: LIRF
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Salon & cuisine
+              - text «Price» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 6 500 € / mois
+              - text «Who» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Libre · offre de Méridia Cargo (IA)
+        - frame «Legend» gap=22 alignItems="center"
+          - frame «Legend · Sélection» gap=8 alignItems="center"
+            - rectangle «Swatch» width=18 height=2 fill="#ECEAE5" opacity=0.85
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Membre sélectionné
+          - frame «Legend · Autres membres» gap=8 alignItems="center"
+            - rectangle «Swatch» width=18 height=2 fill="#A9ACB0" opacity=0.6
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Autres lignes de l'alliance
+          - frame «Legend · Partage de code» gap=8 alignItems="center"
+            - frame «Swatch» layout="vertical" gap=3
+              - rectangle «Strand» width=18 height=2 fill="#A9ACB0"
+              - rectangle «Strand» width=18 height=1.5 fill="#A9ACB0" opacity=0.6
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Partage de code
+          - frame «Legend · Apport IA» gap=8 alignItems="center"
+            - frame «Swatch» gap=3 alignItems="center"
+              - rectangle «Dot» width=2 height=2 fill="#A9ACB0"
+              - rectangle «Dot» width=2 height=2 fill="#A9ACB0"
+              - rectangle «Dot» width=2 height=2 fill="#A9ACB0"
+              - rectangle «Dot» width=2 height=2 fill="#A9ACB0"
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Apport d'une compagnie IA
+          - frame «Legend · Correspondances» gap=8 alignItems="center"
+            - ellipse «Swatch» width=18 height=9 stroke="#FFFFFF80" strokeWidth=1
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Correspondances garanties
+      - frame «Right Column» width=420 height="fill_container" layout="vertical" gap=16
+        - instance «Panel · Membres» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Membres
+            - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Part du trafic de l'alliance
+          - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[6, 14, 12, 14]
+            - frame «Member · Azur Régional» width="fill_container" layout="vertical" gap=5 padding=[11, 10] cornerRadius=4
+              - frame «Top» width="fill_container" gap=10 alignItems="center"
+                - instance «Hub» of «Sign/Location»
+                  - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=12 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+                - text «Company» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Azur Régional
+                - text «Contribution» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: 22 %
+              - frame «Details» width="fill_container" gap=10 padding=[0, 0, 0, 62] alignItems="center"
+                - frame «Player Row» width="fill_container" gap=7 alignItems="center"
+                  - text «Player» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Toi · Cdt. L. Moreau
+                - text «Fleet» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 9 avions · réput. 4,6
+            - frame «Member · Aero Provence» width="fill_container" layout="vertical" gap=5 padding=[11, 10] fill="$surface-selected" cornerRadius=4
+              - frame «Top» width="fill_container" gap=10 alignItems="center"
+                - instance «Hub» of «Sign/Location»
+                  - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=12 fontWeight="700" letterSpacing=0.5  TEXT: LFML
+                - text «Company» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Aero Provence
+                - text «Contribution» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: 38 %
+              - frame «Details» width="fill_container" gap=10 padding=[0, 0, 0, 62] alignItems="center"
+                - frame «Player Row» width="fill_container" gap=7 alignItems="center"
+                  - ellipse «Status Dot» width=7 height=7 fill="$success"
+                  - text «Player» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: m.tournier · en ligne
+                - text «Fleet» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 14 avions · réput. 4,8
+            - frame «Member · Brisa Catalana» width="fill_container" layout="vertical" gap=5 padding=[11, 10] stroke="$border" strokeWidth={"top": 1} cornerRadius=4
+              - frame «Top» width="fill_container" gap=10 alignItems="center"
+                - instance «Hub» of «Sign/Location»
+                  - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=12 fontWeight="700" letterSpacing=0.5  TEXT: LEBL
+                - text «Company» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Brisa Catalana
+                - text «Contribution» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: 27 %
+              - frame «Details» width="fill_container" gap=10 padding=[0, 0, 0, 62] alignItems="center"
+                - frame «Player Row» width="fill_container" gap=7 alignItems="center"
+                  - ellipse «Status Dot» width=7 height=7 fill="$info"
+                  - text «Player» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: j.ferrer · en vol
+                - text «Fleet» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 8 avions · réput. 4,3
+            - frame «Member · Tirrenia Air» width="fill_container" layout="vertical" gap=5 padding=[11, 10] stroke="$border" strokeWidth={"top": 1} cornerRadius=4
+              - frame «Top» width="fill_container" gap=10 alignItems="center"
+                - instance «Hub» of «Sign/Location»
+                  - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=12 fontWeight="700" letterSpacing=0.5  TEXT: LIRF
+                - text «Company» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Tirrenia Air
+                - text «Contribution» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: 13 %
+              - frame «Details» width="fill_container" gap=10 padding=[0, 0, 0, 62] alignItems="center"
+                - frame «Player Row» width="fill_container" gap=7 alignItems="center"
+                  - ellipse «Status Dot» width=7 height=7 stroke="$text-tertiary" strokeWidth=1.5
+                  - text «Player» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: g.rinaldi · hors ligne depuis 2 j
+                - text «Fleet» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 6 avions · réput. 3,9
+        - instance «Panel · Règles» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Règles
+            - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Statuts complets
+          - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=12 padding=[8, 24, 20, 24]
+            - frame «Rule · Cotisation» width="fill_container" gap=12
+              - text «Key» width=84 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Cotisation
+              - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.35  TEXT: 2 % du chiffre d'affaires, chaque mois
+            - frame «Rule · Votes» width="fill_container" gap=12
+              - text «Key» width=84 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Votes
+              - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.35  TEXT: Une voix par compagnie, majorité des deux tiers
+            - frame «Rule · Adhésion» width="fill_container" gap=12
+              - text «Key» width=84 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Adhésion
+              - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.35  TEXT: Sur invitation d'un membre, puis vote unanime
+            - frame «Rule · Départ» width="fill_container" gap=12
+              - text «Key» width=84 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Départ
+              - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.35  TEXT: Préavis de 30 jours, locations rendues
+            - frame «Vote en cours» width="fill_container" gap=10 padding=[14, 0, 0, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Vote Text» width="fill_container" layout="vertical" gap=2
+                - text «Question» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Louer le salon LIRF à Méridia Cargo ?
+                - text «Tally» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 2 pour · 1 contre · ta voix manque · clos dans 2 j
+              - instance «Voter» of «Button/Secondary»
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Voter
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

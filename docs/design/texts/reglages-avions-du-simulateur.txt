@@ -1,0 +1,62 @@
+Compte lmoreau · serveur global
+Réglages
+Clés API
+Compte et données
+Avions du simulateur
+Avions détectés dans MSFS 2024
+Associe chaque avion installé à un type de la carrière. C'est lui que tu piloteras quand tu prends les commandes d'un appareil de ce type dans ta flotte.
+Dans le simulateur
+Type de la carrière
+État
+ATR 72-600
+Asobo · inclus dans MSFS 2024
+ATR 72-600
+4 livrées
+Associé
+ATR 42-600
+Asobo · inclus dans MSFS 2024
+ATR 42-600
+1 livrée
+Associé
+A320neo V2
+iniBuilds · Marketplace
+A320neo
+2 livrées
+Associé
+DHC-6 Twin Otter
+Aerosoft · dossier Community
+DHC-6 Twin Otter 400
+Suggéré, série 300 installée
+À confirmer
+Cessna 172 Skyhawk
+Asobo · inclus dans MSFS 2024
+Aucun type
+Aviation légère, hors carrière
+Ignoré
+A310-300
+iniBuilds · Marketplace
+Pas au catalogue
+Aucun type équivalent
+Hors catalogue
+Dernière analyse aujourd'hui à 18:12, 214 paquets lus
+Relancer l'analyse
+DHC-6 Twin Otter
+Aerosoft
+Type de la carrière
+DHC-6 Twin Otter 400
+Suggéré : seule la série 300 existe dans le simulateur. La carrière garde les performances et la consommation de la 400.
+Livrées de tes avions
+F-HAZG
+Azur Régional, livrée perso
+Changer
+F-HAZF
+Blanche, livrée par défaut
+Changer
+Prendre la livrée de la compagnie dès qu'elle est installée
+Confirmer l'association
+Entrée
+Autre type
+Manquant dans le simulateur
+CRJ700, utilisé par F-HAZC
+Aucun avion installé ne correspond. Tu ne peux pas le piloter toi-même, tes équipages continuent de l'exploiter.
+Voir les CRJ700 compatibles

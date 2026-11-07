@@ -1,0 +1,225 @@
+# Groupe · créer une filiale
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Groupe · créer une filiale» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-3.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=24 padding=[28, 32, 24, 32]
+    - frame «Header» width="fill_container" alignItems="end"
+      - frame «Title Block» layout="vertical" gap=8
+        - frame «Status» gap=10 alignItems="center"
+          - instance «Sign · LFKJ» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFKJ
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Nouvelle filiale d'Azur Régional · base d'Ajaccio
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Corse Navette
+    - frame «Body» width="fill_container" height="fill_container" gap=24
+      - instance «Panel · Identité» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Identité
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=18 padding=[14, 22, 22, 22]
+          - instance «Input · Nom» of «Input»
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Nom de la société
+            - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+              - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="building-2"
+              - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Corse Navette
+          - frame «Codes» width="fill_container" gap=12
+            - instance «Input · OACI» of «Input»
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Code OACI
+              - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: CRN
+              - text «Hint» fill="$success" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Disponible
+            - instance «Input · IATA» of «Input»
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Code IATA
+              - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: N7
+              - text «Hint» fill="$success" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Disponible
+          - instance «Input · Base» of «Input»
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Base
+            - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12, 0, 8] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+              - instance «Sign · LFKJ» of «Sign/Location»
+                - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=13 fontWeight="700" letterSpacing=0.5  TEXT: LFKJ
+              - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Ajaccio
+              - icon «Chevron» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+            - text «Hint» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Napoléon-Bonaparte · un bureau d'escale y est libre
+          - frame «Activity» width="fill_container" layout="vertical" gap=7
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Activité
+            - instance «Activity Switcher» of «View Switcher»
+              - frame «View · Vue en coupe» width="fill_container" padding=[8, 16] justifyContent="center" fill="#FFFFFF1A" cornerRadius=4
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Passagers
+              - frame «View · Cabine & charge» width="fill_container" padding=[8, 16] justifyContent="center" cornerRadius=4
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Fret
+              - frame «View · Systèmes» width="fill_container" padding=[8, 16] justifyContent="center" cornerRadius=4
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Charter
+            - text «Hint» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Navettes régulières Ajaccio ⇄ Nice et Bastia
+          - frame «Spacer» width="fill_container" height="fill_container"
+          - text «Legal» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" lineHeight=1.45  TEXT: Filiale détenue à 100 % par Azur Régional. Comptes séparés, consolidés dans ceux du groupe.
+      - instance «Panel · Dotation de départ» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Dotation de départ
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Ce qu'Azur Régional lui apporte
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[8, 24, 14, 24]
+          - frame «Money» width="fill_container" layout="vertical" gap=16 padding=[4, 0, 18, 0]
+            - frame «Money Row» width="fill_container" gap=36 alignItems="end"
+              - frame «Amount» width="fill_container" layout="vertical" gap=4
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Virement initial depuis Azur Régional
+                - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=46 fontWeight="500"  TEXT: 220 000 €
+                - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Environ 5 mois de charges, avant la première recette
+              - frame «Slider» width=440 layout="vertical" gap=8 padding=[0, 0, 6, 0]
+                - frame «Track» width=440 height=18 alignItems="center"
+                  - rectangle «Filled» width=233 height=4 fill="$text-primary" cornerRadius=2
+                  - ellipse «Knob» width=18 height=18 fill="$text-primary"
+                  - rectangle «Rest» width="fill_container" height=4 fill="$border-strong" cornerRadius=2
+                  - rectangle «Threshold» width=2 height=12 fill="$warning"
+                - frame «Scale» width=440 height=16 layout="none"
+                  - text «Min» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 0 €
+                  - text «Threshold Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 1 mois de charges
+                  - text «Max» width=120 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: 400 000 €
+            - frame «Warning» width="fill_container" gap=10 padding=[10, 14] alignItems="center" fill="$surface-sunken" cornerRadius=4
+              - icon «Icon» width=16 height=16 fill="$warning" icon="triangle-alert"
+              - text «Text» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Une filiale à 0 € ne peut pas payer ses salaires : sans virement, les 5 personnes mutées ne seraient pas payées le 1er décembre (23 500 €).
+          - frame «Section · Avions» width="fill_container" gap=16 padding=[10, 0] stroke="$border" strokeWidth={"top": 1}
+            - frame «Label» width=140 layout="vertical" gap=3 padding=[7, 0, 0, 0]
+              - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="600"  TEXT: Avions
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 1 cédé · 7 restent
+            - frame «Rows» width="fill_container" layout="vertical"
+              - frame «Row · F-HAZT» width="fill_container" gap=12 padding=[6, 10] alignItems="center" fill="$surface-hover" cornerRadius=4
+                - frame «Name Block» width="fill_container" layout="vertical" gap=2
+                  - frame «Name Row» gap=10 alignItems="center"
+                    - text «Registration» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: F-HAZT
+                    - text «Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: ATR 42-600
+                  - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 48 places · au sol à Nice, poste PK3
+                - text «Cost» width=120 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: Sans paiement
+                - frame «Choice» width=118 gap=4 alignItems="center"
+                  - icon «Prev» width=14 height=14 fill="$text-primary" icon="chevron-left"
+                  - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500" textAlign="center"  TEXT: Céder
+                  - icon «Next» width=14 height=14 fill="$text-primary" icon="chevron-right"
+              - frame «Row · F-HAZB» width="fill_container" gap=12 padding=[6, 10] alignItems="center" cornerRadius=4
+                - frame «Name Block» width="fill_container" layout="vertical" gap=2
+                  - frame «Name Row» gap=10 alignItems="center"
+                    - text «Registration» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: F-HAZB
+                    - text «Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: ATR 72-600
+                  - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Sur la ligne Nice ⇄ Lyon
+                - text «Cost» width=120 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: —
+                - frame «Choice» width=118 gap=4 alignItems="center"
+                  - icon «Prev» width=14 height=14 fill="$text-tertiary" icon="chevron-left"
+                  - text «Value» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500" textAlign="center"  TEXT: Garder
+                  - icon «Next» width=14 height=14 fill="$text-tertiary" icon="chevron-right"
+          - frame «Section · Équipe» width="fill_container" gap=16 padding=[10, 0] stroke="$border" strokeWidth={"top": 1}
+            - frame «Label» width=140 layout="vertical" gap=3 padding=[7, 0, 0, 0]
+              - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="600"  TEXT: Équipe
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 5 mutés · 1 partagé
+            - frame «Rows» width="fill_container" layout="vertical"
+              - frame «Row · Équipage ATR 42» width="fill_container" gap=12 padding=[6, 10] alignItems="center" cornerRadius=4
+                - frame «Name Block» width="fill_container" layout="vertical" gap=2
+                  - frame «Name Row» gap=10 alignItems="center"
+                    - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Équipage ATR 42
+                  - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Cdt. Rossi, OPL Martin et 2 PNC, basés à Nice
+                - text «Cost» width=120 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 20 600 € / mois
+                - frame «Choice» width=118 gap=4 alignItems="center"
+                  - icon «Prev» width=14 height=14 fill="$text-tertiary" icon="chevron-left"
+                  - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500" textAlign="center"  TEXT: Muter
+                  - icon «Next» width=14 height=14 fill="$text-tertiary" icon="chevron-right"
+              - frame «Row · Agent d'escale» width="fill_container" gap=12 padding=[6, 10] alignItems="center" cornerRadius=4
+                - frame «Name Block» width="fill_container" layout="vertical" gap=2
+                  - frame «Name Row» gap=10 alignItems="center"
+                    - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Agent d'escale
+                  - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Inès Santoni, aujourd'hui à Nice
+                - text «Cost» width=120 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 2 900 € / mois
+                - frame «Choice» width=118 gap=4 alignItems="center"
+                  - icon «Prev» width=14 height=14 fill="$text-tertiary" icon="chevron-left"
+                  - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500" textAlign="center"  TEXT: Muter
+                  - icon «Next» width=14 height=14 fill="$text-tertiary" icon="chevron-right"
+              - frame «Row · Mécanicien B1» width="fill_container" gap=12 padding=[6, 10] alignItems="center" cornerRadius=4
+                - frame «Name Block» width="fill_container" layout="vertical" gap=2
+                  - frame «Name Row» gap=10 alignItems="center"
+                    - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Mécanicien B1
+                  - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Hugo Leclerc reste salarié d'Azur Régional
+                - text «Cost» width=120 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 1 950 € / mois
+                - frame «Choice» width=118 gap=4 alignItems="center"
+                  - icon «Prev» width=14 height=14 fill="$text-tertiary" icon="chevron-left"
+                  - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500" textAlign="center"  TEXT: Partager
+                  - icon «Next» width=14 height=14 fill="$text-tertiary" icon="chevron-right"
+          - frame «Section · Installations» width="fill_container" gap=16 padding=[10, 0] stroke="$border" strokeWidth={"top": 1}
+            - frame «Label» width=140 layout="vertical" gap=3 padding=[7, 0, 0, 0]
+              - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="600"  TEXT: Installations
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 1 partagée · 1 louée
+            - frame «Rows» width="fill_container" layout="vertical"
+              - frame «Row · Hangar de maintenance de Nice» width="fill_container" gap=12 padding=[6, 10] alignItems="center" cornerRadius=4
+                - frame «Name Block» width="fill_container" layout="vertical" gap=2
+                  - frame «Name Row» gap=10 alignItems="center"
+                    - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Hangar de maintenance de Nice
+                  - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Visites de l'ATR 42, comme pour Azur Cargo
+                - text «Cost» width=120 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 2 400 € / mois
+                - frame «Choice» width=118 gap=4 alignItems="center"
+                  - icon «Prev» width=14 height=14 fill="$text-tertiary" icon="chevron-left"
+                  - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500" textAlign="center"  TEXT: Partager
+                  - icon «Next» width=14 height=14 fill="$text-tertiary" icon="chevron-right"
+              - frame «Row · Bureau d'escale et 2 postes» width="fill_container" gap=12 padding=[6, 10] alignItems="center" cornerRadius=4
+                - frame «Name Block» width="fill_container" layout="vertical" gap=2
+                  - frame «Name Row» gap=10 alignItems="center"
+                    - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Bureau d'escale et 2 postes
+                  - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Libres à Ajaccio, loués au nom de la filiale
+                - text «Cost» width=120 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 5 400 € / mois
+                - frame «Choice» width=118 gap=4 alignItems="center"
+                  - icon «Prev» width=14 height=14 fill="$text-tertiary" icon="chevron-left"
+                  - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500" textAlign="center"  TEXT: Louer
+                  - icon «Next» width=14 height=14 fill="$text-tertiary" icon="chevron-right"
+      - instance «Panel · Effet sur les soldes» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Effet sur les deux sociétés
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[14, 22, 22, 22]
+          - frame «Company · Azur Régional» width="fill_container" layout="vertical" gap=10 padding=[4, 0, 18, 0]
+            - frame «Head» gap=10 alignItems="center"
+              - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Azur Régional
+              - text «Code» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12 fontWeight="normal"  TEXT: AZR
+            - frame «Balance» width="fill_container" layout="vertical" gap=2
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Solde après création
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=28 fontWeight="500"  TEXT: 1 051 060 €
+              - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 1 284 560 €  − 233 500 €
+            - frame «Lines» width="fill_container" layout="vertical" gap=6 padding=[4, 0, 0, 0]
+              - frame «Line · Avions» width="fill_container" justifyContent="space_between"
+                - text «Key» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Avions
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 8 → 7
+              - frame «Line · Personnel» width="fill_container" justifyContent="space_between"
+                - text «Key» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Personnel
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 70 → 65
+              - frame «Line · Charges mensuelles» width="fill_container" justifyContent="space_between"
+                - text «Key» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Refacturé chaque mois à Corse Navette
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: + 4 350 €
+          - frame «Company · Corse Navette» width="fill_container" layout="vertical" gap=10 padding=[16, 0, 18, 0] stroke="$border" strokeWidth={"top": 1}
+            - frame «Head» gap=10 alignItems="center"
+              - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Corse Navette
+              - text «Code» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12 fontWeight="normal"  TEXT: CRN
+            - frame «Balance» width="fill_container" layout="vertical" gap=2
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Solde après création
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=28 fontWeight="500"  TEXT: 220 000 €
+              - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 0 €  + 220 000 €
+            - frame «Lines» width="fill_container" layout="vertical" gap=6 padding=[4, 0, 0, 0]
+              - frame «Line · Avions» width="fill_container" justifyContent="space_between"
+                - text «Key» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Avions
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1
+              - frame «Line · Personnel» width="fill_container" justifyContent="space_between"
+                - text «Key» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Personnel
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 5, et 1 partagé
+              - frame «Line · Charges mensuelles» width="fill_container" justifyContent="space_between"
+                - text «Key» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Charges mensuelles
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ≈ 44 000 €
+          - frame «Fees» width="fill_container" layout="vertical" gap=6 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+            - text «Title» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Frais de création, payés par Azur Régional
+            - frame «Fee · Immatriculation de la société» width="fill_container" justifyContent="space_between"
+              - text «Key» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Immatriculation de la société
+              - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 2 800 €
+            - frame «Fee · Certificat de transporteur aérien» width="fill_container" justifyContent="space_between"
+              - text «Key» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Certificat de transporteur aérien
+              - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 9 500 €
+            - frame «Fee · Transfert d'immatriculation F-HAZT» width="fill_container" justifyContent="space_between"
+              - text «Key» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Transfert d'immatriculation F-HAZT
+              - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1 200 €
+          - frame «Spacer» width="fill_container" height="fill_container"
+          - instance «Button · Créer la filiale» of «Button/Primary»
+            - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Créer Corse Navette
+            - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+              - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

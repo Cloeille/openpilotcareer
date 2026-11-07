@@ -6,4 +6,4 @@ Resolved tree (component instances expanded with their overrides; HUD bars refer
   - text «Section Number» fill="$text-tertiary" fontFamily="$font-display" fontSize=44 fontWeight="500"  TEXT: 01
   - frame «Section Text» layout="vertical" gap=4 padding=[0, 0, 6, 0]
     - text «Section Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Accès & réglages
-    - text «Section Description» fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Connexion et choix du serveur, réglages du pont simulateur, compte et données, états de session
+    - text «Section Description» fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Connexion et choix du serveur, réglages du pont simulateur, avions installés dans le simulateur, compte et données, états de session
