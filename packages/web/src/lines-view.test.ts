@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import type { FlyingNow, Line, Network, OpsRow, ScheduledFlight } from './api-lines.ts';
 import {
   asProgramme, causesOf, clockNow, dayKind, draftProblem, everyHours, faceToFace, filterOps, firstAlert, ganttLanes, hhmm, isoDay, lineDelay, lineVisual, mapAirportCodes, mapFlights, mapLines,
-  minuteOfDay, minutesOf, nextFilter, opsBadge, pairId, previewProgramme, pnlParts, progressPct, projectionKind, reopenTarget, stepDay, DEFAULT_DRAFT, forecastShare, candidateAircraft,
+  minuteOfDay, minutesOf, nextFilter, opsBadge, pairId, phaseOf, perHour, freqFromPerHour, windowHours, isRoundTheClock, ROUND_THE_CLOCK, previewProgramme, pnlParts, progressPct, projectionKind, reopenTarget, stepDay, DEFAULT_DRAFT, forecastShare, candidateAircraft,
 } from './lines-view.ts';
 
 const line = (o: Partial<Line> = {}): Line => ({
@@ -193,4 +193,20 @@ test('progress along a flight is clamped to 0-100', () => {
   assert.equal(progressPct(f, 500), 0);
   assert.equal(progressPct(f, 2000), 50);
   assert.equal(progressPct(f, 9000), 100);
+});
+
+test('frequency per hour: round trips per hour of the window, converted both ways and capped', () => {
+  const w = { windowStart: '06:00', windowEnd: '22:00' };
+  assert.equal(windowHours(w), 16);
+  assert.equal(perHour({ ...w, freqPerDay: 16 }), 1);
+  assert.equal(perHour({ ...w, freqPerDay: 7 }), 1, 'never below one per hour');
+  assert.equal(freqFromPerHour(1, w), 16);
+  assert.equal(freqFromPerHour(2, w), 24, 'capped at the maximum');
+  assert.equal(windowHours({ windowStart: '10:00', windowEnd: '10:00' }), 1);
+  assert.ok(isRoundTheClock(ROUND_THE_CLOCK));
+  assert.ok(!isRoundTheClock(w));
+});
+
+test('flight phase follows the progress', () => {
+  assert.deepEqual([0, 0.1, 0.4, 0.8, 0.82, 1].map(phaseOf), ['climb', 'climb', 'cruise', 'cruise', 'descent', 'descent']);
 });

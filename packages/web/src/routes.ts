@@ -21,6 +21,10 @@ import { lease } from './screens/lease.ts';
 import { live } from './screens/live.ts';
 import { simbrief } from './screens/simbrief.ts';
 import { realism } from './screens/ob-realism.ts';
+import { network } from './screens/network.ts';
+import { lineScreen } from './screens/line.ts';
+import { lineNew } from './screens/line-new.ts';
+import { ops } from './screens/ops.ts';
 
 export const routes: Record<string, ScreenFn> = {
   dashboard,
@@ -34,6 +38,8 @@ export const routes: Record<string, ScreenFn> = {
   leaderboard, duel: duelScreen, 'company-sheet': companySheet, recap,
   settings,
   realism,
+  // ---- lines (v3 F1)
+  network, line: lineScreen, 'line-new': lineNew, ops,
 };
 
 /** Old bookmarks (`#flights`) keep working. */

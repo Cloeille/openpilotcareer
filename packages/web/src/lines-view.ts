@@ -176,8 +176,18 @@ export function draftProblem(d: Draft, known: { a: boolean; b: boolean }): Draft
   return null;
 }
 
+/** Hours of the operating window (the unit of "per hour" frequencies). */
+export const windowHours = (d: Pick<Draft, 'windowStart' | 'windowEnd'>): number => Math.max(1, Math.floor((minutesOf(d.windowEnd) - minutesOf(d.windowStart)) / 60));
+/** The "par heure" view of a frequency: round trips per hour of the window, at least 1. */
+export const perHour = (d: Pick<Draft, 'freqPerDay' | 'windowStart' | 'windowEnd'>): number => Math.max(1, Math.round(d.freqPerDay / windowHours(d)));
+/** Round trips per day for `n` per hour over the window, capped at MAX_FREQ. */
+export const freqFromPerHour = (n: number, d: Pick<Draft, 'windowStart' | 'windowEnd'>): number => Math.min(MAX_FREQ, Math.max(1, n) * windowHours(d));
+/** The whole-day window ("24 h sur 24"): 23:59 closes it, since the contract's times are HH:MM within one day. */
+export const ROUND_THE_CLOCK = { windowStart: '00:00', windowEnd: '23:59' } as const;
+export const isRoundTheClock = (d: Pick<Draft, 'windowStart' | 'windowEnd'>): boolean => d.windowStart === ROUND_THE_CLOCK.windowStart && d.windowEnd === ROUND_THE_CLOCK.windowEnd;
+
 /** Block time of a leg, in minutes, with the aircraft that flies it: the same `blockHours` the server settles with. */
-export const blockMinutesFor = (type: Pick<AircraftType, 'cruiseKts'> & Partial<AircraftType>, distanceNm: number): number => Math.round(blockHours(type as AircraftType, distanceNm) * 60);
+export const blockMinutesFor = (type: Pick<AircraftType, 'cruiseKts'>, distanceNm: number): number => Math.round(blockHours(type as AircraftType, distanceNm) * 60);
 
 export type RotationBlock = { leg: 'out' | 'back'; dep: number; arr: number; conflict: boolean };
 export type PreviewLane = { aircraftId: number; blocks: RotationBlock[] };
@@ -249,6 +259,10 @@ export const opsBadge = (r: Pick<OpsRow, 'status' | 'delayMin' | 'own'>): OpsBad
 /** The cause of a cancellation as a message key suffix; the screen translates it. `note` from the server is plain words and only a fallback. */
 export const CAUSE_KEYS: Record<CancelCause, string> = { aircraft_unavailable: 'aircraft', no_crew: 'crew', duty_limit: 'duty', line_paused: 'paused' };
 export const causeKey = (c: CancelCause | null): string | null => (c ? CAUSE_KEYS[c] : null);
+
+/** The phase an in-flight row shows when the server gives no distance: derived from the progress. */
+export type Phase = 'climb' | 'cruise' | 'descent';
+export const phaseOf = (progress: number): Phase => (progress < 0.15 ? 'climb' : progress > 0.8 ? 'descent' : 'cruise');
 
 /** Where an in-flight row is along its flight, as a percentage. */
 export const progressPct = (f: Pick<ScheduledFlight, 'dep' | 'arr'>, now: number): number => Math.round(Math.min(1, Math.max(0, (now - f.dep) / Math.max(1, f.arr - f.dep))) * 100);

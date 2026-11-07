@@ -5,6 +5,7 @@
 @import './onboarding.css';
 @import './finance.css';
 @import './live.css';
+@import './lines.css';
 
 :root {
   color-scheme: dark;
