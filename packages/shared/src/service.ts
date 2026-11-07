@@ -44,8 +44,9 @@ export const DEFAULT_QUALITY: MealQuality = 'soigne';
 /** A caterer cannot do the chef's menu (the Cuisine screen: "sans plafond de volume, pas de Gastronomique"). */
 export const CATERER_MAX_QUALITY: MealQuality = 'soigne';
 export const catererQuality = (q: MealQuality): MealQuality => (MEAL_QUALITIES.indexOf(q) > MEAL_QUALITIES.indexOf(CATERER_MAX_QUALITY) ? CATERER_MAX_QUALITY : q);
-/** A hot meal is worth its rating over this base to a passenger who is given it. */
+/** A hot meal given free is worth `(rating - MEAL_RATING_BASE) x MEAL_BONUS_SHARE` points of satisfaction (soigne 0.96): tuned so the mockup's medium-haul offer comes to its 4.2. */
 export const MEAL_RATING_BASE = 3;
+export const MEAL_BONUS_SHARE = 0.8;
 
 /** A snack is a packed tray: made at the economy rate of the kitchen, with this much food in it. */
 export const SNACK_QUALITY: MealQuality = 'economy';
@@ -94,12 +95,12 @@ const flat = (n: number): Record<HaulClass, number> => ({ short: n, medium: n, l
  *  (snack and hot meal cost what the kitchen says, `foodCost`). `infotainment`: needs a screen or a Wi-Fi unit, so only jets have it. */
 type ItemSpec = { price: Record<HaulClass, number>; cost: Record<HaulClass, number>; take: number; paidTake: number; bonus: number; modes: readonly ServiceMode[]; infotainment: boolean };
 export const ITEMS: Record<ServiceItem, ItemSpec> = {
-  drinks: { price: flat(2.5), cost: flat(0.6), take: 1, paidTake: 0.3, bonus: 0.5, modes: SERVICE_MODES, infotainment: false },
-  snack: { price: flat(4), cost: flat(0), take: 0.9, paidTake: 0.2, bonus: 0.3, modes: SERVICE_MODES, infotainment: false },
+  drinks: { price: flat(2.5), cost: flat(0.6), take: 1, paidTake: 0.3, bonus: 0.4, modes: SERVICE_MODES, infotainment: false },
+  snack: { price: flat(4), cost: flat(0), take: 0.9, paidTake: 0.2, bonus: 0.2, modes: SERVICE_MODES, infotainment: false },
   hot_meal: { price: flat(0), cost: flat(0), take: 0.85, paidTake: 0.12, bonus: 0, modes: SERVICE_MODES, infotainment: false },
-  alcohol: { price: flat(7), cost: flat(1.8), take: 0.35, paidTake: 0.05, bonus: 0.2, modes: SERVICE_MODES, infotainment: false },
+  alcohol: { price: flat(7), cost: flat(1.8), take: 0.35, paidTake: 0.05, bonus: 0.1, modes: SERVICE_MODES, infotainment: false },
   films: { price: flat(5), cost: flat(0.15), take: 0.5, paidTake: 0.1, bonus: 0.3, modes: SERVICE_MODES, infotainment: true },
-  wifi: { price: { short: 4, medium: 8, long: 15 }, cost: flat(0.5), take: 0.4, paidTake: 0.06, bonus: 0.3, modes: SERVICE_MODES, infotainment: true },
+  wifi: { price: { short: 4, medium: 8, long: 15 }, cost: flat(0.5), take: 0.4, paidTake: 0.06, bonus: 0.2, modes: SERVICE_MODES, infotainment: true },
   comfort: { price: flat(6), cost: flat(0.8), take: 0.3, paidTake: 0.04, bonus: 0.2, modes: SERVICE_MODES, infotainment: false },
   // a duty-free basket is sold, never given: the reduced (short, medium) or the full catalogue (long), at 60 % cost of goods
   duty_free: { price: { short: 10, medium: 18, long: 30 }, cost: { short: 6, medium: 10.8, long: 18 }, take: 0, paidTake: 0.04, bonus: 0.1, modes: ['none', 'paid'], infotainment: false },
@@ -119,7 +120,7 @@ export const DEFAULT_POLICY: Record<HaulClass, Policy> = {
 
 /** Price and satisfaction bonus of an item on this haul class (the hot meal takes both from the quality). */
 export const unitOf = (item: ServiceItem, haul: HaulClass, quality: MealQuality): { price: number; bonus: number } =>
-  item === 'hot_meal' ? { price: MEALS[quality].price, bonus: MEALS[quality].rating - MEAL_RATING_BASE } : { price: ITEMS[item].price[haul], bonus: ITEMS[item].bonus };
+  item === 'hot_meal' ? { price: MEALS[quality].price, bonus: (MEALS[quality].rating - MEAL_RATING_BASE) * MEAL_BONUS_SHARE } : { price: ITEMS[item].price[haul], bonus: ITEMS[item].bonus };
 
 // ---------------------------------------------------------------- what a leg offers, earns and costs
 

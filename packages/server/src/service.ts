@@ -11,7 +11,7 @@ import {
 } from '@opc/shared';
 import { airports } from './catalog.ts';
 import { all, get, run, type Db } from './db.ts';
-import { effectOf, heldBy } from './facilities.ts';
+import { seedsOf } from './facilities.ts';
 import { isHuman } from './fleet-extras.ts';
 
 /** The instant after the last one: "the configuration as it will be". */
@@ -55,8 +55,14 @@ export function setQuality(db: Db, companyId: number, quality: MealQuality, now:
 
 // ---------------------------------------------------------------- who makes the meals at an airport
 
-/** The kitchen hall of the hub (S3's facility with the `kitchen` effect) is held by the company at `at`. */
-export const hallHeld = (db: Db, companyId: number, hub: string, at: number): boolean => heldBy(db, companyId, hub).some((h) => effectOf(h) === 'kitchen' && h.started_at <= at);
+/** The slot of the hub's kitchen hall in the catalogue (null: a small airport has none, a caterer serves). */
+export const hallSlot = (hub: string): { slot: string; rent: number } | null => { const s = seedsOf(hub).find((x) => x.effect === 'kitchen'); return s ? { slot: s.slot, rent: s.rent } : null; };
+/** The company holds the hub's kitchen hall at instant `at`: a contract that had started and not ended then (read off the contracts, not off the active ones, so a replayed tick sees the hall of its own time). */
+export function hallHeld(db: Db, companyId: number, hub: string, at: number): boolean {
+  const slot = hallSlot(hub)?.slot;
+  return !!slot && !!get(db, `SELECT 1 AS x FROM facility_contracts c JOIN facilities f ON f.id = c.facility_id
+    WHERE c.company_id = ? AND f.hub_icao = ? AND f.slot = ? AND c.started_at <= ? AND (c.ended_at IS NULL OR c.ended_at > ?)`, companyId, hub, slot, at, at);
+}
 
 /** A caterer serves unless the company chose its own kitchen AND holds the hall at that instant (a hall given up puts the caterer back, nobody makes meals in a building they do not have). */
 export function providerAt(db: Db, companyId: number, hub: string, at: number = LATEST): KitchenProvider {
