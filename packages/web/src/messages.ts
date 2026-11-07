@@ -2516,6 +2516,8 @@ const table = {
   // ---- parts (S5: the ledger kinds the finance screen shows)
   'fin.kind.parts_order': ['Spare parts ordered', 'Pièces de rechange commandées'], 'fin.kind.parts_emergency': ['Part for a breakdown', 'Pièce pour une panne'],
   'fin.kind.parts_sale': ['Spare parts sold back', 'Pièces de rechange revendues'], 'fin.kind.refurbish': ['Refurbishment', 'Remise à neuf'],
+  // ---- service (v3 lot S6: the kitchen hall is a facility, so its effect sentence belongs to the facilities screens; F6 appends the rest of its block)
+  'fc.effect.kitchen': ['Runs your central kitchen at {icao}: your own cooks make the meals of the flights that leave from here.', 'Fait tourner ta cuisine centrale à {icao} : tes cuisiniers préparent les repas des vols au départ d’ici.'],
 } as const satisfies Record<string, readonly [string, string]>;
 
 export type Key = keyof typeof table;

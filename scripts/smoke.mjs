@@ -248,6 +248,18 @@ const ord = await call('POST', '/warehouse/LFPG/order', { token: lineTok, body: 
 expect(ord.status === 201 && ord.body.order.eta > ord.body.order.orderedAt, `a part ordered by hand, delivery in ${Math.round((ord.body.order.eta - ord.body.order.orderedAt) / 86_400_000)} day(s)`, ord);
 const wearView = await call('GET', `/me/fleet/${lineAircraft.id}/wear`, { token: lineTok });
 expect(wearView.status === 200 && wearView.body.components.length >= 5 && wearView.body.totals.cashCurve.length > 0, `wear screen: ${wearView.body.components.map((c) => `${c.component} ${c.wearPct}%`).join(', ')}`, wearView);
+// v3 service: the policy table and the meal cards answer, a change is pending until tomorrow, the kitchen hall is on the plan, and the line's legs booked their service
+const service = await call('GET', '/service', { token: lineTok });
+expect(service.status === 200 && service.body.hauls.length === 3 && service.body.qualities.length === 3, `service: ${service.body.network.lines} line(s), satisfaction ${service.body.satisfaction.value ?? 'n/a (no cabin)'}, ${service.body.perDay.sales} sold and ${service.body.perDay.cost} spent today`, service);
+const policy = await call('PUT', '/service/policy', { token: lineTok, body: { haul: 'short', item: 'snack', mode: 'free' } });
+const snackCell = policy.body.hauls[0].cells.find((c) => c.item === 'snack');
+expect(policy.status === 200 && snackCell.mode === 'paid' && snackCell.next === 'free', 'a policy change applies tomorrow (paid now, free next)', snackCell);
+const kitchenHall = hubPlan.buildings.find((b) => b.effect === 'kitchen');
+const kitchen = await call('GET', '/kitchen/LFPG', { token: lineTok });
+expect(kitchen.status === 200 && kitchen.body.hall?.facilityId === kitchenHall?.facilityId && kitchen.body.provider === 'caterer', `kitchen at LFPG: hall ${kitchen.body.hall?.facilityId} on offer, a caterer serves`, kitchen);
+expect((await call('PUT', '/kitchen/LFPG', { token: lineTok, body: { provider: 'own' } })).body.error === 'no_kitchen_hall', 'an own kitchen needs the hall');
+const lineService = (await call('GET', '/me/transactions', { token: lp.body.token })).body.filter((x) => x.kind.startsWith('service_'));
+expect(lineService.length === 0 && service.body.satisfaction.value === null, 'the smoke line flies a C172 (no cabin crew): nothing is served, nothing is booked, no satisfaction term', lineService);
 const off = await call('PUT', '/network/enabled', { token: lp.body.token, body: { enabled: false } });
 expect(off.body.enabled === false && (await call('GET', '/network', { token: lp.body.token })).body.enabled === false, 'the network switch turns the lines off');
 await call('DELETE', '/me', { token: lp.body.token, body: { password } });

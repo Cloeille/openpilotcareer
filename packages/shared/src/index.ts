@@ -356,3 +356,6 @@ export * from './safety.ts';
 
 // ---- lot parts (v3)
 export * from './parts.ts';
+
+// ---- lot service (v3)
+export * from './service.ts';
