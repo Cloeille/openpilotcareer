@@ -336,13 +336,14 @@ test('fatigue comes from the duty actually worked; the card alerts on the next f
   assert.equal(d.duty.fatigue, 55, 'the mockup\'s 46 h in 7 days and 6 duty days in a row');
   assert.equal(d.duty.flight28d, 99);
   assert.equal(d.last7d.filter((x) => x.kind === 'duty').length, 6);
+  const o = (await w.call('GET', '/api/v1/staff')).body as StaffOverview;
+  assert.ok(o.watch.some((x) => x.staffId === p.id && x.reason === 'fatigue' && x.value === 55), JSON.stringify(o.watch));
   assert.ok(d.alert && d.alert.rule === 'streak' && d.alert.overBy === 1 && /^\w{3} \d+$/.test(d.alert.flightNo), 'six days in a row: the next flight would be a seventh');
   run(w.h.db, 'DELETE FROM staff_duty WHERE leg_id = -1');
   run(w.h.db, 'UPDATE staff_duty SET flight_min = 2200 WHERE leg_id = -2');
   const over = (await w.call('GET', `/api/v1/staff/${p.id}`)).body as StaffDetail;
   assert.ok(over.alert && over.alert.rule === 'flight28' && over.alert.overBy > 0, JSON.stringify(over.alert));
-  const o = (await w.call('GET', '/api/v1/staff')).body as StaffOverview;
-  assert.ok(o.watch.some((x) => x.staffId === p.id && x.reason === 'fatigue' && x.value === 55), JSON.stringify(o.watch));
+  assert.ok(((await w.call('GET', '/api/v1/staff')).body as StaffOverview).watch.some((x) => x.staffId === p.id && x.reason === 'duty'), 'and past 85 h of the 100 h the pilot is on the watch list for the flight limit');
 });
 
 test('a person is on duty until the release after the landing, resting until the rest policy\'s hours are over, then free', async () => {
