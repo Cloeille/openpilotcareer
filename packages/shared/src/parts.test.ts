@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  COMPONENTS, DELIVERY_DAYS, FAILURE_WEAR_PCT, FERRY_DAYS, FIX_HOURS_WITH_PART, HANGAR_FIX_HOURS, HEAVY_CHECK_DAYS, HOURS_PER_MONTH, KEEP_VALUE_SHARE, NEVER_PAYBACK_MONTHS, OVERHAUL_WEAR_PCT, PARTS, PART_CLASSES,
+  COMPONENTS, DELIVERY_DAYS, REFURB_DAYS, isHeavyCheck, FAILURE_WEAR_PCT, FERRY_DAYS, FIX_HOURS_WITH_PART, HANGAR_FIX_HOURS, HEAVY_CHECK_DAYS, HOURS_PER_MONTH, KEEP_VALUE_SHARE, NEVER_PAYBACK_MONTHS, OVERHAUL_WEAR_PCT, PARTS, PART_CLASSES,
   RENEWED_WEAR_PCT, SEED_WEAR_MAX_PCT, addEffects, bestChoice, choiceView, componentRate, componentWearAfter, componentsOf, deliveryDays, failedPart, failuresPerYear, fixHours, groundDayValue,
   groundDaysPerYear, kitCapital, kitCovers, kitOf, kpiOf, moneyFactors, monthlyLoss, orderBodySchema, partClassOf, policyBodySchema, refurbCost, refurbTotals, refurbishBodySchema, reliabilityRiskFactor,
   seedWear, wearEffects, wearQuerySchema, worksDays, type Choice, type Economics,
@@ -138,8 +138,11 @@ test('a breakdown picks the failed part of its component from a draw, and a deli
 test('workshop days: a hangar halves them (B.4), a heavy check without a staffed level-2 hangar adds the ferry, a short visit never does', () => {
   assert.equal(worksDays(0, 0.5, false), 0);
   assert.equal(worksDays(6, 1, false), 6, 'six days is not a heavy check: no ferry');
+  assert.equal(worksDays(HEAVY_CHECK_DAYS, 1, false), HEAVY_CHECK_DAYS, 'the limit itself is not heavy');
   assert.equal(worksDays(6, 0.5, false), 3);
   const heavy = HEAVY_CHECK_DAYS + 3;
+  assert.equal(REFURB_DAYS.replace.engines, 21);
+  assert.deepEqual(COMPONENTS.flatMap((c) => (['overhaul', 'replace'] as const).filter((a) => isHeavyCheck(REFURB_DAYS[a][c])).map((a) => `${c}:${a}`)), ['engines:replace'], 'only an engine replacement is a heavy check');
   assert.equal(worksDays(heavy, 1, false), heavy + FERRY_DAYS);
   assert.equal(worksDays(heavy, 0.5, false), Math.ceil(heavy / 2) + FERRY_DAYS);
   assert.equal(worksDays(heavy, 0.5, true), Math.ceil(heavy / 2), 'a level-2 hangar: heavy checks without ferry');

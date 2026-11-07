@@ -130,8 +130,8 @@ export const KEEP_VALUE_SHARE = 0.46;
 export const HORIZON_MONTHS = 24;
 export const NEVER_PAYBACK_MONTHS = 100;
 /** B.4 (level 2 hangar: heavy checks without ferry): a visit longer than this is a heavy check, done at the base only if a staffed hangar of level 2 stands there; otherwise the aircraft is ferried to a
- *  workshop, which costs the convoy fee and FERRY_DAYS more. Shorter visits are done wherever the aircraft is. The mockup's six days for the gear, propellers, avionics and seats are not a heavy check. */
-export const HEAVY_CHECK_DAYS = 7;
+ *  workshop, which costs the convoy fee and FERRY_DAYS more. Shorter visits are done wherever the aircraft is: only an engine replacement is a heavy check; the mockup's six days for the gear, propellers, avionics and seats are not. */
+export const HEAVY_CHECK_DAYS = 14;
 export const FERRY_DAYS = 2;
 export const isHeavyCheck = (itemDays: number): boolean => itemDays > HEAVY_CHECK_DAYS;
 /** Days the aircraft is in the workshop: the longest item times the hangar's downtime factor (B.4: any staffed hangar halves it), plus the ferry of a heavy check without a level-2 hangar. */
