@@ -85,7 +85,9 @@ export function planMonth(start: number, contracts: PlanContract[], fleet: PlanA
   return { charges, contracts: next, facilities: built.rows, ended, returned, owned };
 }
 
-function planInputs(db: Db, companyId: number, at: number): { contracts: PlanContract[]; fleet: PlanAircraft[]; staff: PlanStaff[]; facilities: PlanFacility[] } {
+export type PlanInputs = { contracts: PlanContract[]; fleet: PlanAircraft[]; staff: PlanStaff[]; facilities: PlanFacility[] };
+
+export function planInputs(db: Db, companyId: number, at: number): PlanInputs {
   const contracts = all<ContractRow>(db, "SELECT * FROM contracts WHERE company_id = ? AND status = 'active' ORDER BY id", companyId);
   const fleet = all<{ id: number; icao: string; registration: string | null; base: string | null; ownership: Ownership; value: number; acquired_at: number; busy: number }>(db,
     `SELECT a.*, EXISTS (SELECT 1 FROM flights f WHERE f.aircraft_id = a.id AND f.status = 'active') AS busy FROM aircraft a WHERE a.company_id = ? AND a.returned_at IS NULL ORDER BY a.id`, companyId)
@@ -272,9 +274,9 @@ export const rentMonthly = (db: Db, companyId: number, hub: string, icao: string
 
 const UPCOMING_MONTHS = 3;
 
-/** What the next `months` billing runs will post, by the rules billing itself uses (`planMonth` on the contracts as they will be). Each charge is dated the 1st of its month. */
-export function projectCharges(db: Db, companyId: number, now: number, months: number): FinanceCharge[] {
-  const { contracts, fleet, staff, facilities } = planInputs(db, companyId, now);
+/** What the next `months` billing runs will post, by the rules billing itself uses (`planMonth` on the contracts as they will be). Each charge is dated the 1st of its month. `inputs` lets the forecast ask "what if" (an extra contract, another fleet). */
+export function projectCharges(db: Db, companyId: number, now: number, months: number, inputs: PlanInputs = planInputs(db, companyId, now)): FinanceCharge[] {
+  const { contracts, fleet, staff, facilities } = inputs;
   const upcoming: FinanceCharge[] = [];
   let state = contracts, buildings = facilities;
   for (let i = 1; i <= months; i++) {

@@ -180,12 +180,20 @@ export function dutyFacts(db: Db, s: StaffRow, now: number): DutyFacts {
 
 // ---------------------------------------------------------------- what a flown leg cost in people
 
+/** One duty row's share of its person's salary: that day's pay (a thirtieth of the month) in proportion to the flying the person did that day. Aliases: `d` staff_duty, `s` staff. */
+const DUTY_COST_SQL = 'd.flight_min * 1.0 / (SELECT SUM(x.flight_min) FROM staff_duty x WHERE x.staff_id = d.staff_id AND x.day = d.day) * s.salary / 30';
+
 /** Salary cost of the crew of the given legs: each person's day of salary (a thirtieth of the month) is shared by the legs they flew that day, in proportion to the flying. */
 export function crewCost(db: Db, legIds: readonly number[]): number {
   if (legIds.length === 0) return 0;
   const marks = legIds.map(() => '?').join(',');
-  return Math.round(all<{ cost: number }>(db, `SELECT d.flight_min * 1.0 / (SELECT SUM(x.flight_min) FROM staff_duty x WHERE x.staff_id = d.staff_id AND x.day = d.day) * s.salary / 30 AS cost
-    FROM staff_duty d JOIN staff s ON s.id = d.staff_id WHERE d.leg_id IN (${marks})`, ...legIds).reduce((t, r) => t + r.cost, 0));
+  return Math.round(all<{ cost: number }>(db, `SELECT ${DUTY_COST_SQL} AS cost FROM staff_duty d JOIN staff s ON s.id = d.staff_id WHERE d.leg_id IN (${marks})`, ...legIds).reduce((t, r) => t + r.cost, 0));
+}
+
+/** The crew cost of every duty row departing in [from, to), by flight number (the line a flight number belongs to is `lines.flight_base`'s block). Duty rows outlive their scheduled leg (`leg_id` is cleared when the leg is pruned), so a closed month is read from here. */
+export function dutyCostByFlight(db: Db, companyId: number, from: number, to: number): { flightNo: number; at: number; cost: number }[] {
+  return all<{ flightNo: number; at: number; cost: number }>(db, `SELECT d.flight_no AS flightNo, d.dep_at AS at, ${DUTY_COST_SQL} AS cost FROM staff_duty d JOIN staff s ON s.id = d.staff_id
+    WHERE s.company_id = ? AND d.dep_at >= ? AND d.dep_at < ?`, companyId, from, to);
 }
 
 /** Surnames of the pilots who flew a leg ("Lefèvre / Martin"), null when nobody is booked on it. */

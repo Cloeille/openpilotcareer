@@ -34,8 +34,19 @@ export const kindsOf = (category: Category): string[] => KNOWN_KINDS.filter((k) 
 /** What the company earns by flying: the categories that make up a month's revenue (credit ceilings and debt ratios read this, never a grant or a refund). */
 export const OPERATING_INCOME: readonly Category[] = ['tickets', 'jobs', 'freight', 'service'];
 
-/** Ledger kinds an aircraft's fixed cost is made of (profitability allocates them to the lines it flew). */
-export const FIXED_COST_KINDS = ['lease_rent', 'insurance', 'parking'] as const;
+/** A month's revenue: what the company earned by flying, out of its totals per category. The one definition every report, the credit ceiling and the debt ratio share. */
+export const revenueOf = (byCategory: readonly CategoryTotal[]): number => byCategory.filter((c) => OPERATING_INCOME.includes(c.category)).reduce((t, c) => t + c.in, 0);
+
+/** The ledger kinds each money figure of the profitability report is made of. Crew and the fixed costs are not postings of a leg: crew comes from the duty ledger, `fixed` is what an aircraft costs a month
+ *  whatever it flies (leasing, hull insurance, parking), allocated to the lines it flew by block hours. Credits and buildings stay out of a line's margin (the mockup: "hors crédits et loyers"). */
+export const PROFIT_KINDS = {
+  revenue: ['line_revenue', 'payout', 'service_sales'],
+  fuel: ['line_fuel', 'fuel', 'club_hours'],
+  fees: ['line_fee', 'landing_fee'],
+  maintenance: ['line_maintenance', 'maintenance'],
+  service: ['service_cost'],
+  fixed: ['lease_rent', 'insurance', 'parking'],
+} as const;
 
 // ---------------------------------------------------------------- cash flow
 
@@ -50,6 +61,9 @@ export type CashMonth = {
   /** Inflows that are not operating income: refunds, resales, starting capital, bailout. `net = revenue + other - spend`. */
   other: number;
   net: number;
+  /** Net minus the previous shown month's net; null for the first month shown. */
+  netVsPrevious: number | null;
+  /** The balance on the last day of the month (the running sum of the postings dated up to it; for the current month, today). */
   endBalance: number;
   byCategory: CategoryTotal[];
 };
@@ -60,13 +74,16 @@ export type CashView = {
   runwayDays: number | null;
   debt: { total: number; monthly: number; credits: number };
   months: CashMonth[];
+  /** The debits of the next billing date, biggest first, and their sum. */
   upcoming: UpcomingDebit[];
+  upcomingTotal: number;
 };
 export const CASH_MONTHS_MAX = 24;
 export const cashQuerySchema = z.object({ months: z.coerce.number().int().min(1).max(CASH_MONTHS_MAX).default(12) });
 
 // ---------------------------------------------------------------- statement
 
+/** `balanceAfter` is the balance after this posting in date order (the order the statement is read in), so a backdated line leg sits where it happened. */
 export type StatementRow = {
   id: number; at: number; kind: string; category: Category; memo: string; amount: number; balanceAfter: number; flightId: number | null;
   line: { id: number; a: string; b: string } | null; aircraft: { id: number; registration: string } | null;
@@ -77,14 +94,15 @@ export type StatementView = {
   summary: { net: number; in: number; out: number; count: number; byCategory: CategoryTotal[] };
   /** Cursor for the next (older) page: pass it as `before`; null at the end. */
   next: number | null;
-  /** The biggest debit of the next billing date. */
+  /** The biggest debit of the next billing date (the mockup's "next scheduled posting"). */
   scheduled: UpcomingDebit | null;
 };
-const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((s) => new Date(`${s}T00:00:00Z`).toISOString().startsWith(s), 'not a calendar date');
 export const statementQuerySchema = z.object({
   from: isoDate.optional(), to: isoDate.optional(), category: z.enum(CATEGORIES).optional(), line: z.coerce.number().int().positive().optional(),
   before: z.coerce.number().int().positive().optional(), limit: z.coerce.number().int().min(1).max(200).default(50),
 });
+export type StatementQuery = z.infer<typeof statementQuerySchema>;
 
 // ---------------------------------------------------------------- profitability
 
@@ -97,11 +115,14 @@ export type ProfitMoney = { flights: number; revenue: number; costs: number; mar
 export type ProfitRow = ProfitMoney & (
   { by: 'line'; id: number; a: string; b: string; aircraft: string[] } | { by: 'aircraft'; id: number; registration: string; icao: string; lines: string[] });
 export type ProfitView = {
-  month: string; by: ProfitBy; rows: ProfitRow[];
+  month: string; by: ProfitBy;
+  /** The month is over: its figures are final. */
+  closed: boolean;
+  rows: ProfitRow[];
   totals: { margin: number; profitable: { count: number; margin: number }; losing: { count: number; margin: number } };
 };
-const month = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
-export const profitQuerySchema = z.object({ month: month.optional(), by: z.enum(PROFIT_BY).default('line') });
+const monthKeySchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
+export const profitQuerySchema = z.object({ month: monthKeySchema.optional(), by: z.enum(PROFIT_BY).default('line') });
 
 // ---------------------------------------------------------------- forecast
 
@@ -117,6 +138,7 @@ export const FORECAST_MONTHS = 12;
 export const DECISIONS = ['pause_line', 'lease_aircraft'] as const;
 export type DecisionId = (typeof DECISIONS)[number];
 
+/** The lowest balance of a month, per scenario. */
 export type ForecastPoint = Record<Scenario, number> & { month: string };
 export type ScenarioSummary = {
   /** Lowest balance of the horizon, the day it happens and the month it falls in. */
@@ -143,4 +165,27 @@ export type ForecastView = {
 };
 export const decisionBodySchema = z.object({ decision: z.enum(DECISIONS) });
 /** The forecast with a decision applied: the new curve and its summary, next to the base. */
-export type DecisionResult = { decision: DecisionId; points: ForecastPoint[]; summary: Record<Scenario, ScenarioSummary> };
+export type DecisionResult = { decision: DecisionId; points: ForecastPoint[]; summary: Record<Scenario, ScenarioSummary>; effect: Record<Scenario, DecisionEffect> };
+
+const DAY = 86_400_000;
+/** The balance day by day (UTC day starts) from `from` (its balance is `balance`) to `to`: each day adds that day's `charges` (billing, on the 1st) and `net` (the flying that day). Pure: the server feeds it the
+ *  charges `planMonth` projects and the line forecast, this only walks the days. Returns the lowest balance of every month it touches (the month of `from` included) and the horizon summary. */
+export function walkBalance(o: { from: number; to: number; balance: number; charges: (day: number) => number; net: (day: number) => number }): { lowByMonth: Map<string, number>; summary: ScenarioSummary } {
+  const key = (day: number): string => new Date(day).toISOString().slice(0, 7);
+  let balance = o.balance;
+  const lowByMonth = new Map<string, number>([[key(o.from), balance]]);
+  let lowest = { balance, at: o.from };
+  const overdraft = { days: 0, from: null as number | null, to: null as number | null };
+  const note = (day: number): void => {
+    if (balance < lowest.balance) lowest = { balance, at: day };
+    if (balance < (lowByMonth.get(key(day)) ?? Infinity)) lowByMonth.set(key(day), balance);
+    if (balance < 0) { overdraft.days++; overdraft.from ??= day; overdraft.to = day; }
+  };
+  if (balance < 0) { overdraft.days++; overdraft.from = o.from; overdraft.to = o.from; }
+  for (let day = o.from + DAY; day <= o.to; day += DAY) {
+    balance += o.charges(day) + o.net(day);
+    note(day);
+  }
+  for (const [m, v] of lowByMonth) lowByMonth.set(m, Math.round(v));
+  return { lowByMonth, summary: { lowest: { balance: Math.round(lowest.balance), at: lowest.at }, end: Math.round(balance), overdraft } };
+}
