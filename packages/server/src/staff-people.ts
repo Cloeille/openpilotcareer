@@ -217,12 +217,16 @@ export const lineShortage = (db: Db, l: Pick<LineRow, 'id' | 'company_id' | 'a' 
 /** Where a line's people are employed: the line end that is one of the company's hubs or bases (else the first). */
 const lineBase = (db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>): string => [l.a, l.b].find((x) => basesOf(db, l.company_id).includes(x)) ?? l.a;
 
-/** The cheapest candidates at the line's base that fill each shortage. */
+/** Positions of each shortage that no hire in notice is going to fill (hiring on top of them would pay premiums for nobody's seat). */
+const openOf = (db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>, x: Shortage, now: number): number =>
+  Math.max(0, x.need - x.have - pendingHires(db, l.company_id, x.family, x.type, [l.a, l.b], now).length);
+
+/** The cheapest candidates at the line's base that fill the open positions of each shortage. */
 export function recruitPlan(db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>, short: readonly Shortage[], now: number): Candidate[] {
   const base = lineBase(db, l);
   const taken = new Set(all<{ candidate_id: string }>(db, 'SELECT candidate_id FROM staff WHERE company_id = ? AND candidate_id IS NOT NULL', l.company_id).map((r) => r.candidate_id));
   const day = dayNo(now);
-  return short.flatMap((x) => candidatesFor(db, l.company_id, day, base, x.family, x.type).filter((c) => !taken.has(c.id)).sort((p, q) => p.askingSalary - q.askingSalary || p.id.localeCompare(q.id)).slice(0, x.need - x.have));
+  return short.flatMap((x) => candidatesFor(db, l.company_id, day, base, x.family, x.type).filter((c) => !taken.has(c.id)).sort((p, q) => p.askingSalary - q.askingSalary || p.id.localeCompare(q.id)).slice(0, openOf(db, l, x, now)));
 }
 
 /** A person who will fill positions of `family` (rated on `type`) when he starts. */
@@ -289,7 +293,10 @@ const nothingToCover = (short: readonly Shortage[]): void => { if (short.length 
 export function recruitForLine(db: Db, l: LineRow, now: number, withInterim = false): number {
   const short = lineShortage(db, l, now);
   const plan = recruitPlan(db, l, short, now);
-  if (plan.length === 0) throw new HttpError(409, 'no_candidates', 'nobody is on the market for this position today');
+  if (plan.length === 0) {
+    if (short.every((x) => openOf(db, l, x, now) === 0)) throw new HttpError(409, 'already_recruited', 'hires already in notice fill every position: bridge with an interim or start them now');
+    throw new HttpError(409, 'no_candidates', 'nobody is on the market for this position today');
+  }
   for (const c of plan) hire(db, l.company_id, c.id, now);
   if (withInterim) bookBridge(db, l, short, pendingArrivals(db, l, short, now), now);
   return plan.length;

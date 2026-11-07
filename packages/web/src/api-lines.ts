@@ -1,3 +1,4 @@
+import type { LineBridge, LineStartNow, ResolveOption } from '@opc/shared';
 import { api } from './api.ts';
 import { ApiError } from './errors.ts';
 
@@ -69,12 +70,17 @@ export type LineProblemView = {
   cost: { cancelled: number; lostRevenue: number; perDay: number; reputation: number; slotsLostAt: number | null };
   options: {
     reassign: { aircraft: FreeAircraft[]; flightsPerDay: number; deltaPerDay: number } | null;
-    recruit: { candidates: number; monthly: number; readyAt: number | null } | null;
+    /** `premium`: paid now; `bridge`: the interim that `withInterim` adds, ending when the hires arrive. */
+    recruit: { candidates: number; monthly: number; readyAt: number | null; premium: number; bridge: LineBridge | null } | null;
+    /** Temporary hires who start now and leave as the recruits arrive; null when the crew is complete. */
+    interim: LineBridge | null;
+    /** The hires in notice started now for START_NOW_FEE each; null unless they fill every missing position. */
+    startNow: LineStartNow | null;
     pause: { fixedCostPerDay: number };
   };
   projection: { date: string; status: ProjectionStatus }[];
 };
-export type ResolveOption = 'reassign' | 'recruit' | 'pause';
+export type { LineBridge, LineStartNow, ResolveOption };
 export type OpsRow = ScheduledFlight & { reg: string; typeName: string; crew: string | null; note: string | null; own: boolean };
 export type OpsView = { now: number; enabled: boolean; counts: { flying: number; upcoming: number; cancelled: number; delayed: number }; flying: OpsRow[]; upcoming: OpsRow[] };
 
@@ -98,7 +104,7 @@ export const createLine = (p: LineBody): Promise<Line> => api<Line>('/lines', { 
 export const pauseLine = (id: number): Promise<unknown> => api(`/lines/${id}/pause`, { method: 'POST', body: {} });
 export const resumeLine = (id: number): Promise<unknown> => api(`/lines/${id}/resume`, { method: 'POST', body: {} });
 export const deleteLine = (id: number): Promise<unknown> => api(`/lines/${id}`, { method: 'DELETE' });
-export const resolveLine = (id: number, option: ResolveOption, aircraftId?: number): Promise<Line> =>
-  api<Line>(`/lines/${id}/resolve`, { method: 'POST', body: { option, ...(aircraftId === undefined ? {} : { aircraftId }) } });
+export const resolveLine = (id: number, option: ResolveOption, extra: { aircraftId?: number; withInterim?: boolean } = {}): Promise<Line> =>
+  api<Line>(`/lines/${id}/resolve`, { method: 'POST', body: { option, ...extra } });
 export const takeRotation = (lineId: number, flightId: number): Promise<{ job: { id: string }; reservedUntil: number }> =>
   api(`/lines/${lineId}/rotations/${flightId}/take`, { method: 'POST', body: {} });
