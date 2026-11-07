@@ -13,6 +13,7 @@ import { h, notify } from '../ui.ts';
 
 /** What the screen remembers across its own redraws (an action, a language change): the column and the row the cursor is on, the meal level looked at. A new visit starts from the data again. */
 let col: HaulClass | null = null;
+let cursor: ServiceItem | null = null;
 let looked: MealQuality | null = null;
 
 const redraw = async (): Promise<void> => { window.dispatchEvent(new Event('opc:redraw')); };
@@ -29,6 +30,8 @@ export async function service(ctx: Ctx): Promise<Screen> {
   kitchenTrail.fromService = false;
   if (col === null || !HAULS.includes(col)) col = defaultHaul(view.hauls);
   if (looked === view.mealQuality) looked = null;
+  const rowItems = GROUPS.flatMap((g) => g.items.filter((i) => view.hauls.some((v) => v.cells[i] !== undefined)));
+  if (cursor === null || !rowItems.includes(cursor)) cursor = rowItems[0] ?? null;
   const hub = me.hubs[0] ?? null;
   const kitchenHash = hub ? `#kitchen/${hub}` : null;
   const toKitchen = (): void => { if (kitchenHash) { kitchenTrail.fromService = true; go(kitchenHash); } };
@@ -50,13 +53,18 @@ export async function service(ctx: Ctx): Promise<Screen> {
   // ------------------------------------------------------------ the matrix
   const haulName = (c: HaulClass): string => t(`sv.haul.${c}` as Key);
   const markColumn = (): void => {
-    document.querySelectorAll<HTMLElement>('.sv-table [data-haul]').forEach((el) => {
+    document.querySelectorAll<HTMLElement>('.sv-table .sv-head[data-haul], .sv-table .sv-cell-in[data-haul]').forEach((el) => {
       const on = el.dataset.haul === col;
       el.classList.toggle('on', on);
       if (el.matches('button')) el.setAttribute('aria-pressed', String(on));
     });
   };
   const pickColumn = (c: HaulClass): void => { col = c; markColumn(); };
+  /** The cursor row is what Enter acts on when no row has the focus (it carries `data-primary`), and it keeps the outlined cell of the mockup. */
+  const moveCursor = (item: ServiceItem): void => {
+    cursor = item;
+    document.querySelectorAll<HTMLElement>('.sv-row').forEach((r) => { const on = r.dataset.item === item; r.classList.toggle('cur', on); if (on) r.setAttribute('data-primary', ''); else r.removeAttribute('data-primary'); });
+  };
 
   const cellText = (item: ServiceItem, haul: HaulClass): { state: string; detail: string | null; mode: string } => {
     const cell = cellOf(view.hauls, haul, item);
@@ -81,7 +89,7 @@ export async function service(ctx: Ctx): Promise<Screen> {
   const head = (v: ServiceView['hauls'][number]): HTMLElement => {
     const c = comfortOf(v.satisfaction);
     const word = t(`sv.comfort.${c.level}` as Key);
-    const sub = operated(v) ? `${t(`sv.haul.sub.${v.haul}` as Key)}${v.aircraft.length > 0 ? ` · ${v.aircraft.join(', ')}` : ''}` : `${t(`sv.haul.sub.${v.haul}` as Key)} · ${t('sv.haul.notOperated')}`;
+    const sub = `${t(`sv.haul.sub.${v.haul}` as Key)} · ${operated(v) ? v.aircraft.join(', ') : t('sv.haul.notOperated')}`.replace(/ · $/, '');
     return h('th', { scope: 'col', class: `sv-th${operated(v) ? '' : ' idle'}`, 'data-haul': v.haul },
       h('button', { type: 'button', class: 'sv-head', 'data-haul': v.haul, 'aria-pressed': String(v.haul === col), onclick: () => pickColumn(v.haul) },
         h('span', { class: 'sv-head-name' }, haulName(v.haul)),
@@ -95,14 +103,13 @@ export async function service(ctx: Ctx): Promise<Screen> {
   const itemRow = (item: ServiceItem): HTMLElement => {
     const label = t(`sv.item.${item}` as Key);
     const texts = HAULS.map((c) => ({ c, ...cellText(item, c) }));
-    const row = h('tr', {
-      class: 'sv-row', id: `sv-row-${item}`, 'data-row': '', tabindex: 0,
+    return h('tr', {
+      class: `sv-row${item === cursor ? ' cur' : ''}`, id: `sv-row-${item}`, 'data-row': '', tabindex: 0, 'data-item': item, 'data-primary': item === cursor ? '' : null, onfocus: () => moveCursor(item),
       'aria-label': t('sv.row.label', { item: label, cells: texts.map((x) => `${haulName(x.c)} ${x.state}${x.detail ? ` ${x.detail.replace(/^· /, '')}` : ''}`).join(', ') }),
       onclick: (e: MouseEvent) => { const td = (e.target as Element).closest<HTMLElement>('td[data-haul]'); const c = (td?.dataset.haul as HaulClass | undefined) ?? col!; pickColumn(c); cycle(item, c); },
     }, h('th', { scope: 'row', class: 'sv-label' }, label),
-      texts.map((x) => h('td', { class: `sv-cell${operated(view.hauls.find((v) => v.haul === x.c)!) ? '' : ' idle'}${x.c === col ? ' on' : ''}`, 'data-haul': x.c },
-        h('span', { class: `sv-state ${x.mode}` }, x.state), x.detail ? h('span', { class: 'sv-detail' }, x.detail) : null)));
-    return row;
+      texts.map((x) => h('td', { class: `sv-cell${operated(view.hauls.find((v) => v.haul === x.c)!) ? '' : ' idle'}`, 'data-haul': x.c },
+        h('div', { class: `sv-cell-in${x.c === col ? ' on' : ''}`, 'data-haul': x.c }, h('span', { class: `sv-state ${x.mode}` }, x.state), x.detail ? h('span', { class: 'sv-detail' }, x.detail) : null))));
   };
 
   const rows = GROUPS.flatMap((g) => [
@@ -126,17 +133,18 @@ export async function service(ctx: Ctx): Promise<Screen> {
     const effect = (e: ReturnType<typeof effectsOf>[number]): HTMLElement => h('div', { class: 'line' }, h('span', { class: 'line-label' }, t(`sv.trade.${e.label}` as Key)),
       h('span', { class: `sv-effect ${e.tone}` }, e.value.kind === 'move' ? t('sv.trade.move', { from: fm.num(e.value.from), to: fm.num(e.value.to) }) : e.value.unit === 'sat' ? signed(e.value.n, 1) : tp('sv.trade.points', Math.abs(e.value.n), { n: signed(e.value.n) })));
     tradeHost.replaceChildren(
-      h('h3', { class: 'sv-trade-title' }, t('sv.trade.title', { quality: qualityName(q).toLowerCase() })),
-      ...(preview ? effectsOf(preview).map(effect) : []),
-      h('div', { class: 'row sv-apply' }, button(t('sv.trade.apply'), { variant: 'secondary', icon: 'chef-hat', onclick: () => void act(t('sv.meals.saved', { quality: qualityName(q).toLowerCase() }), () => setMealQuality(q), async () => { looked = null; await redraw(); }) })));
+      h('div', { class: 'sv-trade-head' },
+        h('h3', { class: 'sv-trade-title' }, t('sv.trade.title', { quality: qualityName(q).toLowerCase() })),
+        button(t('sv.trade.apply'), { variant: 'secondary', icon: 'chef-hat', onclick: () => void act(t('sv.meals.saved', { quality: qualityName(q).toLowerCase() }), () => setMealQuality(q), async () => { looked = null; await redraw(); }) })),
+      ...(preview ? effectsOf(preview).map(effect) : []));
   };
   const shownQuality = looked ?? candidateOf(view.tiers, view.mealQuality) ?? view.mealQuality;
   const tierCard = (q: MealQuality): HTMLElement | null => {
     const x = view.tiers.find((y) => y.quality === q);
     if (!x) return null;
     const now = q === view.mealQuality;
-    return h('button', { type: 'button', class: `sv-tier${q === shownQuality ? ' sel' : ''}`, 'aria-pressed': String(q === shownQuality),
-      onclick: () => { looked = q; document.querySelectorAll<HTMLElement>('.sv-tier').forEach((el) => { const on = el.dataset.q === q; el.classList.toggle('sel', on); el.setAttribute('aria-pressed', String(on)); }); void paintTrade(q); }, 'data-q': q },
+    return h('button', { type: 'button', class: `sv-tier${now ? ' sel' : ''}${q === shownQuality ? ' look' : ''}`, 'aria-pressed': String(q === shownQuality), 'data-q': q,
+      onclick: () => { looked = q; document.querySelectorAll<HTMLElement>('.sv-tier').forEach((el) => { const on = el.dataset.q === q; el.classList.toggle('look', on); el.setAttribute('aria-pressed', String(on)); }); void paintTrade(q); } },
       h('span', { class: 'sv-tier-name' }, qualityName(q), now ? h('span', { class: 'sv-now', title: t('sv.meals.current') }, icon('check', 13), h('span', { class: 'sr' }, t('sv.meals.current'))) : null),
       h('span', { class: 'sv-tier-cost' }, priceLine(x.price)),
       h('span', { class: 'sv-tier-fact' }, icon('smile', 12), outOf5(x.satisfaction)),

@@ -23,7 +23,8 @@ export const SERVICE: ServiceView = {
   mealQuality: 'soigne', tiers: TIERS,
 };
 
-export const PREVIEW_GASTRO: QualityPreview = { quality: 'gastronomique', satisfaction: 0.5, marginPts: -19, mealsPerDay: { from: 420, to: 260 }, cooks: { from: 6, to: 11 } };
+/** Soigné -> gastronomique on the tiers above: satisfaction 4.2 -> 4.7, margin 54 % -> 36 % (C14), 620 -> 310 meals a day, 6 -> 9 cooks. */
+export const PREVIEW_GASTRO: QualityPreview = { quality: 'gastronomique', satisfaction: 0.5, marginPts: -18, mealsPerDay: { from: 620, to: 310 }, cooks: { from: 6, to: 9 } };
 
 export const CATERER: CatererOption = { name: 'Riviera Traiteur Aviation', costPerMeal: 8.1, margin: 1 - 8.1 / 14, qualities: ['economy', 'soigne'] };
 

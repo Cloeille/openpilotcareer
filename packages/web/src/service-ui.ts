@@ -18,8 +18,8 @@ export const kitchenTrail = { fromService: false };
 
 export const qualityName = (q: MealQuality): string => t(`sv.q.${q}` as Key);
 
-/** Euros with cents, for a price per meal: `6,40 €`. */
-export const money2 = (n: number): string => `${fmt().num(n, 2)}${NBSP}\u20ac`;
+/** A price per meal: whole euros stay whole (`14 €`), the others have cents (`6,40 €`), as the mockup writes them. */
+export const money2 = (n: number): string => (Number.isInteger(n) ? fmt().money(n) : `${fmt().num(n, 2)}${NBSP}\u20ac`);
 
 /** A signed number with the typographic minus: `+0,5`, `−0,3`. */
 export const signed = (n: number, digits = 0): string => `${n > 0 ? '+' : ''}${fmt().num(n, digits)}`;

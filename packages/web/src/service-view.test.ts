@@ -50,13 +50,13 @@ test('the trade-off compares with the next level up, or the one below at the top
   assert.equal(candidateOf([], 'soigne'), null);
 });
 
-test('the four effects of the mockup\'s switch to gastronomique: +0.5 good, -19 pts bad, 420 -> 260 a warning, 6 -> 11 plain', () => {
+test('the four effects of a switch to gastronomique: +0.5 good, -18 pts bad, 620 -> 310 meals a warning, 6 -> 9 cooks plain', () => {
   const [sat, margin, meals, cooks] = effectsOf(PREVIEW_GASTRO);
   assert.deepEqual(sat, { label: 'sat', tone: 'ok', value: { kind: 'delta', n: 0.5, unit: 'sat' } });
-  assert.deepEqual(margin, { label: 'margin', tone: 'bad', value: { kind: 'delta', n: -19, unit: 'pts' } });
-  assert.deepEqual(meals, { label: 'meals', tone: 'warn', value: { kind: 'move', from: 420, to: 260 } });
-  assert.deepEqual(cooks, { label: 'cooks', tone: 'plain', value: { kind: 'move', from: 6, to: 11 } });
-  assert.equal(effectsOf({ ...PREVIEW_GASTRO, mealsPerDay: { from: 260, to: 420 } })[2]!.tone, 'plain');
+  assert.deepEqual(margin, { label: 'margin', tone: 'bad', value: { kind: 'delta', n: -18, unit: 'pts' } });
+  assert.deepEqual(meals, { label: 'meals', tone: 'warn', value: { kind: 'move', from: 620, to: 310 } });
+  assert.deepEqual(cooks, { label: 'cooks', tone: 'plain', value: { kind: 'move', from: 6, to: 9 } });
+  assert.equal(effectsOf({ ...PREVIEW_GASTRO, mealsPerDay: { from: 310, to: 620 } })[2]!.tone, 'plain');
 });
 
 test('cabin crew per type follow the crew rule the line engine checks (1 per 40 seats from 20 seats), smallest aircraft first, none for a cabin-less one', () => {

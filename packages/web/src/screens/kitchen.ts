@@ -95,7 +95,7 @@ export async function kitchen(ctx: Ctx): Promise<Screen> {
       const problem = problemText(c);
       return h('td', { class: `kt-cell${cur ? ' cur' : ''}${c.quality === sel.quality && change !== null ? ' pick' : ''}` },
         h('div', { class: 'kt-value-row' }, h('span', { class: 'kt-value' }, valueText(c.metric, c.value)),
-          problem ? h('span', { class: 'kt-delta warn' }, problem) : c.delta === null ? null : h('span', { class: 'kt-delta' }, deltaText(c.metric, c.delta))),
+          problem ? h('span', { class: `kt-delta${c.problem?.kind === 'demand' ? ' warn' : ''}` }, problem) : c.delta === null ? null : h('span', { class: 'kt-delta' }, deltaText(c.metric, c.delta))),
         h('span', { class: 'kt-track', 'aria-hidden': 'true' }, h('span', { class: 'kt-bar', style: `width:${Math.round(c.bar * 100)}%` })));
     };
     const rows = METRICS.map((m, i) => h('tr', { class: 'kt-row' },
@@ -105,8 +105,9 @@ export async function kitchen(ctx: Ctx): Promise<Screen> {
       h('caption', { class: 'sr' }, t('kt.tiers.title')),
       h('thead', null, h('tr', null, h('td', { class: 'kt-corner' }), tiers.map(th))),
       h('tbody', null, rows));
-    const apply = button(change ? t('kt.apply') : t('kt.change'), { variant: change ? 'primary' : 'secondary', icon: 'chef-hat', key: change ? t('key.enter') : undefined, disabled: change === null,
-      onclick: () => { if (change) void act(t('kt.saved'), () => setKitchen(icao, change), async () => { reset(); await redraw(); }); } });
+    /** With nothing chosen the button starts a change (it picks the next level up, or the one below at the top); with a choice it applies it. */
+    const apply = button(change ? t('kt.apply') : t('kt.change'), { variant: change ? 'primary' : 'secondary', icon: 'chef-hat', key: change ? t('key.enter') : undefined,
+      onclick: () => { if (change) void act(t('kt.saved'), () => setKitchen(icao, change), async () => { reset(); await redraw(); }); else pick(stepQuality(k, pending, 1) === sel.quality ? stepQuality(k, pending, -1) : stepQuality(k, pending, 1)); } });
     tierHost.replaceChildren(comparison, h('div', { class: 'kt-foot' }, h('p', { class: 'kt-note' }, t('kt.note')), apply));
 
     // ---- in-house or caterer
@@ -116,7 +117,7 @@ export async function kitchen(ctx: Ctx): Promise<Screen> {
       const on = sel.provider === id;
       return h('button', { type: 'button', class: `kt-opt${on ? ' sel' : ''}`, 'aria-pressed': String(on), disabled, onclick: () => { pending = { ...pending, hub: icao, provider: id }; paint(); } },
         h('span', { class: 'kt-opt-head' }, h('span', { class: 'kt-opt-name' }, id === 'own' ? t('kt.prov.own') : cat?.name ?? t('kt.role.catererAnon')),
-          on ? icon('check', 14) : null, id === k.provider ? h('span', { class: 'kt-opt-cur' }, t('kt.prov.current')) : null), body);
+          on ? icon('check', 14) : null, id === k.provider && sel.provider !== k.provider ? h('span', { class: 'kt-opt-cur' }, t('kt.prov.current')) : null), body);
     };
     const ownCard = optionCard('own', [
       ownTier ? h('span', { class: 'kt-opt-econ' }, t('kt.prov.econ', { cost: money2(ownTier.cost), pct: fm.percent(ownTier.margin) })) : null,
@@ -155,7 +156,7 @@ export async function kitchen(ctx: Ctx): Promise<Screen> {
     absent > 0 && k.capacityNow !== null ? h('p', { class: 'kt-shift-note' }, tp('kt.shift.absent', absent, { cap: fm.num(k.capacityNow) })) : null,
     k.provider === 'own' && k.cooks.headcount < k.cooks.needed ? button(t('kt.shift.recruit'), { variant: 'ghost', onclick: () => { Object.assign(hireFilter, { family: 'kitchen', base: icao, qual: null }); go('#staff/hire'); } }) : null);
   const departures = panel({ title: t('kt.dep.title'), id: 'kt-deps', class: 'sv-side' },
-    k.departures.length === 0 ? h('p', { class: 'dim small' }, t('kt.dep.none')) : h('ul', { class: 'plain kt-deps' }, k.departures.map(depRow)),
+    k.departures.length === 0 ? h('p', { class: 'dim small' }, t('kt.dep.none')) : h('ul', { class: 'plain kt-deps', role: 'region', tabindex: 0, 'aria-label': t('kt.dep.title') }, k.departures.map(depRow)),
     shift);
 
   const providers = panel({ title: t('kt.prov.title'), id: 'kt-prov', class: 'sv-side',
