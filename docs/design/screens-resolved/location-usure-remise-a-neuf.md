@@ -1,0 +1,388 @@
+# Location · usure & remise à neuf
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Location · usure & remise à neuf» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-5.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=20 padding=[24, 32, 20, 32]
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Identity» layout="vertical" gap=8
+        - frame «Breadcrumb» gap=10 alignItems="center"
+          - instance «Base Sign» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+          - text «Crumb Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Flotte  ›  F-HAZG en location
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600" lineHeight=1.05  TEXT: Usure & remise à neuf
+        - text «Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: DHC-6 Twin Otter 400 F-HAZG · occasion de 2015, 6 840 h de vol · loué à Viking Air Leasing, encore 24 mois
+      - frame «Key Stats» gap=44 padding=[0, 0, 4, 0]
+        - instance «Stat · Performance» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Performance
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: −4 %
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: −3 % après vos choix
+        - instance «Stat · Fiabilité» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Fiabilité
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 91 %
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: 96 % après vos choix
+        - instance «Stat · Satisfaction passagers» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Satisfaction passagers
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 3,4 / 5
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: 3,9 / 5 après vos choix
+    - frame «Body» width="fill_container" height="fill_container" gap=20
+      - instance «Panel · Composant par composant» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Composant par composant
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Calcul pour une restitution en octobre 2028
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[10, 22, 16, 22]
+          - frame «Column Heads» width="fill_container" gap=12 padding=[6, 12, 8, 12]
+            - text «Head · Composant» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Composant et usure
+            - text «Head · Effet» width=168 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Effet de l'usure
+            - frame «Head · Laisser en l'état» width=152 padding=[0, 10]
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Laisser
+            - frame «Head · Remettre à neuf» width=152 padding=[0, 10]
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Remettre à neuf
+            - frame «Head · Remplacer» width=152 padding=[0, 10]
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Remplacer
+            - text «Head · Net» width=132 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: Net sur 24 mois
+          - frame «Row · Moteurs» width="fill_container" gap=12 padding=[13, 12] alignItems="center"
+            - frame «Component» width="fill_container" layout="vertical" gap=6
+              - frame «Name Row» width="fill_container" alignItems="end" justifyContent="space_between"
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Moteurs
+                - text «Wear» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 81 % usé
+              - frame «Wear Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                - rectangle «Wear Fill» width=191 height=4 fill="$warning" cornerRadius=2
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 2 910 h depuis révision, sur 3 600
+            - frame «Effect» width=168 layout="vertical" gap=3
+              - text «Effect Main» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Performance −3 %
+              - text «Effect Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: +3 % de carburant
+            - frame «Option · Laisser» width=152 layout="vertical" gap=4 padding=[9, 10] fill="$surface-selected" cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=7
+                  - ellipse «Radio Dot» width=6 height=6 fill="$text-primary"
+                - text «Cost» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 0 €
+              - text «Payback» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: révisés par le loueur
+            - frame «Option · Remettre à neuf» width=152 layout="vertical" gap=4 padding=[9, 10] cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=7
+                - text «Cost» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 64 000 €
+              - text «Payback» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: jamais rentable
+            - frame «Option · Remplacer» width=152 layout="vertical" gap=4 padding=[9, 10] cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=7
+                - text «Cost» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 1 180 000 €
+              - text «Payback» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: jamais rentable
+            - frame «Net» width=132 layout="vertical" gap=3 alignItems="end"
+              - text «Net Return» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 0 €
+              - text «Net Buy» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: rien d'investi
+          - frame «Row · Train d'atterrissage» width="fill_container" gap=12 padding=[13, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Component» width="fill_container" layout="vertical" gap=6
+              - frame «Name Row» width="fill_container" alignItems="end" justifyContent="space_between"
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Train d'atterrissage
+                - text «Wear» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 76 % usé
+              - frame «Wear Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                - rectangle «Wear Fill» width=179 height=4 fill="$warning" cornerRadius=2
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 9 100 cycles sur 12 000
+            - frame «Effect» width=168 layout="vertical" gap=3
+              - text «Effect Main» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Fiabilité −2 pts
+              - text «Effect Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: amortisseurs, retards au sol
+            - frame «Option · Laisser» width=152 layout="vertical" gap=4 padding=[9, 10] cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=7
+                - text «Cost» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 0 €
+              - text «Payback» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: −2 600 € / mois
+            - frame «Option · Remettre à neuf» width=152 layout="vertical" gap=4 padding=[9, 10] fill="$surface-selected" cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=7
+                  - ellipse «Radio Dot» width=6 height=6 fill="$text-primary"
+                - text «Cost» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 18 500 €
+              - text «Payback» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: rentable en 8 mois
+            - frame «Option · Remplacer» width=152 layout="vertical" gap=4 padding=[9, 10] cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=7
+                - text «Cost» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 96 000 €
+              - text «Payback» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: rentable en 37 mois
+            - frame «Net» width=132 layout="vertical" gap=3 alignItems="end"
+              - text «Net Return» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: +43 900 €
+              - text «Net Buy» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: +52 900 € si racheté
+          - frame «Row · Hélices» width="fill_container" gap=12 padding=[13, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Component» width="fill_container" layout="vertical" gap=6
+              - frame «Name Row» width="fill_container" alignItems="end" justifyContent="space_between"
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Hélices
+                - text «Wear» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 64 % usé
+              - frame «Wear Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                - rectangle «Wear Fill» width=151 height=4 fill="$text-secondary" cornerRadius=2
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 2 560 h sur 4 000 h · bords érodés
+            - frame «Effect» width=168 layout="vertical" gap=3
+              - text «Effect Main» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Performance −1 %
+              - text «Effect Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: vibrations en cabine
+            - frame «Option · Laisser» width=152 layout="vertical" gap=4 padding=[9, 10] cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=7
+                - text «Cost» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 0 €
+              - text «Payback» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: −1 400 € / mois
+            - frame «Option · Remettre à neuf» width=152 layout="vertical" gap=4 padding=[9, 10] fill="$surface-selected" cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=7
+                  - ellipse «Radio Dot» width=6 height=6 fill="$text-primary"
+                - text «Cost» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 14 000 €
+              - text «Payback» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: rentable en 10 mois
+            - frame «Option · Remplacer» width=152 layout="vertical" gap=4 padding=[9, 10] cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=7
+                - text «Cost» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 116 000 €
+              - text «Payback» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: rentable en 83 mois
+            - frame «Net» width=132 layout="vertical" gap=3 alignItems="end"
+              - text «Net Return» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: +19 600 €
+              - text «Net Buy» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: +27 600 € si racheté
+          - frame «Row · Avionique» width="fill_container" gap=12 padding=[13, 12] alignItems="center" fill="$surface-hover" stroke="$border" strokeWidth={"top": 1} cornerRadius="$radius-md"
+            - frame «Component» width="fill_container" layout="vertical" gap=6
+              - frame «Name Row» width="fill_container" alignItems="end" justifyContent="space_between"
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Avionique
+                - text «Wear» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 70 % usé
+              - frame «Wear Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                - rectangle «Wear Fill» width=165 height=4 fill="$text-secondary" cornerRadius=2
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Primus Apex d'origine, 2015
+            - frame «Effect» width=168 layout="vertical" gap=3
+              - text «Effect Main» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Fiabilité −3 pts
+              - text «Effect Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 2 pannes d'écran en 6 mois
+            - frame «Option · Laisser» width=152 layout="vertical" gap=4 padding=[9, 10] cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=7
+                - text «Cost» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 0 €
+              - text «Payback» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: −2 800 € / mois
+            - frame «Option · Remettre à neuf» width=152 layout="vertical" gap=4 padding=[9, 10] fill="$surface-selected" cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=7
+                  - ellipse «Radio Dot» width=6 height=6 fill="$text-primary"
+                - text «Cost» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 42 000 €
+              - text «Payback» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: rentable en 15 mois
+            - frame «Option · Remplacer» width=152 layout="vertical" gap=4 padding=[9, 10] cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=7
+                - text «Cost» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 310 000 €
+              - text «Payback» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: jamais rentable
+            - frame «Net» width=132 layout="vertical" gap=3 alignItems="end"
+              - text «Net Return» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: +25 200 €
+              - text «Net Buy» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: +45 200 € si racheté
+          - frame «Row · Sièges & intérieur» width="fill_container" gap=12 padding=[13, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Component» width="fill_container" layout="vertical" gap=6
+              - frame «Name Row» width="fill_container" alignItems="end" justifyContent="space_between"
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Sièges & intérieur
+                - text «Wear» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 68 % usé
+              - frame «Wear Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                - rectangle «Wear Fill» width=160 height=4 fill="$text-secondary" cornerRadius=2
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 19 sièges, 4 à regarnir
+            - frame «Effect» width=168 layout="vertical" gap=3
+              - text «Effect Main» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Satisfaction −0,5
+              - text «Effect Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: −4 % de remplissage
+            - frame «Option · Laisser» width=152 layout="vertical" gap=4 padding=[9, 10] cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=7
+                - text «Cost» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 0 €
+              - text «Payback» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: −4 100 € / mois
+            - frame «Option · Remettre à neuf» width=152 layout="vertical" gap=4 padding=[9, 10] fill="$surface-selected" cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=7
+                  - ellipse «Radio Dot» width=6 height=6 fill="$text-primary"
+                - text «Cost» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 36 000 €
+              - text «Payback» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: rentable en 9 mois
+            - frame «Option · Remplacer» width=152 layout="vertical" gap=4 padding=[9, 10] cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=7
+                - text «Cost» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 128 000 €
+              - text «Payback» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: rentable en 32 mois
+            - frame «Net» width=132 layout="vertical" gap=3 alignItems="end"
+              - text «Net Return» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: +62 400 €
+              - text «Net Buy» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: +76 400 € si racheté
+          - frame «Row · Peinture» width="fill_container" gap=12 padding=[13, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Component» width="fill_container" layout="vertical" gap=6
+              - frame «Name Row» width="fill_container" alignItems="end" justifyContent="space_between"
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Peinture
+                - text «Wear» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 58 % usé
+              - frame «Wear Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                - rectangle «Wear Fill» width=137 height=4 fill="$text-secondary" cornerRadius=2
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Livrée Viking de 2015, écaillée
+            - frame «Effect» width=168 layout="vertical" gap=3
+              - text «Effect Main» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Satisfaction −0,2
+              - text «Effect Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: pas aux couleurs AZR
+            - frame «Option · Laisser» width=152 layout="vertical" gap=4 padding=[9, 10] fill="$surface-selected" cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=7
+                  - ellipse «Radio Dot» width=6 height=6 fill="$text-primary"
+                - text «Cost» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 0 €
+              - text «Payback» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: −500 € / mois
+            - frame «Option · Remettre à neuf» width=152 layout="vertical" gap=4 padding=[9, 10] cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=7
+                - text «Cost» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 9 000 €
+              - text «Payback» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: rentable en 18 mois
+            - frame «Option · Remplacer» width=152 layout="vertical" gap=4 padding=[9, 10] cornerRadius="$radius-md"
+              - frame «Head» gap=8 alignItems="center"
+                - frame «Radio» width=14 height=14 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=7
+                - text «Cost» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 48 000 €
+              - text «Payback» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: à repeindre au retour
+            - frame «Net» width=132 layout="vertical" gap=3 alignItems="end"
+              - text «Net Return» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 0 €
+              - text «Net Buy» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: rien d'investi
+          - frame «Spacer» width="fill_container" height="fill_container"
+          - text «Footnote» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Gains estimés sur vos 80 h de vol par mois. Les visites d'entretien sont à la charge du loueur et ne sont pas comptées.
+      - instance «Panel · Investir dans un avion loué» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Investir dans un avion loué ?
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=16 padding=[8, 22, 22, 22]
+          - frame «Verdict» width="fill_container" layout="vertical" gap=2
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Avec vos choix, sur les 24 mois
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=38 fontWeight="600"  TEXT: +151 100 €
+            - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.35  TEXT: Oui, même en rendant l'avion : 110 500 € de travaux rapportent 261 600 € avant le retour.
+          - frame «Payback Chart» width="fill_container" layout="vertical" gap=8 padding=[6, 0, 0, 0]
+            - frame «Chart Head» width="fill_container" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Trésorerie cumulée des travaux
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: rentable au 11e mois
+            - frame «Bars» width="fill_container" gap=3
+              - frame «Month 1» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+                  - rectangle «Bar» width="fill_container" height=47 fill="#FFFFFF2E"
+              - frame «Month 2» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+                  - rectangle «Bar» width="fill_container" height=42 fill="#FFFFFF2E"
+              - frame «Month 3» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+                  - rectangle «Bar» width="fill_container" height=37 fill="#FFFFFF2E"
+              - frame «Month 4» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+                  - rectangle «Bar» width="fill_container" height=32 fill="#FFFFFF2E"
+              - frame «Month 5» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+                  - rectangle «Bar» width="fill_container" height=27 fill="#FFFFFF2E"
+              - frame «Month 6» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+                  - rectangle «Bar» width="fill_container" height=21 fill="#FFFFFF2E"
+              - frame «Month 7» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+                  - rectangle «Bar» width="fill_container" height=16 fill="#FFFFFF2E"
+              - frame «Month 8» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+                  - rectangle «Bar» width="fill_container" height=11 fill="#FFFFFF2E"
+              - frame «Month 9» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+                  - rectangle «Bar» width="fill_container" height=6 fill="#FFFFFF2E"
+              - frame «Month 10» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+                  - rectangle «Bar» width="fill_container" height=1 fill="#FFFFFF2E"
+              - frame «Month 11» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                  - rectangle «Bar» width="fill_container" height=4 fill="$text-secondary"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+              - frame «Month 12» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                  - rectangle «Bar» width="fill_container" height=10 fill="$text-secondary"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+              - frame «Month 13» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                  - rectangle «Bar» width="fill_container" height=15 fill="$text-secondary"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+              - frame «Month 14» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                  - rectangle «Bar» width="fill_container" height=20 fill="$text-secondary"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+              - frame «Month 15» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                  - rectangle «Bar» width="fill_container" height=25 fill="$text-secondary"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+              - frame «Month 16» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                  - rectangle «Bar» width="fill_container" height=30 fill="$text-secondary"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+              - frame «Month 17» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                  - rectangle «Bar» width="fill_container" height=36 fill="$text-secondary"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+              - frame «Month 18» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                  - rectangle «Bar» width="fill_container" height=41 fill="$text-secondary"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+              - frame «Month 19» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                  - rectangle «Bar» width="fill_container" height=46 fill="$text-secondary"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+              - frame «Month 20» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                  - rectangle «Bar» width="fill_container" height=51 fill="$text-secondary"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+              - frame «Month 21» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                  - rectangle «Bar» width="fill_container" height=56 fill="$text-secondary"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+              - frame «Month 22» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                  - rectangle «Bar» width="fill_container" height=62 fill="$text-secondary"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+              - frame «Month 23» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                  - rectangle «Bar» width="fill_container" height=67 fill="$text-secondary"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+              - frame «Month 24» width="fill_container" layout="vertical"
+                - frame «Up» width="fill_container" height=72 layout="vertical" justifyContent="end"
+                  - rectangle «Bar» width="fill_container" height=72 fill="$text-primary"
+                - rectangle «Zero» width="fill_container" height=1 fill="$border-strong"
+                - frame «Down» width="fill_container" height=48 layout="vertical"
+            - frame «Axis» width="fill_container" justifyContent="space_between"
+              - text «Start» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: nov. 2026
+              - text «End» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: oct. 2028 · retour au loueur
+          - rectangle «Divider» width="fill_container" height=1 fill="$border"
+          - frame «Scenarios» width="fill_container" layout="vertical" gap=14
+            - frame «Scenario · Vous rendez l'avion» width="fill_container" layout="vertical" gap=3
+              - frame «Row» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Vous rendez l'avion
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: +151 100 €
+              - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Les 51 000 € de pièces neuves restent au loueur
+            - frame «Scenario · Vous levez l'option d'achat» width="fill_container" layout="vertical" gap=3
+              - frame «Row» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Vous levez l'option d'achat
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: +202 100 €
+              - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Prix fixe de 2 650 000 € : les pièces neuves restent à vous
+          - frame «Spacer» width="fill_container" height="fill_container"
+          - frame «Balance» width="fill_container" alignItems="center" justifyContent="space_between"
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Solde après travaux · avion immobilisé 6 jours
+            - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 1 174 060 €
+          - frame «Actions» width="fill_container" gap=10
+            - instance «Btn · Tout laisser» of «Button/Secondary»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Tout laisser
+            - instance «Btn · Lancer les travaux» of «Button/Primary»
+              - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Lancer les travaux
+              - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

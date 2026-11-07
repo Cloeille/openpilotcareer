@@ -2,8 +2,20 @@ OpenHangar
 Carrière et économie pour Microsoft Flight Simulator
 Étape 1 sur 2 · serveur et compte
 Connexion
-Connexion
-Étape 1 sur 2
+Serveur
+Serveur global
+Serveur personnalisé
+https://hangar.aeroclub-cannes.fr
+Hangar · Aéroclub de Cannes-Mandelieu
+Version 1.3.2, compatible · inscriptions ouvertes
+Nom d'utilisateur
+lmoreau
+Mot de passe
+••••••••••••
+Les comptes sont propres à chaque serveur.
+Se connecter
+Entrée
+Créer un compte
 Simulateur
 MSFS 2024 détecté
 Client

@@ -1,0 +1,61 @@
+LFLL
+⇄
+LFML
+Réseau  ›  Lignes autonomes
+Ligne interrompue depuis jeu. 5 novembre 14:00Z
+Lyon ⇄ Marseille
+Vols AZR 7341 à 7346 · 150 NM · 3 allers-retours par jour en CRJ700
+Pourquoi elle est à l'arrêt
+F-HAZC est en inspection
+Visite C au hangar de Lyon, c'est le seul CRJ700 de la flotte. Sortie prévue mar. 10 novembre 14:00Z.
+62 % · encore 4 jours
+Aucun pilote qualifié CRJ700
+Tes 4 pilotes volent sur ATR 72-600. Le contrat de l'équipage intérimaire CRJ a pris fin le 4 novembre.
+Les deux blocages doivent être levés : même sorti d'inspection, F-HAZC resterait au sol sans équipage.
+Ce que ça coûte
+Vols annulés
+10
+dont AZR 7345 et 7346 ce soir
+Recette perdue
+58 000 €
++34 800 € par jour d'arrêt
+Réputation
+−0,1
+−0,05 par jour supplémentaire
+Créneaux de Marseille rendus le 19 novembre sans reprise.
+Remettre la ligne en service
+Choisis comment débloquer la ligne. L'exploitation automatique applique ton choix et replanifie les vols.
+Réaffecter F-HAZR, ATR 72-600
+Libre après ton vol AZR 4127 · équipage ATR intérimaire
+2 allers-retours au lieu de 3, l'ATR est plus lent sur cette ligne
+sam. 7 nov.
++21 000 € / jour
+Recruter un équipage CRJ700
+2 candidats qualifiés à Lyon · 15 600 € / mois pour le binôme
+La ligne reprend quand F-HAZC sort d'inspection
+Ou qualifier un binôme maison : 18 jours · 84 000 €
+mar. 10 nov.
++34 800 € / jour
+Mettre la ligne en pause
+Plus d'annulations, la réputation cesse de baisser
+Créneaux de Marseille perdus le 19 novembre
+En pause
+−3 200 € / jour de frais fixes
+Avec ce choix
+20 vols assurés sur 30 d'ici mer. 11
+ven. 6
+Annulés
+sam. 7
+2 A/R · ATR
+dim. 8
+2 A/R · ATR
+lun. 9
+2 A/R · ATR
+mar. 10
+2 A/R · ATR
+mer. 11
+2 A/R · ATR
+Tu peux combiner : réaffecter F-HAZR maintenant, puis rendre la ligne au CRJ700 une fois l'équipage recruté.
+Réaffecter F-HAZR
+Entrée
+Voir les candidats

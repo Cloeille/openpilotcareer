@@ -1,0 +1,82 @@
+Exploitation automatique · 4 avions sur 6 en service
+Centre des opérations
+Exploitation 24/7
+Horloge simulée · ven. 6 novembre
+17:58Z
+Tableau des vols
+Planning complet
+En vol
+Vol
+Trajet
+Avion
+Progression
+
+18:26Z
+AZR 1136
+LFLL → LFMN
+F-HAZA
+ATR 72-600
+en descente
+Retardé +14 min
+18:42Z
+AZR 4127
+LFMN → LFPG
+F-HAZR
+ATR 72-600
+312 NM restants
+Ton vol
+19:05Z
+AZR 2214
+LFPG → LFMN
+F-HAZD
+A220-300
+en croisière
+À l'heure
+Prochains départs
+Vol
+Trajet
+Avion
+Équipage
+
+18:10Z
+AZR 1641
+LFMN → LFKJ
+F-HAZB
+ATR 72-600
+Cdt. Vidal · OPL Roux · 2 PNC
+À l'heure
+18:46Z
+AZR 1137
+LFMN → LFLL
+F-HAZA
+ATR 72-600
+Cdt. Perrin · OPL Lefèvre · avion arrivé en retard
+Retardé +20 min
+19:20Z
+AZR 7345
+LFLL → LFML
+F-HAZC
+CRJ700
+Avion en inspection, aucun pilote CRJ disponible
+Annulé
+19:25Z
+AZR 1642
+LFKJ → LFMN
+F-HAZB
+ATR 72-600
+Cdt. Vidal · OPL Roux · 2 PNC
+À l'heure
+20:35Z
+AZR 7346
+LFML → LFLL
+F-HAZC
+CRJ700
+Même cause que AZR 7345
+Annulé
+20:50Z
+AZR 1138
+LFLL → LFMN
+F-HAZA
+ATR 72-600
+OPL Lefèvre dépasserait sa limite de service
+À l'heure

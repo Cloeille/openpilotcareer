@@ -1,0 +1,49 @@
+# Ligne · interrompue
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Ligne · interrompue» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-6.png", "mode": "cover"}
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"...
+  - frame «Content» width=1600 height=778 gap=20 padding=[28, 32, 24, 32] justifyContent="space_between"
+    - frame «Left Column» width=480 height="fill_container" layout="vertical" gap=40
+      - frame «Identity» width="fill_container" layout="vertical" gap=8
+        - frame «Breadcrumb» gap=10 alignItems="center"
+          - ref «Sign · LFLL» ref="pirBQ" descendants={"OYKAu": {"content": "LFLL"}}  (instance of «Sign/Location»)
+          - text «Pair Arrow» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: ⇄
+          - ref «Sign · LFML» ref="pirBQ" descendants={"OYKAu": {"content": "LFML"}}  (instance of «Sign/Location»)
+          - text «Crumb Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Réseau  ›  Lignes autonomes
+        - frame «Status» gap=8 padding=[6, 0, 0, 0] alignItems="center"
+          - ellipse «Status Dot» width=7 height=7 fill="$danger"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Ligne interrompue depuis jeu. 5 novembre 14:00Z
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600"  TEXT: Lyon ⇄ Marseille
+        - text «Subtitle» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Vols AZR 7341 à 7346 · 150 NM · 3 allers-retours par jour en CRJ700
+      - frame «Why» width="fill_container" layout="vertical" gap=14
+        - text «Why Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Pourquoi elle est à l'arrêt
+        - frame «Blocker · Avion» width="fill_container" gap=14 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+          - icon «Icon» width=18 height=18 fill="$danger" icon="wrench"
+          - frame «Blocker Text» width="fill_container" layout="vertical" gap=4
+            - text «Blocker Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: F-HAZC est en inspection
+            - text «Blocker Desc» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Visite C au hangar de Lyon, c'est le seul CRJ700 de la flotte. Sortie prévue mar. 10 novembre 14:00Z.
+            - frame «Inspection Meter» width="fill_container" gap=12 padding=[6, 0, 0, 0] alignItems="center"
+              - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                - rectangle «Bar Fill» width=202 height=4 fill="$text-secondary" cornerRadius=2
+              - text «Meter Value» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 62 % · encore 4 jours
+        - frame «Blocker · Équipage» width="fill_container" gap=14 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+          - icon «Icon» width=18 height=18 fill="$danger" icon="user-x"
+          - frame «Blocker Text» width="fill_container" layout="vertical" gap=4
+            - text «Blocker Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Aucun pilote qualifié CRJ700
+            - text «Blocker Desc» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Tes 4 pilotes volent sur ATR 72-600. Le contrat de l'équipage intérimaire CRJ a pris fin le 4 novembre.
+        - text «Why Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Les deux blocages doivent être levés : même sorti d'inspection, F-HAZC resterait au sol sans équipage.
+      - frame «Impact» width="fill_container" layout="vertical" gap=16
+        - text «Impact Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Ce que ça coûte
+        - frame «Impact Stats» width="fill_container" gap=32
+          - ref «Stat · Vols annulés» width="fit_content" ref="stcmC" descendants={"V6gpg0": {"content": "Vols annulés"}, "GqS8d": {"content": "10"}, "JT5Iq": {"content": "dont AZR 7345 et 7346 ce soir", "fill": "$text-...  (instance of «Stat»)
+          - ref «Stat · Recette perdue» width="fit_content" ref="stcmC" descendants={"V6gpg0": {"content": "Recette perdue"}, "GqS8d": {"content": "58 000 €"}, "JT5Iq": {"content": "+34 800 € par jour d'arrêt", "fill": "$...  (instance of «Stat»)
+          - ref «Stat · Réputation» width="fit_content" ref="stcmC" descendants={"V6gpg0": {"content": "Réputation"}, "GqS8d": {"content": "−0,1"}, "JT5Iq": {"content": "−0,05 par jour supplémentaire", "fill": "$dange...  (instance of «Stat»)
+        - frame «Slot Deadline» width="fill_container" gap=10 padding=[12, 14] alignItems="center" fill="$warning-soft" cornerRadius="$radius-md"
+          - icon «Icon» width=16 height=16 fill="$warning" icon="clock-alert"
+          - text «Deadline Text» width="fill_container" fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Créneaux de Marseille rendus le 19 novembre sans reprise.
+    - ref «Panel · Remettre en service» width=540 height="fill_container" ref="bibzm" descendants={"e0veVE": {"content": "Remettre la ligne en service"}, "A9Tx2K": {"enabled": false}, "q5ftx0": {"height": "fill_container", "gap": 18, "...  (instance of «Panel»)
+  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": "#00000000"}, "Ely3m": {"fill": "$text-tertiary"}, "zg3vi": {"stroke": "$text-primary"}, "O6CMm": {"fill": "$text-pr...  (instance of «HUD/Top»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"XuZbG": {"content": "Retour au réseau"}, "msx5l/Mw53t": {"content": "↑ ↓"}, "sA5qV": {"content": "Choisir une solution"}, "EYYNz/Mw53t"...  (instance of «HUD/Bottom»)

@@ -1,0 +1,215 @@
+# Opérations · centre 24/7
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Opérations · centre 24/7» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-7.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=22 padding=[28, 32, 24, 32]
+    - frame «Ops Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - ellipse «Live Dot» width=7 height=7 fill="$success"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Exploitation automatique · 4 avions sur 6 en service
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Centre des opérations
+      - frame «Clock Group» gap=28 alignItems="end"
+        - frame «Auto Ops» gap=10 padding=[0, 0, 9, 0] alignItems="center"
+          - instance «Auto Ops Switch» of «Switch»
+            - ellipse «Knob» width=16 height=16 fill="$on-btn-primary"
+          - text «Auto Ops Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Exploitation 24/7
+        - rectangle «Clock Divider» width=1 height=48 fill="$border-strong"
+        - frame «Simulated Clock» layout="vertical" alignItems="end"
+          - text «Clock Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Horloge simulée · ven. 6 novembre
+          - text «Clock Time» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="500" lineHeight=1.1  TEXT: 17:58Z
+    - frame «Ops Body» width="fill_container" height="fill_container" gap=20
+      - instance «Panel · Tableau des vols» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Tableau des vols
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Planning complet
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=18 padding=[14, 22, 22, 22]
+          - frame «Section · En vol» width="fill_container" layout="vertical"
+            - frame «Column Head» width="fill_container" gap=16 padding=[0, 0, 8, 0] alignItems="end"
+              - frame «Col · En vol» width=78 gap=8 alignItems="center"
+                - text «Section Title» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: En vol
+              - frame «Col · Vol» width=92 gap=8 alignItems="center"
+                - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Vol
+              - frame «Col · Trajet» width=140 gap=8 alignItems="center"
+                - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Trajet
+              - frame «Col · Avion» width=200 gap=8 alignItems="center"
+                - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Avion
+              - frame «Col · Progression» width="fill_container" gap=8 alignItems="center"
+                - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Progression
+              - frame «Col · Statut» width=150 gap=8 alignItems="center" justifyContent="end"
+                - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 
+            - frame «Row · AZR 1136» width="fill_container" height=42 gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Time» width=78 gap=8 alignItems="center"
+                - text «Time» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 18:26Z
+              - frame «Flight» width=92 gap=8 alignItems="center"
+                - text «Flight Number» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 1136
+              - frame «Route» width=140 gap=8 alignItems="center"
+                - text «Route» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFLL → LFMN
+              - frame «Aircraft» width=200 gap=8 alignItems="center"
+                - text «Registration» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: F-HAZA
+                - text «Type» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72-600
+              - frame «Progress» width="fill_container" gap=8 alignItems="center"
+                - frame «Progress Track» width=180 height=9 alignItems="center"
+                  - rectangle «Flown» width=144 height=2 fill="$text-secondary"
+                  - ellipse «Aircraft Dot» width=9 height=9 fill="$text-secondary"
+                  - rectangle «Remaining» width="fill_container" height=1 fill="$border-strong"
+                - text «Progress Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: en descente
+              - frame «Status» width=150 gap=8 alignItems="center" justifyContent="end"
+                - instance «Status Badge» of «Badge/Contesté»
+                  - icon «Icon» width=12 height=12 fill="$warning" icon="clock-alert"
+                  - text «Label» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Retardé +14 min
+            - frame «Row · AZR 4127» width="fill_container" height=42 gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Time» width=78 gap=8 alignItems="center"
+                - text «Time» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 18:42Z
+              - frame «Flight» width=92 gap=8 alignItems="center"
+                - text «Flight Number» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 4127
+              - frame «Route» width=140 gap=8 alignItems="center"
+                - text «Route» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN → LFPG
+              - frame «Aircraft» width=200 gap=8 alignItems="center"
+                - text «Registration» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: F-HAZR
+                - text «Type» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72-600
+              - frame «Progress» width="fill_container" gap=8 alignItems="center"
+                - frame «Progress Track» width=180 height=9 alignItems="center"
+                  - rectangle «Flown» width=103 height=2 fill="$route"
+                  - ellipse «Aircraft Dot» width=9 height=9 fill="$route"
+                  - rectangle «Remaining» width="fill_container" height=1 fill="$border-strong"
+                - text «Progress Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 312 NM restants
+              - frame «Status» width=150 gap=8 alignItems="center" justifyContent="end"
+                - instance «Status Badge» of «Badge/Route»
+                  - icon «Icon» width=12 height=12 fill="$route" icon="user-round"
+                  - text «Label» fill="$route" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Ton vol
+            - frame «Row · AZR 2214» width="fill_container" height=42 gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Time» width=78 gap=8 alignItems="center"
+                - text «Time» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 19:05Z
+              - frame «Flight» width=92 gap=8 alignItems="center"
+                - text «Flight Number» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 2214
+              - frame «Route» width=140 gap=8 alignItems="center"
+                - text «Route» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFPG → LFMN
+              - frame «Aircraft» width=200 gap=8 alignItems="center"
+                - text «Registration» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: F-HAZD
+                - text «Type» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: A220-300
+              - frame «Progress» width="fill_container" gap=8 alignItems="center"
+                - frame «Progress Track» width=180 height=9 alignItems="center"
+                  - rectangle «Flown» width=62 height=2 fill="$text-secondary"
+                  - ellipse «Aircraft Dot» width=9 height=9 fill="$text-secondary"
+                  - rectangle «Remaining» width="fill_container" height=1 fill="$border-strong"
+                - text «Progress Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: en croisière
+              - frame «Status» width=150 gap=8 alignItems="center" justifyContent="end"
+                - instance «Status Badge» of «Badge/Neutre»
+                  - icon «Icon» width=12 height=12 fill="$text-secondary" icon="circle-check"
+                  - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: À l'heure
+          - frame «Section · Prochains départs» width="fill_container" layout="vertical"
+            - frame «Column Head» width="fill_container" gap=16 padding=[0, 0, 8, 0] alignItems="end"
+              - frame «Col · Prochains départs» width=78 gap=8 alignItems="center"
+                - text «Section Title» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: Prochains départs
+              - frame «Col · Vol» width=92 gap=8 alignItems="center"
+                - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Vol
+              - frame «Col · Trajet» width=140 gap=8 alignItems="center"
+                - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Trajet
+              - frame «Col · Avion» width=200 gap=8 alignItems="center"
+                - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Avion
+              - frame «Col · Équipage» width="fill_container" gap=8 alignItems="center"
+                - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Équipage
+              - frame «Col · Statut» width=150 gap=8 alignItems="center" justifyContent="end"
+                - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 
+            - frame «Row · AZR 1641» width="fill_container" height=42 gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Time» width=78 gap=8 alignItems="center"
+                - text «Time» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 18:10Z
+              - frame «Flight» width=92 gap=8 alignItems="center"
+                - text «Flight Number» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 1641
+              - frame «Route» width=140 gap=8 alignItems="center"
+                - text «Route» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN → LFKJ
+              - frame «Aircraft» width=200 gap=8 alignItems="center"
+                - text «Registration» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: F-HAZB
+                - text «Type» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72-600
+              - frame «Crew» width="fill_container" gap=8 alignItems="center"
+                - text «Crew» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Cdt. Vidal · OPL Roux · 2 PNC
+              - frame «Status» width=150 gap=8 alignItems="center" justifyContent="end"
+                - instance «Status Badge» of «Badge/Neutre»
+                  - icon «Icon» width=12 height=12 fill="$text-secondary" icon="circle-check"
+                  - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: À l'heure
+            - frame «Row · AZR 1137» width="fill_container" height=42 gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Time» width=78 gap=8 alignItems="center"
+                - text «Time» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 18:46Z
+              - frame «Flight» width=92 gap=8 alignItems="center"
+                - text «Flight Number» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 1137
+              - frame «Route» width=140 gap=8 alignItems="center"
+                - text «Route» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN → LFLL
+              - frame «Aircraft» width=200 gap=8 alignItems="center"
+                - text «Registration» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: F-HAZA
+                - text «Type» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72-600
+              - frame «Crew» width="fill_container" gap=8 alignItems="center"
+                - text «Crew» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Cdt. Perrin · OPL Lefèvre · avion arrivé en retard
+              - frame «Status» width=150 gap=8 alignItems="center" justifyContent="end"
+                - instance «Status Badge» of «Badge/Contesté»
+                  - icon «Icon» width=12 height=12 fill="$warning" icon="clock-alert"
+                  - text «Label» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Retardé +20 min
+            - frame «Row · AZR 7345» width="fill_container" height=42 gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Time» width=78 gap=8 alignItems="center"
+                - text «Time» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 19:20Z
+              - frame «Flight» width=92 gap=8 alignItems="center"
+                - text «Flight Number» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 7345
+              - frame «Route» width=140 gap=8 alignItems="center"
+                - text «Route» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFLL → LFML
+              - frame «Aircraft» width=200 gap=8 alignItems="center"
+                - text «Registration» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: F-HAZC
+                - text «Type» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: CRJ700
+              - frame «Crew» width="fill_container" gap=8 alignItems="center"
+                - text «Crew» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Avion en inspection, aucun pilote CRJ disponible
+              - frame «Status» width=150 gap=8 alignItems="center" justifyContent="end"
+                - instance «Status Badge» of «Badge/Rejeté»
+                  - icon «Icon» width=12 height=12 fill="$danger" icon="circle-x"
+                  - text «Label» fill="$danger" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Annulé
+            - frame «Row · AZR 1642» width="fill_container" height=42 gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Time» width=78 gap=8 alignItems="center"
+                - text «Time» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 19:25Z
+              - frame «Flight» width=92 gap=8 alignItems="center"
+                - text «Flight Number» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 1642
+              - frame «Route» width=140 gap=8 alignItems="center"
+                - text «Route» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFKJ → LFMN
+              - frame «Aircraft» width=200 gap=8 alignItems="center"
+                - text «Registration» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: F-HAZB
+                - text «Type» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72-600
+              - frame «Crew» width="fill_container" gap=8 alignItems="center"
+                - text «Crew» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Cdt. Vidal · OPL Roux · 2 PNC
+              - frame «Status» width=150 gap=8 alignItems="center" justifyContent="end"
+                - instance «Status Badge» of «Badge/Neutre»
+                  - icon «Icon» width=12 height=12 fill="$text-secondary" icon="circle-check"
+                  - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: À l'heure
+            - frame «Row · AZR 7346» width="fill_container" height=42 gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Time» width=78 gap=8 alignItems="center"
+                - text «Time» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 20:35Z
+              - frame «Flight» width=92 gap=8 alignItems="center"
+                - text «Flight Number» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 7346
+              - frame «Route» width=140 gap=8 alignItems="center"
+                - text «Route» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFML → LFLL
+              - frame «Aircraft» width=200 gap=8 alignItems="center"
+                - text «Registration» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: F-HAZC
+                - text «Type» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: CRJ700
+              - frame «Crew» width="fill_container" gap=8 alignItems="center"
+                - text «Crew» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Même cause que AZR 7345
+              - frame «Status» width=150 gap=8 alignItems="center" justifyContent="end"
+                - instance «Status Badge» of «Badge/Rejeté»
+                  - icon «Icon» width=12 height=12 fill="$danger" icon="circle-x"
+                  - text «Label» fill="$danger" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Annulé
+            - frame «Row · AZR 1138» width="fill_container" height=42 gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Time» width=78 gap=8 alignItems="center"
+                - text «Time» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 20:50Z
+              - frame «Flight» width=92 gap=8 alignItems="center"
+                - text «Flight Number» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 1138
+              - frame «Route» width=140 gap=8 alignItems="center"
+                - text «Route» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFLL → LFMN
+              - frame «Aircraft» width=200 gap=8 alignItems="center"
+                - text «Registration» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: F-HAZA
+                - text «Type» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72-600
+              - frame «Crew» width="fill_container" gap=8 alignItems="center"
+                - text «Crew» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: OPL Lefèvre dépasserait sa limite de service
+              - frame «Status» width=150 gap=8 alignItems="center" justifyContent="end"
+                - instance «Status Badge» of «Badge/Neutre»
+                  - icon «Icon» width=12 height=12 fill="$text-secondary" icon="circle-check"
+                  - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: À l'heure
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

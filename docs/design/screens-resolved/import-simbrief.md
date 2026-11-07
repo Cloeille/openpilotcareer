@@ -25,7 +25,7 @@ Resolved tree (component instances expanded with their overrides; HUD bars refer
         - frame «Header» width="fill_container" gap=10 padding=[24, 28, 4, 28] alignItems="center"
           - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Aperçu du job
           - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Plan généré il y a 8 min
-        - frame «Content» width="fill_container" layout="vertical" gap=28 padding=[16, 28, 28, 28]
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=28 padding=[16, 28, 28, 28]
           - frame «Route» width="fill_container" layout="vertical" gap=8
             - frame «Route Head» width="fill_container" gap=14 alignItems="center"
               - text «Codes» fill="$text-primary" fontFamily="$font-mono" fontSize=20 fontWeight="700"  TEXT: LFMN → LIEO

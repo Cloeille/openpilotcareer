@@ -20,5 +20,32 @@ Entrée
 Voir la preuve
 Contrôles anti-triche
 5 sur 6 réussis
+Mode slew
+Jamais activé pendant le vol
+Accélération du temps
+×4 pendant 6 min, de 17:32Z à 17:38Z
+Pause
+Aucune pause pendant le vol
+Sauts de position
+Écart maximal de 0,3 NM entre deux relevés
+Carburant et charge
+Aucune modification en vol
+Intégrité du rapport
+Signature du pont valide
 Phases du vol
 Décollage 17:05Z · toucher 17:49Z
+Roulage
+9 min
+Montée
+18 min
+Croisière FL210
+21 min, dont 6 min en accélération ×4
+Descente
+13 min
+Approche
+7 min
+Roulage
+3 min
+Carburant consommé
+520 kg
+Incohérent avec la durée de vol réelle

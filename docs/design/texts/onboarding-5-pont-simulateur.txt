@@ -15,7 +15,20 @@ C
 Perdue ? Révoque-la et crées-en une autre dans Réglages › Clés API.
 J'ai copié
 Test de connexion
-Tout voir
+En direct
+En attente du simulateur
+Lance MSFS 2020 ou 2024 et charge un vol : le test continue tout seul.
+depuis 24 s
+OpenHangar Bridge répond
+version 0.6.2 · PC-BUREAU
+Clé API acceptée
+par le serveur global
+MSFS détecté via SimConnect
+en attente…
+Premières données de vol
+au chargement d'un vol
+Relancer le test
+Diagnostic
 Si le test réussit
 Connecté à MSFS 2024
 Tes vols sont vérifiés automatiquement et « Continuer » s'active.

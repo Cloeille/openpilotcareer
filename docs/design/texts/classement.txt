@@ -9,7 +9,76 @@ Réputation
 Tab
 Saison
 Carrière
-Classement général
-24 compagnies
+Rang
+Compagnie
+Hub
+Vols
+Réputation
+Valeur nette
+1
+Transalpine Express
+IA prudente
+LSZH
+412
+4,8
+21,4 M€
+2
+Ibérica Sol
+IA agressive
+LEBL
+455
+3,9
+18,9 M€
+3
+Aéro Provence
+Joueur · m.tournier
+LFML
+138
+4,7
+14,2 M€
+4
+Rhône Air
+IA prudente
+LFLL
+196
+4,5
+11,7 M€
+5
+Méridia Cargo
+IA agressive
+LIMC
+151
+3,8
+9,80 M€
+6
+Alpes Air Link
+IA prudente
+LSGG
+118
+4,7
+8,90 M€
+7
+Azur Régional
+Toi
+LFMN
+47
+4,6
+8,42 M€
+8
+Corsica Wings
+IA agressive
+LFKJ
+164
+3,6
+8,11 M€
+Pg suiv
+16 autres compagnies
+Encore 480 k€ pour passer 6e
 Alpes Air Link
 6e
+IA prudente · hub LSGG
+Valeur nette
+8,90 M€
+480 k€ devant toi
+Voir la fiche
+Entrée

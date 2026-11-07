@@ -1,0 +1,445 @@
+# Staff · congés & repos
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Staff · congés & repos» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-13.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=24 padding=[28, 32, 24, 32]
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Identity» layout="vertical" gap=8
+        - frame «Breadcrumb» gap=10 alignItems="center"
+          - instance «Base Sign» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+          - text «Crumb Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Staff  ›  Congés & repos
+        - frame «Status» gap=8 padding=[6, 0, 0, 0] alignItems="center"
+          - ellipse «Status Dot» width=7 height=7 fill="$warning"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 2 jours en sous-effectif d'ici le 3 décembre, aucun pilote CRJ
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600" lineHeight=1.05  TEXT: Congés & repos
+        - text «Subtitle» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Qui est absent, quand, et ce que ça laisse pour faire tourner tes lignes
+      - frame «Key Stats» gap=44 padding=[0, 0, 4, 0]
+        - instance «Stat · Congés restants» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Congés restants
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 312 j
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: sur l'année · 48 personnes
+        - instance «Stat · En repos maintenant» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: En repos maintenant
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 9
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: dont 4 pilotes
+        - instance «Stat · Fatigue moyenne» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Fatigue moyenne
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 38 %
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: stable
+    - frame «Body» width="fill_container" height="fill_container" gap=20
+      - instance «Panel · Couverture» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Couverture du planning
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Vue par personne
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[8, 22, 16, 22]
+          - frame «Day Heads» width="fill_container" gap=3 padding=[0, 0, 8, 0] alignItems="end"
+            - frame «Month» width=170 layout="vertical" gap=2
+              - text «Month Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: novembre → décembre
+            - frame «Day 0» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: v
+              - text «N» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 6
+            - frame «Day 1» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: s
+              - text «N» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 7
+            - frame «Day 2» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: d
+              - text «N» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 8
+            - frame «Day 3» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: l
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 9
+            - frame «Day 4» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: m
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 10
+            - frame «Day 5» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: m
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 11
+            - frame «Day 6» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: j
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 12
+            - frame «Day 7» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: v
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 13
+            - frame «Day 8» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: s
+              - text «N» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 14
+            - frame «Day 9» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: d
+              - text «N» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 15
+            - frame «Day 10» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: l
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 16
+            - frame «Day 11» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: m
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 17
+            - frame «Day 12» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: m
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 18
+            - frame «Day 13» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: j
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 19
+            - frame «Day 14» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: v
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 20
+            - frame «Day 15» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: s
+              - text «N» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 21
+            - frame «Day 16» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: d
+              - text «N» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 22
+            - frame «Day 17» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: l
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 23
+            - frame «Day 18» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: m
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 24
+            - frame «Day 19» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: m
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 25
+            - frame «Day 20» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: j
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 26
+            - frame «Day 21» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: v
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 27
+            - frame «Day 22» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: s
+              - text «N» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 28
+            - frame «Day 23» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: d
+              - text «N» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 29
+            - frame «Day 24» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: l
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 30
+            - frame «Day 25» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: m
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 1
+            - frame «Day 26» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: m
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 2
+            - frame «Day 27» width="fill_container" layout="vertical" gap=1 alignItems="center"
+              - text «W» fill="$text-tertiary" fontFamily="$font-ui" fontSize=10 fontWeight="normal"  TEXT: j
+              - text «N» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 3
+          - frame «Row · Pilotes ATR» width="fill_container" gap=3 padding=[5, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Label» width=170 layout="vertical" gap=1
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Pilotes ATR
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 14 · 12 par jour
+            - frame «Cell 0» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 1» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 2» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 3» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 4» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 5» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 6» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 7» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 8» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$warning-soft" stroke="$warning" strokeWidth={"bottom": 2} cornerRadius=2
+            - frame «Cell 9» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$danger-soft" stroke="$text-primary" strokeWidth=2 cornerRadius=2
+              - text «Gap» fill="$danger" fontFamily="$font-ui" fontSize=10 fontWeight="600"  TEXT: −1
+            - frame «Cell 10» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$warning-soft" stroke="$warning" strokeWidth={"bottom": 2} cornerRadius=2
+            - frame «Cell 11» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 12» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 13» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 14» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 15» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 16» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 17» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 18» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 19» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 20» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 21» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 22» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$warning-soft" stroke="$warning" strokeWidth={"bottom": 2} cornerRadius=2
+            - frame «Cell 23» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 24» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 25» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 26» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 27» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+          - frame «Row · Pilotes A220» width="fill_container" gap=3 padding=[5, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Label» width=170 layout="vertical" gap=1
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Pilotes A220
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 6 · 4 par jour
+            - frame «Cell 0» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 1» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 2» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 3» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 4» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 5» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 6» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 7» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 8» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 9» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 10» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 11» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 12» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 13» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 14» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 15» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 16» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 17» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 18» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 19» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 20» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 21» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 22» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 23» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 24» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 25» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 26» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 27» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+          - frame «Row · Pilotes CRJ» width="fill_container" gap=3 padding=[5, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Label» width=170 layout="vertical" gap=1
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Pilotes CRJ
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 0 · LFLL ⇄ LFML suspendue
+            - frame «Cell 0» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 1» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 2» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 3» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 4» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 5» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 6» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 7» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 8» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 9» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 10» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 11» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 12» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 13» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 14» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 15» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 16» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 17» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 18» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 19» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 20» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 21» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 22» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 23» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 24» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 25» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 26» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+            - frame «Cell 27» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=2
+          - frame «Row · PNC» width="fill_container" gap=3 padding=[5, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Label» width=170 layout="vertical" gap=1
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: PNC
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 22 · 16 par jour
+            - frame «Cell 0» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 1» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 2» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 3» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 4» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 5» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 6» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 7» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 8» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 9» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$warning-soft" stroke="$warning" strokeWidth={"bottom": 2} cornerRadius=2
+            - frame «Cell 10» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 11» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 12» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 13» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 14» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 15» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 16» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$warning-soft" stroke="$warning" strokeWidth={"bottom": 2} cornerRadius=2
+            - frame «Cell 17» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$danger-soft" stroke="$danger" strokeWidth=1 cornerRadius=2
+              - text «Gap» fill="$danger" fontFamily="$font-ui" fontSize=10 fontWeight="600"  TEXT: −1
+            - frame «Cell 18» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 19» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 20» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 21» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 22» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 23» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 24» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 25» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 26» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 27» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+          - frame «Row · Agents au sol» width="fill_container" gap=3 padding=[5, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Label» width=170 layout="vertical" gap=1
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Agents au sol
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 9 · 6 par jour
+            - frame «Cell 0» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 1» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 2» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 3» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 4» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 5» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 6» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 7» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 8» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 9» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 10» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 11» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 12» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 13» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 14» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 15» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 16» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 17» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 18» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 19» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 20» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 21» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 22» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 23» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 24» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 25» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 26» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 27» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+          - frame «Row · Maintenance» width="fill_container" gap=3 padding=[5, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Label» width=170 layout="vertical" gap=1
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Maintenance
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 8 · 5 par jour
+            - frame «Cell 0» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 1» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 2» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 3» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 4» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 5» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 6» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 7» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 8» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 9» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 10» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 11» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 12» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 13» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 14» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 15» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 16» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 17» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 18» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 19» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 20» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 21» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 22» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 23» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$warning-soft" stroke="$warning" strokeWidth={"bottom": 2} cornerRadius=2
+            - frame «Cell 24» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 25» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 26» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 27» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+          - frame «Row · Administratif» width="fill_container" gap=3 padding=[5, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Label» width=170 layout="vertical" gap=1
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Administratif
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 6 · 4 par jour
+            - frame «Cell 0» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 1» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 2» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 3» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 4» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 5» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 6» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 7» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 8» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 9» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 10» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 11» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 12» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 13» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 14» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 15» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 16» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 17» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 18» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 19» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$warning-soft" stroke="$warning" strokeWidth={"bottom": 2} cornerRadius=2
+            - frame «Cell 20» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$warning-soft" stroke="$warning" strokeWidth={"bottom": 2} cornerRadius=2
+            - frame «Cell 21» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 22» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 23» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 24» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 25» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 26» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+            - frame «Cell 27» width="fill_container" height=24 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius=2
+          - frame «Legend» width="fill_container" gap=20 padding=[12, 0, 0, 0] alignItems="center"
+            - frame «Legend · Couvert» gap=7 alignItems="center"
+              - rectangle «Swatch» width=14 height=10 fill="$neutral-soft" cornerRadius=1
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Couvert
+            - frame «Legend · Juste, aucune marge» gap=7 alignItems="center"
+              - rectangle «Swatch» width=14 height=10 fill="$warning-soft" stroke="$warning" strokeWidth={"bottom": 2} cornerRadius=1
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Juste, aucune marge
+            - frame «Legend · Il manque quelqu'un» gap=7 alignItems="center"
+              - rectangle «Swatch» width=14 height=10 fill="$danger-soft" stroke="$danger" strokeWidth=1 cornerRadius=1
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Il manque quelqu'un
+            - frame «Legend · Aucun qualifié» gap=7 alignItems="center"
+              - rectangle «Swatch» width=14 height=10 fill="#E5625B14" stroke="#E5625B4D" strokeWidth=1 cornerRadius=1
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Aucun qualifié
+          - frame «Spacer» width="fill_container" height="fill_container"
+          - frame «Selected Day» width="fill_container" gap=20 padding=[14, 16] alignItems="center" fill="$surface-hover" cornerRadius="$radius-md"
+            - frame «Day Text» width="fill_container" layout="vertical" gap=4
+              - text «Day Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Dimanche 15 novembre · pilotes ATR
+              - text «Day Detail» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.35  TEXT: 11 disponibles pour 12 nécessaires. Camille Lefèvre est en congé et OPL Roux en repos obligatoire après 6 jours de service : AZR 1641 et 1642 partiraient sans copilote.
+            - instance «Move Leave» of «Button/Secondary»
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="calendar-arrow-down"
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Décaler un congé
+            - instance «Temp Pilot» of «Button/Ghost»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Pilote intérimaire · 1 450 €
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+      - frame «Side Column» width=420 height="fill_container" layout="vertical" gap=20
+        - instance «Panel · Demandes» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Demandes de congés
+            - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 2 en attente
+          - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[4, 22, 14, 22]
+            - frame «Request · Cdt. Perrin» width="fill_container" layout="vertical" gap=8 padding=[10, 0]
+              - frame «Head» width="fill_container" alignItems="center" justifyContent="space_between"
+                - frame «Who» layout="vertical" gap=2
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Cdt. Perrin
+                  - text «Dates» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: du 21 au 27 nov. · 7 jours
+                - frame «Actions» gap=14 alignItems="center"
+                  - text «Refuse» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Refuser
+                  - frame «Accept» height=30 padding=[0, 12] alignItems="center" fill="$btn-primary" cornerRadius=3
+                    - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Accepter
+              - frame «Consequence» width="fill_container" gap=8 alignItems="center"
+                - icon «Icon» width=13 height=13 fill="$text-tertiary" icon="check"
+                - text «Text» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" lineHeight=1.35  TEXT: Sans impact, Cdt. Vidal couvre ses rotations.
+            - frame «Request · Inès Mercier · PNC» width="fill_container" layout="vertical" gap=8 padding=[10, 0] stroke="$border" strokeWidth={"top": 1}
+              - frame «Head» width="fill_container" alignItems="center" justifyContent="space_between"
+                - frame «Who» layout="vertical" gap=2
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Inès Mercier · PNC
+                  - text «Dates» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: du 22 au 23 nov. · 2 jours
+                - frame «Actions» gap=14 alignItems="center"
+                  - text «Refuse» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Refuser
+                  - frame «Accept» height=30 padding=[0, 12] alignItems="center" fill="$btn-primary" cornerRadius=3
+                    - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Accepter
+              - frame «Consequence» width="fill_container" gap=8 alignItems="center"
+                - icon «Icon» width=13 height=13 fill="$warning" icon="triangle-alert"
+                - text «Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" lineHeight=1.35  TEXT: Le 23, il manquerait un PNC sur AZR 2214.
+        - instance «Panel · Politique de repos» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Politique de repos
+          - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=10 padding=[14, 22, 22, 22]
+            - frame «Policy Selector» width="fill_container" gap=4
+              - frame «Policy · Minimum légal» width="fill_container" height=34 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius="$radius-md"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Minimum légal
+              - frame «Policy · Standard» width="fill_container" height=34 alignItems="center" justifyContent="center" fill="$surface-selected" stroke="$text-primary" strokeWidth=1 cornerRadius="$radius-md"
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Standard
+              - frame «Policy · Généreux» width="fill_container" height=34 alignItems="center" justifyContent="center" fill="$neutral-soft" cornerRadius="$radius-md"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Généreux
+            - frame «Rules» width="fill_container" layout="vertical" gap=6
+              - frame «Rule · Repos après service, à la base» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Repos après service, à la base
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 12 h
+              - frame «Rule · Repos après service, en escale» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Repos après service, en escale
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 10 h
+              - frame «Rule · Jours de service d'affilée» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Jours de service d'affilée
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 6 au plus
+              - frame «Rule · Repos hebdomadaire» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Repos hebdomadaire
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 36 h dont 2 nuits
+            - frame «Effects» width="fill_container" layout="vertical" gap=6 padding=[10, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+              - text «Effects Title» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Passer en généreux
+              - frame «Effect · Personnes en plus à recruter» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Personnes en plus à recruter
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: +5
+              - frame «Effect · Masse salariale» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Masse salariale
+                - text «Value» fill="$danger" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: +21 600 € / mois
+              - frame «Effect · Fatigue moyenne» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Fatigue moyenne
+                - text «Value» fill="$success" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 38 % → 24 %
+              - frame «Effect · Risque d'incident» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Risque d'incident
+                - text «Value» fill="$success" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: −30 %
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

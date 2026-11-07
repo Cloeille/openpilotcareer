@@ -1,0 +1,92 @@
+# Staff · recrutement
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Staff · recrutement» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated.png", "mode": "cover"}
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"...
+  - frame «Content» width=1600 height=778 gap=24 padding=[28, 32, 24, 32]
+    - frame «Main Column» width="fill_container" height="fill_container" layout="vertical" gap=18
+      - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+        - frame «Title Block» layout="vertical" gap=6
+          - frame «Overline» gap=8 alignItems="center"
+            - ellipse «Live Dot» width=7 height=7 fill="$success"
+            - text «Overline Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Marché de l'emploi · 214 candidats en France ce mois-ci
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=34 fontWeight="600"  TEXT: Recrutement
+          - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 6 pilotes qualifiés CRJ prêts à travailler à Lyon
+        - ref «View Switcher» ref="a7ZUZ" descendants={"wmERV": {"fill": "#00000000"}, "NWATU": {"content": "Effectifs", "fill": "$text-secondary"}, "z8pczc": {"fill": "#FFFFFF1A"}, "JvCPs": ...  (instance of «View Switcher»)
+      - frame «Filters» width="fill_container" gap=28 alignItems="center"
+        - frame «Filter Group · Poste» gap=6 alignItems="center"
+          - text «Group Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Poste
+          - frame «Gap» width=4 height=1
+          - frame «Chip · Pilotes» padding=[6, 12] fill="#FFFFFF1A" stroke="$border-strong" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Pilotes
+          - frame «Chip · PNC» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: PNC
+          - frame «Chip · Sol» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Sol
+          - frame «Chip · Administratif» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Administratif
+          - frame «Chip · Maintenance» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Maintenance
+        - frame «Filter Group · Base» gap=6 alignItems="center"
+          - text «Group Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Base
+          - frame «Gap» width=4 height=1
+          - frame «Chip · LFMN» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-mono" fontSize=12 fontWeight="500"  TEXT: LFMN
+          - frame «Chip · LFLL» padding=[6, 12] fill="#FFFFFF1A" stroke="$border-strong" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-primary" fontFamily="$font-mono" fontSize=12 fontWeight="500"  TEXT: LFLL
+        - frame «Filter Group · Qualification» gap=6 alignItems="center"
+          - text «Group Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Qualification
+          - frame «Gap» width=4 height=1
+          - frame «Chip · ATR 72» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: ATR 72
+          - frame «Chip · A220» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: A220
+          - frame «Chip · CRJ» padding=[6, 12] fill="#FFFFFF1A" stroke="$border-strong" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: CRJ
+      - ref «Panel · Candidats» width="fill_container" height="fill_container" ref="bibzm" descendants={"e0veVE": {"content": "Candidats"}, "A9Tx2K": {"content": "Tri : pertinence"}, "q5ftx0": {"gap": 0, "height": "fill_container", "padding...  (instance of «Panel»)
+    - frame «Candidate Panel» width=380 height="fill_container" layout="vertical" gap=18 padding=[24, 26] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 28}
+      - frame «Candidate Head» width="fill_container" layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - icon «Status Icon» width=14 height=14 fill="$success" icon="circle-check"
+          - text «Status Text» fill="$success" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Débloque la ligne Lyon – Marseille
+        - text «Candidate Name» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="600"  TEXT: Sarah Benali
+        - text «Candidate Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Commandant de bord · qualifiée CRJ et A220
+      - frame «Facts» width="fill_container" layout="vertical" gap=10 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - frame «Fact · Expérience» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Expérience
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 8 900 h dont 5 200 h sur CRJ
+        - frame «Fact · Dernier poste» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Dernier poste
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: HOP! · base de Lyon
+        - frame «Fact · Disponible» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Disponible
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 13 nov. · préavis de 7 jours
+        - frame «Fact · Fiabilité · moral» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Fiabilité · moral
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 88 % · haut
+        - frame «Fact · Prime d'embauche» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Prime d'embauche
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 1 mois de salaire
+      - frame «Options» width="fill_container" layout="vertical" gap=10 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - text «Options Title» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Pour combler le manque CRJ
+        - frame «Option · Embaucher Sarah Benali» width="fill_container" gap=12 padding=[12, 14] alignItems="center" fill="#FFFFFF0D" stroke="$text-primary" strokeWidth=1.5 cornerRadius=6
+          - frame «Radio» width=16 height=16 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=8
+            - ellipse «Dot» width=8 height=8 fill="$text-primary"
+          - frame «Option Text» width="fill_container" layout="vertical" gap=2
+            - text «Option Label» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Embaucher
+            - text «Option Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Sarah Benali · dès le 13 nov.
+          - text «Option Price» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="500"  TEXT: 13 800 € / mois
+        - frame «Option · Qualifier Cdt. Perrin sur CRJ» width="fill_container" gap=12 padding=[12, 14] alignItems="center" stroke="$border" strokeWidth=1 cornerRadius=6
+          - frame «Radio» width=16 height=16 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=8
+          - frame «Option Text» width="fill_container" layout="vertical" gap=2
+            - text «Option Label» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Qualifier Cdt. Perrin sur CRJ
+            - text «Option Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Stage de 21 jours · quitte les lignes ATR
+          - text «Option Price» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="500"  TEXT: 24 000 €
+      - frame «Spacer» width="fill_container" height="fill_container"
+      - frame «Actions» width="fill_container" layout="vertical" gap=10
+        - ref «Hire» width="fill_container" ref="Im067" descendants={"h8MyJ": {"content": "Embaucher Sarah Benali"}}  (instance of «Button/Primary»)
+        - ref «Negotiate» ref="n9Pulf" descendants={"RUCj0": {"content": "Négocier le salaire"}}  (instance of «Button/Ghost»)
+  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": "#00000000"}, "Ely3m": {"fill": "$text-tertiary"}, "daIvj": {"stroke": "$text-primary"}, "cXwn0": {"fill": "$text-pr...  (instance of «HUD/Top»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"XuZbG": {"content": "Retour aux effectifs"}, "sA5qV": {"content": "Filtres"}, "EYYNz/Mw53t": {"content": "↑ ↓"}, "T7rBqn": {"content": ...  (instance of «HUD/Bottom»)

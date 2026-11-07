@@ -3,7 +3,104 @@ Catalogue d'avions
 2 547 types OACI · 412 avec données réelles
 Types d'appareils
 Trier par pertinence
-Type sélectionné
-Étape 1 sur 2
+DHC
+code OACI, constructeur ou modèle
+11 résultats
+/
+Z
+Tous
+Piston
+Turbopropulseur
+Jet
+Hélicoptère
+C
+Type
+Catégorie
+Sièges
+Rayon (NM)
+Prix
+DHC-2 Beaver
+DHC2
+De Havilland Canada
+Piston
+7
+395
+640 000 €
+DHC-6 Twin Otter 400
+DHC6
+De Havilland · Viking Air
+Turbopropulseur
+19
+799
+4 200 000 €
+Dash 8-400 · Q400
+DH8D
+De Havilland Canada
+Turbopropulseur
+78
+1 100
+11 600 000 €
+DHC-7 Dash 7
+DHC7
+De Havilland Canada
+Turbopropulseur
+50
+1 100
+7 800 000 €
+≈ estimé
+DHC-3 Otter
+DHC3
+De Havilland Canada
+Piston
+6
+700
+350 000 €
+≈ estimé
+Dash 8-100
+DH8A
+De Havilland Canada
+Turbopropulseur
+37
+1 020
+2 400 000 €
+DHC-5 Buffalo
+DHC5
+De Havilland Canada
+Turbopropulseur
+44
+1 000
+6 500 000 €
+≈ estimé
+7 sur 11
+≈ estimé
+valeurs déduites de la catégorie FAA
+DHC-6 Twin Otter 400
+DHC6
+De Havilland · Viking Air · turbopropulseur
+Sièges
+19
+Fret
+1 400 kg
+Croisière
+182 kt
+Rayon d'action
+799 NM
+Prix catalogue
+4 200 000 €
+Location indicative
+38 000 € / mois
+Louer
+Acheter cet avion
+Entrée
 Ajouter un avion d'addon
-Saisir un type OACI
+Détecté dans le simulateur
+Kodiak 900 · SimWorks Studios
+Type OACI inconnu
+Choisir une catégorie
+Ses performances seront estimées à partir de la catégorie.
+Piston
+Turbopropulseur
+Jet
+Hélicoptère
+≈ 9 sièges · 900 kg · 230 kt · 1 000 NM
+Ajouter au catalogue

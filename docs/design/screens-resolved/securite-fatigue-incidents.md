@@ -1,0 +1,185 @@
+# Sécurité · fatigue & incidents
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Sécurité · fatigue & incidents» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-13.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=24 padding=[28, 32, 24, 32]
+    - frame «Safety Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Identity» layout="vertical" gap=8
+        - frame «Breadcrumb» gap=10 alignItems="center"
+          - instance «Base Sign» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+          - text «Crumb Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Compagnie  ›  Sécurité
+        - frame «Status» gap=8 padding=[6, 0, 0, 0] alignItems="center"
+          - ellipse «Status Dot» width=7 height=7 fill="$warning"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Risque en hausse depuis lundi · un vol de ce soir dépasserait la limite de service
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600"  TEXT: Sécurité des vols
+      - frame «Key Stats» gap=36 padding=[0, 0, 4, 0] alignItems="end"
+        - instance «Stat · Indice de sécurité» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Indice de sécurité
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="500"  TEXT: 72 / 100
+          - text «Delta» fill="$warning" fontFamily="$font-ui" fontSize=12  TEXT: −6 depuis lundi
+        - rectangle «Divider» width=1 height=64 fill="$border-strong"
+        - frame «Factor · Fatigue des équipages» width=196 layout="vertical" gap=8
+          - instance «Stat» of «Stat»
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Fatigue des équipages
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 27 / 40
+            - text «Delta» fill="$warning" fontFamily="$font-ui" fontSize=12  TEXT: repos courts · 34 jours de congés dus
+          - frame «Bar Track» width="fill_container" height=3 layout="none" fill="#FFFFFF1F"
+            - rectangle «Bar Fill» width=132 height=3 fill="$warning"
+        - frame «Factor · État des avions» width=196 layout="vertical" gap=8
+          - instance «Stat» of «Stat»
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: État des avions
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 29 / 40
+            - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: usure de F-HAZC · 3 réparations reportées
+          - frame «Bar Track» width="fill_container" height=3 layout="none" fill="#FFFFFF1F"
+            - rectangle «Bar Fill» width=142 height=3 fill="$text-primary"
+        - frame «Factor · Formation» width=196 layout="vertical" gap=8
+          - instance «Stat» of «Stat»
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Formation
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 16 / 20
+            - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: 1 contrôle simulateur à repasser
+          - frame «Bar Track» width="fill_container" height=3 layout="none" fill="#FFFFFF1F"
+            - rectangle «Bar Fill» width=157 height=3 fill="$text-primary"
+    - frame «Safety Body» width="fill_container" height="fill_container" gap=20
+      - instance «Panel · Risque d'incident» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Risque d'incident par vol
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Détail du calcul
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=16 padding=[16, 22, 22, 22]
+          - frame «Chart Intro» width="fill_container" alignItems="center" justifyContent="space_between"
+            - text «Chart Caption» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Part des vols qui finissent en incident, selon le temps de service de l'équipage et l'usure de l'avion
+            - frame «Legend» gap=20 alignItems="center"
+              - frame «Legend · Avion usé · plus de 60 %» gap=8 alignItems="center"
+                - rectangle «Swatch» width=18 height=2 fill="$text-primary"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Avion usé · plus de 60 %
+              - frame «Legend · Avion en bon état · moins de 40 %» gap=8 alignItems="center"
+                - rectangle «Swatch» width=18 height=2 fill="$text-tertiary"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Avion en bon état · moins de 40 %
+          - frame «Risk Chart» width=1032 height=250 layout="none"
+            - rectangle «Grid 0» width=972 height=1 fill="$border-strong"
+            - text «Y 0» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 0
+            - rectangle «Grid 1» width=972 height=1 fill="$border"
+            - text «Y 1» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 1 %
+            - rectangle «Grid 2» width=972 height=1 fill="$border"
+            - text «Y 2» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 2 %
+            - rectangle «Grid 3» width=972 height=1 fill="$border"
+            - text «Y 3» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 3 %
+            - rectangle «Grid 4» width=972 height=1 fill="$border"
+            - text «Y 4» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 4 %
+            - rectangle «Over Limit Zone» width=69 height=218 fill="#E9A04612"
+            - rectangle «Duty Limit Line» width=1 height=218 fill="$warning"
+            - text «Duty Limit Label» width=222 fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="500" textAlign="right"  TEXT: Limite de service · 13 h
+            - path «Wear Effect Band» geometry="M40 196.1l17.4-0.1 17.3-0.2 17.4-0.2 17.3-0.2 17.4-0.2 17.3-0.3 17.4-0.2 17.4-0.3 17.3-0.3 17.4-0.3 17.3-0.4 17.4-0.4 17.3-0.4 17.4-0.4 17.4-0.5 17.3-0.5 17.4-0.6 17.3-0.6 17.4-0.7 17.3-0.7 17.4-0.8 17.4-0.9 17.3-0.9 17.4-1 17.3-1.1 17.4-1.1 17.3-1.3 17.4-1.4 17.4-1.5 17.3-1.6 17.4-1.8 17.3-1.9 17.4-2 17.3-2.2 17.4-2.4 17.4-2.7 17.3-2.8 17.4-3.1 17.3-3.3 17.4-3.6 17.3-3.9 17.4-4.2 17.4-4.6 17.3-4.9 17.4-5.4 17.3-5.8 17.4-6.3 17.3-6.8 17.4-7.4 17.4-8 17.3-8.7 17.4-9.4 17.3-10.2 17.4-11 17.3-11.9 17.4-13 0 74-17.4 8.8-17.3 8.1-17.4 7.4-17.3 6.8-17.4 6.3-17.3 5.8-17.4 5.4-17.4 4.9-17.3 4.5-17.4 4.2-17.3 3.8-17.4 3.6-17.3 3.2-17.4 3-17.4 2.8-17.3 2.5-17.4 2.4-17.3 2.1-17.4 2-17.3 1.8-17.4 1.7-17.4 1.6-17.3 1.4-17.4 1.3-17.3 1.2-17.4 1.1-17.3 1-17.4 1-17.4 0.9-17.3 0.8-17.4 0.7-17.3 0.7-17.4 0.6-17.3 0.6-17.4 0.5-17.4 0.5-17.3 0.4-17.4 0.5-17.3 0.3-17.4 0.4-17.3 0.3-17.4 0.3-17.4 0.3-17.3 0.2-17.4 0.3-17.3 0.2-17.4 0.2-17.3 0.2-17.4 0.1-17.4 0.2-17.3 0.1-17.4 0.2-17.3 0.1-17.4 0.1-17.3 0.1-17.4 0.1z" viewBox=[0, 0, 1032, 250] fill="#FFFFFF0A" width=1032 height=250
+            - path «Curve · Avion en bon état» geometry="M40 213.3l17.4-0.1 17.3-0.1 17.4-0.1 17.3-0.1 17.4-0.2 17.3-0.1 17.4-0.2 17.4-0.1 17.3-0.2 17.4-0.2 17.3-0.2 17.4-0.3 17.3-0.2 17.4-0.3 17.4-0.3 17.3-0.3 17.4-0.4 17.3-0.3 17.4-0.5 17.3-0.4 17.4-0.5 17.4-0.5 17.3-0.6 17.4-0.6 17.3-0.7 17.4-0.7 17.3-0.8 17.4-0.9 17.4-1 17.3-1 17.4-1.1 17.3-1.2 17.4-1.3 17.3-1.4 17.4-1.6 17.4-1.7 17.3-1.8 17.4-2 17.3-2.1 17.4-2.4 17.3-2.5 17.4-2.8 17.4-3 17.3-3.2 17.4-3.6 17.3-3.8 17.4-4.2 17.3-4.5 17.4-4.9 17.4-5.4 17.3-5.8 17.4-6.3 17.3-6.8 17.4-7.4 17.3-8.1 17.4-8.8" viewBox=[0, 0, 1032, 250] width=1032 height=250 stroke="$text-tertiary" strokeWidth=2 strokeLinejoin="round" strokeLinecap="round"
+            - path «Curve · Avion usé» geometry="M40 196.1l17.4-0.1 17.3-0.2 17.4-0.2 17.3-0.2 17.4-0.2 17.3-0.3 17.4-0.2 17.4-0.3 17.3-0.3 17.4-0.3 17.3-0.4 17.4-0.4 17.3-0.4 17.4-0.4 17.4-0.5 17.3-0.5 17.4-0.6 17.3-0.6 17.4-0.7 17.3-0.7 17.4-0.8 17.4-0.9 17.3-0.9 17.4-1 17.3-1.1 17.4-1.1 17.3-1.3 17.4-1.4 17.4-1.5 17.3-1.6 17.4-1.8 17.3-1.9 17.4-2 17.3-2.2 17.4-2.4 17.4-2.7 17.3-2.8 17.4-3.1 17.3-3.3 17.4-3.6 17.3-3.9 17.4-4.2 17.4-4.6 17.3-4.9 17.4-5.4 17.3-5.8 17.4-6.3 17.3-6.8 17.4-7.4 17.4-8 17.3-8.7 17.4-9.4 17.3-10.2 17.4-11 17.3-11.9 17.4-13" viewBox=[0, 0, 1032, 250] width=1032 height=250 stroke="$text-primary" strokeWidth=2 strokeLinejoin="round" strokeLinecap="round"
+            - path «AZR 1138 Leader» geometry="M959.9 137l0 68-8 0" viewBox=[0, 0, 1032, 250] width=1032 height=250 stroke="#E9A04699" strokeWidth=1
+            - ellipse «AZR 1138 Halo» width=24 height=24 fill="#E9A04633"
+            - ellipse «AZR 1138 Dot» width=10 height=10 fill="$warning"
+            - frame «AZR 1138 Label» width=250 layout="vertical" gap=2
+              - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500" textAlign="right"  TEXT: AZR 1138 ce soir · OPL Lefèvre
+              - text «Detail» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: 13 h 15 de service · 1,8 % · 4 fois la moyenne
+            - ellipse «Hard Landing Dot» width=10 height=10 fill="$bg" stroke="$text-primary" strokeWidth=2
+            - frame «Hard Landing Label» width=280 layout="vertical" gap=2
+              - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500" textAlign="right"  TEXT: Atterrissage dur · 3 nov.
+              - text «Detail» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: F-HAZC · équipage à 12 h 40 de service
+            - text «X 0» width=40 fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal" textAlign="center"  TEXT: 0 h
+            - text «X 2» width=40 fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal" textAlign="center"  TEXT: 2 h
+            - text «X 4» width=40 fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal" textAlign="center"  TEXT: 4 h
+            - text «X 6» width=40 fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal" textAlign="center"  TEXT: 6 h
+            - text «X 8» width=40 fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal" textAlign="center"  TEXT: 8 h
+            - text «X 10» width=40 fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal" textAlign="center"  TEXT: 10 h
+            - text «X 12» width=40 fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal" textAlign="center"  TEXT: 12 h
+            - text «X 14» width=40 fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal" textAlign="center"  TEXT: 14 h
+          - frame «Risk Drivers» width="fill_container" layout="vertical" gap=4
+            - frame «Drivers Head» width="fill_container" padding=[0, 0, 6, 0] alignItems="center" justifyContent="space_between"
+              - text «Drivers Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Ce qui pèse aujourd'hui
+              - text «Drivers Summary» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Jusqu'à +10 points d'indice en agissant sur ces trois leviers
+            - frame «Driver · Trouver un remplaçant» width="fill_container" gap=16 padding=[10, 14] alignItems="center" fill="$surface-hover" stroke="$border-strong" strokeWidth=1 cornerRadius="$radius-md"
+              - icon «Driver Icon» width=18 height=18 fill="$warning" icon="user-round"
+              - frame «Driver Text» width="fill_container" layout="vertical" gap=2
+                - text «Driver Title» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: AZR 1138 ce soir · OPL Lefèvre à 13 h 15 de service
+                - text «Driver Detail» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Dépasse sa limite de 15 minutes · risque du vol multiplié par 4
+              - text «Driver Effect» width=90 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500" textAlign="right"  TEXT: +3 points
+              - frame «Driver Action» width=250 justifyContent="end"
+                - instance «Find Replacement» of «Button/Primary»
+                  - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Trouver un remplaçant
+                  - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                    - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+            - frame «Driver · Programmer la visite» width="fill_container" gap=16 padding=[10, 14] alignItems="center" fill="#FFFFFF00" stroke="#FFFFFF00" strokeWidth=1 cornerRadius="$radius-md"
+              - icon «Driver Icon» width=18 height=18 fill="$text-secondary" icon="plane"
+              - frame «Driver Text» width="fill_container" layout="vertical" gap=2
+                - text «Driver Title» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: F-HAZC · CRJ700 de 22 ans, usé à 63 %
+                - text «Driver Detail» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 3 réparations reportées · déjà immobilisé pour l'inspection du train
+              - text «Driver Effect» width=90 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500" textAlign="right"  TEXT: +4 points
+              - frame «Driver Action» width=250 justifyContent="end"
+                - instance «Programmer la visite» of «Button/Secondary»
+                  - icon «Icon» width=16 height=16 fill="$text-secondary" icon="wrench"
+                  - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Programmer la visite
+            - frame «Driver · Ouvrir le planning» width="fill_container" gap=16 padding=[10, 14] alignItems="center" fill="#FFFFFF00" stroke="#FFFFFF00" strokeWidth=1 cornerRadius="$radius-md"
+              - icon «Driver Icon» width=18 height=18 fill="$text-secondary" icon="calendar-days"
+              - frame «Driver Text» width="fill_container" layout="vertical" gap=2
+                - text «Driver Title» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Congés non pris · 34 jours dus
+                - text «Driver Detail» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 5 pilotes sans repos long depuis plus de six semaines
+              - text «Driver Effect» width=90 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500" textAlign="right"  TEXT: +3 points
+              - frame «Driver Action» width=250 justifyContent="end"
+                - instance «Ouvrir le planning» of «Button/Secondary»
+                  - icon «Icon» width=16 height=16 fill="$text-secondary" icon="calendar-range"
+                  - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Ouvrir le planning
+      - frame «Side Column» width=440 height="fill_container" layout="vertical" gap=20
+        - instance «Panel · Incidents de la saison» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Incidents de la saison
+            - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Journal complet
+          - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[2, 22, 18, 22]
+            - frame «Incident · Atterrissage dur» width="fill_container" gap=14 padding=[16, 0] stroke="#FFFFFF00"
+              - text «Date» width=46 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 3 nov.
+              - frame «Incident Text» width="fill_container" layout="vertical" gap=3
+                - frame «Incident Title Row» width="fill_container" gap=8 alignItems="center"
+                  - ellipse «Severity Dot» width=7 height=7 fill="$text-tertiary"
+                  - text «Event Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Atterrissage dur
+                  - text «Event Meta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Mineur · F-HAZC à Lyon
+                - text «Cause» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Équipage à 12 h 40 de service, train usé à 63 %
+                - text «Consequences» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Train inspecté · 18 400 € · immobilisé 2 jours
+            - frame «Incident · Sortie de piste» width="fill_container" gap=14 padding=[16, 0] stroke="$border" strokeWidth={"top": 1}
+              - text «Date» width=46 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 27 oct.
+              - frame «Incident Text» width="fill_container" layout="vertical" gap=3
+                - frame «Incident Title Row» width="fill_container" gap=8 alignItems="center"
+                  - ellipse «Severity Dot» width=7 height=7 fill="$danger"
+                  - text «Event Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Sortie de piste
+                  - text «Event Meta» fill="$danger" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Grave · F-HAZF à Calvi
+                - text «Cause» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Coupure moteur en approche après deux reports de maintenance
+                - text «Consequences» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Enquête BEA en cours · 112 000 € · avion au sol · réputation −0,3
+            - frame «Incident · Retard technique» width="fill_container" gap=14 padding=[16, 0] stroke="$border" strokeWidth={"top": 1}
+              - text «Date» width=46 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 19 oct.
+              - frame «Incident Text» width="fill_container" layout="vertical" gap=3
+                - frame «Incident Title Row» width="fill_container" gap=8 alignItems="center"
+                  - ellipse «Severity Dot» width=7 height=7 fill="$text-tertiary"
+                  - text «Event Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Retard technique
+                  - text «Event Meta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Mineur · F-HAZA à Lyon
+                - text «Cause» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Fuite hydraulique, réparation repoussée de 6 jours
+                - text «Consequences» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 2 h 10 de retard · 9 300 € d'indemnités
+            - frame «Incident · Impact d'oiseau» width="fill_container" gap=14 padding=[16, 0] stroke="$border" strokeWidth={"top": 1}
+              - text «Date» width=46 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 8 oct.
+              - frame «Incident Text» width="fill_container" layout="vertical" gap=3
+                - frame «Incident Title Row» width="fill_container" gap=8 alignItems="center"
+                  - ellipse «Severity Dot» width=7 height=7 fill="$text-tertiary"
+                  - text «Event Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Impact d'oiseau
+                  - text «Event Meta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Mineur · F-HAZB à Ajaccio
+                - text «Cause» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Hors de votre contrôle
+                - text «Consequences» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Pare-brise remplacé · couvert par l'assurance
+            - frame «Spacer» width="fill_container" height="fill_container"
+            - frame «Season Cost» width="fill_container" layout="vertical" gap=6 padding=[12, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+              - frame «Total Row» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Coût total · dont 17 400 € couverts
+                - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 157 100 €
+              - frame «Cost Row» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: À votre charge cette saison
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 139 700 €
+              - frame «Premium Row» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Prime d'assurance dès décembre
+                - text «Value» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: +12 % · 2 740 € par mois
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

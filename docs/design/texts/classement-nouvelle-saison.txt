@@ -11,5 +11,84 @@ Saison
 Carrière
 Tout le monde repart de zéro
 Valeur nette carrière, pour référence
+Rang
+Compagnie
+Activité
+Vols
+Gain de saison
+Valeur nette
+—
+Transalpine Express
+IA prudente
+En vol · LSZH → LFPG
+0
+0 €
+23,8 M€
+—
+Ibérica Sol
+IA agressive
+En vol · LEBL → EGKK
+0
+0 €
+20,6 M€
+—
+Aéro Provence
+Joueur · m.tournier
+Hors ligne
+0
+0 €
+15,1 M€
+—
+Rhône Air
+IA prudente
+Au sol · départ 06:10Z
+0
+0 €
+12,4 M€
+—
+Méridia Cargo
+IA agressive
+Chargement · LIMC
+0
+0 €
+10,7 M€
+—
+Alpes Air Link
+IA prudente
+Au sol · départ 07:25Z
+0
+0 €
+9,85 M€
+—
+Azur Régional
+Toi
+Au sol · LFMN
+0
+0 €
+9,41 M€
+—
+Corsica Wings
+IA agressive
+En vol · LFKJ → LFML
+0
+0 €
+8,62 M€
+Pg suiv
+16 autres compagnies
+Ton premier vol validé t'inscrit au classement
 Ibérica Sol
 2e en novembre
+IA agressive · hub LEBL
+Premier vol vers EGKK · arrivée 03:05Z
+Gain de saison
+0 €
+Compté à l'atterrissage du premier vol
+Carrière, pour référence
+Valeur nette
+20,6 M€
+Vols
+2 140
+Réputation
+3,9
+Voir la fiche
+Entrée

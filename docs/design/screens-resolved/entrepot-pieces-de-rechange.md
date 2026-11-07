@@ -1,0 +1,252 @@
+# Entrepôt · pièces de rechange
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Entrepôt · pièces de rechange» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-13.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=24 padding=[28, 32, 24, 32]
+    - frame «Warehouse Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Identity» layout="vertical" gap=8
+        - frame «Breadcrumb» gap=10 alignItems="center"
+          - instance «Base Sign» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+          - text «Crumb Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Compagnie  ›  Installations à Nice
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600" lineHeight=1.05  TEXT: Entrepôt de pièces de rechange
+        - text «Subtitle» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Zone fret Ouest · 380 m² loués 4 200 € par mois · 18 pièces pour 3 types d'avions sur 4
+      - frame «Key Stats» gap=44 padding=[0, 0, 4, 0]
+        - instance «Stat · Capital immobilisé» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Capital immobilisé
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 481 400 €
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: soit 37 % du solde
+        - instance «Stat · Jours au sol évités» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Jours au sol attendus
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: ≈ 24 j
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: par an · dont 11 j pour le Caravan
+        - instance «Stat · Avions couverts» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Avions couverts
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 5 sur 6
+          - text «Delta» fill="$danger" fontFamily="$font-ui" fontSize=12  TEXT: F-HAZF sans aucune pièce
+    - frame «Warehouse Body» width="fill_container" height="fill_container" gap=20
+      - instance «Panel · Arbitrage» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Argent qui dort ou avion au sol
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Comment c'est estimé
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=16 padding=[14, 22, 22, 22]
+          - frame «Live Case · F-HAZF» width="fill_container" gap=32
+            - frame «Case Timeline» width=732 layout="vertical" gap=14
+              - frame «Case Head» width="fill_container" layout="vertical" gap=4
+                - frame «Status» gap=8 alignItems="center"
+                  - ellipse «Status Dot» width=7 height=7 fill="$danger"
+                  - text «Status Text» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: F-HAZF · Grand Caravan au sol depuis 3 jours
+                - text «Case Detail» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Panne moteur mar. 3 à 18:40 · régulateur carburant PT6A commandé, livraison prévue sam. 7 vers 14:00
+              - frame «Case Chart» width="fill_container" layout="vertical" gap=6
+                - frame «Ruler Row» gap=12
+                  - frame «Spacer» width=120 height=16
+                  - frame «Day Ruler» width=600 height=16 layout="none"
+                    - rectangle «Tick mar. 3» width=1 height=10 fill="$border-strong"
+                    - text «Day mar. 3» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: mar. 3
+                    - rectangle «Tick mer. 4» width=1 height=10 fill="$border-strong"
+                    - text «Day mer. 4» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: mer. 4
+                    - rectangle «Tick jeu. 5» width=1 height=10 fill="$border-strong"
+                    - text «Day jeu. 5» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: jeu. 5
+                    - rectangle «Tick ven. 6» width=1 height=10 fill="$border-strong"
+                    - text «Day ven. 6» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: ven. 6
+                    - rectangle «Tick sam. 7» width=1 height=10 fill="$border-strong"
+                    - text «Day sam. 7» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: sam. 7
+                    - rectangle «Now Cursor» width=2 height=10 fill="$text-primary"
+                - frame «Track Row · Sans la pièce» gap=12 alignItems="center"
+                  - text «Track Label» width=120 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Sans la pièce
+                  - frame «Track» width=600 height=40 layout="none" fill="#FFFFFF05" cornerRadius=2
+                    - frame «Seg · Au sol» width=356 height=32 layout="vertical" padding=[0, 10] justifyContent="center" fill="#E5625B38" stroke="#E5625B80" strokeWidth=1 cornerRadius=2
+                      - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: Au sol · 3 jours écoulés
+                    - frame «Seg · Au sol prévu» width=129 height=32 layout="vertical" padding=[0, 10] justifyContent="center" fill="#E5625B12" stroke="#E5625B59" strokeWidth=1 cornerRadius=2
+                      - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: +1 jour prévu
+                    - rectangle «Now Line» width=2 height=40 fill="$text-primary"
+                - frame «Track Row · Avec la pièce» gap=12 alignItems="center"
+                  - text «Track Label» width=120 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Avec la pièce
+                  - frame «Track» width=600 height=40 layout="none" fill="#FFFFFF05" cornerRadius=2
+                    - frame «Seg · Remplacement» width=30 height=32 layout="vertical" padding=[0, 10] justifyContent="center" fill="$surface-selected" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                    - frame «Seg · En ligne» width=475 height=32 layout="vertical" padding=[0, 10] justifyContent="center" fill="$neutral-soft" cornerRadius=2
+                      - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Remplacée en 6 h · de nouveau en ligne mer. 4 à 00:40
+                    - rectangle «Now Line» width=2 height=40 fill="#ECEAE559"
+                - frame «Markers Row» gap=12
+                  - frame «Spacer» width=120 height=16
+                  - frame «Markers» width=600 height=16 layout="none"
+                    - text «Now Label» width=200 fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600" textAlign="right"  TEXT: Maintenant · ven. 6 17:58Z
+                    - text «Part Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Pièce attendue sam. 7
+              - text «Trade-off Line» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Passer le Caravan en kit critique : 18,4 k€ immobilisés pour ≈ 8 jours au sol évités par an, soit ≈ 27 200 € de recettes gardées. Rentabilisé dès la deuxième panne.
+            - frame «Case Verdict» width="fill_container" layout="vertical" gap=16
+              - frame «Fig · Perdu» width="fill_container" layout="vertical" gap=2
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Perdu sur cette panne
+                - text «Value» fill="$danger" fontFamily="$font-display" fontSize=30 fontWeight="500" lineHeight=1.1  TEXT: 13 600 €
+                - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 4 jours sans vol × 3 400 € par jour
+              - frame «Fig · Immobilisé» width="fill_container" layout="vertical" gap=2
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Le kit critique Caravan aurait immobilisé
+                - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="500" lineHeight=1.1  TEXT: 18 400 €
+                - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: régulateur carburant inclus · revendable 80 %
+              - instance «Button · Commander le kit» of «Button/Primary»
+                - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Commander le kit critique
+                - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                  - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+          - rectangle «Divider» width="fill_container" height=1 fill="$border"
+          - frame «Stock Policy» width="fill_container" layout="vertical" gap=4
+            - frame «Policy Head» width="fill_container" gap=28 padding=[0, 12, 4, 12] alignItems="end"
+              - frame «Head Title» width="fill_container" layout="vertical" gap=2
+                - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="600"  TEXT: Politique de stock par type
+                - text «Hint» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Ce que chaque choix immobilise, et les jours au sol qu'il laisse
+              - frame «Column Labels»
+                - text «Col · Argent» width=222 fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: Argent immobilisé
+                - frame «Col Gap» width=17 height=1
+                - text «Col · Jours» width=222 fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Jours au sol attendus par an
+            - frame «Policy · ATR 72-600» width="fill_container" gap=28 padding=[7, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Type» width="fill_container" layout="vertical" gap=2
+                - text «Type Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: ATR 72-600
+                - text «Type Meta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: ×3 · F-HAZA, F-HAZB, F-HAZR · un jour au sol 9 800 €
+              - frame «Policy Choice» gap=2 padding=3 fill="$surface-sunken" cornerRadius=4
+                - frame «Option · Aucune» padding=[6, 12] cornerRadius=3
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Aucune
+                - frame «Option · Critiques» padding=[6, 12] cornerRadius=3
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Critiques
+                - frame «Option · Kit complet» padding=[6, 12] fill="$surface-selected" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Kit complet
+              - frame «Trade-off» alignItems="center"
+                - frame «Capital Side» width=230 height=26 layout="none"
+                  - rectangle «Capital Bar» width=143 height=16 fill="#ECEAE58C" cornerRadius=[2, 0, 0, 2]
+                  - text «Capital Value» width=80 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600" textAlign="right"  TEXT: 382,5 k€
+                - rectangle «Axis» width=1 height=26 fill="$border-strong"
+                - frame «Ground Side» width=230 height=26 layout="none"
+                  - rectangle «Ground Bar» width=19 height=16 fill="#E5625B73" cornerRadius=[0, 2, 2, 0]
+                  - text «Ground Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: ≈ 4 j
+            - frame «Policy · A220-300» width="fill_container" gap=28 padding=[7, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Type» width="fill_container" layout="vertical" gap=2
+                - text «Type Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: A220-300
+                - text «Type Meta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: F-HAZD · un jour au sol 14 200 €
+              - frame «Policy Choice» gap=2 padding=3 fill="$surface-sunken" cornerRadius=4
+                - frame «Option · Aucune» padding=[6, 12] cornerRadius=3
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Aucune
+                - frame «Option · Critiques» padding=[6, 12] fill="$surface-selected" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Critiques
+                - frame «Option · Kit complet» padding=[6, 12] cornerRadius=3
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Kit complet
+              - frame «Trade-off» alignItems="center"
+                - frame «Capital Side» width=230 height=26 layout="none"
+                  - rectangle «Capital Bar» width=24 height=16 fill="#ECEAE58C" cornerRadius=[2, 0, 0, 2]
+                  - text «Capital Value» width=80 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600" textAlign="right"  TEXT: 65 k€
+                - rectangle «Axis» width=1 height=26 fill="$border-strong"
+                - frame «Ground Side» width=230 height=26 layout="none"
+                  - rectangle «Ground Bar» width=23 height=16 fill="#E5625B73" cornerRadius=[0, 2, 2, 0]
+                  - text «Ground Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: ≈ 5 j
+            - frame «Policy · CRJ700» width="fill_container" gap=28 padding=[7, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Type» width="fill_container" layout="vertical" gap=2
+                - text «Type Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: CRJ700
+                - text «Type Meta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: F-HAZC · un jour au sol 8 600 €
+              - frame «Policy Choice» gap=2 padding=3 fill="$surface-sunken" cornerRadius=4
+                - frame «Option · Aucune» padding=[6, 12] cornerRadius=3
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Aucune
+                - frame «Option · Critiques» padding=[6, 12] fill="$surface-selected" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Critiques
+                - frame «Option · Kit complet» padding=[6, 12] cornerRadius=3
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Kit complet
+              - frame «Trade-off» alignItems="center"
+                - frame «Capital Side» width=230 height=26 layout="none"
+                  - rectangle «Capital Bar» width=13 height=16 fill="#ECEAE58C" cornerRadius=[2, 0, 0, 2]
+                  - text «Capital Value» width=80 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600" textAlign="right"  TEXT: 33,9 k€
+                - rectangle «Axis» width=1 height=26 fill="$border-strong"
+                - frame «Ground Side» width=230 height=26 layout="none"
+                  - rectangle «Ground Bar» width=19 height=16 fill="#E5625B73" cornerRadius=[0, 2, 2, 0]
+                  - text «Ground Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: ≈ 4 j
+            - frame «Policy · Grand Caravan» width="fill_container" gap=28 padding=[7, 12] alignItems="center" fill="$surface-hover" stroke="$border" strokeWidth={"top": 1} cornerRadius=3
+              - frame «Type» width="fill_container" layout="vertical" gap=2
+                - text «Type Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Grand Caravan
+                - text «Type Meta» fill="$danger" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: F-HAZF, en panne · un jour au sol 3 400 €
+              - frame «Policy Choice» gap=2 padding=3 fill="$surface-sunken" cornerRadius=4
+                - frame «Option · Aucune» padding=[6, 12] fill="$surface-selected" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Aucune
+                - frame «Option · Critiques» padding=[6, 12] cornerRadius=3
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Critiques
+                - frame «Option · Kit complet» padding=[6, 12] cornerRadius=3
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Kit complet
+              - frame «Trade-off» alignItems="center"
+                - frame «Capital Side» width=230 height=26 layout="none"
+                  - text «Capital Value» width=80 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600" textAlign="right"  TEXT: 0 €
+                - rectangle «Axis» width=1 height=26 fill="$border-strong"
+                - frame «Ground Side» width=230 height=26 layout="none"
+                  - rectangle «Ground Bar» width=52 height=16 fill="#E5625BCC" cornerRadius=[0, 2, 2, 0]
+                  - text «Ground Value» fill="$danger" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: ≈ 11 j
+      - instance «Panel · En stock» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: En stock à LFMN
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Inventaire complet
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=18 padding=[14, 22, 22, 22]
+          - frame «Stock · ATR 72-600» width="fill_container" layout="vertical" gap=6
+            - frame «Group Head» width="fill_container" gap=10 alignItems="end"
+              - text «Type Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: ATR 72-600
+              - text «Covers» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: F-HAZA · F-HAZB · F-HAZR
+              - text «Subtotal» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="500"  TEXT: 382 500 €
+            - frame «Items» width="fill_container" layout="vertical"
+              - frame «Item · Module moteur PW127M · échange standard» width="fill_container" gap=12 padding=[4, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - text «Part» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Module moteur PW127M · échange standard
+                - text «Qty» width=28 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: ×1
+                - text «Value» width=78 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 245 000 €
+              - frame «Item · Pale d'hélice» width="fill_container" gap=12 padding=[4, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - text «Part» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Pale d'hélice
+                - text «Qty» width=28 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: ×2
+                - text «Value» width=78 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 37 000 €
+              - frame «Item · Calculateurs avionique ADC et VHF» width="fill_container" gap=12 padding=[4, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - text «Part» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Calculateurs avionique ADC et VHF
+                - text «Qty» width=28 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: ×2
+                - text «Value» width=78 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 36 500 €
+              - frame «Item · Démarreur-génératrice» width="fill_container" gap=12 padding=[4, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - text «Part» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Démarreur-génératrice
+                - text «Qty» width=28 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: ×1
+                - text «Value» width=78 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 32 000 €
+              - frame «Item · Frein carbone» width="fill_container" gap=12 padding=[4, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - text «Part» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Frein carbone
+                - text «Qty» width=28 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: ×2
+                - text «Value» width=78 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 19 600 €
+              - frame «Item · Roue et pneu de train principal» width="fill_container" gap=12 padding=[4, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - text «Part» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Roue et pneu de train principal
+                - text «Qty» width=28 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: ×4
+                - text «Value» width=78 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 12 400 €
+          - frame «Stock · A220-300» width="fill_container" layout="vertical" gap=6
+            - frame «Group Head» width="fill_container" gap=10 alignItems="end"
+              - text «Type Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: A220-300
+              - text «Covers» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: F-HAZD
+              - text «Subtotal» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="500"  TEXT: 65 000 €
+            - frame «Items» width="fill_container" layout="vertical"
+              - frame «Item · Module avionique MAU» width="fill_container" gap=12 padding=[4, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - text «Part» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Module avionique MAU
+                - text «Qty» width=28 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: ×1
+                - text «Value» width=78 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 30 800 €
+              - frame «Item · Frein carbone» width="fill_container" gap=12 padding=[4, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - text «Part» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Frein carbone
+                - text «Qty» width=28 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: ×1
+                - text «Value» width=78 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 24 600 €
+              - frame «Item · Roue et pneu de train principal» width="fill_container" gap=12 padding=[4, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - text «Part» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Roue et pneu de train principal
+                - text «Qty» width=28 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: ×2
+                - text «Value» width=78 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 9 600 €
+          - frame «Stock · CRJ700» width="fill_container" layout="vertical" gap=6
+            - frame «Group Head» width="fill_container" gap=10 alignItems="end"
+              - text «Type Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: CRJ700
+              - text «Covers» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: F-HAZC
+              - text «Subtotal» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="500"  TEXT: 33 900 €
+            - frame «Items» width="fill_container" layout="vertical"
+              - frame «Item · Démarreur moteur» width="fill_container" gap=12 padding=[4, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - text «Part» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Démarreur moteur
+                - text «Qty» width=28 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: ×1
+                - text «Value» width=78 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 31 000 €
+              - frame «Item · Roue et pneu de train principal» width="fill_container" gap=12 padding=[4, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - text «Part» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Roue et pneu de train principal
+                - text «Qty» width=28 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: ×1
+                - text «Value» width=78 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: 2 900 €
+          - frame «Stock · Grand Caravan» width="fill_container" layout="vertical" gap=6
+            - frame «Group Head» width="fill_container" gap=10 alignItems="end"
+              - text «Type Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Grand Caravan
+              - text «Covers» width="fill_container" fill="$danger" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: F-HAZF · rien en stock
+              - text «Subtotal» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="500"  TEXT: 0 €
+            - frame «Empty Note» width="fill_container" padding=[6, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+              - text «Note» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Le régulateur carburant de F-HAZF arrive sam. 7 par fret express depuis Toulouse : 2 900 € de transport en plus.
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

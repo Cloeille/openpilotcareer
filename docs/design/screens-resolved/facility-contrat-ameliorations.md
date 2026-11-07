@@ -1,0 +1,210 @@
+# Facility · contrat & améliorations
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Facility · contrat & améliorations» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-14.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 gap=56 padding=[28, 32, 24, 32]
+    - frame «Contract Column» width=700 height="fill_container" layout="vertical" gap=24
+      - frame «Title Block» width="fill_container" layout="vertical" gap=8
+        - frame «Status» gap=10 alignItems="center"
+          - instance «Sign · LFMN» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Hub principal · facilities
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Hangar de maintenance 2
+        - text «Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Zone technique nord · 4 200 m² · libre depuis septembre · proposé par Aéroports de la Côte d'Azur
+      - instance «Choice Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Louer ou acheter
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Mêmes effets, seul le coût change
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="horizontal" gap=4 padding=[8, 10, 14, 10]
+          - frame «Option · Louer» width="fill_container" layout="vertical" gap=14 padding=14 fill="$surface-hover" cornerRadius="$radius-md"
+            - frame «Head» gap=10 alignItems="center"
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=9
+                - ellipse «Radio Dot» width=8 height=8 fill="$text-primary"
+              - text «Mode» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Louer
+            - frame «Price Stack» width="fill_container" layout="vertical" gap=3
+              - text «Price» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: 18 500 € / mois
+              - text «Price Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 666 000 € sur les 36 mois du bail
+            - frame «Terms» width="fill_container" layout="vertical" gap=8 padding=[12, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+              - frame «Term · Durée» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Durée
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 36 mois, renouvelable
+              - frame «Term · Caution» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Caution
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 37 000 €
+              - frame «Term · Préavis de sortie» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Préavis de sortie
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 3 mois
+              - frame «Term · Entretien du bâtiment» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Entretien du bâtiment
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Inclus
+          - frame «Option · Acheter» width="fill_container" layout="vertical" gap=14 padding=14 cornerRadius="$radius-md"
+            - frame «Head» gap=10 alignItems="center"
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+              - text «Mode» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Acheter
+            - frame «Price Stack» width="fill_container" layout="vertical" gap=3
+              - text «Price» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: 2 350 000 €
+              - text «Price Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: L'équivalent de 127 mois de loyer
+            - frame «Terms» width="fill_container" layout="vertical" gap=8 padding=[12, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+              - frame «Term · Durée» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Durée
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Définitive
+              - frame «Term · Financement» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Financement
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Crédit à 80 % possible
+              - frame «Term · Revente» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Revente
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: ≈ 75 % du prix
+              - frame «Term · Entretien du bâtiment» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Entretien du bâtiment
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 2 400 € / mois
+      - instance «Staff Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Personnel requis
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Pour le niveau 2
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[6, 22, 18, 22]
+          - frame «Role · Cheffe d'atelier» width="fill_container" gap=14 padding=[12, 0] alignItems="center"
+            - icon «Icon» width=16 height=16 fill="$text-secondary" icon="hard-hat"
+            - frame «Role Text» width="fill_container" layout="vertical" gap=2
+              - text «Role» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Cheffe d'atelier
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1 requise · Élodie Garnier, 12 ans en atelier A320
+            - text «Status» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Candidate retenue
+            - instance «Button · Changer» of «Button/Ghost»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Changer
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+          - frame «Role · Techniciens» width="fill_container" gap=14 padding=[12, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - icon «Icon» width=16 height=16 fill="$text-secondary" icon="wrench"
+            - frame «Role Text» width="fill_container" layout="vertical" gap=2
+              - text «Role» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Techniciens
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 10 requis · aucun disponible à Nice, 23 candidats
+            - text «Status» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 10 à recruter
+            - instance «Button · Recruter» of «Button/Ghost»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Recruter
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+          - frame «Staff Footer» width="fill_container" gap=10 padding=[12, 0, 0, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - icon «Icon» width=14 height=14 fill="$text-tertiary" icon="info"
+            - text «Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: + 46 200 € / mois de salaires. Recrutement en 10 jours, avant la fin des travaux.
+    - frame «Upgrade Column» width="fill_container" height="fill_container" layout="vertical" gap=24 padding=[119, 0, 0, 0]
+      - instance «Levels Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Niveau du hangar
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Le loyer ne change pas avec le niveau
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="horizontal" gap=4 padding=[8, 10, 14, 10]
+          - frame «Level 1 · Entretien courant» width="fill_container" layout="vertical" gap=14 padding=14 cornerRadius="$radius-md"
+            - frame «Head» width="fill_container" gap=10 alignItems="center"
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+              - text «Level» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Niveau 1
+            - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Entretien courant
+              - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Niveau d'ouverture
+            - frame «Unlocks» width="fill_container" layout="vertical" gap=8
+              - frame «Unlock» width="fill_container" gap=8
+                - icon «Icon» width=14 height=14 fill="$text-secondary" icon="check"
+                - text «Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.3  TEXT: Visites A et B sur place
+              - frame «Unlock» width="fill_container" gap=8
+                - icon «Icon» width=14 height=14 fill="$text-secondary" icon="check"
+                - text «Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.3  TEXT: 2 avions à la fois, jusqu'à l'A321
+              - frame «Unlock» width="fill_container" gap=8
+                - icon «Icon» width=14 height=14 fill="$text-secondary" icon="check"
+                - text «Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.3  TEXT: Maintenance 35 % moins chère
+            - frame «Terms» width="fill_container" layout="vertical" gap=8 padding=[12, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+              - frame «Term · Techniciens» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Techniciens
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 6
+              - frame «Term · Chefs d'atelier» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Chefs d'atelier
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 1
+              - frame «Term · Travaux» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Travaux
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Aucuns
+              - frame «Term · Coût» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Coût
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Inclus
+          - frame «Level 2 · Atelier lourd» width="fill_container" layout="vertical" gap=14 padding=14 fill="$surface-hover" cornerRadius="$radius-md"
+            - frame «Head» width="fill_container" gap=10 alignItems="center"
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=9
+                - ellipse «Radio Dot» width=8 height=8 fill="$text-primary"
+              - text «Level» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Niveau 2
+            - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Atelier lourd
+              - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Améliorable dès la signature
+            - frame «Unlocks» width="fill_container" layout="vertical" gap=8
+              - frame «Unlock» width="fill_container" gap=8
+                - icon «Icon» width=14 height=14 fill="$text-secondary" icon="check"
+                - text «Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.3  TEXT: Grandes visites sans convoyage
+              - frame «Unlock» width="fill_container" gap=8
+                - icon «Icon» width=14 height=14 fill="$text-secondary" icon="check"
+                - text «Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.3  TEXT: 3 avions à la fois
+              - frame «Unlock» width="fill_container" gap=8
+                - icon «Icon» width=14 height=14 fill="$text-secondary" icon="check"
+                - text «Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.3  TEXT: Pannes réglées en 4 h
+            - frame «Terms» width="fill_container" layout="vertical" gap=8 padding=[12, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+              - frame «Term · Techniciens» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Techniciens
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 10
+              - frame «Term · Chefs d'atelier» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Chefs d'atelier
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 1
+              - frame «Term · Travaux» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Travaux
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 3 semaines
+              - frame «Term · Coût» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Coût
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 420 000 €
+          - frame «Level 3 · Centre de maintenance» width="fill_container" layout="vertical" gap=14 padding=14 cornerRadius="$radius-md"
+            - frame «Head» width="fill_container" gap=10 alignItems="center"
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+              - text «Level» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Niveau 3
+              - icon «Lock» width=14 height=14 fill="$text-tertiary" icon="lock"
+            - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+              - text «Name» fill="$text-secondary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Centre de maintenance
+              - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Après 6 mois au niveau 2
+            - frame «Unlocks» width="fill_container" layout="vertical" gap=8
+              - frame «Unlock» width="fill_container" gap=8
+                - icon «Icon» width=14 height=14 fill="$text-tertiary" icon="check"
+                - text «Text» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.3  TEXT: Gros-porteurs jusqu'à l'A350
+              - frame «Unlock» width="fill_container" gap=8
+                - icon «Icon» width=14 height=14 fill="$text-tertiary" icon="check"
+                - text «Text» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.3  TEXT: Entretien vendu aux compagnies IA
+              - frame «Unlock» width="fill_container" gap=8
+                - icon «Icon» width=14 height=14 fill="$text-tertiary" icon="check"
+                - text «Text» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.3  TEXT: ≈ 30 000 € / mois de revenus
+            - frame «Terms» width="fill_container" layout="vertical" gap=8 padding=[12, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+              - frame «Term · Techniciens» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Techniciens
+                - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 16
+              - frame «Term · Chefs d'atelier» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Chefs d'atelier
+                - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 2
+              - frame «Term · Travaux» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Travaux
+                - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 8 semaines
+              - frame «Term · Coût» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Coût
+                - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 1 150 000 €
+      - frame «Spacer» width="fill_container" height="fill_container"
+      - frame «Confirm» width="fill_container" layout="vertical" gap=18 padding=[20, 22, 22, 22] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 24}
+        - frame «Summary» width="fill_container" gap=40 alignItems="end"
+          - instance «Stat · À la signature» of «Stat»
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: À payer à la signature
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="500"  TEXT: 457 000 €
+            - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Caution 37 000 € · niveau 2 420 000 €
+          - instance «Stat · Chaque mois» of «Stat»
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Ensuite, chaque mois
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="500"  TEXT: 64 700 €
+            - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Loyer 18 500 € · salaires 46 200 €
+          - frame «Spacer» width="fill_container" height=1
+          - frame «Balance After» layout="vertical" gap=2 alignItems="end"
+            - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Solde après signature
+            - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 827 560 €
+        - frame «Actions» width="fill_container" gap=16 alignItems="center"
+          - instance «Button · Signer» of «Button/Primary»
+            - text «Label» width="fill_container" fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Louer et lancer le niveau 2
+            - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+              - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+          - instance «Button · Niveau 1» of «Button/Secondary»
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Louer au niveau 1
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

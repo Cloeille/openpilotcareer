@@ -3,7 +3,69 @@ Choisis ton premier avion
 Ta flotte est vide. La location te permet de démarrer sans entamer ton capital de 1 500 000 €.
 Avions de départ
 3 dans ton budget
+Avion
+Louer
+Acheter
+DHC2
+De Havilland DHC-2 Beaver
+Piston · 7 sièges · 395 NM · pistes courtes
+9 600 € / mois
+Caution 19 200 €
+640 000 €
+Solde après 854 000 €
+BN2P
+Britten-Norman BN-2 Islander
+Piston bimoteur · 9 sièges · 755 NM
+13 400 € / mois
+Caution 26 800 €
+890 000 €
+Solde après 603 000 €
+C208
+Cessna 208B Grand Caravan EX
+Turbopropulseur · 12 sièges · 960 NM
+18 500 € / mois
+Caution 37 000 €
+1 320 000 €
+Solde après 170 500 €
+Louer, conseillé pour démarrer
+Un loyer par mois et une caution rendue à la fin. Maintenance incluse, ta trésorerie reste libre.
+Acheter
+Tout se paie aujourd'hui et l'avion t'appartient. Il se revend, mais l'entretien est pour toi.
 Base d'attache
 Le premier hub est offert
+LFMN
+Nice Côte d'Azur
+14 jobs adaptés
+LFML
+Marseille Provence
+11 jobs adaptés
+LFLL
+Lyon Saint-Exupéry
+9 jobs adaptés
+LFBO
+Toulouse Blagnac
+8 jobs adaptés
 Récapitulatif
 Avant le premier vol
+Capital de départ
+1 500 000 €
+Caution, rendue en fin de contrat
+− 37 000 €
+Premier loyer
+− 18 500 €
+Convoyage jusqu'à Nice
+− 9 500 €
+Base d'attache LFMN
+Offerte
+Solde après signature
+1 435 000 €
+Loyer mensuel
+18 500 € / mois
+Engagement
+24 mois, sortie dès 6 mois
+Livraison à Nice
+Demain, 09:00Z
+1 264 500 € de plus en caisse qu'avec l'achat.
+Plus tard
+Louer et commencer
+Entrée

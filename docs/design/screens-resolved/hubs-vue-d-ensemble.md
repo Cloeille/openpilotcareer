@@ -1,0 +1,188 @@
+# Hubs · vue d'ensemble
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Hubs · vue d'ensemble» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-15.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=24 padding=[28, 32, 24, 32]
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=6
+        - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Azur Régional · 2 bases · 6 avions · 44 employés
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Hubs et bases
+      - instance «Stat · Coût des installations» of «Stat»
+        - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: Installations, toutes bases
+        - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500"  TEXT: 36 900 € / mois
+        - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: LFMN 28 300 € · LFLL 8 600 €
+    - frame «Hubs» width="fill_container" height="fill_container" gap=24
+      - instance «Hub · LFMN» of «Panel»
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=20 padding=[24, 28, 20, 28]
+          - frame «Hub Head» width="fill_container" alignItems="end" justifyContent="space_between"
+            - frame «Hub Title» layout="vertical" gap=8
+              - frame «Status» gap=10 alignItems="center"
+                - instance «Sign · LFMN» of «Sign/Location»
+                  - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+                - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Hub principal · siège de la compagnie
+              - text «Hub Name» fill="$text-primary" fontFamily="$font-display" fontSize=28 fontWeight="600"  TEXT: Nice Côte d'Azur
+            - instance «Button · Plan 3D» of «Button/Primary»
+              - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Plan 3D de l'aéroport
+              - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+          - frame «Hub Body» width="fill_container" height="fill_container" gap=44
+            - frame «Facilities» width="fill_container" layout="vertical"
+              - frame «Section Head» width="fill_container" padding=[0, 0, 10, 0] alignItems="center" justifyContent="space_between"
+                - text «Section Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Installations
+                - text «Section Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 28 300 € / mois
+              - frame «Facility · Bureaux administratifs» width="fill_container" gap=14 padding=[12, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - icon «Icon» width=16 height=16 fill="$text-secondary" icon="building-2"
+                - frame «Name Block» width="fill_container" layout="vertical" gap=2
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Bureaux administratifs
+                  - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Siège d'Azur Régional · 18 postes de travail
+                - text «Status» width=150 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Loués
+                - text «Cost» width=96 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500" textAlign="right"  TEXT: 6 200 €
+              - frame «Facility · Hangar de maintenance 1» width="fill_container" gap=14 padding=[12, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - icon «Icon» width=16 height=16 fill="$text-secondary" icon="wrench"
+                - frame «Name Block» width="fill_container" layout="vertical" gap=2
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Hangar de maintenance 1
+                  - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Niveau 1 · 2 avions jusqu'à l'A321
+                - text «Status» width=150 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Acheté
+                - text «Cost» width=96 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500" textAlign="right"  TEXT: 2 400 €
+              - frame «Facility · Postes de stationnement» width="fill_container" gap=14 padding=[12, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - icon «Icon» width=16 height=16 fill="$text-secondary" icon="square-parking"
+                - frame «Name Block» width="fill_container" layout="vertical" gap=2
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Postes de stationnement
+                  - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: PK1 à PK4 · aire de trafic Est
+                - text «Status» width=150 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 4 loués sur 6
+                - text «Cost» width=96 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500" textAlign="right"  TEXT: 8 400 €
+              - frame «Facility · Terminal 1» width="fill_container" gap=14 padding=[12, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - icon «Icon» width=16 height=16 fill="$text-secondary" icon="door-open"
+                - frame «Name Block» width="fill_container" layout="vertical" gap=2
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Terminal 1
+                  - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 4 comptoirs · 2 portes d'embarquement
+                - text «Status» width=150 fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Redevance au passager
+                - text «Cost» width=96 fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500" textAlign="right"  TEXT: ≈ 11 300 €
+              - frame «Facility · Terminal aviation d'affaires» width="fill_container" gap=14 padding=[12, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="armchair"
+                - frame «Name Block» width="fill_container" layout="vertical" gap=2
+                  - text «Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Terminal aviation d'affaires
+                  - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Salon VIP · accès piste direct
+                - text «Status» width=150 fill="$accent" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Disponible
+                - text «Cost» width=96 fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500" textAlign="right"  TEXT: dès 7 800 €
+              - frame «Facility · Fret & stockage» width="fill_container" gap=14 padding=[12, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+                - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="package"
+                - frame «Name Block» width="fill_container" layout="vertical" gap=2
+                  - text «Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Fret & stockage
+                  - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Entrepôt 3 200 m² · zone Ouest
+                - text «Status» width=150 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Méridia Cargo
+                - text «Cost» width=96 fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500" textAlign="right"  TEXT: —
+              - frame «Also Available» width="fill_container" padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Aussi disponibles : Hangar de maintenance 2, Centre d'opérations, 2 postes
+            - frame «Team & Fleet» width=270 layout="vertical" gap=30
+              - frame «Team» width="fill_container" layout="vertical" gap=14
+                - frame «Section Head» width="fill_container" alignItems="center" justifyContent="space_between"
+                  - text «Section Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Équipe basée
+                  - text «Section Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 37 personnes
+                - frame «Hub Chief» width="fill_container" gap=12 alignItems="center"
+                  - frame «Avatar» width=38 height=38 alignItems="center" justifyContent="center" fill="$surface-hover" stroke="$border-strong" strokeWidth=1 cornerRadius=19
+                    - text «Initials» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: SM
+                  - frame «Chief Text» layout="vertical" gap=2
+                    - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Sophie Marchetti
+                    - text «Role» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Cheffe de hub depuis 14 mois
+                - frame «Breakdown» width="fill_container" layout="vertical" gap=8
+                  - frame «Role · Pilotes» width="fill_container" alignItems="center" justifyContent="space_between"
+                    - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Pilotes
+                    - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 14
+                  - frame «Role · Personnel de cabine» width="fill_container" alignItems="center" justifyContent="space_between"
+                    - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Personnel de cabine
+                    - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 9
+                  - frame «Role · Techniciens» width="fill_container" alignItems="center" justifyContent="space_between"
+                    - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Maintenance
+                    - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 7
+                  - frame «Role · Agents d'escale» width="fill_container" alignItems="center" justifyContent="space_between"
+                    - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Agents d'escale
+                    - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 4
+                  - frame «Role · Administratifs» width="fill_container" alignItems="center" justifyContent="space_between"
+                    - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Administratifs
+                    - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 3
+              - frame «Fleet» width="fill_container" layout="vertical" gap=10
+                - frame «Section Head» width="fill_container" padding=[0, 0, 4, 0] alignItems="center" justifyContent="space_between"
+                  - text «Section Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Avions basés
+                  - text «Section Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 5
+                - frame «Aircraft · F-HAZR» width="fill_container" gap=10 alignItems="center"
+                  - text «Registration» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: F-HAZR
+                  - text «Type» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72-600
+                  - text «Status» fill="$route" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Ton vol
+                - frame «Aircraft · F-HAZA» width="fill_container" gap=10 alignItems="center"
+                  - text «Registration» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: F-HAZA
+                  - text «Type» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72-600
+                  - text «Status» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Retard +14 min
+                - frame «Aircraft · F-HAZD» width="fill_container" gap=10 alignItems="center"
+                  - text «Registration» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: F-HAZD
+                  - text «Type» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: A220-300
+                  - text «Status» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: En vol
+                - frame «Aircraft · F-HAZB» width="fill_container" gap=10 alignItems="center"
+                  - text «Registration» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: F-HAZB
+                  - text «Type» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72-600
+                  - text «Status» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Départ 18:10Z
+                - frame «Aircraft · F-HAZT» width="fill_container" gap=10 alignItems="center"
+                  - text «Registration» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: F-HAZT
+                  - text «Type» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 42-600
+                  - text «Status» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Au sol · PK3
+          - frame «Hub Footer» width="fill_container" padding=[12, 0, 0, 0] alignItems="center" justifyContent="space_between" stroke="$border" strokeWidth={"top": 1}
+            - frame «Renewal» gap=10 alignItems="center"
+              - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="calendar-clock"
+              - text «Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Bail des postes PK1 à PK4 à renouveler avant le 31 janvier
+            - frame «Links» gap=28 alignItems="center"
+              - instance «Button · Contrats» of «Button/Ghost»
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Contrats
+                - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+              - instance «Button · Équipe» of «Button/Ghost»
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Gérer l'équipe
+                - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+      - frame «Side Column» width=392 height="fill_container" layout="vertical" gap=24
+        - instance «Base · LFLL» of «Panel»
+          - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=20 padding=[24, 26, 20, 26]
+            - frame «Base Title» width="fill_container" layout="vertical" gap=8
+              - frame «Status» gap=10 alignItems="center"
+                - instance «Sign · LFLL» of «Sign/Location»
+                  - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFLL
+                - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Base secondaire
+              - text «Base Name» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="600"  TEXT: Lyon-Saint-Exupéry
+            - frame «Facts» width="fill_container" layout="vertical" gap=10 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+              - frame «Fact · Installations» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Installations
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Bureau d'escale · 2 postes
+              - frame «Fact · Contrats» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Contrats
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Tout en location
+              - frame «Fact · Coût mensuel» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Coût mensuel
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 8 600 €
+              - frame «Fact · Chef de base» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Chef de base
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Karim Benali
+              - frame «Fact · Équipe basée» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Équipe basée
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 7 personnes
+            - frame «Aircraft · F-HAZC» width="fill_container" gap=10 padding=[14, 0, 0, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - text «Registration» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: F-HAZC
+              - text «Type» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: CRJ700
+              - text «Status» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: En inspection
+            - instance «Button · Plan LFLL» of «Button/Ghost»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Plan 3D de l'aéroport
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+        - frame «Spacer» width="fill_container" height="fill_container"
+        - frame «Opportunity» width="fill_container" layout="vertical" gap=12 padding=[0, 4]
+          - frame «Opportunity Head» gap=10 alignItems="center"
+            - instance «Sign · LFKJ» of «Sign/Direction»
+              - text «Code» fill="$on-accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFKJ
+              - icon «Arrow» width=16 height=16 fill="$on-accent" icon="arrow-up-right"
+            - text «Label» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Ouvrir une base à Ajaccio
+          - text «Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.45  TEXT: Tu opères déjà 12 vols par semaine vers Ajaccio. Un bureau d'escale et 2 postes y sont libres : tes équipages pourraient y passer la nuit au lieu de rentrer à vide.
+          - frame «Opportunity Footer» width="fill_container" alignItems="center" justifyContent="space_between"
+            - text «Cost» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: dès 5 400 € / mois
+            - instance «Button · Étudier» of «Button/Ghost»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Étudier l'ouverture
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

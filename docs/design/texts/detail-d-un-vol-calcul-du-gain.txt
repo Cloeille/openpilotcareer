@@ -7,5 +7,48 @@ G
 Calcul du gain
 Relevé du gain
 Crédité le 4 nov. à 21:19Z
+Revenu
++15 424 €
+Billets
+68 passagers × 209 €
++14 212 €
+Fret
+340 kg × 1,80 €
++612 €
+Prime de ponctualité
+Arrivée 2 min en avance
++350 €
+Prime d'atterrissage doux
+Toucher à −142 fpm
++250 €
+Charges
+−2 944 €
+Carburant
+1 180 kg × 1,12 €
+−1 322 €
+Taxes d'atterrissage
+Nice, avion de 23 t
+−485 €
+Maintenance
+1 h 04 × 1 066 € par heure
+−1 137 €
+Coefficient de vérification
+Vol vérifié par télémétrie, aucune décote
+×1,00
+Gain net
+(15 424 € − 2 944 €) × 1,00
++12 480 €
 Vérification et paie
-Tout voir
+Le gain net est multiplié par un coefficient qui dépend de la vérification du vol.
+Vérifié · ce vol
+Télémétrie complète, contrôles réussis
+×1,00
+Non vérifié
+Saisie manuelle, sans télémétrie
+×0,60
+Rejeté
+Un contrôle anti-triche a échoué
+×0
+En saisie manuelle, ce vol aurait rapporté
++7 488 €
+Soit 4 992 € de moins, après décote ×0,60

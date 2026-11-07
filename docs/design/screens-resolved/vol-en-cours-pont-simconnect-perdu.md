@@ -39,7 +39,7 @@ Resolved tree (component instances expanded with their overrides; HUD bars refer
         - frame «Verification» gap=8 alignItems="center"
           - icon «Verif Icon» width=15 height=15 fill="$warning" icon="pause"
           - text «Verif Text» fill="$warning" fontFamily="$font-ui" fontSize=14  TEXT: Vérification en pause · dernières valeurs à 17:58Z
-  - frame «Bridge Lost Alert» width=600 layout="vertical" gap=22 padding=[28, 32, 30, 32] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=8 effect=[{"type": "background_blur", "radius": 30}, {"type": "shadow", "shadowType": "outer", "...
+  - frame «Bridge Lost Alert» width=600 layout="vertical" gap=22 padding=[28, 32, 30, 32] fill="$surface-raised" stroke="$border-strong" strokeWidth=1 cornerRadius=8 effect=[{"type": "background_blur", "radius": 30}, {"type": "shadow", "shadowType": "outer", "color": "#00000099", "offset": {"x": 0, "y": 24}, ...
     - frame «Alert Head» gap=14 alignItems="center"
       - frame «Alert Icon» width=44 height=44 alignItems="center" justifyContent="center" fill="$warning-soft" cornerRadius=6
         - icon «Unplug» width=22 height=22 fill="$warning" icon="unplug"

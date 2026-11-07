@@ -1,0 +1,92 @@
+# Hub · plan de l'aéroport 3D
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Hub · plan de l'aéroport 3D» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Backdrop» width=1600 height=900 fill=["#07090C", {"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.3, "height": 1.1}, "colors...
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.6, "height": 1.6}, "colors": [{"color"...
+  - frame «Content» width=1600 height=778 gap=24 padding=[28, 32, 24, 32]
+    - frame «Chart Column» width="fill_container" height="fill_container" layout="vertical" gap=12
+      - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+        - frame «Title Block» layout="vertical" gap=6
+          - frame «Overline» gap=10 alignItems="center"
+            - ref «Hub Sign» ref="pirBQ" descendants={"OYKAu": {"content": "LFMN", "fontSize": 12}}  (instance of «Sign/Location»)
+            - text «Overline Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Hub principal · Azur Régional
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=34 fontWeight="600"  TEXT: Nice Côte d'Azur
+          - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: 3 installations à toi · 4 disponibles · 1 occupée par Méridia Cargo
+        - frame «View Toggle» gap=2 padding=4 fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6
+          - frame «View · Plan 3D» padding=[8, 16] fill="#FFFFFF1A" cornerRadius=4
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Plan 3D
+          - frame «View · Liste» padding=[8, 16] cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Liste
+      - script «Airport Chart · LFMN» width="fill_container" height="fill_container" clip=true
+      - frame «Footer» width="fill_container" alignItems="center" justifyContent="space_between"
+        - frame «Legend» gap=22 alignItems="center"
+          - frame «Legend · À toi» gap=8 alignItems="center"
+            - rectangle «Swatch» width=14 height=10 fill="#ECEAE5" cornerRadius=2
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: À toi
+          - frame «Legend · Disponible» gap=8 alignItems="center"
+            - rectangle «Swatch» width=14 height=10 fill="#E6BE4C40" stroke="#E6BE4C" strokeWidth=1 cornerRadius=2
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Disponible
+          - frame «Legend · Compagnie IA» gap=8 alignItems="center"
+            - rectangle «Swatch» width=14 height=10 fill="#5A5F66" cornerRadius=2
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Compagnie IA
+          - frame «Legend · Aéroport» gap=8 alignItems="center"
+            - rectangle «Swatch» width=14 height=10 fill="#2E333B" stroke="#FFFFFF26" strokeWidth=1 cornerRadius=2
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Aéroport
+        - frame «Filters» gap=6 alignItems="center"
+          - frame «Filter · Tout» padding=[6, 12] fill="#FFFFFF1A" cornerRadius=4
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Tout
+          - frame «Filter · Maintenance» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Maintenance
+          - frame «Filter · Terminaux» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Terminaux
+          - frame «Filter · Fret» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Fret
+          - frame «Filter · Bureaux» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Bureaux
+          - frame «Filter · Stationnement» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Stationnement
+    - frame «Selection Panel» width=380 height="fill_container" layout="vertical" gap=18 padding=[24, 26] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 28}
+      - frame «Selection Head» width="fill_container" layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - rectangle «Status Swatch» width=10 height=10 fill="#E6BE4C40" stroke="$accent" strokeWidth=1 cornerRadius=2
+          - text «Status Text» fill="$accent" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Disponible · à louer ou à acheter
+        - text «Facility Name» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="600"  TEXT: Hangar de maintenance 2
+        - text «Facility Type» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Maintenance avions · zone technique Est
+      - frame «Facts» width="fill_container" layout="vertical" gap=10 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - frame «Fact · Surface» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Surface
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 6 200 m²
+        - frame «Fact · Capacité» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Capacité
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 2 avions jusqu'à l'A321
+        - frame «Fact · Niveau» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Niveau
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 1 sur 3 · extensible
+        - frame «Fact · Staff requis» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14  TEXT: Staff requis
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 6 techniciens · 1 chef d'atelier
+      - frame «Effect» width="fill_container" layout="vertical" gap=6 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - text «Effect Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Effet sur tes opérations
+        - text «Effect Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Les avions basés à LFMN sont entretenus sur place : maintenance 35 % moins chère et immobilisation divisée par deux.
+      - frame «Options» width="fill_container" layout="vertical" gap=10
+        - frame «Option · Louer» width="fill_container" gap=12 padding=[12, 14] alignItems="center" fill="#FFFFFF0D" stroke="$text-primary" strokeWidth=1.5 cornerRadius=6
+          - frame «Radio» width=16 height=16 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=8
+            - ellipse «Dot» width=8 height=8 fill="$text-primary"
+          - frame «Option Text» width="fill_container" layout="vertical" gap=2
+            - text «Option Label» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Louer
+            - text «Option Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Dépôt 37 000 € · 12 mois minimum
+          - text «Option Price» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: 18 500 € / mois
+        - frame «Option · Acheter» width="fill_container" gap=12 padding=[12, 14] alignItems="center" stroke="$border" strokeWidth=1 cornerRadius=6
+          - frame «Radio» width=16 height=16 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=8
+          - frame «Option Text» width="fill_container" layout="vertical" gap=2
+            - text «Option Label» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Acheter
+            - text «Option Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: Revente possible · pas de loyer
+          - text «Option Price» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: 2 350 000 €
+      - frame «Spacer» width="fill_container" height="fill_container"
+      - frame «Actions» width="fill_container" layout="vertical" gap=10
+        - ref «Rent» width="fill_container" ref="Im067" descendants={"h8MyJ": {"content": "Louer ce hangar"}}  (instance of «Button/Primary»)
+        - ref «Contract» ref="n9Pulf" descendants={"RUCj0": {"content": "Voir le contrat et les améliorations"}}  (instance of «Button/Ghost»)
+  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": "#00000000"}, "Ely3m": {"fill": "$text-tertiary"}, "daIvj": {"stroke": "$text-primary"}, "cXwn0": {"fill": "$text-pr...  (instance of «HUD/Top»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"D3kro/Mw53t": {"content": "Échap"}, "XuZbG": {"content": "Retour aux hubs"}, "msx5l/Mw53t": {"content": "Souris"}, "sA5qV": {"content":...  (instance of «HUD/Bottom»)

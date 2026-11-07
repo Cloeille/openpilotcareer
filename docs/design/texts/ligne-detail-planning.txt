@@ -1,0 +1,120 @@
+LFMN
+⇄
+LFLL
+Réseau  ›  Lignes autonomes
+Ligne active · exploitation automatique depuis le 12 octobre
+Nice ⇄ Lyon
+Vols AZR 1131 à 1138 · 162 NM · 1 h 10 de vol en ATR 72-600
+Avions affectés
+2
+F-HAZA · F-HAZB à mi-temps
+Fréquence
+1 vol / 3 h
+depuis Nice · 4 allers-retours par jour
+Remplissage
+78 %
++4 pts sur 7 jours
+Recette par jour
+41 500 €
+marge 9 400 € après coûts
+Planning de la ligne
+Modifier le programme
+lun. 2
+4 A/R · 76 %
+mar. 3
+4 A/R · 74 %
+mer. 4
+4 A/R · 79 %
+jeu. 5
+4 A/R · 81 %
+ven. 6
+aujourd'hui · 78 %
+sam. 7
+3 A/R prévus
+dim. 8
+3 A/R prévus
+Jour
+Semaine
+Heure UTC
+00:00
+02:00
+04:00
+06:00
+08:00
+10:00
+12:00
+14:00
+16:00
+20:00
+22:00
+Maintenant · 17:58Z
+F-HAZA
+ATR 72-600
+3 rotations · état 84 %
+Nuit à Nice · visite journalière 02:00Z
+1131
+→ LFLL
+1132
+→ LFMN
+1135
+→ LFLL
+1136
+→ LFMN
+1137
+→ LFLL
+1138
+→ LFMN
+Nuit
+F-HAZB
+ATR 72-600
+1 rotation · puis Nice ⇄ Ajaccio
+Nuit à Nice
+1133
+→ LFLL
+1134
+→ LFMN
+1641
+Ajaccio
+1642
+Nice
+Nuit à Nice
+Cdt. Perrin · OPL Lefèvre
+sur F-HAZA · dépasse à 21:45Z
+En service depuis 08:45Z
+Arrivée prévue 22:00Z
+Cdt. Vidal · OPL Roux
+sur F-HAZB · service 6 h 13
+En service depuis 11:45Z
+Fin prévue 20:50Z
+Vol effectué
+En vol
+Prévu
+Autre ligne
+Retard
+Risque
+Ce que rapporte la journée
+8 vols · 449 passagers
+Carburant
+12 800 €
+Redevances
+7 300 €
+Équipages
+6 900 €
+Maintenance
+5 100 €
+Marge
+9 400 €
+Ce dont dépend la ligne
+si l'un manque, les rotations concernées sont annulées
+F-HAZA · état
+84 %
+visite A dans 38 h de vol
+F-HAZB · état
+91 %
+aucune visite avant décembre
+Pilotes ATR à Nice
+4 sur 4
+tous engagés · aucun en réserve
+OPL Lefèvre · service
+9 h 13 / 13 h
+limite à 21:45Z
