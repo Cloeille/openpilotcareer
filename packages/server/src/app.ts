@@ -20,7 +20,8 @@ import { registerStart } from './routes-start.ts';
 import { registerLive } from './routes-live.ts';
 import { registerLines } from './routes-lines.ts';
 import { registerCatalogueStats } from './routes-catalogue-stats.ts';
-import { fetchLatestOfp, type Fetch } from './simbrief.ts';
+import { fetchOfp, type Fetch } from './simbrief.ts';
+import { registerSimbrief } from './routes-simbrief.ts';
 import { maintenanceTick } from './finance.ts';
 import { registerFinance } from './routes-finance.ts';
 import { onboardingOf, toleratedFlags } from './start.ts';
@@ -274,7 +275,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   app.post('/api/v1/jobs/import-simbrief', async (req, reply) => {
     const p = user(req);
     const b = parse(simbriefImportSchema, req.body);
-    const ofp = await fetchLatestOfp(b.simbriefUsername.trim(), doFetch);
+    const ofp = await fetchOfp('pilotId' in b ? { pilotId: b.pilotId } : { username: b.simbriefUsername }, doFetch);
     const job = tx(db, () => importJob(db, p.companyId, ofp, now()));
     return reply.status(201).send(job);
   });
@@ -330,6 +331,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   registerStart(app, { db, now });
   registerFinance(app, { db, now });
   registerLive(app, { db, now });
+  registerSimbrief(app, { db, now, doFetch });
 
   return app;
 }

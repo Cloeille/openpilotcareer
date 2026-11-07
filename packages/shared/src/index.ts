@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import type { Realism, StartMode } from './career.ts';
 import { financingSchema, type FleetAircraftFinance } from './finance.ts';
+import type { FlightSimbrief } from './simbrief.ts';
 
 export * from './career.ts';
 export * from './finance.ts';
@@ -287,7 +288,6 @@ export const FLIGHT_STATUSES = ['active', 'verified', 'unverified', 'rejected', 
 export const listQuerySchema = z.object({ limit: z.coerce.number().int().min(1).max(200).default(50), before: z.coerce.number().int().positive().optional() });
 export const flightListQuerySchema = listQuerySchema.extend({ status: z.enum(FLIGHT_STATUSES).optional() });
 export const apiKeyCreateSchema = z.object({ label: z.string().trim().min(1).max(40) });
-export const simbriefImportSchema = z.object({ simbriefUsername: z.string().regex(/^[A-Za-z0-9._ -]{1,64}$/, 'invalid SimBrief username') });
 
 export const infoSchema = z.object({
   name: z.string(), version: z.string(), apiVersion: z.number(), registrationOpen: z.boolean(),
@@ -324,6 +324,8 @@ export type Flight = {
   revenue: number; fuelCost: number; landingFee: number; maintenance: number; net: number;
   /** From the telemetry report, when the bridge saw reloads or sim restarts: allowed, shown, never punished. */
   interruptions?: Interruptions;
+  /** Lot SIMBRIEF-LINK: the id the SimBrief dispatch is made under, and the OFP fetched for the flight. Only flights of players have it. */
+  simbrief?: FlightSimbrief;
 };
 export type Transaction = { id: number; at: number; kind: string; amount: number; balanceAfter: number; flightId: number | null; memo: string };
 export type ApiKeyInfo = { id: number; label: string; createdAt: number; lastUsedAt: number | null };
@@ -343,3 +345,5 @@ export type CompanyProfile = Company & {
 export * from './live.ts';
 // ---- lot lines (v3)
 export * from './lines.ts';
+// ---- lot simbrief-link
+export * from './simbrief.ts';

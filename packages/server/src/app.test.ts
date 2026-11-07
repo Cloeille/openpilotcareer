@@ -373,7 +373,7 @@ test('export: full JSON with schemaVersion, CSV for flights and transactions, no
   assert.equal(d.companies[0].flights.length, 1);
   assert.equal(d.companies[0].flights[0].telemetry.source, 'simconnect');
   assert.equal(d.companies[0].transactions.length, 5);
-  assert.ok(!/pass_hash|token|key_hash|opc_/.test(json.text), 'no credentials in the export');
+  assert.ok(!/pass_hash|token|key_hash|opc_[\w-]{43}/.test(json.text), 'no credentials in the export');
 
   const fl = await h.call('GET', '/api/v1/me/export?format=flights.csv', { token });
   assert.match(String(fl.headers['content-type']), /text\/csv/);

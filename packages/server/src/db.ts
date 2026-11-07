@@ -165,6 +165,8 @@ ALTER TABLE users ADD COLUMN simbrief_pilot_id INTEGER;
 ALTER TABLE users ADD COLUMN simbrief_verified_at INTEGER;
 ALTER TABLE flights ADD COLUMN simbrief_static_id TEXT;
 ALTER TABLE flights ADD COLUMN simbrief_ofp_id TEXT;
+-- Flights already in the air get the id they would have got at accept time (same shape as game.ts startFlight).
+UPDATE flights SET simbrief_static_id = 'opc_' || id || '_' || lower(hex(randomblob(6))) WHERE status = 'active';
 `;
 
 /** Append-only, in deployment order (the position, not the constant's name, is the version): `PRAGMA user_version` records how many ran. */

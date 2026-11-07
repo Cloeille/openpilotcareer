@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { icaoAirportSchema, icaoTypeSchema } from '@opc/shared';
+import type { SimbriefLink } from '@opc/shared';
+import { get, run, type Db } from './db.ts';
 import { HttpError } from './http.ts';
 
 const TIMEOUT_MS = 8_000;
@@ -16,7 +18,9 @@ const ofpSchema = z.object({
   weights: z.object({ payload: num, pax_count_actual: num.default(0) }),
   fuel: z.object({ plan_ramp: num }),
   general: z.object({ route: z.string().max(4000).default('') }),
-  params: z.object({ units: z.string(), request_id: optionalId, user_id: optionalId }),
+  params: z.object({ units: z.string(), request_id: optionalId }),
+  /** The static id the plan was generated with (`{}` when it had none). */
+  fetch: z.object({ static_id: z.string().optional().catch(undefined) }).optional().catch(undefined),
 });
 const refusalSchema = z.object({ fetch: z.object({ status: z.string(), userid: optionalId }) });
 const accountSchema = z.object({ params: z.object({ user_id: optionalId }) });
@@ -26,8 +30,8 @@ export type OfpQuery = { username: string } | { pilotId: number; staticId?: stri
 
 export type Ofp = {
   origin: string; destination: string; aircraftIcao: string; payloadKg: number; pax: number; plannedFuelKg: number; route: string;
-  /** SimBrief's id of this plan (`params.request_id`) and of the account it belongs to (`params.user_id`), when the answer carries them. */
-  ofpId: string | null; pilotId: number | null;
+  /** SimBrief's id of this plan (`params.request_id`), when the answer carries it. */
+  ofpId: string | null;
 };
 
 export type Fetch = typeof fetch;
@@ -86,12 +90,14 @@ export async function fetchOfp(q: OfpQuery, doFetch: Fetch): Promise<Ofp> {
   const ofp = ofpSchema.safeParse(r.body);
   if (!ofp.success) throw new HttpError(502, 'simbrief_invalid', 'SimBrief returned a flight plan this server cannot read');
   const o = ofp.data;
+  // The answer echoes the static id of the plan it holds: a plan made under another id (or none) is not the one that was asked for.
+  if ('staticId' in q && q.staticId !== undefined && o.fetch?.static_id !== q.staticId) throw new HttpError(404, 'simbrief_not_found', 'SimBrief has no plan for this flight yet: generate it on SimBrief first');
   const toKg = /^k/i.test(o.params.units) ? 1 : LBS_TO_KG;
   return {
     origin: o.origin.icao_code, destination: o.destination.icao_code, aircraftIcao: o.aircraft.icaocode,
     payloadKg: Math.round(o.weights.payload * toKg), pax: Math.round(o.weights.pax_count_actual),
     plannedFuelKg: Math.round(o.fuel.plan_ramp * toKg), route: o.general.route,
-    ofpId: o.params.request_id === undefined ? null : String(o.params.request_id), pilotId: o.params.user_id ?? null,
+    ofpId: o.params.request_id === undefined ? null : String(o.params.request_id),
   };
 }
 
@@ -107,4 +113,14 @@ export async function lookupAccount(q: OfpQuery, doFetch: Fetch): Promise<{ pilo
 export function ofpMismatch(ofp: Pick<Ofp, 'origin' | 'destination' | 'aircraftIcao'>, flight: { origin: string; destination: string; aircraftIcao: string }): string | null {
   if (ofp.origin === flight.origin && ofp.destination === flight.destination && ofp.aircraftIcao === flight.aircraftIcao) return null;
   return `the SimBrief plan is ${ofp.origin} → ${ofp.destination} in a ${ofp.aircraftIcao}, this flight is ${flight.origin} → ${flight.destination} in a ${flight.aircraftIcao}`;
+}
+
+/** The SimBrief identifier saved on an account: all null while nothing is connected. */
+export function linkOf(db: Db, userId: number): SimbriefLink {
+  const r = get<{ username: string | null; pilot_id: number | null; verified_at: number | null }>(db, 'SELECT simbrief_username AS username, simbrief_pilot_id AS pilot_id, simbrief_verified_at AS verified_at FROM users WHERE id = ?', userId);
+  return { username: r?.username ?? null, pilotId: r?.pilot_id ?? null, verifiedAt: r?.verified_at ?? null };
+}
+
+export function saveLink(db: Db, userId: number, link: SimbriefLink): void {
+  run(db, 'UPDATE users SET simbrief_username = ?, simbrief_pilot_id = ?, simbrief_verified_at = ? WHERE id = ?', link.username, link.pilotId, link.verifiedAt, userId);
 }

@@ -46,7 +46,7 @@ type JobColumns = {
 type CustomJobRow = JobColumns & { id: string; company_id: number; created_at: number; expires_at: number | null };
 export type FlightRow = JobColumns & {
   id: number; company_id: number; aircraft_id: number; aircraft_icao: string; job_id: string; status: FlightStatus;
-  reject_reason: string | null; accepted_at: number; completed_at: number | null; season: string | null;
+  reject_reason: string | null; accepted_at: number; completed_at: number | null; season: string | null; simbrief_static_id: string | null; simbrief_ofp_id: string | null;
   revenue: number; fuel_cost: number; landing_fee: number; maintenance: number; net: number; telemetry: string | null;
 };
 type CustomRow = { icao: string; name: string; category: AircraftType['category']; engines: number; wtc: AircraftType['wtc']; seats: number; cargo_kg: number; cruise_kts: number; range_nm: number };
@@ -235,6 +235,7 @@ export function flightView(r: FlightRow): Flight {
   const stored = r.telemetry ? (JSON.parse(r.telemetry) as { interruptions?: unknown }).interruptions : undefined; // validated when it was ingested
   const interruptions = interruptionsSchema.safeParse(stored);
   if (interruptions.success && interruptions.data.reloads + interruptions.data.simRestarts > 0) f.interruptions = interruptions.data;
+  if (r.simbrief_static_id) f.simbrief = { staticId: r.simbrief_static_id, ofpId: r.simbrief_ofp_id };
   return f;
 }
 
@@ -325,6 +326,8 @@ export function startFlight(db: Db, companyId: number, job: Job, aircraft: Aircr
   const id = run(db, `INSERT INTO flights (company_id, aircraft_id, aircraft_icao, job_id, source, kind, origin, destination, distance_nm, payload_kg, pax, payout, required_aircraft, planned_fuel_kg, route, status, accepted_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?)`,
   companyId, aircraft.id, aircraft.icao, job.id, job.source, job.kind, job.origin, job.destination, job.distanceNm, job.payloadKg, job.pax, job.payout, job.requiredAircraft ?? null, job.plannedFuelKg ?? null, job.route ?? null, now).id;
+  // The id a SimBrief dispatch for this flight is made under, so exactly that plan can be fetched again (players only: AI companies never dispatch).
+  if (isHuman(db, companyId)) run(db, `UPDATE flights SET simbrief_static_id = 'opc_' || id || '_' || lower(hex(randomblob(6))) WHERE id = ?`, id);
   return get<FlightRow>(db, 'SELECT * FROM flights WHERE id = ?', id)!;
 }
 

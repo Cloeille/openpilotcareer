@@ -6,13 +6,11 @@ export const SIMBRIEF_DISPATCH_URL = 'https://dispatch.simbrief.com/options/cust
 
 const username = z.string().trim().min(1).max(64).regex(/^[A-Za-z0-9._ -]+$/, 'invalid SimBrief username');
 const pilotId = z.int().min(1).max(9_999_999);
-const exactlyOne = (a: unknown, b: unknown): boolean => (a === undefined) !== (b === undefined);
-const ONE_OF = { message: 'give either a SimBrief username or a Pilot ID' };
 
-/** `PUT /me/simbrief`: the account's SimBrief username or its numeric Pilot ID (SimBrief → Account Settings), one of them. */
-export const simbriefConnectSchema = z.object({ username: username.optional(), pilotId: pilotId.optional() }).refine((b) => exactlyOne(b.username, b.pilotId), ONE_OF);
+/** `PUT /me/simbrief`: the account's SimBrief username or its numeric Pilot ID (SimBrief → Account Settings), one of them (a body with both is refused). */
+export const simbriefConnectSchema = z.union([z.strictObject({ username }), z.strictObject({ pilotId })]);
 /** `POST /jobs/import-simbrief`: whose latest plan to import. `simbriefUsername` is the original field; `pilotId` is the alternative. */
-export const simbriefImportSchema = z.object({ simbriefUsername: username.optional(), pilotId: pilotId.optional() }).refine((b) => exactlyOne(b.simbriefUsername, b.pilotId), ONE_OF);
+export const simbriefImportSchema = z.union([z.strictObject({ simbriefUsername: username }), z.strictObject({ pilotId })]);
 
 /** What is saved for an account. Both fields can be set: a username lookup also learns the Pilot ID. `verifiedAt` is when SimBrief last confirmed the account exists. */
 export type SimbriefLink = { username: string | null; pilotId: number | null; verifiedAt: number | null };
@@ -33,7 +31,6 @@ export type DispatchParams = {
   orig: string;
   dest: string;
   airline?: string | undefined;
-  fltnum?: string | undefined;
   callsign?: string | undefined;
   reg?: string | undefined;
   /** Passengers; when above 0 it wins over `cargoKg`. */
@@ -51,7 +48,6 @@ export function dispatchUrl(p: DispatchParams): string {
   q.set('dest', p.dest);
   const set = (key: string, value: string | undefined): void => { if (value) q.set(key, value); };
   set('airline', p.airline);
-  set('fltnum', p.fltnum);
   set('callsign', p.callsign);
   set('reg', p.reg);
   if (p.pax !== undefined && p.pax > 0) q.set('pax', String(Math.round(p.pax)));
