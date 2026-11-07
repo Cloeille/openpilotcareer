@@ -28,7 +28,7 @@ test('day masks and HH:MM round-trip', () => {
 const programme = (over: Partial<Programme> = {}): Programme => ({ a: 'LFLL', b: 'LFMN', flightBase: 1100, freqPerDay: 4, days: 0b1111111, windowStartMin: 6 * 60, windowEndMin: 18 * 60, turnaroundMin: 30, ...over });
 
 test('layoutDay: evenly spaced departures, returns after block + turnaround, round-robin aircraft, numbers in pairs', () => {
-  const legs = layoutDay(programme(), [{ id: 1, blockMin: 70 }, { id: 2, blockMin: 70 }], WED);
+  const legs = layoutDay(programme(), [{ id: 1, blockMin: 70, home: 'LFLL' }, { id: 2, blockMin: 70, home: 'LFLL' }], WED);
   assert.equal(legs.length, 8);
   const outs = legs.filter((l) => l.origin === 'LFLL');
   assert.deepEqual(outs.map((l) => (l.dep - WED) / 60_000), [360, 540, 720, 900]);
@@ -36,21 +36,27 @@ test('layoutDay: evenly spaced departures, returns after block + turnaround, rou
   assert.deepEqual(legs.map((l) => l.flightNo), [1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107]);
   const back = legs[1]!;
   assert.equal(back.origin, 'LFMN');
-  assert.equal(back.dep, legs[0]!.dep + (70 + 30) * 60_000);
+  assert.equal(back.dep, legs[0]!.dep + 105 * 60_000, '70 + 30 min rounded up to the 15-minute grid');
+  assert.ok(legs.every((l) => l.dep % 900_000 === 0), 'departures on the tick grid');
   assert.equal(back.arr, back.dep + 70 * 60_000);
+});
+
+test('layoutDay: an aircraft that starts at B flies B to A first, with the odd number', () => {
+  const legs = layoutDay(programme({ freqPerDay: 1 }), [{ id: 7, blockMin: 60, home: 'LFMN' }], WED);
+  assert.deepEqual(legs.map((l) => [l.origin, l.dest, l.flightNo]), [['LFMN', 'LFLL', 1101], ['LFLL', 'LFMN', 1100]]);
 });
 
 test('layoutDay: operating days only, nothing without aircraft', () => {
   const monToFri = daysToMask([true, true, true, true, true, false, false]);
-  assert.equal(layoutDay(programme({ days: monToFri }), [{ id: 1, blockMin: 60 }], WED).length, 8);
-  assert.equal(layoutDay(programme({ days: monToFri }), [{ id: 1, blockMin: 60 }], WED + 3 * DAY_MS).length, 0);
+  assert.equal(layoutDay(programme({ days: monToFri }), [{ id: 1, blockMin: 60, home: 'LFLL' }], WED).length, 8);
+  assert.equal(layoutDay(programme({ days: monToFri }), [{ id: 1, blockMin: 60, home: 'LFLL' }], WED + 3 * DAY_MS).length, 0);
   assert.equal(layoutDay(programme(), [], WED).length, 0);
 });
 
 test('overlappingLegs flags an aircraft asked to leave before it has landed and turned around', () => {
-  const tight = layoutDay(programme({ freqPerDay: 8, windowEndMin: 6 * 60 + 60 }), [{ id: 1, blockMin: 70 }], WED);
+  const tight = layoutDay(programme({ freqPerDay: 8, windowEndMin: 6 * 60 + 60 }), [{ id: 1, blockMin: 70, home: 'LFLL' }], WED);
   assert.ok(overlappingLegs(tight, 30).length > 0);
-  const relaxed = layoutDay(programme({ freqPerDay: 2 }), [{ id: 1, blockMin: 70 }], WED);
+  const relaxed = layoutDay(programme({ freqPerDay: 2 }), [{ id: 1, blockMin: 70, home: 'LFLL' }], WED);
   assert.deepEqual(overlappingLegs(relaxed, 30), []);
 });
 

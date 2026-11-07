@@ -125,34 +125,38 @@ const SCHEMA_V5 = `ALTER TABLE flights ADD COLUMN last_live_at INTEGER;`;
 
 // OpenHangar v3, lot LINES: the line engine's clock ticks, each company's network switch and last-seen time (the offline cap),
 // the lines themselves with their aircraft, and the timetable. A scheduled flight keeps its own money columns (the day P&L reads them).
-// lines.laid_until: legs of every day before it exist (or were deliberately skipped); the engine lays the days after it.
+// lines.live_from: no leg departing before it is ever created (the line did not exist yet, was paused, switched off or its owner was away);
+// lines.laid_through: legs exist up to that instant (the end of tomorrow, B.2 item 1), so ticks re-lay only when the day has turned.
 // Only 'scheduled', 'done' and 'cancelled' are stored: flying and delayed are derived from the clock and delay_min (docs/v3-plan.md B.2, S1 notes).
 // SCHEMA_V6 is reserved for the SimBrief-link lot: the orchestrator slots it in before this one at merge.
 const SCHEMA_V7 = `
 CREATE TABLE line_ticks (tick INTEGER PRIMARY KEY);
 CREATE TABLE line_networks (
-  company_id INTEGER PRIMARY KEY REFERENCES companies(id) ON DELETE CASCADE, enabled INTEGER NOT NULL DEFAULT 1, seen_at INTEGER NOT NULL);
+  company_id INTEGER PRIMARY KEY REFERENCES companies(id) ON DELETE CASCADE, enabled INTEGER NOT NULL DEFAULT 1, seen_at INTEGER NOT NULL, lapsed_at INTEGER);
 CREATE TABLE lines (
   id INTEGER PRIMARY KEY, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, a TEXT NOT NULL, b TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','paused','interrupted')), created_at INTEGER NOT NULL,
   freq_per_day INTEGER NOT NULL, days INTEGER NOT NULL, window_start_min INTEGER NOT NULL, window_end_min INTEGER NOT NULL,
-  turnaround_min INTEGER NOT NULL, flight_base INTEGER NOT NULL, laid_until INTEGER NOT NULL DEFAULT 0, paused_at INTEGER, interrupted_since INTEGER, interrupt_cause TEXT,
+  turnaround_min INTEGER NOT NULL, flight_base INTEGER NOT NULL, live_from INTEGER NOT NULL DEFAULT 0, laid_through INTEGER NOT NULL DEFAULT 0, paused_at INTEGER, interrupted_since INTEGER, interrupt_cause TEXT, stoppage_charged REAL NOT NULL DEFAULT 0,
   UNIQUE (company_id, a, b), CHECK (a < b));
 CREATE TABLE line_aircraft (
   line_id INTEGER NOT NULL REFERENCES lines(id) ON DELETE CASCADE, aircraft_id INTEGER NOT NULL REFERENCES aircraft(id) ON DELETE CASCADE,
-  PRIMARY KEY (line_id, aircraft_id));
+  home TEXT NOT NULL, PRIMARY KEY (line_id, aircraft_id));
 CREATE INDEX line_aircraft_aircraft ON line_aircraft(aircraft_id);
 CREATE TABLE scheduled_flights (
   id INTEGER PRIMARY KEY, line_id INTEGER NOT NULL REFERENCES lines(id) ON DELETE CASCADE, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
   aircraft_id INTEGER NOT NULL REFERENCES aircraft(id) ON DELETE CASCADE, flight_no INTEGER NOT NULL, dep_at INTEGER NOT NULL, arr_at INTEGER NOT NULL,
   origin TEXT NOT NULL, dest TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled','done','cancelled')),
-  delay_min INTEGER NOT NULL DEFAULT 0, delay_cause TEXT, cancel_cause TEXT, taken_at INTEGER,
+  delay_min INTEGER NOT NULL DEFAULT 0, delay_cause TEXT, cancel_cause TEXT, taken_job TEXT,
   pax INTEGER, revenue INTEGER, fuel_cost INTEGER, landing_fee INTEGER, maintenance INTEGER,
   UNIQUE (line_id, flight_no, dep_at));
 CREATE INDEX scheduled_due ON scheduled_flights(status, dep_at);
 CREATE INDEX scheduled_company_day ON scheduled_flights(company_id, dep_at);
 CREATE INDEX scheduled_aircraft ON scheduled_flights(aircraft_id, dep_at);
+-- A rotation the player takes over becomes a private job (source 'line') that stays hers until the leg is over; SimBrief imports keep the default.
+ALTER TABLE custom_jobs ADD COLUMN source TEXT NOT NULL DEFAULT 'simbrief';
+ALTER TABLE custom_jobs ADD COLUMN expires_at INTEGER;
 `;
 
 /** Append-only; `PRAGMA user_version` records how many ran. */

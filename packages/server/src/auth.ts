@@ -35,7 +35,7 @@ export function createSession(db: Db, userId: number, now: number): string {
   return token;
 }
 
-const bearer = (req: FastifyRequest): string | null => /^Bearer (\S+)$/.exec(req.headers.authorization ?? '')?.[1] ?? null;
+export const bearer = (req: FastifyRequest): string | null => /^Bearer (\S+)$/.exec(req.headers.authorization ?? '')?.[1] ?? null;
 
 /** A player owns one or more companies; a request acts as exactly one of them (`companyId`, the ACTIVE company). */
 export type User = { userId: number; username: string };

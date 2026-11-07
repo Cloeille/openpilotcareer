@@ -78,7 +78,7 @@ export function assertFlyable(db: Db, aircraftId: number, now: number): void {
   if (!a || a.returned_at !== null) throw new HttpError(404, 'aircraft_not_found', 'aircraft not found');
   if (a.status === 'maintenance') throw new HttpError(409, 'in_maintenance', `this aircraft is in maintenance until ${new Date(a.maintenance_until ?? now).toISOString()}`);
   // v3: an aircraft in the air on one of the company's autonomous lines (lines.ts) cannot be taken for a flown job.
-  const leg = get<{ dest: string; until: number }>(db, "SELECT dest, arr_at + delay_min * 60000 AS until FROM scheduled_flights WHERE aircraft_id = ?1 AND status = 'done' AND dep_at + delay_min * 60000 <= ?2 AND arr_at + delay_min * 60000 > ?2", aircraftId, now);
+  const leg = get<{ dest: string; until: number }>(db, "SELECT dest, arr_at + delay_min * 60000 AS until FROM scheduled_flights WHERE aircraft_id = ?1 AND status = 'done' AND dep_at <= ?2 AND arr_at + delay_min * 60000 > ?2", aircraftId, now);
   if (leg) throw new HttpError(409, 'aircraft_busy', `this aircraft is flying a line leg to ${leg.dest} until ${new Date(leg.until).toISOString()}`);
 }
 

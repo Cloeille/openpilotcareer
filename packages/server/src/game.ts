@@ -25,6 +25,9 @@ const NET_WORTH_SQL = `c.balance + COALESCE((SELECT SUM(value) FROM aircraft WHE
   + COALESCE((SELECT SUM(deposit) FROM contracts WHERE company_id = c.id AND status = 'active'), 0)
   - COALESCE((SELECT SUM(principal) FROM contracts WHERE company_id = c.id AND status = 'active' AND kind = 'loan'), 0)`;
 export const SB_PREFIX = 'sb-';
+/** Id prefix of the private job made when the player takes over a line rotation (lines.ts). */
+export const LINE_JOB_PREFIX = 'ln-';
+const isCustomJobId = (id: string): boolean => id.startsWith(SB_PREFIX) || id.startsWith(LINE_JOB_PREFIX);
 
 // ---------------------------------------------------------------- rows
 
@@ -37,10 +40,10 @@ export type AircraftRow = {
   registration: string | null; ownership: Ownership; wear_pct: number; status: string; maintenance_until: number | null; base: string | null; acquired_at: number; returned_at: number | null;
 };
 type JobColumns = {
-  source: 'board' | 'simbrief'; kind: 'pax' | 'cargo'; origin: string; destination: string; distance_nm: number; payload_kg: number;
+  source: 'board' | 'simbrief' | 'line'; kind: 'pax' | 'cargo'; origin: string; destination: string; distance_nm: number; payload_kg: number;
   pax: number; payout: number; required_aircraft: string | null; planned_fuel_kg: number | null; route: string | null;
 };
-type CustomJobRow = JobColumns & { id: string; company_id: number; created_at: number };
+type CustomJobRow = JobColumns & { id: string; company_id: number; created_at: number; expires_at: number | null };
 export type FlightRow = JobColumns & {
   id: number; company_id: number; aircraft_id: number; aircraft_icao: string; job_id: string; status: FlightStatus;
   reject_reason: string | null; accepted_at: number; completed_at: number | null; season: string | null;
@@ -49,7 +52,7 @@ export type FlightRow = JobColumns & {
 type CustomRow = { icao: string; name: string; category: AircraftType['category']; engines: number; wtc: AircraftType['wtc']; seats: number; cargo_kg: number; cruise_kts: number; range_nm: number };
 
 const round1 = (n: number): number => Math.round(n * 10) / 10;
-const hasHub = (db: Db, companyId: number, icao: string): boolean => !!get(db, 'SELECT 1 AS x FROM hubs WHERE company_id = ? AND icao = ?', companyId, icao);
+export const hasHub = (db: Db, companyId: number, icao: string): boolean => !!get(db, 'SELECT 1 AS x FROM hubs WHERE company_id = ? AND icao = ?', companyId, icao);
 
 /** The aircraft record every calculation uses: the company's own custom definition, else the catalog, else the category fallback. */
 export function typeFor(db: Db, companyId: number, icao: string): AircraftType {
@@ -261,7 +264,7 @@ export function openBoard(db: Db, icao: string, now: number, companyId?: number)
 }
 
 export function pendingImports(db: Db, companyId: number, now: number): Job[] {
-  return all<CustomJobRow>(db, `SELECT j.* FROM custom_jobs j WHERE j.company_id = ? AND j.created_at > ? AND NOT EXISTS (SELECT 1 FROM job_claims c WHERE c.job_id = j.id) ORDER BY j.created_at DESC`, companyId, now - IMPORT_TTL_MS).map(jobView);
+  return all<CustomJobRow>(db, `SELECT j.* FROM custom_jobs j WHERE j.company_id = ? AND COALESCE(j.expires_at, j.created_at + ?) > ? AND NOT EXISTS (SELECT 1 FROM job_claims c WHERE c.job_id = j.id) ORDER BY j.created_at DESC`, companyId, IMPORT_TTL_MS, now).map(jobView);
 }
 
 /** Create a custom job from a validated SimBrief OFP. Payload maths follow the board rules, so pax jobs pay for pax x PAX_KG only. */
@@ -273,7 +276,7 @@ export function importJob(db: Db, companyId: number, ofp: Ofp, now: number): Job
   const payloadKg = kind === 'pax' ? ofp.pax * PAX_KG : ofp.payloadKg;
   if (payloadKg <= 0) throw new HttpError(422, 'invalid_plan', 'the flight plan carries no passengers or cargo');
   run(db, 'DELETE FROM custom_jobs WHERE company_id = ? AND created_at <= ?', companyId, now - IMPORT_TTL_MS);
-  const n = get<{ n: number }>(db, `SELECT COUNT(*) AS n FROM custom_jobs j WHERE j.company_id = ? AND NOT EXISTS (SELECT 1 FROM job_claims c WHERE c.job_id = j.id)`, companyId)!.n;
+  const n = get<{ n: number }>(db, `SELECT COUNT(*) AS n FROM custom_jobs j WHERE j.company_id = ? AND j.source = 'simbrief' AND NOT EXISTS (SELECT 1 FROM job_claims c WHERE c.job_id = j.id)`, companyId)!.n;
   if (n >= MAX_PENDING_IMPORTS) throw new HttpError(409, 'limit_reached', `at most ${MAX_PENDING_IMPORTS} imported jobs can wait; fly or let some expire`);
   const dist = Math.round(distanceNm(from.lat, from.lon, to.lat, to.lon));
   const pax = kind === 'pax' ? ofp.pax : 0;
@@ -286,10 +289,10 @@ export function importJob(db: Db, companyId: number, ofp: Ofp, now: number): Job
 
 /** Resolve an acceptable job: an own pending import, or a board job of the current window. */
 function resolveJob(db: Db, companyId: number, id: string, now: number): Job {
-  if (id.startsWith(SB_PREFIX)) {
-    const j = get<CustomJobRow>(db, 'SELECT * FROM custom_jobs WHERE id = ? AND company_id = ? AND created_at > ?', id, companyId, now - IMPORT_TTL_MS);
+  if (isCustomJobId(id)) {
+    const j = get<CustomJobRow>(db, 'SELECT * FROM custom_jobs WHERE id = ? AND company_id = ? AND COALESCE(expires_at, created_at + ?) > ?', id, companyId, IMPORT_TTL_MS, now);
     if (!j) throw new HttpError(404, 'job_not_found', 'imported job not found or expired');
-    return jobView({ ...j, source: 'simbrief' });
+    return jobView(j);
   }
   // A first-job reservation outlives the 6 h board window it was made in: the reserving company may still accept it.
   const w = windowOf(now);

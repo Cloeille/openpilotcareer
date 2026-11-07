@@ -29,15 +29,18 @@ export const AUTONOMY_FACTOR = 0.5;
 export const PAUSED_LINE_COST_PER_DAY = 0;
 /** C5: free up to 6 lines; beyond that an operations-centre building is needed (lot FACILITIES). Until it exists the cap is hard. */
 export const MAX_LINES_PER_COMPANY = 6;
-/** A rotation taken by the player stays hers to accept this long. */
-export const TAKE_HOLD_MS = 6 * 3_600_000;
+/** A request from the owner refreshes the offline clock at most this often. */
+export const PRESENCE_STEP_MS = 60_000;
 export const MAX_FREQ_PER_DAY = 48;
 export const DEFAULT_TURNAROUND_MIN = 30;
 export const FIRST_FLIGHT_NO = 1100;
+/** Each line owns a block of flight numbers (a line flies at most 2 x MAX_FREQ_PER_DAY legs a day), so editing a programme never renumbers another line. */
+export const FLIGHT_NO_BLOCK = 100;
 /** `weeklyDemand` is calibrated so that large-large at 262 nm (the mockup's LFMN-LEBL) comes to 5 200 passengers a week. */
 export const DEMAND_K = 893;
 export const LOAD_FACTOR_MIN = 0.35;
 export const LOAD_FACTOR_MAX = 0.95;
+export const SLOT_LOSS_DAYS = 14;
 /** Stored reputation points (0-100, C17). */
 export const CANCELLED_LEG_REPUTATION = 0.02;
 export const STOPPAGE_REPUTATION_FIRST_DAY = 2;
@@ -96,11 +99,16 @@ export type Programme = {
   a: string; b: string; flightBase: number; freqPerDay: number; days: number;
   windowStartMin: number; windowEndMin: number; turnaroundMin: number;
 };
-export type PlannedAircraft = { id: number; blockMin: number };
+/** `home`: the airport where the aircraft starts each of its rotations (A or B of the line), so a rotation always ends where it began. */
+export type PlannedAircraft = { id: number; blockMin: number; home: string };
 export type PlannedLeg = { aircraftId: number; flightNo: number; dep: number; arr: number; origin: string; dest: string };
 
-/** The legs of the rotations that START on the UTC day `dayStartMs`: `freqPerDay` departures from A evenly across the window, each followed
- *  by its return after the block time and the turnaround. Aircraft are assigned round-robin. Returns may spill past midnight. Pure. */
+const snapDown = (min: number): number => Math.floor(min / 15) * 15;
+const snapUp = (min: number): number => Math.ceil(min / 15) * 15;
+
+/** The legs of the rotations that START on the UTC day `dayStartMs`: `freqPerDay` departures evenly across the window, each followed by
+ *  its return after the block time and the turnaround. Aircraft are assigned round-robin. Departures sit on the 15-minute grid, so a
+ *  tick resolves exactly the legs due in it. Flight numbers keep their direction (even A to B, odd B to A). Returns may spill past midnight. Pure. */
 export function layoutDay(p: Programme, fleet: readonly PlannedAircraft[], dayStartMs: number): PlannedLeg[] {
   if (fleet.length === 0 || (p.days & (1 << weekdayOf(dayStartMs))) === 0) return [];
   const span = p.windowEndMin - p.windowStartMin;
@@ -108,10 +116,13 @@ export function layoutDay(p: Programme, fleet: readonly PlannedAircraft[], daySt
   const legs: PlannedLeg[] = [];
   for (let i = 0; i < p.freqPerDay; i++) {
     const ac = fleet[i % fleet.length]!;
-    const out = dayStartMs + (p.windowStartMin + Math.floor((i * span) / p.freqPerDay)) * 60_000;
-    const back = out + (lineBlock + p.turnaroundMin) * 60_000;
-    legs.push({ aircraftId: ac.id, flightNo: p.flightBase + 2 * i, dep: out, arr: out + ac.blockMin * 60_000, origin: p.a, dest: p.b });
-    legs.push({ aircraftId: ac.id, flightNo: p.flightBase + 2 * i + 1, dep: back, arr: back + ac.blockMin * 60_000, origin: p.b, dest: p.a });
+    const outMin = snapDown(p.windowStartMin + Math.floor((i * span) / p.freqPerDay));
+    const backMin = snapUp(outMin + lineBlock + p.turnaroundMin);
+    const fromA = ac.home === p.a;
+    const [from, to] = fromA ? [p.a, p.b] : [p.b, p.a];
+    const base = p.flightBase + 2 * i;
+    legs.push({ aircraftId: ac.id, flightNo: base + (fromA ? 0 : 1), dep: dayStartMs + outMin * 60_000, arr: dayStartMs + (outMin + ac.blockMin) * 60_000, origin: from, dest: to });
+    legs.push({ aircraftId: ac.id, flightNo: base + (fromA ? 1 : 0), dep: dayStartMs + backMin * 60_000, arr: dayStartMs + (backMin + ac.blockMin) * 60_000, origin: to, dest: from });
   }
   return legs;
 }
@@ -149,15 +160,19 @@ export function weeklySeats(freqPerDay: number, daysMask: number, seats: readonl
   return day * maskToDays(daysMask).filter(Boolean).length;
 }
 
+/** Crew a type needs (B.3): two pilots, one cabin crew member per 40 seats. Lot STAFF owns the model; until it merges this only sizes the forecast. */
+export const crewNeeded = (seats: number): { pilots: number; cabin: number } => ({ pilots: 2, cabin: Math.ceil(seats / 40) });
+
 // ---------------------------------------------------------------- delays and stoppages (B.2 items 2 and 7)
 
 /** +10 min per 10 points of wear from 70 % (explainable, no randomness). */
 export const wearDelayMin = (wearPct: number): number =>
   wearPct >= WEAR_DELAY_FROM_PCT ? WEAR_DELAY_STEP_MIN * (1 + Math.floor((wearPct - WEAR_DELAY_FROM_PCT) / WEAR_DELAY_STEP_PCT)) : 0;
 
-/** The part of the previous leg's delay that the gap before this departure does not absorb. */
+/** Delay a departure inherits: the previous leg lands `prevDelayMin` late, so the aircraft is ready `prevDelayMin + turnaround - gap` minutes
+ *  after the planned departure (`gapMin` = planned departure minus planned arrival of the previous leg). */
 export const inheritedDelayMin = (prevDelayMin: number, gapMin: number, turnaroundMin: number): number =>
-  Math.max(0, prevDelayMin - Math.max(0, gapMin - turnaroundMin));
+  Math.max(0, prevDelayMin + turnaroundMin - gapMin);
 
 /** Reputation lost at the UTC midnight `boundary` by a line interrupted since `since`: the first stoppage day costs more. Nothing before it started. */
 export const stoppageReputation = (since: number, boundary: number): number =>
@@ -205,7 +220,10 @@ export type LineProblem = { kind: 'aircraft' | 'crew'; detail: string; ready: bo
 
 export type FlyingRow = { flightId: number; flightNo: string; lineId: number | null; from: string; to: string; progress: number; delayMin: number; reg: string; own: boolean };
 export type NetworkView = {
-  now: number; enabled: boolean; lines: Line[]; flying: FlyingRow[];
+  now: number; enabled: boolean;
+  /** When the 14-day offline cap (C1) last stopped this network; null if it never did. */
+  lapsedAt: number | null;
+  lines: Line[]; flying: FlyingRow[];
   /** `onTimePct` is null until a leg of the day has flown. */
   today: { done: number; cancelled: number; onTimePct: number | null; nextDeparture: ScheduledFlight | null };
 };
@@ -236,7 +254,8 @@ export type LineForecastView = {
 export type FreeAircraft = { id: number; registration: string; icao: string; freeAt: number };
 export type LineProblemView = {
   problem: LineProblem[];
-  cost: { cancelled: number; lostRevenue: number; perDay: number; reputation: number };
+  /** `reputation` is in stored points and negative (a loss); `slotsLostAt` is when 14 days of stoppage forfeit the slots (informational: nothing is deleted). */
+  cost: { cancelled: number; lostRevenue: number; perDay: number; reputation: number; slotsLostAt: number | null };
   options: {
     reassign: { aircraft: FreeAircraft[]; flightsPerDay: number; deltaPerDay: number } | null;
     recruit: { candidates: number; monthly: number; readyAt: number | null } | null;
