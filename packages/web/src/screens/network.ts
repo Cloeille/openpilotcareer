@@ -1,12 +1,12 @@
 import type { CompanyProfile } from '@opc/shared';
 import { act } from '../actions.ts';
-import { fetchNetwork, setNetworkEnabled, type Network } from '../api-lines.ts';
+import { fetchNetwork, setNetworkEnabled, type NetworkView } from '../api-lines.ts';
 import { button, icon, panel, titleBlock, unknownValue } from '../components.ts';
 import { aiRivals } from '../competition.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import { hashFor } from '../keys.ts';
-import { airportFacts, clockGroup, featureOff, pairLabel, sinceLabel, stateLabel, swatch, typeNames } from '../lines-ui.ts';
+import { airportFacts, clockGroup, dayMedium, featureOff, pairLabel, sinceLabel, stateLabel, swatch, typeNames } from '../lines-ui.ts';
 import {
   aircraftOfLine, clockNow, everyHours, faceToFace, flightsPerDay, inService, lineDelay, networkAirports, lineVisual, mapAirportCodes, mapAirports, mapFlights, mapLines, NETWORK_TAB, pairId, reopenTarget, rivalOrder,
   type FaceToFace,
@@ -25,9 +25,9 @@ const MAP_FIT = { left: 110, top: 205, right: 1090, bottom: 650 };
 /** The line the keyboard has selected. Kept across redraws so the list does not jump back to the first line. */
 let selected: string | null = null;
 
-type Rival = { profile: CompanyProfile; net: Network; name: string; lines: Network['lines'] };
+type Rival = { profile: CompanyProfile; net: NetworkView; name: string; lines: NetworkView['lines'] };
 /** The AI companies that fly lines. A server without the route, or a company without lines, is left out. */
-async function loadRivals(mine: Network['lines']): Promise<Rival[]> {
+async function loadRivals(mine: NetworkView['lines']): Promise<Rival[]> {
   const { profiles } = await aiRivals();
   const nets = await Promise.all(profiles.map((p) => fetchNetwork(p.id).catch(() => null)));
   const found = profiles.flatMap((profile, i) => (nets[i]?.lines.length ? [{ profile, net: nets[i]!, name: profile.name, lines: nets[i]!.lines }] : []));
@@ -48,7 +48,7 @@ export async function network(ctx: Ctx): Promise<Screen> {
   const rival = rivals.find((r) => r.profile.id === asked) ?? null;
   /** What is on screen, replaced by each poll. */
   const data = { own, rival: rival?.net ?? null, at: Date.now() };
-  const shown = (): Network => data.rival ?? data.own;
+  const shown = (): NetworkView => data.rival ?? data.own;
   const lines = shown().lines;
   const [facts, nameOf] = await Promise.all([
     airportFacts(mapAirportCodes(own, rival?.net ?? null, [...me.hubs, ...(rival?.profile.hubs ?? [])])),
@@ -75,7 +75,7 @@ export async function network(ctx: Ctx): Promise<Screen> {
     const n = shown();
     const { running, total } = inService(me.fleet);
     dot.className = `dot${n.enabled ? '' : ' idle'}`;
-    status.textContent = rival ? t('ln.net.rivalStatus') : n.enabled ? t('ln.net.status', { running, total }) : t('ln.net.statusOff');
+    status.textContent = rival ? t('ln.net.rivalStatus') : n.lapsedAt !== null && !n.enabled ? t('ln.net.lapsed', { at: dayMedium(n.lapsedAt) }) : n.enabled ? t('ln.net.status', { running, total }) : t('ln.net.statusOff');
   };
   const clock = clockGroup(own.enabled, (on) => void act(t(on ? 'ln.auto.on' : 'ln.auto.off'), () => setNetworkEnabled(on), async () => redraw()));
   const paintClock = (): void => clock.set(clockNow(data.own.now, data.at, Date.now()), data.own.enabled);
@@ -97,7 +97,7 @@ export async function network(ctx: Ctx): Promise<Screen> {
     paintMap();
     paintPrimary();
   };
-  const lineRow = (l: Network['lines'][number]): HTMLElement => {
+  const lineRow = (l: NetworkView['lines'][number]): HTMLElement => {
     const visual = lineVisual(l, own.flying);
     const id = pairId(l);
     const state = h('span', { class: 'ln-state-host' }, stateLabel(visual, lineDelay(l, own.flying)));
@@ -122,7 +122,7 @@ export async function network(ctx: Ctx): Promise<Screen> {
     today.replaceChildren(
       fact(t('ln.today.flights'), t('ln.today.counts', { done, cancelled })),
       fact(t('ln.today.next'), next ? t('ln.today.nextValue', { at: fm.zulu(next.dep), from: next.origin, to: next.dest }) : unknownValue()),
-      fact(t('ln.today.onTime'), done + cancelled === 0 ? unknownValue() : `${fm.num(onTimePct)}\u00a0%`));
+      fact(t('ln.today.onTime'), onTimePct === null ? unknownValue() : `${fm.num(onTimePct)}\u00a0%`));
   };
 
   const actions = h('div', { class: 'ln-actions' });
@@ -150,7 +150,7 @@ export async function network(ctx: Ctx): Promise<Screen> {
       h('span', { class: 'ln-face-line' }, h('span', { class: 'ln-face-who' }, t('ln.face.you')), h('span', { class: down ? 'ln-down' : 'muted' }, youState)),
       h('span', { class: 'ln-face-line' }, h('span', { class: 'ln-face-who' }, name), h('span', { class: 'muted' }, t('ln.row.every', { every: everyHours(s.rival) })))));
   };
-  const aloneRow = (l: Network['lines'][number]): HTMLElement =>
+  const aloneRow = (l: NetworkView['lines'][number]): HTMLElement =>
     h('li', null, h('button', { type: 'button', class: 'ln-alone', 'data-row': '', 'aria-label': pairLabel(l.a, l.b) }, h('span', { class: 'mono strong' }, pairLabel(l.a, l.b)), h('span', { class: 'dim small' }, t('ln.row.every', { every: everyHours(l) }))));
 
   let side: HTMLElement;
@@ -181,7 +181,7 @@ export async function network(ctx: Ctx): Promise<Screen> {
   const view = h('div', { class: 'ln-net' }, mapHost, header, h('div', { class: 'ln-body' }, h('div', { class: 'ln-map-col' }, h('div', { class: 'ln-map-foot' }, switcher, legend)), h('div', { class: 'ln-side' }, side)));
 
   // ------------------------------------------------------------ live: the clock runs, the network refreshes
-  const signature = (n: Network): string => n.lines.map((l) => `${l.id}:${l.status}:${lineDelay(l, n.flying)}`).join();
+  const signature = (n: NetworkView): string => n.lines.map((l) => `${l.id}:${l.status}:${lineDelay(l, n.flying)}`).join();
   pollWhileShown('ln-clock', view, async () => paintClock(), POLL_CLOCK_MS);
   pollWhileShown('ln-network', view, async () => {
     const [fresh, freshRival] = await Promise.all([fetchNetwork(), rival ? fetchNetwork(rival.profile.id) : Promise.resolve(null)]);

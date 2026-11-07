@@ -1,5 +1,5 @@
 import { act } from '../actions.ts';
-import { fetchOps, setNetworkEnabled, type Ops, type OpsRow } from '../api-lines.ts';
+import { fetchOps, setNetworkEnabled, type OpsView, type OpsRow } from '../api-lines.ts';
 import { button, icon, panel, titleBlock } from '../components.ts';
 import { fmt } from '../format.ts';
 import { t } from '../i18n.ts';
@@ -34,7 +34,7 @@ export async function ops(ctx: Ctx): Promise<Screen> {
   if (!data) return { title: t('ln.ops.title'), scene: 'history', tab: NETWORK_TAB, back: '#network', hints: [{ key: t('key.esc'), label: t('ln.hint.network') }], view: featureOff('ln.off.title') };
   const redraw = (): void => { window.dispatchEvent(new Event('opc:redraw')); };
 
-  let current: Ops = data;
+  let current: OpsView = data;
   let at = Date.now();
   const clock = clockGroup(data.enabled, (on) => void act(t(on ? 'ln.auto.on' : 'ln.auto.off'), () => setNetworkEnabled(on), async () => redraw()));
   const paintClock = (): void => clock.set(clockNow(current.now, at, Date.now()), current.enabled);
@@ -91,7 +91,7 @@ export async function ops(ctx: Ctx): Promise<Screen> {
   pollWhileShown('ln-ops', view, async () => {
     const fresh = await fetchOps();
     if (!fresh) return;
-    const sig = (o: Ops): string => [...o.flying, ...o.upcoming].map((r) => `${r.id}${r.status}${r.delayMin}${r.note ?? ''}`).join();
+    const sig = (o: OpsView): string => [...o.flying, ...o.upcoming].map((r) => `${r.id}${r.status}${r.delayMin}${r.note ?? ''}`).join();
     const changed = sig(fresh) !== sig(current);
     current = fresh; at = Date.now();
     if (changed) paint(); else paintClock();

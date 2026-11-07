@@ -1,5 +1,5 @@
 import { blockHours, type AircraftType } from '@opc/shared';
-import type { CancelCause, FlightStatus, FlyingNow, Line, Network, OpsRow, Programme, ScheduledFlight } from './api-lines.ts';
+import type { CancelCause, ProjectionStatus, ScheduledFlightStatus, FlyingRow, Line, NetworkView, OpsRow, LineBody, ScheduledFlight } from './api-lines.ts';
 import type { MapAirport, MapFlight, MapLine } from './network-map.ts';
 import type { Screen } from './screen.ts';
 
@@ -18,14 +18,14 @@ const DAY_MS = 86_400_000;
 
 /** What a line looks like: `delayed` when an aircraft flying it is late right now. */
 export type LineVisual = 'ok' | 'delayed' | 'interrupted' | 'paused';
-export function lineVisual(line: Pick<Line, 'id' | 'status'>, flying: readonly Pick<FlyingNow, 'lineId' | 'delayMin'>[]): LineVisual {
+export function lineVisual(line: Pick<Line, 'id' | 'status'>, flying: readonly Pick<FlyingRow, 'lineId' | 'delayMin'>[]): LineVisual {
   if (line.status === 'interrupted') return 'interrupted';
   if (line.status === 'paused') return 'paused';
   return flying.some((f) => f.lineId === line.id && f.delayMin > 0) ? 'delayed' : 'ok';
 }
 
 /** The delay of the worst late aircraft on a line, 0 when none. */
-export const lineDelay = (line: Pick<Line, 'id'>, flying: readonly Pick<FlyingNow, 'lineId' | 'delayMin'>[]): number =>
+export const lineDelay = (line: Pick<Line, 'id'>, flying: readonly Pick<FlyingRow, 'lineId' | 'delayMin'>[]): number =>
   Math.max(0, ...flying.filter((f) => f.lineId === line.id).map((f) => f.delayMin));
 
 /** The id of a pair of airports, whichever way round it is given: `LFLL-LFMN`. A line is its pair, so two companies' lines on it share this id. */
@@ -50,7 +50,7 @@ export const flightsPerDay = (l: Pick<Line, 'freqPerDay'>): number => l.freqPerD
 export const aircraftOfLine = (l: Line, typeName: (icao: string) => string): string[] => l.aircraft.map((a) => `${a.registration} · ${typeName(a.icao)}`);
 
 /** Map lines of one network. `owner` says whose network it is; in the rival view the player's own lines are drawn dimmed behind it. */
-export function mapLines(own: Network, rival: Network | null): MapLine[] {
+export function mapLines(own: NetworkView, rival: NetworkView | null): MapLine[] {
   const ownPairs = new Set(own.lines.map(pairId));
   const mine = own.lines.map((l): MapLine => ({ id: pairId(l), a: l.a, b: l.b, owner: 'player', state: stateOf(lineVisual(l, own.flying)), ...(rival ? { dim: true } : {}) }));
   if (!rival) return mine;
@@ -60,9 +60,9 @@ export function mapLines(own: Network, rival: Network | null): MapLine[] {
 const stateOf = (v: LineVisual): MapLine['state'] => (v === 'paused' ? 'interrupted' : v);
 
 /** Aircraft in the air: the player's own flight is `me`, the rest are autonomous; a rival view shows the rival's aircraft only. */
-export function mapFlights(own: Network, rival: Network | null, text: (f: FlyingNow, mine: boolean) => string): MapFlight[] {
+export function mapFlights(own: NetworkView, rival: NetworkView | null, text: (f: FlyingRow, mine: boolean) => string): MapFlight[] {
   const source = rival ?? own;
-  const ownerOf = (f: FlyingNow): MapFlight['owner'] => (rival ? 'rival' : f.own ? 'me' : 'player');
+  const ownerOf = (f: FlyingRow): MapFlight['owner'] => (rival ? 'rival' : f.own ? 'me' : 'player');
   return source.flying.map((f): MapFlight => ({
     reg: f.reg, info: text(f, f.own && !rival), from: f.from, to: f.to, t: f.progress, owner: ownerOf(f),
     line: f.lineId === null ? null : lineId(source.lines, f.lineId),
@@ -73,9 +73,9 @@ const lineId = (lines: readonly Line[], id: number): string | null => { const l 
 
 /** Every airport the map must place: the ends of every line, every flight and the hubs. */
 /** The airports of the network being looked at: what the camera frames. */
-export function networkAirports(n: Network): string[] { return [...new Set([...n.lines.flatMap((l) => [l.a, l.b]), ...n.flying.flatMap((f) => [f.from, f.to])])]; }
+export function networkAirports(n: NetworkView): string[] { return [...new Set([...n.lines.flatMap((l) => [l.a, l.b]), ...n.flying.flatMap((f) => [f.from, f.to])])]; }
 
-export function mapAirportCodes(own: Network, rival: Network | null, hubs: readonly string[]): string[] {
+export function mapAirportCodes(own: NetworkView, rival: NetworkView | null, hubs: readonly string[]): string[] {
   const set = new Set<string>(hubs);
   for (const n of rival ? [own, rival] : [own]) {
     for (const l of n.lines) { set.add(l.a); set.add(l.b); }
@@ -133,7 +133,7 @@ export const dayKind = (date: string, today: string): DayKind => (date === today
 
 export type SegmentKind = 'done' | 'flying' | 'scheduled' | 'delayed' | 'cancelled';
 /** `left` / `width` are percents of the 24 h track; `delay` is the width of the late part before the flight actually leaves (the flight itself is drawn from `dep + delay`). */
-export type Segment = { id: number; flightNo: string; to: string; left: number; width: number; delayLeft: number; delay: number; kind: SegmentKind; takenByPlayer: boolean; status: FlightStatus; delayMin: number };
+export type Segment = { id: number; flightNo: string; to: string; left: number; width: number; delayLeft: number; delay: number; kind: SegmentKind; takenByPlayer: boolean; status: ScheduledFlightStatus; delayMin: number };
 export type Lane = { aircraftId: number; segments: Segment[]; rotations: number };
 
 const round2 = (n: number): number => Math.round(n * 100) / 100;
@@ -182,12 +182,15 @@ export function pnlParts(p: { fuel: number; fees: number; crews: number; mainten
 
 export const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 export const ALL_DAYS = [true, true, true, true, true, true, true];
-export const MAX_FREQ = 24;
+/** The server's `MAX_FREQ_PER_DAY`. */
+export const MAX_FREQ = 48;
+/** Turnaround the server applies when the body names none (`DEFAULT_TURNAROUND_MIN`); the preview lays out with it. */
+export const DEFAULT_TURNAROUND_MIN = 30;
 
 export type Draft = { a: string; b: string; freqPerDay: number; days: boolean[]; windowStart: string; windowEnd: string; aircraftIds: number[] };
 export const DEFAULT_DRAFT: Draft = { a: '', b: '', freqPerDay: 4, days: ALL_DAYS, windowStart: '06:00', windowEnd: '22:00', aircraftIds: [] };
 
-export const asProgramme = (d: Draft): Programme => ({ a: d.a, b: d.b, freqPerDay: d.freqPerDay, days: d.days, windowStart: d.windowStart, windowEnd: d.windowEnd, aircraftIds: d.aircraftIds });
+export const asProgramme = (d: Draft): LineBody => ({ a: d.a, b: d.b, freqPerDay: d.freqPerDay, days: d.days, windowStart: d.windowStart, windowEnd: d.windowEnd, aircraftIds: d.aircraftIds });
 export const fromLine = (l: Line): Draft => ({ a: l.a, b: l.b, freqPerDay: l.freqPerDay, days: l.days, windowStart: l.windowStart, windowEnd: l.windowEnd, aircraftIds: l.aircraft.map((a) => a.id) });
 
 /** Why the draft cannot be created yet; null when it can. The server stays the judge (hub, range, duplicates). */
@@ -262,8 +265,8 @@ export const causesOf = (l: Pick<Line, 'interruptCause'>): Cause[] => (l.interru
 /** Whole days between two instants, UTC calendar days. */
 export const daysBetween = (from: number, to: number): number => Math.floor(to / DAY_MS) - Math.floor(from / DAY_MS);
 
-/** A projection day: the server's `status` is `'cancelled'` when nothing flies that day, otherwise the text to show under the bar ("2 A/R · ATR"). */
-export const projectionKind = (status: string): 'cancelled' | 'flying' => (status === 'cancelled' ? 'cancelled' : 'flying');
+/** Days of the projection that fly: `assured` ones (`stopped` and `off` days do not). */
+export const assuredDays = (projection: readonly { status: ProjectionStatus }[]): number => projection.filter((x) => x.status === 'assured').length;
 
 // ---------------------------------------------------------------- operations board
 

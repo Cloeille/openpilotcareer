@@ -1,12 +1,12 @@
 import type { FleetAircraft } from '@opc/shared';
 import { act } from '../actions.ts';
-import { fetchLine, fetchProblem, pauseLine, resolveLine, resumeLine, takeRotation, type LineDetail, type ProblemView, type ResolveOption, type ScheduledFlight } from '../api-lines.ts';
+import { fetchLine, fetchProblem, pauseLine, resolveLine, resumeLine, takeRotation, type LineDetail, type LineProblemView, type ResolveOption, type ScheduledFlight } from '../api-lines.ts';
 import { button, icon, panel, signLocation, stat, unknownValue } from '../components.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import { dayMedium, dayShort, dayTime, fill, typeNames } from '../lines-ui.ts';
 import {
-  causeKey, causesOf, dayKind, meterFraction, daysBetween, ganttLanes, isoDay, minuteOfDay, MINUTES_PER_DAY, NETWORK_TAB, pnlParts, progressPct, projectionKind, RULER_HOURS, stepDay, type Lane, type Segment,
+  causeKey, causesOf, dayKind, meterFraction, daysBetween, ganttLanes, isoDay, minuteOfDay, MINUTES_PER_DAY, NETWORK_TAB, pnlParts, progressPct, assuredDays, RULER_HOURS, stepDay, type Lane, type Segment,
 } from '../lines-view.ts';
 import type { Key } from '../messages.ts';
 import { pollWhileShown } from '../live-poll.ts';
@@ -170,7 +170,7 @@ async function fillCities(root: HTMLElement): Promise<void> {
 
 // ====================================================================== interrupted
 
-function interrupted(ctx: Ctx, d: LineDetail, p: ProblemView): Screen {
+function interrupted(ctx: Ctx, d: LineDetail, p: LineProblemView): Screen {
   const { go } = ctx;
   const { line } = d;
   const fm = fmt();
@@ -190,7 +190,7 @@ function interrupted(ctx: Ctx, d: LineDetail, p: ProblemView): Screen {
   const costs = h('div', { class: 'ln-costs' },
     fact(t('ln.cost.cancelled'), String(cost.cancelled), t('ln.cost.cancelledSub')),
     fact(t('ln.cost.lost'), fm.money(cost.lostRevenue), t('ln.cost.perDay', { amount: fm.money(cost.perDay) })),
-    fact(t('ln.cost.rep'), fm.num(cost.reputation, 1).replace('-', '−'), t('ln.cost.repSub')));
+    fact(t('ln.cost.rep'), fm.num(cost.reputation, 1).replace('-', '−'), cost.slotsLostAt === null ? t('ln.cost.repSub') : t('ln.cost.slots', { at: dayMedium(cost.slotsLostAt) })));
 
   // ------------------------------------------------------------ the three ways out
   const reassign = p.options.reassign;
@@ -234,12 +234,11 @@ function interrupted(ctx: Ctx, d: LineDetail, p: ProblemView): Screen {
 
   const projectionHost = h('div', { class: 'ln-projection' });
   const paintProjection = (): void => {
-    const flying = p.projection.filter((x) => projectionKind(x.status) === 'flying').length;
+    const flying = assuredDays(p.projection);
     projectionHost.replaceChildren(
       h('div', { class: 'ln-econ-head' }, h('h3', { class: 'ln-sub-title' }, t('ln.proj.title')), h('span', { class: 'strong' }, t('ln.proj.assured', { n: flying, total: p.projection.length }))),
       h('div', { class: 'ln-proj-days' }, p.projection.map((x) => {
-        const kind = projectionKind(x.status);
-        return h('div', { class: `ln-proj ${kind}` }, h('span', { class: 'muted small' }, dayShort(x.date)), h('span', { class: 'ln-proj-bar' }), h('span', { class: kind === 'cancelled' ? 'ln-down small' : 'dim small' }, kind === 'cancelled' ? t('ln.fs.cancelled') : x.status));
+        return h('div', { class: `ln-proj ${x.status}` }, h('span', { class: 'muted small' }, dayShort(x.date)), h('span', { class: 'ln-proj-bar' }), h('span', { class: x.status === 'stopped' ? 'ln-down small' : 'dim small' }, t(`ln.proj.day.${x.status}` as Key)));
       })));
   };
   paintApply();

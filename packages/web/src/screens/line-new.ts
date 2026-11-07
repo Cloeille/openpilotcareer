@@ -1,4 +1,4 @@
-import { createLine, forecastLine, type Forecast } from '../api-lines.ts';
+import { createLine, forecastLine, type LineForecastView } from '../api-lines.ts';
 import { act } from '../actions.ts';
 import { airportInfo, cityOf } from '../airports.ts';
 import { airportField } from '../airport-field.ts';
@@ -9,7 +9,7 @@ import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import { hashFor } from '../keys.ts';
 import {
-  asProgramme, blockMinutesFor, candidateAircraft, DEFAULT_DRAFT, draftProblem, forecastShare, freqFromPerHour, hhmm, isRoundTheClock, MAX_FREQ, minutesOf, NETWORK_TAB, perHour,
+  asProgramme, blockMinutesFor, candidateAircraft, DEFAULT_DRAFT, DEFAULT_TURNAROUND_MIN, draftProblem, forecastShare, freqFromPerHour, hhmm, isRoundTheClock, MAX_FREQ, minutesOf, NETWORK_TAB, perHour,
   previewProgramme, ROUND_THE_CLOCK, WEEKDAYS, type Draft, type DraftProblem, type Preview,
 } from '../lines-view.ts';
 import { fill } from '../lines-ui.ts';
@@ -21,9 +21,10 @@ import { distanceNm } from '@opc/shared';
 /** The draft survives a redraw (language change, refresh) so a half-made line is not lost. */
 let draft: Draft = { ...DEFAULT_DRAFT };
 let unit: 'day' | 'hour' = 'day';
-/** Turnaround of a new line when the server has not said otherwise; the server fixes the real one at creation. */
-const TURNAROUND_MIN = 40;
 
+/** Why the server would refuse the programme (codes of `POST /lines` errors), in the player's words; an unknown code is shown as it is. */
+const REFUSAL_KEY: Record<string, Key> = { hub_missing: 'ln.err.hub_missing', aircraft_busy: 'ln.err.aircraft_busy', duplicate_line: 'ln.err.duplicate_line', distance_exceeds_range: 'ln.err.distance_exceeds_range' };
+const refusalText = (code: string): string => (REFUSAL_KEY[code] ? t(REFUSAL_KEY[code]!) : code);
 const PROBLEM_KEY: Record<DraftProblem, Key> = { airports: 'ln.new.p.airports', same: 'ln.new.p.same', aircraft: 'ln.new.p.aircraft', days: 'ln.new.p.days', window: 'ln.new.p.window', freq: 'ln.new.p.freq' };
 
 /** `#line-new`: pick two airports, a programme and aircraft; see the timetable it makes, what it needs and a week's forecast; open the line. */
@@ -98,8 +99,8 @@ export async function lineNew(ctx: Ctx): Promise<Screen> {
   const controls = h('div', { class: 'ln-controls' }, planes, freq, days, hours);
 
   // ------------------------------------------------------------ the timetable the programme makes
-  const turnaround = TURNAROUND_MIN;
-  let forecast: Forecast | null = null;
+  const turnaround = DEFAULT_TURNAROUND_MIN;
+  let forecast: LineForecastView | null = null;
   const preview = (): Preview | null => (block ? previewProgramme(draft, block, turnaround, forecast?.conflicts ?? []) : null);
   const tableHost = h('div', { class: 'ln-schedule' });
   const sideHost = h('div', { class: 'ln-need-col' });
@@ -140,13 +141,16 @@ export async function lineNew(ctx: Ctx): Promise<Screen> {
     const f = forecast;
     const share = f ? forecastShare(f.forecast) : null;
     const conflicts = f?.conflicts ?? [];
-    const crewShort = f && (f.needs.pilots.available < f.needs.pilots.required);
+    const crewShort = f !== null && f.crewModelled && f.needs.pilots.available < f.needs.pilots.required;
+    const crewNeed = (n: { required: number; available: number }): { text?: string } => (f!.crewModelled ? {} : { text: t('ln.need.requiredOnly', { required: n.required }) });
+    const refusal = f && !f.valid ? f.problems[0] ?? null : null;
     const primary = button(t('ln.new.open'), { variant: 'primary', key: t('key.enter'), disabled: problem !== null || (f !== null && !f.valid), onclick: () => void create() });
     sideHost.replaceChildren(
       panel({ title: t('ln.need.title'), class: 'ln-needs', id: 'ln-needs' },
-        f ? [need(t('ln.need.pilots'), f.needs.pilots), need(t('ln.need.cabin'), f.needs.cabin), need(t('ln.need.ground', { city: cities(info.b) || draft.b }), f.needs.ground, f.needs.ground.missingAt.length ? t('ln.need.groundMissing', { n: f.needs.ground.required - f.needs.ground.available }) : t('ln.need.groundOk')), need(t('ln.need.maintenance'), null, f.needs.maintenance)] : h('p', { class: 'dim small' }, problem ? t(PROBLEM_KEY[problem]) : t('ln.need.loading')),
+        f ? [need(t('ln.need.pilots'), f.needs.pilots, crewNeed(f.needs.pilots).text), need(t('ln.need.cabin'), f.needs.cabin, crewNeed(f.needs.cabin).text), need(t('ln.need.ground', { city: cities(info.b) || draft.b }), f.needs.ground, f.needs.ground.missingAt.length ? t('ln.need.groundMissing', { n: f.needs.ground.required - f.needs.ground.available }) : t('ln.need.groundOk')), need(t('ln.need.maintenance'), null, f.needs.maintenance)] : h('p', { class: 'dim small' }, problem ? t(PROBLEM_KEY[problem]) : t('ln.need.loading')),
         crewShort ? h('div', { class: 'ln-warn' }, icon('triangle-alert', 16), h('div', { class: 'col tight' }, h('span', null, t('ln.warn.crew', { n: f!.needs.pilots.required - f!.needs.pilots.available })), h('button', { type: 'button', class: 'link-btn', onclick: () => go('#staff/hire') }, t('ln.warn.recruit', { n: f!.needs.pilots.required - f!.needs.pilots.available })))) : null,
-        conflicts.length ? h('div', { class: 'ln-warn' }, icon('triangle-alert', 16), h('span', null, t('ln.warn.conflict', { reg: aircraft.find((x) => x.id === conflicts[0]!.aircraftId)?.registration ?? '', no: conflicts[0]!.flightNo, at: fm.zulu(conflicts[0]!.at) }))) : null),
+        refusal ? h('div', { class: 'ln-warn', role: 'alert' }, icon('circle-x', 16), h('span', null, refusalText(refusal))) : null,
+        conflicts.length ? h('div', { class: 'ln-warn' }, icon('triangle-alert', 16), h('span', null, t('ln.warn.conflict', { reg: aircraft.find((x) => x.id === conflicts[0]!.aircraftId)?.registration ?? '', no: `${me.company.code ?? ''} ${conflicts[0]!.flightNo}`.trim(), at: fm.zulu(conflicts[0]!.at) }))) : null),
       panel({ title: t('ln.fc.title'), action: h('span', { class: 'badge estimated' }, t('ln.fc.estimated')), class: 'ln-forecast', id: 'ln-forecast' },
         f ? [h('div', { class: 'col tight' }, h('span', { class: 'muted small' }, t('ln.fc.profit')), h('span', { class: `ln-profit${f.forecast.profit < 0 ? ' loss' : ''}` }, fm.signedMoney(f.forecast.profit)), h('span', { class: 'dim small' }, t('ln.fc.split', { revenue: fm.money(f.forecast.revenue), costs: fm.money(f.forecast.costs) }))),
           share ? h('div', { class: 'ln-fc-bar', role: 'img', 'aria-label': t('ln.fc.split', { revenue: fm.money(f.forecast.revenue), costs: fm.money(f.forecast.costs) }) }, h('span', { class: 'cost', style: `width:${share.costs}%` }), h('span', { class: 'margin', style: `width:${share.margin}%` })) : null,

@@ -1,20 +1,20 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import type { FlyingNow, Line, Network, OpsRow, ScheduledFlight } from './api-lines.ts';
+import type { FlyingRow, Line, NetworkView, OpsRow, ScheduledFlight } from './api-lines.ts';
 import {
   asProgramme, causesOf, clockNow, dayKind, draftProblem, everyHours, faceToFace, filterOps, firstAlert, ganttLanes, hhmm, isoDay, lineDelay, lineVisual, mapAirportCodes, mapFlights, mapLines,
-  minuteOfDay, minutesOf, nextFilter, opsBadge, pairId, meterFraction, rivalOrder, sinceToday, phaseOf, perHour, freqFromPerHour, windowHours, isRoundTheClock, ROUND_THE_CLOCK, previewProgramme, pnlParts, progressPct, projectionKind, reopenTarget, stepDay, DEFAULT_DRAFT, forecastShare, candidateAircraft,
+  minuteOfDay, minutesOf, nextFilter, opsBadge, pairId, meterFraction, rivalOrder, sinceToday, phaseOf, perHour, freqFromPerHour, windowHours, isRoundTheClock, ROUND_THE_CLOCK, previewProgramme, pnlParts, progressPct, assuredDays, reopenTarget, stepDay, DEFAULT_DRAFT, forecastShare, candidateAircraft,
 } from './lines-view.ts';
 
 const line = (o: Partial<Line> = {}): Line => ({
   id: 1, a: 'LFLL', b: 'LFMN', status: 'active', distanceNm: 153, blockMinutes: 75, freqPerDay: 4, days: [true, true, true, true, true, false, false], windowStart: '06:00', windowEnd: '22:00', turnaroundMin: 40,
   flightNos: [1131, 1138], aircraft: [{ id: 7, registration: 'F-HAZA', icao: 'AT76' }], interruptedSince: null, interruptCause: null, ...o,
 });
-const flying = (o: Partial<FlyingNow> = {}): FlyingNow => ({ flightId: 1, flightNo: 'AZR 1136', lineId: 1, from: 'LFLL', to: 'LFMN', progress: 0.82, delayMin: 0, reg: 'F-HAZA', own: false, ...o });
-const net = (o: Partial<Network> = {}): Network => ({ now: 0, enabled: true, lines: [line()], flying: [], today: { done: 0, cancelled: 0, onTimePct: 100, nextDeparture: null }, ...o });
+const flying = (o: Partial<FlyingRow> = {}): FlyingRow => ({ flightId: 1, flightNo: 'AZR 1136', lineId: 1, from: 'LFLL', to: 'LFMN', progress: 0.82, delayMin: 0, reg: 'F-HAZA', own: false, ...o });
+const net = (o: Partial<NetworkView> = {}): NetworkView => ({ now: 0, enabled: true, lapsedAt: null, lines: [line()], flying: [], today: { done: 0, cancelled: 0, onTimePct: 100, nextDeparture: null }, ...o });
 const T0 = Date.parse('2026-11-06T00:00:00Z');
 const leg = (o: Partial<ScheduledFlight> = {}): ScheduledFlight => ({
-  id: 1, lineId: 1, flightNo: 'AZR 1131', dep: T0 + 6 * 3_600_000, arr: T0 + 7.25 * 3_600_000, origin: 'LFMN', dest: 'LFLL', aircraftId: 7, status: 'scheduled', delayMin: 0, cancelCause: null, pax: null, takenByPlayer: false, ...o,
+  id: 1, lineId: 1, flightNo: 'AZR 1131', dep: T0 + 6 * 3_600_000, arr: T0 + 7.25 * 3_600_000, origin: 'LFMN', dest: 'LFLL', aircraftId: 7, status: 'scheduled', delayMin: 0, delayCause: null, cancelCause: null, pax: null, takenByPlayer: false, ...o,
 });
 
 test('a line is delayed only while one of its aircraft is late, and interrupted or paused win over that', () => {
@@ -208,8 +208,8 @@ test('interrupted: one or two causes; the projection shows a cancelled day as su
   assert.deepEqual(causesOf({ interruptCause: 'both' }), ['aircraft', 'crew']);
   assert.deepEqual(causesOf({ interruptCause: 'crew' }), ['crew']);
   assert.deepEqual(causesOf({ interruptCause: null }), []);
-  assert.equal(projectionKind('cancelled'), 'cancelled');
-  assert.equal(projectionKind('2 A/R · ATR'), 'flying');
+  assert.equal(assuredDays([{ status: 'stopped' }, { status: 'assured' }, { status: 'off' }, { status: 'assured' }]), 2);
+  assert.equal(assuredDays([]), 0);
 });
 
 const row = (o: Partial<OpsRow> = {}): OpsRow => ({ ...leg(), reg: 'F-HAZA', typeName: 'ATR 72-600', crew: null, note: null, own: false, ...o });
@@ -242,7 +242,8 @@ test('frequency per hour: round trips per hour of the window, converted both way
   assert.equal(perHour({ ...w, freqPerDay: 16 }), 1);
   assert.equal(perHour({ ...w, freqPerDay: 7 }), 1, 'never below one per hour');
   assert.equal(freqFromPerHour(1, w), 16);
-  assert.equal(freqFromPerHour(2, w), 24, 'capped at the maximum');
+  assert.equal(freqFromPerHour(2, w), 32);
+  assert.equal(freqFromPerHour(4, w), 48, 'capped at the server maximum');
   assert.equal(windowHours({ windowStart: '10:00', windowEnd: '10:00' }), 1);
   assert.ok(isRoundTheClock(ROUND_THE_CLOCK));
   assert.ok(!isRoundTheClock(w));
