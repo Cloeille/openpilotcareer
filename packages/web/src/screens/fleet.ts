@@ -4,6 +4,7 @@ import type { FinanceOverview, FleetAircraft, HubSpots } from '@opc/shared';
 import { buyoutLease, financeOverview, hubUsage, terminateLease } from '../api-finance.ts';
 import { airportInfo } from '../airports.ts';
 import { fleetSummary } from '../catalogue.ts';
+import { ferryPanel } from '../ferry-ui.ts';
 import { badge, button, dataTable, line, panel, unknownValue } from '../components.ts';
 import { aircraftName, byRegistration, monthLabel, nextCharges, parkingSummary, statusOf, wearOf, type ActiveFlightInfo } from '../finance-view.ts';
 import { locale, perform, tidyCity } from '../finance-ui.ts';
@@ -23,7 +24,8 @@ const statusCell = (a: FleetAircraft, flights: Map<number, ActiveFlightInfo>, co
   const dot = v.kind === 'flying' ? 'dot route' : v.kind === 'maintenance' ? 'dot maint' : 'dot';
   const label = v.kind === 'flying' ? t('fleet.inFlight') : v.kind === 'maintenance' ? t('fin.status.maintenance') : t('fleet.available');
   const sub = v.flight ? t('fin.fleet.flight', { flight: `${code ? `${code} ` : ''}${v.flight.flightId}`, dest: v.flight.destination })
-    : v.hoursLeft !== null ? t('fin.status.hoursLeft', { n: v.hoursLeft }) : null;
+    : v.hoursLeft !== null ? t('fin.status.hoursLeft', { n: v.hoursLeft })
+      : a.ferryUntil !== null ? t('ferry.until', { time: fmt().zulu(a.ferryUntil) }) : null;
   return h('div', { class: 'status-cell' }, h('span', { class: 'status-line' }, h('span', { class: dot }), label), sub ? h('span', { class: 'status-sub' }, sub) : null);
 };
 
@@ -51,7 +53,14 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
 
   const detail = h('div', { class: 'detail-host' });
   let confirming: 'terminate' | 'buyout' | null = null;
+  let ferrying: number | null = null;
 
+  const canFerry = (a: FleetAircraft): boolean => statusOf(a, now).kind === 'available';
+  const openFerry = (a: FleetAircraft): void => {
+    ferrying = a.id;
+    showDetail(a);
+    detail.querySelector<HTMLElement>('.ferry-panel button, .ferry-panel input')?.focus();
+  };
   const showDetail = (a: FleetAircraft | undefined): void => {
     if (!a) { detail.replaceChildren(h('p', { class: 'dim' }, t('fleet.pick'))); return; }
     selected = a.id;
@@ -65,7 +74,10 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
     const baseLine = h('span', { class: 'mono' }, a.location);
     void airportInfo(a.location).then((ap) => { if (ap) baseLine.textContent = `${a.location} · ${tidyCity(ap)}`; });
     const actions = h('div', { class: 'fin-actions-row' });
-    if (c?.kind === 'lease') {
+    if (ferrying === a.id) {
+      actions.style.flexDirection = 'column';
+      actions.replaceChildren(ferryPanel(a, me, ctx.refresh, () => { ferrying = null; showDetail(a); }));
+    } else if (c?.kind === 'lease') {
       if (confirming) {
         const isBuy = confirming === 'buyout';
         actions.style.flexDirection = 'column';
@@ -80,6 +92,7 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
           button(t('fin.lease.buyout'), { variant: 'secondary', onclick: () => { confirming = 'buyout'; showDetail(a); } }));
       }
     }
+    if (ferrying !== a.id && canFerry(a)) actions.append(button(t('ferry.action'), { variant: 'secondary', icon: 'route', label: t('ferry.pick', { plane: aircraftName(a) }), onclick: () => openFerry(a) }));
     detail.replaceChildren(h('div', { class: 'detail-v2' },
       h('div', { class: 'identity' },
         h('h2', { class: 'reg' }, aircraftName(a)),
@@ -103,7 +116,7 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
     return {
       label: `${aircraftName(a)} · ${a.type.name}`,
       selected: a.id === selected,
-      onFocus: () => { confirming = null; showDetail(a); },
+      onFocus: () => { confirming = null; ferrying = null; showDetail(a); },
       onOpen: () => { showDetail(a); },
       cells: [
         h('div', { class: 'col tight' }, h('span', { class: 'reg-sm' }, aircraftName(a)), h('span', { class: 'dim small' }, `${a.type.name} · ${categoryName(a.type.category)}`)),
@@ -144,7 +157,7 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
       financePanel));
   return {
     title: t('tab.fleet'), scene: 'fleet', tab: 'fleet', view, back: '#dashboard',
-    hints: [{ key: t('key.esc'), label: t('hint.dashboard') }, { key: '↑ ↓', label: t('hint.browse') }, { key: t('key.enter'), label: t('fin.hint.sheet') }, { key: 'A', label: t('fleet.buy') }],
-    keys: { a: () => go('#catalogue') },
+    hints: [{ key: t('key.esc'), label: t('hint.dashboard') }, { key: '↑ ↓', label: t('hint.browse') }, { key: t('key.enter'), label: t('fin.hint.sheet') }, { key: 'A', label: t('fleet.buy') }, { key: 'F', label: t('hint.ferry') }],
+    keys: { a: () => go('#catalogue'), f: () => { const a = planes.find((x) => x.id === selected); if (a && canFerry(a)) openFerry(a); } },
   };
 }

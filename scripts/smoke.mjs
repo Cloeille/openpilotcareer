@@ -264,6 +264,30 @@ const off = await call('PUT', '/network/enabled', { token: lp.body.token, body: 
 expect(off.body.enabled === false && (await call('GET', '/network', { token: lp.body.token })).body.enabled === false, 'the network switch turns the lines off');
 await call('DELETE', '/me', { token: lp.body.token, body: { password } });
 
+// --- ferry: the aircraft stands where its last job ended; send it empty to the nearest other board destination (priced by the preview, paid once), wait for it to land, take a job there
+const beforeFerry = (await call("GET", "/me", { token })).body;
+const idle = beforeFerry.fleet[0];
+const nearby = (await call('GET', `/jobs?airport=${idle.location}`, { token })).body.jobs.filter((j) => j.distanceNm <= t.rangeNm).sort((a, b) => a.distanceNm - b.distanceNm)[0];
+const ferryTo = nearby.destination;
+const quote = await call('GET', `/me/fleet/${idle.id}/ferry?to=${ferryTo}`, { token });
+expect(quote.status === 200 && quote.body.ok && quote.body.cost > 0 && quote.body.distanceNm > 0, `ferry preview ${idle.location}-${ferryTo}: ${quote.body.distanceNm} nm, ${quote.body.cost} for ${quote.body.hours.toFixed(2)} h`, quote);
+expect((await call('GET', '/me', { token })).body.company.balance === beforeFerry.company.balance, 'the preview booked nothing');
+expect((await call('POST', `/me/fleet/${idle.id}/ferry`, { token: rival.body.token, body: { to: ferryTo } })).status === 404, "another company's aircraft cannot be ferried");
+const booked = await call('POST', `/me/fleet/${idle.id}/ferry`, { token, body: { to: ferryTo } });
+expect(booked.status === 201 && booked.body.cost === quote.body.cost && booked.body.balanceAfter === beforeFerry.company.balance - quote.body.cost, `ferried: charged ${booked.body.cost}, the preview's price`, booked);
+const flying = (await call('GET', '/me', { token })).body.fleet[0];
+expect(flying.location === ferryTo && flying.busy && flying.ferryUntil === booked.body.arrivesAt, `the aircraft is at ${ferryTo} and busy until it lands`, flying);
+await sleepUntil(booked.body.arrivesAt + 60_000);
+const landed = (await call('GET', '/me', { token })).body.fleet[0];
+expect(!landed.busy && landed.ferryUntil === null, 'it is free once it has landed');
+const canFlyHere = (j) => (j.kind === 'pax' ? j.pax <= t.seats : j.payloadKg <= t.cargoKg) && j.distanceNm <= t.rangeNm;
+const there = (await call('GET', `/jobs?airport=${ferryTo}`, { token })).body.jobs.find(canFlyHere);
+const take = await call('POST', `/jobs/${there.id}/accept`, { token, body: { aircraftId: idle.id } });
+expect(take.status === 201 && take.body.job.origin === ferryTo, `accepted ${there.origin}-${there.destination} at the ferry destination -> flight ${take.body.id}`, take);
+expect((await call('POST', `/flights/${take.body.id}/cancel`, { token })).status === 200, 'cancelled it again');
+const txs = (await call('GET', '/me/transactions?limit=200', { token })).body;
+expect(txs.filter((x) => x.kind === 'ferry_flight').length === 1 && txs.reduce((sum, x) => sum + x.amount, 0) === (await call('GET', '/me', { token })).body.company.balance, 'one ferry_flight ledger line, and the ledger still sums to the balance');
+
 // --- delete
 expect((await call('DELETE', '/me', { token, body: { password: 'not the password' } })).status === 403, 'account deletion with a wrong password is refused');
 expect((await call('DELETE', '/me', { token, body: { password } })).status === 204, 'account deleted with the right password');
