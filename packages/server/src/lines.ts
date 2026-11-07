@@ -147,7 +147,7 @@ export function linesRequest(db: Db, now: number, token: string | null): void {
 
 // ---------------------------------------------------------------- the tick
 
-type Book = { companyId: number; kind: string; amount: number; at: number; pair: string; day: string; legs: number };
+type Book = { companyId: number; kind: string; amount: number; at: number; pair: string; day: string; legs: number; lineId: number; aircraftId: number };
 type Run = { bulkBefore: number; books: Map<string, Book>; touched: Map<number, number>; lines: Map<number, LineRow>; loads: Map<number, number>; types: Map<string, AircraftType> };
 
 /** Play every tick that is due. The last MAX_LINE_CATCHUP_TICKS are resolved leg by leg; older ones are replayed too but their money is
@@ -289,9 +289,9 @@ function resolveLeg(db: Db, leg: LegRow, r: Run): void {
   const entries: [string, number][] = [['line_revenue', m.revenue], ['line_fuel', -m.fuel], ['line_fee', -m.fee], ['line_maintenance', -m.maintenance], ['service_sales', svc?.sales ?? 0], ['service_cost', -(svc?.cost ?? 0)]];
   for (const [kind, amount] of entries) {
     if (amount === 0) continue;
-    if (!bulk) { post(db, leg.company_id, leg.dep_at, kind, amount, `${memo} ${leg.flight_no}`); continue; }
-    const key = `${line.id}:${isoDay(leg.dep_at)}:${kind}`;
-    const b = r.books.get(key) ?? { companyId: leg.company_id, kind, amount: 0, at: leg.dep_at, pair: `${line.a}-${line.b}`, day: isoDay(leg.dep_at), legs: 0 };
+    if (!bulk) { post(db, leg.company_id, leg.dep_at, kind, amount, `${memo} ${leg.flight_no}`, null, { lineId: line.id, aircraftId: ac.id, legs: kind === 'line_revenue' ? 1 : 0 }); continue; }
+    const key = `${line.id}:${ac.id}:${isoDay(leg.dep_at)}:${kind}`;
+    const b = r.books.get(key) ?? { companyId: leg.company_id, kind, amount: 0, at: leg.dep_at, pair: `${line.a}-${line.b}`, day: isoDay(leg.dep_at), legs: 0, lineId: line.id, aircraftId: ac.id };
     b.amount += amount; b.legs++; b.at = Math.max(b.at, leg.dep_at);
     r.books.set(key, b);
   }
@@ -308,7 +308,7 @@ function resolveLeg(db: Db, leg: LegRow, r: Run): void {
 
 /** Post the aggregated money of the old ticks: one ledger line per line, day and kind, e.g. `LFLL-LFMN 2026-11-04 x8`. */
 function flushBooks(db: Db, r: Run): void {
-  for (const b of [...r.books.values()].sort((x, y) => x.at - y.at || x.kind.localeCompare(y.kind))) post(db, b.companyId, b.at, b.kind, b.amount, `${b.pair} ${b.day} x${b.legs}`);
+  for (const b of [...r.books.values()].sort((x, y) => x.at - y.at || x.kind.localeCompare(y.kind))) post(db, b.companyId, b.at, b.kind, b.amount, `${b.pair} ${b.day} x${b.legs}`, null, { lineId: b.lineId, aircraftId: b.aircraftId, legs: b.kind === 'line_revenue' ? b.legs : 0 });
   r.books.clear();
 }
 

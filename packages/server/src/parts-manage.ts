@@ -75,10 +75,10 @@ export function refurbish(db: Db, companyId: number, aircraftId: number, items: 
   pay(db, companyId, total);
   const reg = a.registration ?? `#${a.id}`;
   for (const i of priced) {
-    post(db, companyId, now, 'refurbish', -i.cost, `${reg} ${i.component} ${i.action}`);
+    post(db, companyId, now, 'refurbish', -i.cost, `${reg} ${i.component} ${i.action}`, null, { aircraftId: a.id });
     run(db, 'UPDATE aircraft_components SET wear_pct = ?, refurb_until = ? WHERE aircraft_id = ? AND component = ?', wearAfterAction(i.action, rows.get(i.component)!.wear_pct), downUntil, a.id, i.component);
   }
-  if (works.ferryCost > 0) post(db, companyId, now, 'ferry', -works.ferryCost, `${reg} ferry to a workshop`);
+  if (works.ferryCost > 0) post(db, companyId, now, 'ferry', -works.ferryCost, `${reg} ferry to a workshop`, null, { aircraftId: a.id });
   run(db, "UPDATE aircraft SET status = 'maintenance', maintenance_until = ? WHERE id = ?", downUntil, a.id);
   snapshot(db, companyId, now);
   return { cost: total, ferry: works.ferryCost, downUntil, balanceAfter: balanceOf(db, companyId), items: priced.map(({ component, action, cost }) => ({ component, action, cost })) };
