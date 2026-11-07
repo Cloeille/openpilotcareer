@@ -208,7 +208,7 @@ INSERT INTO staff_company (company_id, starter_pending) SELECT DISTINCT l.compan
 // OpenHangar v3, lot FACILITIES: buildings at hubs. `facilities` is only the id of a slot at an airport (the catalogue itself, names, areas, rents, who holds what at the start,
 // is code in shared/src/facilities.ts, so retuning it never needs a migration); rows are created the first time a hub's plan is read. What a company holds is a contract:
 // a lease (36 months, a deposit) or a purchase (cash or credit). The partial unique index is the guard that nobody else can hold a building at the same time.
-// `level` is the level in force, `works_to` / `works_until` an upgrade in progress (folded into `level` by the request hook when it is over), `level_since` when the level began.
+// `level` is the level in force when the last upgrade started, `works_to` / `works_until` an upgrade in progress or just over (the level at any instant is derived from the clock; the next upgrade folds it into `level`), `level_since` when the level began.
 // `value` is what the building would resell for (net worth), `principal` the credit left. Nothing is billed retroactively: a contract starts paying on the 1st after it was signed.
 const SCHEMA_V9 = `
 CREATE TABLE facilities (id INTEGER PRIMARY KEY, hub_icao TEXT NOT NULL, slot TEXT NOT NULL, UNIQUE (hub_icao, slot));

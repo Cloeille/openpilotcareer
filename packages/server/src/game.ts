@@ -65,6 +65,8 @@ export function typeFor(db: Db, companyId: number, icao: string): AircraftType {
 
 // ---------------------------------------------------------------- ledger
 
+export const balanceOf = (db: Db, companyId: number): number => get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId)?.balance ?? 0;
+
 /** The only place a balance changes: updates the balance and appends the matching ledger line. */
 export function post(db: Db, companyId: number, at: number, kind: string, amount: number, memo: string, flightId: number | null = null): void {
   const row = get<{ balance: number }>(db, 'UPDATE companies SET balance = balance + ? WHERE id = ? RETURNING balance', amount, companyId);

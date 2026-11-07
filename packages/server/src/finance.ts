@@ -11,7 +11,7 @@ import { applyBailout, startModeOf } from './start.ts';
 import {
   assertHubSpot, ferryFee, insertAircraft, insuranceMonthly, releaseMaintenance, type ContractRow, type LeaseTerms,
 } from './fleet-extras.ts';
-import { addMonths, fleetView, post, snapshot, typeFor } from './game.ts';
+import { addMonths, balanceOf, fleetView, post, snapshot, typeFor } from './game.ts';
 import { HttpError } from './http.ts';
 import { dayOf, leaseOffer, parseOfferId } from './leasing.ts';
 
@@ -22,7 +22,6 @@ const monthStart = (key: string): number => Date.parse(`${key}-01T00:00:00Z`);
 const nextMonthKey = (key: string): string => monthKey(addMonths(monthStart(key), 1));
 
 const hasHub = (db: Db, companyId: number, icao: string): boolean => !!get(db, 'SELECT 1 AS x FROM hubs WHERE company_id = ? AND icao = ?', companyId, icao);
-const balanceOf = (db: Db, companyId: number): number => get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId)?.balance ?? 0;
 const short = (needed: number, extra: Record<string, unknown> = {}): HttpError => new HttpError(409, 'insufficient_funds', `needs ${needed} more`, { needed, ...extra });
 
 // ---------------------------------------------------------------- monthly plan (pure)

@@ -9,6 +9,7 @@ import {
 import { airportList, airports } from './catalog.ts';
 import { all, get, run, type Db } from './db.ts';
 import { LINE_JOB_PREFIX, hasHub, jobView, typeFor, type AircraftRow } from './game.ts';
+import { lineLimit } from './facilities.ts';
 import { HttpError } from './http.ts';
 import { countOf, demandOf } from './staff-needs.ts';
 import { recruitForLine, recruitOffer } from './staff-people.ts';
@@ -60,8 +61,9 @@ export function programmeProblems(db: Db, companyId: number, c: Candidate): { pr
   }
   const dup = get<{ id: number }>(db, 'SELECT id FROM lines WHERE company_id = ? AND a = ? AND b = ? AND id != ?', companyId, a, b, c.excludeLineId);
   if (dup) add('duplicate_line', 409, `you already fly ${a}-${b}`);
-  if (!c.excludeLineId && get<{ n: number }>(db, 'SELECT COUNT(*) AS n FROM lines WHERE company_id = ?', companyId)!.n >= MAX_LINES_PER_COMPANY) {
-    add('line_limit', 409, `at most ${MAX_LINES_PER_COMPANY} lines until an operations centre exists`);
+  const limit = lineLimit(db, companyId);
+  if (!c.excludeLineId && get<{ n: number }>(db, 'SELECT COUNT(*) AS n FROM lines WHERE company_id = ?', companyId)!.n >= limit) {
+    add('line_limit', 409, `at most ${limit} lines${limit === MAX_LINES_PER_COMPANY ? ' until you rent an operations centre' : ''}`);
   }
   if (fleet.length === p.aircraftIds.length) {
     const prog = { a, b, flightBase: 0, freqPerDay: p.freqPerDay, days: daysToMask(p.days), windowStartMin: hhmmToMin(p.windowStart), windowEndMin: hhmmToMin(p.windowEnd), turnaroundMin: p.turnaroundMin ?? DEFAULT_TURNAROUND_MIN };

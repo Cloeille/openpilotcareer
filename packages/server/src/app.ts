@@ -20,6 +20,7 @@ import { registerStart } from './routes-start.ts';
 import { registerLive } from './routes-live.ts';
 import { registerLines } from './routes-lines.ts';
 import { registerStaff } from './routes-staff.ts';
+import { registerFacilities } from './routes-facilities.ts';
 import { registerCatalogueStats } from './routes-catalogue-stats.ts';
 import { fetchOfp, type Fetch } from './simbrief.ts';
 import { registerSimbrief } from './routes-simbrief.ts';
@@ -332,6 +333,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
 
   registerStart(app, { db, now });
   registerFinance(app, { db, now });
+  registerFacilities(app, { db, now });
   registerLive(app, { db, now });
   registerSimbrief(app, { db, now, doFetch });
 

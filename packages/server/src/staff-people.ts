@@ -5,8 +5,9 @@ import {
   type AircraftCategory, type Candidate, type FireResult, type InterimResult, type RestPolicy, type StaffFamily, type StaffRole, type TrainResult,
 } from '@opc/shared';
 import { hashSeed, mulberry32 } from './board.ts';
+import { assertSeat } from './facilities.ts';
 import { all, get, run, type Db } from './db.ts';
-import { post, typeFor, snapshot } from './game.ts';
+import { balanceOf, post, typeFor, snapshot } from './game.ts';
 import { HttpError } from './http.ts';
 import { companyDemand, demandOf, type DemandLine, type Slot } from './staff-needs.ts';
 import { crewShortage, rosterOf, rulesOf, stateOf, type Shortage, type StaffRow } from './staff.ts';
@@ -19,8 +20,6 @@ const LAST = ['Lefèvre', 'Martin', 'Bernard', 'Dubois', 'Moreau', 'Laurent', 'S
 const nameFrom = (rand: () => number): string => `${FIRST[Math.floor(rand() * FIRST.length)]} ${LAST[Math.floor(rand() * LAST.length)]}`;
 
 // ---------------------------------------------------------------- shared helpers
-
-const balanceOf = (db: Db, companyId: number): number => get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId)?.balance ?? 0;
 
 /** Pay `amount` now or refuse with 409 insufficient_funds. */
 export function pay(db: Db, companyId: number, at: number, kind: string, amount: number, memo: string): void {
@@ -106,6 +105,7 @@ export function hire(db: Db, companyId: number, candidateId: string, now: number
   const listed = c && (STAFF_FAMILIES as readonly string[]).includes(c.family) && (c.family === 'pilot' ? c.qual !== null && fleetTypes(db, companyId).includes(c.qual) : c.qual === null);
   if (!c || !listed) throw new HttpError(404, 'candidate_not_found', 'this candidate is no longer on the market');
   if (get(db, 'SELECT 1 AS x FROM staff WHERE company_id = ? AND candidate_id = ?', companyId, c.id)) throw new HttpError(409, 'candidate_taken', 'you already hired this candidate');
+  assertSeat(db, companyId, c.family, c.base, now);
   pay(db, companyId, now, 'hire_premium', c.premium, `hiring premium ${c.name}`);
   const startsAt = now + c.noticeDays * DAY_MS;
   const staffId = insertStaff(db, {
@@ -148,6 +148,7 @@ export function transfer(db: Db, companyId: number, id: number, base: string, no
   const s = ownedStaff(db, companyId, id);
   if (!basesOf(db, companyId).includes(base)) throw new HttpError(422, 'not_a_base', `${base} is not one of your hubs or bases`);
   if (s.base === base) throw new HttpError(409, 'already_there', 'this person is already based there');
+  assertSeat(db, companyId, s.family, base, now);
   if (!employedNow(s, now) && s.starts_at <= now) throw new HttpError(409, 'already_left', 'this person has left');
   if (stateOf(db, s, now, rulesOf(db, companyId)) === 'onDuty') throw new HttpError(409, 'on_duty', 'this person is flying now');
   run(db, 'UPDATE staff SET base = ? WHERE id = ?', base, id);
@@ -168,6 +169,7 @@ export function interim(db: Db, companyId: number, o: { family: StaffFamily; qua
   const bases = basesOf(db, companyId);
   const base = o.base ?? bases[0];
   if (!base || !bases.includes(base)) throw new HttpError(422, 'not_a_base', `${base ?? 'no airport'} is not one of your hubs or bases`);
+  assertSeat(db, companyId, o.family, base, now);
   const rand = mulberry32(hashSeed(`interim:${companyId}:${now}:${o.family}:${o.qual ?? '-'}`));
   const experience = o.family === 'pilot' ? 3_500 : 8;
   const salary = salaryFor(o.family, roleOf(o.family, experience), experienceFactor(o.family, experience), categoryOf(db, companyId, o.qual ?? null));

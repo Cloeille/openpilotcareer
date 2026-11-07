@@ -90,6 +90,9 @@ export const purchaseTerms = (rent: number): FacilityPurchase => {
 };
 
 export type FacilityContractKind = 'lease' | 'purchase';
+/** Ending a lease pays the rent of the notice, or of the rest of the 36 months when that is longer (the rent is owed; the deposit comes back).
+ *  Selling a purchased building settles the credit left and pays the resale value. */
+export const leaseExitFee = (rent: number, months: number, monthsPaid: number, noticeMonths: number): number => rent * Math.max(noticeMonths, months - monthsPaid);
 /** What signing costs and what the building costs a month afterwards, for one choice. The preview and the booking both read this, so they cannot disagree. */
 export type FacilitySigning = {
   /** Cash leaving the account at signing: deposit or down payment, plus the works of the starting level. */
@@ -174,9 +177,8 @@ export const facilityLevels = (effect: FacilityEffect, rent: number): FacilityLe
       sellsMaintenance: hangar && level >= HANGAR_SELLS_LEVEL, desks: effect === 'desks' ? desksFor(level) : 0,
     };
   });
-/** The first instant a building at `level` (since `levelSince`) can start works to the next level; `works` is a build in progress. */
-export const nextLevelAt = (level: number, levelSince: number, works: { until: number } | null): number =>
-  Math.max(works?.until ?? 0, level + 1 === 3 ? levelSince + LEVEL3_AFTER_DAYS * DAY_MS : 0);
+/** The first instant a building that reached `level` at `levelSince` can start the works to the next one (level 3 needs LEVEL3_AFTER_DAYS at level 2). */
+export const nextLevelAt = (level: number, levelSince: number): number => (level + 1 === 3 ? levelSince + LEVEL3_AFTER_DAYS * DAY_MS : levelSince);
 
 // ---------------------------------------------------------------- the monthly plan (rent, upkeep, instalments, income)
 
@@ -186,7 +188,13 @@ export type PlanFacility = {
   id: number; label: string; kind: FacilityContractKind; started_at: number; months: number | null; months_paid: number; monthly: number; upkeep: number; principal: number; income: number;
 };
 
-/** What the month starting at `start` costs for the buildings. Whatever was signed before `start` is billed; what was signed this month was paid at signing and starts next month
+/** First instant after a lease's initial term: the month of signing is free (signing costs the deposit and the works, never a rent), then `months` rents are billed. */
+export const leaseTermEnd = (startedAt: number, months: number): number => {
+  const d = new Date(startedAt);
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + months + 1, 1);
+};
+
+/** What the month starting at `start` costs for the buildings. Whatever was signed before `start` is billed; what was signed this month starts paying on the 1st after it
  *  (never retroactive). A lease runs on after its term (it renews) until terminated. Returns the new states without touching the input, like `planMonth`. */
 export function planFacilityMonth(start: number, rows: readonly PlanFacility[]): { charges: FacilityCharge[]; rows: PlanFacility[] } {
   const charges: FacilityCharge[] = [];
@@ -221,6 +229,7 @@ export const facilityQuerySchema = z.object({
   mode: z.enum(['lease', 'buy']).default('lease'), level: z.coerce.number().int().min(1).max(MAX_LEVEL_AT_SIGNING).default(1),
   downPct: z.coerce.number().int().min(LOAN_DOWN_PCT_MIN).max(LOAN_DOWN_PCT_MAX).optional(), months: z.coerce.number().int().min(LOAN_MONTHS_MIN).max(LOAN_MONTHS_MAX).optional(),
 }).refine((q) => (q.downPct === undefined) === (q.months === undefined), { message: 'downPct and months go together' });
+export type FacilityQuery = z.infer<typeof facilityQuerySchema>;
 
 // ---------------------------------------------------------------- wire types
 
@@ -232,6 +241,8 @@ export type FacilityContractView = {
   monthly: number; upkeep: number; deposit: number; price: number; principal: number; noticeMonths: number;
   /** Since when the building has worked at its present level. */
   levelSince: number;
+  /** What ending the contract costs now (`fee`: the notice or the rest of the term for a lease, the credit left for a purchase) and brings back (`refund`: the deposit, or the resale value). */
+  exit: { fee: number; refund: number };
 };
 export type FacilityView = {
   id: number; hub: string; slot: string; name: string; kind: FacilityKind; effect: FacilityEffect; areaM2: number;
