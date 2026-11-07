@@ -123,13 +123,13 @@ function leversOf(db: Db, people: readonly Person[], fleet: readonly { id: numbe
   // maintenance: the worst aircraft goes through the workshop
   const worst = [...fleet].sort((a, b) => b.wear_pct - a.wear_pct || a.id - b.id)[0];
   if (worst) {
-    offer({ ...cur, wears: fleet.map((a) => (a.id === worst.id ? WEAR_AFTER_SERVICE_PCT : a.wear_pct)) }, {
+    offer({ ...cur, wears: cur.wears.map((w, i) => (fleet[i]!.id === worst.id ? WEAR_AFTER_SERVICE_PCT : w)) }, {
       action: 'maintenance', ref: String(worst.id), label: `Service ${worst.registration ?? `#${worst.id}`}`, detail: `Wear at ${Math.round(worst.wear_pct)} %`,
     });
   }
 
   // leave: everybody at or over the tired threshold rests
-  const tired = people.filter((p) => p.fatigue >= TIRED_FATIGUE).length;
+  const tired = cur.fatigues.filter((f) => f >= TIRED_FATIGUE).length;
   if (tired > 0) {
     offer({ ...cur, fatigues: cur.fatigues.map((f) => (f >= TIRED_FATIGUE ? 0 : f)) }, {
       action: 'leave', ref: '', label: `Rest ${plural(tired, 'tired crew member', 'tired crew members')}`, detail: `Fatigue at ${TIRED_FATIGUE} % or more`,
