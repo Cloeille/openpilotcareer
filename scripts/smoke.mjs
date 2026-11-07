@@ -173,6 +173,27 @@ expect(fcsv.status === 200 && fcsv.text.trim().split('\r\n').length === 3 && /^t
 const tcsv = await call('GET', '/me/export?format=transactions.csv', { token, raw: true });
 expect(tcsv.status === 200 && tcsv.text.trim().split('\r\n').length === ledger.length + 1, `transactions.csv: header + ${ledger.length} rows`);
 
+// --- v3 lines: a line flies by itself on the server clock (x600), is paid through the ledger, and can be switched off
+const lp = await call('POST', '/auth/register', { body: { username: `${username}l`, password, hub: 'LFPG' } });
+const lineBody = { a: 'LFPG', b: 'LFLL', freqPerDay: 4, days: Array(7).fill(true), windowStart: '00:00', windowEnd: '23:45', aircraftIds: [lp.body.fleet[0].id] };
+const fc = await call('POST', '/lines/forecast', { token: lp.body.token, body: lineBody });
+expect(fc.status === 200 && fc.body.valid === true && fc.body.forecast.estimated === true, `line forecast: valid, ${fc.body.forecast.seatsPerWeek} seats a week`, fc);
+const made = await call('POST', '/lines', { token: lp.body.token, body: lineBody });
+expect(made.status === 201 && made.body.a === 'LFLL' && made.body.b === 'LFPG', `line ${made.body.a}-${made.body.b} created, flights ${made.body.flightNos.join('-')}`, made);
+let flown = 0;
+for (let i = 0; i < 90 && flown === 0; i++) {
+  await new Promise((r) => setTimeout(r, 1000));
+  const net = await call('GET', '/network', { token: lp.body.token });
+  flown = net.body.today.done + net.body.flying.length;
+}
+const lineTx = (await call('GET', '/me/transactions', { token: lp.body.token })).body.filter((x) => x.kind.startsWith('line_'));
+expect(flown > 0 && lineTx.some((x) => x.kind === 'line_revenue' && x.amount > 0), `the line flew on its own: ${lineTx.length} ledger lines (line_revenue ${lineTx.find((x) => x.kind === 'line_revenue')?.amount})`, lineTx);
+const ops = await call('GET', '/ops', { token: lp.body.token });
+expect(ops.status === 200 && ops.body.enabled === true, `operations board: ${ops.body.counts.flying} flying, ${ops.body.counts.upcoming} upcoming`, ops);
+const off = await call('PUT', '/network/enabled', { token: lp.body.token, body: { enabled: false } });
+expect(off.body.enabled === false && (await call('GET', '/network', { token: lp.body.token })).body.enabled === false, 'the network switch turns the lines off');
+await call('DELETE', '/me', { token: lp.body.token, body: { password } });
+
 // --- delete
 expect((await call('DELETE', '/me', { token, body: { password: 'not the password' } })).status === 403, 'account deletion with a wrong password is refused');
 expect((await call('DELETE', '/me', { token, body: { password } })).status === 204, 'account deleted with the right password');

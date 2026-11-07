@@ -304,7 +304,7 @@ export type ApiError = { error: string; message: string };
 export type Airport = { icao: string; name: string; lat: number; lon: number; size: AirportSize; country: string; city: string; iata: string };
 
 export type Job = {
-  id: string; source: 'board' | 'simbrief'; kind: JobKind; origin: string; destination: string;
+  id: string; source: 'board' | 'simbrief' | 'line'; kind: JobKind; origin: string; destination: string;
   distanceNm: number; payloadKg: number; pax: number; payout: number;
   requiredAircraft?: string; plannedFuelKg?: number; route?: string;
 };
@@ -341,3 +341,5 @@ export type CompanyProfile = Company & {
 
 // ---- lot live
 export * from './live.ts';
+// ---- lot lines (v3)
+export * from './lines.ts';

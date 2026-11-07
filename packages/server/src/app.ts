@@ -18,6 +18,7 @@ import {
 import { HttpError, Limiter, NUMERIC_ID, parse } from './http.ts';
 import { registerStart } from './routes-start.ts';
 import { registerLive } from './routes-live.ts';
+import { registerLines } from './routes-lines.ts';
 import { registerCatalogueStats } from './routes-catalogue-stats.ts';
 import { fetchLatestOfp, type Fetch } from './simbrief.ts';
 import { maintenanceTick } from './finance.ts';
@@ -75,6 +76,8 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
 
   // AI companies play lazily: any API request first plays the ticks that are due (cheap no-op otherwise).
   if (o.ai !== false) app.addHook('onRequest', async (req) => { if (req.url.startsWith('/api/')) catchUp(db, now()); });
+
+  registerLines(app, { db, now }); // lot LINES: adds its tick hook HERE, before the maintenance hook below, so past ticks replay with the workshop state of their time
 
   // Lot FINANCE: free aircraft whose workshop visit is over and bill the months that are due (cheap no-op otherwise).
   app.addHook('onRequest', async (req) => { if (req.url.startsWith('/api/')) maintenanceTick(db, now()); });

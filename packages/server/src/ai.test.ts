@@ -5,6 +5,7 @@ import { AI_COMPANIES, TICK_MS, catchUp, runTick, seedAi, tickOf } from './ai.ts
 import { airports } from './catalog.ts';
 import { openDb, tx, all, get, run } from './db.ts';
 import { finishFlight, openBoard, startFlight, typeFor, leaderboard, companyProfile, type AircraftRow, type FlightRow } from './game.ts';
+import { catchUpLines } from './lines.ts';
 import { harness } from './harness.ts';
 
 const T0 = Date.UTC(2026, 10, 4, 12, 0, 0);
@@ -75,10 +76,11 @@ test('AI takes jobs from the shared board with the same ledger rules; money is c
 
 test('AI companies grow: they buy aircraft and finish the season ahead of their start', () => {
   const db = world();
-  for (let t = tickOf(T0) - 8; t <= tickOf(T0) + 40; t++) runTick(db, t);
+  // v3: an AI aircraft on a line is flown by the line clock, so the world plays both clocks as the app does (a 6 h AI tick, then the 15 min line ticks up to its end)
+  for (let t = tickOf(T0) - 8; t <= tickOf(T0) + 60; t++) { runTick(db, t); catchUpLines(db, (t + 1) * TICK_MS - 1); }
   const fleet = get<{ n: number }>(db, 'SELECT COUNT(*) n FROM aircraft')!.n;
   assert.ok(fleet > AI_COMPANIES.length, `fleet grew to ${fleet}`);
-  const lb = leaderboard(db, '2026-11', T0 + 40 * TICK_MS);
+  const lb = leaderboard(db, '2026-11', T0 + 60 * TICK_MS);
   assert.equal(lb.rows.length, AI_COMPANIES.length);
   assert.ok(lb.rows.every((r) => r.isAI && r.netWorth > 400_000), 'every AI is worth more than its starting capital');
   assert.deepEqual(lb.rows.map((r) => r.rank), lb.rows.map((_, i) => i + 1));

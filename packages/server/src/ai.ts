@@ -5,6 +5,7 @@ import { airports } from './catalog.ts';
 import { hashSeed, mulberry32 } from './board.ts';
 import { all, get, run, tx, type Db } from './db.ts';
 import { buyAircraft, createCompany, finishFlight, openBoard, startFlight, typeFor, type AircraftRow } from './game.ts';
+import { assignAiLine } from './lines-manage.ts';
 
 /** ponytail: a tick lets each aircraft fly at most one leg; leg duration is not simulated. 6 h keeps AI pace within reach of a diligent human. */
 export const TICK_MS = 6 * 3_600_000;
@@ -23,6 +24,9 @@ export const AI_COMPANIES: AiSeed[] = [
   { name: 'Alpine Charter', hub: 'LSZH', personality: { style: 'cautious', preferred: ['TBM9', 'PC12', 'C750', 'GLF6'] } },
   { name: 'Outback Bush Air', hub: 'YSSY', personality: { style: 'cautious', preferred: ['C182', 'C208', 'PC12', 'B190'] } },
   { name: 'Nordic Link', hub: 'ENGM', personality: { style: 'aggressive', preferred: ['PC12', 'AT76', 'DH8D', 'E170'] } },
+  // v3 (decision C15): two French rivals so the network screens have competition on French pairs. The names are the mockup's placeholders.
+  { name: 'Alpes Air Link', hub: 'LFML', personality: { style: 'cautious', preferred: ['C208', 'B190', 'AT76', 'DH8D'] } },
+  { name: 'Méridia Cargo', hub: 'LFLL', personality: { style: 'aggressive', preferred: ['C208', 'B190', 'AT76', 'B763'] } },
 ];
 
 // Style decides how much cash stays in reserve when buying, how often an aircraft flies, and what a job is scored by.
@@ -55,8 +59,11 @@ function playCompany(db: Db, c: AiCompany, tick: number): void {
   const rand = mulberry32(hashSeed(`ai:${c.id}:${tick}`));
   const hubs = all<{ icao: string }>(db, 'SELECT icao FROM hubs WHERE company_id = ? ORDER BY icao', c.id).map((h) => h.icao);
   const fleet = all<AircraftRow>(db, 'SELECT * FROM aircraft WHERE company_id = ? ORDER BY id', c.id);
+  // Aircraft assigned to a line are flown by the line engine (lines.ts); the others keep taking the best board job each tick.
+  const onLine = new Set(all<{ aircraft_id: number }>(db, 'SELECT la.aircraft_id FROM line_aircraft la JOIN lines l ON l.id = la.line_id WHERE l.company_id = ?', c.id).map((r) => r.aircraft_id));
 
   for (const aircraft of fleet) {
+    if (onLine.has(aircraft.id)) continue;
     if (rand() >= style.flyChance) continue;
     const type = typeFor(db, c.id, aircraft.icao);
     let best: { job: Job; score: number } | null = null;
@@ -79,7 +86,7 @@ function playCompany(db: Db, c: AiCompany, tick: number): void {
       .map((icao) => typeFor(db, c.id, icao))
       .filter((t) => company.balance >= aircraftPrice(t) * (1 + style.reserve))
       .sort((a, b) => aircraftPrice(b) - aircraftPrice(a))[0];
-    if (pick) buyAircraft(db, c.id, pick.icao, hubs[Math.floor(rand() * hubs.length)]!, at);
+    if (pick) assignAiLine(db, c.id, buyAircraft(db, c.id, pick.icao, hubs[Math.floor(rand() * hubs.length)]!, at), at);
   }
 }
 
