@@ -1,10 +1,11 @@
 // Lot FINANCE domain: monthly billing (pure planner + lazy idempotent runner), leases, rentals, loans. Like game.ts, nothing
 // here opens a transaction (callers use `tx`) and rule violations throw HttpError. The money still moves through game.ts `post`.
 import {
-  CLUB, LOAN_QUOTE_DOWN_PCTS, LOAN_QUOTE_MONTHS, LOAN_RATE, MONTHLY_RENTAL, PARKING_FEE_BY_SIZE, aircraftPrice, aircraftValue, loanOption,
-  type AircraftCategory, type FinanceCharge, type FinanceContract, type FinanceOverview, type FleetQuote, type LeaseOffer, type Ownership, type PurchaseResult,
+  CLUB, LOAN_QUOTE_DOWN_PCTS, LOAN_QUOTE_MONTHS, MONTHLY_RENTAL, PARKING_FEE_BY_SIZE, aircraftPrice, aircraftValue, loanOption, loanStep, planFacilityMonth,
+  type AircraftCategory, type FinanceCharge, type FinanceContract, type FinanceOverview, type FleetQuote, type LeaseOffer, type Ownership, type PlanFacility, type PurchaseResult,
 } from '@opc/shared';
 import { airports } from './catalog.ts';
+import { planRows, savePlanRows } from './facilities.ts';
 import { all, get, run, type Db } from './db.ts';
 import { applyBailout, startModeOf } from './start.ts';
 import {
@@ -32,11 +33,11 @@ export type Charge = { kind: string; amount: number; memo: string };
 /** Who is on the payroll: employees on a permanent contract (a temporary one is paid up front when it is booked). */
 /** `since`: the later of the contract start and the day the person was hired, so a starter crew granted at the upgrade is paid from the next month, never retroactively. */
 export type PlanStaff = { salary: number; since: number; ends_at: number | null };
-export type MonthPlan = { charges: Charge[]; contracts: PlanContract[]; ended: number[]; returned: number[]; owned: number[] };
+export type MonthPlan = { charges: Charge[]; contracts: PlanContract[]; facilities: PlanFacility[]; ended: number[]; returned: number[]; owned: number[] };
 
 /** What the month starting at `start` (UTC, the 1st) costs. Everything signed or bought before `start` is billed; things signed this month were paid at signing.
  *  Returns the new contract states without touching the input, so `GET /me/finance` can project several months with the same rules billing uses. */
-export function planMonth(start: number, contracts: PlanContract[], fleet: PlanAircraft[], staff: PlanStaff[] = []): MonthPlan {
+export function planMonth(start: number, contracts: PlanContract[], fleet: PlanAircraft[], staff: PlanStaff[] = [], facilities: PlanFacility[] = []): MonthPlan {
   const charges: Charge[] = [];
   const ended: number[] = [], returned: number[] = [], owned: number[] = [];
   const reg = (id: number): string => fleet.find((a) => a.id === id)?.registration ?? `#${id}`;
@@ -57,13 +58,11 @@ export function planMonth(start: number, contracts: PlanContract[], fleet: PlanA
       n.months_paid++;
       charges.push({ kind: 'lease_rent', amount: -n.monthly, memo: `${reg(c.aircraft_id)} monthly rental ${n.months_paid}` });
     } else if (c.kind === 'loan' && n.months_paid < (n.months ?? 0)) {
-      const interest = Math.round((n.principal * LOAN_RATE) / 12);
-      const last = n.months_paid + 1 === n.months;
-      const pay = last ? n.principal + interest : n.monthly;
-      n.principal = last ? 0 : Math.max(0, n.principal - (pay - interest));
+      const step = loanStep(n.principal, n.monthly, n.months_paid, n.months!);
+      n.principal = step.principal;
       n.months_paid++;
-      charges.push({ kind: 'loan_installment', amount: -pay, memo: `${reg(c.aircraft_id)} instalment ${n.months_paid}/${n.months}` });
-      if (last) { ended.push(n.id); owned.push(n.aircraft_id); }
+      charges.push({ kind: 'loan_installment', amount: -step.pay, memo: `${reg(c.aircraft_id)} instalment ${n.months_paid}/${n.months}` });
+      if (step.last) { ended.push(n.id); owned.push(n.aircraft_id); }
     }
     return n;
   });
@@ -78,16 +77,19 @@ export function planMonth(start: number, contracts: PlanContract[], fleet: PlanA
   // C7: payroll is its own charge. Whoever started before the 1st and has not left by it is paid for the month (the hiring premium covered the month they joined).
   const paid = staff.filter((p) => p.since < start && (p.ends_at === null || p.ends_at > start));
   if (paid.length > 0) charges.push({ kind: 'payroll', amount: -paid.reduce((t, p) => t + p.salary, 0), memo: `payroll ${paid.length} people` });
-  return { charges, contracts: next, ended, returned, owned };
+  // v3 facilities: rent, upkeep, instalments and the sale of maintenance of the buildings she holds (shared/facilities.ts), billed like everything else
+  const built = planFacilityMonth(start, facilities);
+  charges.push(...built.charges);
+  return { charges, contracts: next, facilities: built.rows, ended, returned, owned };
 }
 
-function planInputs(db: Db, companyId: number): { contracts: PlanContract[]; fleet: PlanAircraft[]; staff: PlanStaff[] } {
+function planInputs(db: Db, companyId: number, at: number): { contracts: PlanContract[]; fleet: PlanAircraft[]; staff: PlanStaff[]; facilities: PlanFacility[] } {
   const contracts = all<ContractRow>(db, "SELECT * FROM contracts WHERE company_id = ? AND status = 'active' ORDER BY id", companyId);
   const fleet = all<{ id: number; icao: string; registration: string | null; base: string | null; ownership: Ownership; value: number; acquired_at: number; busy: number }>(db,
     `SELECT a.*, EXISTS (SELECT 1 FROM flights f WHERE f.aircraft_id = a.id AND f.status = 'active') AS busy FROM aircraft a WHERE a.company_id = ? AND a.returned_at IS NULL ORDER BY a.id`, companyId)
     .map((a) => ({ id: a.id, registration: a.registration ?? `#${a.id}`, base: a.base, ownership: a.ownership, value: a.value, category: typeFor(db, companyId, a.icao).category, acquired_at: a.acquired_at, busy: !!a.busy }));
   const staff = all<PlanStaff>(db, "SELECT salary, MAX(starts_at, hired_at) AS since, ends_at FROM staff WHERE company_id = ? AND contract = 'cdi'", companyId);
-  return { contracts, fleet, staff };
+  return { contracts, fleet, staff, facilities: planRows(db, companyId, at) };
 }
 
 // ---------------------------------------------------------------- monthly billing (lazy, idempotent per company and UTC month)
@@ -107,9 +109,10 @@ export function runBilling(db: Db, companyId: number, now: number): number {
   for (const m of months.slice(-MAX_CATCHUP_MONTHS)) {
     if (run(db, 'INSERT INTO billing_runs (company_id, month, at) VALUES (?, ?, ?) ON CONFLICT DO NOTHING', companyId, m, now).changes === 0) continue;
     const at = monthStart(m);
-    const { contracts, fleet, staff } = planInputs(db, companyId);
-    const plan = planMonth(at, contracts, fleet, staff);
+    const { contracts, fleet, staff, facilities } = planInputs(db, companyId, at);
+    const plan = planMonth(at, contracts, fleet, staff, facilities);
     for (const c of plan.charges) post(db, companyId, at, c.kind, c.amount, c.memo);
+    savePlanRows(db, facilities, plan.facilities);
     for (const c of plan.contracts) {
       const before = contracts.find((x) => x.id === c.id)!;
       if (c.months_paid !== before.months_paid || c.principal !== before.principal) run(db, 'UPDATE contracts SET months_paid = ?, principal = ? WHERE id = ?', c.months_paid, c.principal, c.id);
@@ -165,7 +168,7 @@ export function signLease(db: Db, companyId: number, o: { offerId: string; month
   const term = offer.durations.find((d) => d.months === o.months);
   if (!term) throw new HttpError(422, 'invalid_term', `this offer runs ${offer.durations.map((d) => d.months).join(', ')} months`);
   if (!hasHub(db, companyId, o.hub)) throw new HttpError(422, 'not_a_hub', `${o.hub} is not one of your hubs`);
-  assertHubSpot(db, companyId, o.hub);
+  assertHubSpot(db, companyId, o.hub, now);
   const type = typeFor(db, companyId, offer.icao);
   const first = term.monthlyRent + offer.deposit + offer.ferryFee;
   const missing = first - balanceOf(db, companyId);
@@ -267,14 +270,15 @@ export const rentMonthly = (db: Db, companyId: number, hub: string, icao: string
 const UPCOMING_MONTHS = 3;
 
 export function overview(db: Db, companyId: number, now: number): FinanceOverview {
-  const { contracts, fleet, staff } = planInputs(db, companyId);
+  const { contracts, fleet, staff, facilities } = planInputs(db, companyId, now);
   const upcoming: FinanceCharge[] = [];
-  let state = contracts;
+  let state = contracts, buildings = facilities;
   for (let i = 1; i <= UPCOMING_MONTHS; i++) {
     const at = addMonths(now, i);
-    const plan = planMonth(at, state, fleet, staff);
+    const plan = planMonth(at, state, fleet, staff, buildings);
     for (const c of plan.charges) upcoming.push({ at, kind: c.kind, amount: c.amount, memo: c.memo });
     state = plan.contracts.filter((c) => !plan.ended.includes(c.id));
+    buildings = plan.facilities;
   }
   const regs = new Map(fleet.map((a) => [a.id, a]));
   const icaos = new Map(all<{ id: number; icao: string }>(db, 'SELECT id, icao FROM aircraft WHERE company_id = ?', companyId).map((a) => [a.id, a.icao]));

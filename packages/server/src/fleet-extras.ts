@@ -1,10 +1,11 @@
 // Aircraft-level finance rules that game.ts (fleet view, flight settlement, purchases) needs. A leaf module: it never imports
 // game.ts values, so game.ts can depend on it without a cycle. The contract/lease/loan/billing logic lives in finance.ts.
 import {
-  MAINTENANCE_HOURS, PARKING_SPOTS_PER_HUB, WEAR_AFTER_MAINTENANCE_PCT, WEAR_THRESHOLD_PCT, wearAfter,
+  MAINTENANCE_HOURS, WEAR_AFTER_MAINTENANCE_PCT, WEAR_THRESHOLD_PCT, wearAfter,
   type AircraftCategory, type AircraftContract, type ContractKind, type FleetAircraftFinance, type Ownership, type Settlement,
 } from '@opc/shared';
 import { all, get, run, type Db } from './db.ts';
+import { hangarEffectFor, hubCapacity } from './facilities.ts';
 import { wearEnabled } from './realism.ts';
 import { HttpError } from './http.ts';
 import { nextRegistration } from './registrations.ts';
@@ -33,14 +34,16 @@ export const isHuman = (db: Db, companyId: number): boolean => !!get(db, 'SELECT
 export const hubUsed = (db: Db, companyId: number, hub: string): number =>
   get<{ n: number }>(db, "SELECT COUNT(*) AS n FROM aircraft WHERE company_id = ? AND base = ? AND returned_at IS NULL AND ownership IN ('owned','leased','financed')", companyId, hub)!.n;
 
-export const hubSpots = (db: Db, companyId: number): { icao: string; spots: number; used: number }[] =>
+/** A hub has the airport's PARKING_SPOTS_PER_HUB spots, plus the aircraft each of the company's hangars there houses (v3 facilities). */
+export const hubSpots = (db: Db, companyId: number, at: number): { icao: string; spots: number; used: number }[] =>
   all<{ icao: string }>(db, 'SELECT icao FROM hubs WHERE company_id = ? ORDER BY icao', companyId)
-    .map((h) => ({ icao: h.icao, spots: PARKING_SPOTS_PER_HUB, used: hubUsed(db, companyId, h.icao) }));
+    .map((h) => ({ icao: h.icao, spots: hubCapacity(db, companyId, h.icao, at), used: hubUsed(db, companyId, h.icao) }));
 
 /** 409 hub_full when the hub has no free spot. AI companies are not capped (their fleet size has its own limit). */
-export function assertHubSpot(db: Db, companyId: number, hub: string): void {
+export function assertHubSpot(db: Db, companyId: number, hub: string, at: number): void {
   if (!isHuman(db, companyId)) return;
-  if (hubUsed(db, companyId, hub) >= PARKING_SPOTS_PER_HUB) throw new HttpError(409, 'hub_full', `${hub} has no free parking spot (${PARKING_SPOTS_PER_HUB} of ${PARKING_SPOTS_PER_HUB} taken)`);
+  const spots = hubCapacity(db, companyId, hub, at), used = hubUsed(db, companyId, hub);
+  if (used >= spots) throw new HttpError(409, 'hub_full', `${hub} has no free parking spot (${used} of ${spots} taken)`);
 }
 
 /** The one place an aircraft row is created: it always gets a registration, an owner type and its base. */
@@ -89,7 +92,9 @@ export function accrueWear(db: Db, companyId: number, aircraftId: number, catego
   if (!a) return;
   const wear = wearAfter(a.wear_pct, category, hours);
   if (wear >= WEAR_THRESHOLD_PCT) {
-    run(db, "UPDATE aircraft SET wear_pct = ?, status = 'maintenance', maintenance_until = ? WHERE id = ?", wear, at + MAINTENANCE_HOURS[category] * HOUR, aircraftId);
+    // a hangar at the aircraft's base halves the time in the workshop (v3 facilities)
+    const downtime = MAINTENANCE_HOURS[category] * HOUR * (hangarEffectFor(db, aircraftId, category, at)?.downtimeFactor ?? 1);
+    run(db, "UPDATE aircraft SET wear_pct = ?, status = 'maintenance', maintenance_until = ? WHERE id = ?", wear, at + Math.round(downtime), aircraftId);
   } else {
     run(db, 'UPDATE aircraft SET wear_pct = ? WHERE id = ?', wear, aircraftId);
   }
@@ -101,7 +106,7 @@ export type FlightCosts = { settlement: Settlement; fuelKind: 'fuel' | 'club_hou
 
 /** Club and monthly-rental aircraft: the hourly rate replaces fuel and maintenance (it is booked in the `fuelCost` column and as ledger kind `club_hours`).
  *  A lease with maintenance included pays no maintenance. Everything else settles as before. */
-export function flightCosts(db: Db, aircraftId: number, blockHours: number, s: Settlement): FlightCosts {
+function contractCosts(db: Db, aircraftId: number, blockHours: number, s: Settlement): FlightCosts {
   const c = get<ContractRow>(db, "SELECT * FROM contracts WHERE aircraft_id = ? AND status = 'active'", aircraftId);
   if (!c) return { settlement: s, fuelKind: 'fuel' };
   if (c.kind === 'club' || c.kind === 'rental') {
@@ -112,4 +117,13 @@ export function flightCosts(db: Db, aircraftId: number, blockHours: number, s: S
     return { settlement: { ...s, maintenance: 0, net: s.revenue - s.fuelCost - s.landingFee }, fuelKind: 'fuel' };
   }
   return { settlement: s, fuelKind: 'fuel' };
+}
+
+/** `contractCosts`, then the hangar of the aircraft's base takes its share off what maintenance is still charged (B.4: -35 %, less when short of technicians). */
+export function flightCosts(db: Db, aircraftId: number, blockHours: number, s: Settlement, category: AircraftCategory, at: number): FlightCosts {
+  const r = contractCosts(db, aircraftId, blockHours, s);
+  const fx = r.settlement.maintenance > 0 ? hangarEffectFor(db, aircraftId, category, at) : null;
+  if (!fx) return r;
+  const maintenance = Math.round(r.settlement.maintenance * (1 - fx.discount));
+  return { ...r, settlement: { ...r.settlement, maintenance, net: r.settlement.net + r.settlement.maintenance - maintenance } };
 }

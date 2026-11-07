@@ -21,9 +21,11 @@ export const MAX_CUSTOM_AIRCRAFT = 20;
 export const MAX_PENDING_IMPORTS = 25;
 export const IMPORT_TTL_MS = 7 * 24 * 3_600_000;
 // Net worth = cash + aircraft owned or financed (not leased, club or rented) + refundable lease deposits - remaining loan principal (a financed aircraft counts at full value, so the debt must come off).
+// Buildings count the same way: a purchased one at its resale value, a leased one for its deposit, less the credit left.
 const NET_WORTH_SQL = `c.balance + COALESCE((SELECT SUM(value) FROM aircraft WHERE company_id = c.id AND returned_at IS NULL AND ownership IN ('owned','financed')), 0)
   + COALESCE((SELECT SUM(deposit) FROM contracts WHERE company_id = c.id AND status = 'active'), 0)
-  - COALESCE((SELECT SUM(principal) FROM contracts WHERE company_id = c.id AND status = 'active' AND kind = 'loan'), 0)`;
+  - COALESCE((SELECT SUM(principal) FROM contracts WHERE company_id = c.id AND status = 'active' AND kind = 'loan'), 0)
+  + COALESCE((SELECT SUM(value + deposit - principal) FROM facility_contracts WHERE company_id = c.id AND status = 'active'), 0)`;
 export const SB_PREFIX = 'sb-';
 /** Id prefix of the private job made when the player takes over a line rotation (lines.ts). */
 export const LINE_JOB_PREFIX = 'ln-';
@@ -141,7 +143,7 @@ export function buyAircraft(db: Db, companyId: number, icao: string, hub: string
   const price = aircraftPrice(t);
   const human = isHuman(db, companyId);
   const ferry = human ? ferryFee(price) : 0;
-  assertHubSpot(db, companyId, hub);
+  assertHubSpot(db, companyId, hub, now);
   const loan = financing ? loanOption(price, ferry, financing.downPct, financing.months) : null;
   const upfront = loan ? loan.dueToday : price + ferry;
   const balance = get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId)?.balance ?? 0;
@@ -359,7 +361,7 @@ export function finishFlight(db: Db, f: FlightRow, status: 'verified' | 'unverif
     destSize: airports.get(f.destination)?.size ?? 'small', destIsHub: hasHub(db, f.company_id, f.destination), ...measured,
     ...realismModifiers(realism.toggles),
     ...(realism.toggles.realFuelPrice ? { fuelPriceFactor: fuelPriceFactor(f.origin, f.accepted_at) } : {}),
-  }));
+  }), type.category, at);
   run(db, `UPDATE flights SET status = ?, completed_at = ?, season = ?, revenue = ?, fuel_cost = ?, landing_fee = ?, maintenance = ?, net = ?, telemetry = ? WHERE id = ?`,
     status, at, seasonOf(at), s.revenue, s.fuelCost, s.landingFee, s.maintenance, s.net, t ? JSON.stringify(t) : null, f.id);
   run(db, 'UPDATE aircraft SET location = ? WHERE id = ?', f.destination, f.aircraft_id);

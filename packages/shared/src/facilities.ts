@@ -230,8 +230,6 @@ export type FacilityContractView = {
   id: number; kind: FacilityContractKind; startedAt: number; months: number | null; monthsPaid: number;
   /** Lease: the rent. Purchase: the loan instalment (0 when paid in cash). */
   monthly: number; upkeep: number; deposit: number; price: number; principal: number; noticeMonths: number;
-  /** Lease: the first instant the lease can be ended (the last `noticeMonths` of the firm term); null for a purchase. */
-  exitFrom: number | null;
   /** Since when the building has worked at its present level. */
   levelSince: number;
 };
@@ -280,7 +278,7 @@ export type HubOverview = {
   monthlyCost: number;
   team: { total: number; byFamily: Partial<Record<StaffFamily, number>> };
   aircraft: { id: number; reg: string; icao: string; typeName: string; status: string; location: string; maintenanceUntil: number | null }[];
-  /** Leases whose firm term ends within RENEWAL_WINDOW_DAYS. */
+  /** Leases whose 36-month term (it then renews month by month) ends within RENEWAL_WINDOW_DAYS. */
   renewals: { facilityId: number; name: string; before: number }[];
   parking: HubParking;
 };

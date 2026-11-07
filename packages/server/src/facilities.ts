@@ -75,7 +75,7 @@ export const hubCapacity = (db: Db, companyId: number, hub: string, at: number):
 
 // ---------------------------------------------------------------- offices: workstations for the people who are not on a flight
 
-/** Non-flying staff of the base (ground, administration, maintenance, kitchen) who are employed or hired: each needs a workstation. */
+/** Ground agents and administrators of the base who are employed or hired: each needs a workstation. */
 export const seatsUsed = (db: Db, companyId: number, base: string, at: number): number =>
   get<{ n: number }>(db, `SELECT COUNT(*) AS n FROM staff WHERE company_id = ? AND base = ? AND family IN (${DESK_FAMILIES.map(() => '?').join(',')}) AND (ends_at IS NULL OR ends_at > ?)`, companyId, base, ...DESK_FAMILIES, at)!.n;
 export const seatCapacity = (db: Db, companyId: number, base: string, at: number): number =>
