@@ -61,7 +61,7 @@ async function sheet(ctx: Ctx, d: StaffDetail, overview: Awaited<ReturnType<type
   // ------------------------------------------------------------ header
   const names = m.quals.map(typeName).join(' · ');
   const tenure = monthsSince(m.hiredAt, now);
-  const stateLine = m.endsAt !== null ? t('st.m.leaving') : facts.onDuty ? `${t('st.m.onDuty', { at: fm.zulu(facts.startedAt!) })}${nearLimit ? ` · ${t('st.m.nearLimit')}` : ''}` : t(`st.m.state.${m.state}` as Key);
+  const stateLine = m.endsAt !== null ? t('st.m.leaving') : facts.onDuty ? `${t('st.m.onDuty', { at: fm.zulu(facts.startedAt!) })}${nearLimit ? ` · ${t('st.m.nearLimit')}` : ''}` : m.state === 'pending' ? t('st.arrives', { date: fm.date(m.startsAt) }) : t(`st.m.state.${m.state}` as Key);
   const header = h('div', { class: 'st-sheet-head' },
     h('div', { class: 'col tight' },
       h('div', { class: 'row' }, signLocation(base), h('span', { class: 'dim small' }, t('st.m.crumb', { family: famLabel(m.family), city: base }))),

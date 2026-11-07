@@ -146,7 +146,7 @@ function sidePanel(data: StaffOverview, v: VisibleRow | null, goHire: (v: Visibl
         w.staffId ? h('button', { type: 'button', class: 'link-btn', onclick: () => go(hashFor('staff', w.staffId)) }, t('st.side.sheet', { name: w.name })) : null)))));
 
   const arriving = row?.arriving ?? [];
-  const arrivals = arriving.length > 0 ? h('section', { 'aria-labelledby': 'st-arrivals' }, h('h3', { class: 'ln-sub-title', id: 'st-arrivals' }, t('st.side.arrivals', { type: row?.label ?? '' })),
+  const arrivals = arriving.length > 0 ? h('section', { 'aria-labelledby': 'st-arrivals' }, h('h3', { class: 'ln-sub-title', id: 'st-arrivals' }, t('st.side.arrivals', { type: row ? rowLabel(row) : '' })),
     h('ul', { class: 'plain st-members' }, arriving.map((a) => h('li', null, h('button', { type: 'button', class: 'link-btn', onclick: () => go(hashFor('staff', a.id)) }, `${a.name} · ${t(`st.role.${a.role}` as Key)}`),
       h('span', { class: 'dim small st-arrives' }, ` · ${t('st.arrives', { date: fm.date(a.startsAt) })}`))))) : null;
   const people = members.length > 0 ? h('section', { 'aria-labelledby': 'st-members' }, h('h3', { class: 'ln-sub-title', id: 'st-members' }, t('st.side.members', { type: row?.label ?? '' })),
