@@ -1,14 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import type { Blocker, DutyBlock, FamilyRow, LeaveRequest, PolicyOption } from './api-staff.ts';
+import type { Arrival, Blocker, DutyBlock, FamilyRow, LeaveRequest, PolicyOption } from './api-staff.ts';
+import { translate, translatePlural } from './i18n.ts';
 import {
   absentOn, availabilitySegments, blockerOf, chartDay, dayBars, dayColumns, defaultExpanded, defaultRow, dutyDays, dutyFacts, dutyPeriods, emptyRows, firstProblem, ganttOf, interimPrice, keepSelection, limitMeters,
-  loadMeter, meanSalary, medicalState, membersOf, monthSpan, monthsSince, moraleLevel, moveCell, pendingRequests, plannedHours, policyPreview, presetFor, requestImpact, rowBadge, service7dMin, shortDays,
+  loadMeter, nextArrival, meanSalary, medicalState, membersOf, monthSpan, monthsSince, moraleLevel, moveCell, pendingRequests, plannedHours, policyPreview, presetFor, requestImpact, rowBadge, service7dMin, shortDays,
   startsAt, stepMember, toggleAll, trainingOffers, unblocks, visibleRows, worst,
 } from './staff-view.ts';
 
-const avail = (o: Partial<FamilyRow['availability']> = {}): FamilyRow['availability'] => ({ onDuty: 0, resting: 0, leave: 0, training: 0, free: 0, vacant: 0, ...o });
-const row = (o: Partial<FamilyRow> = {}): FamilyRow => ({ family: 'pilot', label: 'Pilotes', headcount: 8, need: 8, availability: avail({ onDuty: 8 }), salaries: 59_400, note: null, ...o });
+const avail = (o: Partial<FamilyRow['availability']> = {}): FamilyRow['availability'] => ({ onDuty: 0, resting: 0, leave: 0, training: 0, free: 0, pending: 0, vacant: 0, ...o });
+const row = (o: Partial<FamilyRow> = {}): FamilyRow => ({ family: 'pilot', label: 'Pilotes', headcount: 8, need: 8, availability: avail({ onDuty: 8 }), arriving: [], salaries: 59_400, note: null, ...o });
 const atr = row({ type: 'AT76', label: 'ATR 72', headcount: 13, need: 14, note: 'Lefèvre · 12 h 10 sur 13 h', members: [{ id: 1, name: 'Perrin', role: 'captain' }, { id: 2, name: 'Lefèvre', role: 'fo' }] });
 const a220 = row({ type: 'BCS3', label: 'A220', members: [{ id: 3, name: 'Vidal', role: 'captain' }] });
 const crj = row({ type: 'CRJ7', label: 'CRJ', headcount: 2, need: 4, availability: avail({ resting: 1, leave: 1, vacant: 2 }) });
@@ -53,6 +54,40 @@ test('families that need attention open on arrival; "Tout dérouler" opens all, 
 test('the availability bar has one segment per state that has people', () => {
   assert.deepEqual(availabilitySegments(avail({ onDuty: 8, free: 2, resting: 9, leave: 4, training: 2 })).map((s) => `${s.kind}:${s.count}`), ['duty:8', 'free:2', 'rest:9', 'leave:4', 'training:2']);
   assert.deepEqual(availabilitySegments(avail()), []);
+});
+
+const arrival = (id: number, startsAt: number, role: Arrival['role'] = 'captain'): Arrival => ({ id, name: `Pilote ${id}`, role, startsAt });
+const NOV_14 = Date.UTC(2026, 10, 14, 12), NOV_16 = Date.UTC(2026, 10, 16, 12);
+/** Chloé's live pilots row: 12 posts, nobody working yet, 10 hires in notice. */
+const hired = row({ headcount: 0, need: 12, availability: avail({ pending: 10, vacant: 2 }), arriving: Array.from({ length: 10 }, (_, i) => arrival(i + 1, i < 9 ? NOV_14 : NOV_16)), note: '2 vacant' });
+
+test('the availability bar shows hires in notice as their own segment, between the working states and the vacant posts', () => {
+  assert.deepEqual(availabilitySegments(hired.availability).map((s) => `${s.kind}:${s.count}`), ['pending:10', 'vacant:2']);
+  assert.deepEqual(availabilitySegments(avail({ onDuty: 3, free: 1, pending: 4, vacant: 2 })).map((s) => `${s.kind}:${s.count}`), ['duty:3', 'free:1', 'pending:4', 'vacant:2']);
+});
+
+test('a row whose missing people are all in notice is complete on the day the last one needed starts; one still short stays missing', () => {
+  assert.deepEqual(rowBadge(row({ headcount: 0, need: 10, availability: avail({ pending: 10 }), arriving: hired.arriving }), []), { tone: 'warn', kind: 'arriving', at: NOV_16 });
+  assert.deepEqual(rowBadge(row({ headcount: 8, need: 9, availability: avail({ onDuty: 8, pending: 2 }), arriving: [arrival(1, NOV_14), arrival(2, NOV_16)] }), []), { tone: 'warn', kind: 'arriving', at: NOV_14 }, 'one is enough: the second is a spare');
+  assert.deepEqual(rowBadge(row({ headcount: 0, need: 12, availability: avail({ pending: 10, vacant: 2 }), arriving: hired.arriving, note: '2 vacant' }), []), { tone: 'warn', kind: 'note', note: '2 vacant' });
+  assert.deepEqual(rowBadge(row({ headcount: 0, need: 12, availability: avail({ pending: 10, vacant: 2 }), arriving: hired.arriving }), []), { tone: 'warn', kind: 'missing', n: 2 });
+  assert.deepEqual(rowBadge(row({ headcount: 8, need: 8, availability: avail({ onDuty: 8, pending: 1 }), arriving: [arrival(1, NOV_14)] }), []), { tone: 'ok', kind: 'complete' }, 'a spare changes nothing');
+});
+
+test('the next arrival is the earliest start over the families, null when nobody is in notice', () => {
+  assert.equal(nextArrival([hired, row({ family: 'cabin', arriving: [arrival(30, NOV_14 - 86_400_000, 'attendant')] })]), NOV_14 - 86_400_000);
+  assert.equal(nextArrival([row(), cabin]), null);
+});
+
+test('the notice labels read in both languages', () => {
+  const day = '14 nov.';
+  assert.equal(translate('fr', 'st.arrives', { date: day }), 'Arrive le 14 nov.');
+  assert.equal(translate('en', 'st.arrives', { date: day }), 'Arrives 14 nov.');
+  assert.equal(translate('fr', 'st.have.arriving', { n: 10 }), '+10 en préavis');
+  assert.equal(translate('fr', 'st.avail.pending', { n: 10 }), '10 en préavis');
+  assert.equal(translate('fr', 'st.b.arriving', { date: day }), 'Complet le 14 nov.');
+  assert.equal(translatePlural('fr', 'st.ov.arriving', 18, { date: day }), '18 recrues en préavis, arrivent dès le 14 nov.');
+  assert.equal(translatePlural('en', 'st.ov.arriving', 1, { date: day }), '1 hire in notice, arriving 14 nov.');
 });
 
 test('the side panel opens on the type that blocks, else the family that does, else the first row', () => {

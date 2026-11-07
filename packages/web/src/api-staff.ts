@@ -1,9 +1,10 @@
+import type { Arrival, FamilyRow as WireFamilyRow, StaffOverview as WireStaffOverview } from '@opc/shared';
 import { api } from './api.ts';
 import { ApiError } from './errors.ts';
 
 /**
  * Typed client for the STAFF section of docs/v3-plan.md (B.3).
- * The wire types are declared here until lot S2's `shared/src/staff.ts` is merged: they are that file's types field for field (read from S2's working copy), so switching is an import change. The few optional fields F2 asks S2 for are marked and listed in "Implementation notes (F2)".
+ * The wire types are declared here as lot S2's `shared/src/staff.ts` has them, except what the screens ask of S2 on top (`poolCount`, `members`, `CoverageRow.type`, see "Implementation notes (F2)"); the overview and its rows are extended from `@opc/shared`, so what the server adds to them reaches the screens.
  * A route the server does not have answers 404/405: `null` means "feature off", any other failure still throws.
  * Days are ISO dates (`2026-11-06`, UTC); instants are epoch milliseconds; durations are minutes unless the name says hours.
  */
@@ -32,20 +33,12 @@ export type DutyRule = 'busy' | 'rest' | 'daily' | 'flight28' | 'flight12' | 'we
 
 /** F2 asks the server for these two optional fields (see the implementation notes): without them the sheet has no previous/next member and the leave rows of the pilots cannot hire a temp. */
 export type MemberRef = { id: number; name: string; role: StaffRole };
-export type FamilyRow = {
-  family: StaffFamily; label: string;
-  /** The aircraft type of a child row of the pilots. */
-  type?: string;
-  headcount: number; need: number;
-  availability: { onDuty: number; resting: number; leave: number; training: number; free: number; vacant: number };
-  salaries: number; note: string | null; children?: FamilyRow[];
-  /** Asked of S2: the named people of a row (a pilot type), in the order the member sheet steps through them. */
-  members?: MemberRef[];
-};
+export type { Arrival };
+export type FamilyRow = Omit<WireFamilyRow, 'children'> & { children?: FamilyRow[]; members?: MemberRef[] };
 /** Today's flights cancelled for want of crew: `family` is what ran short (null when unknown), `type` the aircraft type. */
 export type Blocker = { kind: 'no_crew' | 'duty_limit'; family: 'pilot' | 'cabin' | null; type: string; flights: number };
 export type WatchItem = { staffId: number; name: string; family: StaffFamily; reason: 'fatigue' | 'duty'; value: number; detail: string };
-export type StaffOverview = { people: number; positions: number; payroll: number; policy: RestPolicy; families: FamilyRow[]; blockers: Blocker[]; watch: WatchItem[] };
+export type StaffOverview = Omit<WireStaffOverview, 'families'> & { families: FamilyRow[] };
 
 export type StaffDetail = {
   member: StaffMember; duty: DutyState; week: DutyBlock[];

@@ -211,7 +211,7 @@ export type DutyBlock = { flightNo: string; dep: number; arr: number; origin: st
 
 /** A hire in notice: signed and paid for, on the roster, but not working before `startsAt`. */
 export type Arrival = { id: number; name: string; role: StaffRole; startsAt: number };
-/** `headcount`: people working now (what the crew check can use). `availability.pending` and `arriving`: hires in notice, who already fill a post, so `vacant` = `need` - `headcount` - `pending`. */
+/** `headcount`: people working now (what the crew check can use). `availability.pending` and `arriving` (soonest first): hires in notice, who already fill a post, so `vacant` = `need` - `headcount` - `pending`. */
 export type FamilyRow = {
   family: StaffFamily; label: string;
   /** The aircraft type of a child row of the pilots. */

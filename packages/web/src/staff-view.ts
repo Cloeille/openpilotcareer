@@ -69,9 +69,10 @@ export type RowBadge =
   | { tone: 'bad'; kind: 'none' }
   | { tone: 'warn'; kind: 'note'; note: string }
   | { tone: 'warn'; kind: 'missing'; n: number }
+  | { tone: 'warn'; kind: 'arriving'; at: number }
   | { tone: 'ok'; kind: 'complete' };
 
-/** The state of a row, said once: a blocker (red), a note or a missing person (amber), or complete. */
+/** The state of a row, said once: a blocker (red), a note or a missing person (amber), hires still in notice who fill the rest (amber), or complete. */
 export function rowBadge(row: FamilyRow, blockers: readonly Blocker[]): RowBadge {
   const blocking = blockers.filter((b) => blocksRow(b, row));
   if (blocking.length > 0) {
@@ -79,7 +80,10 @@ export function rowBadge(row: FamilyRow, blockers: readonly Blocker[]): RowBadge
     return { tone: 'bad', kind: 'blocks', flights: blocking.reduce((n, b) => n + b.flights, 0) };
   }
   if (row.note) return { tone: 'warn', kind: 'note', note: row.note };
-  if (row.headcount < row.need) return { tone: 'warn', kind: 'missing', n: row.need - row.headcount };
+  const short = row.need - row.headcount;
+  if (short > row.availability.pending) return { tone: 'warn', kind: 'missing', n: short - row.availability.pending };
+  // every post is filled once the hires in notice have started: the row is complete on the day the last one needed does
+  if (short > 0) return { tone: 'warn', kind: 'arriving', at: row.arriving[short - 1]!.startsAt };
   return { tone: 'ok', kind: 'complete' };
 }
 
@@ -103,13 +107,19 @@ export const toggleAll = (families: readonly FamilyRow[], expanded: ReadonlySet<
   return all.every((k) => expanded.has(k)) ? new Set() : new Set(all);
 };
 
-export type AvailabilityKind = 'duty' | 'free' | 'rest' | 'leave' | 'training' | 'vacant';
+export type AvailabilityKind = 'duty' | 'free' | 'rest' | 'leave' | 'training' | 'pending' | 'vacant';
 export type AvailabilitySegment = { kind: AvailabilityKind; count: number };
-/** The bar of "Disponibilité maintenant": one segment per state that has people; each is as wide as its count. */
+/** The bar of "Disponibilité maintenant": one segment per state that has people; each is as wide as its count. Hires in notice come before the vacant posts: they fill a post but do not work yet. */
 export function availabilitySegments(a: FamilyRow['availability']): AvailabilitySegment[] {
-  const all: AvailabilitySegment[] = [{ kind: 'duty', count: a.onDuty }, { kind: 'free', count: a.free }, { kind: 'rest', count: a.resting }, { kind: 'leave', count: a.leave }, { kind: 'training', count: a.training }, { kind: 'vacant', count: a.vacant }];
+  const all: AvailabilitySegment[] = [{ kind: 'duty', count: a.onDuty }, { kind: 'free', count: a.free }, { kind: 'rest', count: a.resting }, { kind: 'leave', count: a.leave }, { kind: 'training', count: a.training }, { kind: 'pending', count: a.pending }, { kind: 'vacant', count: a.vacant }];
   return all.filter((s) => s.count > 0);
 }
+
+/** When the first hire in notice of the families starts (each family lists its own soonest first); null when nobody is arriving. */
+export const nextArrival = (families: readonly Pick<FamilyRow, 'arriving'>[]): number | null => {
+  const firsts = families.flatMap((f) => (f.arriving[0] ? [f.arriving[0].startsAt] : []));
+  return firsts.length === 0 ? null : Math.min(...firsts);
+};
 
 /** The row the side panel opens on: the first type or family that blocks flights (types first, they say which), else the first row. */
 export function defaultRow(rows: readonly VisibleRow[], blockers: readonly Blocker[]): string | null {

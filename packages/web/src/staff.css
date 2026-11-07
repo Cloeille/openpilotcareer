@@ -42,7 +42,8 @@
 .st-fam { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .st-row.child .st-fam { padding-left: 26px; }
 .st-chev-gap { width: 16px; flex: none; }
-.st-count { display: flex; align-items: baseline; justify-content: flex-end; gap: 5px; }
+.st-count { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: flex-end; gap: 0 5px; }
+.st-incoming { flex-basis: 100%; text-align: right; color: var(--info); white-space: nowrap; }
 .st-have { font: 500 22px/1.1 var(--display); font-variant-numeric: tabular-nums; }
 .st-have.child { font: 500 15px var(--ui); }
 .st-avail { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
@@ -53,6 +54,7 @@
 .st-seg.rest { background: #ECEAE580; }
 .st-seg.leave { background: #ECEAE533; }
 .st-seg.training { border: 1px solid #ECEAE599; }
+.st-seg.pending { background: var(--info-soft); border: 1px dashed var(--info); }
 .st-seg.vacant { background: var(--warning-soft); border: 1px solid var(--warning); }
 .st-seg.blocks { background: var(--danger-soft); border: 1px solid var(--danger); }
 .st-seg.sw { width: 14px; height: 8px; flex: none; }
