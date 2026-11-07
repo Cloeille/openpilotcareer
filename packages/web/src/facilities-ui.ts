@@ -34,3 +34,6 @@ export function statusText(holding: Holding, ownerName?: string): string {
 
 /** The owner a holding is drawn as. */
 export const ownerOfHolding = (holding: Holding): Owner => (holding === 'leased' || holding === 'owned' ? 'player' : holding === 'available' ? 'available' : holding === 'ai' ? 'ai' : 'airport');
+
+/** The building the plan opens on when the player came from a row of the overview. Read once by the plan. */
+export const planFocus: { slot: string | null } = { slot: null };

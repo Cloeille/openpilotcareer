@@ -2172,6 +2172,7 @@ const table = {
   'fc.f.chief': ['Base chief', 'Chef de base'],
   'fc.f.team': ['Team based', 'Équipe basée'],
   'fc.sug.title': ['Open a base at {city}', 'Ouvrir une base à {city}'],
+  'fc.sug.fromLabel': ['Suggested base', 'Base suggérée'],
   'fc.sug.from': ['from {amount} / month', 'dès {amount} / mois'],
   'fc.sug.open': ['Look into it', 'Étudier l’ouverture'],
   'fc.hint.base': ['Switch base', 'Changer de base'],
