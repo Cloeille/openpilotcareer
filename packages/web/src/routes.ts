@@ -11,7 +11,7 @@ import { custom } from './screens/custom.ts';
 import { fleet } from './screens/fleet.ts';
 import { flightDetail } from './screens/flight.ts';
 import { history } from './screens/history.ts';
-import { hubs } from './screens/hubs.ts';
+import { hubsOverview } from './screens/hubs-overview.ts';
 import { manual } from './screens/manual.ts';
 import { jobDetail } from './screens/job.ts';
 import { newCompany } from './screens/new-company.ts';
@@ -34,7 +34,7 @@ export const routes: Record<Tab, ScreenFn> & Record<string, ScreenFn> = {
   jobs,
   job: jobDetail,
   simbrief,
-  fleet, catalogue, buy, hubs, custom, company: newCompany,
+  fleet, catalogue, buy, hubs: hubsOverview, custom, company: newCompany,
   lease,
   history, flight: flightDetail, manual,
   leaderboard, duel: duelScreen, 'company-sheet': companySheet, recap,

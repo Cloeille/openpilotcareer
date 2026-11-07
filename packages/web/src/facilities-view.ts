@@ -1,55 +1,46 @@
-import { loanOption, LOAN_QUOTE_MONTHS } from '@opc/shared';
 import type { StaffFamily } from '@opc/shared';
-import type { FacilityDetail, FacilityKind, FacilityRow, Financing, Hold, LevelInfo, PlanBuilding, PurchaseTerms, RequiredRole, StaffNeed } from './api-facilities.ts';
+import type { Building, FacilityDetail, FacilityKind, FacilityLevelInfo, FacilityOwner, FacilityPurchase, FacilityView, Hold } from './api-facilities.ts';
 import type { IconName } from './icons.ts';
 import type { Key } from './messages.ts';
 
-/** Pure rules behind the FACILITIES screens: what a row says, what a contract costs, which building is next. The DOM lives in the screens. */
+/** Pure rules behind the FACILITIES screens: what a row says, which level can be picked, which building is next. The DOM lives in the screens. */
 
-export const KIND_ICON: Record<FacilityKind, IconName> = { maintenance: 'wrench', terminal: 'door-open', cargo: 'package', office: 'building-2', parking: 'square-parking', airport: 'radio' };
-export const KIND_KEY: Record<FacilityKind, Key> = {
-  maintenance: 'fc.kind.maintenance', terminal: 'fc.kind.terminal', cargo: 'fc.kind.cargo', office: 'fc.kind.office', parking: 'fc.kind.parking', airport: 'fc.kind.airport',
-};
-/** The filter chips of the plan, in the mockup's order. */
+export const KIND_ICON: Record<FacilityKind, IconName> = { maintenance: 'wrench', terminal: 'door-open', cargo: 'package', office: 'building-2', airport: 'radio' };
+/** The filter chips of the plan, in the mockup's order. `parking` is the hub's stands, not a facility. */
 export const FILTERS = ['all', 'maintenance', 'terminal', 'cargo', 'office', 'parking'] as const;
 
-/** B.4: a rented facility has the same effects as a bought one, so the effect is a property of the kind. Mirrors S3's constants until `shared/src/facilities.ts` is merged. */
-export const EFFECT = { maintenanceCostPct: 35, downtimeFactor: 0.5 } as const;
+/** What a hangar does to the aircraft based at its hub, whatever its level (S3: HANGAR_MAINTENANCE_DISCOUNT; swap for the shared constant once S3 is merged). */
+export const MAINTENANCE_DISCOUNT_PCT = 35;
 
 // ---------------------------------------------------------------- what a row says
 
-export type Holding = 'leased' | 'owned' | 'available' | 'ai' | 'fee' | 'airport';
+export type Holding = 'leased' | 'owned' | 'available' | 'ai' | 'airport';
 
-/** How the player stands with a building. A terminal of the airport that bills a passenger fee is `fee`. */
-export function holdingOf(f: Pick<FacilityRow, 'owner' | 'hold' | 'kind' | 'monthly'>): Holding {
+/** How the player stands with a building. */
+export function holdingOf(f: Pick<FacilityView, 'owner' | 'contract'>): Holding {
   switch (f.owner) {
-    case 'player': return f.hold === 'purchase' ? 'owned' : 'leased';
+    case 'player': return f.contract?.kind === 'purchase' ? 'owned' : 'leased';
     case 'available': return 'available';
     case 'ai': return 'ai';
-    case 'airport': return f.kind === 'terminal' && f.monthly !== null ? 'fee' : 'airport';
+    case 'airport': return 'airport';
   }
 }
+/** The same for a building of the plan (`Building` has no contract; its `monthly` is what she pays, and an owned building is told by the facility screen). */
+export const holdingOfOwner = (owner: FacilityOwner, hold: Hold | null): Holding => holdingOf({ owner, contract: hold ? { kind: hold } as FacilityView['contract'] : null });
 
 export type Tone = 'plain' | 'accent' | 'dim';
-export const HOLDING_TONE: Record<Holding, Tone> = { leased: 'plain', owned: 'plain', available: 'accent', ai: 'dim', fee: 'plain', airport: 'dim' };
-export const HOLDING_KEY: Record<Holding, Key> = {
-  leased: 'fc.h.leased', owned: 'fc.h.owned', available: 'fc.h.available', ai: 'fc.h.ai', fee: 'fc.h.fee', airport: 'fc.h.airport',
-};
+export const HOLDING_TONE: Record<Holding, Tone> = { leased: 'plain', owned: 'plain', available: 'accent', ai: 'dim', airport: 'dim' };
+export const HOLDING_KEY: Record<Holding, Key> = { leased: 'fc.h.leased', owned: 'fc.h.owned', available: 'fc.h.available', ai: 'fc.h.ai', airport: 'fc.h.airport' };
 
-const HOLDING_ORDER: Holding[] = ['leased', 'owned', 'fee', 'ai', 'available', 'airport'];
+const HOLDING_ORDER: Holding[] = ['leased', 'owned', 'ai', 'available', 'airport'];
 /** How many facilities a hub card lists before the rest of the available ones go to the "also available" line. */
 export const SHOWN = 5;
 
-/** The hub card's list: what the player holds, what bills a fee, what an AI company holds, then what is free to take. The airport's own buildings (tower, fuel depot) are on the plan only. `more` are the available ones that did not fit. */
-export function shown(rows: readonly FacilityRow[], cap = SHOWN): { rows: FacilityRow[]; more: FacilityRow[] } {
+/** The hub card's list: what the player holds, then what is free to take. `more` are the available ones that did not fit. */
+export function shown(rows: readonly FacilityView[], cap = SHOWN): { rows: FacilityView[]; more: FacilityView[] } {
   const all = rows.filter((f) => holdingOf(f) !== 'airport').sort((a, b) => HOLDING_ORDER.indexOf(holdingOf(a)) - HOLDING_ORDER.indexOf(holdingOf(b)));
   return { rows: all.slice(0, cap), more: all.slice(cap).filter((f) => f.owner === 'available') };
 }
-
-/** Parking is not a facility (B.4: `hubSpots` stays the source): what it costs is what the monthly parking charge bills, per aircraft in use. */
-export const parkingCost = (used: number, feePerAircraft: number): number => used * feePerAircraft;
-/** B.4's `monthlyCost` covers the buildings; the stands are added here (see "Implementation notes (F3)"). */
-export const hubTotal = (buildings: number, parking: number): number => buildings + parking;
 
 /** The team rows of a hub card, biggest family first, empty ones left out. */
 export function teamRows(byFamily: Partial<Record<StaffFamily, number>>): { family: StaffFamily; n: number }[] {
@@ -57,15 +48,15 @@ export function teamRows(byFamily: Partial<Record<StaffFamily, number>>): { fami
 }
 
 /** What the player's contracts at a hub are, in one word. */
-export function contractsOf(rows: readonly Pick<FacilityRow, 'owner' | 'hold'>[]): 'none' | 'leased' | 'owned' | 'mixed' {
+export function contractsOf(rows: readonly Pick<FacilityView, 'owner' | 'contract'>[]): 'none' | 'leased' | 'owned' | 'mixed' {
   const mine = rows.filter((f) => f.owner === 'player');
   if (mine.length === 0) return 'none';
-  const buys = mine.filter((f) => f.hold === 'purchase').length;
+  const buys = mine.filter((f) => f.contract?.kind === 'purchase').length;
   return buys === 0 ? 'leased' : buys === mine.length ? 'owned' : 'mixed';
 }
 
-/** The names of the AI companies that hold a building of the plan, once each. */
-export const aiNames = (buildings: readonly Pick<PlanBuilding, 'owner' | 'ownerName'>[]): string[] => [...new Set(buildings.flatMap((b) => (b.owner === 'ai' && b.ownerName ? [b.ownerName] : [])))];
+/** The names of the companies that hold a building of the plan, once each. */
+export const aiNames = (buildings: readonly Pick<Building, 'owner' | 'ownerName'>[]): string[] => [...new Set(buildings.flatMap((b) => (b.owner === 'ai' && b.ownerName ? [b.ownerName] : [])))];
 
 /** The item `dir` steps from `current`, wrapping around; from nothing, the first (next) or last (prev). */
 export function stepOf<T>(items: readonly T[], current: T | null, dir: 1 | -1): T | null {
@@ -76,24 +67,24 @@ export function stepOf<T>(items: readonly T[], current: T | null, dir: 1 | -1): 
 }
 
 /** The order the arrow keys walk the buildings in: left to right on the drawing, the buildings it does not place after them. */
-export function keyOrder(buildings: readonly Pick<PlanBuilding, 'slot'>[], drawn: readonly string[]): string[] {
+export function keyOrder(buildings: readonly Pick<Building, 'slot'>[], drawn: readonly string[]): string[] {
   const known = new Set(buildings.map((b) => b.slot));
   const placed = drawn.filter((s) => known.has(s));
   return [...placed, ...buildings.map((b) => b.slot).filter((s) => !placed.includes(s))];
 }
 
 /** The building the plan opens on: the first one to take, else the first of the player's, else the first, in key order. */
-export function defaultSlot(buildings: readonly Pick<PlanBuilding, 'slot' | 'owner'>[], order: readonly string[]): string | null {
+export function defaultSlot(buildings: readonly Pick<Building, 'slot' | 'owner'>[], order: readonly string[]): string | null {
   const by = order.flatMap((slot) => buildings.filter((b) => b.slot === slot));
   return (by.find((b) => b.owner === 'available') ?? by.find((b) => b.owner === 'player') ?? by[0])?.slot ?? null;
 }
 
 /** The slot to show: the one asked for if the plan has it, else the default. */
-export const keepSlot = (buildings: readonly Pick<PlanBuilding, 'slot' | 'owner'>[], order: readonly string[], asked: string | null): string | null =>
+export const keepSlot = (buildings: readonly Pick<Building, 'slot' | 'owner'>[], order: readonly string[], asked: string | null): string | null =>
   asked !== null && buildings.some((b) => b.slot === asked) ? asked : defaultSlot(buildings, order);
 
 /** Chips for the kinds this plan has buildings of, `all` first, in the mockup's order. */
-export const filtersOf = (buildings: readonly Pick<PlanBuilding, 'kind'>[], hasStands: boolean): string[] => {
+export const filtersOf = (buildings: readonly Pick<Building, 'kind'>[], hasStands: boolean): string[] => {
   const kinds = new Set<string>(buildings.map((b) => b.kind));
   if (hasStands) kinds.add('parking');
   return ['all', ...FILTERS.filter((k) => k !== 'all' && kinds.has(k))];
@@ -102,90 +93,52 @@ export const filtersOf = (buildings: readonly Pick<PlanBuilding, 'kind'>[], hasS
 /** Does a building stay lit under the filter? The list view uses it; the chart dims by the same rule. */
 export const matchesFilter = (kind: string, filter: string): boolean => filter === 'all' || kind === filter;
 
-/** The effect sentence of a kind of building. Maintenance has a number; the others are described. */
-export function effectOf(kind: FacilityKind): { key: Key; vars: Record<string, number> } {
-  switch (kind) {
-    case 'maintenance': return { key: 'fc.effect.maintenance', vars: { pct: EFFECT.maintenanceCostPct } };
-    case 'terminal': return { key: 'fc.effect.terminal', vars: {} };
-    case 'cargo': return { key: 'fc.effect.cargo', vars: {} };
-    case 'office': return { key: 'fc.effect.office', vars: {} };
-    case 'parking': case 'airport': return { key: 'fc.effect.none', vars: {} };
+/** The effect sentence of a building (S3's `effect`, not its kind: an operations centre and offices are both offices). */
+export function effectOf(f: Pick<FacilityView, 'effect' | 'kind'> | Pick<Building, 'effect' | 'kind'>): { key: Key; vars: Record<string, number> } {
+  switch (f.effect) {
+    case 'hangar': return { key: 'fc.effect.maintenance', vars: { pct: MAINTENANCE_DISCOUNT_PCT } };
+    case 'desks': return { key: 'fc.effect.office', vars: {} };
+    case 'ops': return { key: 'fc.effect.ops', vars: {} };
+    case 'none': return { key: 'fc.effect.none', vars: {} };
   }
 }
 
-// ---------------------------------------------------------------- the contract
+// ---------------------------------------------------------------- levels and the contract
 
-/** The loan terms offered on a building: the share the bank does not lend is paid up front, the term is one of the quoted ones. */
-export const CREDIT_MONTHS = LOAN_QUOTE_MONTHS;
-export const creditOf = (p: Pick<PurchaseTerms, 'creditPct'>, months: number): Financing => ({ downPct: 100 - p.creditPct, months });
-
-export type Quote = {
-  /** Cash leaving the account at signing. */
-  today: number;
-  /** Cash leaving the account every month after. */
-  monthly: number;
-  balanceAfter: number;
-  affordable: boolean;
-  shortfall: number;
-  /** The pieces of `today` and `monthly`, for the line under each figure. */
-  parts: { works: number; deposit: number; down: number; rent: number; upkeep: number; instalment: number; salaries: number };
-};
-
-const levelAt = (levels: readonly LevelInfo[], level: number): LevelInfo | undefined => levels.find((l) => l.level === level);
+export type LevelState = 'done' | 'pickable' | 'locked';
 
 /**
- * What signing costs, for one way of holding (rent or buy), one level and, when buying, one credit. Follows the mockup: the deposit (rent) or the price (buy, less the credit) plus the works of the level are due at signing;
- * every month after, the rent (or the upkeep and the instalments) plus the salaries of the people the level needs. Works are charged for levels above the one the facility stands at.
- * The server answers the real figures when the player signs; this is the quote read before it.
+ * Can the player pick this level? Before signing: the levels the contract may start at (the server says which opens later with `opensAfterDays`).
+ * Once held: only the level right above the one in force, when the works are not running and the server's `nextLevelAt` has come.
  */
-export function quote(d: Pick<FacilityDetail, 'offer' | 'levels'> & { facility: Pick<FacilityRow, 'level'> }, hold: Hold, level: number, credit: Financing | null, balance: number): Quote | null {
-  if (!d.offer) return null;
-  const info = levelAt(d.levels, level);
-  const works = level > d.facility.level ? (info?.works?.cost ?? 0) : 0;
-  const salaries = info?.salaries ?? 0;
-  let deposit = 0, down = 0, rent = 0, upkeep = 0, instalment = 0;
-  if (hold === 'lease') {
-    deposit = d.offer.lease.deposit;
-    rent = d.offer.lease.monthly;
-  } else {
-    const p = d.offer.purchase;
-    upkeep = p.upkeep;
-    if (credit) {
-      const loan = loanOption(p.price, 0, credit.downPct, credit.months);
-      down = loan.down;
-      instalment = loan.monthly;
-    } else down = p.price;
-  }
-  const today = deposit + down + works;
-  const monthly = rent + upkeep + instalment + salaries;
-  const balanceAfter = balance - today;
-  return { today, monthly, balanceAfter, affordable: balanceAfter >= 0, shortfall: Math.max(0, -balanceAfter), parts: { works, deposit, down, rent, upkeep, instalment, salaries } };
+export function levelState(l: Pick<FacilityLevelInfo, 'level' | 'opensAfterDays'>, f: Pick<FacilityView, 'level' | 'works' | 'nextLevelAt' | 'owner'>, now: number): LevelState {
+  if (f.owner !== 'player') return l.opensAfterDays === null ? 'pickable' : 'locked';
+  if (l.level <= f.level) return 'done';
+  return l.level === f.level + 1 && !f.works && f.nextLevelAt !== null && f.nextLevelAt <= now ? 'pickable' : 'locked';
 }
 
-/** Total paid over the lease, shown under the rent. */
-export const leaseTotal = (lease: { monthly: number; months: number }): number => lease.monthly * lease.months;
-
-/** Can the player pick this level? A locked level is shown but not offered; the one the facility has is not an upgrade. */
-export const pickable = (l: LevelInfo, current: number, held: boolean): boolean => l.locked === null && (held ? l.level > current : true);
-
 /** The level `dir` steps from `level` among the pickable ones; stays put at the ends. */
-export function stepLevel(levels: readonly LevelInfo[], level: number, dir: 1 | -1, current: number, held: boolean): number {
-  const ok = levels.filter((l) => pickable(l, current, held)).map((l) => l.level);
+export function stepLevel(levels: readonly FacilityLevelInfo[], states: ReadonlyMap<number, LevelState>, level: number, dir: 1 | -1): number {
+  const ok = levels.map((l) => l.level).filter((n) => states.get(n) === 'pickable');
   const next = dir === 1 ? ok.find((n) => n > level) : [...ok].reverse().find((n) => n < level);
   return next ?? level;
 }
 
-export type StaffLine = { need: StaffNeed; have: number; candidates: number | null; missing: number };
-/** One line per kind of person the level needs: how many are on the roster, how many candidates the market has. `candidates` is null when the server does not say. */
-export function staffLines(level: LevelInfo | undefined, required: readonly RequiredRole[]): StaffLine[] {
-  return (level?.staff ?? []).map((need) => {
-    const r = required.find((x) => x.family === need.family && x.role === need.role);
-    const have = r?.have ?? 0;
-    return { need, have, candidates: r ? r.candidates : null, missing: Math.max(0, need.need - have) };
-  });
-}
+/** The level the screen opens on: the lowest pickable one. */
+export const firstLevel = (levels: readonly FacilityLevelInfo[], states: ReadonlyMap<number, LevelState>): number => levels.find((l) => states.get(l.level) === 'pickable')?.level ?? levels[0]?.level ?? 1;
 
-export const totalMissing = (lines: readonly StaffLine[]): number => lines.reduce((n, l) => n + l.missing, 0);
+/** The credit terms offered on a purchase: S3 lists a loan per down payment and term; the screen offers the cheapest down payment. */
+export const creditLoans = (p: Pick<FacilityPurchase, 'loans' | 'creditPct'>): FacilityPurchase['loans'] => p.loans.filter((l) => l.downPct === 100 - p.creditPct);
+
+export type StaffLine = { need: number; have: number; candidates: number; missing: number };
+/** The technicians the previewed level needs (S3's `required`, else the level's own figure), with how many are on the roster and on the market. */
+export function staffLine(d: Pick<FacilityDetail, 'required' | 'levels'>, level: number): StaffLine | null {
+  const r = d.required[0];
+  const need = r?.need ?? d.levels.find((l) => l.level === level)?.technicians ?? 0;
+  if (need === 0) return null;
+  const have = r?.have ?? 0;
+  return { need, have, candidates: r?.candidates ?? 0, missing: Math.max(0, need - have) };
+}
 
 /** Whole months between two instants (UTC calendar, the day of the month counted). */
 export function monthsBetween(from: number, now: number): number {
@@ -193,5 +146,8 @@ export function monthsBetween(from: number, now: number): number {
   return Math.max(0, (b.getUTCFullYear() - a.getUTCFullYear()) * 12 + b.getUTCMonth() - a.getUTCMonth() - (b.getUTCDate() < a.getUTCDate() ? 1 : 0));
 }
 
-/** Months a lease still binds: 0 once the term is over (then only the notice remains). */
+/** Months a lease still binds: 0 once the term is over (then it renews month by month and only the notice remains). */
 export const leaseMonthsLeft = (startedAt: number, months: number, now: number): number => Math.max(0, months - monthsBetween(startedAt, now));
+
+/** Months at the level below before a locked level opens (S3 gives days). */
+export const opensAfterMonths = (days: number): number => Math.round(days / 30);
