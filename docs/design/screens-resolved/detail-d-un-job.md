@@ -21,7 +21,7 @@ Resolved tree (component instances expanded with their overrides; HUD bars refer
       - instance «Briefing Panel» of «Panel»
         - frame «Header» width="fill_container" gap=10 padding=[24, 28, 4, 28] alignItems="center"
           - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Briefing
-        - frame «Content» width="fill_container" layout="vertical" gap=32 padding=[16, 28, 28, 28]
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=32 padding=[16, 28, 28, 28]
           - frame «Facts» width="fill_container" layout="vertical" gap=28
             - frame «Facts Row 1» width="fill_container" gap=32
               - instance «Fact · Charge» of «Stat»

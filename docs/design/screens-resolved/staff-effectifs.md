@@ -1,0 +1,281 @@
+# Staff · effectifs
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Staff · effectifs» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-2.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 gap=24 padding=[28, 32, 24, 32]
+    - frame «Main Column» width="fill_container" height="fill_container" layout="vertical" gap=18
+      - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+        - frame «Title Block» layout="vertical" gap=6
+          - frame «Overline» gap=8 alignItems="center"
+            - instance «Base Sign · LFMN» of «Sign/Location»
+              - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=12 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+            - instance «Base Sign · LFLL» of «Sign/Location»
+              - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=12 fontWeight="700" letterSpacing=0.5  TEXT: LFLL
+            - text «Overline Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Azur Régional · hub de Nice et base de Lyon
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=34 fontWeight="600"  TEXT: Effectifs
+          - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 70 personnes pour 77 postes prévus par le planning des lignes · masse salariale 345 500 € / mois
+        - instance «View Switcher» of «View Switcher»
+          - frame «View · Vue en coupe» padding=[8, 16] fill="#FFFFFF1A" cornerRadius=4
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Effectifs
+          - frame «View · Cabine & charge» padding=[8, 16] cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Recrutement
+      - instance «Panel · Par famille» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Par famille
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Tout dérouler
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[12, 22, 14, 22]
+          - frame «Column Head» width="fill_container" gap=20 padding=[0, 12, 10, 12] alignItems="end"
+            - frame «Col · Famille» width=240
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Famille
+            - frame «Col · Effectif / besoin» width=100
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Effectif / besoin
+            - frame «Col · Disponibilité maintenant» width="fill_container"
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Disponibilité maintenant
+            - frame «Col · Salaires / mois» width=100 justifyContent="end"
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Salaires / mois
+            - frame «Col · État» width=200 height=14 justifyContent="end"
+          - frame «Group · Pilotes» width="fill_container" layout="vertical" fill="#FFFFFF08" stroke="$border" strokeWidth={"top": 1} cornerRadius=4
+            - frame «Row · Pilotes» width="fill_container" height=66 gap=20 padding=[0, 12] alignItems="center"
+              - frame «Family» width=240 gap=10 alignItems="center"
+                - icon «Chevron» width=16 height=16 fill="$text-secondary" icon="chevron-down"
+                - frame «Family Text» layout="vertical" gap=2
+                  - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="600"  TEXT: Pilotes
+                  - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Commandants et copilotes
+              - frame «Count» width=100 gap=5 alignItems="end"
+                - text «Headcount» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500" lineHeight=1.1  TEXT: 23
+                - text «Need» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: / 26
+              - frame «Availability» width="fill_container" layout="vertical" gap=7
+                - frame «Bar» height=8 gap=2
+                  - rectangle «Segment · s» width=81 height=8 fill="#ECEAE5" cornerRadius=1
+                  - rectangle «Segment · r» width=91 height=8 fill="#ECEAE580" cornerRadius=1
+                  - rectangle «Segment · c» width=40 height=8 fill="#ECEAE533" cornerRadius=1
+                  - rectangle «Segment · f» width=20 height=8 stroke="#ECEAE599" strokeWidth=1 cornerRadius=1
+                  - rectangle «Segment · md» width=30 height=8 fill="$danger-soft" stroke="$danger" strokeWidth=1 cornerRadius=1
+                - text «Caption» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 8 en service · 9 au repos · 4 en congé · 2 en formation
+              - frame «Payroll» width=100 justifyContent="end"
+                - text «Payroll Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 173 800 €
+              - frame «State» width=200 gap=6 alignItems="center" justifyContent="end"
+                - instance «State Badge» of «Badge/Rejeté»
+                  - icon «Icon» width=12 height=12 fill="$danger" icon="ban"
+                  - text «Label» fill="$danger" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Bloque 2 vols
+            - frame «Row · ATR 72» width="fill_container" height=42 gap=20 padding=[0, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Family» width=240 gap=10 padding=[0, 0, 0, 26] alignItems="center"
+                - frame «Family Text» gap=8 alignItems="center"
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: ATR 72
+                  - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 7 Cdt · 6 OPL
+              - frame «Count» width=100 gap=5 alignItems="end"
+                - text «Headcount» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 13
+                - text «Need» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: / 14
+              - frame «Availability» width="fill_container" layout="vertical" gap=7
+                - frame «Bar» height=8 gap=2
+                  - rectangle «Segment · s» width=94 height=8 fill="#ECEAE5" cornerRadius=1
+                  - rectangle «Segment · r» width=94 height=8 fill="#ECEAE580" cornerRadius=1
+                  - rectangle «Segment · c» width=37 height=8 fill="#ECEAE533" cornerRadius=1
+                  - rectangle «Segment · f» width=19 height=8 stroke="#ECEAE599" strokeWidth=1 cornerRadius=1
+                  - rectangle «Segment · mw» width=19 height=8 fill="$warning-soft" stroke="$warning" strokeWidth=1 cornerRadius=1
+              - frame «Payroll» width=100 justifyContent="end"
+                - text «Payroll Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 95 200 €
+              - frame «State» width=200 gap=6 alignItems="center" justifyContent="end"
+                - icon «State Icon» width=14 height=14 fill="$warning" icon="triangle-alert"
+                - text «State Text» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Lefèvre · 12 h 10 sur 13 h
+            - frame «Row · A220» width="fill_container" height=42 gap=20 padding=[0, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Family» width=240 gap=10 padding=[0, 0, 0, 26] alignItems="center"
+                - frame «Family Text» gap=8 alignItems="center"
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: A220
+                  - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 4 Cdt · 4 OPL
+              - frame «Count» width=100 gap=5 alignItems="end"
+                - text «Headcount» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 8
+                - text «Need» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: / 8
+              - frame «Availability» width="fill_container" layout="vertical" gap=7
+                - frame «Bar» height=8 gap=2
+                  - rectangle «Segment · s» width=99 height=8 fill="#ECEAE5" cornerRadius=1
+                  - rectangle «Segment · r» width=99 height=8 fill="#ECEAE580" cornerRadius=1
+                  - rectangle «Segment · c» width=33 height=8 fill="#ECEAE533" cornerRadius=1
+                  - rectangle «Segment · f» width=33 height=8 stroke="#ECEAE599" strokeWidth=1 cornerRadius=1
+              - frame «Payroll» width=100 justifyContent="end"
+                - text «Payroll Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 59 400 €
+              - frame «State» width=200 gap=6 alignItems="center" justifyContent="end"
+                - icon «State Icon» width=14 height=14 fill="$text-tertiary" icon="check"
+                - text «State Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Complet
+            - frame «Row · CRJ» width="fill_container" height=42 gap=20 padding=[0, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Family» width=240 gap=10 padding=[0, 0, 0, 26] alignItems="center"
+                - frame «Family Text» gap=8 alignItems="center"
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: CRJ
+                  - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 1 Cdt · 1 OPL
+              - frame «Count» width=100 gap=5 alignItems="end"
+                - text «Headcount» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 2
+                - text «Need» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: / 4
+              - frame «Availability» width="fill_container" layout="vertical" gap=7
+                - frame «Bar» height=8 gap=2
+                  - rectangle «Segment · r» width=67 height=8 fill="#ECEAE580" cornerRadius=1
+                  - rectangle «Segment · c» width=67 height=8 fill="#ECEAE533" cornerRadius=1
+                  - rectangle «Segment · md» width=133 height=8 fill="$danger-soft" stroke="$danger" strokeWidth=1 cornerRadius=1
+              - frame «Payroll» width=100 justifyContent="end"
+                - text «Payroll Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 19 200 €
+              - frame «State» width=200 gap=6 alignItems="center" justifyContent="end"
+                - icon «State Icon» width=14 height=14 fill="$danger" icon="ban"
+                - text «State Text» fill="$danger" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Aucun disponible
+          - frame «Row · Personnel de cabine» width="fill_container" height=66 gap=20 padding=[0, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Family» width=240 gap=10 alignItems="center"
+              - icon «Chevron» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+              - frame «Family Text» layout="vertical" gap=2
+                - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="600"  TEXT: Personnel de cabine
+                - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: PNC · hôtesses et stewards
+            - frame «Count» width=100 gap=5 alignItems="end"
+              - text «Headcount» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500" lineHeight=1.1  TEXT: 18
+              - text «Need» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: / 18
+            - frame «Availability» width="fill_container" layout="vertical" gap=7
+              - frame «Bar» height=8 gap=2
+                - rectangle «Segment · s» width=103 height=8 fill="#ECEAE5" cornerRadius=1
+                - rectangle «Segment · r» width=103 height=8 fill="#ECEAE580" cornerRadius=1
+                - rectangle «Segment · c» width=44 height=8 fill="#ECEAE533" cornerRadius=1
+                - rectangle «Segment · f» width=15 height=8 stroke="#ECEAE599" strokeWidth=1 cornerRadius=1
+              - text «Caption» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 7 en service · 7 au repos · 3 en congé · 1 en formation
+            - frame «Payroll» width=100 justifyContent="end"
+              - text «Payroll Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 61 200 €
+            - frame «State» width=200 gap=6 alignItems="center" justifyContent="end"
+              - icon «State Icon» width=14 height=14 fill="$text-tertiary" icon="check"
+              - text «State Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Complet
+          - frame «Row · Personnel au sol» width="fill_container" height=66 gap=20 padding=[0, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Family» width=240 gap=10 alignItems="center"
+              - icon «Chevron» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+              - frame «Family Text» layout="vertical" gap=2
+                - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="600"  TEXT: Personnel au sol
+                - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Escale, piste et comptoirs
+            - frame «Count» width=100 gap=5 alignItems="end"
+              - text «Headcount» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500" lineHeight=1.1  TEXT: 14
+              - text «Need» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: / 16
+            - frame «Availability» width="fill_container" layout="vertical" gap=7
+              - frame «Bar» height=8 gap=2
+                - rectangle «Segment · s» width=149 height=8 fill="#ECEAE5" cornerRadius=1
+                - rectangle «Segment · r» width=50 height=8 fill="#ECEAE580" cornerRadius=1
+                - rectangle «Segment · c» width=33 height=8 fill="#ECEAE533" cornerRadius=1
+                - rectangle «Segment · mw» width=33 height=8 fill="$warning-soft" stroke="$warning" strokeWidth=1 cornerRadius=1
+              - text «Caption» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 9 en service · 3 au repos · 2 en congé
+            - frame «Payroll» width=100 justifyContent="end"
+              - text «Payroll Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 40 600 €
+            - frame «State» width=200 gap=6 alignItems="center" justifyContent="end"
+              - icon «State Icon» width=14 height=14 fill="$warning" icon="triangle-alert"
+              - text «State Text» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Manque 2 à LFLL
+          - frame «Row · Administratif» width="fill_container" height=66 gap=20 padding=[0, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Family» width=240 gap=10 alignItems="center"
+              - icon «Chevron» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+              - frame «Family Text» layout="vertical" gap=2
+                - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="600"  TEXT: Administratif
+                - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: RH, managers, chefs de hub
+            - frame «Count» width=100 gap=5 alignItems="end"
+              - text «Headcount» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500" lineHeight=1.1  TEXT: 6
+              - text «Need» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: / 6
+            - frame «Availability» width="fill_container" layout="vertical" gap=7
+              - frame «Bar» height=8 gap=2
+                - rectangle «Segment · s» width=89 height=8 fill="#ECEAE5" cornerRadius=1
+                - rectangle «Segment · r» width=133 height=8 fill="#ECEAE580" cornerRadius=1
+                - rectangle «Segment · c» width=44 height=8 fill="#ECEAE533" cornerRadius=1
+              - text «Caption» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 2 en service · 3 hors horaires · 1 en congé
+            - frame «Payroll» width=100 justifyContent="end"
+              - text «Payroll Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 31 200 €
+            - frame «State» width=200 gap=6 alignItems="center" justifyContent="end"
+              - icon «State Icon» width=14 height=14 fill="$text-tertiary" icon="check"
+              - text «State Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Complet
+          - frame «Row · Maintenance» width="fill_container" height=66 gap=20 padding=[0, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Family» width=240 gap=10 alignItems="center"
+              - icon «Chevron» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+              - frame «Family Text» layout="vertical" gap=2
+                - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="600"  TEXT: Maintenance
+                - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Techniciens avion et installations
+            - frame «Count» width=100 gap=5 alignItems="end"
+              - text «Headcount» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="500" lineHeight=1.1  TEXT: 9
+              - text «Need» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: / 11
+            - frame «Availability» width="fill_container" layout="vertical" gap=7
+              - frame «Bar» height=8 gap=2
+                - rectangle «Segment · s» width=120 height=8 fill="#ECEAE5" cornerRadius=1
+                - rectangle «Segment · r» width=72 height=8 fill="#ECEAE580" cornerRadius=1
+                - rectangle «Segment · f» width=24 height=8 stroke="#ECEAE599" strokeWidth=1 cornerRadius=1
+                - rectangle «Segment · mw» width=48 height=8 fill="$warning-soft" stroke="$warning" strokeWidth=1 cornerRadius=1
+              - text «Caption» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 5 en service · 3 au repos · 1 en formation
+            - frame «Payroll» width=100 justifyContent="end"
+              - text «Payroll Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 38 700 €
+            - frame «State» width=200 gap=6 alignItems="center" justifyContent="end"
+              - icon «State Icon» width=14 height=14 fill="$warning" icon="triangle-alert"
+              - text «State Text» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Inspection F-HAZC +1 j
+      - frame «Footer» width="fill_container" alignItems="center" justifyContent="space_between"
+        - frame «Legend» gap=22 alignItems="center"
+          - frame «Legend · En service» gap=8 alignItems="center"
+            - rectangle «Swatch» width=14 height=8 fill="#ECEAE5" cornerRadius=1
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: En service
+          - frame «Legend · Au repos» gap=8 alignItems="center"
+            - rectangle «Swatch» width=14 height=8 fill="#ECEAE580" cornerRadius=1
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Au repos
+          - frame «Legend · Congé» gap=8 alignItems="center"
+            - rectangle «Swatch» width=14 height=8 fill="#ECEAE533" cornerRadius=1
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Congé
+          - frame «Legend · Formation» gap=8 alignItems="center"
+            - rectangle «Swatch» width=14 height=8 stroke="#ECEAE599" strokeWidth=1 cornerRadius=1
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Formation
+          - frame «Legend · Poste vacant» gap=8 alignItems="center"
+            - rectangle «Swatch» width=14 height=8 fill="$warning-soft" stroke="$warning" strokeWidth=1 cornerRadius=1
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Poste vacant
+          - frame «Legend · Bloque un vol» gap=8 alignItems="center"
+            - rectangle «Swatch» width=14 height=8 fill="$danger-soft" stroke="$danger" strokeWidth=1 cornerRadius=1
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Vacant, bloque un vol
+        - frame «Filters» gap=6 alignItems="center"
+          - frame «Filter · Toutes les bases» padding=[6, 12] fill="#FFFFFF1A" cornerRadius=4
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Toutes les bases
+          - frame «Filter · LFMN Nice» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: LFMN Nice
+          - frame «Filter · LFLL Lyon» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: LFLL Lyon
+    - frame «Shortage Panel» width=380 height="fill_container" layout="vertical" gap=18 padding=[24, 26] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 28}
+      - frame «Shortage Head» width="fill_container" layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - icon «Status Icon» width=14 height=14 fill="$danger" icon="ban"
+          - text «Status Text» fill="$danger" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Bloque une ligne ce soir
+        - text «Shortage Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="600" lineHeight=1.15  TEXT: Aucun pilote CRJ disponible
+        - text «Shortage Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.45  TEXT: Le seul équipage qualifié est au repos et en congé. La ligne Lyon – Marseille ne peut pas partir.
+      - frame «Facts» width="fill_container" layout="vertical" gap=10 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - frame «Fact · Vols annulés» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Vols annulés
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: AZR 7345 · AZR 7346
+        - frame «Fact · Avion immobilisé» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Avion immobilisé
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: F-HAZC · CRJ700
+        - frame «Fact · Il manque» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Il manque
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 1 Cdt · 1 OPL qualifiés CRJ
+        - frame «Fact · Manque à gagner» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Manque à gagner
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: ≈ 21 400 € / jour
+      - frame «Other Issues» width="fill_container" layout="vertical" gap=12 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - text «Other Title» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: À surveiller
+        - frame «Issue · OPL Lefèvre · 12 h 10 de service sur 13 h» width="fill_container" gap=10
+          - frame «Icon Box» padding=[2, 0, 0, 0]
+            - icon «Issue Icon» width=14 height=14 fill="$warning" icon="triangle-alert"
+          - frame «Issue Text» width="fill_container" layout="vertical" gap=2
+            - text «Issue Title» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: OPL Lefèvre · 12 h 10 de service sur 13 h
+            - text «Issue Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: AZR 1138 de 20:50Z dépasserait sa limite
+        - frame «Issue · Personnel au sol · 2 postes vacants à LFLL» width="fill_container" gap=10
+          - frame «Icon Box» padding=[2, 0, 0, 0]
+            - icon «Issue Icon» width=14 height=14 fill="$warning" icon="triangle-alert"
+          - frame «Issue Text» width="fill_container" layout="vertical" gap=2
+            - text «Issue Title» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Personnel au sol · 2 postes vacants à LFLL
+            - text «Issue Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Escales de Lyon rallongées de 10 min
+        - frame «Issue · Maintenance · 2 techniciens manquants» width="fill_container" gap=10
+          - frame «Icon Box» padding=[2, 0, 0, 0]
+            - icon «Issue Icon» width=14 height=14 fill="$warning" icon="triangle-alert"
+          - frame «Issue Text» width="fill_container" layout="vertical" gap=2
+            - text «Issue Title» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Maintenance · 2 techniciens manquants
+            - text «Issue Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Inspection de F-HAZC prolongée d'un jour
+      - frame «Spacer» width="fill_container" height="fill_container"
+      - frame «Actions» width="fill_container" layout="vertical" gap=10
+        - instance «Recruit» of «Button/Primary»
+          - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Recruter un pilote CRJ
+          - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+            - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+        - instance «Train» of «Button/Ghost»
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Qualifier un pilote ATR sur CRJ
+          - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

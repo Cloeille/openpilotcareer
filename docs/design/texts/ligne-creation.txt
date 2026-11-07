@@ -1,0 +1,108 @@
+Nouvelle ligne autonome · Azur Régional
+Nice → Barcelone
+262 NM · 1 h 20 de vol · première rotation possible lun. 9 novembre
+Départ
+LFMN
+Nice Côte d'Azur
+Arrivée
+LEBL
+Barcelone-El Prat
+Programme de la ligne
+Reprendre le programme d'une autre ligne
+Avions sur la ligne
+2 avions
+Fréquence
+7 allers-retours
+par jour
+par heure
+Jours d'exploitation
+L
+M
+M
+J
+V
+S
+D
+Exploitation
+24 h sur 24
+00Z
+03Z
+06Z
+09Z
+12Z
+15Z
+18Z
+21Z
+Fenêtre d'exploitation
+06:00Z
+22:00Z
+Départs de Nice
+06:00
+08:00
+10:00
+12:00
+14:00
+16:00
+18:00
+Départs de Barcelone
+08:00
+10:00
+12:00
+14:00
+16:00
+18:00
+20:00
+F-HAZT
+ATR 42-600 · libre à Nice
+LEBL
+LFMN
+LEBL
+LFMN
+LEBL
+LFMN
+LEBL
+LFMN
+Visite de nuit à Nice
+F-HAZR
+ATR 72-600 · déjà sur 2 vols
+LEBL
+LFMN
+LEBL
+LFMN
+LEBL
+LFMN
+AZR 4127
+AZR 4128
+Visite de nuit à Nice
+Affecter un avion
+Aucun autre avion libre à Nice
+Aller vers Barcelone
+Retour vers Nice
+Autre vol de l'avion
+Conflit
+42 allers-retours par semaine · 112 h de vol · escale de 40 min à Barcelone
+Ce que ça demande
+Pilotes ATR
+8 requis · 6 disponibles
+PNC
+8 requis · 8 disponibles
+Escale à Barcelone
+3 agents à recruter
+Maintenance
+Visite chaque nuit à Nice
+Il manque 2 pilotes ATR : sans recrutement, les vols du dimanche ne partiront pas.
+Recruter 2 pilotes
+F-HAZR assure déjà AZR 4127 à 17:05Z : ses rotations de 16:00 et 18:00 sont en conflit.
+Prévision sur une semaine
+≈ estimé
+Bénéfice estimé
++66 500 €
+418 900 € de recettes · 352 400 € de coûts
+Demande du marché
+5 200 passagers
+Remplissage
+78 % · 3 760 sur 4 824 sièges
+Concurrence
+Alpes Air Link · 3 vols/jour
+Ouvrir la ligne
+Entrée

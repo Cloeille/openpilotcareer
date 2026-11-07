@@ -24,6 +24,28 @@ Réputation
 Tu pourras baisser le réalisme plus tard. C'est en le montant que tu gagnes des bonus de paie et de réputation.
 Ce que règle Équilibré
 4 sur 6 activés
+Usure et pannes
+Les pièces s'usent et une panne peut survenir en vol.
++10 % paie
++10 % réputation
+Prix réel du carburant
+Le carburant suit le prix du jour de chaque aéroport.
++8 % paie
++5 % réputation
+Pénalités de retard
+Arriver après l'heure prévue retire une partie de la paie.
++5 % paie
++10 % réputation
+Météo réelle obligatoire
+Un vol n'est vérifié que si la météo réelle est active.
++7 % paie
++5 % réputation
+Aide financière en cas de faillite
+La banque efface ta dette une fois par saison.
+−10 % réputation
+Tolérance anti-triche pour les pauses
+Pauses jusqu'à 15 min sans perdre la vérification du vol.
+−5 % paie
 Changer un seul réglage fait passer ton préréglage en « Personnalisé ».
 Continuer avec Équilibré
 Entrée

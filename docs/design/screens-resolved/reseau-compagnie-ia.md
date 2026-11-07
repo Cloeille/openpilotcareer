@@ -1,0 +1,101 @@
+# Réseau · compagnie IA
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Réseau · compagnie IA» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-9.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=16 padding=[28, 32, 24, 32]
+    - script «Carte réseau · Méridia Cargo» width=1600 height=778
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - ellipse «Live Dot» width=7 height=7 fill="$success"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Compagnie IA · exploitation automatique, comme toi
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Réseau Méridia Cargo
+        - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Hub à Marseille · 5 lignes · 7 avions dont 3 en vol
+      - frame «Clock Group» gap=28 alignItems="end"
+        - frame «Auto Ops» gap=10 padding=[0, 0, 9, 0] alignItems="center"
+          - instance «Auto Ops Switch» of «Switch»
+            - ellipse «Knob» width=16 height=16 fill="$on-btn-primary"
+          - text «Auto Ops Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Exploitation 24/7
+        - rectangle «Clock Divider» width=1 height=48 fill="$border-strong"
+        - frame «Simulated Clock» layout="vertical" alignItems="end"
+          - text «Clock Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Horloge simulée · ven. 6 novembre
+          - text «Clock Time» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="500" lineHeight=1.1  TEXT: 17:58Z
+    - frame «Body» width="fill_container" height="fill_container" gap=24
+      - frame «Map Column» width="fill_container" height="fill_container" layout="vertical" justifyContent="end"
+        - frame «Map Footer» width="fill_container" alignItems="center" justifyContent="space_between"
+          - instance «View Switcher · réseaux» of «View Switcher»
+            - frame «View · Vue en coupe» padding=[8, 16] fill="#00000000" cornerRadius=4
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Mon réseau
+            - frame «View · Cabine & charge» padding=[8, 16] fill="#FFFFFF1A" cornerRadius=4
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Méridia Cargo
+            - frame «View · Systèmes» padding=[8, 16] cornerRadius=4
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Alpes Air Link
+          - frame «Legend» gap=22 alignItems="center"
+            - frame «Legend · Méridia Cargo» gap=8 alignItems="center"
+              - rectangle «Swatch» width=18 height=2 fill="#9A9DA2"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Méridia Cargo
+            - frame «Legend · Tes lignes» gap=8 alignItems="center"
+              - rectangle «Swatch» width=18 height=2 fill="#ECEAE5" opacity=0.35
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Tes lignes
+            - frame «Legend · Ligne contestée» gap=8 alignItems="center"
+              - rectangle «Swatch» width=18 height=2 fill="$warning"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Ligne contestée
+            - frame «Legend · En vol maintenant» gap=8 alignItems="center"
+              - icon «Icon» width=16 height=16 fill="#C4C6C9" icon="flight"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: En vol maintenant
+      - instance «Panel · Face à face» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Face à face
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 2 lignes en commun
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[10, 14, 18, 14]
+          - frame «Duel · LFMN – LFPG» width="fill_container" layout="vertical" gap=10 padding=[14, 10] fill="$surface-selected" cornerRadius=4
+            - frame «Top» width="fill_container" gap=10 alignItems="center"
+              - icon «Icon» width=14 height=14 fill="$warning" icon="swords"
+              - text «Code» width="fill_container" fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="700"  TEXT: LFMN – LFPG
+              - text «Cities» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Nice – Paris
+            - frame «Compare» width="fill_container" layout="vertical" gap=6 padding=[0, 0, 0, 24]
+              - frame «Side · Toi» width="fill_container" gap=10
+                - text «Who» width=64 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Toi
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: toutes les 3 h · A220-300
+              - frame «Side · Méridia» width="fill_container" gap=10
+                - text «Who» width=64 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Méridia
+                - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: toutes les 4 h · fret de nuit
+            - text «Verdict» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Elle prend le fret, toi les passagers : la concurrence porte sur les créneaux de nuit.
+          - frame «Duel · LFLL – LFML» width="fill_container" layout="vertical" gap=10 padding=[14, 10] stroke="$border" strokeWidth={"top": 1} cornerRadius=4
+            - frame «Top» width="fill_container" gap=10 alignItems="center"
+              - icon «Icon» width=14 height=14 fill="$warning" icon="swords"
+              - text «Code» width="fill_container" fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="700"  TEXT: LFLL – LFML
+              - text «Cities» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Lyon – Marseille
+            - frame «Compare» width="fill_container" layout="vertical" gap=6 padding=[0, 0, 0, 24]
+              - frame «Side · Toi» width="fill_container" gap=10
+                - text «Who» width=64 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Toi
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: interrompue depuis 14:20Z
+              - frame «Side · Méridia» width="fill_container" gap=10
+                - text «Who» width=64 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Méridia
+                - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: toutes les 2 h · ATR 72F
+            - text «Verdict» width="fill_container" fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Ta ligne est à l'arrêt et Méridia vole : chaque heure perdue lui laisse ta clientèle.
+          - frame «Spacer» width="fill_container" height="fill_container"
+          - frame «Elle seule» width="fill_container" layout="vertical" gap=8 padding=[16, 10] stroke="$border" strokeWidth={"top": 1}
+            - text «Title» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Lignes où elle est seule
+            - frame «Only · LFML – LFKJ» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Code» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: LFML – LFKJ
+              - text «Freq» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: toutes les 4 h
+            - frame «Only · LFML – LEBL» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Code» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: LFML – LEBL
+              - text «Freq» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: toutes les 3 h
+            - frame «Only · LFML – LIMC» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Code» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="700"  TEXT: LFML – LIMC
+              - text «Freq» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: toutes les 3 h
+          - frame «Actions» width="fill_container" layout="vertical" gap=4 padding=[0, 10]
+            - instance «Button · Rouvrir» of «Button/Primary»
+              - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Rouvrir LFLL – LFML
+              - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+            - instance «Button · Fiche» of «Button/Ghost»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Fiche de Méridia Cargo
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

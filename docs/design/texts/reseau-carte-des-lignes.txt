@@ -1,0 +1,40 @@
+Exploitation automatique · 4 avions sur 6 en service
+Réseau Azur Régional
+Tes lignes tournent seules, jour et nuit, selon ton planning.
+Exploitation 24/7
+Horloge simulée · ven. 6 novembre
+17:58Z
+Mon réseau
+Méridia Cargo
+Alpes Air Link
+En service
+Ton vol
+Interrompue
+En vol maintenant
+Lignes autonomes
+4 lignes
+LFMN – LFLL
+Retard +14 min
+Nice – Lyon · toutes les 2 h, 12 vols par jour
+F-HAZA · ATR 72-600
+LFMN – LFPG
+À l'heure
+Nice – Paris-CDG · toutes les 3 h, 8 vols par jour
+F-HAZD · A220-300
+LFMN – LFKJ
+À l'heure
+Nice – Ajaccio · toutes les 2 h, 10 vols par jour
+F-HAZB · ATR 72-600
+LFLL – LFML
+Interrompue
+Lyon – Marseille · suspendue depuis 14:20Z
+F-HAZC · CRJ700 en inspection
+Vols depuis 00:00Z
+23 effectués · 2 annulés
+Prochain départ
+18:10Z · LFMN → LFKJ
+Ponctualité sur 24 h
+91 %
+Ouvrir LFMN – LFLL
+Entrée
+Créer une ligne

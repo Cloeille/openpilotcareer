@@ -1,0 +1,268 @@
+# Ligne · détail & planning
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Ligne · détail & planning» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-4.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=22 padding=[28, 32, 24, 32]
+    - frame «Line Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Identity» layout="vertical" gap=8
+        - frame «Breadcrumb» gap=10 alignItems="center"
+          - instance «Sign · LFMN» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+          - text «Pair Arrow» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: ⇄
+          - instance «Sign · LFLL» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFLL
+          - text «Crumb Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Réseau  ›  Lignes autonomes
+        - frame «Status» gap=8 padding=[6, 0, 0, 0] alignItems="center"
+          - ellipse «Status Dot» width=7 height=7 fill="$success"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Ligne active · exploitation automatique depuis le 12 octobre
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600" lineHeight=1.05  TEXT: Nice ⇄ Lyon
+        - text «Subtitle» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Vols AZR 1131 à 1138 · 162 NM · 1 h 10 de vol en ATR 72-600
+      - frame «Key Stats» gap=44 padding=[0, 0, 4, 0]
+        - instance «Stat · Avions affectés» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Avions affectés
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 2
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: F-HAZA · F-HAZB à mi-temps
+        - instance «Stat · Fréquence» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Fréquence
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 1 vol / 3 h
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: depuis Nice · 4 allers-retours par jour
+        - instance «Stat · Remplissage» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Remplissage
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 78 %
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: +4 pts sur 7 jours
+        - instance «Stat · Recette par jour» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Recette par jour
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 41 500 €
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: marge 9 400 € après coûts
+    - instance «Panel · Planning» of «Panel»
+      - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+        - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Planning de la ligne
+        - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Modifier le programme
+      - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=20 padding=[14, 22, 22, 22]
+        - frame «Week Row» width="fill_container" alignItems="center" justifyContent="space_between"
+          - frame «Days» gap=4
+            - frame «Day · lun. 2» layout="vertical" gap=2 padding=[8, 16] cornerRadius=4
+              - text «Day» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: lun. 2
+              - text «Day Summary» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 4 A/R · 76 %
+            - frame «Day · mar. 3» layout="vertical" gap=2 padding=[8, 16] cornerRadius=4
+              - text «Day» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: mar. 3
+              - text «Day Summary» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 4 A/R · 74 %
+            - frame «Day · mer. 4» layout="vertical" gap=2 padding=[8, 16] cornerRadius=4
+              - text «Day» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: mer. 4
+              - text «Day Summary» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 4 A/R · 79 %
+            - frame «Day · jeu. 5» layout="vertical" gap=2 padding=[8, 16] cornerRadius=4
+              - text «Day» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: jeu. 5
+              - text «Day Summary» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 4 A/R · 81 %
+            - frame «Day · ven. 6» layout="vertical" gap=2 padding=[8, 16] fill="$surface-selected" cornerRadius=4
+              - text «Day» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: ven. 6
+              - text «Day Summary» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: aujourd'hui · 78 %
+            - frame «Day · sam. 7» layout="vertical" gap=2 padding=[8, 16] cornerRadius=4
+              - text «Day» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: sam. 7
+              - text «Day Summary» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 3 A/R prévus
+            - frame «Day · dim. 8» layout="vertical" gap=2 padding=[8, 16] cornerRadius=4
+              - text «Day» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: dim. 8
+              - text «Day Summary» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 3 A/R prévus
+          - instance «View Switcher · Jour/Semaine» of «View Switcher»
+            - frame «View · Vue en coupe» padding=[8, 16] fill="#FFFFFF1A" cornerRadius=4
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Jour
+            - frame «View · Cabine & charge» padding=[8, 16] cornerRadius=4
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Semaine
+        - frame «Timeline» width="fill_container" layout="vertical" gap=10
+          - frame «Ruler Row» gap=16 alignItems="end"
+            - text «Ruler Caption» width=180 fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: Heure UTC
+            - frame «Hour Ruler» width=1296 height=18 layout="none"
+              - rectangle «Tick 0» width=1 height=6 fill="$border-strong"
+              - text «Hour 0» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 00:00
+              - rectangle «Tick 2» width=1 height=6 fill="$border-strong"
+              - text «Hour 2» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 02:00
+              - rectangle «Tick 4» width=1 height=6 fill="$border-strong"
+              - text «Hour 4» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 04:00
+              - rectangle «Tick 6» width=1 height=6 fill="$border-strong"
+              - text «Hour 6» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 06:00
+              - rectangle «Tick 8» width=1 height=6 fill="$border-strong"
+              - text «Hour 8» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 08:00
+              - rectangle «Tick 10» width=1 height=6 fill="$border-strong"
+              - text «Hour 10» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 10:00
+              - rectangle «Tick 12» width=1 height=6 fill="$border-strong"
+              - text «Hour 12» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 12:00
+              - rectangle «Tick 14» width=1 height=6 fill="$border-strong"
+              - text «Hour 14» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 14:00
+              - rectangle «Tick 16» width=1 height=6 fill="$border-strong"
+              - text «Hour 16» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 16:00
+              - rectangle «Tick 18» width=1 height=6 fill="$border-strong"
+              - rectangle «Tick 20» width=1 height=6 fill="$border-strong"
+              - text «Hour 20» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 20:00
+              - rectangle «Tick 22» width=1 height=6 fill="$border-strong"
+              - text «Hour 22» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 22:00
+              - text «Now Label» width=120 fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600" textAlign="center"  TEXT: Maintenant · 17:58Z
+              - rectangle «Now Cursor» width=2 height=3 fill="$text-primary"
+          - frame «Lane · F-HAZA» gap=16 alignItems="center"
+            - frame «Lane Label» width=180 layout="vertical" gap=3
+              - frame «Lane Title» gap=8 alignItems="center"
+                - text «Primary» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: F-HAZA
+                - text «Secondary» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: ATR 72-600
+              - text «Lane Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 3 rotations · état 84 %
+            - frame «Track» width=1296 height=56 layout="none" fill="#FFFFFF05" cornerRadius=2
+              - rectangle «Now Line» width=2 height=56 fill="$text-primary"
+              - frame «Seg · Nuit à Nice · visite journalière 02:00Z» width=475 height=48 layout="vertical" gap=1 padding=[0, 6] justifyContent="center" stroke="$border" strokeWidth=1 cornerRadius=2
+                - text «Flight» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Nuit à Nice · visite journalière 02:00Z
+              - frame «Seg · 1131» width=61 height=48 layout="vertical" gap=1 padding=[0, 6] justifyContent="center" fill="$surface-selected" cornerRadius=2
+                - text «Flight» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 1131
+                - text «Route» fill="$text-secondary" fontFamily="$font-ui" fontSize=11 fontWeight="normal" opacity=0.8  TEXT: → LFLL
+              - rectangle «Ground 10:40» width=39 height=2 fill="$border-strong"
+              - frame «Seg · 1132» width=61 height=48 layout="vertical" gap=1 padding=[0, 6] justifyContent="center" fill="$surface-selected" cornerRadius=2
+                - text «Flight» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 1132
+                - text «Route» fill="$text-secondary" fontFamily="$font-ui" fontSize=11 fontWeight="normal" opacity=0.8  TEXT: → LFMN
+              - rectangle «Ground 12:35» width=151 height=2 fill="$border-strong"
+              - frame «Seg · 1135» width=60 height=48 layout="vertical" gap=1 padding=[0, 6] justifyContent="center" fill="$surface-selected" cornerRadius=2
+                - text «Flight» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 1135
+                - text «Route» fill="$text-secondary" fontFamily="$font-ui" fontSize=11 fontWeight="normal" opacity=0.8  TEXT: → LFLL
+              - rectangle «Ground 16:35» width=23 height=2 fill="$border-strong"
+              - rectangle «Delay 17:02» width=12 height=2 fill="$warning"
+              - frame «Seg · 1136» width=61 height=48 layout="vertical" gap=1 padding=[0, 6] justifyContent="center" fill="#FFFFFF24" stroke="$text-primary" strokeWidth=1 cornerRadius=2
+                - text «Flight» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 1136
+                - text «Route» fill="$text-primary" fontFamily="$font-ui" fontSize=11 fontWeight="normal" opacity=0.8  TEXT: → LFMN
+              - rectangle «Delay 18:46» width=18 height=2 fill="$warning"
+              - frame «Seg · 1137» width=61 height=48 layout="vertical" gap=1 padding=[0, 6] justifyContent="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                - text «Flight» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 1137
+                - text «Route» fill="$text-primary" fontFamily="$font-ui" fontSize=11 fontWeight="normal" opacity=0.8  TEXT: → LFLL
+              - rectangle «Ground 20:16» width=29 height=2 fill="$border-strong"
+              - frame «Seg · 1138» width=61 height=48 layout="vertical" gap=1 padding=[0, 6] justifyContent="center" fill="#E9A0461A" stroke="$warning" strokeWidth=1 cornerRadius=2
+                - text «Flight» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 1138
+                - text «Route» fill="$warning" fontFamily="$font-ui" fontSize=11 fontWeight="normal" opacity=0.8  TEXT: → LFMN
+              - frame «Seg · Nuit» width=88 height=48 layout="vertical" gap=1 padding=[0, 6] justifyContent="center" stroke="$border" strokeWidth=1 cornerRadius=2
+                - text «Flight» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Nuit
+          - frame «Lane · F-HAZB» gap=16 alignItems="center"
+            - frame «Lane Label» width=180 layout="vertical" gap=3
+              - frame «Lane Title» gap=8 alignItems="center"
+                - text «Primary» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: F-HAZB
+                - text «Secondary» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: ATR 72-600
+              - text «Lane Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 1 rotation · puis Nice ⇄ Ajaccio
+            - frame «Track» width=1296 height=56 layout="none" fill="#FFFFFF05" cornerRadius=2
+              - rectangle «Now Line» width=2 height=56 fill="$text-primary"
+              - frame «Seg · Nuit à Nice» width=628 height=48 layout="vertical" gap=1 padding=[0, 6] justifyContent="center" stroke="$border" strokeWidth=1 cornerRadius=2
+                - text «Flight» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Nuit à Nice
+              - frame «Seg · 1133» width=61 height=48 layout="vertical" gap=1 padding=[0, 6] justifyContent="center" fill="$surface-selected" cornerRadius=2
+                - text «Flight» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 1133
+                - text «Route» fill="$text-secondary" fontFamily="$font-ui" fontSize=11 fontWeight="normal" opacity=0.8  TEXT: → LFLL
+              - rectangle «Ground 13:40» width=34 height=2 fill="$border-strong"
+              - frame «Seg · 1134» width=61 height=48 layout="vertical" gap=1 padding=[0, 6] justifyContent="center" fill="$surface-selected" cornerRadius=2
+                - text «Flight» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 1134
+                - text «Route» fill="$text-secondary" fontFamily="$font-ui" fontSize=11 fontWeight="normal" opacity=0.8  TEXT: → LFMN
+              - frame «Seg · 1641» width=48 height=48 layout="vertical" gap=1 padding=[0, 6] justifyContent="center" fill="$neutral-soft" cornerRadius=2
+                - text «Flight» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 1641
+                - text «Route» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal" opacity=0.8  TEXT: Ajaccio
+              - rectangle «Ground 19:05» width=16 height=2 fill="$border-strong"
+              - frame «Seg · 1642» width=47 height=48 layout="vertical" gap=1 padding=[0, 6] justifyContent="center" fill="$neutral-soft" cornerRadius=2
+                - text «Flight» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: 1642
+                - text «Route» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal" opacity=0.8  TEXT: Nice
+              - frame «Seg · Nuit à Nice» width=160 height=48 layout="vertical" gap=1 padding=[0, 6] justifyContent="center" stroke="$border" strokeWidth=1 cornerRadius=2
+                - text «Flight» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Nuit à Nice
+          - frame «Crew · Perrin Lefèvre» gap=16 alignItems="center"
+            - frame «Lane Label» width=180 layout="vertical" gap=3
+              - text «Primary» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Cdt. Perrin · OPL Lefèvre
+              - text «Lane Note» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: sur F-HAZA · dépasse à 21:45Z
+            - frame «Track» width=1296 height=36 layout="none" fill="#FFFFFF05" cornerRadius=2
+              - rectangle «Now Line» width=2 height=36 fill="$text-primary"
+              - frame «Duty 08:45» width=495 height=24 padding=[0, 8] alignItems="center" fill="$neutral-soft" cornerRadius=2
+                - text «Duty Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: En service depuis 08:45Z
+              - frame «Duty 17:58» width=216 height=24 padding=[0, 8] alignItems="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                - text «Duty Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: Arrivée prévue 22:00Z
+              - rectangle «Limit Line» width=2 height=36 fill="$warning"
+              - rectangle «Over Limit» width=10 height=24 fill="#E9A04633"
+          - frame «Crew · Vidal Roux» gap=16 alignItems="center"
+            - frame «Lane Label» width=180 layout="vertical" gap=3
+              - text «Primary» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Cdt. Vidal · OPL Roux
+              - text «Lane Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: sur F-HAZB · service 6 h 13
+            - frame «Track» width=1296 height=36 layout="none" fill="#FFFFFF05" cornerRadius=2
+              - rectangle «Now Line» width=2 height=36 fill="$text-primary"
+              - frame «Duty 11:45» width=333 height=24 padding=[0, 8] alignItems="center" fill="$neutral-soft" cornerRadius=2
+                - text «Duty Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: En service depuis 11:45Z
+              - frame «Duty 17:58» width=153 height=24 padding=[0, 8] alignItems="center" stroke="$border-strong" strokeWidth=1 cornerRadius=2
+                - text «Duty Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: Fin prévue 20:50Z
+          - frame «Legend Row» gap=16 padding=[6, 0, 0, 0] alignItems="center"
+            - frame «Legend Spacer» width=180 height=1
+            - frame «Legend» gap=20 alignItems="center"
+              - frame «Legend · Vol effectué» gap=7 alignItems="center"
+                - rectangle «Swatch» width=14 height=10 fill="$surface-selected" cornerRadius=1
+                - text «Legend Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Vol effectué
+              - frame «Legend · En vol» gap=7 alignItems="center"
+                - rectangle «Swatch» width=14 height=10 fill="#FFFFFF24" stroke="$text-primary" strokeWidth=1 cornerRadius=1
+                - text «Legend Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: En vol
+              - frame «Legend · Prévu» gap=7 alignItems="center"
+                - rectangle «Swatch» width=14 height=10 stroke="$border-strong" strokeWidth=1 cornerRadius=1
+                - text «Legend Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Prévu
+              - frame «Legend · Autre ligne» gap=7 alignItems="center"
+                - rectangle «Swatch» width=14 height=10 fill="$neutral-soft" cornerRadius=1
+                - text «Legend Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Autre ligne
+              - frame «Legend · Retard» gap=7 alignItems="center"
+                - rectangle «Swatch» width=14 height=2 fill="$warning" cornerRadius=1
+                - text «Legend Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Retard
+              - frame «Legend · Risque» gap=7 alignItems="center"
+                - rectangle «Swatch» width=14 height=10 fill="#E9A0461A" stroke="$warning" strokeWidth=1 cornerRadius=1
+                - text «Legend Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Risque
+        - frame «Line Footer» width="fill_container" gap=64 padding=[20, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+          - frame «Economics» width=520 layout="vertical" gap=12
+            - frame «Economics Head» width="fill_container" alignItems="end" justifyContent="space_between"
+              - text «Economics Title» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: Ce que rapporte la journée
+              - text «Economics Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 8 vols · 449 passagers
+            - frame «Revenue Bar» width="fill_container" height=8 gap=2
+              - rectangle «Part · Carburant» width=158 height=8 fill="#FFFFFF2E" cornerRadius=1
+              - rectangle «Part · Redevances» width=90 height=8 fill="#FFFFFF24" cornerRadius=1
+              - rectangle «Part · Équipages» width=85 height=8 fill="#FFFFFF1A" cornerRadius=1
+              - rectangle «Part · Maintenance» width=63 height=8 fill="#FFFFFF12" cornerRadius=1
+              - rectangle «Part · Marge» width=116 height=8 fill="$text-primary" cornerRadius=1
+            - frame «Revenue Legend» width="fill_container" justifyContent="space_between"
+              - frame «Part · Carburant» layout="vertical" gap=2
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Carburant
+                - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 12 800 €
+              - frame «Part · Redevances» layout="vertical" gap=2
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Redevances
+                - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 7 300 €
+              - frame «Part · Équipages» layout="vertical" gap=2
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Équipages
+                - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 6 900 €
+              - frame «Part · Maintenance» layout="vertical" gap=2
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Maintenance
+                - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 5 100 €
+              - frame «Part · Marge» layout="vertical" gap=2
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Marge
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 9 400 €
+          - frame «Dependencies» width="fill_container" layout="vertical" gap=14
+            - frame «Dependencies Head» width="fill_container" alignItems="end" justifyContent="space_between"
+              - text «Dependencies Title» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: Ce dont dépend la ligne
+              - text «Dependencies Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: si l'un manque, les rotations concernées sont annulées
+            - frame «Meters» width="fill_container" gap=28
+              - frame «Meter · F-HAZA · état» width=200 layout="vertical" gap=6
+                - frame «Meter Head» width="fill_container" alignItems="end" justifyContent="space_between"
+                  - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZA · état
+                  - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 84 %
+                - frame «Bar» width=200 height=4 fill="$neutral-soft" cornerRadius=2
+                  - rectangle «Bar Fill» width=168 height=4 fill="$text-secondary" cornerRadius=2
+                - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: visite A dans 38 h de vol
+              - frame «Meter · F-HAZB · état» width=200 layout="vertical" gap=6
+                - frame «Meter Head» width="fill_container" alignItems="end" justifyContent="space_between"
+                  - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZB · état
+                  - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 91 %
+                - frame «Bar» width=200 height=4 fill="$neutral-soft" cornerRadius=2
+                  - rectangle «Bar Fill» width=182 height=4 fill="$text-secondary" cornerRadius=2
+                - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: aucune visite avant décembre
+              - frame «Meter · Pilotes ATR à Nice» width=200 layout="vertical" gap=6
+                - frame «Meter Head» width="fill_container" alignItems="end" justifyContent="space_between"
+                  - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Pilotes ATR à Nice
+                  - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 4 sur 4
+                - frame «Bar» width=200 height=4 fill="$neutral-soft" cornerRadius=2
+                  - rectangle «Bar Fill» width=200 height=4 fill="$text-secondary" cornerRadius=2
+                - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: tous engagés · aucun en réserve
+              - frame «Meter · OPL Lefèvre · service» width=200 layout="vertical" gap=6
+                - frame «Meter Head» width="fill_container" alignItems="end" justifyContent="space_between"
+                  - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: OPL Lefèvre · service
+                  - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 9 h 13 / 13 h
+                - frame «Bar» width=200 height=4 fill="$neutral-soft" cornerRadius=2
+                  - rectangle «Bar Fill» width=142 height=4 fill="$warning" cornerRadius=2
+                - text «Note» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: limite à 21:45Z
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

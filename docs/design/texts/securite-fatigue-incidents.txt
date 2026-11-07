@@ -1,0 +1,82 @@
+LFMN
+Compagnie  ›  Sécurité
+Risque en hausse depuis lundi · un vol de ce soir dépasserait la limite de service
+Sécurité des vols
+Indice de sécurité
+72 / 100
+−6 depuis lundi
+Fatigue des équipages
+27 / 40
+repos courts · 34 jours de congés dus
+État des avions
+29 / 40
+usure de F-HAZC · 3 réparations reportées
+Formation
+16 / 20
+1 contrôle simulateur à repasser
+Risque d'incident par vol
+Détail du calcul
+Part des vols qui finissent en incident, selon le temps de service de l'équipage et l'usure de l'avion
+Avion usé · plus de 60 %
+Avion en bon état · moins de 40 %
+0
+1 %
+2 %
+3 %
+4 %
+Limite de service · 13 h
+AZR 1138 ce soir · OPL Lefèvre
+13 h 15 de service · 1,8 % · 4 fois la moyenne
+Atterrissage dur · 3 nov.
+F-HAZC · équipage à 12 h 40 de service
+0 h
+2 h
+4 h
+6 h
+8 h
+10 h
+12 h
+14 h
+Ce qui pèse aujourd'hui
+Jusqu'à +10 points d'indice en agissant sur ces trois leviers
+AZR 1138 ce soir · OPL Lefèvre à 13 h 15 de service
+Dépasse sa limite de 15 minutes · risque du vol multiplié par 4
++3 points
+Trouver un remplaçant
+Entrée
+F-HAZC · CRJ700 de 22 ans, usé à 63 %
+3 réparations reportées · déjà immobilisé pour l'inspection du train
++4 points
+Programmer la visite
+Congés non pris · 34 jours dus
+5 pilotes sans repos long depuis plus de six semaines
++3 points
+Ouvrir le planning
+Incidents de la saison
+Journal complet
+3 nov.
+Atterrissage dur
+Mineur · F-HAZC à Lyon
+Équipage à 12 h 40 de service, train usé à 63 %
+Train inspecté · 18 400 € · immobilisé 2 jours
+27 oct.
+Sortie de piste
+Grave · F-HAZF à Calvi
+Coupure moteur en approche après deux reports de maintenance
+Enquête BEA en cours · 112 000 € · avion au sol · réputation −0,3
+19 oct.
+Retard technique
+Mineur · F-HAZA à Lyon
+Fuite hydraulique, réparation repoussée de 6 jours
+2 h 10 de retard · 9 300 € d'indemnités
+8 oct.
+Impact d'oiseau
+Mineur · F-HAZB à Ajaccio
+Hors de votre contrôle
+Pare-brise remplacé · couvert par l'assurance
+Coût total · dont 17 400 € couverts
+157 100 €
+À votre charge cette saison
+139 700 €
+Prime d'assurance dès décembre
++12 % · 2 740 € par mois

@@ -6,10 +6,12 @@ Entrée
 Touche qui déclenche la transition
 Navigation globale · HUD
 Q
-Tableau de bord
+Accueil
 Vol en cours
 Jobs
+Réseau
 Flotte
+Compagnie
 Historique
 Classement
 E
@@ -193,6 +195,71 @@ Solde trop bas à la confirmation d'achat
 Nouvelle compagnie
 Premier lancement sans avion : location proposée en premier, puis achat
 06
+Réseau & lignes
+Réseau
+Carte des lignes
+Entrée
+Ouvrir la ligne
+Ligne · planning
+Avions, fréquences, horaires 24 h
+Espace
+Mettre en pause
+Ligne en pause
+Plus de rotations
+Réseau
+N
+Nouvelle ligne
+Ligne · création
+Demande, avion, fréquence, prix
+Entrée
+Ouvrir la ligne
+Ligne · planning
+Réseau
+O
+Opérations
+Centre 24/7
+Vols autonomes en direct
+Entrée
+Traiter l'alerte
+Ligne interrompue
+Cause et solutions
+États et cas limites
+Ligne interrompue
+Avion immobilisé ou équipage indisponible : rotations annulées
+Vol pris en main
+Le joueur vole lui-même une rotation à la place de l'équipage
+Réseau IA
+Même mécanique pour les IA, visible via Tab sur la carte
+07
+Compagnie
+Hubs
+Vue d'ensemble
+Entrée
+Ouvrir le hub
+Plan 3D de l'aéroport
+Bâtiments à louer ou acheter
+Entrée
+Louer
+Facility · contrat
+Bail ou achat, améliorations
+Staff · effectifs
+Par service et par hub
+R
+Recruter
+Recrutement
+Candidats qualifiés
+Entrée
+Embaucher
+Fiche d'un membre
+Qualifs, fatigue, affectation
+États et cas limites
+Bâtiment occupé
+Déjà loué ou acheté par une compagnie IA
+Pénurie de staff
+Effectif sous le besoin du planning : retards et annulations
+Fatigue et repos
+Limites de temps de service appliquées aux équipages
+08
 Historique des vols
 Historique
 Journal et totaux de saison
@@ -212,7 +279,7 @@ Marqué non vérifié, payé moins
 États et cas limites
 Vol rejeté
 Anti-triche : motif, preuve sur la chronologie, contestation
-07
+09
 Compétition IA
 Classement
 Saison mensuelle

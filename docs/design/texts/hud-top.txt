@@ -3,11 +3,13 @@ Serveur global
 ·
 Changer
 Q
-Tableau de bord
+Accueil
 Vol en cours
 Jobs
 42
+Réseau
 Flotte
+Compagnie
 Historique
 Classement
 E

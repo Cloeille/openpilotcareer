@@ -46,6 +46,19 @@ carburant au prix réel
 hors pannes
 Ta progression
 Aperçu
+Chaque palier débloque la location et l'achat des avions de sa catégorie.
+Cessna 172
+Monomoteur à pistons, Cessna 152 compris
+Ton point de départ
+Bimoteur à pistons
+Diamond DA62, Beechcraft Baron 58
+Rang 2 · 150 h de vol · réputation 3,0
+Turbopropulseur
+Pilatus PC-12, King Air 350
+Rang 3 · 500 h de vol · réputation 3,8
+Jet régional
+Embraer E175, Bombardier CRJ700
+Rang 4 · 1 500 h de vol · réputation 4,3
 Repère : sous 13 h de vol par mois, l'aéroclub reste la formule la moins chère.
 Continuer avec l'aéroclub
 Entrée

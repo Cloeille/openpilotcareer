@@ -4,3 +4,35 @@ Clés API
 Compte et données
 Clés API du pont simulateur
 4 sur 10
+OpenHangar Bridge utilise une clé pour envoyer tes vols à ce serveur. Crées-en une par installation du simulateur : tu pourras la révoquer seule si la machine est perdue.
+Nom de la nouvelle clé
+ex. PC bureau — MSFS 2024
+Créer la clé
+Clé « Portable ROG — MSFS 2020 » créée
+Affichée une seule fois
+oh_sk_9fK2mQ7vXa4LtR8pWc3NzE6hYb1JdU5s
+Copier
+C
+Colle-la dans OpenHangar Bridge › Compte › Clé API. Perdue ? Révoque-la et crées-en une autre.
+J'ai copié
+Portable ROG — MSFS 2020
+Créée à l'instant
+oh_sk_9fK2…
+Jamais utilisée
+Révoquer
+PC bureau — MSFS 2024
+Bridge 0.6.1 · Windows 11
+oh_sk_Q4wd…
+Utilisée en ce moment
+Révoquer
+Cockpit A320 — MSFS 2020
+Bridge 0.5.8 · Windows 10
+oh_sk_mT8c…
+Utilisée le 18/10/2026
+Révoquer
+Ancien PC — Windows 10
+Bridge 0.4.2 · Windows 10
+oh_sk_2bTe…
+Inutilisée depuis 7 mois
+Révoquer
+Jusqu'à 10 clés par compte. Il t'en reste 6.

@@ -16,5 +16,107 @@ Rejetés
 2
 Toute la flotte
 Saison de novembre
-Vol en cours
-Tout voir
+Date
+Route
+Appareil
+Durée
+Atterrissage
+Carburant
+Gain
+Vérification
+4 nov.
+21:14Z
+LFLL → LFMN
+AZR 4122
+ATR 72-600
+F-HAZR
+1 h 04
+−142 fpm
+1 180 kg
++12 480 €
+Vérifié
+3 nov.
+16:20Z
+LFMN → LIRF
+AZR 4118
+ATR 72-600
+F-HAZB
+1 h 28
+−218 fpm
+1 420 kg
++9 760 €
+Vérifié
+3 nov.
+07:45Z
+LFMN → LFKJ
+AZR 4115
+ATR 42-600
+F-HAZD
+0 h 23
+−264 fpm
+610 kg
+0 €
+7 940 € annulés
+Rejeté
+Mode slew activé en croisière
+2 nov.
+18:30Z
+LFKJ → LFMN
+AZR 4111
+ATR 42-600
+F-HAZD
+0 h 58
+—
+≈ 640 kg
++1 290 €
+payé ×0,60
+Non vérifié
+Saisie manuelle, pont déconnecté
+1 nov.
+15:10Z
+LFML → LFMN
+AZR 7307
+C208B Caravan
+F-HAZC
+0 h 52
+−176 fpm
+154 kg
++3 310 €
+Vérifié
+1 nov.
+13:30Z
+LFTH → LFML
+AZR 7306
+C208B Caravan
+F-HAZC
+0 h 24
+−312 fpm
+74 kg
++1 340 €
+Vérifié
+1 nov.
+12:15Z
+LFMV → LFTH
+AZR 7305
+C208B Caravan
+F-HAZC
+0 h 41
+—
+≈ 120 kg
++1 010 €
+payé ×0,60
+Non vérifié
+Saisie manuelle, vol hors pont
+1 nov.
+10:50Z
+LFML → LFMV
+AZR 7304
+C208B Caravan
+F-HAZC
+0 h 31
+−204 fpm
+96 kg
++1 120 €
+Vérifié
+8 vols sur 11 · défiler pour voir les plus anciens
+Vols non vérifiés payés à 60 % · vols rejetés non payés
