@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CLUB, MONTHLY_RENTAL, PARKING_FEE_BY_SIZE, PARKING_SPOTS_PER_HUB, loanPayment, type LeaseOffer } from '@opc/shared';
 import { get, run, tx } from './db.ts';
-import { runBilling } from './finance.ts';
+import { planMonth, runBilling } from './finance.ts';
 import { dayOf, leaseOffer } from './leasing.ts';
 import { catalogType } from './catalog.ts';
 import { harness } from './harness.ts';
@@ -370,4 +370,18 @@ test('finance routes need a session and only touch the caller company', async ()
   assert.equal((await h.call('POST', `${V1}/me/leases/${id}/terminate`, { token: b.token })).status, 404);
   assert.equal((await h.call('GET', `${V1}/me/finance`, { token: b.token })).body.contracts.length, 0);
   assert.equal((await h.call('POST', `${V1}/me/leases/abc/terminate`, { token: a.token })).status, 404);
+});
+
+test('planMonth: the insurance rise multiplies the premiums and nothing else, facilities included', () => {
+  const start = Date.UTC(2026, 11, 1);
+  const fleet = [{ id: 1, registration: 'F-TEST', base: null, ownership: 'owned' as const, value: 1_000_000, category: 'turboprop-airliner' as const, acquired_at: 1, busy: false }];
+  const building = { id: 1, label: 'LFMN MX1', kind: 'lease' as const, started_at: 1, months: 36, months_paid: 0, monthly: 5000, upkeep: 0, principal: 0, income: 0 };
+  const base = planMonth(start, [], fleet, [], [building]);
+  const risen = planMonth(start, [], fleet, [], [building], 0.12);
+  const by = (p: typeof base, kind: string) => p.charges.filter((c) => c.kind === kind);
+  assert.equal(by(base, 'insurance').length, 1);
+  assert.equal(by(risen, 'insurance')[0]!.amount, Math.round(by(base, 'insurance')[0]!.amount * 1.12));
+  assert.match(by(risen, 'insurance')[0]!.memo, /\+12 %$/);
+  assert.deepEqual(by(risen, 'facility_rent'), by(base, 'facility_rent'));
+  assert.equal(by(risen, 'facility_rent')[0]!.amount, -5000);
 });

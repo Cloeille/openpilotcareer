@@ -12,6 +12,7 @@ import {
   assertHubSpot, ferryFee, insertAircraft, insuranceMonthly, releaseMaintenance, type ContractRow, type LeaseTerms,
 } from './fleet-extras.ts';
 import { addMonths, balanceOf, fleetView, post, snapshot, typeFor } from './game.ts';
+import { insuranceRise } from './safety.ts';
 import { HttpError } from './http.ts';
 import { dayOf, leaseOffer, parseOfferId } from './leasing.ts';
 
@@ -36,10 +37,12 @@ export type MonthPlan = { charges: Charge[]; contracts: PlanContract[]; faciliti
 
 /** What the month starting at `start` (UTC, the 1st) costs. Everything signed or bought before `start` is billed; things signed this month were paid at signing.
  *  Returns the new contract states without touching the input, so `GET /me/finance` can project several months with the same rules billing uses. */
-export function planMonth(start: number, contracts: PlanContract[], fleet: PlanAircraft[], staff: PlanStaff[] = [], facilities: PlanFacility[] = []): MonthPlan {
+export function planMonth(start: number, contracts: PlanContract[], fleet: PlanAircraft[], staff: PlanStaff[] = [], facilities: PlanFacility[] = [], rise = 0): MonthPlan {
   const charges: Charge[] = [];
   const ended: number[] = [], returned: number[] = [], owned: number[] = [];
   const reg = (id: number): string => fleet.find((a) => a.id === id)?.registration ?? `#${id}`;
+  // v3 SAFETY: the premium rises by the share the last month's incidents earned (shared/safety.ts `insuranceSurcharge`), on every insurance charge.
+  const premium = (base: number, who: string): Charge => ({ kind: 'insurance', amount: -Math.round(base * (1 + rise)), memo: `${who} insurance${rise > 0 ? ` +${Math.round(rise * 100)} %` : ''}` });
   const next = contracts.map((c) => {
     if (c.started_at >= start) return { ...c };
     const n = { ...c };
@@ -48,7 +51,7 @@ export function planMonth(start: number, contracts: PlanContract[], fleet: PlanA
       if (n.months_paid < (n.months ?? 0)) {
         n.months_paid++;
         charges.push({ kind: 'lease_rent', amount: -n.monthly, memo: `${reg(c.aircraft_id)} rent ${n.months_paid}/${n.months}` });
-        if (n.insurance > 0) charges.push({ kind: 'insurance', amount: -n.insurance, memo: `${reg(c.aircraft_id)} insurance` });
+        if (n.insurance > 0) charges.push(premium(n.insurance, reg(c.aircraft_id)));
       } else if (n.ends_at !== null && start >= n.ends_at && !a?.busy) {
         if (n.deposit > 0) charges.push({ kind: 'deposit_refund', amount: n.deposit, memo: `${reg(c.aircraft_id)} deposit returned` });
         ended.push(n.id); returned.push(n.aircraft_id);
@@ -68,7 +71,7 @@ export function planMonth(start: number, contracts: PlanContract[], fleet: PlanA
   const gone = new Set(returned);
   for (const a of fleet) {
     if (a.acquired_at >= start || gone.has(a.id)) continue;
-    if ((a.ownership === 'owned' || a.ownership === 'financed') ) charges.push({ kind: 'insurance', amount: -insuranceMonthly(a.value, a.category), memo: `${a.registration} insurance` });
+    if ((a.ownership === 'owned' || a.ownership === 'financed') ) charges.push(premium(insuranceMonthly(a.value, a.category), a.registration));
     if (a.ownership !== 'club' && a.ownership !== 'rented' && a.base) {
       charges.push({ kind: 'parking', amount: -PARKING_FEE_BY_SIZE[airports.get(a.base)?.size ?? 'small'], memo: `${a.registration} parking ${a.base}` });
     }
@@ -109,7 +112,7 @@ export function runBilling(db: Db, companyId: number, now: number): number {
     if (run(db, 'INSERT INTO billing_runs (company_id, month, at) VALUES (?, ?, ?) ON CONFLICT DO NOTHING', companyId, m, now).changes === 0) continue;
     const at = monthStart(m);
     const { contracts, fleet, staff, facilities } = planInputs(db, companyId, at);
-    const plan = planMonth(at, contracts, fleet, staff, facilities);
+    const plan = planMonth(at, contracts, fleet, staff, facilities, insuranceRise(db, companyId, m));
     for (const c of plan.charges) post(db, companyId, at, c.kind, c.amount, c.memo);
     savePlanRows(db, facilities, plan.facilities);
     for (const c of plan.contracts) {
@@ -274,7 +277,7 @@ export function overview(db: Db, companyId: number, now: number): FinanceOvervie
   let state = contracts, buildings = facilities;
   for (let i = 1; i <= UPCOMING_MONTHS; i++) {
     const at = addMonths(now, i);
-    const plan = planMonth(at, state, fleet, staff, buildings);
+    const plan = planMonth(at, state, fleet, staff, buildings, insuranceRise(db, companyId, monthKey(at)));
     for (const c of plan.charges) upcoming.push({ at, kind: c.kind, amount: c.amount, memo: c.memo });
     state = plan.contracts.filter((c) => !plan.ended.includes(c.id));
     buildings = plan.facilities;

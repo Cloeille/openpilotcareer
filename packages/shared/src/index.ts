@@ -351,3 +351,5 @@ export * from './simbrief.ts';
 export * from './staff.ts';
 // ---- lot facilities (v3)
 export * from './facilities.ts';
+// ---- lot safety (v3)
+export * from './safety.ts';

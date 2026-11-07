@@ -44,15 +44,15 @@ const kinds = (l: Tx[], k: string): Tx[] => l.filter((t) => t.kind === k);
 
 // ---------------------------------------------------------------- SCHEMA_V9
 
-test('SCHEMA_V9 is the last migration and creates the facility tables; a v8 database upgrades with its rows intact', () => {
-  assert.ok(MIGRATIONS[MIGRATIONS.length - 1]!.includes('facility_contracts'));
+test('SCHEMA_V9 is the ninth migration and creates the facility tables; a v8 database upgrades with its rows intact', () => {
+  assert.ok(MIGRATIONS[8]!.includes('facility_contracts'));
   const db = openDb(':memory:');
   for (const t of ['facilities', 'facility_contracts']) assert.ok(get(db, "SELECT 1 AS x FROM sqlite_master WHERE type = 'table' AND name = ?", t), t);
 
   const file = join(mkdtempSync(join(tmpdir(), 'opc-v9-')), 'v8.sqlite');
   const raw = new DatabaseSync(file);
-  for (let i = 0; i < MIGRATIONS.length - 1; i++) raw.exec(MIGRATIONS[i]!);
-  raw.exec(`PRAGMA user_version = ${MIGRATIONS.length - 1}`);
+  for (let i = 0; i < 8; i++) raw.exec(MIGRATIONS[i]!);
+  raw.exec('PRAGMA user_version = 8');
   raw.exec(`INSERT INTO users (id, username, pass_hash, created_at) VALUES (1, 'a', 'h', 1); INSERT INTO companies (id, user_id, name, balance, reputation, created_at) VALUES (1, 1, 'A Air', 5, 50, 1);`);
   raw.close();
   const up = openDb(file);

@@ -4,7 +4,7 @@
 import { randomUUID } from 'node:crypto';
 import {
   HUB_PRICE, MAX_COMPANIES_PER_USER, loanOption, loanPayment, PAX_KG, REJECT_REPUTATION_PENALTY, START_MODES, START_REPUTATION, STARTER_AIRCRAFT, STARTING_BALANCE,
-  aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, fuelPriceFactor, interruptionsSchema, jobPayout, minFlightHours, presetSetting, rankFor, realismModifiers, realismView, seasonOf, settle,
+  aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, flightDutyMin, fuelPriceFactor, interruptionsSchema, jobPayout, minFlightHours, presetSetting, rankFor, realismModifiers, realismView, seasonOf, settle,
   type AircraftType, type Company, type CompanyProfile, type CustomAircraftInput, type FleetAircraft, type Flight,
   type Financing, type FlightStatus, type Job, type Leaderboard, type LeaderboardRow, type Me, type Ownership, type Personality, type Pilot, type StartMode, type Telemetry, type Transaction,
 } from '@opc/shared';
@@ -13,9 +13,13 @@ import { boardFor, boardJob, windowOf } from './board.ts';
 import { all, get, run, type Db } from './db.ts';
 import { accrueWear, activeContractsOf, assertFlyable, assertHubSpot, ferryFee, financeFields, flightCosts, insertAircraft, isHuman } from './fleet-extras.ts';
 import { HttpError } from './http.ts';
+import { post } from './ledger.ts';
 import { parseRealism, realismSettingOf, saveRealism } from './realism.ts';
 import { release, reservedAgainst, reservedIds, reservationOf, windowOfJobId } from './reservations.ts';
+import { rollIncident } from './safety.ts';
 import type { Ofp } from './simbrief.ts';
+
+export { post };
 
 export const MAX_CUSTOM_AIRCRAFT = 20;
 export const MAX_PENDING_IMPORTS = 25;
@@ -67,13 +71,7 @@ export function typeFor(db: Db, companyId: number, icao: string): AircraftType {
 
 export const balanceOf = (db: Db, companyId: number): number => get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId)?.balance ?? 0;
 
-/** The only place a balance changes: updates the balance and appends the matching ledger line. */
-export function post(db: Db, companyId: number, at: number, kind: string, amount: number, memo: string, flightId: number | null = null): void {
-  const row = get<{ balance: number }>(db, 'UPDATE companies SET balance = balance + ? WHERE id = ? RETURNING balance', amount, companyId);
-  if (!row) throw new HttpError(404, 'company_not_found', 'company not found');
-  run(db, 'INSERT INTO transactions (company_id, at, kind, amount, balance_after, flight_id, memo) VALUES (?, ?, ?, ?, ?, ?, ?)', companyId, at, kind, amount, row.balance, flightId, memo);
-}
-
+/** Spending that needs the money in the bank: 402 when the balance does not cover it. `post` (ledger.ts) is the only place a balance changes. */
 function spend(db: Db, companyId: number, at: number, kind: string, price: number, memo: string): void {
   const c = get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId);
   if (!c || c.balance < price) throw new HttpError(402, 'insufficient_funds', `needs ${price}, balance is ${c?.balance ?? 0}`);
@@ -374,7 +372,10 @@ export function finishFlight(db: Db, f: FlightRow, status: 'verified' | 'unverif
   post(db, f.company_id, at, fuelKind, -s.fuelCost, memo, f.id);
   post(db, f.company_id, at, 'landing_fee', -s.landingFee, memo, f.id);
   post(db, f.company_id, at, 'maintenance', -s.maintenance, memo, f.id);
+  const wearBefore = get<{ wear_pct: number }>(db, 'SELECT wear_pct FROM aircraft WHERE id = ?', f.aircraft_id)?.wear_pct ?? 0;
   accrueWear(db, f.company_id, f.aircraft_id, type.category, hours, at);
+  // B.5: one incident roll per flight. The player is not crew (C4): the duty period is the flight's own and the rest policy does not apply.
+  rollIncident(db, { ref: `flight:${f.id}`, companyId: f.company_id, aircraftId: f.aircraft_id, at, airport: f.destination, flightId: f.id, flightNo: null, dutyMin: flightDutyMin(hours), riskFactor: 1, wearPct: wearBefore, landedAt: at });
   snapshot(db, f.company_id, at);
   return get<FlightRow>(db, 'SELECT * FROM flights WHERE id = ?', f.id)!;
 }
