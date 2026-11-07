@@ -21,14 +21,16 @@ import { lease } from './screens/lease.ts';
 import { live } from './screens/live.ts';
 import { simbrief } from './screens/simbrief.ts';
 import { realism } from './screens/ob-realism.ts';
-import { networkSoon } from './screens/network-soon.ts';
+import { network } from './screens/network.ts';
+import { lineScreen } from './screens/line.ts';
+import { lineNew } from './screens/line-new.ts';
+import { ops } from './screens/ops.ts';
 
 /** Every HUD tab is a route (the HUD links to `#<tab>`), which the type enforces: a tab added to TABS without a screen does not compile. */
 export const routes: Record<Tab, ScreenFn> & Record<string, ScreenFn> = {
   dashboard,
   live,
   jobs,
-  network: networkSoon,
   job: jobDetail,
   simbrief,
   fleet, catalogue, buy, hubs, custom, company: newCompany,
@@ -37,6 +39,8 @@ export const routes: Record<Tab, ScreenFn> & Record<string, ScreenFn> = {
   leaderboard, duel: duelScreen, 'company-sheet': companySheet, recap,
   settings,
   realism,
+  // ---- lines (v3 F1)
+  network, line: lineScreen, 'line-new': lineNew, ops,
 };
 
 /** Old bookmarks (`#flights`) keep working. */
