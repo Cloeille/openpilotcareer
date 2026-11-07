@@ -82,9 +82,9 @@ const technicianPayroll = (db: Db, companyId: number, hub: string, at: number): 
 
 // ---------------------------------------------------------------- hangar: maintenance cost, workshop time, parking spots
 
-/** Levels in force of the company's hangars at the hub (a contract that has not started is not counted: nothing is retroactive). */
-export const hangarLevels = (db: Db, companyId: number, hub: string, at: number): number[] =>
-  heldBy(db, companyId, hub).filter((h) => h.started_at <= at && effectOf(h) === 'hangar').map((h) => levelAt(h, at));
+/** Levels in force of the company's hangars at the hub (a contract that has not started is not counted: nothing is retroactive). `without`: what the hub would have with that contract gone. */
+export const hangarLevels = (db: Db, companyId: number, hub: string, at: number, without?: number): number[] =>
+  heldBy(db, companyId, hub).filter((h) => h.id !== without && h.started_at <= at && effectOf(h) === 'hangar').map((h) => levelAt(h, at));
 
 /** What the company's hangars give an aircraft based at their hub, at instant `at`. null: none that can service it (a wide-body needs a level-3 hangar). */
 export function hangarEffectFor(db: Db, aircraftId: number, category: AircraftCategory, at: number): HangarEffect | null {
@@ -95,8 +95,8 @@ export function hangarEffectFor(db: Db, aircraftId: number, category: AircraftCa
 }
 
 /** Parking spots of a hub: the airport's ten, plus the aircraft each hangar houses. Players only (AI companies are not capped). */
-export const hubCapacity = (db: Db, companyId: number, hub: string, at: number): number =>
-  PARKING_SPOTS_PER_HUB + hangarLevels(db, companyId, hub, at).reduce((t, l) => t + hangarAircraft(l), 0);
+export const hubCapacity = (db: Db, companyId: number, hub: string, at: number, without?: number): number =>
+  PARKING_SPOTS_PER_HUB + hangarLevels(db, companyId, hub, at, without).reduce((t, l) => t + hangarAircraft(l), 0);
 
 // ---------------------------------------------------------------- offices: workstations for the people who are not on a flight
 

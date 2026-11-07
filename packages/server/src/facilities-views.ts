@@ -82,7 +82,7 @@ function hubOverview(db: Db, companyId: number, icao: string, main: boolean, now
   const aircraft = all<{ id: number; registration: string | null; icao: string; location: string; status: string; maintenance_until: number | null; busy: number }>(db,
     `SELECT a.*, EXISTS (SELECT 1 FROM flights f WHERE f.aircraft_id = a.id AND f.status = 'active')
         OR EXISTS (SELECT 1 FROM scheduled_flights s WHERE s.aircraft_id = a.id AND s.status = 'done' AND s.dep_at <= ?3 AND s.arr_at + s.delay_min * 60000 > ?3) AS busy
-     FROM aircraft a WHERE a.company_id = ? AND a.base = ? AND a.returned_at IS NULL ORDER BY a.id`, companyId, icao, now)
+     FROM aircraft a WHERE a.company_id = ?1 AND a.base = ?2 AND a.returned_at IS NULL ORDER BY a.id`, companyId, icao, now)
     .map((x) => ({ id: x.id, reg: x.registration ?? `#${x.id}`, icao: x.icao, typeName: typeFor(db, companyId, x.icao).name, status: x.status === 'maintenance' ? 'maintenance' : x.busy ? 'flying' : 'available', location: x.location, maintenanceUntil: x.status === 'maintenance' ? x.maintenance_until : null }));
   const parking = parkingOf(db, companyId, icao, now);
   const renewals = heldBy(db, companyId, icao).flatMap((h) => {
@@ -130,6 +130,7 @@ const TECHNICIAN_SALARY = salaryFor('maintenance', 'technician', 0.5, null);
 
 export function facilityDetail(db: Db, companyId: number, id: number, q: FacilityQuery, now: number): FacilityDetail {
   const f = facilityById(db, id);
+  assertHub(db, companyId, f.hub_icao);
   const holder = holderOf(db, id);
   const facility = facilityView(db, companyId, f, holder, now);
   const seed = seedOf(f.hub_icao, f.slot)!;

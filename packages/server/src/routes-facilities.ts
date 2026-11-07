@@ -34,7 +34,7 @@ export function registerFacilities(app: FastifyInstance, ctx: FacilitiesCtx): vo
   app.get('/api/v1/facilities/:id', async (req) => {
     const p = billed(user(req));
     const q = parse(facilityQuerySchema, req.query);
-    return tx(db, () => facilityDetail(db, p.companyId, id(req), q, now()));
+    return facilityDetail(db, p.companyId, id(req), q, now());
   });
 
   app.post('/api/v1/facilities/:id/lease', async (req, reply) => {

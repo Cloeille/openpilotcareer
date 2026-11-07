@@ -4,16 +4,17 @@ import {
   DAY_MS, FACILITY_MAX_LEVEL, LEASE_MONTHS, LEASE_NOTICE_MONTHS, LEVEL_WORKS_DAYS, MAX_LEVEL_AT_SIGNING, facilityLevelCost, leaseExitFee, nextLevelAt, resaleValue, signing,
   type FacilityContractKind, type FacilitySignResult, type FacilityTerminateResult, type FacilityUpgradeResult, type Financing,
 } from '@opc/shared';
-import { run, get, type Db } from './db.ts';
-import { assertHub, facilityById, heldFacility, holderOf, labelOf, levelAt, levelSinceAt, seedOf, forRent, worksAt, type Held } from './facilities.ts';
+import { get, run, type Db } from './db.ts';
+import { assertHub, facilityById, forRent, heldFacility, holderOf, hubCapacity, labelOf, levelAt, levelSinceAt, seedOf, worksAt, type Held } from './facilities.ts';
 import { facilityContractView } from './facilities-views.ts';
+import { hubUsed } from './fleet-extras.ts';
 import { balanceOf, post, snapshot } from './game.ts';
 import { HttpError } from './http.ts';
 
 const short = (needed: number, balance: number): HttpError => new HttpError(409, 'insufficient_funds', `needs ${needed - balance} more`, { needed, balance, missing: needed - balance });
 
 /** Pay (a negative amount is money coming in) if the balance can take the net of all `lines` at once; one check so a signing never half-books. */
-function settle(db: Db, companyId: number, at: number, lines: readonly { kind: string; amount: number; memo: string }[]): void {
+function book(db: Db, companyId: number, at: number, lines: readonly { kind: string; amount: number; memo: string }[]): void {
   const net = lines.reduce((t, l) => t + l.amount, 0);
   const balance = balanceOf(db, companyId);
   if (balance + net < 0) throw short(-net, balance);
@@ -34,7 +35,7 @@ function sign(db: Db, companyId: number, facilityId: number, kind: FacilityContr
     ? [{ kind: 'facility_deposit', amount: -s.deposit, memo: `${label} security deposit` }]
     : [{ kind: 'facility_purchase', amount: -s.down, memo: `${label} ${s.principal > 0 ? 'down payment' : 'purchase'}` }];
   if (s.works > 0) lines.push({ kind: 'facility_works', amount: -s.works, memo: `${label} works to level ${level}` });
-  settle(db, companyId, now, lines);
+  book(db, companyId, now, lines);
   const works = level > 1 ? { to: level, until: now + LEVEL_WORKS_DAYS[level]! * DAY_MS } : null;
   const id = run(db, `INSERT INTO facility_contracts (facility_id, company_id, kind, started_at, months, monthly, upkeep, deposit, price, principal, value, notice_months, level, level_since, works_to, works_until)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)`,
@@ -67,7 +68,7 @@ export function upgradeFacility(db: Db, companyId: number, facilityId: number, t
   const opensAt = nextLevelAt(level, since);
   if (opensAt > now) throw new HttpError(409, 'too_early', `level ${toLevel} opens ${new Date(opensAt).toISOString()}`, { availableAt: opensAt });
   const cost = facilityLevelCost(seed.rent, toLevel), until = now + LEVEL_WORKS_DAYS[toLevel]! * DAY_MS;
-  settle(db, companyId, now, [{ kind: 'facility_works', amount: -cost, memo: `${labelOf(h)} works to level ${toLevel}` }]);
+  book(db, companyId, now, [{ kind: 'facility_works', amount: -cost, memo: `${labelOf(h)} works to level ${toLevel}` }]);
   run(db, 'UPDATE facility_contracts SET level = ?, level_since = ?, works_to = ?, works_until = ? WHERE id = ?', level, since, toLevel, until, h.id);
   return { toLevel, cost, until, balanceAfter: balanceOf(db, companyId) };
 }
@@ -76,11 +77,14 @@ export function upgradeFacility(db: Db, companyId: number, facilityId: number, t
  *  The building is on offer again; its works in progress are lost. */
 export function terminateFacility(db: Db, companyId: number, facilityId: number, now: number): FacilityTerminateResult {
   const h = owned(db, companyId, facilityId);
+  // the aircraft a hangar houses must still have a spot once it is gone
+  const spots = hubCapacity(db, companyId, h.hub_icao, now, h.id), used = hubUsed(db, companyId, h.hub_icao);
+  if (used > spots) throw new HttpError(409, 'hub_in_use', `${h.hub_icao} would have ${spots} parking spots for ${used} aircraft: move some away first`, { spots, used });
   const label = labelOf(h);
   const lease = h.kind === 'lease';
   const fee = lease ? leaseExitFee(h.monthly, h.months ?? 0, h.months_paid, h.notice_months) : h.principal;
   const refund = lease ? h.deposit : h.value;
-  settle(db, companyId, now, lease
+  book(db, companyId, now, lease
     ? [{ kind: 'facility_rent', amount: -fee, memo: `${label} exit` }, { kind: 'facility_deposit_refund', amount: refund, memo: `${label} deposit returned` }]
     : [{ kind: 'facility_loan', amount: -fee, memo: `${label} credit settled` }, { kind: 'facility_sale', amount: refund, memo: `${label} sold` }]);
   run(db, "UPDATE facility_contracts SET status = 'ended', ended_at = ? WHERE id = ?", now, h.id);
