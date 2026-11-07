@@ -135,6 +135,12 @@ const flights = (await call('GET', '/me/flights', { token })).body;
 expect(flights.map((x) => x.status).join() === 'verified,rejected', `flight history: ${flights.map((x) => `${x.job.origin}-${x.job.destination} ${x.status}`).join(', ')}`, flights);
 const ledger = (await call('GET', '/me/transactions?limit=200', { token })).body;
 expect(ledger.reduce((s, x) => s + x.amount, 0) === me.company.balance, `ledger (${ledger.length} lines) sums to the balance`);
+// --- simulator aircraft: the bridge sends its scan with the key, the player reads it with the session, the catalogue stays the only price
+const scan = await call('PUT', '/me/sim-aircraft', { token: apiKey, body: { aircraft: [{ title: 'Cessna 172 Skyhawk (Asobo)', icao: 'C172', manufacturer: 'Cessna', model: '172', source: 'official', liveries: 4 }, { title: 'Mod Without Designator', icao: null, manufacturer: '', model: '', source: 'community', liveries: 1 }] } });
+const simList = await call('GET', '/me/sim-aircraft', { token });
+expect(scan.status === 200 && simList.body.aircraft.length === 2 && simList.body.types.length === 1 && simList.body.types[0].icao === 'C172', 'simulator aircraft: the key PUTs the scan, the session reads it with the catalogue type', simList);
+expect((await call('GET', '/me/sim-aircraft', { token: apiKey })).status === 401 && (await call('PUT', '/me/sim-aircraft', { token, body: { aircraft: [] } })).status === 401, 'simulator aircraft: a key cannot read and a session cannot write');
+
 expect((await call('DELETE', `/me/api-keys/${key.body.id}`, { token })).status === 204 && (await call('GET', '/flights/active', { token: apiKey })).status === 401, 'revoking the key stops it working immediately');
 
 // --- a second company: create, rename, act as it, ownership
@@ -274,6 +280,47 @@ expect((await call('DELETE', `/agency/missions/${mission.body.id}`, { token: lin
 const off = await call('PUT', '/network/enabled', { token: lp.body.token, body: { enabled: false } });
 expect(off.body.enabled === false && (await call('GET', '/network', { token: lp.body.token })).body.enabled === false, 'the network switch turns the lines off');
 await call('DELETE', '/me', { token: lp.body.token, body: { password } });
+
+// --- ferry: the aircraft stands where its last job ended; send it empty to the nearest other board destination (priced by the preview, paid once), wait for it to land, take a job there
+const beforeFerry = (await call("GET", "/me", { token })).body;
+const idle = beforeFerry.fleet[0];
+const nearby = (await call('GET', `/jobs?airport=${idle.location}`, { token })).body.jobs.filter((j) => j.distanceNm <= t.rangeNm).sort((a, b) => a.distanceNm - b.distanceNm)[0];
+const ferryTo = nearby.destination;
+const quote = await call('GET', `/me/fleet/${idle.id}/ferry?to=${ferryTo}`, { token });
+expect(quote.status === 200 && quote.body.ok && quote.body.cost > 0 && quote.body.distanceNm > 0, `ferry preview ${idle.location}-${ferryTo}: ${quote.body.distanceNm} nm, ${quote.body.cost} for ${quote.body.hours.toFixed(2)} h`, quote);
+expect((await call('GET', '/me', { token })).body.company.balance === beforeFerry.company.balance, 'the preview booked nothing');
+expect((await call('POST', `/me/fleet/${idle.id}/ferry`, { token: rival.body.token, body: { to: ferryTo } })).status === 404, "another company's aircraft cannot be ferried");
+const booked = await call('POST', `/me/fleet/${idle.id}/ferry`, { token, body: { to: ferryTo } });
+expect(booked.status === 201 && booked.body.cost === quote.body.cost && booked.body.balanceAfter === beforeFerry.company.balance - quote.body.cost, `ferried: charged ${booked.body.cost}, the preview's price`, booked);
+const flying = (await call('GET', '/me', { token })).body.fleet[0];
+expect(flying.location === ferryTo && flying.busy && flying.ferryUntil === booked.body.arrivesAt, `the aircraft is at ${ferryTo} and busy until it lands`, flying);
+await sleepUntil(booked.body.arrivesAt + 60_000);
+const landed = (await call('GET', '/me', { token })).body.fleet[0];
+expect(!landed.busy && landed.ferryUntil === null, 'it is free once it has landed');
+const canFlyHere = (j) => (j.kind === 'pax' ? j.pax <= t.seats : j.payloadKg <= t.cargoKg) && j.distanceNm <= t.rangeNm;
+const there = (await call('GET', `/jobs?airport=${ferryTo}`, { token })).body.jobs.find(canFlyHere);
+const take = await call('POST', `/jobs/${there.id}/accept`, { token, body: { aircraftId: idle.id } });
+expect(take.status === 201 && take.body.job.origin === ferryTo, `accepted ${there.origin}-${there.destination} at the ferry destination -> flight ${take.body.id}`, take);
+expect((await call('POST', `/flights/${take.body.id}/cancel`, { token })).status === 200, 'cancelled it again');
+const txs = (await call('GET', '/me/transactions?limit=200', { token })).body;
+expect(txs.filter((x) => x.kind === 'ferry_flight').length === 1 && txs.reduce((sum, x) => sum + x.amount, 0) === (await call('GET', '/me', { token })).body.company.balance, 'one ferry_flight ledger line, and the ledger still sums to the balance');
+
+// --- company reset and delete (password, session only, owner only)
+const companiesBefore = (await call('GET', '/me', { token })).body.companies.length;
+const spare = await call('POST', '/me/companies', { token, body: { name: `${username} Spare`, hub: 'LFPG' } });
+const spareId = spare.body.company.id;
+expect(spare.status === 201, `a second company ${spareId} to reset and delete`, spare);
+const liveKey = (await call('POST', '/me/api-keys', { token, body: { label: 'reset-check' } })).body.key; // the first key was revoked above: a 401 from it would prove nothing
+const resetBody = (pw) => ({ password: pw, startMode: 'hardcore' });
+expect((await call('POST', `/companies/${spareId}/reset`, { token, body: resetBody('not the password') })).status === 403, 'reset with a wrong password is refused');
+expect((await call('POST', `/companies/${spareId}/reset`, { token: liveKey, body: resetBody(password) })).status === 401, 'an API key cannot reset a company');
+expect((await call('POST', `/companies/${rival.body.company.id}/reset`, { token, body: resetBody(password) })).status === 403, "another player's company cannot be reset");
+const fresh = await call('POST', `/companies/${spareId}/reset`, { token, body: resetBody(password) });
+expect(fresh.status === 200 && fresh.body.company.id === spareId && fresh.body.company.balance === 45000 && fresh.body.fleet.length === 0, `reset: same company ${spareId}, hardcore capital ${fresh.body?.company?.balance}, no aircraft`, fresh);
+expect((await call('DELETE', `/companies/${spareId}`, { token, body: { password: 'not the password' } })).status === 403, 'company deletion with a wrong password is refused');
+expect((await call('DELETE', `/companies/${spareId}`, { token: liveKey, body: { password } })).status === 401, 'an API key cannot delete a company');
+expect((await call('DELETE', `/companies/${spareId}`, { token, body: { password } })).status === 204 && (await call('GET', '/me', { token, company: spareId })).status === 403, 'company deleted: its id is no longer the player\'s');
+expect((await call('GET', '/me', { token })).body.companies.length === companiesBefore, 'the other companies are untouched');
 
 // --- delete
 expect((await call('DELETE', '/me', { token, body: { password: 'not the password' } })).status === 403, 'account deletion with a wrong password is refused');

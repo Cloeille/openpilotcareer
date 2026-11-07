@@ -2,19 +2,21 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { AIRCRAFT_CATEGORIES, COMPONENTS, FACILITY_KINDS, HAULS, MECHANICAL, MEAL_QUALITIES, PARTS_POLICIES, PART_CLASSES, REALISM_TOGGLES, RANKS, REST_POLICY_NAMES, SERVICE_ITEMS, SERVICE_MODES, STAFF_FAMILIES, WTCS, type AirportSize, type Ownership } from '@opc/shared';
+import { SIM_AIRCRAFT_SOURCES, AIRCRAFT_CATEGORIES, COMPONENTS, FACILITY_KINDS, HAULS, MECHANICAL, MEAL_QUALITIES, PARTS_POLICIES, PART_CLASSES, REALISM_TOGGLES, RANKS, REST_POLICY_NAMES, SERVICE_ITEMS, SERVICE_MODES, STAFF_FAMILIES, WTCS, type AirportSize, type Ownership } from '@opc/shared';
 import type { Coverage, DutyRule, StaffRole, StaffState } from './api-staff.ts';
 import type { Meter, Level } from './staff-view.ts';
 import type { DuelKey, Kind } from './standings.ts';
 import type { OpsBadge, LineVisual, Part, Phase } from './lines-view.ts';
 import type { ProjectionStatus, ResolveOption, ScheduledFlightStatus } from './api-lines.ts';
 import type { AddonCategory } from './finance-view.ts';
+import type { RowState } from './simair-view.ts';
 import type { EffectLines } from './parts-view.ts';
 import type { Comfort, Effect } from './service-view.ts';
 import { OPTION_HASH, OPTION_NOTE, OPTION_PHASES, OPTION_SUB, OPTION_TITLE, OPTION_UNAVAILABLE, SAVED_AGAINST } from './agency-view.ts';
 import type { KitchenDeparture } from './api-service.ts';
 import type { AgencyOptionId } from './api-agency.ts';
 import { METRICS } from './kitchen-view.ts';
+import type { NoAircraftReason } from './board.ts';
 import { GROUPS } from './catalogue.ts';
 import { GROUPS as SERVICE_GROUPS } from './service-view.ts';
 import { STATUS_FILTERS } from './history.ts';
@@ -49,6 +51,7 @@ const DUEL_KEYS = every<DuelKey>({ worth: 0, gain: 0, flights: 0, reputation: 0,
 const OWNERSHIPS = every<Ownership>({ owned: 0, leased: 0, financed: 0, club: 0, rented: 0 });
 const AIRPORT_SIZES = every<AirportSize>({ large: 0, medium: 0, small: 0 });
 const ADDONS = every<AddonCategory>({ piston: 0, turboprop: 0, jet: 0, helicopter: 0 });
+const NO_AIRCRAFT_REASONS = every<NoAircraftReason['kind']>({ none: 0, type: 0, seats: 0, cargo: 0, range: 0, elsewhere: 0, far: 0, arriving: 0, busy: 0 });
 const STYLES = ['cautious', 'aggressive'] as const;
 const EFFECT_KINDS = every<NonNullable<EffectLines['main']>['kind']>({ performance: 0, reliability: 0, satisfaction: 0 });
 const COMFORTS = every<Comfort['level']>({ basic: 0, comfort: 0, premium: 0 });
@@ -56,6 +59,7 @@ const TRADES = every<Effect['label']>({ sat: 0, margin: 0, meals: 0, cooks: 0 })
 const DEPARTURES = every<KitchenDeparture['status']>({ scheduled: 0, done: 0 });
 const CATALOGUES = every<'reduced' | 'full'>({ reduced: 0, full: 0 });
 const AGENCY_OPTIONS = every<AgencyOptionId>({ agency: 0, train: 0, classic: 0 });
+const SIM_STATES = every<RowState>({ offered: 0, hidden: 0, noType: 0 });
 
 /** [message prefix, the values it is followed by, an optional suffix]. */
 const LOOKUPS: readonly (readonly [string, readonly (string | number)[], string?])[] = [
@@ -76,6 +80,8 @@ const LOOKUPS: readonly (readonly [string, readonly (string | number)[], string?
   ['sv.haul.', HAULS], ['sv.haul.on.', HAULS], ['sv.haul.sub.', HAULS], ['sv.mode.', [...SERVICE_MODES, 'unavailable']], ['sv.item.', SERVICE_ITEMS],
   ['sv.group.', SERVICE_GROUPS.map((g) => g.id)], ['sv.comfort.', COMFORTS], ['sv.q.', MEAL_QUALITIES], ['sv.trade.', TRADES], ['sv.cell.catalogue.', CATALOGUES],
   ['kt.m.', METRICS.map((m) => m.id)], ['kt.m.', METRICS.map((m) => m.id), '.sub'], ['kt.q.', MEAL_QUALITIES, '.desc'], ['kt.dep.', DEPARTURES],
+  ['ferry.why.', NO_AIRCRAFT_REASONS],
+  ['sa.state.', SIM_STATES], ['sa.source.', SIM_AIRCRAFT_SOURCES], ['set.nav.', ['keys', 'aircraft', 'simbrief', 'account']],
   ['ob.s2.color.', [...LIVERY_COLORS.map((c) => c.id), 'none']], ['ob.s6.own.', [...OWNERSHIPS, 'plain']],
 ];
 

@@ -2,9 +2,11 @@ import { MANUAL_PAY_FACTOR, blockHours, type Job } from '@opc/shared';
 import { act } from '../actions.ts';
 import { api } from '../api.ts';
 import { airportInfo, cityOf, fillCity } from '../airports.ts';
-import { jobsAtIdleAirports, candidates, flyable, lookupJob } from '../board.ts';
+import { ferryPreview } from '../api-ferry.ts';
+import { jobsAtIdleAirports, candidates, flyable, lookupJob, noAircraftReason } from '../board.ts';
 import { badge, button, dataTable, icon, panel, signDirection, signLocation, titleBlock } from '../components.ts';
 import { contestedIds, rivalsFor } from '../competition.ts';
+import { distanceLookup, ferryOffer, reasonLine } from '../ferry-ui.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import { loadLabel } from '../job-view.ts';
@@ -37,14 +39,17 @@ export async function jobDetail(ctx: Ctx): Promise<Screen> {
     void act(t('jobs.accepted', { route: `${job.origin} → ${job.destination}` }), () => api(`/jobs/${job.id}/accept`, { method: 'POST', body: { aircraftId: chosen() } }), ctx.refresh).then((ok) => { if (ok) go('#dashboard'); });
   };
 
-  const [contested, rivals] = await Promise.all([contestedIds([job]), rivalsFor(job)]);
+  const [contested, rivals, dist] = await Promise.all([contestedIds([job]), rivalsFor(job), options.length === 0 ? distanceLookup([job.origin, ...me.fleet.map((a) => a.location)]) : undefined]);
+  const reason = options.length === 0 ? noAircraftReason(me, job, dist) : null;
+  const quote = reason?.kind === 'elsewhere' ? await ferryPreview(reason.aircraft.id, job.origin).catch(() => null) : null;
+  const offer = reason?.kind === 'elsewhere' && quote ? ferryOffer(reason.aircraft, job.origin, quote, ctx.refresh) : null;
   const isContested = contested.has(job.id);
   const [orig, dest] = await Promise.all([airportInfo(job.origin), airportInfo(job.destination)]);
   const hours = type ? blockHours(type, job.distanceNm) : null;
 
   const noteHost = h('span', { class: 'dim' });
   if (isContested && rivals.length > 0) noteHost.textContent = tp('job.contestedNote', rivals.length, { names: rivals.slice(0, 3).join(', '), origin: job.origin });
-  const why = options.length === 0 && job.requiredAircraft ? t('job.aircraftRequired', { icao: job.requiredAircraft }) : t('job.aircraftNone', { where: job.origin });
+  const why = reason ? reasonLine(reason, job.origin) : '';
 
   const view = h('div', { class: 'briefing-column' },
     h('div', { class: 'col' },
@@ -65,10 +70,12 @@ export async function jobDetail(ctx: Ctx): Promise<Screen> {
           options.length > 1 ? h('label', { class: 'sr', for: 'job-aircraft' }, t('job.aircraftPicker')) : null,
           options.length > 1 ? h('div', { class: 'input-field inline' }, aircraftSelect) : null,
           button(t('job.acceptLock'), { variant: 'primary', key: options.length > 0 ? t('key.enter') : undefined, disabled: options.length === 0, onclick: accept })),
+        offer,
         h('p', { class: 'dim small' }, job.source === 'simbrief' ? t('job.private') : t('job.lockNote')))));
   return {
     title: `${job.origin} → ${job.destination}`, scene: 'job', tab: 'jobs', view, back,
-    hints: [{ key: t('key.esc'), label: t('hint.backJobs') }, ...(options.length > 0 ? [{ key: t('key.enter'), label: t('hint.select') }] : [])],
+    hints: [{ key: t('key.esc'), label: t('hint.backJobs') }, ...(options.length > 0 ? [{ key: t('key.enter'), label: t('hint.select') }] : []), ...(offer ? [{ key: 'F', label: t('hint.ferry') }] : [])],
+    ...(offer ? { keys: { f: () => offer.querySelector('button')?.click() } } : {}),
   };
 }
 

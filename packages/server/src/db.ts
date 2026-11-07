@@ -280,9 +280,20 @@ CREATE TABLE service_days (
   PRIMARY KEY (company_id, day, hub));
 `;
 
+// Lot SIM-AIRCRAFT: the aircraft models a player's simulator has installed, as scanned by the bridge (one row per model, liveries folded into `liveries`).
+// A PUT replaces the player's rows but keeps `hidden` of the titles that are still there. `icao` is the designator the buy and lease screens use (the bridge's, else matched
+// against the catalogue by title; NULL = cannot be bought). Client input: it filters what is offered and never prices anything.
+const SCHEMA_SIM_AIRCRAFT = `
+CREATE TABLE sim_aircraft (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, title TEXT NOT NULL COLLATE NOCASE, icao TEXT, manufacturer TEXT NOT NULL, model TEXT NOT NULL,
+  source TEXT NOT NULL CHECK (source IN ('official','community')), liveries INTEGER NOT NULL, hidden INTEGER NOT NULL DEFAULT 0, scanned_at INTEGER NOT NULL,
+  PRIMARY KEY (user_id, title));
+`;
+
+
 // v4 AGENCY: a recruiter mission. The shortlist is not stored: it is a function of the mission (company, start day, base, type, count), like the market's candidates.
 // `commission` is what the signature paid (0 while the mission is open); `premium_pct` is the salary premium the mission was opened at.
-const SCHEMA_V15 = `
+const SCHEMA_AGENCY = `
 CREATE TABLE recruit_missions (
   id INTEGER PRIMARY KEY, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, base TEXT NOT NULL, qual TEXT NOT NULL,
   count INTEGER NOT NULL CHECK (count BETWEEN 1 AND 6), started_at INTEGER NOT NULL, ready_at INTEGER NOT NULL, commission INTEGER NOT NULL DEFAULT 0, premium_pct INTEGER NOT NULL,
@@ -291,7 +302,7 @@ CREATE UNIQUE INDEX recruit_missions_open ON recruit_missions(company_id, base, 
 `;
 
 /** Append-only; `PRAGMA user_version` records how many ran. */
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_V15];
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT, SCHEMA_AGENCY];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);

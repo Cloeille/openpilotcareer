@@ -13,6 +13,12 @@
 .settings-keys-col { width: 760px; min-height: 0; display: flex; flex-direction: column; }
 .settings-keys-col .panel { min-height: 0; }
 .settings-keys-col .panel-body { overflow: auto; }
+.settings-aircraft-col { width: 960px; min-height: 0; display: flex; flex-direction: column; }
+.settings-aircraft-col .panel { min-height: 0; }
+.settings-aircraft-col .panel-body { overflow: auto; }
+.sim-aircraft-list { min-height: 0; display: flex; flex-direction: column; }
+.sim-aircraft-list .scroll { max-height: 440px; }
+.settings-aircraft .key-box { display: inline-flex; align-self: flex-start; margin-top: 4px; }
 .panel-action .dim { color: var(--text-tertiary); }
 .key-create { display: flex; gap: 12px; align-items: flex-end; }
 .key-create .input { flex: 1; }
@@ -66,3 +72,23 @@
 .lang-pick { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 14px; color: var(--text-secondary); }
 .lang-select { background: var(--surface-sunken); border: 1px solid var(--border-strong); border-radius: 3px; padding: 6px 10px; font-size: 14px; }
 .lang-select option { background: #171A1E; }
+
+.company-list { gap: 0; max-height: 232px; overflow-y: auto; }
+#companies-panel { flex: 0 1 auto; min-height: 0; }
+.company-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.company-row:last-child { border-bottom: 0; }
+.company-row .btn { height: 38px; font-size: 13px; }
+.cd-overlay { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: #000000B8; }
+.cd-dialog { width: 560px; max-width: calc(100vw - 32px); max-height: calc(100vh - 32px); overflow: auto; background: #0F1114; border: 1px solid #E5625B66; border-radius: 6px; color: var(--text-primary); }
+.cd-head { display: flex; align-items: center; gap: 10px; padding: 18px 24px; border-bottom: 1px solid var(--border); color: var(--danger); }
+.cd-head h2 { margin: 0; font-size: 18px; color: var(--text-primary); }
+.cd-body { display: flex; flex-direction: column; gap: 16px; padding: 20px 24px; }
+.cd-body p, .cd-body ul { margin: 0; }
+.cd-list { padding-left: 20px; display: flex; flex-direction: column; gap: 4px; margin-top: 8px !important; }
+.cd-flight { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px !important; color: var(--danger); }
+.cd-start { border: 1px solid var(--border); border-radius: 4px; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+.cd-mode { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.cd-export { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 14px; color: var(--text-secondary); }
+.cd-export .link-btn { font-size: 14px; text-decoration: underline; }
+.cd-error { color: var(--danger); min-height: 1.4em; }
+.cd-foot { display: flex; justify-content: flex-end; gap: 12px; padding: 16px 24px; border-top: 1px solid var(--border); }

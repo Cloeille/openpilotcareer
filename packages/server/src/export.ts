@@ -40,7 +40,7 @@ export function exportDocument(db: Db, userId: number, server: ServerInfo, now: 
     companies: companiesOf(db, userId).map((company) => ({
       company,
       hubs: hubsOf(db, company.id),
-      fleet: fleetView(db, company.id),
+      fleet: fleetView(db, company.id, now),
       customAircraft: customAircraftOf(db, company.id),
       flights: allFlights(db, company.id).map((f) => ({ ...flightView(f), telemetry: f.telemetry ? (JSON.parse(f.telemetry) as unknown) : null })),
       transactions: allTransactions(db, company.id),

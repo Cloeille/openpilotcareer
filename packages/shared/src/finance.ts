@@ -121,6 +121,8 @@ export type AircraftContract = { kind: ContractKind; id: number; monthly: number
 /** The fields `FleetAircraft` gains (see index.ts). */
 export type FleetAircraftFinance = {
   registration: string; ownership: Ownership; wearPct: number; status: AircraftStatus; maintenanceUntil: number | null; contract: AircraftContract | null;
+  /** On an empty repositioning flight (`status` reads `flying`): when it lands. The aircraft already stands at its destination. */
+  ferryUntil: number | null;
 };
 
 export type LeaseOffer = {

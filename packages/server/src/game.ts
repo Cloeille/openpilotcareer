@@ -45,6 +45,8 @@ type CompanyRow = {
 export type AircraftRow = {
   id: number; company_id: number; icao: string; location: string; value: number;
   registration: string | null; ownership: Ownership; wear_pct: number; status: string; maintenance_until: number | null; base: string | null; acquired_at: number; returned_at: number | null;
+  /** Until when the aircraft is on a ferry flight (0: never was). It already stands at its destination (ferry.ts). */
+  available_at: number;
 };
 type JobColumns = {
   source: 'board' | 'simbrief' | 'line'; kind: 'pax' | 'cargo'; origin: string; destination: string; distance_nm: number; payload_kg: number;
@@ -73,9 +75,12 @@ export function typeFor(db: Db, companyId: number, icao: string): AircraftType {
 export const balanceOf = (db: Db, companyId: number): number => get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId)?.balance ?? 0;
 
 /** Spending that needs the money in the bank: 402 when the balance does not cover it. `post` (ledger.ts) is the only place a balance changes. */
-export function spend(db: Db, companyId: number, at: number, kind: string, price: number, memo: string): void {
+export function assertFunds(db: Db, companyId: number, price: number): void {
   const c = get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId);
   if (!c || c.balance < price) throw new HttpError(402, 'insufficient_funds', `needs ${price}, balance is ${c?.balance ?? 0}`);
+}
+export function spend(db: Db, companyId: number, at: number, kind: string, price: number, memo: string): void {
+  assertFunds(db, companyId, price);
   post(db, companyId, at, kind, -price, memo);
 }
 
@@ -96,6 +101,8 @@ function assertNameFree(db: Db, name: string, exceptId = 0): void {
 
 export type NewCompany = {
   userId: number | null; name: string; hub: string; personality?: Personality; now: number;
+  /** Re-found a company under its old id (reset, see company-lifecycle.ts); omitted, SQLite picks the next one. */
+  id?: number;
   /** v2 identity. With `startMode` the company starts from that mode's capital with NO aircraft (the onboarding leases or rents one) and its suggested realism. */
   code?: string; callsign?: string; liveryColor?: string | null; startMode?: StartMode;
 };
@@ -109,8 +116,8 @@ export function createCompany(db: Db, o: NewCompany): number {
   assertNameFree(db, o.name);
   if (o.code !== undefined && get(db, 'SELECT 1 AS x FROM companies WHERE code = ?', o.code)) throw new HttpError(409, 'code_taken', `airline code ${o.code} is already taken`);
   const mode = o.startMode ? START_MODES[o.startMode] : null;
-  const id = run(db, `INSERT INTO companies (user_id, name, personality, balance, reputation, created_at, code, callsign, livery_color, start_mode, realism) VALUES (?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?)`,
-    o.userId, o.name, o.personality ? JSON.stringify(o.personality) : null, START_REPUTATION, o.now, o.code ?? null, o.callsign ?? null, o.liveryColor ?? null, o.startMode ?? null,
+  const id = run(db, `INSERT INTO companies (id, user_id, name, personality, balance, reputation, created_at, code, callsign, livery_color, start_mode, realism) VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?)`,
+    o.id ?? null, o.userId, o.name, o.personality ? JSON.stringify(o.personality) : null, START_REPUTATION, o.now, o.code ?? null, o.callsign ?? null, o.liveryColor ?? null, o.startMode ?? null,
     mode ? JSON.stringify(presetSetting(mode.suggestedRealism)) : null).id;
   post(db, id, o.now, 'grant', mode?.capital ?? STARTING_BALANCE, 'starting capital');
   if (o.userId !== null) run(db, 'INSERT INTO billing_runs (company_id, month, at) VALUES (?, ?, ?)', id, new Date(o.now).toISOString().slice(0, 7), o.now);
@@ -195,10 +202,11 @@ export function companyView(db: Db, id: number): Company {
   };
 }
 
-export function fleetView(db: Db, companyId: number): FleetAircraft[] {
+/** `busy`: on an active flight, or on a ferry flight that has not landed at `now`. */
+export function fleetView(db: Db, companyId: number, now: number): FleetAircraft[] {
   const contracts = activeContractsOf(db, companyId);
-  return all<AircraftRow & { busy: number }>(db, `SELECT a.*, EXISTS (SELECT 1 FROM flights f WHERE f.aircraft_id = a.id AND f.status = 'active') AS busy FROM aircraft a WHERE a.company_id = ? AND a.returned_at IS NULL ORDER BY a.id`, companyId)
-    .map((a) => ({ id: a.id, icao: a.icao, type: typeFor(db, companyId, a.icao), location: a.location, busy: !!a.busy, value: a.value, ...financeFields(a, !!a.busy, contracts.get(a.id)) }));
+  return all<AircraftRow & { busy: number }>(db, `SELECT a.*, (EXISTS (SELECT 1 FROM flights f WHERE f.aircraft_id = a.id AND f.status = 'active') OR a.available_at > ?2) AS busy FROM aircraft a WHERE a.company_id = ?1 AND a.returned_at IS NULL ORDER BY a.id`, companyId, now)
+    .map((a) => ({ id: a.id, icao: a.icao, type: typeFor(db, companyId, a.icao), location: a.location, busy: !!a.busy, value: a.value, ...financeFields(a, !!a.busy, contracts.get(a.id), now) }));
 }
 
 export const hubsOf = (db: Db, companyId: number): string[] => all<{ icao: string }>(db, 'SELECT icao FROM hubs WHERE company_id = ? ORDER BY icao', companyId).map((h) => h.icao);
@@ -216,10 +224,10 @@ export function pilotView(db: Db, userId: number): Pilot {
 }
 
 /** The account seen through `companyId`, which the caller has already proven is the user's (auth.ts `ownedCompany`). */
-export function meView(db: Db, userId: number, companyId: number): Me {
+export function meView(db: Db, userId: number, companyId: number, now: number): Me {
   const u = get<{ username: string }>(db, 'SELECT username FROM users WHERE id = ?', userId);
   if (!u) throw new HttpError(404, 'user_not_found', 'user not found');
-  return { username: u.username, pilot: pilotView(db, userId), company: companyView(db, companyId), companies: companiesOf(db, userId), hubs: hubsOf(db, companyId), fleet: fleetView(db, companyId), customAircraft: customAircraftOf(db, companyId) };
+  return { username: u.username, pilot: pilotView(db, userId), company: companyView(db, companyId), companies: companiesOf(db, userId), hubs: hubsOf(db, companyId), fleet: fleetView(db, companyId, now), customAircraft: customAircraftOf(db, companyId) };
 }
 
 export function jobView(r: JobColumns & { id: string }): Job {

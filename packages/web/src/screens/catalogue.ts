@@ -1,6 +1,7 @@
 import { aircraftPrice, deriveAircraft, type AircraftType } from '@opc/shared';
 import { act } from '../actions.ts';
 import { api } from '../api.ts';
+import { getSimAircraft } from '../api-simair.ts';
 import type { LeaseOffer } from '@opc/shared';
 import { catalogueStats, leaseOffers, type CatalogueStats } from '../api-finance.ts';
 import { GROUPS, inGroup, isIcaoType, stepGroup, type Group } from '../catalogue.ts';
@@ -10,6 +11,7 @@ import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import { hashFor } from '../keys.ts';
 import type { Ctx, Screen } from '../screen.ts';
+import { filterIsOn, narrow, offersOf, titlesLabel, type CatalogueChoice } from '../simair-view.ts';
 import { debounce, h } from '../ui.ts';
 import { categoryName } from './fleet.ts';
 
@@ -21,6 +23,8 @@ let query = '';
 let group: Group = 'all';
 let selectedIcao: string | null = null;
 let addonCategory: AddonCategory = 'turboprop';
+/** The player's choice of "My simulator aircraft": null until they choose, then the filter follows it (on by default when the simulator list has something to offer). */
+let simChoice: CatalogueChoice = null;
 const offerCache = new Map<string, Promise<LeaseOffer[]>>();
 const offersFor = (icao: string): Promise<LeaseOffer[]> => {
   let p = offerCache.get(icao);
@@ -36,6 +40,9 @@ export async function catalogue(ctx: Ctx): Promise<Screen> {
   const footer = h('div', { class: 'list-footer row' });
   const search = h('input', { id: 'cat-search', type: 'search', name: 'type-search', autocomplete: 'off', spellcheck: 'false', 'aria-label': t('cat.search'), placeholder: t('cat.searchScope'), value: query });
   const stats: CatalogueStats | null = await catalogueStats().catch(() => null);
+  const offers = offersOf(await getSimAircraft().catch(() => null), ctx.snap.me.customAircraft);
+  const titlesOf = new Map(offers.map((o) => [o.type.icao, o.titles]));
+  let mine = filterIsOn(simChoice, offers);
   let shown: AircraftType[] = [];
   let lastInput: 'keyboard' | 'pointer' = 'pointer';
   results.addEventListener('keydown', () => { lastInput = 'keyboard'; });
@@ -43,6 +50,7 @@ export async function catalogue(ctx: Ctx): Promise<Screen> {
 
   async function fetchTypes(): Promise<AircraftType[]> {
     const q = query.trim();
+    if (mine) return narrow(offers, q, 'all').map((o) => o.type);
     if (q === '') return (await Promise.all(SHORTLIST.map((icao) => api<AircraftType>(`/aircraft-types/${icao}`).catch(() => null)))).filter((x): x is AircraftType => x !== null);
     return api<AircraftType[]>(`/aircraft-types?q=${encodeURIComponent(q)}`).catch(() => []);
   }
@@ -66,7 +74,8 @@ export async function catalogue(ctx: Ctx): Promise<Screen> {
     sheet.replaceChildren(
       h('div', { class: 'col', style: 'gap:6px' },
         h('div', { class: 'fin-model-row' }, h('h2', { class: 'fin-model' }, x.name), h('span', { class: 'icao-chip' }, x.icao), x.derived ? badge('estimated', t('badge.estimated'), null) : null),
-        h('p', { class: 'muted' }, categoryName(x.category))),
+        h('p', { class: 'muted' }, categoryName(x.category)),
+        titlesOf.has(x.icao) ? h('p', { class: 'dim small' }, t('cat.mine.in', { titles: titlesOf.get(x.icao)!.join(', ') })) : null),
       h('div', { class: 'fin-facts' },
         fact(t('fin.cat.seats'), String(x.seats)), fact(t('fin.cat.cargo'), fm.kg(x.cargoKg)), fact(t('fin.cat.cruise'), fm.kt(x.cruiseKts)), fact(t('fin.cat.range'), fm.nm(x.rangeNm))),
       h('div', { class: 'fin-totals' },
@@ -91,16 +100,19 @@ export async function catalogue(ctx: Ctx): Promise<Screen> {
       onFocus: () => { selectedIcao = x.icao; markSelected(); drawSheet(); },
       onOpen: () => { if (lastInput === 'keyboard') go(hashFor('buy', x.icao)); },
       cells: [
-        h('div', { class: 'fin-row-ident' }, h('div', { class: 'row tight' }, h('span', { class: 'model' }, x.name), h('span', { class: 'icao-chip' }, x.icao), x.derived ? badge('estimated', t('badge.estimated'), null) : null)),
+        h('div', { class: 'fin-row-ident' }, h('div', { class: 'row tight' }, h('span', { class: 'model' }, x.name), h('span', { class: 'icao-chip' }, x.icao), x.derived ? badge('estimated', t('badge.estimated'), null) : null),
+          mine && titlesOf.has(x.icao) ? h('span', { class: 'dim small' }, titlesLabel(titlesOf.get(x.icao)!)) : null),
         categoryName(x.category), String(x.seats), fm.num(x.rangeNm), h('span', { class: 'strong' }, fm.money(aircraftPrice(x))),
       ],
     }));
-    const empty = h('div', { class: 'col', style: 'padding:22px' }, h('p', { class: 'muted' }, t('cat.noMatch', { q: query })), h('p', { class: 'dim small' }, t('cat.exact')),
-      isIcaoType(query) ? button(`${t('hint.buy')} ${query.trim().toUpperCase()}`, { variant: 'secondary', onclick: () => go(hashFor('buy', query.trim().toUpperCase())) }) : null);
+    const empty = mine
+      ? h('div', { class: 'col', style: 'padding:22px' }, h('p', { class: 'muted' }, t('cat.mine.none')), button(t('cat.mine.all'), { variant: 'secondary', onclick: () => setMine(false) }))
+      : h('div', { class: 'col', style: 'padding:22px' }, h('p', { class: 'muted' }, t('cat.noMatch', { q: query })), h('p', { class: 'dim small' }, t('cat.exact')),
+        isIcaoType(query) ? button(`${t('hint.buy')} ${query.trim().toUpperCase()}`, { variant: 'secondary', onclick: () => go(hashFor('buy', query.trim().toUpperCase())) }) : null);
     const table = dataTable(t('cat.panel'), [{ label: t('cat.col.type') }, { label: t('cat.col.category') }, { label: t('cat.col.seats'), align: 'end' }, { label: t('cat.col.range'), align: 'end' }, { label: t('cat.col.price'), align: 'end' }], rows, empty);
     table.querySelectorAll('tbody tr').forEach((tr, i) => { tr.setAttribute('data-icao', types[i]!.icao); tr.classList.toggle('est', types[i]!.derived); });
     results.replaceChildren(table);
-    footer.replaceChildren(h('span', null, t('fin.cat.shown', { n: types.length, total: stats ? stats.total : types.length })), h('span', { class: 'spacer' }), badge('estimated', t('badge.estimated'), null), h('span', null, t('fin.cat.legend')));
+    footer.replaceChildren(h('span', null, t('fin.cat.shown', { n: types.length, total: mine ? offers.length : stats ? stats.total : types.length })), h('span', { class: 'spacer' }), badge('estimated', t('badge.estimated'), null), h('span', null, t('fin.cat.legend')));
     drawSheet();
   }
   function markSelected(): void {
@@ -110,6 +122,10 @@ export async function catalogue(ctx: Ctx): Promise<Screen> {
   const drawGroups = (): void => groupBar.querySelector('.seg-host')!.replaceChildren(segments(t('cat.groups'), GROUPS.map((g) => ({ value: g, label: t(`cat.group.${g}`) })), group, setGroup));
   function setGroup(g: Group): void { group = g; drawGroups(); void draw(); }
   drawGroups();
+  const mineBar = h('div', { class: 'category-row' }, keycap('M'), h('div', { class: 'seg-host' }));
+  const drawMine = (): void => mineBar.querySelector('.seg-host')!.replaceChildren(segments(t('cat.mine.scope'), [{ value: 'mine', label: t('cat.mine') }, { value: 'all', label: t('cat.mine.all') }], mine ? 'mine' : 'all', (v) => setMine(v === 'mine')));
+  function setMine(on: boolean): void { simChoice = on ? 'mine' : 'all'; mine = on && offers.length > 0; drawMine(); void draw(); }
+  drawMine();
   search.addEventListener('input', debounce(() => { query = (search as HTMLInputElement).value; void draw(); }, 200));
   await draw();
 
@@ -122,17 +138,18 @@ export async function catalogue(ctx: Ctx): Promise<Screen> {
         h('div', { class: 'panel-head' }, h('h2', null, t('cat.panel')), h('div', { class: 'panel-action' }, t('fin.cat.sort'))),
         h('div', { class: 'toolbar' },
           h('div', { class: 'search-row' }, h('div', { class: 'input-field' }, icon('search', 16), search, count, keycap('/'))),
-          groupBar),
+          offers.length > 0 ? mineBar : null, groupBar),
         results, footer)),
     h('div', { class: 'fin-purchase' },
       h('section', { class: 'panel', 'aria-label': t('fin.cat.panelLabel') }, h('div', { class: 'panel-body' }, sheet)),
       addonPanel(ctx)));
   return {
     title: t('cat.title'), scene: 'catalogue', tab: 'fleet', view, back: '#fleet',
-    hints: [{ key: t('key.esc'), label: t('hint.fleet') }, { key: '/', label: t('hint.search') }, { key: 'L', label: t('fin.hint.lease') }, { key: t('key.enter'), label: t('hint.buy') }],
+    hints: [{ key: t('key.esc'), label: t('hint.fleet') }, { key: '/', label: t('hint.search') }, { key: 'L', label: t('fin.hint.lease') }, { key: t('key.enter'), label: t('hint.buy') }, ...(offers.length > 0 ? [{ key: 'M', label: t('cat.mine.hint') }] : [])],
     keys: {
       '/': () => { document.getElementById('cat-search')?.focus(); },
       z: () => setGroup(stepGroup(group, -1)), c: () => setGroup(stepGroup(group, 1)),
+      m: () => { if (offers.length > 0) setMine(!mine); },
       l: () => { if (selectedIcao) go(hashFor('lease', selectedIcao)); },
     },
   };

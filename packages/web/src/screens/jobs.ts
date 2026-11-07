@@ -1,10 +1,11 @@
 import type { Job } from '@opc/shared';
 import { act } from '../actions.ts';
 import { api } from '../api.ts';
-import { DEFAULT_FILTERS, boardRows, candidates, matchesFilters, nextBoardWave, type JobFilters } from '../board.ts';
+import { DEFAULT_FILTERS, boardRows, candidates, matchesFilters, nextBoardWave, noAircraftReason, type JobFilters } from '../board.ts';
 import { badge, button, dataTable, keycap, segments } from '../components.ts';
 import { contestedIds } from '../competition.ts';
 import { fillCity } from '../airports.ts';
+import { distanceLookup, reasonLine } from '../ferry-ui.ts';
 import { fmt } from '../format.ts';
 import { t } from '../i18n.ts';
 import { loadLabel } from '../job-view.ts';
@@ -32,7 +33,8 @@ export async function jobs(ctx: Ctx): Promise<Screen> {
   const fleetBoard = all.filter((j) => j.source === 'simbrief' || idleAirports.includes(j.origin));
   const counts = (kind: JobFilters['kind']): number => fleetBoard.filter((j) => matchesFilters(me, j, { ...filters, kind }, false)).length;
   const shown = fleetBoard.filter((j) => matchesFilters(me, j, filters));
-  const contested = await contestedIds(shown);
+  const unserved = shown.filter((j) => candidates(me, j).length === 0);
+  const [contested, dist] = await Promise.all([contestedIds(shown), unserved.length > 0 ? distanceLookup([...me.fleet.map((a) => a.location), ...unserved.map((j) => j.origin)]) : undefined]);
 
   const host = h('div', { class: 'panel-fill' });
   const set = (patch: Partial<JobFilters>): void => { filters = { ...filters, ...patch }; window.dispatchEvent(new Event('opc:redraw')); };
@@ -53,7 +55,7 @@ export async function jobs(ctx: Ctx): Promise<Screen> {
         h('span', { class: 'strong pay' }, fm.money(j.payout)),
         options.length > 0
           ? button(t('jobs.accept'), { variant: 'secondary', label: `${t('jobs.accept')} ${j.origin} → ${j.destination}`, onclick: () => void accept(j, options[0]!.id) })
-          : h('span', { class: 'dim small' }, t('jobs.noAircraft')),
+          : h('span', { class: 'dim small' }, reasonLine(noAircraftReason(me, j, dist) ?? { kind: 'busy' }, j.origin)),
       ],
     };
   };

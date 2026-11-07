@@ -37,7 +37,7 @@ export function onboardingOf(db: Db, userId: number): Onboarding {
   return { completed: !!r.completed, step: r.step as OnboardingStep, startMode: r.start_mode, companyId: r.company_id, draft: parseDraft(r.draft) };
 }
 
-function save(db: Db, userId: number, o: Onboarding, at: number): void {
+export function save(db: Db, userId: number, o: Onboarding, at: number): void {
   run(db, `INSERT INTO onboarding (user_id, completed, step, start_mode, company_id, draft, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT (user_id) DO UPDATE SET completed = excluded.completed, step = excluded.step, start_mode = excluded.start_mode, company_id = excluded.company_id, draft = excluded.draft, updated_at = excluded.updated_at`,
   userId, o.completed ? 1 : 0, o.step, o.startMode, o.companyId, JSON.stringify(o.draft), at);
