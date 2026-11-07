@@ -19,12 +19,12 @@ import type { Ofp } from './simbrief.ts';
 
 export const MAX_CUSTOM_AIRCRAFT = 20;
 export const MAX_PENDING_IMPORTS = 25;
-const IMPORT_TTL_MS = 7 * 24 * 3_600_000;
+export const IMPORT_TTL_MS = 7 * 24 * 3_600_000;
 // Net worth = cash + aircraft owned or financed (not leased, club or rented) + refundable lease deposits - remaining loan principal (a financed aircraft counts at full value, so the debt must come off).
 const NET_WORTH_SQL = `c.balance + COALESCE((SELECT SUM(value) FROM aircraft WHERE company_id = c.id AND returned_at IS NULL AND ownership IN ('owned','financed')), 0)
   + COALESCE((SELECT SUM(deposit) FROM contracts WHERE company_id = c.id AND status = 'active'), 0)
   - COALESCE((SELECT SUM(principal) FROM contracts WHERE company_id = c.id AND status = 'active' AND kind = 'loan'), 0)`;
-const SB_PREFIX = 'sb-';
+export const SB_PREFIX = 'sb-';
 
 // ---------------------------------------------------------------- rows
 
