@@ -19,6 +19,7 @@ import { HttpError, Limiter, NUMERIC_ID, parse } from './http.ts';
 import { registerStart } from './routes-start.ts';
 import { registerLive } from './routes-live.ts';
 import { registerLines } from './routes-lines.ts';
+import { registerSafety } from './routes-safety.ts';
 import { registerStaff } from './routes-staff.ts';
 import { registerCatalogueStats } from './routes-catalogue-stats.ts';
 import { fetchOfp, type Fetch } from './simbrief.ts';
@@ -334,6 +335,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   registerFinance(app, { db, now });
   registerLive(app, { db, now });
   registerSimbrief(app, { db, now, doFetch });
+  registerSafety(app, { db, now });
 
   return app;
 }

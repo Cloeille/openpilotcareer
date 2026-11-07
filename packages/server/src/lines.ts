@@ -15,7 +15,8 @@ import { all, get, run, tx, type Db } from './db.ts';
 import { accrueWear, flightCosts, isHuman, releaseMaintenance } from './fleet-extras.ts';
 import { hasHub, post, snapshot, typeFor, type AircraftRow } from './game.ts';
 import { realismSettingOf } from './realism.ts';
-import { crewLeg, crewShortage } from './staff.ts';
+import { crewDutyMin, rollIncident } from './safety.ts';
+import { crewLeg, crewShortage, rulesOf } from './staff.ts';
 
 /** Ticks replayed after a long silence; older ones are skipped (a human network lapses after MAX_OFFLINE_DAYS anyway). */
 const MAX_REPLAY_TICKS = (MAX_OFFLINE_DAYS + 1) * TICKS_PER_DAY;
@@ -284,6 +285,9 @@ function resolveLeg(db: Db, leg: LegRow, r: Run): void {
     r.books.set(key, b);
   }
   accrueWear(db, leg.company_id, ac.id, type.category, m.hours, leg.dep_at);
+  // B.5: the leg's incident roll, seeded by the leg's own identity (a leg's row id is reused once pruned); `ac` still holds the wear the aircraft flew with.
+  rollIncident(db, { ref: `leg:${line.id}:${leg.dep_at}:${leg.flight_no}`, companyId: leg.company_id, aircraftId: ac.id, at: leg.dep_at, airport: dest, flightId: null, flightNo: leg.flight_no,
+    dutyMin: crewDutyMin(db, leg.id), riskFactor: rulesOf(db, leg.company_id).riskFactor, wearPct: ac.wear_pct, landedAt: leg.arr_at + delay * 60_000 });
   run(db, 'UPDATE aircraft SET location = ? WHERE id = ?', dest, ac.id);
   run(db, `UPDATE scheduled_flights SET status = 'done', origin = ?, dest = ?, delay_min = ?, delay_cause = ?, pax = ?, revenue = ?, fuel_cost = ?, landing_fee = ?, maintenance = ? WHERE id = ?`,
     origin, dest, delay, delayCause, m.pax, m.revenue, m.fuel, m.fee, m.maintenance, leg.id);

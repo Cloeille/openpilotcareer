@@ -20,9 +20,11 @@ export const incidentRisk = (dutyHours: number, wearPct: number, riskFactor = 1)
 /** How many times the average flight's risk a flight carries (what the mockup calls "4 fois la moyenne"). */
 export const riskMultiple = (risk: number): number => Math.round((risk / INCIDENT_BASE_RISK) * 10) / 10;
 
-/** The two wear levels of the chart's curves (legend: "bon état, moins de 40 %", "usé, plus de 60 %"). */
-export const CURVE_WEAR_GOOD = 40;
-export const CURVE_WEAR_WORN = 63;
+/** The wear at which the wear factor is 1: what an aircraft is assumed to have when the fleet is empty. */
+export const BASE_WEAR_PCT = 40;
+/** The most flights `today` lists (riskiest first). */
+export const TODAY_MAX = 20;
+/** The chart's x axis: 0 to 14 h of duty. */
 export const CURVE_MAX_H = 14;
 export const CURVE_STEP_H = 0.5;
 
@@ -141,6 +143,8 @@ export const incidentsQuerySchema = z.object({ season: z.string().regex(/^\d{4}-
 
 export type IncidentView = {
   id: number; at: number; season: string; severity: Severity; kind: IncidentKind;
+  /** The server's text, shown as sent. */
+  title: string; detail: string;
   aircraftId: number; registration: string; airport: string;
   /** 'AZR 1138' for a line leg, null for a flight the player flew (then `flightId`). */
   flightNo: string | null; flightId: number | null;
@@ -151,29 +155,24 @@ export type IncidentView = {
   /** Stored points (0 to 100). */
   reputationDelta: number;
 };
-/** A flight of the next 24 h and the risk of the crew the line engine would give it now. `crew`: the pilots' surnames; `factor`: times the risk of an average flight (`riskMultiple`). */
-export type TodayRisk = { flightNo: string; dep: number; crew: string | null; dutyHours: number; wearPct: number; risk: number; factor: number };
+/** A flight of the next 24 h and the risk of the crew the line engine would give it (a flight nobody could crew is not listed: it would be cancelled). `crew`: the pilots' surnames; `factor`: times the risk of an average flight (`riskMultiple`). */
+export type TodayRisk = { flightNo: string; dep: number; crew: string; dutyHours: number; wearPct: number; risk: number; factor: number };
 
-/** What the index gains if the problem is fixed (the gains add up: each lever is computed on what the ones before it left). `ref`: a staff id for `crew`, an aircraft id for `maintenance`. */
-export type SafetyLever =
-  | { action: 'crew'; points: number; ref: string; flightNo: string; name: string; dutyHours: number }
-  | { action: 'maintenance'; points: number; ref: string; registration: string; wearPct: number }
-  | { action: 'leave'; points: number; ref: ''; tired: number };
+/** What the index gains if the problem is fixed (the gains add up: each lever is computed on what the ones before it left). `ref`: a staff id for `crew`, an aircraft id for `maintenance`, '' for `leave`.
+ *  `label` and `detail` are the server's text, shown as sent. */
+export type SafetyLever = { action: 'crew' | 'maintenance' | 'leave'; points: number; ref: string; label: string; detail: string };
 
-export type RiskPoint = { dutyHours: number; risk: number; good: number; worn: number };
+export type RiskPoint = { dutyHours: number; risk: number };
 export const riskCurve = (worstWearPct: number, riskFactor: number): RiskPoint[] =>
-  Array.from({ length: Math.round(CURVE_MAX_H / CURVE_STEP_H) + 1 }, (_, i) => {
-    const h = i * CURVE_STEP_H;
-    return { dutyHours: h, risk: incidentRisk(h, worstWearPct, riskFactor), good: incidentRisk(h, CURVE_WEAR_GOOD), worn: incidentRisk(h, CURVE_WEAR_WORN) };
-  });
+  Array.from({ length: Math.round(CURVE_MAX_H / CURVE_STEP_H) + 1 }, (_, i) => ({ dutyHours: i * CURVE_STEP_H, risk: incidentRisk(i * CURVE_STEP_H, worstWearPct, riskFactor) }));
 
 export type SafetyView = {
   now: number;
   /** False when the company's realism has "wear and failures" off: no incident is ever rolled; the figures are still computed. */
   active: boolean;
   index: number;
-  /** Against the earliest reading of the last 7 days; null until one exists (a reading is taken the first time a day's index is asked for). */
-  delta7d: number | null;
+  /** Against the earliest reading of the last 7 days (a reading is taken the first time a day's index is asked for, so the first answer of all is 0). */
+  delta7d: number;
   parts: {
     fatigue: { points: number; max: number; avgFatigue: number; tired: number };
     aircraft: { points: number; max: number; worst: { aircraftId: number; registration: string; wearPct: number } | null; deferred: number };
@@ -181,7 +180,7 @@ export type SafetyView = {
   };
   /** The rest policy's factor on the risk of a crewed flight (1 / 0.9 / 0.7). */
   riskFactor: number;
-  /** `risk`: the company's own curve (wear of its worst aircraft, rest policy factor); `good` and `worn`: the chart's two reference curves (CURVE_WEAR_GOOD, CURVE_WEAR_WORN, factor 1). */
+  /** The company's own curve: the wear of its worst aircraft and the rest policy's factor. */
   riskCurve: RiskPoint[];
   today: TodayRisk[];
   levers: SafetyLever[];
