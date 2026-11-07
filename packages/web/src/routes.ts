@@ -34,6 +34,7 @@ import { leaseWear } from './screens/lease-wear.ts';
 import { service } from './screens/service.ts';
 import { kitchen } from './screens/kitchen.ts';
 import { financeRoute } from './screens/finance-route.ts';
+import { groupRoute } from './screens/group-route.ts';
 
 /** Every HUD tab is a route (the HUD links to `#<tab>`), which the type enforces: a tab added to TABS without a screen does not compile. */
 export const routes: Record<Tab, ScreenFn> & Record<string, ScreenFn> = {
@@ -62,6 +63,8 @@ export const routes: Record<Tab, ScreenFn> & Record<string, ScreenFn> = {
   service, kitchen,
   // ---- reports (v4)
   finance: financeRoute,
+  // ---- group (v4)
+  group: groupRoute,
 };
 
 /** Old bookmarks (`#flights`) keep working. */

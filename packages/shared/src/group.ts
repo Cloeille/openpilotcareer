@@ -38,7 +38,8 @@ export const groupTransferSchema = z.object({ from: z.int().positive(), to: z.in
   .refine((t) => t.cash > 0 || t.aircraftIds.length > 0, { message: 'nothing to transfer', path: ['cash'] });
 export type GroupTransferRequest = z.infer<typeof groupTransferSchema>;
 
-export type GroupRole = 'parent' | 'subsidiary';
+export const GROUP_ROLES = ['parent', 'subsidiary'] as const;
+export type GroupRole = (typeof GROUP_ROLES)[number];
 export type GroupAircraft = { id: number; registration: string; icao: string; location: string; value: number; cession: CessionRefusal | null };
 /** One closed month of one company, from its cash report (reports.ts) with the capital movements taken out: grants, bailouts and what the group moves between its companies are not results. */
 export type GroupMonth = { revenue: number; spend: number; result: number };
