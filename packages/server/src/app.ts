@@ -34,6 +34,7 @@ import { registerSimAircraft } from './routes-simair.ts';
 import { maintenanceTick } from './finance.ts';
 import { registerFinance } from './routes-finance.ts';
 import { registerReports } from './routes-reports.ts';
+import { registerCredit } from './routes-credit.ts';
 import { onboardingOf, toleratedFlags } from './start.ts';
 import { registerDownloads } from './routes-downloads.ts';
 
@@ -379,6 +380,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   registerSimAircraft(app, { db, now });
   registerAgency(app, { db, now });
   registerReports(app, { db, now });
+  registerCredit(app, { db, now });
 
   return app;
 }

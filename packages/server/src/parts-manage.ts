@@ -7,14 +7,14 @@ import {
 import { get, run, type Db } from './db.ts';
 import { assertHub } from './facilities.ts';
 import { assertFlyable } from './fleet-extras.ts';
-import { balanceOf, post, snapshot, typeFor } from './game.ts';
+import { balanceOf, post, snapshot, spendable, typeFor } from './game.ts';
 import { HttpError } from './http.ts';
 import { economicsOf, orderLine, worksPlan } from './parts-views.ts';
 import { basedAt, ensureComponents, freightOf, onTheWay, ownAircraft, placeOrder, policiesAt, receiveOrders, stockOf, targetsOf, takeStock } from './parts.ts';
 import { wearEnabled } from './realism.ts';
 
-const short = (needed: number, balance: number): HttpError => new HttpError(409, 'insufficient_funds', `needs ${needed - balance} more`, { needed, balance, missing: needed - balance });
-const pay = (db: Db, companyId: number, needed: number): void => { const b = balanceOf(db, companyId); if (b < needed) throw short(needed, b); };
+const short = (needed: number, available: number, balance: number): HttpError => new HttpError(409, 'insufficient_funds', `needs ${needed - available} more`, { needed, balance, missing: needed - available });
+const pay = (db: Db, companyId: number, needed: number): void => { const available = spendable(db, companyId); if (available < needed) throw short(needed, available, balanceOf(db, companyId)); };
 
 // ---------------------------------------------------------------- the policy of a type
 
@@ -32,7 +32,7 @@ export function setPolicy(db: Db, companyId: number, hub: string, icao: string, 
   const buy = PARTS.flatMap((p) => { const missing = (targets.get(p.id) ?? 0) - (stock.get(p.id) ?? 0) - onTheWay(db, companyId, hub, p.id); return missing > 0 ? [{ part: p, qty: missing }] : []; });
   const sell = PARTS.flatMap((p) => { const qty = Math.min(stock.get(p.id) ?? 0, (oldTargets.get(p.id) ?? 0) - (targets.get(p.id) ?? 0)); return qty > 0 ? [{ part: p, qty }] : []; });
   const ordered = buy.reduce((t, l) => t + l.part.price * l.qty, 0), refund = sell.reduce((t, l) => t + Math.round(l.part.price * l.qty * PARTS_RESALE_FACTOR), 0);
-  if (balanceOf(db, companyId) + refund < ordered) throw short(ordered - refund, balanceOf(db, companyId));
+  if (spendable(db, companyId) + refund < ordered) throw short(ordered - refund, spendable(db, companyId), balanceOf(db, companyId));
   for (const l of sell) { takeStock(db, companyId, hub, l.part.id, l.qty); post(db, companyId, now, 'parts_sale', Math.round(l.part.price * l.qty * PARTS_RESALE_FACTOR), `${l.qty} x ${l.part.name} sold back (${hub})`); }
   for (const l of buy) placeOrder(db, { companyId, hub, part: l.part, qty: l.qty, express: false, freight: 0, at: now });
   const econ = economicsOf(type), covers = (p: PartsPolicy) => groundDaysPerYear(type.category, kitCovers(cls, p)) * own.length;

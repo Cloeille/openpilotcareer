@@ -7,7 +7,7 @@ import {
 import { hashSeed, mulberry32 } from './board.ts';
 import { assertSeat } from './facilities.ts';
 import { all, get, run, type Db } from './db.ts';
-import { balanceOf, post, snapshot, spend, typeFor } from './game.ts';
+import { balanceOf, post, snapshot, spend, spendable, typeFor } from './game.ts';
 import { HttpError } from './http.ts';
 import { companyDemand, demandOf, type DemandLine, type Slot } from './staff-needs.ts';
 import { crewShortage, pendingHires, rosterOf, rulesOf, stateOf, type Shortage, type StaffRow } from './staff.ts';
@@ -24,8 +24,8 @@ export const nameFrom = (rand: () => number): string => `${FIRST[Math.floor(rand
 /** Pay `amount` now or refuse with 409 insufficient_funds. */
 export function pay(db: Db, companyId: number, at: number, kind: string, amount: number, memo: string): void {
   if (amount === 0) return;
-  const balance = balanceOf(db, companyId);
-  if (balance < amount) throw new HttpError(409, 'insufficient_funds', `needs ${amount - balance} more`, { needed: amount, balance });
+  const available = spendable(db, companyId);
+  if (available < amount) throw new HttpError(409, 'insufficient_funds', `needs ${amount - available} more`, { needed: amount, balance: balanceOf(db, companyId) });
   post(db, companyId, at, kind, -amount, memo);
   snapshot(db, companyId, at);
 }

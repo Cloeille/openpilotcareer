@@ -1,8 +1,8 @@
 // Lot REPORTS (v4) read models over the ledger: cash flow, the statement, debt, and the revenue helper other lots read. Nothing here writes: the money was posted by `post()` and
 // every figure below is a sum of postings, so a report can never disagree with the balance. The category of a posting is code (shared/reports.ts), applied in SQL from the same table.
 import {
-  CATEGORIES, DAY_MS, KNOWN_KINDS, categoryOf, isoDay, revenueOf,
-  type CashMonth, type CashView, type Category, type CategoryTotal, type StatementQuery, type StatementRow, type StatementView, type UpcomingDebit,
+  CATEGORIES, DAY_MS, KNOWN_KINDS, LOAN_RATE, categoryOf, isoDay, revenueOf,
+  type Annuity, type CashMonth, type CashView, type Category, type CategoryTotal, type StatementQuery, type StatementRow, type StatementView, type UpcomingDebit,
 } from '@opc/shared';
 import { all, get, type Db } from './db.ts';
 import { monthKey, projectCharges } from './finance.ts';
@@ -44,12 +44,16 @@ export const lastMonthRevenue = (db: Db, companyId: number, now: number): number
 
 // ---------------------------------------------------------------- debt
 
-/** The principal the company still owes and what it pays a month for it: aircraft loans and the building purchases it financed. Lot CREDIT adds its credits here. */
+/** Everything the company still amortises: aircraft loans, the building purchases it financed and its consumer credits (`monthly` without the insurance a credit adds to each instalment). */
+export const debtLines = (db: Db, companyId: number): Annuity[] => all<Annuity>(db,
+  `SELECT principal, monthly, 0 AS insurance, months_paid AS monthsPaid, COALESCE(months, 0) AS months, ? AS rate FROM contracts WHERE company_id = ? AND status = 'active' AND kind = 'loan' AND principal > 0
+   UNION ALL SELECT principal, monthly, 0, months_paid, COALESCE(months, 0), ? FROM facility_contracts WHERE company_id = ? AND status = 'active' AND kind = 'purchase' AND principal > 0
+   UNION ALL SELECT principal, monthly, insurance, months_paid, months, rate FROM credits WHERE company_id = ? AND status = 'active' AND principal > 0`, LOAN_RATE, companyId, LOAN_RATE, companyId, companyId);
+
+/** The principal the company still owes and what it pays a month for it, by `debtLines`. */
 export function debtOf(db: Db, companyId: number): CashView['debt'] {
-  const rows = all<{ principal: number; monthly: number; months: number | null; months_paid: number }>(db,
-    `SELECT principal, monthly, months, months_paid FROM contracts WHERE company_id = ? AND status = 'active' AND kind = 'loan' AND principal > 0
-     UNION ALL SELECT principal, monthly, months, months_paid FROM facility_contracts WHERE company_id = ? AND status = 'active' AND kind = 'purchase' AND principal > 0`, companyId, companyId);
-  return { total: sumOf(rows, (r) => r.principal), monthly: sumOf(rows, (r) => (r.months_paid < (r.months ?? 0) ? r.monthly : 0)), credits: rows.length };
+  const rows = debtLines(db, companyId);
+  return { total: sumOf(rows, (r) => r.principal), monthly: sumOf(rows, (r) => (r.monthsPaid < r.months ? r.monthly + r.insurance : 0)), credits: rows.length };
 }
 
 // ---------------------------------------------------------------- upcoming

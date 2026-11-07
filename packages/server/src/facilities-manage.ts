@@ -8,16 +8,16 @@ import { run, type Db } from './db.ts';
 import { assertHub, facilityById, forRent, heldFacility, holderOf, hubCapacity, labelOf, levelAt, levelSinceAt, seedOf, worksAt, type Held } from './facilities.ts';
 import { facilityContractView } from './facilities-views.ts';
 import { hubUsed } from './fleet-extras.ts';
-import { balanceOf, post, snapshot } from './game.ts';
+import { balanceOf, post, snapshot, spendable } from './game.ts';
 import { HttpError } from './http.ts';
 
-const short = (needed: number, balance: number): HttpError => new HttpError(409, 'insufficient_funds', `needs ${needed - balance} more`, { needed, balance, missing: needed - balance });
+const short = (needed: number, available: number, balance: number): HttpError => new HttpError(409, 'insufficient_funds', `needs ${needed - available} more`, { needed, balance, missing: needed - available });
 
 /** Pay (a negative amount is money coming in) if the balance can take the net of all `lines` at once; one check so a signing never half-books. */
 function book(db: Db, companyId: number, at: number, lines: readonly { kind: string; amount: number; memo: string }[]): void {
   const net = lines.reduce((t, l) => t + l.amount, 0);
-  const balance = balanceOf(db, companyId);
-  if (balance + net < 0) throw short(-net, balance);
+  const available = spendable(db, companyId);
+  if (available + net < 0) throw short(-net, available, balanceOf(db, companyId));
   for (const l of lines) if (l.amount !== 0) post(db, companyId, at, l.kind, l.amount, l.memo);
   snapshot(db, companyId, at);
 }

@@ -1,17 +1,18 @@
 // Lot FINANCE domain: monthly billing (pure planner + lazy idempotent runner), leases, rentals, loans. Like game.ts, nothing
 // here opens a transaction (callers use `tx`) and rule violations throw HttpError. The money still moves through game.ts `post`.
 import {
-  CLUB, LOAN_QUOTE_DOWN_PCTS, LOAN_QUOTE_MONTHS, MONTHLY_RENTAL, PARKING_FEE_BY_SIZE, aircraftPrice, aircraftValue, loanOption, loanStep, planFacilityMonth,
-  type AircraftCategory, type FinanceCharge, type FinanceContract, type FinanceOverview, type FleetQuote, type LeaseOffer, type Ownership, type PlanFacility, type PurchaseResult,
+  CLUB, CREDIT_INSTALMENT, LOAN_QUOTE_DOWN_PCTS, LOAN_QUOTE_MONTHS, MONTHLY_RENTAL, PARKING_FEE_BY_SIZE, aircraftPrice, aircraftValue, loanOption, loanStep, NO_CREDIT, planCreditMonth, planFacilityMonth,
+  type AircraftCategory, type CreditInputs, type CreditState, type FinanceCharge, type FinanceContract, type FinanceOverview, type FleetQuote, type LeaseOffer, type Ownership, type PlanFacility, type PurchaseResult,
 } from '@opc/shared';
 import { airports } from './catalog.ts';
+import { activeCredits, overdraftLow, saveCredits, settleLate } from './credit.ts';
 import { planRows, savePlanRows } from './facilities.ts';
 import { all, get, run, type Db } from './db.ts';
 import { applyBailout, startModeOf } from './start.ts';
 import {
   assertHubSpot, ferryFee, insertAircraft, insuranceMonthly, releaseMaintenance, type ContractRow, type LeaseTerms,
 } from './fleet-extras.ts';
-import { addMonths, balanceOf, fleetView, post, snapshot, typeFor } from './game.ts';
+import { addMonths, balanceOf, fleetView, post, snapshot, spendable, typeFor } from './game.ts';
 import { insuranceRise } from './safety.ts';
 import { HttpError } from './http.ts';
 import { dayOf, leaseOffer, parseOfferId } from './leasing.ts';
@@ -33,11 +34,11 @@ export type Charge = { kind: string; amount: number; memo: string; /** The aircr
 /** Who is on the payroll: employees on a permanent contract (a temporary one is paid up front when it is booked). */
 /** `since`: the later of the contract start and the day the person was hired, so a starter crew granted at the upgrade is paid from the next month, never retroactively. */
 export type PlanStaff = { salary: number; since: number; ends_at: number | null };
-export type MonthPlan = { charges: Charge[]; contracts: PlanContract[]; facilities: PlanFacility[]; ended: number[]; returned: number[]; owned: number[] };
+export type MonthPlan = { charges: Charge[]; contracts: PlanContract[]; facilities: PlanFacility[]; credits: CreditState[]; ended: number[]; returned: number[]; owned: number[] };
 
 /** What the month starting at `start` (UTC, the 1st) costs. Everything signed or bought before `start` is billed; things signed this month were paid at signing.
  *  Returns the new contract states without touching the input, so `GET /me/finance` can project several months with the same rules billing uses. */
-export function planMonth(start: number, contracts: PlanContract[], fleet: PlanAircraft[], staff: PlanStaff[] = [], facilities: PlanFacility[] = [], rise = 0): MonthPlan {
+export function planMonth(start: number, contracts: PlanContract[], fleet: PlanAircraft[], staff: PlanStaff[] = [], facilities: PlanFacility[] = [], rise = 0, credit: CreditInputs = NO_CREDIT): MonthPlan {
   const charges: Charge[] = [];
   const ended: number[] = [], returned: number[] = [], owned: number[] = [];
   const reg = (id: number): string => fleet.find((a) => a.id === id)?.registration ?? `#${id}`;
@@ -82,18 +83,22 @@ export function planMonth(start: number, contracts: PlanContract[], fleet: PlanA
   // v3 facilities: rent, upkeep, instalments and the sale of maintenance of the buildings she holds (shared/facilities.ts), billed like everything else
   const built = planFacilityMonth(start, facilities);
   charges.push(...built.charges);
-  return { charges, contracts: next, facilities: built.rows, ended, returned, owned };
+  // v4 CREDIT: the overdraft interest of the month just over and the consumer-credit instalments come last, so the late rule reads the account after every other bill
+  const lent = planCreditMonth(start, credit);
+  charges.push(...lent.charges);
+  return { charges, contracts: next, facilities: built.rows, credits: lent.credits, ended, returned, owned };
 }
 
-export type PlanInputs = { contracts: PlanContract[]; fleet: PlanAircraft[]; staff: PlanStaff[]; facilities: PlanFacility[] };
+export type PlanInputs = { contracts: PlanContract[]; fleet: PlanAircraft[]; staff: PlanStaff[]; facilities: PlanFacility[]; credit: CreditInputs };
 
-export function planInputs(db: Db, companyId: number, at: number): PlanInputs {
+/** What the next billing charges, seen from `at`. `low`: the lowest balance of the month whose overdraft interest it bills; by default the month in progress (a projection), billing passes the month that just ended. */
+export function planInputs(db: Db, companyId: number, at: number, low: number = overdraftLow(db, companyId, addMonths(at, 0), at + 1)): PlanInputs {
   const contracts = all<ContractRow>(db, "SELECT * FROM contracts WHERE company_id = ? AND status = 'active' ORDER BY id", companyId);
   const fleet = all<{ id: number; icao: string; registration: string | null; base: string | null; ownership: Ownership; value: number; acquired_at: number; busy: number }>(db,
     `SELECT a.*, EXISTS (SELECT 1 FROM flights f WHERE f.aircraft_id = a.id AND f.status = 'active') AS busy FROM aircraft a WHERE a.company_id = ? AND a.returned_at IS NULL ORDER BY a.id`, companyId)
     .map((a) => ({ id: a.id, registration: a.registration ?? `#${a.id}`, base: a.base, ownership: a.ownership, value: a.value, category: typeFor(db, companyId, a.icao).category, acquired_at: a.acquired_at, busy: !!a.busy }));
   const staff = all<PlanStaff>(db, "SELECT salary, MAX(starts_at, hired_at) AS since, ends_at FROM staff WHERE company_id = ? AND contract = 'cdi'", companyId);
-  return { contracts, fleet, staff, facilities: planRows(db, companyId, at) };
+  return { contracts, fleet, staff, facilities: planRows(db, companyId, at), credit: { credits: activeCredits(db, companyId), overdraftLow: low } };
 }
 
 // ---------------------------------------------------------------- monthly billing (lazy, idempotent per company and UTC month)
@@ -113,10 +118,14 @@ export function runBilling(db: Db, companyId: number, now: number): number {
   for (const m of months.slice(-MAX_CATCHUP_MONTHS)) {
     if (run(db, 'INSERT INTO billing_runs (company_id, month, at) VALUES (?, ?, ?) ON CONFLICT DO NOTHING', companyId, m, now).changes === 0) continue;
     const at = monthStart(m);
-    const { contracts, fleet, staff, facilities } = planInputs(db, companyId, at);
-    const plan = planMonth(at, contracts, fleet, staff, facilities, insuranceRise(db, companyId, m));
-    for (const c of plan.charges) post(db, companyId, at, c.kind, c.amount, c.memo, null, c.aircraftId === undefined ? {} : { aircraftId: c.aircraftId });
+    const { contracts, fleet, staff, facilities, credit } = planInputs(db, companyId, at, overdraftLow(db, companyId, addMonths(at, -1), at));
+    const plan = planMonth(at, contracts, fleet, staff, facilities, insuranceRise(db, companyId, m), credit);
+    for (const c of plan.charges) {
+      post(db, companyId, at, c.kind, c.amount, c.memo, null, c.aircraftId === undefined ? {} : { aircraftId: c.aircraftId });
+      if (c.kind === CREDIT_INSTALMENT) settleLate(db, companyId, at, -c.amount, c.memo);
+    }
     savePlanRows(db, facilities, plan.facilities);
+    saveCredits(db, credit.credits, plan.credits);
     for (const c of plan.contracts) {
       const before = contracts.find((x) => x.id === c.id)!;
       if (c.months_paid !== before.months_paid || c.principal !== before.principal) run(db, 'UPDATE contracts SET months_paid = ?, principal = ? WHERE id = ?', c.months_paid, c.principal, c.id);
@@ -175,7 +184,7 @@ export function signLease(db: Db, companyId: number, o: { offerId: string; month
   assertHubSpot(db, companyId, o.hub, now);
   const type = typeFor(db, companyId, offer.icao);
   const first = term.monthlyRent + offer.deposit + offer.ferryFee;
-  const missing = first - balanceOf(db, companyId);
+  const missing = first - spendable(db, companyId);
   if (missing > 0) throw short(first, { missing, balance: balanceOf(db, companyId) });
   const aircraftId = insertAircraft(db, { companyId, icao: offer.icao, hub: o.hub, value: aircraftValue(type), ownership: 'leased', at: now });
   const registration = get<{ registration: string }>(db, 'SELECT registration FROM aircraft WHERE id = ?', aircraftId)!.registration;
@@ -218,7 +227,7 @@ export function terminateContract(db: Db, companyId: number, id: number, now: nu
     throw new HttpError(409, 'too_early', `the rental runs at least ${c.months} months`, { afterMonths: c.months, monthsPaid: c.months_paid });
   }
   const net = c.deposit - penalty;
-  if (balanceOf(db, companyId) + net < 0) throw short(-net - balanceOf(db, companyId), { penalty });
+  if (spendable(db, companyId) + net < 0) throw short(-net - spendable(db, companyId), { penalty });
   if (penalty > 0) post(db, companyId, now, 'lease_rent', -penalty, `${reg} early exit penalty`, null, { aircraftId: c.aircraft_id });
   if (c.deposit > 0) post(db, companyId, now, 'deposit_refund', c.deposit, `${reg} deposit returned`, null, { aircraftId: c.aircraft_id });
   endContract(db, c, now);
@@ -233,7 +242,7 @@ export function buyoutLease(db: Db, companyId: number, id: number, now: number):
   const t = termsOf(c);
   if (c.months_paid < (t.earlyExit?.afterMonths ?? 0)) throw new HttpError(409, 'too_early', `the purchase option opens after ${t.earlyExit.afterMonths} months`, { afterMonths: t.earlyExit.afterMonths, monthsPaid: c.months_paid });
   const needed = t.purchaseOptionPrice - c.deposit;
-  const missing = needed - balanceOf(db, companyId);
+  const missing = needed - spendable(db, companyId);
   if (missing > 0) throw short(needed, { missing, price: t.purchaseOptionPrice, deposit: c.deposit });
   const reg = get<{ registration: string }>(db, 'SELECT registration FROM aircraft WHERE id = ?', c.aircraft_id)!.registration;
   post(db, companyId, now, 'purchase_aircraft', -t.purchaseOptionPrice, `${reg} purchase option`, null, { aircraftId: c.aircraft_id });
@@ -253,7 +262,7 @@ function rentAircraft(db: Db, companyId: number, kind: 'club' | 'rental', hub: s
   if (open >= MAX_CLUB_AIRCRAFT) throw new HttpError(409, 'already_rented', `you already have ${kind === 'club' ? 'a club aircraft' : 'a monthly rental'}`);
   const rental = kind === 'rental' ? MONTHLY_RENTAL[icao]! : null;
   const first = rental ? rental.deposit + rental.monthly : 0;
-  const missing = first - balanceOf(db, companyId);
+  const missing = first - spendable(db, companyId);
   if (missing > 0) throw short(first, { missing, balance: balanceOf(db, companyId) });
   const type = typeFor(db, companyId, icao);
   const aircraftId = insertAircraft(db, { companyId, icao, hub, value: aircraftValue(type), ownership: kind === 'club' ? 'club' : 'rented', at: now });
@@ -278,13 +287,14 @@ const UPCOMING_MONTHS = 3;
 export function projectCharges(db: Db, companyId: number, now: number, months: number, inputs: PlanInputs = planInputs(db, companyId, now)): FinanceCharge[] {
   const { contracts, fleet, staff, facilities } = inputs;
   const upcoming: FinanceCharge[] = [];
-  let state = contracts, buildings = facilities;
+  let state = contracts, buildings = facilities, lent = inputs.credit;
   for (let i = 1; i <= months; i++) {
     const at = addMonths(now, i);
-    const plan = planMonth(at, state, fleet, staff, buildings, insuranceRise(db, companyId, monthKey(at)));
+    const plan = planMonth(at, state, fleet, staff, buildings, insuranceRise(db, companyId, monthKey(at)), lent);
     for (const c of plan.charges) upcoming.push({ at, kind: c.kind, amount: c.amount, memo: c.memo });
     state = plan.contracts.filter((c) => !plan.ended.includes(c.id));
     buildings = plan.facilities;
+    lent = { credits: plan.credits, overdraftLow: 0 }; // only the first month has a balance to read; the later ones are projected without an overdraft
   }
   return upcoming;
 }

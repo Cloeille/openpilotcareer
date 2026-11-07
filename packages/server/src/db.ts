@@ -326,7 +326,17 @@ UPDATE transactions SET aircraft_id = (SELECT a.id FROM aircraft a WHERE a.compa
   WHERE aircraft_id IS NULL AND kind IN ('lease_rent', 'insurance', 'parking', 'loan_installment', 'deposit', 'deposit_refund', 'ferry', 'ferry_flight', 'refurbish', 'incident', 'parts_emergency');
 `;
 
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT, SCHEMA_AGENCY, SCHEMA_REPORTS];
+// v4 CREDIT: a consumer credit (unsecured, no aircraft: contracts.aircraft_id is NOT NULL). `principal0` is what was borrowed, `principal` what is left, `monthly` the annuity (insurance apart),
+// `fee` was held back from the payout. The rate is the bank's at signing and never changes (C22). The overdraft is not stored: it is the balance, bounded by `spendable` (game.ts).
+const SCHEMA_CREDIT = `
+CREATE TABLE credits (
+  id INTEGER PRIMARY KEY, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, bank TEXT NOT NULL, principal0 INTEGER NOT NULL, principal INTEGER NOT NULL, rate REAL NOT NULL,
+  months INTEGER NOT NULL, months_paid INTEGER NOT NULL DEFAULT 0, monthly INTEGER NOT NULL, fee INTEGER NOT NULL, insurance INTEGER NOT NULL, early_penalty_pct INTEGER NOT NULL, started_at INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','repaid')));
+CREATE INDEX credits_company ON credits(company_id, status);
+`;
+
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT, SCHEMA_AGENCY, SCHEMA_REPORTS, SCHEMA_CREDIT];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);

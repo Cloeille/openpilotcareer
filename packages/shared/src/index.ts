@@ -407,3 +407,5 @@ export * from './simair.ts';
 export * from './agency.ts';
 // ---- lot reports (v4)
 export * from './reports.ts';
+// ---- lot credit (v4)
+export * from './credit.ts';

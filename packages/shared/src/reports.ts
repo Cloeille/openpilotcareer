@@ -14,7 +14,7 @@ const CATEGORY_OF_KIND: Readonly<Record<string, Category>> = {
   payroll: 'payroll', hire_premium: 'payroll', severance: 'payroll', training: 'payroll', interim: 'payroll', start_now: 'payroll', agency_fee: 'payroll',
   line_maintenance: 'maintenance', maintenance: 'maintenance', refurbish: 'maintenance', parts_order: 'maintenance', parts_emergency: 'maintenance', parts_sale: 'maintenance',
   line_fee: 'fees', landing_fee: 'fees', ferry: 'fees', ferry_flight: 'fees',
-  loan_installment: 'credits', facility_loan: 'credits',
+  loan_installment: 'credits', facility_loan: 'credits', credit: 'credits', credit_fee: 'credits', credit_installment: 'credits', credit_prepay: 'credits', credit_late_fee: 'credits', overdraft_interest: 'credits',
   lease_rent: 'leasing', deposit: 'leasing', deposit_refund: 'leasing',
   facility_rent: 'rent', facility_upkeep: 'rent', facility_deposit: 'rent', facility_deposit_refund: 'rent', facility_income: 'rent', parking: 'rent',
   insurance: 'insurance', incident: 'insurance',

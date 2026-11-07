@@ -3,7 +3,7 @@
 // Rule violations throw HttpError.
 import { randomUUID } from 'node:crypto';
 import {
-  HUB_PRICE, MAX_COMPANIES_PER_USER, loanOption, loanPayment, PAX_KG, REJECT_REPUTATION_PENALTY, START_MODES, START_REPUTATION, STARTER_AIRCRAFT, STARTING_BALANCE,
+  HUB_PRICE, MAX_COMPANIES_PER_USER, OVERDRAFT_LIMIT, loanOption, loanPayment, PAX_KG, REJECT_REPUTATION_PENALTY, START_MODES, START_REPUTATION, STARTER_AIRCRAFT, STARTING_BALANCE,
   EXPRESS_AIRCRAFT, aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, flightDutyMin, fuelPriceFactor, interruptionsSchema, jobPayout, minFlightHours, presetSetting, rankFor, realismModifiers, realismView, seasonOf, settle,
   type AircraftType, type Company, type CompanyProfile, type CustomAircraftInput, type FleetAircraft, type Flight,
   type Financing, type FlightStatus, type Job, type Leaderboard, type LeaderboardRow, type Me, type Ownership, type Personality, type Pilot, type StartMode, type Telemetry, type Transaction,
@@ -30,6 +30,7 @@ export const IMPORT_TTL_MS = 7 * 24 * 3_600_000;
 const NET_WORTH_SQL = `c.balance + COALESCE((SELECT SUM(value) FROM aircraft WHERE company_id = c.id AND returned_at IS NULL AND ownership IN ('owned','financed')), 0)
   + COALESCE((SELECT SUM(deposit) FROM contracts WHERE company_id = c.id AND status = 'active'), 0)
   - COALESCE((SELECT SUM(principal) FROM contracts WHERE company_id = c.id AND status = 'active' AND kind = 'loan'), 0)
+  - COALESCE((SELECT SUM(principal) FROM credits WHERE company_id = c.id AND status = 'active'), 0)
   + COALESCE((SELECT SUM(value + deposit - principal) FROM facility_contracts WHERE company_id = c.id AND status = 'active'), 0)`;
 export const SB_PREFIX = 'sb-';
 /** Id prefix of the private job made when the player takes over a line rotation (lines.ts). */
@@ -74,10 +75,12 @@ export function typeFor(db: Db, companyId: number, icao: string): AircraftType {
 
 export const balanceOf = (db: Db, companyId: number): number => get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId)?.balance ?? 0;
 
-/** Spending that needs the money in the bank: 402 when the balance does not cover it. `post` (ledger.ts) is the only place a balance changes. */
+/** What the company can pay now: its balance plus the overdraft the bank allows (C19). The one place that limit is applied: every guard that refuses a payment compares against this, never against the bare balance. */
+export const spendable = (db: Db, companyId: number): number => balanceOf(db, companyId) + OVERDRAFT_LIMIT;
+
+/** Spending that needs the money in the bank (the overdraft included): 402 when `spendable` does not cover it. `post` (ledger.ts) is the only place a balance changes. */
 export function assertFunds(db: Db, companyId: number, price: number): void {
-  const c = get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId);
-  if (!c || c.balance < price) throw new HttpError(402, 'insufficient_funds', `needs ${price}, balance is ${c?.balance ?? 0}`);
+  if (spendable(db, companyId) < price) throw new HttpError(402, 'insufficient_funds', `needs ${price}, balance is ${balanceOf(db, companyId)}`);
 }
 export function spend(db: Db, companyId: number, at: number, kind: string, price: number, memo: string): void {
   assertFunds(db, companyId, price);
@@ -154,9 +157,9 @@ export function buyAircraft(db: Db, companyId: number, icao: string, hub: string
   assertHubSpot(db, companyId, hub, now);
   const loan = financing ? loanOption(price, ferry, financing.downPct, financing.months) : null;
   const upfront = loan ? loan.dueToday : price + ferry;
-  const balance = get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId)?.balance ?? 0;
-  if (balance < upfront) {
-    throw new HttpError(409, 'insufficient_funds', `needs ${upfront}, balance is ${balance}`, { needed: upfront, missing: upfront - balance, balance, ...(loan ? {} : { options: ['loan', 'lease'] }) });
+  const balance = balanceOf(db, companyId);
+  if (spendable(db, companyId) < upfront) {
+    throw new HttpError(409, 'insufficient_funds', `needs ${upfront}, balance is ${balance}`, { needed: upfront, missing: upfront - spendable(db, companyId), balance, ...(loan ? {} : { options: ['loan', 'lease'] }) });
   }
   const id = insertAircraft(db, { companyId, icao: t.icao, hub, value: aircraftValue(t), ownership: loan ? 'financed' : 'owned', at: now });
   const registration = get<{ registration: string }>(db, 'SELECT registration FROM aircraft WHERE id = ?', id)!.registration;
