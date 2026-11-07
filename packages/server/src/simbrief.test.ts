@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { HttpError } from './http.ts';
 import { fetchOfp, lookupAccount, ofpMismatch } from './simbrief.ts';
 
@@ -95,11 +96,50 @@ test('server errors, non-JSON and schema-violating bodies are soft 502s', async 
   await fails(reply({ oops: 1 }, 500), 502, 'simbrief_unavailable');
   await fails(reply('<html>maintenance</html>', 200), 502, 'simbrief_invalid');
   await fails(reply(ofp({ origin: { icao_code: 'paris' } })), 502, 'simbrief_invalid');
-  await fails(reply(ofp({ weights: { payload: '-5' } })), 502, 'simbrief_invalid');
+  await fails(reply(ofp({ weights: { payload: 'lots' } })), 502, 'simbrief_invalid');
+  await fails(reply(ofp({ weights: { payload: '1', pax_count_actual: 'Infinity' } })), 502, 'simbrief_invalid');
   await fails(reply({ origin: {} }), 502, 'simbrief_invalid');
 });
 
 test('oversized responses are refused, declared or streamed', async () => {
   await fails(reply(ofp(), 200, { 'content-length': String(50 * 1024 * 1024) }), 502, 'simbrief_invalid');
   await fails(reply(' '.repeat(5 * 1024 * 1024) + JSON.stringify(ofp())), 502, 'simbrief_invalid');
+});
+
+/** What SimBrief returned for a custom 787-8 based airframe named QUASAR (trimmed to the fields the schema reads): its empty weight exceeds the zero-fuel weight, so payload and pax are negative. */
+const QUASAR_OFP = JSON.parse(readFileSync(new URL('simbrief-quasar-ofp.fixture.json', import.meta.url), 'utf8')) as ReturnType<typeof ofp>;
+const quasar = (aircraft: Record<string, unknown>) => ofp({ ...QUASAR_OFP, aircraft: { ...QUASAR_OFP.aircraft, ...aircraft } });
+
+test('a custom airframe\'s negative payload and pax mean no load, not an unreadable plan', async () => {
+  const r = await fetchOfp({ username: 'someone' }, reply(QUASAR_OFP));
+  assert.deepEqual([r.origin, r.destination, r.payloadKg, r.pax, r.plannedFuelKg], ['LFOK', 'RJTT', 0, 0, 58149]);
+  const lbs = await fetchOfp({ username: 'someone' }, reply(ofp({ params: { units: 'lbs' }, weights: { payload: '-5', pax_count_actual: '-1' } })));
+  assert.deepEqual([lbs.payloadKg, lbs.pax], [0, 0]);
+});
+
+test('a custom airframe maps to the career type named by its fin, then its name; the base type is only the fallback', async () => {
+  const type = async (aircraft: Record<string, unknown>) => (await fetchOfp({ username: 'someone' }, reply(quasar(aircraft)))).aircraftIcao;
+  assert.equal(await type({}), 'QASR', 'name QUASAR is the Quasar alias');
+  assert.equal(await type({ fin: 'qasr', name: 'Whatever' }), 'QASR', 'fin is an exact catalogue designator, case-insensitive');
+  assert.equal(await type({ fin: 'QSAR', name: 'QASR' }), 'QASR', 'name is an exact catalogue designator');
+  assert.equal(await type({ fin: 'A320', name: 'QUASAR' }), 'A320', 'fin wins over the alias');
+  assert.equal(await type({ fin: 'QSAR', name: 'My Dreamliner' }), 'B788', 'no designator, no alias: the base type');
+  assert.equal(await type({ fin: 'ZZ99', name: 'Quasar 2' }), 'B788', 'no fuzzy guessing, and an unknown designator is not a catalogue type');
+  assert.equal(await type({ fin: '', name: '' }), 'B788');
+  const bare = { ...QUASAR_OFP, aircraft: { icaocode: 'B788' } };
+  assert.equal((await fetchOfp({ username: 'someone' }, reply(bare))).aircraftIcao, 'B788', 'a plan without the custom fields is still readable');
+});
+
+test('the alias and the designators are for custom airframes only', async () => {
+  const type = async (aircraft: Record<string, unknown>) => (await fetchOfp({ username: 'someone' }, reply(quasar(aircraft)))).aircraftIcao;
+  assert.equal(await type({ is_custom: '0' }), 'B788');
+  assert.equal(await type({ is_custom: '0', fin: 'QASR' }), 'B788');
+  assert.equal(await type({ is_custom: '' }), 'B788');
+  assert.equal(await type({ is_custom: 1 }), 'QASR', 'the number 1 is a custom airframe too');
+});
+
+test('a plan for the Quasar is compared as a QASR, a plain B788 plan is not', () => {
+  const flight = { origin: 'LFOK', destination: 'RJTT', aircraftIcao: 'QASR' };
+  assert.equal(ofpMismatch({ origin: 'LFOK', destination: 'RJTT', aircraftIcao: 'QASR' }, flight), null);
+  assert.match(ofpMismatch({ origin: 'LFOK', destination: 'RJTT', aircraftIcao: 'B788' }, flight)!, /\(B788\).*\(QASR\)/);
 });

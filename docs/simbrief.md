@@ -125,9 +125,9 @@ Accept: application/json        (8 s timeout, no redirects, 4 MiB cap)
 |---|---|---|---|
 | `origin.icao_code` | yes, `^[A-Z]{4}$` | `origin` | Must also exist in the bundled airport database, else `422 unknown_airport` |
 | `destination.icao_code` | yes, `^[A-Z]{4}$` | `destination` | same |
-| `aircraft.icaocode` | yes, `^[A-Z0-9]{2,4}$` | `requiredAircraft` | The job can only be flown with exactly this ICAO type (`cannotFly`), checked at accept time |
-| `weights.payload` | yes, number ≥ 0 | `payloadKg` for **cargo** jobs | Converted to kg, rounded |
-| `weights.pax_count_actual` | no (default 0) | `pax` | `> 0` makes the job `pax` |
+| `aircraft.icaocode` | yes, `^[A-Z0-9]{2,4}$` | `requiredAircraft` | The job can only be flown with exactly this ICAO type (`cannotFly`), checked at accept time. For a custom airframe (`aircraft.is_custom` = `1`) the base type is not the aircraft flown, so the type is `aircraft.fin`, else `aircraft.name`, when it is an exact non-derived catalogue designator, else `name` `QUASAR` → `QASR`, else `icaocode`. No fuzzy matching. The same type is what `ofpMismatch` compares with a flight |
+| `weights.payload` | yes, finite number | `payloadKg` for **cargo** jobs | Converted to kg, rounded. A negative value (a custom airframe whose empty weight exceeds the zero-fuel weight) is read as 0 |
+| `weights.pax_count_actual` | no (default 0) | `pax` | `> 0` makes the job `pax`; negative is read as 0 |
 | `fuel.plan_ramp` | yes, number ≥ 0 | `plannedFuelKg` | Stored and shown only; not used in payout or settlement |
 | `general.route` | no (default `""`), ≤ 4000 chars | `route` | Longer routes fail validation (not truncated) |
 | `params.units` | yes, string | unit switch | starts with `k` (case-insensitive) → kg, anything else → lbs × 0.45359237 |
@@ -140,6 +140,7 @@ What the server computes itself, not from the OFP:
 - **`kind`**: `pax` when `pax_count_actual > 0`, otherwise `cargo`.
 - **`payloadKg`** for a `pax` job is `pax × 100 kg` (`PAX_KG`), **not** SimBrief's payload. SimBrief's `weights.payload` is the *total* load. In the one plan I inspected it equalled pax weight + bag weight + freight (176 × 185 + 176 × 35 + 5 271 = 43 991 lb). So on a mixed passenger + freight plan the freight is dropped. This is intentional (`importJob` comment: "pax jobs pay for pax × PAX_KG only").
 - **`payout`**: `round(distance × payloadKg × rate)` with the same `jobRate` as board jobs.
+- **Quasar with no load**: a `QASR` plan with 0 passengers and 0 payload is an express job: `payloadKg` is `EXPRESS_PAYLOAD_KG` (2 000 kg) and the payout is `expressPayout(distance)` when the distance is within the board's express range (200–8 000 nm), else the regular cargo payout of 2 000 kg. A `QASR` plan that carries a load keeps it.
 - **`id`**: `sb-` + random UUID. Importing the same plan twice creates two jobs (no de-duplication).
 
 ## Lifecycle and limits
@@ -171,7 +172,7 @@ Every error is `{ "error": "<code>", "message": "<text>" }`. Checks run in this 
 | 8 | JSON does not match the schema above | 502 | `simbrief_invalid` ("a flight plan this server cannot read") |
 | 9 | Airport not in the database | 422 | `unknown_airport` |
 | 10 | Origin equals destination | 422 | `invalid_plan` |
-| 11 | No passengers and payload 0 | 422 | `invalid_plan` |
+| 11 | No passengers and payload 0 (except a `QASR` plan, see above) | 422 | `invalid_plan` |
 | 12 | 25 pending imports already | 409 | `limit_reached` |
 
 Failures at accept time (wrong aircraft type, not at the origin, too few seats, out of range) belong to `POST /jobs/:id/accept`, not to the import.

@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import type { Flight } from '@opc/shared';
+import { readFileSync } from 'node:fs';
+import { EXPRESS_PAYLOAD_KG, aircraftPrice, expressPayout, jobPayout, type Flight, type Job } from '@opc/shared';
+import { catalogType } from './catalog.ts';
 import { get, run } from './db.ts';
 import { insertAircraft } from './fleet-extras.ts';
 import { harness } from './harness.ts';
@@ -204,4 +206,54 @@ test('a line rotation (private job, source "line") is a flight like any other fo
   assert.equal(accepted.status, 201, accepted.text);
   assert.equal(accepted.body.job.source, 'line');
   assert.match(accepted.body.simbrief.staticId, /^opc_\d+_[0-9a-f]{12}$/);
+});
+
+const QUASAR_OFP = JSON.parse(readFileSync(new URL('simbrief-quasar-ofp.fixture.json', import.meta.url), 'utf8')) as ReturnType<typeof plan>;
+
+test('Chloé\'s Quasar plan (custom 787-8 base, negative payload) imports as an express QASR cargo job and is fetched for its flight without a B788 mismatch', async () => {
+  let staticId = '';
+  const h = await harness({ fetch: fakeSimbrief(() => ({ ...QUASAR_OFP, fetch: { ...QUASAR_OFP.fetch, static_id: staticId } })).fetch });
+  const u = await h.register('chloe');
+  const cid = u.me.company.id as number;
+  const imported = await h.call('POST', '/api/v1/jobs/import-simbrief', { token: u.token, body: { pilotId: 1423851 } });
+  assert.equal(imported.status, 201, imported.text);
+  const job = imported.body as Job;
+  assert.deepEqual([job.kind, job.pax, job.payloadKg, job.requiredAircraft, job.origin, job.destination], ['cargo', 0, EXPRESS_PAYLOAD_KG, 'QASR', 'LFOK', 'RJTT']);
+  assert.equal(job.payout, expressPayout(job.distanceNm));
+  assert.ok(job.payout > jobPayout('cargo', job.distanceNm, EXPRESS_PAYLOAD_KG), 'the express premium, not the plain cargo rate');
+
+  const aircraftId = insertAircraft(h.db, { companyId: cid, icao: 'QASR', hub: 'LFOK', value: aircraftPrice(catalogType('QASR')), ownership: 'owned', at: h.clock.t });
+  const accepted = await h.call('POST', `/api/v1/jobs/${job.id}/accept`, { token: u.token, body: { aircraftId } });
+  assert.equal(accepted.status, 201, accepted.text);
+  const flight = accepted.body as Flight;
+  assert.equal(flight.aircraftIcao, 'QASR');
+  staticId = flight.simbrief!.staticId;
+
+  await h.call('PUT', '/api/v1/me/simbrief', { token: u.token, body: { pilotId: 1423851 } });
+  const fetched = await h.call('POST', `/api/v1/flights/${flight.id}/simbrief/fetch`, { token: u.token });
+  assert.equal(fetched.status, 200, fetched.text);
+  assert.equal(fetched.body.job.plannedFuelKg, 58149);
+});
+
+test('a Quasar plan that carries a load keeps it: pax or cargo are not replaced by the express payload', async () => {
+  const withLoad = (weights: Record<string, string>) => plan({ ...QUASAR_OFP, weights: { ...QUASAR_OFP.weights, ...weights } });
+  let body: unknown = withLoad({ payload: '1500', pax_count_actual: '0' });
+  const h = await harness({ fetch: fakeSimbrief(() => body).fetch });
+  const { token } = await h.register('amy');
+  const cargo = (await h.call('POST', '/api/v1/jobs/import-simbrief', { token, body: { pilotId: 1423851 } })).body as Job;
+  assert.deepEqual([cargo.kind, cargo.payloadKg, cargo.payout, cargo.requiredAircraft], ['cargo', 1500, jobPayout('cargo', cargo.distanceNm, 1500), 'QASR']);
+  body = withLoad({ payload: '1500', pax_count_actual: '4' });
+  const pax = (await h.call('POST', '/api/v1/jobs/import-simbrief', { token, body: { pilotId: 1423851 } })).body as Job;
+  assert.deepEqual([pax.kind, pax.pax, pax.payloadKg], ['pax', 4, 400]);
+});
+
+test('an ordinary plan is unchanged: a B738 imports as a B738 job, and an empty one is still an invalid_plan', async () => {
+  let body: unknown = plan({ aircraft: { icaocode: 'B738', name: 'QUASAR', fin: 'QASR', is_custom: '0' }, weights: { payload: '15000', pax_count_actual: '150' } });
+  const h = await harness({ fetch: fakeSimbrief(() => body).fetch });
+  const { token } = await h.register('amy');
+  const job = (await h.call('POST', '/api/v1/jobs/import-simbrief', { token, body: { pilotId: 1423851 } })).body as Job;
+  assert.deepEqual([job.kind, job.pax, job.payloadKg, job.requiredAircraft], ['pax', 150, 15000, 'B738']);
+  body = plan({ aircraft: { icaocode: 'B738' }, weights: { payload: '-100', pax_count_actual: '-1' } });
+  const empty = await h.call('POST', '/api/v1/jobs/import-simbrief', { token, body: { pilotId: 1423851 } });
+  assert.deepEqual([empty.status, empty.body.error], [422, 'invalid_plan']);
 });
