@@ -89,7 +89,7 @@ export function leverHash(l: Pick<Lever, 'action' | 'ref'>): string {
   switch (l.action) {
     case 'crew': return hashFor('staff', l.ref);
     case 'leave': return '#staff/leave';
-    case 'maintenance': return '#fleet';
+    case 'maintenance': return hashFor('wear', l.ref);
   }
 }
 

@@ -76,6 +76,7 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
             button(t('fin.confirm'), { variant: isBuy ? 'primary' : 'danger', onclick: () => void perform(() => (isBuy ? buyoutLease(c.id) : terminateLease(c.id)), () => t(isBuy ? 'fin.lease.bought' : 'fin.lease.terminated'), ctx.refresh) })));
       } else {
         actions.replaceChildren(
+          button(t('pt.r.open'), { variant: 'secondary', icon: 'wrench', onclick: () => go(`#wear/${a.id}`) }),
           button(t('fin.lease.terminate'), { variant: 'secondary', onclick: () => { confirming = 'terminate'; showDetail(a); } }),
           button(t('fin.lease.buyout'), { variant: 'secondary', onclick: () => { confirming = 'buyout'; showDetail(a); } }));
       }
