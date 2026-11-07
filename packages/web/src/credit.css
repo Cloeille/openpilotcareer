@@ -1,0 +1,45 @@
+/* ---------------------------------------------------------------- credit (v4 CREDIT): the credits screen and the new-credit screen.
+   Same panels and tokens as the reports (reports.css); only what they do not have is here. */
+
+.cr-screen .rp-main { min-width: 0; }
+.cr-side { gap: 16px; }
+.cr-h { font: 500 13px var(--ui); color: var(--text-secondary); margin: 8px 0 0; }
+.cr-refusal { color: var(--warning); font-size: 13px; display: flex; align-items: flex-start; gap: 6px; margin: 0; }
+
+/* ---- schedule: a stacked bar per month */
+.cr-bars { display: grid; grid-template-columns: repeat(auto-fit, minmax(18px, 1fr)); gap: 3px; align-items: end; height: 240px; margin-top: 8px; }
+.cr-bar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 100%; padding: 4px 1px; background: transparent; border: 1px solid transparent; border-radius: 3px; cursor: pointer; color: var(--text-secondary); }
+.cr-bar:hover { background: var(--surface-hover); }
+.cr-bar.on { background: var(--surface-selected); border-color: var(--border-strong); color: var(--text-primary); }
+.cr-stack { display: flex; flex-direction: column; width: 70%; max-width: 22px; min-height: 2px; border-radius: 1px 1px 0 0; overflow: hidden; }
+.cr-stack i { display: block; min-height: 0; }
+.cr-stack .capital, .rp-legend i.capital { background: var(--text-secondary); }
+.cr-stack .interest, .rp-legend i.interest { background: var(--warning); }
+.cr-stack .insurance, .rp-legend i.insurance { background: var(--text-tertiary); opacity: .6; }
+.cr-bar-month { font-size: 11px; text-transform: capitalize; }
+
+/* ---- the credits and the loans */
+.cr-cards { display: flex; flex-direction: column; gap: 10px; }
+.cr-card { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 4px; }
+.cr-card.on { border-color: var(--border-strong); background: var(--surface-selected); }
+.cr-card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; padding: 0; background: transparent; border: 0; color: inherit; text-align: left; font: inherit; cursor: pointer; }
+.cr-card-head.static { cursor: default; }
+.cr-fields { display: flex; gap: 20px; flex-wrap: wrap; }
+.cr-field { display: flex; flex-direction: column; gap: 2px; }
+.cr-amount { display: flex; flex-direction: column; gap: 4px; }
+.cr-amount input { width: 100%; }
+
+/* ---- the new credit: slider, durations, banks */
+.cr-amount-block { display: flex; flex-direction: column; gap: 8px; }
+.cr-amount-label { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.cr-amount-value { font: 500 30px/1.12 var(--display); font-variant-numeric: tabular-nums; }
+.cr-amount-block input[type='range'] { width: 100%; accent-color: var(--accent); }
+.cr-range { display: flex; justify-content: space-between; gap: 12px; }
+.cr-durations { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+.cr-duration, .cr-bank { display: flex; gap: 4px; padding: 10px 12px; background: transparent; border: 1px solid var(--border); border-radius: 4px; color: var(--text-secondary); text-align: left; font: inherit; cursor: pointer; }
+.cr-duration { flex-direction: column; }
+.cr-bank { justify-content: space-between; align-items: center; width: 100%; }
+.cr-duration:hover, .cr-bank:hover { background: var(--surface-hover); }
+.cr-duration.on, .cr-bank.on { background: var(--surface-selected); border-color: var(--border-strong); color: var(--text-primary); }
+.cr-banks { display: flex; flex-direction: column; gap: 8px; }
+.col.end { align-items: flex-end; }

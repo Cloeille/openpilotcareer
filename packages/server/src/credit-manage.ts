@@ -2,7 +2,7 @@
 // The ceiling reads `lastMonthRevenue` (reports.ts), the debt ratio and the schedule read `debtLines` (reports.ts), the money moves through `post` and the spending guard of game.ts.
 import {
   CREDIT_BANKS, CREDIT_BANK_IDS, CREDIT_MAX_ACTIVE, CREDIT_MAX_RATIO, CREDIT_MONTHS, LOAN_RATE, OVERDRAFT_LIMIT, OVERDRAFT_RATE, creditCeiling, creditSchedule, creditTerms, debtRatio, overdraftInterest, prepayPlan, ratingOf,
-  type CreditQuote, type CreditRefusal, type CreditRequest, type CreditSheet, type CreditView, type CreditsView, type LoanLine, type PrepayQuote, type PrepayRequest,
+  type CreditQuote, type CreditRefusal, type CreditRequest, type CreditSheet, type CreditSigned, type CreditView, type CreditsView, type LoanLine, type PrepayDone, type PrepayQuote, type PrepayRequest,
 } from '@opc/shared';
 import { overdraftLow, type CreditRow } from './credit.ts';
 import { all, get, run, type Db } from './db.ts';
@@ -55,7 +55,7 @@ export const quoteCredit = (db: Db, companyId: number, r: CreditRequest, now: nu
 });
 
 /** Sign: 409 too_many / over_ceiling / debt_ratio. The amount less the bank's fee reaches the account now; the first instalment is billed on the 1st of next month. */
-export function signCredit(db: Db, companyId: number, r: CreditRequest, now: number): { credit: CreditView; net: number; balanceAfter: number } {
+export function signCredit(db: Db, companyId: number, r: CreditRequest, now: number): CreditSigned {
   const q = quoteOf(db, companyId, r, now);
   if (q.refusal) {
     const s = standing(db, companyId, now);
@@ -91,13 +91,13 @@ export function prepayQuote(db: Db, companyId: number, id: number, request: Prep
 }
 
 /** Repay: the amount (and the bank's penalty on it) leaves the account, the instalment is recomputed over the months left, a full repayment closes the credit. 409 insufficient_funds. */
-export function prepayCredit(db: Db, companyId: number, id: number, request: PrepayRequest, now: number): { plan: PrepayQuote; credit: CreditView | null; balanceAfter: number } {
+export function prepayCredit(db: Db, companyId: number, id: number, request: PrepayRequest, now: number): PrepayDone {
   const c = creditOf(db, companyId, id);
   const plan = planOf(db, c, request);
   if (spendable(db, companyId) < plan.total) throw short(plan.total, db, companyId);
   post(db, companyId, now, 'credit_prepay', -plan.amount, `credit #${c.id} early repayment`);
   if (plan.penalty > 0) post(db, companyId, now, 'credit_prepay', -plan.penalty, `credit #${c.id} early repayment penalty`);
-  run(db, 'UPDATE credits SET principal = ?, monthly = ?, status = ? WHERE id = ?', plan.principalAfter, plan.monthlyAfter, plan.closes ? 'repaid' : 'active', c.id);
+  run(db, 'UPDATE credits SET principal = ?, monthly = ?, status = ? WHERE id = ?', plan.principalAfter, plan.annuityAfter, plan.closes ? 'repaid' : 'active', c.id);
   snapshot(db, companyId, now);
   const balanceAfter = balanceOf(db, companyId);
   return { plan: { ...plan, balanceAfter, refusal: null }, credit: plan.closes ? null : viewOf(get<CreditRow>(db, 'SELECT * FROM credits WHERE id = ?', c.id)!), balanceAfter };

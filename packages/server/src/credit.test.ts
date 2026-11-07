@@ -63,9 +63,10 @@ test('early repayment maths: the term stays, the instalment falls, and what is s
   assert.equal(partial.total, 101_000);
   assert.equal(partial.principalAfter, left - 100_000);
   assert.equal(partial.monthsLeft, months - paid);
-  assert.equal(partial.monthlyAfter, loanPayment(left - 100_000, months - paid, rate));
-  assert.ok(partial.monthlyAfter < monthly);
-  const after = creditSchedule({ ...c, principal: partial.principalAfter, monthly: partial.monthlyAfter });
+  assert.equal(partial.annuityAfter, loanPayment(left - 100_000, months - paid, rate));
+  assert.equal(partial.monthlyAfter, partial.annuityAfter + insurance, 'the whole instalment, insurance included, is what the screen shows');
+  assert.ok(partial.annuityAfter < monthly);
+  const after = creditSchedule({ ...c, principal: partial.principalAfter, monthly: partial.annuityAfter });
   assert.equal(after.length, before.length, 'same number of instalments');
   const total = (s: typeof before) => s.reduce((t, m) => t + m.pay, 0);
   assert.equal(total(before) - (total(after) + partial.amount), partial.saved, 'what was saved is the difference of what is paid in all');
@@ -268,7 +269,7 @@ test('early repayment: the quote and the repayment agree, the bank penalty is on
   await w.call('GET', '/credits');
   const row = w.credit(id);
   assert.equal(row.months_paid, 3);
-  const quote = (await w.call<{ amount: number; penalty: number; total: number; principalAfter: number; monthlyAfter: number; saved: number; balanceAfter: number; refusal: null }>('POST', `/credits/${id}/prepay/quote`, { amount: 100_000 })).body;
+  const quote = (await w.call<{ amount: number; penalty: number; total: number; principalAfter: number; annuityAfter: number; monthlyAfter: number; saved: number; balanceAfter: number; refusal: null }>('POST', `/credits/${id}/prepay/quote`, { amount: 100_000 })).body;
   assert.deepEqual([quote.amount, quote.penalty, quote.total, quote.principalAfter, quote.refusal], [100_000, 1_000, 101_000, row.principal - 100_000, null]);
   const balance = w.balance();
   assert.equal(w.balance(), balance, 'quoting books nothing');
@@ -276,8 +277,9 @@ test('early repayment: the quote and the repayment agree, the bank penalty is on
   assert.equal(done.status, 200, done.text);
   assert.equal(w.balance(), balance - 101_000);
   assert.equal(done.body.balanceAfter, balance - 101_000);
-  assert.deepEqual([w.credit(id).principal, w.credit(id).monthly, w.credit(id).months_paid], [quote.principalAfter, quote.monthlyAfter, 3]);
-  assert.ok(quote.monthlyAfter < row.monthly);
+  assert.deepEqual([w.credit(id).principal, w.credit(id).monthly, w.credit(id).months_paid], [quote.principalAfter, quote.annuityAfter, 3]);
+  assert.equal(quote.monthlyAfter, quote.annuityAfter + CREDIT_BANKS.meridional.insurance);
+  assert.ok(quote.annuityAfter < row.monthly);
   assert.equal(w.txs('credit_prepay').length, 2, 'the repaid amount and the penalty are two lines');
   const tooMuch = await w.call('POST', `/credits/${id}/prepay`, { amount: w.credit(id).principal + 1 });
   assert.deepEqual([tooMuch.status, tooMuch.body.error], [422, 'invalid_amount']);

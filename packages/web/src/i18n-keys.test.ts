@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { SIM_AIRCRAFT_SOURCES, CATEGORIES, COST_PARTS, DECISIONS, FINANCE_SCREENS, PROFIT_BY, SCENARIOS, AIRCRAFT_CATEGORIES, COMPONENTS, FACILITY_KINDS, HAULS, MECHANICAL, MEAL_QUALITIES, PARTS_POLICIES, PART_CLASSES, REALISM_TOGGLES, RANKS, REST_POLICY_NAMES, SERVICE_ITEMS, SERVICE_MODES, STAFF_FAMILIES, WTCS, type AirportSize, type Ownership } from '@opc/shared';
+import { CREDIT_BANK_IDS, CREDIT_REFUSALS, SIM_AIRCRAFT_SOURCES, CATEGORIES, COST_PARTS, DECISIONS, FINANCE_SCREENS, PROFIT_BY, SCENARIOS, AIRCRAFT_CATEGORIES, COMPONENTS, FACILITY_KINDS, HAULS, MECHANICAL, MEAL_QUALITIES, PARTS_POLICIES, PART_CLASSES, REALISM_TOGGLES, RANKS, REST_POLICY_NAMES, SERVICE_ITEMS, SERVICE_MODES, STAFF_FAMILIES, WTCS, type AirportSize, type Ownership } from '@opc/shared';
 import type { Coverage, DutyRule, StaffRole, StaffState } from './api-staff.ts';
 import type { Meter, Level } from './staff-view.ts';
 import type { DuelKey, Kind } from './standings.ts';
@@ -86,6 +86,8 @@ const LOOKUPS: readonly (readonly [string, readonly (string | number)[], string?
   ['ob.s2.color.', [...LIVERY_COLORS.map((c) => c.id), 'none']], ['ob.s6.own.', [...OWNERSHIPS, 'plain']],
   ['rp.cat.', CATEGORIES], ['rp.part.', COST_PARTS], ['rp.sc.', SCENARIOS], ['rp.sc.', SCENARIOS, '.note'], ['rp.f.d.', DECISIONS], ['rp.f.d.', DECISIONS, '.note'],
   ['rp.nav.', FINANCE_SCREENS], ['rp.l.by.', PROFIT_BY], ['rp.l.period.', PERIODS],
+  ['cr.bank.', CREDIT_BANK_IDS], ['cr.refusal.', CREDIT_REFUSALS], ['err.', CREDIT_REFUSALS],
+  ['tx.kind.', ['credit', 'credit_fee', 'credit_installment', 'credit_prepay', 'credit_late_fee', 'overdraft_interest']], ['fin.kind.', ['credit_installment', 'overdraft_interest']],
 ];
 
 test('every value of every closed set a message is looked up by has a message in both languages', () => {

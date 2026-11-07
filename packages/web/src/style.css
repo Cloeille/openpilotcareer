@@ -14,6 +14,7 @@
 @import './service.css';
 @import './agency.css';
 @import './reports.css';
+@import './credit.css';
 
 :root {
   color-scheme: dark;

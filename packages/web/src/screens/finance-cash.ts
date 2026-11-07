@@ -1,4 +1,5 @@
 import { fetchCash } from '../api-reports.ts';
+import { creditsEntry } from '../credit-ui.ts';
 import { icon, panel, titleBlock } from '../components.ts';
 import { locale } from '../finance-ui.ts';
 import { fmt } from '../format.ts';
@@ -66,11 +67,11 @@ export async function financeCash(ctx: Ctx): Promise<Screen> {
   };
 
   const view = h('div', { class: 'rp-screen' }, header, reportNav('cash', go),
-    h('div', { class: 'rp-body' }, chart, h('div', { class: 'rp-side' }, upcomingPanel(cash, (u) => t(CATEGORY_KEY[u.category])))),
+    h('div', { class: 'rp-body' }, chart, h('div', { class: 'rp-side' }, upcomingPanel(cash, (u) => t(CATEGORY_KEY[u.category])), creditsEntry(cash.debt, go))),
     h('div', { class: 'rp-pair' }, side('in'), side('out')));
   return {
     title: t('rp.c.title'), scene: 'finance', tab: 'hubs', view, back, wide: false,
-    hints: reportHints('cash', { key: '← →', label: t('rp.hint.month') }),
-    keys: { left: step(-1), right: step(1), ...reportKeys('cash', go) },
+    hints: reportHints('cash', { key: '← →', label: t('rp.hint.month') }, { key: 'C', label: t('cr.hint.open') }),
+    keys: { left: step(-1), right: step(1), c: () => go('#finance/credits'), ...reportKeys('cash', go) },
   };
 }

@@ -290,6 +290,16 @@ expect(fcast.status === 200 && fcast.body.points.length === 12 && fcast.body.poi
 const tried = await call('POST', '/finance/forecast/decision', { token: lineTok, body: { decision: 'lease_aircraft' } });
 expect(tried.status === 200 && (await call('GET', '/me', { token: lineTok })).body.company.balance === meNow, 'testing a decision changes nothing', tried);
 expect((await call('GET', '/finance/cash', { token: apiKey })).status === 401, 'an API key cannot read the finance reports');
+// v4 credit: a young company has no full month of revenue, so the bank lends nothing yet; the quote says why, signing is refused and books nothing, the credits are session-only
+const creditsView = await call('GET', '/credits', { token: lineTok });
+expect(creditsView.status === 200 && creditsView.body.ceiling === 0 && creditsView.body.room === 0 && creditsView.body.overdraft.limit === 250000 && creditsView.body.credits.length === 0, `credits: ceiling ${creditsView.body.ceiling} on a month with no revenue, overdraft ${creditsView.body.overdraft.limit}`, creditsView);
+const creditAsk = { amount: 100000, months: 24, bank: 'alpes' };
+const creditQuote = await call('POST', '/credits/quote', { token: lineTok, body: creditAsk });
+expect(creditQuote.status === 200 && creditQuote.body.quote.refusal === 'over_ceiling' && creditQuote.body.banks.length === 3 && creditQuote.body.durations.length === 5, 'credit quote: three banks, five durations, refused over the ceiling', creditQuote);
+const creditBalance = (await call('GET', '/me', { token: lineTok })).body.company.balance;
+const creditSigned = await call('POST', '/credits', { token: lineTok, body: creditAsk });
+expect(creditSigned.status === 409 && creditSigned.body.error === 'over_ceiling' && (await call('GET', '/me', { token: lineTok })).body.company.balance === creditBalance, 'signing over the ceiling is refused and books nothing', creditSigned);
+expect((await call('GET', '/credits', { token: apiKey })).status === 401 && (await call('POST', '/credits', { token: apiKey, body: creditAsk })).status === 401, 'an API key cannot read or sign credits');
 const off = await call('PUT', '/network/enabled', { token: lp.body.token, body: { enabled: false } });
 expect(off.body.enabled === false && (await call('GET', '/network', { token: lp.body.token })).body.enabled === false, 'the network switch turns the lines off');
 await call('DELETE', '/me', { token: lp.body.token, body: { password } });

@@ -62,26 +62,26 @@ export function creditSchedule(a: Annuity): ScheduleMonth[] {
 }
 const sum = (rows: readonly ScheduleMonth[], pick: (r: ScheduleMonth) => number): number => rows.reduce((t, r) => t + pick(r), 0);
 
-export type CreditTerms = { bank: CreditBankId; months: number; rate: number; /** The payment of every month, insurance included. */ monthly: number; fee: number; interest: number; /** All the insurance of the term. */ insurance: number; /** Interest + fee + insurance: what the credit costs over its term. */ cost: number };
+export type CreditTerms = { bank: CreditBankId; months: number; rate: number; earlyPenaltyPct: number; /** The payment of every month, insurance included. */ monthly: number; fee: number; interest: number; /** All the insurance of the term. */ insurance: number; /** Interest + fee + insurance: what the credit costs over its term. */ cost: number };
 export function creditTerms(amount: number, months: number, bank: CreditBankId): CreditTerms {
   const b = CREDIT_BANKS[bank];
   const annuity = loanPayment(amount, months, b.rate);
   const interest = sum(creditSchedule({ principal: amount, monthly: annuity, insurance: 0, monthsPaid: 0, months, rate: b.rate }), (m) => m.interest);
-  return { bank, months, rate: b.rate, monthly: annuity + b.insurance, fee: b.fee, interest, insurance: b.insurance * months, cost: interest + b.fee + b.insurance * months };
+  return { bank, months, rate: b.rate, earlyPenaltyPct: b.earlyPenaltyPct, monthly: annuity + b.insurance, fee: b.fee, interest, insurance: b.insurance * months, cost: interest + b.fee + b.insurance * months };
 }
 
 /** Repaying `amount` of the principal now (all of it for `full`), the term unchanged: the instalment falls, the interest still to come shrinks. The penalty is on the amount repaid. */
-export type PrepayPlan = { amount: number; penalty: number; /** Cash leaving the account. */ total: number; principalAfter: number; monthlyAfter: number; monthsLeft: number; closes: boolean; /** Interest and insurance no longer paid. */ saved: number };
+export type PrepayPlan = { amount: number; penalty: number; /** Cash leaving the account. */ total: number; principalAfter: number; /** The annuity that is stored (insurance apart) and the whole instalment of every month from now on (0 when the credit is closed). */ annuityAfter: number; monthlyAfter: number; monthsLeft: number; closes: boolean; /** Interest and insurance no longer paid. */ saved: number };
 export function prepayPlan(c: Annuity & { earlyPenaltyPct: number }, request: PrepayRequest): PrepayPlan {
   const amount = 'full' in request ? c.principal : request.amount;
   const principalAfter = c.principal - amount;
   const monthsLeft = c.months - c.monthsPaid;
-  const monthlyAfter = principalAfter === 0 ? 0 : loanPayment(principalAfter, monthsLeft, c.rate);
+  const annuityAfter = principalAfter === 0 ? 0 : loanPayment(principalAfter, monthsLeft, c.rate);
   const before = creditSchedule(c);
-  const after = principalAfter === 0 ? [] : creditSchedule({ ...c, principal: principalAfter, monthly: monthlyAfter });
+  const after = principalAfter === 0 ? [] : creditSchedule({ ...c, principal: principalAfter, monthly: annuityAfter });
   const penalty = Math.round((amount * c.earlyPenaltyPct) / 100);
   return {
-    amount, penalty, total: amount + penalty, principalAfter, monthlyAfter, monthsLeft, closes: principalAfter === 0,
+    amount, penalty, total: amount + penalty, principalAfter, annuityAfter, monthlyAfter: principalAfter === 0 ? 0 : annuityAfter + c.insurance, monthsLeft, closes: principalAfter === 0,
     saved: sum(before, (m) => m.interest) + c.insurance * before.length - (sum(after, (m) => m.interest) + c.insurance * after.length),
   };
 }
@@ -120,9 +120,10 @@ export type PrepayRequest = z.infer<typeof prepayRequestSchema>;
 
 // ---------------------------------------------------------------- wire types
 
-export type CreditRefusal = 'too_many' | 'over_ceiling' | 'debt_ratio';
+export const CREDIT_REFUSALS = ['too_many', 'over_ceiling', 'debt_ratio'] as const;
+export type CreditRefusal = (typeof CREDIT_REFUSALS)[number];
 export type CreditQuote = CreditTerms & {
-  amount: number; earlyPenaltyPct: number;
+  amount: number;
   /** What reaches the account: the amount less the fee. */
   net: number;
   /** The first instalment is taken on the 1st of the next month. */
@@ -155,3 +156,6 @@ export type CreditsView = {
   schedule: { month: string; capital: number; interest: number; insurance: number }[];
 };
 export type PrepayQuote = PrepayPlan & { balanceAfter: number; /** Null when the account can pay it. */ refusal: 'insufficient_funds' | null };
+export type CreditSigned = { credit: CreditView; net: number; balanceAfter: number };
+/** `credit` is null when the repayment closed it. */
+export type PrepayDone = { plan: PrepayQuote; credit: CreditView | null; balanceAfter: number };
