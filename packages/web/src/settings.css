@@ -13,6 +13,12 @@
 .settings-keys-col { width: 760px; min-height: 0; display: flex; flex-direction: column; }
 .settings-keys-col .panel { min-height: 0; }
 .settings-keys-col .panel-body { overflow: auto; }
+.settings-aircraft-col { width: 960px; min-height: 0; display: flex; flex-direction: column; }
+.settings-aircraft-col .panel { min-height: 0; }
+.settings-aircraft-col .panel-body { overflow: auto; }
+.sim-aircraft-list { min-height: 0; display: flex; flex-direction: column; }
+.sim-aircraft-list .scroll { max-height: 440px; }
+.settings-aircraft .key-box { display: inline-flex; align-self: flex-start; margin-top: 4px; }
 .panel-action .dim { color: var(--text-tertiary); }
 .key-create { display: flex; gap: 12px; align-items: flex-end; }
 .key-create .input { flex: 1; }

@@ -27,7 +27,7 @@ import { registerService } from './routes-service.ts';
 import { registerCatalogueStats } from './routes-catalogue-stats.ts';
 import { fetchOfp, type Fetch } from './simbrief.ts';
 import { registerSimbrief } from './routes-simbrief.ts';
-import { registerSimAircraft } from './routes-sim-aircraft.ts';
+import { registerSimAircraft } from './routes-simair.ts';
 import { maintenanceTick } from './finance.ts';
 import { registerFinance } from './routes-finance.ts';
 import { onboardingOf, toleratedFlags } from './start.ts';

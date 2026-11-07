@@ -361,4 +361,4 @@ export * from './parts.ts';
 export * from './service.ts';
 
 // ---- lot sim-aircraft
-export * from './sim-aircraft.ts';
+export * from './simair.ts';

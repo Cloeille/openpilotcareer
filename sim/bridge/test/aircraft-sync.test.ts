@@ -20,14 +20,15 @@ const HELICOPTERS = [packet(11, 0, 1, [['Airbus H135 (Asobo)', 'Default']])];
 
 /** The part of a ConnectionHandle enumerateOn uses, answering like the simulator: each request is answered with its packets, after the call returns. */
 function fakeSim(answers: Record<number, ListPacket[]>, o: { refuse?: boolean } = {}) {
-  const h = Object.assign(new EventEmitter(), {
-    sent: [] as [number, number][],
+  class Handle extends EventEmitter {
+    sent: [number, number][] = [];
     enumerateSimObjectsAndLiveries(id: number, type: number): number {
       this.sent.push([id, type]);
       setImmediate(() => { if (o.refuse) this.emit('exception', { exception: 1, sendId: 100 + id }); else for (const p of answers[id] ?? []) this.emit('enumerateSimobjectAndLiveryList', p); });
       return 100 + id;
-    },
-  });
+    }
+  }
+  const h = new Handle();
   const sc = { SimObjectType: { AIRCRAFT: 2, HELICOPTER: 3 } };
   return { h, sc: sc as never, handle: h as never };
 }

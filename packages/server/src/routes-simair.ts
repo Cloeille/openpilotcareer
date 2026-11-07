@@ -4,7 +4,7 @@ import { simAircraftHideSchema, simAircraftPutSchema } from '@opc/shared';
 import { apiKeyAuth, sessionUser } from './auth.ts';
 import type { Db } from './db.ts';
 import { HttpError, parse } from './http.ts';
-import { saveSimAircraft, setSimAircraftHidden, simAircraftOf } from './sim-aircraft.ts';
+import { saveSimAircraft, setSimAircraftHidden, simAircraftOf } from './simair.ts';
 
 /** 2 000 entries of up to ~400 bytes: above the server's default 64 KiB body limit. */
 const PUT_BODY_LIMIT = 1024 * 1024;

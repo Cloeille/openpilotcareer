@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { SIM_AIRCRAFT_MAX, type SimAircraftEntry, type SimAircraftList } from '@opc/shared';
 import { MIGRATIONS } from './db.ts';
 import { harness } from './harness.ts';
-import { matchByName } from './sim-aircraft.ts';
+import { matchByName } from './simair.ts';
 
 const URL = '/api/v1/me/sim-aircraft';
 const entry = (over: Partial<SimAircraftEntry> = {}): SimAircraftEntry => ({ title: 'Cessna 172 Skyhawk (Asobo)', icao: 'C172', manufacturer: 'Cessna', model: '172', source: 'official', liveries: 3, ...over });
