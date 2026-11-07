@@ -186,6 +186,15 @@ const fc = await call('POST', '/lines/forecast', { token: lp.body.token, body: l
 expect(fc.status === 200 && fc.body.valid === true && fc.body.forecast.estimated === true, `line forecast: valid, ${fc.body.forecast.seatsPerWeek} seats a week`, fc);
 const made = await call('POST', '/lines', { token: lp.body.token, body: lineBody });
 expect(made.status === 201 && made.body.a === 'LFLL' && made.body.b === 'LFPG', `line ${made.body.a}-${made.body.b} created, flights ${made.body.flightNos.join('-')}`, made);
+// v3 staff (C11): a new company has nobody, so its line cannot fly until it has a crew. A hire starts after its notice (7 days), an interim pilot now.
+const lineTok = lp.body.token;
+const need = (await call('GET', '/staff', { token: lineTok })).body;
+expect(need.people === 0 && need.positions > 0, `staff: ${need.positions} positions, nobody employed yet`, need);
+const cand = (await call('GET', '/staff/candidates?family=pilot&base=LFPG&qual=C172', { token: lineTok })).body.candidates[0];
+const hire = await call('POST', '/staff/hire', { token: lineTok, body: { candidateId: cand.id } });
+expect(hire.status === 201 && hire.body.member.state === 'pending', `hired ${cand.name}: starts after the notice, premium ${hire.body.premium}`, hire);
+const interim = await call('POST', '/staff/interim', { token: lineTok, body: { family: 'pilot', qual: 'C172', days: 30 } });
+expect(interim.status === 201 && interim.body.member.state === 'free', `interim pilot ${interim.body.member.name} flies from now`, interim);
 let flown = 0;
 for (let i = 0; i < 90 && flown === 0; i++) {
   await new Promise((r) => setTimeout(r, 1000));
@@ -194,6 +203,8 @@ for (let i = 0; i < 90 && flown === 0; i++) {
 }
 const lineTx = (await call('GET', '/me/transactions', { token: lp.body.token })).body.filter((x) => x.kind.startsWith('line_'));
 expect(flown > 0 && lineTx.some((x) => x.kind === 'line_revenue' && x.amount > 0), `the line flew on its own: ${lineTx.length} ledger lines (line_revenue ${lineTx.find((x) => x.kind === 'line_revenue')?.amount})`, lineTx);
+const staffNow = await call('GET', `/staff/${interim.body.member.id}`, { token: lineTok });
+expect(staffNow.status === 200 && staffNow.body.week.length > 0 && staffNow.body.duty.flight28d > 0, `the interim pilot's card shows the legs flown: ${staffNow.body.duty.flight28d} h in 28 days`, staffNow.body.duty);
 const ops = await call('GET', '/ops', { token: lp.body.token });
 expect(ops.status === 200 && ops.body.enabled === true, `operations board: ${ops.body.counts.flying} flying, ${ops.body.counts.upcoming} upcoming`, ops);
 const off = await call('PUT', '/network/enabled', { token: lp.body.token, body: { enabled: false } });

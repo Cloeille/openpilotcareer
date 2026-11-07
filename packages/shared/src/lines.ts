@@ -160,9 +160,6 @@ export function weeklySeats(freqPerDay: number, daysMask: number, seats: readonl
   return day * maskToDays(daysMask).filter(Boolean).length;
 }
 
-/** Crew a type needs (B.3): two pilots, one cabin crew member per 40 seats. Lot STAFF owns the model; until it merges this only sizes the forecast. */
-export const crewNeeded = (seats: number): { pilots: number; cabin: number } => ({ pilots: 2, cabin: Math.ceil(seats / 40) });
-
 // ---------------------------------------------------------------- delays and stoppages (B.2 items 2 and 7)
 
 /** +10 min per 10 points of wear from 70 % (explainable, no randomness). */
@@ -246,7 +243,7 @@ export type LineForecastView = {
     pilots: { required: number; available: number }; cabin: { required: number; available: number };
     ground: { required: number; available: number; missingAt: string[] }; maintenance: string;
   };
-  /** False until lot STAFF merges: `available` then mirrors `required` and the crew check never cancels a leg. */
+  /** Always true from lot STAFF on; kept so a client written against S1 keeps working. */
   crewModelled: boolean;
   valid: boolean;
 };

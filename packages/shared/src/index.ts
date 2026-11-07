@@ -347,3 +347,5 @@ export * from './live.ts';
 export * from './lines.ts';
 // ---- lot simbrief-link
 export * from './simbrief.ts';
+// ---- lot staff (v3)
+export * from './staff.ts';

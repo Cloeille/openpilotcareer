@@ -169,8 +169,44 @@ ALTER TABLE flights ADD COLUMN simbrief_ofp_id TEXT;
 UPDATE flights SET simbrief_static_id = 'opc_' || id || '_' || lower(hex(randomblob(6))) WHERE status = 'active';
 `;
 
-/** Append-only, in deployment order (the position, not the constant's name, is the version): `PRAGMA user_version` records how many ran. */
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF];
+// OpenHangar v3, lot STAFF: employees (one row per person, whatever the family), their type ratings, leave and training days, and the per-leg duty ledger the
+// line engine's crew check reads. `staff_company` holds the rest policy and the one-shot marker of the starter crew (decision C11): every human company that already
+// flies a line when this migration runs gets a crew sized to its timetable, granted lazily by the first request (the sizing needs the airport catalogue, not SQL).
+// staff_duty is keyed (person, departure): nobody flies two legs at once. leg_id is not a foreign key: scheduled legs are pruned after 35 days but the 12-month flight limit needs the ledger for a year.
+const SCHEMA_V8 = `
+CREATE TABLE staff_company (
+  company_id INTEGER PRIMARY KEY REFERENCES companies(id) ON DELETE CASCADE, policy TEXT NOT NULL DEFAULT 'standard' CHECK (policy IN ('legal','standard','generous')),
+  starter_pending INTEGER NOT NULL DEFAULT 0);
+CREATE TABLE staff (
+  id INTEGER PRIMARY KEY, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  family TEXT NOT NULL CHECK (family IN ('pilot','cabin','ground','admin','maintenance','kitchen')), name TEXT NOT NULL, role TEXT NOT NULL, base TEXT NOT NULL,
+  hired_at INTEGER NOT NULL, starts_at INTEGER NOT NULL, ends_at INTEGER /* last day on the payroll; NULL: still employed */, salary INTEGER NOT NULL, experience REAL NOT NULL DEFAULT 0,
+  reliability REAL NOT NULL, morale REAL NOT NULL,
+  contract TEXT NOT NULL DEFAULT 'cdi' CHECK (contract IN ('cdi','cdd')), notice_days INTEGER NOT NULL DEFAULT 7, candidate_id TEXT,
+  UNIQUE (company_id, candidate_id));
+CREATE INDEX staff_roster ON staff(company_id, family);
+CREATE TABLE staff_quals (
+  staff_id INTEGER NOT NULL REFERENCES staff(id) ON DELETE CASCADE, type_icao TEXT NOT NULL, valid_from INTEGER NOT NULL DEFAULT 0, valid_until INTEGER,
+  PRIMARY KEY (staff_id, type_icao));
+CREATE TABLE staff_leave (
+  id INTEGER PRIMARY KEY, staff_id INTEGER NOT NULL REFERENCES staff(id) ON DELETE CASCADE, from_day INTEGER NOT NULL, to_day INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','granted','refused')), kind TEXT NOT NULL DEFAULT 'leave' CHECK (kind IN ('leave','rest','training')),
+  UNIQUE (staff_id, from_day, kind));
+CREATE TABLE staff_duty (
+  staff_id INTEGER NOT NULL REFERENCES staff(id) ON DELETE CASCADE, leg_id INTEGER, day INTEGER NOT NULL, flight_no INTEGER NOT NULL,
+  dep_at INTEGER NOT NULL, arr_at INTEGER NOT NULL, origin TEXT NOT NULL, dest TEXT NOT NULL, duty_start INTEGER NOT NULL, duty_min INTEGER NOT NULL, flight_min INTEGER NOT NULL,
+  PRIMARY KEY (staff_id, dep_at));
+CREATE INDEX staff_duty_day ON staff_duty(staff_id, day);
+CREATE INDEX staff_duty_leg ON staff_duty(leg_id);
+-- A scheduled_flights id can be reused once its row is gone (no AUTOINCREMENT): the ledger must never point at a leg that is not there. leg_id becomes NULL, the hours stay.
+CREATE TRIGGER staff_duty_leg_gone BEFORE DELETE ON scheduled_flights BEGIN UPDATE staff_duty SET leg_id = NULL WHERE leg_id = OLD.id; END;
+-- which family ran short when a leg was cancelled for want of crew (the staff screen's blockers)
+ALTER TABLE scheduled_flights ADD COLUMN crew_family TEXT;
+INSERT INTO staff_company (company_id, starter_pending) SELECT DISTINCT l.company_id, 1 FROM lines l JOIN companies c ON c.id = l.company_id WHERE c.user_id IS NOT NULL;
+`;
+
+/** Append-only; `PRAGMA user_version` records how many ran. */
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);
