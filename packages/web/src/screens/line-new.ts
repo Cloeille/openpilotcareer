@@ -89,7 +89,7 @@ export async function lineNew(ctx: Ctx): Promise<Screen> {
       chosen > 0, aircraft.some((x) => !draft.aircraftIds.includes(x.id) && x.status !== 'maintenance'), 'ln-planes'));
   const days = h('div', { class: 'ln-control' }, h('span', { class: 'ln-control-label' }, t('ln.new.days')),
     h('div', { class: 'ln-days', role: 'group', 'aria-label': t('ln.new.days') }, WEEKDAYS.map((d, i) =>
-      h('button', { type: 'button', class: 'ln-daybtn', 'aria-pressed': String(draft.days[i]), 'aria-label': t(`ln.wd.${d}` as Key), onclick: () => set({ days: draft.days.map((v, j) => (j === i ? !v : v)) }) }, t(`ln.wd.${d}` as Key).slice(0, 1).toUpperCase()))));
+      h('button', { type: 'button', class: 'ln-daybtn', 'aria-pressed': String(draft.days[i]), 'aria-label': t(`ln.wd.${d}`), onclick: () => set({ days: draft.days.map((v, j) => (j === i ? !v : v)) }) }, t(`ln.wd.${d}`).slice(0, 1).toUpperCase()))));
   const around = isRoundTheClock(draft);
   const hours = h('div', { class: 'ln-control' }, h('span', { class: 'ln-control-label', id: 'ln-around-label' }, t('ln.new.operation')),
     h('div', { class: 'row' }, switchControl({ checked: around, labelledBy: 'ln-around-label', id: 'ln-around', onchange: (on) => set(on ? { ...ROUND_THE_CLOCK } : { windowStart: DEFAULT_DRAFT.windowStart, windowEnd: DEFAULT_DRAFT.windowEnd }) }), h('span', { class: 'muted' }, t('ln.new.allDay'))));

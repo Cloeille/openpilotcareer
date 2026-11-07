@@ -1,0 +1,309 @@
+# Finance · relevé des opérations
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Finance · relevé des opérations» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-11.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=22 padding=[28, 32, 24, 32]
+    - frame «Statement Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - ellipse «Status Dot» width=7 height=7 fill="$success"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Compte courant Azur Régional · Banque Riviera
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Relevé des opérations
+      - frame «Key Stats» gap=44 padding=[0, 0, 4, 0]
+        - instance «Stat · Découvert autorisé» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Découvert autorisé
+          - text «Value» fill="$text-secondary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 250 000 €
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: à 11,5 % · non utilisé
+        - instance «Stat · Solde» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Solde au 6 novembre, 17:52Z
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 1 284 560 €
+          - text «Delta» fill="$success" fontFamily="$font-ui" fontSize=12  TEXT: +132 840 € depuis le 1er novembre
+    - frame «Filters» width="fill_container" alignItems="center" justifyContent="space_between"
+      - frame «Filter Group» gap=12 alignItems="center"
+        - instance «Period Switcher» of «View Switcher»
+          - frame «View · Vue en coupe» padding=[8, 16] fill="#00000000" cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Cette semaine
+          - frame «View · Cabine & charge» padding=[8, 16] fill="#FFFFFF1A" cornerRadius=4
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Novembre
+          - frame «View · Systèmes» padding=[8, 16] cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Octobre
+        - instance «Btn · Autre période» of «Button/Ghost»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Autre période
+          - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="calendar-range"
+        - rectangle «Filter Divider» width=1 height=24 fill="$border-strong"
+        - frame «Select · Catégorie» height=42 gap=8 padding=[0, 14] alignItems="center" fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 20}
+          - icon «Icon» width=15 height=15 fill="$text-tertiary" icon="tags"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Catégorie
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Toutes
+          - icon «Chevron» width=15 height=15 fill="$text-secondary" icon="chevron-down"
+        - frame «Select · Ligne» height=42 gap=8 padding=[0, 14] alignItems="center" fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 20}
+          - icon «Icon» width=15 height=15 fill="$text-tertiary" icon="route"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Ligne
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Toutes les lignes
+          - icon «Chevron» width=15 height=15 fill="$text-secondary" icon="chevron-down"
+      - instance «Btn · Exporter en CSV» of «Button/Secondary»
+        - icon «Icon» width=16 height=16 fill="$text-secondary" icon="download"
+        - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Exporter en CSV
+    - frame «Statement Body» width="fill_container" height="fill_container" gap=20
+      - instance «Panel · Relevé» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Novembre, du 1er au 6
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 148 opérations · les plus récentes en premier
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[10, 0, 16, 0]
+          - frame «Column Head» width="fill_container" gap=16 padding=[0, 22, 8, 22] alignItems="end"
+            - frame «Col · Heure» width=64
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Heure
+            - frame «Col · Opération» width="fill_container"
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Opération
+            - frame «Col · Catégorie» width=150
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Catégorie
+            - frame «Col · Lié à» width=200
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Lié à
+            - frame «Col · Montant» width=116 justifyContent="end"
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Montant
+            - frame «Col · Solde» width=128 justifyContent="end"
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Solde
+          - frame «Day · Aujourd'hui, vendredi 6 novembre» width="fill_container" height=36 padding=[0, 22] alignItems="end" justifyContent="space_between"
+            - frame «Day Title» padding=[0, 0, 8, 0]
+              - text «Day Label» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: Aujourd'hui, vendredi 6 novembre
+            - frame «Day Net» padding=[0, 0, 8, 0]
+              - text «Day Net Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: −2 200 € sur la journée
+          - frame «Row · 17:52Z Billets» width="fill_container" height=40 gap=16 padding=[0, 22] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Time» width=64 alignItems="center"
+              - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 17:52Z
+            - frame «Label» width="fill_container" alignItems="center"
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Recette billetterie · 64 passagers
+            - frame «Category» width=150 gap=8 alignItems="center"
+              - icon «Category Icon» width=14 height=14 fill="$text-tertiary" icon="ticket"
+              - text «Category» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Billets
+            - frame «Link» width=200 gap=8 alignItems="center"
+              - text «Primary» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 1136
+              - text «Secondary» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZA
+            - frame «Amount» width=116 alignItems="center" justifyContent="end"
+              - text «Amount» fill="$success" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: +9 860 €
+            - frame «Balance» width=128 alignItems="center" justifyContent="end"
+              - text «Balance» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1 284 560 €
+          - frame «Row · 17:46Z Redevances» width="fill_container" height=40 gap=16 padding=[0, 22] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Time» width=64 alignItems="center"
+              - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 17:46Z
+            - frame «Label» width="fill_container" alignItems="center"
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Redevances de départ et passagers
+            - frame «Category» width=150 gap=8 alignItems="center"
+              - icon «Category Icon» width=14 height=14 fill="$text-tertiary" icon="landmark"
+              - text «Category» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Redevances
+            - frame «Link» width=200 gap=8 alignItems="center"
+              - instance «Airport Sign» of «Sign/Location»
+                - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=12 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+              - text «Secondary» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: AZR 4127
+            - frame «Amount» width=116 alignItems="center" justifyContent="end"
+              - text «Amount» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: −1 420 €
+            - frame «Balance» width=128 alignItems="center" justifyContent="end"
+              - text «Balance» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1 274 700 €
+          - frame «Row · 17:05Z Carburant» width="fill_container" height=40 gap=16 padding=[0, 22] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Time» width=64 alignItems="center"
+              - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 17:05Z
+            - frame «Label» width="fill_container" alignItems="center"
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Avitaillement Jet A-1 · 2 840 L
+            - frame «Category» width=150 gap=8 alignItems="center"
+              - icon «Category Icon» width=14 height=14 fill="$text-tertiary" icon="fuel"
+              - text «Category» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Carburant
+            - frame «Link» width=200 gap=8 alignItems="center"
+              - text «Primary» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 4127
+              - text «Secondary» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZR
+            - frame «Amount» width=116 alignItems="center" justifyContent="end"
+              - text «Amount» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: −4 260 €
+            - frame «Balance» width=128 alignItems="center" justifyContent="end"
+              - text «Balance» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1 276 120 €
+          - frame «Row · 16:30Z Jobs» width="fill_container" height=40 gap=16 padding=[0, 22] alignItems="center" fill="$surface-hover" stroke="$border" strokeWidth={"top": 1}
+            - rectangle «Focus Bar» width=2 height=40 fill="$text-primary"
+            - frame «Time» width=64 alignItems="center"
+              - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 16:30Z
+            - frame «Label» width="fill_container" alignItems="center"
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Job fret · 1,2 t de pièces vers Paris
+            - frame «Category» width=150 gap=8 alignItems="center"
+              - icon «Category Icon» width=14 height=14 fill="$text-tertiary" icon="briefcase"
+              - text «Category» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Jobs
+            - frame «Link» width=200 gap=8 alignItems="center"
+              - text «Primary» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 4127
+              - text «Secondary» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN → LFPG
+            - frame «Amount» width=116 alignItems="center" justifyContent="end"
+              - text «Amount» fill="$success" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: +18 400 €
+            - frame «Balance» width=128 alignItems="center" justifyContent="end"
+              - text «Balance» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1 280 380 €
+          - frame «Row · 14:20Z Restauration» width="fill_container" height=40 gap=16 padding=[0, 22] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Time» width=64 alignItems="center"
+              - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 14:20Z
+            - frame «Label» width="fill_container" alignItems="center"
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Plateaux repas · rotation Nice ⇄ Calvi
+            - frame «Category» width=150 gap=8 alignItems="center"
+              - icon «Category Icon» width=14 height=14 fill="$text-tertiary" icon="utensils"
+              - text «Category» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Restauration
+            - frame «Link» width=200 gap=8 alignItems="center"
+              - text «Primary» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 1641/1642
+              - text «Secondary» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZB
+            - frame «Amount» width=116 alignItems="center" justifyContent="end"
+              - text «Amount» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: −1 180 €
+            - frame «Balance» width=128 alignItems="center" justifyContent="end"
+              - text «Balance» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1 261 980 €
+          - frame «Row · 09:10Z Maintenance» width="fill_container" height=40 gap=16 padding=[0, 22] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Time» width=64 alignItems="center"
+              - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 09:10Z
+            - frame «Label» width="fill_container" alignItems="center"
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Check A · remplacement des freins
+            - frame «Category» width=150 gap=8 alignItems="center"
+              - icon «Category Icon» width=14 height=14 fill="$text-tertiary" icon="wrench"
+              - text «Category» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Maintenance
+            - frame «Link» width=200 gap=8 alignItems="center"
+              - text «Primary» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: F-HAZB
+              - text «Secondary» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72-600
+            - frame «Amount» width=116 alignItems="center" justifyContent="end"
+              - text «Amount» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: −23 600 €
+            - frame «Balance» width=128 alignItems="center" justifyContent="end"
+              - text «Balance» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1 263 160 €
+          - frame «Day · Jeudi 5 novembre» width="fill_container" height=36 padding=[0, 22] alignItems="end" justifyContent="space_between"
+            - frame «Day Title» padding=[0, 0, 8, 0]
+              - text «Day Label» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: Jeudi 5 novembre
+            - frame «Day Net» padding=[0, 0, 8, 0]
+              - text «Day Net Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: −121 460 € sur la journée
+          - frame «Row · 22:14Z Billets» width="fill_container" height=40 gap=16 padding=[0, 22] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Time» width=64 alignItems="center"
+              - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 22:14Z
+            - frame «Label» width="fill_container" alignItems="center"
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Recette billetterie · 58 passagers
+            - frame «Category» width=150 gap=8 alignItems="center"
+              - icon «Category Icon» width=14 height=14 fill="$text-tertiary" icon="ticket"
+              - text «Category» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Billets
+            - frame «Link» width=200 gap=8 alignItems="center"
+              - text «Primary» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 1138
+              - text «Secondary» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZA
+            - frame «Amount» width=116 alignItems="center" justifyContent="end"
+              - text «Amount» fill="$success" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: +8 940 €
+            - frame «Balance» width=128 alignItems="center" justifyContent="end"
+              - text «Balance» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1 286 760 €
+          - frame «Row · 08:00Z Crédits» width="fill_container" height=40 gap=16 padding=[0, 22] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Time» width=64 alignItems="center"
+              - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 08:00Z
+            - frame «Label» width="fill_container" alignItems="center"
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Échéance du prêt A220 · Banque Riviera
+            - frame «Category» width=150 gap=8 alignItems="center"
+              - icon «Category Icon» width=14 height=14 fill="$text-tertiary" icon="banknote"
+              - text «Category» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Crédits
+            - frame «Link» width=200 gap=8 alignItems="center"
+              - text «Primary» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: F-HAZD
+              - text «Secondary» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: A220-300
+            - frame «Amount» width=116 alignItems="center" justifyContent="end"
+              - text «Amount» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: −112 400 €
+            - frame «Balance» width=128 alignItems="center" justifyContent="end"
+              - text «Balance» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1 277 820 €
+          - frame «Row · 07:30Z Loyers» width="fill_container" height=40 gap=16 padding=[0, 22] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Time» width=64 alignItems="center"
+              - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 07:30Z
+            - frame «Label» width="fill_container" alignItems="center"
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Loyer hangar et bureaux · novembre
+            - frame «Category» width=150 gap=8 alignItems="center"
+              - icon «Category Icon» width=14 height=14 fill="$text-tertiary" icon="warehouse"
+              - text «Category» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Loyers
+            - frame «Link» width=200 gap=8 alignItems="center"
+              - instance «Airport Sign» of «Sign/Location»
+                - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=12 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+              - text «Secondary» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Hangar 3
+            - frame «Amount» width=116 alignItems="center" justifyContent="end"
+              - text «Amount» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: −18 000 €
+            - frame «Balance» width=128 alignItems="center" justifyContent="end"
+              - text «Balance» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1 390 220 €
+          - frame «Spacer» width="fill_container" height="fill_container"
+          - frame «List Footer» width="fill_container" padding=[14, 22, 0, 22] alignItems="center" justifyContent="space_between" stroke="$border" strokeWidth={"top": 1}
+            - frame «Upcoming» gap=10 alignItems="center"
+              - icon «Icon» width=15 height=15 fill="$text-tertiary" icon="calendar-clock"
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Prochaine opération programmée
+              - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Salaires du 28 novembre · −345 500 €
+            - instance «Btn · Jours précédents» of «Button/Ghost»
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Afficher les jours précédents
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-down"
+      - instance «Panel · Synthèse» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Synthèse de la période
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 1er – 6 nov.
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=18 padding=[14, 22, 20, 22]
+          - frame «Net» width="fill_container" layout="vertical" gap=2
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Variation du solde
+            - text «Value» fill="$success" fontFamily="$font-display" fontSize=34 fontWeight="500"  TEXT: +132 840 €
+            - frame «In Out» gap=20 padding=[2, 0, 0, 0]
+              - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: sur 148 opérations, du 1er au 6 novembre
+          - rectangle «Divider» width="fill_container" height=1 fill="$border"
+          - frame «Group · Entrées» width="fill_container" layout="vertical" gap=10
+            - frame «Group Head» width="fill_container" padding=[0, 0, 2, 0] alignItems="end" justifyContent="space_between"
+              - text «Group Title» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: Entrées
+              - text «Group Total» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: +598 700 €
+            - frame «Cat · Billets» width="fill_container" gap=12 alignItems="center"
+              - frame «Label Box» width=96
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Billets
+              - frame «Track» width="fill_container" height=3 layout="none" fill="$neutral-soft" cornerRadius=2
+                - rectangle «Level» width=128 height=3 fill="$text-secondary" cornerRadius=2
+              - frame «Value Box» width=88 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 412 300 €
+            - frame «Cat · Jobs» width="fill_container" gap=12 alignItems="center"
+              - frame «Label Box» width=96
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Jobs
+              - frame «Track» width="fill_container" height=3 layout="none" fill="$neutral-soft" cornerRadius=2
+                - rectangle «Level» width=58 height=3 fill="$text-secondary" cornerRadius=2
+              - frame «Value Box» width=88 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 186 400 €
+          - frame «Group · Sorties» width="fill_container" layout="vertical" gap=10
+            - frame «Group Head» width="fill_container" padding=[0, 0, 2, 0] alignItems="end" justifyContent="space_between"
+              - text «Group Title» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: Sorties
+              - text «Group Total» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: −465 860 €
+            - frame «Cat · Carburant» width="fill_container" gap=12 alignItems="center"
+              - frame «Label Box» width=96
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Carburant
+              - frame «Track» width="fill_container" height=3 layout="none" fill="$neutral-soft" cornerRadius=2
+                - rectangle «Level» width=46 height=3 fill="$text-tertiary" cornerRadius=2
+              - frame «Value Box» width=88 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 148 900 €
+            - frame «Cat · Crédits» width="fill_container" gap=12 alignItems="center"
+              - frame «Label Box» width=96
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Crédits
+              - frame «Track» width="fill_container" height=3 layout="none" fill="$neutral-soft" cornerRadius=2
+                - rectangle «Level» width=39 height=3 fill="$text-tertiary" cornerRadius=2
+              - frame «Value Box» width=88 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 125 100 €
+            - frame «Cat · Maintenance» width="fill_container" gap=12 alignItems="center"
+              - frame «Label Box» width=96
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Maintenance
+              - frame «Track» width="fill_container" height=3 layout="none" fill="$neutral-soft" cornerRadius=2
+                - rectangle «Level» width=30 height=3 fill="$text-tertiary" cornerRadius=2
+              - frame «Value Box» width=88 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 96 200 €
+            - frame «Cat · Redevances» width="fill_container" gap=12 alignItems="center"
+              - frame «Label Box» width=96
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Redevances
+              - frame «Track» width="fill_container" height=3 layout="none" fill="$neutral-soft" cornerRadius=2
+                - rectangle «Level» width=13 height=3 fill="$text-tertiary" cornerRadius=2
+              - frame «Value Box» width=88 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 42 760 €
+            - frame «Cat · Restauration» width="fill_container" gap=12 alignItems="center"
+              - frame «Label Box» width=96
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Restauration
+              - frame «Track» width="fill_container" height=3 layout="none" fill="$neutral-soft" cornerRadius=2
+                - rectangle «Level» width=7 height=3 fill="$text-tertiary" cornerRadius=2
+              - frame «Value Box» width=88 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 21 400 €
+            - frame «Cat · Loyers» width="fill_container" gap=12 alignItems="center"
+              - frame «Label Box» width=96
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Loyers
+              - frame «Track» width="fill_container" height=3 layout="none" fill="$neutral-soft" cornerRadius=2
+                - rectangle «Level» width=6 height=3 fill="$text-tertiary" cornerRadius=2
+              - frame «Value Box» width=88 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 18 000 €
+            - frame «Cat · Autres» width="fill_container" gap=12 alignItems="center"
+              - frame «Label Box» width=96
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Autres
+              - frame «Track» width="fill_container" height=3 layout="none" fill="$neutral-soft" cornerRadius=2
+                - rectangle «Level» width=4 height=3 fill="$text-tertiary" cornerRadius=2
+              - frame «Value Box» width=88 justifyContent="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 13 500 €
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

@@ -5,7 +5,7 @@ import { candidatesQuerySchema, hireSchema, interimSchema, leaveDecisionSchema, 
 import { sessionAuth, type Principal } from './auth.ts';
 import { tx, type Db } from './db.ts';
 import { HttpError, NUMERIC_ID, parse } from './http.ts';
-import { fire, grantPendingStarters, hire, interim, memberRow, ownedStaff, rest, setPolicy, train, transfer } from './staff-people.ts';
+import { fire, grantPendingStarters, hire, interim, memberRow, ownedStaff, rest, setPolicy, startNow, train, transfer } from './staff-people.ts';
 import { candidates, decideLeave, detail, leaveView, memberView, overview } from './staff-views.ts';
 
 export type StaffCtx = { db: Db; now: () => number };
@@ -57,7 +57,7 @@ export function registerStaff(app: FastifyInstance, ctx: StaffCtx): void {
   app.post('/api/v1/staff/hire', async (req, reply) => {
     const p = user(req);
     const b = parse(hireSchema, req.body);
-    const r = tx(db, () => hire(db, p.companyId, b.candidateId, now()));
+    const r = tx(db, () => hire(db, p.companyId, b.candidateId, now(), b.startNow ?? false));
     return reply.status(201).send({ member: memberView(db, memberRow(db, r.staffId), now()), startsAt: r.startsAt, premium: r.premium, balanceAfter: balance(db, p.companyId) });
   });
 
@@ -77,6 +77,12 @@ export function registerStaff(app: FastifyInstance, ctx: StaffCtx): void {
     const b = parse(trainSchema, req.body);
     const r = tx(db, () => train(db, p.companyId, id(req), b.type, now()));
     return { ...r, member: memberView(db, memberRow(db, id(req)), now()) };
+  });
+
+  app.post('/api/v1/staff/:id/start-now', async (req) => {
+    const p = user(req);
+    const r = tx(db, () => startNow(db, p.companyId, id(req), now()));
+    return { member: memberView(db, memberRow(db, r.staffId), now()), fee: r.fee, balanceAfter: r.balanceAfter };
   });
 
   app.post('/api/v1/staff/:id/rest', async (req) => {

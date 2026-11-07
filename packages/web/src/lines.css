@@ -190,6 +190,8 @@ li:first-child > .ln-row { border-top-color: transparent; }
 .ln-proj.off .ln-proj-bar { background: transparent; border: 1px dashed var(--border-strong); height: 6px; }
 .ln-apply { display: flex; flex-direction: column; gap: 6px; }
 .ln-apply .btn.primary { width: 100%; justify-content: space-between; }
+.ln-bridge { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 4px; cursor: pointer; }
+.ln-bridge input { accent-color: var(--text-primary); width: 16px; height: 16px; margin: 2px 0 0; flex: none; }
 
 /* ---- line creation */
 .ln-new { width: 100%; display: flex; flex-direction: column; gap: 20px; min-height: 0; }

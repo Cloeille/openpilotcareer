@@ -21,7 +21,11 @@ export function companyTitle(snap: Snapshot): HTMLElement {
     h('span', { class: 'company-line' }, r ? t('company.line', { rank: f.ordinal(r.position), of: r.of, worth }) : t('company.lineNoRank', { worth })));
 }
 
-export const rankName = (index: number): string => t(`rank.${index}` as Key);
+/** One message per entry of RANKS: the typecheck fails when RANKS grows and this list does not. */
+type PerEntry<T extends readonly unknown[]> = { readonly [I in keyof T]: Key };
+const RANK_KEYS: PerEntry<typeof RANKS> = ['rank.0', 'rank.1', 'rank.2', 'rank.3', 'rank.4', 'rank.5'];
+/** `index` comes from rankProgress, so it is always in range. */
+export const rankName = (index: number): string => t(RANK_KEYS[index] ?? RANK_KEYS[0]);
 
 /** The side panel of the dashboard and of the offline screen: balance, reputation, rank, last flight. Balance has no weekly delta and reputation no "out of 5" because the API provides neither. */
 export function keyFigures(me: Me, lastFlight: Flight | null, now = Date.now(), note?: Node): HTMLElement {

@@ -1,8 +1,9 @@
+import { START_NOW_FEE } from '@opc/shared';
 import { act } from '../actions.ts';
-import { fetchMember, fetchStaff, hireInterim, restMember, trainMember, transferMember, type StaffDetail } from '../api-staff.ts';
+import { fetchMember, fetchStaff, hireInterim, restMember, startNowMember, trainMember, transferMember, type StaffDetail } from '../api-staff.ts';
 import { typesOf } from '../competition-data.ts';
 import { button, icon, panel, signLocation, stat, titleBlock } from '../components.ts';
-import { locale } from '../finance-ui.ts';
+import { locale, perform } from '../finance-ui.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import { hashFor } from '../keys.ts';
@@ -61,7 +62,7 @@ async function sheet(ctx: Ctx, d: StaffDetail, overview: Awaited<ReturnType<type
   // ------------------------------------------------------------ header
   const names = m.quals.map(typeName).join(' · ');
   const tenure = monthsSince(m.hiredAt, now);
-  const stateLine = m.endsAt !== null ? t('st.m.leaving') : facts.onDuty ? `${t('st.m.onDuty', { at: fm.zulu(facts.startedAt!) })}${nearLimit ? ` · ${t('st.m.nearLimit')}` : ''}` : m.state === 'pending' ? t('st.arrives', { date: fm.date(m.startsAt) }) : t(`st.m.state.${m.state}` as Key);
+  const stateLine = m.endsAt !== null ? t('st.m.leaving') : facts.onDuty ? `${t('st.m.onDuty', { at: fm.zulu(facts.startedAt!) })}${nearLimit ? ` · ${t('st.m.nearLimit')}` : ''}` : m.state === 'pending' ? t('st.arrives', { date: fm.date(m.startsAt) }) : t(`st.m.state.${m.state}`);
   const header = h('div', { class: 'st-sheet-head' },
     h('div', { class: 'col tight' },
       h('div', { class: 'row' }, signLocation(base), h('span', { class: 'dim small' }, t('st.m.crumb', { family: famLabel(m.family), city: base }))),
@@ -72,7 +73,7 @@ async function sheet(ctx: Ctx, d: StaffDetail, overview: Awaited<ReturnType<type
       isPilot ? stat(t('st.k.hours'), `${fm.num(m.experience)} h`) : stat(t('st.k.years'), fm.num(m.experience)),
       stat(t('st.k.rel'), fm.percent(m.reliability / 100), h('span', { class: reliabilityTone(m.reliability) === 'warn' ? 'st-warn' : 'dim' }, m.reliability < 100 ? '' : '')),
       stat(t('st.k.morale'), fm.percent(m.morale / 100)),
-      stat(t('st.k.salary'), fm.money(m.salary), t('st.k.salarySub', { contract: t(`st.contract.${m.contract}` as Key) }))));
+      stat(t('st.k.salary'), fm.money(m.salary), t('st.k.salarySub', { contract: t(`st.contract.${m.contract}`) }))));
 
   // ------------------------------------------------------------ the duty panel
   const dutyHead = facts.onDuty
@@ -92,13 +93,13 @@ async function sheet(ctx: Ctx, d: StaffDetail, overview: Awaited<ReturnType<type
         h('span', { class: 'st-block-no' }, b.block.kind === 'flight' ? (b.block.flightNo ?? '') : barLabel(b)),
         b.block.kind === 'flight' ? h('span', { class: 'st-block-route' }, `${b.block.origin ?? ''} → ${b.block.dest ?? ''}`) : null,
         b.over ? h('i', { class: 'st-over', style: `left:${((b.over.left - b.left) / (b.width || 1)) * 100}%;width:${(b.over.width / (b.width || 1)) * 100}%` }) : null))),
-    h('div', { class: 'st-legend' }, (['done', 'flying', 'planned', 'over'] as const).map((k) => h('span', { class: 'ln-legend-item' }, h('i', { class: `st-lg ${k}`, 'aria-hidden': 'true' }), t(`st.du.l.${k}` as Key)))));
+    h('div', { class: 'st-legend' }, (['done', 'flying', 'planned', 'over'] as const).map((k) => h('span', { class: 'ln-legend-item' }, h('i', { class: `st-lg ${k}`, 'aria-hidden': 'true' }), t(`st.du.l.${k}`)))));
   const dayStrip = days.length > 1 ? h('div', { class: 'segments st-days', role: 'group', 'aria-label': t('st.du.week') }, days.map((x) =>
     h('button', { type: 'button', class: 'seg', 'aria-pressed': String(x === day), onclick: () => { chartOf = { id: m.id, day: x }; redraw(); } }, shortDate(x, loc)))) : null;
 
   const al = d.alert;
   const alertBox = al ? h('div', { class: 'st-alert', role: 'status' }, icon('triangle-alert', 18),
-    h('div', { class: 'col tight' }, h('span', { class: 'strong' }, al.rule === 'streak' ? t('st.al.streak', { no: al.flightNo }) : t('st.al.title', { no: al.flightNo, n: Math.round(al.overBy) })), h('span', { class: 'muted small' }, t(`st.al.rule.${al.rule}` as Key))),
+    h('div', { class: 'col tight' }, h('span', { class: 'strong' }, al.rule === 'streak' ? t('st.al.streak', { no: al.flightNo }) : t('st.al.title', { no: al.flightNo, n: Math.round(al.overBy) })), h('span', { class: 'muted small' }, t(`st.al.rule.${al.rule}`))),
     h('div', { class: 'row tight' }, button(t('st.al.find'), { variant: 'secondary', icon: 'user', key: t('key.enter'), onclick: () => void replacement() }))) : null;
   async function replacement(): Promise<void> {
     const price = overview ? (overview.families.find((f) => f.family === m.family)?.salaries ?? 0) / Math.max(1, overview.families.find((f) => f.family === m.family)?.headcount ?? 1) : m.salary;
@@ -118,7 +119,7 @@ async function sheet(ctx: Ctx, d: StaffDetail, overview: Awaited<ReturnType<type
         h('span', { class: 'st-d7-val' }, label), h('span', { class: 'dim small' }, shortDate(b.day, loc)));
     })));
   const meters = h('div', { class: 'st-meters' }, limitMeters(d.duty, service7dMin(d.last7d)).map((x) =>
-    h('div', { class: 'st-meter-row' }, h('div', { class: 'ln-meter-head' }, h('span', { class: 'muted' }, t(`st.lim.${x.key}` as Key)), h('span', { class: x.tone === 'ok' ? 'strong' : 'strong st-warn' }, t('st.lim.of', { used: fm.hours(x.usedMin / 60), limit: fm.hours(x.limitMin / 60) }))),
+    h('div', { class: 'st-meter-row' }, h('div', { class: 'ln-meter-head' }, h('span', { class: 'muted' }, t(`st.lim.${x.key}`)), h('span', { class: x.tone === 'ok' ? 'strong' : 'strong st-warn' }, t('st.lim.of', { used: fm.hours(x.usedMin / 60), limit: fm.hours(x.limitMin / 60) }))),
       meterBar(x.fraction, x.tone, t('st.lim.of', { used: fm.hours(x.usedMin / 60), limit: fm.hours(x.limitMin / 60) })))));
 
   const dutyPanel = panel({ title: t('st.du.title'), action: dayStrip, id: 'st-duty', class: 'st-panel' }, dutyHead, chart, alertBox, h('div', { class: 'st-lower' }, week, meters));
@@ -152,13 +153,19 @@ async function sheet(ctx: Ctx, d: StaffDetail, overview: Awaited<ReturnType<type
     if (!confirm(t('st.c.restConfirm', { name: m.name }))) return;
     void act(t('st.c.rested', { name: m.name }), () => restMember(m.id), async () => { redraw(); });
   };
+  const startNow = (): void => {
+    if (!confirm(t('st.m.startNowConfirm', { amount: fm.money(START_NOW_FEE), name: m.name, date: fm.date(m.startsAt) }))) return;
+    void perform(() => startNowMember(m.id), (r) => t('st.m.startedNow', { name: m.name, balance: fm.money(r.balanceAfter) }), async () => { await ctx.refresh(); });
+  };
+  const pending = m.state === 'pending' && m.endsAt === null;
   const contract = panel({ title: t('st.c.title'), id: 'st-contract', class: 'st-panel' },
     h('div', { class: 'col tight st-facts-list' },
       line(t('st.c.base'), `${base}`),
-      line(t('st.c.contract'), t('st.c.contractVal', { kind: t(`st.contract.${d.contract.kind}` as Key), n: d.contract.noticeDays })),
+      line(t('st.c.contract'), t('st.c.contractVal', { kind: t(`st.contract.${d.contract.kind}`), n: d.contract.noticeDays })),
       line(t('st.c.salary'), t('st.d.hirePay', { amount: fm.money(d.contract.salary) })),
       line(t('st.c.firing'), fm.money(d.contract.firingCost)),
       line(t('st.c.nextLeave'), d.nextLeave ? t('st.c.nextLeaveVal', { from: shortDate(d.nextLeave.from, loc), to: shortDate(d.nextLeave.to, loc) }) : t('st.c.none'))),
+    pending ? h('div', { class: 'row' }, button(t('st.m.startNow', { amount: fm.money(START_NOW_FEE) }), { variant: 'primary', icon: 'clock', disabled: me.company.balance < START_NOW_FEE, onclick: startNow })) : null,
     h('div', { class: 'row' }, isPilot ? button(t('st.c.rest'), { variant: 'secondary', icon: 'clock', onclick: rest }) : null,
       otherBases.length > 0 ? button(t('st.c.transfer'), { variant: 'secondary', onclick: (e: MouseEvent) => { transfer.hidden = !transfer.hidden; if (!transfer.hidden) (e.currentTarget as HTMLElement).blur(); } }) : null), transfer);
 

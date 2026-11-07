@@ -12,7 +12,6 @@ import {
   type FaceToFace,
 } from '../lines-view.ts';
 import { pollWhileShown } from '../live-poll.ts';
-import type { Key } from '../messages.ts';
 import { buildNetworkMap, drawNetworkMap } from '../network-map.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
@@ -143,8 +142,9 @@ export async function network(ctx: Ctx): Promise<Screen> {
 
   // ------------------------------------------------------------ the right-hand panel
   const faceRow = (s: FaceToFace, name: string): HTMLElement => {
-    const down = s.own.status !== 'active';
-    const youState = down ? `${t(`ln.state.${s.own.status}` as Key, { n: 0 })}${s.own.interruptedSince === null ? '' : ` · ${t('ln.row.since', { at: sinceLabel(s.own.interruptedSince, data.own.now) })}`}` : t('ln.row.every', { every: everyHours(s.own) });
+    const state = s.own.status;
+    const down = state !== 'active';
+    const youState = down ? `${t(`ln.state.${state}`, { n: 0 })}${s.own.interruptedSince === null ? '' : ` · ${t('ln.row.since', { at: sinceLabel(s.own.interruptedSince, data.own.now) })}`}` : t('ln.row.every', { every: everyHours(s.own) });
     return h('li', null, h('button', { type: 'button', class: 'ln-face-row', 'data-row': '', 'aria-label': pairLabel(s.own.a, s.own.b), onclick: () => go(hashFor('line', s.own.id)) },
       h('span', { class: 'ln-face-head' }, h('span', { class: 'mono strong' }, pairLabel(s.own.a, s.own.b)), h('span', { class: 'dim small' }, `${city.get(s.own.a) ?? s.own.a} – ${city.get(s.own.b) ?? s.own.b}`)),
       h('span', { class: 'ln-face-line' }, h('span', { class: 'ln-face-who' }, t('ln.face.you')), h('span', { class: down ? 'ln-down' : 'muted' }, youState)),

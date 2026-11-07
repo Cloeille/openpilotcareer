@@ -5,7 +5,6 @@ import { aiCanTake } from '../board.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import { hashFor } from '../keys.ts';
-import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { kindOf } from '../standings.ts';
 import { h, notify } from '../ui.ts';
@@ -36,9 +35,9 @@ export async function companySheet(ctx: Ctx): Promise<Screen> {
   const fig = (label: string, value: string): HTMLElement => h('div', { class: 'fact' }, h('span', { class: 'fact-label' }, label), h('span', { class: 'fact-value' }, value));
 
   const identity = h('div', { class: 'col' },
-    titleBlock(t('sheet.status', { kind: profile.isAI ? t('sheet.kindAI') : t(`lb.kind.${kind ?? 'pilot'}` as Key), rank: row ? fm.ordinal(row.rank) : '–' }), profile.name),
-    style ? h('div', { class: 'row tight' }, h('span', { class: 'strong' }, t(`sheet.style.${style}` as Key)), h('span', { class: 'muted' }, t('sheet.mainHub', { hub: profile.hubs[0] ?? '–' }))) : null,
-    h('p', { class: 'muted doctrine' }, style ? t(`sheet.doctrine.${style}` as Key) : t('sheet.human')));
+    titleBlock(t('sheet.status', { kind: profile.isAI ? t('sheet.kindAI') : t(`lb.kind.${kind ?? 'pilot'}`), rank: row ? fm.ordinal(row.rank) : '–' }), profile.name),
+    style ? h('div', { class: 'row tight' }, h('span', { class: 'strong' }, t(`sheet.style.${style}`)), h('span', { class: 'muted' }, t('sheet.mainHub', { hub: profile.hubs[0] ?? '–' }))) : null,
+    h('p', { class: 'muted doctrine' }, style ? t(`sheet.doctrine.${style}`) : t('sheet.human')));
 
   const network = panel({ title: t('sheet.hubs'), headless: true },
     h('div', { class: 'network' },

@@ -7,7 +7,6 @@ import { inBudget, newestOf, purchaseFees, starterRow, starterSummary, type Star
 import { enterConfirms, hubCity, perform, tidyCity } from '../finance-ui.ts';
 import { fmt } from '../format.ts';
 import { t } from '../i18n.ts';
-import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
 
@@ -120,7 +119,7 @@ export async function starter(ctx: Ctx): Promise<Screen> {
   };
   const rowEl = (row: StarterRow): HTMLElement => {
     const ty = row.type;
-    const sub = ty ? [t(`cat.${ty.category}` as Key), `${ty.seats} ${t('fin.cat.seats').toLowerCase()}`, fm.nm(ty.rangeNm)].join(' · ') : '';
+    const sub = ty ? [t(`cat.${ty.category}`), `${ty.seats} ${t('fin.cat.seats').toLowerCase()}`, fm.nm(ty.rangeNm)].join(' · ') : '';
     return h('div', { class: `starter-row${row.icao === pick.icao ? ' sel' : ''}`, 'data-icao': row.icao },
       h('span', { class: 'code' }, row.icao),
       h('div', { class: 'name' }, h('span', { class: 'n' }, row.offer.typeName), sub ? h('span', { class: 's' }, sub) : null),
@@ -138,7 +137,7 @@ export async function starter(ctx: Ctx): Promise<Screen> {
     return h('label', { class: 'hub-card', for: id },
       h('span', { class: 'head' }, h('input', { type: 'radio', name: 'start-hub', id, value: icao, checked: icao === hub, onchange: () => { hub = icao; needFees(); drawSummary(); } }), icao),
       h('span', { class: 'n' }, airport ? airport.name : icao),
-      airport ? h('span', { class: 's' }, `${tidyCity(airport)} · ${t(`hub.size.${airport.size}` as Key)}`) : null);
+      airport ? h('span', { class: 's' }, `${tidyCity(airport)} · ${t(`hub.size.${airport.size}`)}`) : null);
   }));
 
   select(pick.icao, pick.mode);

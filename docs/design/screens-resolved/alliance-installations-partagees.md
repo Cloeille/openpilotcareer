@@ -1,0 +1,194 @@
+# Alliance · installations partagées
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Alliance · installations partagées» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-14.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=20 padding=[28, 32, 24, 32]
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - icon «Status Icon» width=14 height=14 fill="$warning" icon="wrench"
+          - text «Status Text» fill="$warning" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Limite de la visite C le 11 novembre · après, F-HAZC ne peut plus voler, même à vide
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Où faire la visite C de F-HAZC ?
+        - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: CRJ700 stationné à Nice · les hangars de l'alliance comparés à un atelier extérieur, convoyage compris
+      - instance «View Switcher · alliance» of «View Switcher»
+        - frame «View · Vue en coupe» padding=[8, 16] fill="#00000000" cornerRadius=4
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Membres & réseau
+        - frame «View · Cabine & charge» padding=[8, 16] fill="#FFFFFF1A" cornerRadius=4
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Installations partagées
+        - frame «View · Systèmes» padding=[8, 16] cornerRadius=4
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Votes · 1 en cours
+    - frame «Body» width="fill_container" height="fill_container" gap=32
+      - instance «Panel · Comparaison» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Trois endroits possibles
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Un jour au sol coûte 6 800 € de recettes
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=4 padding=[14, 14, 20, 14]
+          - frame «Axis» width="fill_container" gap=24 padding=[0, 14, 4, 14] alignItems="end"
+            - text «Option» width=250 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Atelier
+            - frame «Days» width=480
+              - frame «Tick · sam. 7» width=80 padding=[0, 0, 0, 6] stroke="$border-strong" strokeWidth={"left": 1}
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: sam. 7
+              - frame «Tick · lun. 9» width=80 padding=[0, 0, 0, 6] stroke="$border-strong" strokeWidth={"left": 1}
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: lun. 9
+              - frame «Tick · mer. 11» width=80 padding=[0, 0, 0, 6] stroke="$warning" strokeWidth={"left": 1}
+                - text «Label» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: mer. 11
+              - frame «Tick · ven. 13» width=80 padding=[0, 0, 0, 6] stroke="$border-strong" strokeWidth={"left": 1}
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: ven. 13
+              - frame «Tick · dim. 15» width=80 padding=[0, 0, 0, 6] stroke="$border-strong" strokeWidth={"left": 1}
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: dim. 15
+              - frame «Tick · mar. 17» width=80 padding=[0, 0, 0, 6] stroke="$border-strong" strokeWidth={"left": 1}
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: mar. 17
+            - text «Hors service» width=84 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Au sol
+            - text «Coût» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: Coût total
+          - frame «Option · LFMN» width="fill_container" layout="vertical" gap=12 padding=[18, 14] cornerRadius=4
+            - frame «Top» width="fill_container" gap=24
+              - frame «Option Col» width=250 layout="vertical" gap=5
+                - frame «Name Row» gap=10 alignItems="center"
+                  - instance «Airport» of «Sign/Location»
+                    - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=12 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+                  - text «Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Ton hangar · Nice
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Sur place, aucun convoyage
+              - frame «Timeline» width=480 layout="vertical" gap=6
+                - frame «Track» width="fill_container" height=30 gap=8 padding=[0, 10] alignItems="center" fill="#FFFFFF06"
+                  - icon «Icon» width=13 height=13 fill="$text-tertiary" icon="ban"
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Impossible ici : pas d'outillage CRJ700
+              - text «Hors service» width=84 fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500" lineHeight=1.1  TEXT: —
+              - text «Coût total» width="fill_container" fill="$text-tertiary" fontFamily="$font-display" fontSize=26 fontWeight="500" lineHeight=1.1 textAlign="right"  TEXT: —
+            - frame «Details» width="fill_container" layout="vertical" gap=4 padding=[0, 0, 0, 274]
+              - frame «Line» gap=7 alignItems="center"
+                - text «Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Qualifier le hangar pour le CRJ700 : 140 000 € et 12 jours de travaux
+          - frame «Option · LFML» width="fill_container" layout="vertical" gap=12 padding=[18, 14] fill="$surface-selected" cornerRadius=4
+            - frame «Top» width="fill_container" gap=24
+              - frame «Option Col» width=250 layout="vertical" gap=5
+                - frame «Name Row» gap=10 alignItems="center"
+                  - instance «Airport» of «Sign/Location»
+                    - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=12 fontWeight="700" letterSpacing=0.5  TEXT: LFML
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Aero Provence · Marseille
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Hangar allié · 38 min de vol
+              - frame «Timeline» width=480 layout="vertical" gap=6
+                - frame «Track» width="fill_container" height=30 fill="#FFFFFF06"
+                  - frame «Segment · ferry» width=20 height=30 alignItems="center" justifyContent="center" fill="#FFFFFF38"
+                    - icon «Icon» width=12 height=12 fill="$text-primary" icon="plane"
+                  - frame «Segment · File d'attente · 3 j» width=120 height=30 padding=[0, 9] alignItems="center" fill="#FFFFFF08" stroke="$border-strong" strokeWidth=1
+                    - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: File d'attente · 3 j
+                  - frame «Segment · Visite C · 6 j» width=240 height=30 padding=[0, 9, 0, 30] alignItems="center" fill="#ECEAE5D9"
+                    - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: Visite C · 6 j
+                  - frame «Segment · ferry» width=20 height=30 alignItems="center" justifyContent="center" fill="#FFFFFF38"
+                    - icon «Icon» width=12 height=12 fill="$text-primary" icon="plane"
+                  - rectangle «Échéance» width=2 height=38 fill="$warning"
+                - frame «Parts Track» width="fill_container" gap=8 alignItems="center"
+                  - frame «Spacer» width=20 height=4
+                  - rectangle «Parts Bar» width=40 height=4 fill="#FFFFFF59" cornerRadius=2
+                  - text «Parts Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Kit C expédié de l'entrepôt LEBL · 1 j, pendant l'attente
+              - text «Hors service» width=84 fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500" lineHeight=1.1  TEXT: 10 j
+              - text «Coût total» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500" lineHeight=1.1 textAlign="right"  TEXT: 147 500 €
+            - frame «Details» width="fill_container" layout="vertical" gap=4 padding=[0, 0, 0, 274]
+              - frame «Line» gap=7 alignItems="center"
+                - text «Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Convoyage à vide 2 × 38 min · 2 300 € de carburant · équipage 2 × 1 h 40 de service
+              - frame «Line» gap=7 alignItems="center"
+                - icon «Icon» width=13 height=13 fill="$warning" icon="clock-alert"
+                - text «Text» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: File de 3 jours : Aero Provence passe en priorité dans son propre hangar
+              - frame «Line» gap=7 alignItems="center"
+                - text «Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Redevance 12 400 € fixée par Aero Provence · travaux et pièces 64 800 € · recettes perdues 68 000 €
+              - frame «Line · quota» gap=7 alignItems="center"
+                - text «Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Prend 6 des 9 jours de quota qu'il te reste ce trimestre
+          - frame «Option · LFLL» width="fill_container" layout="vertical" gap=12 padding=[18, 14] stroke="$border" strokeWidth={"top": 1} cornerRadius=4
+            - frame «Top» width="fill_container" gap=24
+              - frame «Option Col» width=250 layout="vertical" gap=5
+                - frame «Name Row» gap=10 alignItems="center"
+                  - instance «Airport» of «Sign/Location»
+                    - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=12 fontWeight="700" letterSpacing=0.5  TEXT: LFLL
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Aérotech MRO · Lyon
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Atelier extérieur · 52 min de vol
+              - frame «Timeline» width=480 layout="vertical" gap=6
+                - frame «Track» width="fill_container" height=30 fill="#FFFFFF06"
+                  - frame «Segment · ferry» width=20 height=30 alignItems="center" justifyContent="center" fill="#FFFFFF38"
+                    - icon «Icon» width=12 height=12 fill="$text-primary" icon="plane"
+                  - frame «Segment · Visite C · 5 j» width=200 height=30 padding=[0, 9] alignItems="center" fill="#ECEAE5D9"
+                    - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: Visite C · 5 j
+                  - frame «Segment · ferry» width=20 height=30 alignItems="center" justifyContent="center" fill="#FFFFFF38"
+                    - icon «Icon» width=12 height=12 fill="$text-primary" icon="plane"
+                  - rectangle «Échéance» width=2 height=38 fill="$warning"
+              - text «Hors service» width=84 fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500" lineHeight=1.1  TEXT: 6 j
+              - text «Coût total» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="500" lineHeight=1.1 textAlign="right"  TEXT: 159 700 €
+            - frame «Details» width="fill_container" layout="vertical" gap=4 padding=[0, 0, 0, 274]
+              - frame «Line» gap=7 alignItems="center"
+                - text «Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Disponible aujourd'hui · pièces en stock sur place
+              - frame «Line» gap=7 alignItems="center"
+                - text «Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Forfait 116 000 € · convoyage 2 × 52 min, 2 900 € · recettes perdues 40 800 €
+          - frame «Spacer» width="fill_container" height="fill_container"
+          - frame «Verdict» width="fill_container" gap=14 padding=[16, 14, 0, 14] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - icon «Icon» width=18 height=18 fill="$text-secondary" icon="scale"
+            - text «Text» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal" lineHeight=1.4  TEXT: Marseille revient 12 200 € moins cher, mais F-HAZC reste au sol 4 jours de plus et la ligne LFLL – LFML reste suspendue jusqu'au mardi 17.
+            - instance «Choisir Lyon» of «Button/Secondary»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Choisir Lyon
+            - instance «Réserver à Marseille» of «Button/Primary»
+              - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Réserver à Marseille
+              - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+      - frame «Right Column» width=360 height="fill_container" layout="vertical" gap=16
+        - instance «Panel · Mis en commun» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Mis en commun
+            - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Proposer le mien
+          - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[6, 22, 22, 22]
+            - frame «Pool · Hangar de maintenance LFML» width="fill_container" layout="vertical" gap=4 padding=[12, 0]
+              - frame «Top» width="fill_container" gap=9 alignItems="center"
+                - instance «Airport» of «Sign/Location»
+                  - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="700" letterSpacing=0.5  TEXT: LFML
+                - text «Name» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Hangar de maintenance
+                - text «Owner» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Aero Provence
+              - text «Detail» width="fill_container" fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: CRJ700, A320 · 2 places, toutes deux prises jusqu'au 10
+            - frame «Pool · Hangar de maintenance LFMN» width="fill_container" layout="vertical" gap=4 padding=[12, 0] stroke="$border" strokeWidth={"top": 1}
+              - frame «Top» width="fill_container" gap=9 alignItems="center"
+                - instance «Airport» of «Sign/Location»
+                  - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=11 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+                - text «Name» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Hangar de maintenance
+                - text «Owner» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Toi
+              - text «Detail» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: ATR 72, A220 · 1 place libre
+            - frame «Pool · Entrepôt de pièces LEBL» width="fill_container" layout="vertical" gap=4 padding=[12, 0] stroke="$border" strokeWidth={"top": 1}
+              - frame «Top» width="fill_container" gap=9 alignItems="center"
+                - instance «Airport» of «Sign/Location»
+                  - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="700" letterSpacing=0.5  TEXT: LEBL
+                - text «Name» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Entrepôt de pièces
+                - text «Owner» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Alliance
+              - text «Detail» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Kits CRJ et ATR · 1 j jusqu'à LFML, 2 j ailleurs
+            - frame «Pool · Salon & cuisine LIRF» width="fill_container" layout="vertical" gap=4 padding=[12, 0] stroke="$border" strokeWidth={"top": 1}
+              - frame «Top» width="fill_container" gap=9 alignItems="center"
+                - instance «Airport» of «Sign/Location»
+                  - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="700" letterSpacing=0.5  TEXT: LIRF
+                - text «Name» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Salon & cuisine
+                - text «Owner» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Alliance
+              - text «Detail» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Repas des vols au départ de Rome uniquement
+            - frame «Pool · Cuisine de bord LFML» width="fill_container" layout="vertical" gap=4 padding=[12, 0] stroke="$border" strokeWidth={"top": 1}
+              - frame «Top» width="fill_container" gap=9 alignItems="center"
+                - instance «Airport» of «Sign/Location»
+                  - text «Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="700" letterSpacing=0.5  TEXT: LFML
+                - text «Name» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Cuisine de bord
+                - text «Owner» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Aero Provence
+              - text «Detail» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 400 plateaux par jour, 120 réservés aux alliés
+            - frame «Règles du partage» width="fill_container" layout="vertical" gap=8 padding=[16, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+              - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Règles du partage
+              - frame «Rule» width="fill_container" gap=9 alignItems="center"
+                - icon «Icon» width=14 height=14 fill="$text-tertiary" icon="crown"
+                - text «Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Le propriétaire passe toujours en premier chez lui
+              - frame «Rule» width="fill_container" gap=9 alignItems="center"
+                - icon «Icon» width=14 height=14 fill="$text-tertiary" icon="receipt"
+                - text «Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Redevance fixée par le propriétaire, 15 000 € au plus
+              - frame «Rule» width="fill_container" gap=9 alignItems="center"
+                - icon «Icon» width=14 height=14 fill="$text-tertiary" icon="package"
+                - text «Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Pièces expédiées de l'entrepôt, sauf stock sur place
+            - frame «Spacer» width="fill_container" height="fill_container"
+            - frame «Quota» width="fill_container" layout="vertical" gap=8 padding=[16, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+              - frame «Quota Top» width="fill_container" alignItems="end" justifyContent="space_between"
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Ton quota ce trimestre
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 11 j sur 20
+              - frame «Bar» width="fill_container" height=6 gap=2 fill="#FFFFFF14" cornerRadius=3
+                - rectangle «Used» width=172 height=6 fill="#ECEAE5D9" cornerRadius=[3, 0, 0, 3]
+                - rectangle «This check» width=93 height=6 fill="#ECEAE559"
+              - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Jours de hangar et d'entrepôt chez les alliés. Au-delà de 20, la redevance double.
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

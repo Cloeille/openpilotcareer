@@ -29,7 +29,7 @@ export async function flightDetail(ctx: Ctx): Promise<Screen> {
   const names = `${from ? from.name : f.job.origin} → ${to ? to.name : f.job.destination}`;
   const setTab = (v: typeof tab): void => { tab = v; window.dispatchEvent(new Event('opc:redraw')); };
   const switcher = h('div', { class: 'view-switcher', role: 'group', 'aria-label': t('hist.views') },
-    ['report', 'gain'].map((v) => h('button', { type: 'button', class: 'view-opt', 'aria-pressed': String(tab === v), onclick: () => setTab(v as typeof tab) }, t(`fl.view.${v}` as 'fl.view.report'), v === 'gain' ? h('kbd', { class: 'keycap' }, 'G') : null)));
+    (['report', 'gain'] as const).map((v) => h('button', { type: 'button', class: 'view-opt', 'aria-pressed': String(tab === v), onclick: () => setTab(v) }, t(`fl.view.${v}`), v === 'gain' ? h('kbd', { class: 'keycap' }, 'G') : null)));
   const header = h('div', { class: 'flight-header' },
     h('div', { class: 'title-block' },
       h('div', { class: 'status-line' }, tab === 'gain' ? t('fl.overlineGain', { id: f.job.id }) : t('fl.overline', { date: fm.date(at) })),
@@ -66,8 +66,8 @@ export async function flightDetail(ctx: Ctx): Promise<Screen> {
 function reportBody(f: Flight): HTMLElement {
   const fm = fmt();
   const s = statement(f);
-  const verdictTitle = t(`fl.verdict.${f.status}` as 'fl.verdict.verified');
-  const sub = f.status === 'unverified' ? t('fl.verdict.unverifiedSub', { pct: fm.percent(MANUAL_PAY_FACTOR) }) : f.status === 'rejected' ? (f.rejectReason ?? '') : t(`fl.verdict.${f.status}Sub` as 'fl.verdict.verifiedSub');
+  const verdictTitle = t(`fl.verdict.${f.status}`);
+  const sub = f.status === 'unverified' ? t('fl.verdict.unverifiedSub', { pct: fm.percent(MANUAL_PAY_FACTOR) }) : f.status === 'rejected' ? (f.rejectReason ?? '') : t(`fl.verdict.${f.status}Sub`);
   const cons = f.status === 'rejected' ? h('div', { class: 'consequences' },
     h('div', { class: 'cons' }, h('span', { class: 'fact-label' }, t('fl.cons.gain')), h('span', { class: 'strong' }, t('fl.cons.gainV', { zero: fm.money(0), payout: fm.money(f.job.payout) }))),
     h('div', { class: 'cons' }, h('span', { class: 'fact-label' }, t('fl.cons.season')), h('span', { class: 'strong' }, t('fl.cons.seasonV'))),

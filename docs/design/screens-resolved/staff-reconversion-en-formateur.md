@@ -1,0 +1,218 @@
+# Staff · reconversion en formateur
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Staff · reconversion en formateur» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-15.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=24 padding=[28, 32, 24, 32]
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Identity» layout="vertical" gap=8
+        - frame «Breadcrumb» gap=10 alignItems="center"
+          - instance «Base Sign» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+          - text «Crumb Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Staff  ›  Pilotes basés à Nice  ›  Cdt. Vidal
+        - frame «Status» gap=8 padding=[6, 0, 0, 0] alignItems="center"
+          - ellipse «Status Dot» width=7 height=7 fill="$danger"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Classe 1 refusée le 4 nov. · il ne peut plus voler en ligne, et aurait eu 65 ans le 9 mars
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600" lineHeight=1.05  TEXT: Reconversion de Cdt. Vidal
+        - text «Subtitle» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Commandant de bord · 64 ans · qualifié ATR 72-600 et A220-300 · chez Azur Régional depuis 19 ans
+      - frame «Key Stats» gap=44 padding=[0, 0, 4, 0]
+        - instance «Stat · Heures de vol» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Heures de vol
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 14 200 h
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: dont 8 300 h sur ATR
+        - instance «Stat · Salaire actuel» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Salaire actuel
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 11 400 €
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: par mois · CDI
+        - instance «Stat · Moral» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Moral
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 58 %
+          - text «Delta» fill="$warning" fontFamily="$font-ui" fontSize=12  TEXT: en chute depuis la visite médicale
+    - frame «Body» width="fill_container" height="fill_container" gap=20
+      - instance «Panel · Options» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Que lui proposer ?
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Voir sa fiche
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[10, 22, 22, 22]
+          - frame «Options» width="fill_container" height="fill_container"
+            - frame «Labels» width=164 layout="vertical"
+              - frame «Head» width="fill_container" height=104
+              - frame «Label · Salaire» width="fill_container" height=62 padding=[12, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Salaire
+              - frame «Label · Il pourra enseigner» width="fill_container" height=62 padding=[12, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Il pourra enseigner
+              - frame «Label · Centre de formation» width="fill_container" height=62 padding=[12, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Centre de formation
+              - frame «Label · Son moral» width="fill_container" height=62 padding=[12, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Son moral
+              - frame «Label · Trou sur la ligne» width="fill_container" height=62 padding=[12, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Trou sur la ligne
+            - frame «Option · Formateur au sol» width="fill_container" layout="vertical" padding=[0, 14]
+              - frame «Head» width="fill_container" height=104 layout="vertical" gap=6 padding=[14, 0, 0, 0]
+                - frame «Title Row» gap=10 alignItems="center"
+                  - instance «Key» of «Keycap»
+                    - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: 1
+                  - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="500"  TEXT: Formateur au sol
+                - text «Description» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.35  TEXT: Théorie et simulateur ATR 72 à Nice, sans plus voler
+              - frame «Cell · Salaire» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 8 600 € par mois
+                - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: −2 800 € par rapport à aujourd'hui
+              - frame «Cell · Il pourra enseigner» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Théorie ATR 72 et A220
+                - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: simulateur ATR à Nice
+              - frame «Cell · Centre de formation» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: +20 h par semaine
+                - text «Detail» width="fill_container" fill="$success" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: simulateur en décembre : 112 → 94 %
+              - frame «Cell · Son moral» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 64 %
+                - text «Detail» width="fill_container" fill="$success" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: +6 · il reste dans le métier
+              - frame «Cell · Trou sur la ligne» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Comblé le 4 déc.
+                - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: intérim d'ici là : 26 100 €
+            - frame «Option · Formateur en vol» width="fill_container" layout="vertical" padding=[0, 14] fill="#FFFFFF0D" stroke="$text-primary" strokeWidth=1 cornerRadius=2
+              - frame «Head» width="fill_container" height=104 layout="vertical" gap=6 padding=[14, 0, 0, 0]
+                - frame «Title Row» gap=10 alignItems="center"
+                  - instance «Key» of «Keycap»
+                    - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: 2
+                  - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Formateur en vol
+                - text «Description» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.35  TEXT: Vols d'école sur ses deux types, grâce à sa classe 2 encore valide
+              - frame «Cell · Salaire» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border-strong" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 9 800 € par mois
+                - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: −1 600 € par rapport à aujourd'hui
+              - frame «Cell · Il pourra enseigner» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border-strong" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Vols d'école ATR 72 et A220
+                - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: plus le simulateur et la théorie
+              - frame «Cell · Centre de formation» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border-strong" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: +35 h par semaine
+                - text «Detail» width="fill_container" fill="$success" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: débloque les vols A220 d'OPL Roux
+              - frame «Cell · Son moral» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border-strong" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 76 %
+                - text «Detail» width="fill_container" fill="$success" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: +18 · c'est ce qu'il souhaite
+              - frame «Cell · Trou sur la ligne» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border-strong" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Comblé le 1er déc.
+                - text «Detail» width="fill_container" fill="$success" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: intérim d'ici là : 23 200 €
+            - frame «Option · Chef pilote à Nice» width="fill_container" layout="vertical" padding=[0, 14]
+              - frame «Head» width="fill_container" height=104 layout="vertical" gap=6 padding=[14, 0, 0, 0]
+                - frame «Title Row» gap=10 alignItems="center"
+                  - instance «Key» of «Keycap»
+                    - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: 3
+                  - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="500"  TEXT: Chef pilote à Nice
+                - text «Description» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.35  TEXT: Bureau : planning, recrutement et suivi des 24 pilotes du hub
+              - frame «Cell · Salaire» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 10 200 € par mois
+                - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: −1 200 € par rapport à aujourd'hui
+              - frame «Cell · Il pourra enseigner» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Rien
+                - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: il encadre, il ne forme pas
+              - frame «Cell · Centre de formation» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Aucun effet
+                - text «Detail» width="fill_container" fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: simulateur en décembre : 112 %
+              - frame «Cell · Son moral» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 61 %
+                - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: +3 · ponctualité du hub +3 %
+              - frame «Cell · Trou sur la ligne» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Comblé le 8 déc.
+                - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: intérim d'ici là : 30 450 €
+            - frame «Option · Retraite avec prime» width="fill_container" layout="vertical" padding=[0, 14]
+              - frame «Head» width="fill_container" height=104 layout="vertical" gap=6 padding=[14, 0, 0, 0]
+                - frame «Title Row» gap=10 alignItems="center"
+                  - instance «Key» of «Keycap»
+                    - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: 4
+                  - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="500"  TEXT: Retraite avec prime
+                - text «Description» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.35  TEXT: Il quitte la compagnie le 30 novembre après 19 ans
+              - frame «Cell · Salaire» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 48 000 € une fois
+                - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: puis plus de salaire à verser
+              - frame «Cell · Il pourra enseigner» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Rien
+                - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 14 200 h d'expérience perdues
+              - frame «Cell · Centre de formation» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Aucun effet
+                - text «Detail» width="fill_container" fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: simulateur en décembre : 112 %
+              - frame «Cell · Son moral» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Il part satisfait
+                - text «Detail» width="fill_container" fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: équipe −4 % · départ d'un ancien
+              - frame «Cell · Trou sur la ligne» width="fill_container" height=62 layout="vertical" gap=3 padding=[11, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+                - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Comblé le 8 déc.
+                - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: intérim d'ici là : 30 450 €
+          - frame «Decision» width="fill_container" gap=16 padding=[16, 0, 0, 0] alignItems="center" stroke="$border-strong" strokeWidth={"top": 1}
+            - frame «Decision Text» width="fill_container" layout="vertical" gap=3
+              - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Formateur en vol dès le lundi 9 novembre
+              - text «Detail» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 9 800 € par mois · classe 2 valide jusqu'en août 2027 · il rejoint Garnier, Aubry et Marchand au centre
+            - instance «Talk» of «Button/Secondary»
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="message-circle"
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: En parler avec lui
+            - instance «Confirm» of «Button/Primary»
+              - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Confirmer la reconversion
+              - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+      - frame «Side Column» width=400 height="fill_container" layout="vertical" gap=20
+        - instance «Panel · Trou sur la ligne» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Trou sur la ligne
+            - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Planning
+          - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[10, 22, 22, 22]
+            - frame «Summary» width="fill_container" layout="vertical" gap=2 padding=[0, 0, 14, 0]
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Avec l'option 2, à reprendre jusqu'au 1er déc.
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=28 fontWeight="500"  TEXT: 20 rotations ATR
+              - text «Detail» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: LFMN ⇄ LFLL · jusqu'à ce qu'OPL Benali passe commandant
+            - frame «Week · 9 – 15 nov.» width="fill_container" gap=14 padding=[11, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - text «Week» width=108 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 9 – 15 nov.
+              - frame «Rotations» gap=4
+                - rectangle «Rotation 1» width=18 height=14 fill="$text-tertiary" cornerRadius=1
+                - rectangle «Rotation 2» width=18 height=14 fill="$warning" cornerRadius=1
+                - rectangle «Rotation 3» width=18 height=14 fill="$warning" cornerRadius=1
+                - rectangle «Rotation 4» width=18 height=14 fill="$warning" cornerRadius=1
+                - rectangle «Rotation 5» width=18 height=14 fill="$warning" cornerRadius=1
+                - rectangle «Rotation 6» width=18 height=14 fill="#E5625B40" stroke="$danger" strokeWidth=1 cornerRadius=1
+              - text «Note» width="fill_container" fill="$danger" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: 1 non couvert
+            - frame «Week · 16 – 22 nov.» width="fill_container" gap=14 padding=[11, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - text «Week» width=108 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 16 – 22 nov.
+              - frame «Rotations» gap=4
+                - rectangle «Rotation 1» width=18 height=14 fill="$text-tertiary" cornerRadius=1
+                - rectangle «Rotation 2» width=18 height=14 fill="$warning" cornerRadius=1
+                - rectangle «Rotation 3» width=18 height=14 fill="$warning" cornerRadius=1
+                - rectangle «Rotation 4» width=18 height=14 fill="$warning" cornerRadius=1
+                - rectangle «Rotation 5» width=18 height=14 fill="$warning" cornerRadius=1
+                - rectangle «Rotation 6» width=18 height=14 fill="$warning" cornerRadius=1
+              - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: 5 en intérim
+            - frame «Week · 23 – 29 nov.» width="fill_container" gap=14 padding=[11, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - text «Week» width=108 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 23 – 29 nov.
+              - frame «Rotations» gap=4
+                - rectangle «Rotation 1» width=18 height=14 fill="$text-tertiary" cornerRadius=1
+                - rectangle «Rotation 2» width=18 height=14 fill="$warning" cornerRadius=1
+                - rectangle «Rotation 3» width=18 height=14 fill="$warning" cornerRadius=1
+                - rectangle «Rotation 4» width=18 height=14 fill="$warning" cornerRadius=1
+                - rectangle «Rotation 5» width=18 height=14 fill="$warning" cornerRadius=1
+                - rectangle «Rotation 6» width=18 height=14 fill="#E5625B40" stroke="$danger" strokeWidth=1 cornerRadius=1
+              - text «Note» width="fill_container" fill="$danger" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: 1 non couvert
+            - frame «Week · 30 nov. – 6 déc.» width="fill_container" gap=14 padding=[11, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - text «Week» width=108 fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 30 nov. – 1er déc.
+              - frame «Rotations» gap=4
+                - rectangle «Rotation 1» width=18 height=14 fill="$text-tertiary" cornerRadius=1
+                - rectangle «Rotation 2» width=18 height=14 fill="$warning" cornerRadius=1
+              - text «Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: 1 en intérim
+            - frame «Legend» width="fill_container" gap=16 padding=[10, 0, 0, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Legend · Collègue en plus» gap=6 alignItems="center"
+                - rectangle «Swatch» width=12 height=10 fill="$text-tertiary" cornerRadius=1
+                - text «Legend Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Collègue en plus
+              - frame «Legend · Intérimaire» gap=6 alignItems="center"
+                - rectangle «Swatch» width=12 height=10 fill="$warning" cornerRadius=1
+                - text «Legend Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Intérimaire
+              - frame «Legend · Personne» gap=6 alignItems="center"
+                - rectangle «Swatch» width=12 height=10 fill="#E5625B40" stroke="$danger" strokeWidth=1 cornerRadius=1
+                - text «Legend Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Personne
+            - frame «Spacer» width="fill_container" height="fill_container"
+            - frame «Footnote» width="fill_container" layout="vertical" gap=2
+              - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Intérimaire ATR · 1 450 € par jour
+              - text «Detail» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Cdt. Perrin en reprend 4 sans dépasser ses limites
+        - instance «Panel · Ce qu'il en dit» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Ce qu'il en dit
+            - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: entretien du 5 nov.
+          - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[8, 22, 20, 22]
+            - text «Quote» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal" lineHeight=1.45  TEXT: « Voler en ligne, c'est fini, je le sais. Mais si je peux encore m'asseoir à droite pour lâcher les jeunes, je signe tout de suite. Le bureau, très peu pour moi. »
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

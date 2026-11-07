@@ -6,7 +6,7 @@ import { UNVERIFIED_PAY_PCT } from '../onboarding-model.ts';
 import { acceptJob, completeOnboarding, firstJob } from '../api-onboarding.ts';
 import type { FirstJob, Me } from '../onboarding-types.ts';
 import { airportInfo, cityOf } from '../airports.ts';
-import { guarded, hintsOf, obError, titleArea, tk, type StepResult, type Wizard } from '../onboarding-shell.ts';
+import { guarded, hintsOf, obError, titleArea, type StepResult, type Wizard } from '../onboarding-shell.ts';
 import { notify, h } from '../ui.ts';
 import type { Key } from '../messages.ts';
 
@@ -16,7 +16,7 @@ function aircraftLine(me: Me): string {
   const a = me.fleet[0];
   if (!a) return '–';
   const name = a.type.name.replace(/^Airbus |^Boeing |^Embraer |^Cessna /, '');
-  const key = a.ownership ? (`ob.s6.own.${a.ownership}` as Key) : ('ob.s6.own.plain' as Key);
+  const key: Key = a.ownership ? `ob.s6.own.${a.ownership}` : 'ob.s6.own.plain';
   return t(key, { type: name });
 }
 
@@ -80,7 +80,7 @@ export async function step6(w: Wizard): Promise<StepResult> {
       h('div', { class: 'ob-job-actions' }, aircraft ? finishBtn : button(t('ob.hint.prevStep'), { variant: 'primary', onclick: () => w.go(3) }), aircraft ? jobsBtn : null));
 
   // ---- company summary
-  const realismName = company.realism ? t(`ob.s4.${company.realism.preset}` as Key) : '–';
+  const realismName = company.realism ? t(`ob.s4.${company.realism.preset}`) : '–';
   const bridgeRow = w.bridge === 'connected' ? [t('ob.s6.bridgeOk'), 'ok'] : w.bridge === 'skipped' ? [t('ob.s6.bridgeSkipped'), 'warn'] : [t('ob.s6.bridgeUnknown'), ''];
   const row = (label: string, value: string, cls = ''): HTMLElement => h('div', { class: 'ob-summary-row' }, h('small', null, label), h('b', { class: cls }, value));
   const mode = w.startMode();
@@ -98,7 +98,7 @@ export async function step6(w: Wizard): Promise<StepResult> {
     titleArea(t('ob.s6.over'), t('ob.s6.title', { company: company.name }), sub || undefined),
     h('div', { class: 'ob-go' }, jobCard, summary),
     h('div', { class: 'ob-foot' }, h('div', { class: 'ob-foot-left' }, error)));
-  void icon; void tk;
+  void icon;
   return {
     scene: 'job', view, back: () => w.prev(),
     keys: { j: () => void guarded(jobsBtn, error, () => done('#jobs', false)) },

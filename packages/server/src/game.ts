@@ -17,6 +17,7 @@ import { post } from './ledger.ts';
 import { parseRealism, realismSettingOf, saveRealism } from './realism.ts';
 import { release, reservedAgainst, reservedIds, reservationOf, windowOfJobId } from './reservations.ts';
 import { rollIncident } from './safety.ts';
+import { bookLeg, planLeg } from './service.ts';
 import type { Ofp } from './simbrief.ts';
 
 export { post };
@@ -72,7 +73,7 @@ export function typeFor(db: Db, companyId: number, icao: string): AircraftType {
 export const balanceOf = (db: Db, companyId: number): number => get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId)?.balance ?? 0;
 
 /** Spending that needs the money in the bank: 402 when the balance does not cover it. `post` (ledger.ts) is the only place a balance changes. */
-function spend(db: Db, companyId: number, at: number, kind: string, price: number, memo: string): void {
+export function spend(db: Db, companyId: number, at: number, kind: string, price: number, memo: string): void {
   const c = get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId);
   if (!c || c.balance < price) throw new HttpError(402, 'insufficient_funds', `needs ${price}, balance is ${c?.balance ?? 0}`);
   post(db, companyId, at, kind, -price, memo);
@@ -372,6 +373,13 @@ export function finishFlight(db: Db, f: FlightRow, status: 'verified' | 'unverif
   post(db, f.company_id, at, fuelKind, -s.fuelCost, memo, f.id);
   post(db, f.company_id, at, 'landing_fee', -s.landingFee, memo, f.id);
   post(db, f.company_id, at, 'maintenance', -s.maintenance, memo, f.id);
+  // lot SERVICE: a passenger flight with a cabin crew serves its passengers like a line leg does (separate ledger kinds: the flight's own settlement above is the job's)
+  const svc = f.kind === 'pax' ? planLeg(db, { companyId: f.company_id, category: type.category, seats: type.seats, origin: f.origin, dep: f.accepted_at, blockMin: hours * 60, pax: f.pax }) : null;
+  if (svc) {
+    if (svc.sales > 0) post(db, f.company_id, at, 'service_sales', svc.sales, memo, f.id);
+    if (svc.cost > 0) post(db, f.company_id, at, 'service_cost', -svc.cost, memo, f.id);
+    bookLeg(db, svc);
+  }
   const wearBefore = get<{ wear_pct: number }>(db, 'SELECT wear_pct FROM aircraft WHERE id = ?', f.aircraft_id)?.wear_pct ?? 0;
   accrueWear(db, f.company_id, f.aircraft_id, type.category, hours, at);
   // B.5: one incident roll per flight. The player is not crew (C4): the duty period is the flight's own and the rest policy does not apply.

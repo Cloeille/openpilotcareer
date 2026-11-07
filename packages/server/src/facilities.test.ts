@@ -75,12 +75,12 @@ test('one building has at most one active contract (the partial unique index), a
 
 // ---------------------------------------------------------------- the plan and the catalogue
 
-test('the plan of Nice: ten buildings, who holds what relative to the player, the drawn layout and the real parking', async () => {
+test('the plan of Nice: ten buildings and the kitchen hall, who holds what relative to the player, the drawn layout and the real parking', async () => {
   const w = await world();
   const p = await w.plan();
-  assert.equal(p.buildings.length, 10);
+  assert.equal(p.buildings.length, 11);
   assert.equal(p.layout, 'LFMN');
-  assert.deepEqual(p.summary, { yours: 0, available: 4, ai: 1 });
+  assert.deepEqual(p.summary, { yours: 0, available: 5, ai: 1 });
   const by = Object.fromEntries(p.buildings.map((b) => [b.slot, b]));
   assert.deepEqual({ o: by.MX1!.owner, rent: by.MX1!.rent }, { o: 'available', rent: MX });
   assert.deepEqual({ o: by.CG1!.owner, name: by.CG1!.ownerName }, { o: 'ai', name: 'Méridia Cargo' });
@@ -95,7 +95,7 @@ test('an airport without a drawn plan answers layout null and a catalogue scaled
   const w = await world({ hub: 'LFPG' });
   const p = await w.plan();
   assert.equal(p.layout, null);
-  assert.deepEqual(p.buildings.map((b) => b.slot), ['T1', 'MX1', 'AD', 'OPS', 'MX2', 'TWR']);
+  assert.deepEqual(p.buildings.map((b) => b.slot), ['T1', 'MX1', 'AD', 'OPS', 'KT', 'MX2', 'TWR']);
   assert.equal(p.buildings.find((b) => b.slot === 'T1')!.owner, 'airport');
 });
 
@@ -223,7 +223,7 @@ test('the overview prices the hub: buildings, stand fees, team by family, renewa
   assert.deepEqual(o.company, { name: 'amy Aviation', hubs: 1, aircraft: 1, employees: 3 });
   const hub = o.hubs[0]!;
   assert.deepEqual({ icao: hub.icao, role: hub.role, layout: hub.layout, team: hub.team }, { icao: 'LFMN', role: 'main', layout: 'LFMN', team: { total: 3, byFamily: { ground: 2, maintenance: 1 } } });
-  assert.deepEqual(hub.facilities.map((f) => [f.slot, f.owner]), [['MX1', 'available'], ['MX2', 'available'], ['AD', 'player'], ['OPS', 'available']]);
+  assert.deepEqual(hub.facilities.map((f) => [f.slot, f.owner]), [['MX1', 'available'], ['MX2', 'available'], ['AD', 'player'], ['OPS', 'available'], ['KT', 'available']]);
   assert.equal(hub.monthlyCost, 6_200 + 3_900, 'the offices and the stand of the aircraft based there');
   assert.equal(o.monthlyCost, hub.monthlyCost);
   assert.deepEqual(hub.aircraft.map((a) => [a.icao, a.status]), [['C172', 'available']]);

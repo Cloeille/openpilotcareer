@@ -95,10 +95,14 @@ export const fetchMember = (id: number): Promise<StaffDetail | null> => optional
 export const fetchCandidates = (q: CandidateQuery): Promise<CandidatesView | null> => optional<CandidatesView>(`/staff/candidates${qs({ ...q })}`);
 export const fetchLeave = (from?: string, days?: number): Promise<LeaveView | null> => optional<LeaveView>(`/staff/leave${qs({ from, days })}`);
 
-export const hireCandidate = (candidateId: string): Promise<HireResult> => api<HireResult>('/staff/hire', { method: 'POST', body: { candidateId } });
+export const hireCandidate = (candidateId: string, startNow = false): Promise<HireResult> => api<HireResult>('/staff/hire', { method: 'POST', body: { candidateId, ...(startNow ? { startNow } : {}) } });
 export const trainMember = (id: number, type: string): Promise<TrainResult> => api<TrainResult>(`/staff/${id}/train`, { method: 'POST', body: { type } });
 export const restMember = (id: number): Promise<unknown> => api(`/staff/${id}/rest`, { method: 'POST', body: {} });
 export const transferMember = (id: number, base: string): Promise<unknown> => api(`/staff/${id}/transfer`, { method: 'POST', body: { base } });
 export const decideLeave = (id: number, decision: 'grant' | 'refuse'): Promise<unknown> => api(`/staff/leave/${id}`, { method: 'POST', body: { decision } });
 export const setRestPolicy = (policy: RestPolicy): Promise<unknown> => api('/staff/rest-policy', { method: 'PUT', body: { policy } });
 export const hireInterim = (p: { family: StaffFamily; days: number; qual?: string; base?: string }): Promise<InterimResult> => api<InterimResult>('/staff/interim', { method: 'POST', body: p });
+
+export type StartNowResult = { member: StaffMember; fee: number; balanceAfter: number };
+/** Pay START_NOW_FEE: a hire still in notice starts now. */
+export const startNowMember = (id: number): Promise<StartNowResult> => api<StartNowResult>(`/staff/${id}/start-now`, { method: 'POST', body: {} });

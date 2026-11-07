@@ -1,0 +1,122 @@
+Compte courant Azur Régional · Banque Riviera
+Relevé des opérations
+Découvert autorisé
+250 000 €
+à 11,5 % · non utilisé
+Solde au 6 novembre, 17:52Z
+1 284 560 €
++132 840 € depuis le 1er novembre
+Cette semaine
+Novembre
+Octobre
+Autre période
+Catégorie
+Toutes
+Ligne
+Toutes les lignes
+Exporter en CSV
+Novembre, du 1er au 6
+148 opérations · les plus récentes en premier
+Heure
+Opération
+Catégorie
+Lié à
+Montant
+Solde
+Aujourd'hui, vendredi 6 novembre
+−2 200 € sur la journée
+17:52Z
+Recette billetterie · 64 passagers
+Billets
+AZR 1136
+F-HAZA
++9 860 €
+1 284 560 €
+17:46Z
+Redevances de départ et passagers
+Redevances
+LFMN
+AZR 4127
+−1 420 €
+1 274 700 €
+17:05Z
+Avitaillement Jet A-1 · 2 840 L
+Carburant
+AZR 4127
+F-HAZR
+−4 260 €
+1 276 120 €
+16:30Z
+Job fret · 1,2 t de pièces vers Paris
+Jobs
+AZR 4127
+LFMN → LFPG
++18 400 €
+1 280 380 €
+14:20Z
+Plateaux repas · rotation Nice ⇄ Calvi
+Restauration
+AZR 1641/1642
+F-HAZB
+−1 180 €
+1 261 980 €
+09:10Z
+Check A · remplacement des freins
+Maintenance
+F-HAZB
+ATR 72-600
+−23 600 €
+1 263 160 €
+Jeudi 5 novembre
+−121 460 € sur la journée
+22:14Z
+Recette billetterie · 58 passagers
+Billets
+AZR 1138
+F-HAZA
++8 940 €
+1 286 760 €
+08:00Z
+Échéance du prêt A220 · Banque Riviera
+Crédits
+F-HAZD
+A220-300
+−112 400 €
+1 277 820 €
+07:30Z
+Loyer hangar et bureaux · novembre
+Loyers
+LFMN
+Hangar 3
+−18 000 €
+1 390 220 €
+Prochaine opération programmée
+Salaires du 28 novembre · −345 500 €
+Afficher les jours précédents
+Synthèse de la période
+1er – 6 nov.
+Variation du solde
++132 840 €
+sur 148 opérations, du 1er au 6 novembre
+Entrées
++598 700 €
+Billets
+412 300 €
+Jobs
+186 400 €
+Sorties
+−465 860 €
+Carburant
+148 900 €
+Crédits
+125 100 €
+Maintenance
+96 200 €
+Redevances
+42 760 €
+Restauration
+21 400 €
+Loyers
+18 000 €
+Autres
+13 500 €

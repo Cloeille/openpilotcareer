@@ -1,4 +1,4 @@
-import type { Flight } from '@opc/shared';
+import type { AircraftCategory, Flight } from '@opc/shared';
 import { api } from '../api.ts';
 import type { FinanceOverview, FleetAircraft, HubSpots } from '@opc/shared';
 import { buyoutLease, financeOverview, hubUsage, terminateLease } from '../api-finance.ts';
@@ -6,17 +6,16 @@ import { airportInfo } from '../airports.ts';
 import { fleetSummary } from '../catalogue.ts';
 import { badge, button, dataTable, line, panel, unknownValue } from '../components.ts';
 import { aircraftName, byRegistration, monthLabel, nextCharges, parkingSummary, statusOf, wearOf, type ActiveFlightInfo } from '../finance-view.ts';
-import { chargeKind, locale, perform, tidyCity } from '../finance-ui.ts';
+import { locale, perform, tidyCity } from '../finance-ui.ts';
 import { fmt } from '../format.ts';
-import { t, tp } from '../i18n.ts';
-import type { Key } from '../messages.ts';
+import { codeLabel, t, tp } from '../i18n.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
 import { starter } from './starter.ts';
 
 let selected: number | null = null;
 
-export const categoryName = (c: string): string => t(`cat.${c}` as Key);
+export const categoryName = (c: AircraftCategory): string => t(`cat.${c}`);
 const companyCode = (c: object): string | null => (c as { code?: string | null }).code || null;
 
 const statusCell = (a: FleetAircraft, flights: Map<number, ActiveFlightInfo>, code: string | null, now: number): HTMLElement => {
@@ -59,7 +58,7 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
     const v = statusOf(a, now, flights.get(a.id) ?? null);
     const wear = wearOf(a);
     const c = a.contract ?? null;
-    const own = a.ownership ? t(`fin.own.${a.ownership}` as Key) : null;
+    const own = a.ownership ? t(`fin.own.${a.ownership}`) : null;
     const contractText = c === null ? (a.ownership === 'owned' ? t('fin.fleet.noContract') : null)
       : [c.monthly > 0 ? t('fin.contract.monthly', { amount: fm.money(c.monthly) }) : null, c.hourly ? t('fin.contract.hourly', { amount: fm.money(c.hourly) }) : null,
         c.endsAt ? t('fin.contract.until', { date: monthLabel(locale(), c.endsAt, true) }) : null].filter(Boolean).join(' · ');
@@ -76,6 +75,7 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
             button(t('fin.confirm'), { variant: isBuy ? 'primary' : 'danger', onclick: () => void perform(() => (isBuy ? buyoutLease(c.id) : terminateLease(c.id)), () => t(isBuy ? 'fin.lease.bought' : 'fin.lease.terminated'), ctx.refresh) })));
       } else {
         actions.replaceChildren(
+          button(t('pt.r.open'), { variant: 'secondary', icon: 'wrench', onclick: () => go(`#wear/${a.id}`) }),
           button(t('fin.lease.terminate'), { variant: 'secondary', onclick: () => { confirming = 'terminate'; showDetail(a); } }),
           button(t('fin.lease.buyout'), { variant: 'secondary', onclick: () => { confirming = 'buyout'; showDetail(a); } }));
       }
@@ -118,7 +118,7 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
   const financePanel = finance === null ? null : panel({ title: t('fin.money.title'), action: t('fin.money.sub'), id: 'fin-money' },
     upcoming.length === 0 ? h('p', { class: 'dim small' }, t('fin.money.none'))
       : h('div', { class: 'fin-panel-list' }, upcoming.map((u) => h('div', { class: 'fin-charge' },
-        h('span', { class: 'what' }, h('span', null, chargeKind(u.kind)), h('span', { class: 'when' }, `${fm.date(u.at)}${u.memo ? ` · ${u.memo}` : ''}`)),
+        h('span', { class: 'what' }, h('span', null, codeLabel(u.kind, 'fin.kind')), h('span', { class: 'when' }, `${fm.date(u.at)}${u.memo ? ` · ${u.memo}` : ''}`)),
         h('span', { class: 'strong' }, fm.money(-Math.abs(u.amount)))))));
 
   const parkNote = parking

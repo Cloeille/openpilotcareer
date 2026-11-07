@@ -93,7 +93,7 @@ test('pathOf draws a polyline and nothing for fewer than two points', () => {
 test('levers lead to the staff sheet, the leave planner or the fleet', () => {
   assert.equal(leverHash({ action: 'crew', ref: '7' }), '#staff/7');
   assert.equal(leverHash({ action: 'leave', ref: '' }), '#staff/leave');
-  assert.equal(leverHash({ action: 'maintenance', ref: '12' }), '#fleet');
+  assert.equal(leverHash({ action: 'maintenance', ref: '12' }), '#wear/12');
 });
 
 test('"up to +10 points" is the sum of the levers, never past 100', () => {

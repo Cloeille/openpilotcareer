@@ -3,7 +3,9 @@ import { act } from '../actions.ts';
 import { api } from '../api.ts';
 import { airportField } from '../airport-field.ts';
 import { fetchHubsOverview } from '../api-facilities.ts';
+import { fetchWarehouse } from '../api-parts.ts';
 import { fetchSafety } from '../api-safety.ts';
+import { fetchService } from '../api-service.ts';
 import { fetchStaff } from '../api-staff.ts';
 import { airportInfo, cityOf } from '../airports.ts';
 import { button, icon, panel, signDirection, signLocation, stat, titleBlock } from '../components.ts';
@@ -11,9 +13,10 @@ import { facilitiesOff, holdingText, planFocus } from '../facilities-ui.ts';
 import { contractsOf, HOLDING_TONE, holdingOf, KIND_ICON, shown, stepOf, teamRows } from '../facilities-view.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
-import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { safetyEntry } from '../safety-ui.ts';
+import { warehouseEntry } from '../parts-ui.ts';
+import { serviceEntry } from '../service-ui.ts';
 import { famLabel, staffEntry } from '../staff-ui.ts';
 import { h } from '../ui.ts';
 
@@ -26,12 +29,14 @@ export async function hubsOverview(ctx: Ctx): Promise<Screen> {
   const { me } = snap;
   const fm = fmt();
   const data = await fetchHubsOverview();
-  const [people, safety] = await Promise.all([fetchStaff().catch(() => null), fetchSafety().catch(() => null)]);
+  const [people, safety, parts, onboard] = await Promise.all([fetchStaff().catch(() => null), fetchSafety().catch(() => null), me.hubs[0] ? fetchWarehouse(me.hubs[0]).catch(() => null) : null, fetchService().catch(() => null)]);
   const infos = new Map(await Promise.all(me.hubs.map(async (icao) => [icao, await airportInfo(icao)] as const)));
   // The doors to the other Company screens (C8): a card, its key, where it leads, its hint. A door whose server feature is off has no card and no key.
   const doors = [
     { card: staffEntry(people, go), key: 's', hash: '#staff', hint: t('st.hint.openStaff') },
     { card: safetyEntry(safety, go), key: 'f', hash: '#safety', hint: t('sf.hint.open') },
+    { card: warehouseEntry(me.hubs[0] ?? '', parts, go), key: 'w', hash: `#warehouse/${me.hubs[0]}`, hint: t('pt.hint.open') },
+    { card: serviceEntry(onboard, go), key: 'b', hash: '#service', hint: t('sv.hint.open') },
   ].filter((d): d is typeof d & { card: HTMLElement } => d.card !== null);
   const doorKeys: Record<string, () => void> = Object.fromEntries(doors.map((d) => [d.key, () => go(d.hash)]));
   const doorHints = doors.map((d) => ({ key: d.key.toUpperCase(), label: d.hint }));
@@ -97,7 +102,7 @@ export async function hubsOverview(ctx: Ctx): Promise<Screen> {
     return h('li', { class: 'fc-fac mine', 'data-row': '', tabindex: 0, 'aria-label': t('fc.hub.parking'), onclick: () => openPlan(hub.icao) },
       icon('square-parking', 16),
       h('span', { class: 'col tight fc-fac-name' }, h('span', { class: 'fc-fac-title' }, t('fc.hub.parking')), h('span', { class: 'dim small' }, t('fc.hub.parkingDetail', { n: p.spots }))),
-      h('span', { class: 'fc-fac-status' }, t('fc.hub.parkingUsed', { used: p.used, spots: p.spots })),
+      h('span', { class: 'fc-fac-status' }, tp('fc.hub.parkingUsed', p.used, { used: p.used, spots: p.spots })),
       h('span', { class: 'fc-fac-cost' }, fm.money(p.monthly)));
   };
 

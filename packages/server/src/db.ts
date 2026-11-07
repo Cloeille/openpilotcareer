@@ -237,6 +237,49 @@ CREATE TABLE safety_readings (
   company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, day INTEGER NOT NULL, idx INTEGER NOT NULL, PRIMARY KEY (company_id, day));
 `;
 
+// OpenHangar v3, lot PARTS: the wear of each component of an aircraft (rows are made the first time an aircraft wears or is looked at: seeded from the lease offer's airframe hours, else new),
+// the spare parts a company keeps at a hub and the orders on their way, the stock policy per aircraft type (a target the shelf is topped up to; `cls` is the part class of the type, so billing and
+// breakdowns need no catalogue lookup), and the breakdowns: a mechanical component that reached its failure wear. The catalogue of parts (names, prices, kits) is code in shared/src/parts.ts.
+// `breakdowns` is unique per (aircraft, component, failed_at): a breakdown that is played twice is recorded once, so its part and its bill are never taken twice.
+const SCHEMA_V11 = `
+CREATE TABLE aircraft_components (
+  aircraft_id INTEGER NOT NULL REFERENCES aircraft(id) ON DELETE CASCADE,
+  component TEXT NOT NULL CHECK (component IN ('engines','gear','propellers','avionics','interior','paint')),
+  wear_pct REAL NOT NULL, refurb_until INTEGER, PRIMARY KEY (aircraft_id, component));
+CREATE TABLE parts_stock (
+  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, hub TEXT NOT NULL, part TEXT NOT NULL, qty INTEGER NOT NULL CHECK (qty >= 0), PRIMARY KEY (company_id, hub, part));
+CREATE TABLE parts_orders (
+  id INTEGER PRIMARY KEY, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, hub TEXT NOT NULL, part TEXT NOT NULL, qty INTEGER NOT NULL,
+  ordered_at INTEGER NOT NULL, eta INTEGER NOT NULL, cost INTEGER NOT NULL, express INTEGER NOT NULL DEFAULT 0, received INTEGER NOT NULL DEFAULT 0);
+CREATE INDEX parts_orders_open ON parts_orders(company_id, received, eta);
+CREATE TABLE parts_policy (
+  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, hub TEXT NOT NULL, icao TEXT NOT NULL, cls TEXT NOT NULL,
+  policy TEXT NOT NULL CHECK (policy IN ('none','critical','full')), PRIMARY KEY (company_id, hub, icao));
+CREATE TABLE breakdowns (
+  id INTEGER PRIMARY KEY, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, aircraft_id INTEGER NOT NULL REFERENCES aircraft(id) ON DELETE CASCADE,
+  hub TEXT NOT NULL, component TEXT NOT NULL, part TEXT NOT NULL, failed_at INTEGER NOT NULL, eta INTEGER NOT NULL, ready_at INTEGER NOT NULL, paid INTEGER NOT NULL, from_stock INTEGER NOT NULL,
+  UNIQUE (aircraft_id, component, failed_at));
+CREATE INDEX breakdowns_company ON breakdowns(company_id, failed_at);
+`;
+
+// OpenHangar v3, lot SERVICE: cabin service and the central kitchen. `service_policy` is a history, not a state: one row per change, `since` the first instant it is in force (the next UTC midnight,
+// "applique le lendemain"), so the configuration at any instant is a read and a replayed tick sees the one of its own time. The policy cells are (haul, item); the meal quality is the row (`all`, `meal_quality`).
+// `kitchen` is the same history for who makes the meals at an airport. `service_days` is the log the satisfaction, the kitchen's day and the service figures read: one row per company, day and departure airport.
+// `sat_pax` is the sum of passengers x satisfaction of the legs, so a mean over any window is a ratio of sums.
+const SCHEMA_V12 = `
+CREATE TABLE service_policy (
+  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, haul TEXT NOT NULL, item TEXT NOT NULL, mode TEXT NOT NULL, since INTEGER NOT NULL,
+  PRIMARY KEY (company_id, haul, item, since));
+CREATE TABLE kitchen (
+  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, hub TEXT NOT NULL, provider TEXT NOT NULL CHECK (provider IN ('own','caterer')), since INTEGER NOT NULL,
+  PRIMARY KEY (company_id, hub, since));
+CREATE TABLE service_days (
+  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, day INTEGER NOT NULL, hub TEXT NOT NULL,
+  pax INTEGER NOT NULL DEFAULT 0, sat_pax REAL NOT NULL DEFAULT 0, sales INTEGER NOT NULL DEFAULT 0, cost INTEGER NOT NULL DEFAULT 0,
+  snacks INTEGER NOT NULL DEFAULT 0, hot INTEGER NOT NULL DEFAULT 0, unserved INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (company_id, day, hub));
+`;
+
 // Lot SIM-AIRCRAFT: the aircraft models a player's simulator has installed, as scanned by the bridge (one row per model, liveries folded into `liveries`).
 // A PUT replaces the player's rows but keeps `hidden` of the titles that are still there. `icao` is the designator the buy and lease screens use (the bridge's, else matched
 // against the catalogue by title; NULL = cannot be bought). Client input: it filters what is offered and never prices anything.
@@ -247,8 +290,8 @@ CREATE TABLE sim_aircraft (
   PRIMARY KEY (user_id, title));
 `;
 
-/** Append-only; `PRAGMA user_version` records how many ran. Other lots append theirs here too: never pin MIGRATIONS.length. */
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_SIM_AIRCRAFT];
+/** Append-only; `PRAGMA user_version` records how many ran. */
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);

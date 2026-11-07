@@ -105,9 +105,10 @@ export async function facilityScreen(ctx: Ctx): Promise<Screen> {
         const s = st.get(l.level)!;
         const on = state.level === l.level;
         const named = fx === 'hangar';
+        const levelName = named ? messageFor(`fc.lv.maintenance.${l.level}`) : null;
         return h('button', { type: 'button', class: `fc-lv${on ? ' on' : ''}${s === 'locked' ? ' locked' : ''}`, role: 'radio', 'aria-checked': String(on), 'aria-disabled': s === 'pickable' ? null : 'true', onclick: () => { if (s === 'pickable') set({ level: l.level }); } },
           h('div', { class: 'row' }, radio(on), h('span', { class: 'strong' }, t('fc.lv.n', { n: l.level })), s === 'locked' ? icon('lock', 14) : null, s === 'done' && l.level === d.facility.level ? h('span', { class: 'dim small' }, t('fc.lv.current')) : null),
-          named ? h('div', { class: 'fc-lv-name' }, t(`fc.lv.maintenance.${l.level}` as 'fc.lv.maintenance.1')) : null,
+          levelName ? h('div', { class: 'fc-lv-name' }, t(levelName)) : null,
           l.opensAfterDays !== null ? h('div', { class: 'dim small' }, t('fc.lv.locked', { n: opensAfterMonths(l.opensAfterDays) })) : null,
           named ? h('ul', { class: 'plain fc-checks' }, (['a', 'b', 'c'] as const).flatMap((k) => { const key = messageFor(`fc.lv.maintenance.${l.level}.${k}`); return key ? [h('li', null, icon('check', 14), t(key, { pct: MAINTENANCE_DISCOUNT_PCT }))] : []; })) : h('p', { class: 'dim small' }, t(eff.key, { ...eff.vars, icao: d.facility.hub })),
           h('div', { class: 'fc-lv-stats' },

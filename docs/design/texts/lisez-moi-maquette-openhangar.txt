@@ -3,11 +3,11 @@ Maquette de l'interface
 Mod open source de carrière et d'économie pour Microsoft Flight Simulator 2020 et 2024 : client web, panneau en jeu et pont SimConnect. Maquette du 6 novembre 2026.
 Lire ce fichier
 Une rangée par domaine
-De 01 à 09 : les écrans principaux à gauche, les états et cas limites à droite de chaque rangée.
+De 01 à 11 : les écrans principaux à gauche, les états et cas limites à droite de chaque rangée.
 Un viewport de jeu fixe
 Tous les écrans font 1600 × 900. Ce ne sont pas des pages qui défilent : le contenu tient dans l'écran, le détail passe par des vues secondaires.
 Les références
-La rangée 10 regroupe la carte des parcours, le schéma d'avion générique et les plans de cabine paramétriques.
+La rangée 12 regroupe la carte des parcours, le schéma d'avion générique et les plans de cabine paramétriques.
 Les composants
 Ils sont en haut du canvas, au-dessus de la rangée 01. Toutes les couleurs, polices et rayons sont des variables.
 Système de design
@@ -21,7 +21,7 @@ Composants
 Button, Badge, Sign/Location et Sign/Direction, Keycap, Input, Stat, Panel, HUD/Top, HUD/Bottom, View Switcher.
 Pour l'implémentation
 Clavier et manette d'abord
-Q / E pour les onglets, Échap pour revenir, Entrée pour l'action principale. Voir la carte des parcours en rangée 10.
+Q / E pour les onglets, Échap pour revenir, Entrée pour l'action principale. Voir la carte des parcours en rangée 12.
 Trois scripts à reprendre
 scripts/aircraft-schematic.js : avion en nuage de points généré par catégorie. scripts/cabin-layout.js : plan de cabine depuis une configuration JSON. scripts/airport-chart.js : plan 3D d'un aéroport avec ses bâtiments sélectionnables. Du JavaScript simple, réutilisable côté client.
 Images et 3D
@@ -48,4 +48,8 @@ Historique
 09
 Compétition IA
 10
+Finance
+11
+Groupe & alliances
+12
 Références

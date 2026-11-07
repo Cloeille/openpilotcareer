@@ -2,14 +2,14 @@ import { icon, button, inputField, panel } from '../components.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import {
-  LIVERY_COLORS, START_FACTS, isValidCallsign, isValidCode, isValidName, liveryIdOf, normalizeCallsign, normalizeCode, otherMode, suggestCallsign, suggestCode,
+  LIVERY_COLORS, START_FACTS, type LiveryId, isValidCallsign, isValidCode, isValidName, liveryIdOf, normalizeCallsign, normalizeCode, otherMode, suggestCallsign, suggestCode,
 } from '../onboarding-model.ts';
 import { codeAvailable, createOnboardingCompany, hubSuggestions, putOnboarding } from '../api-onboarding.ts';
 import type { HubNoteKey } from '@opc/shared';
 import type { HubSuggestion, StartMode } from '../onboarding-types.ts';
 import { session } from '../api.ts';
 import { PRODUCT_NAME } from '../brand.ts';
-import { arrows, guarded, hintsOf, obError, titleArea, tk, type StepResult, type Wizard } from '../onboarding-shell.ts';
+import { arrows, guarded, hintsOf, obError, titleArea, type StepResult, type Wizard } from '../onboarding-shell.ts';
 import { debounce, h } from '../ui.ts';
 import type { Key } from '../messages.ts';
 
@@ -146,10 +146,10 @@ export async function step2(w: Wizard): Promise<StepResult> {
   const swatchName = h('span', { class: 'ob-swatch-name' });
   const paintSwatch = (): void => {
     const id = liveryIdOf(f.color);
-    swatchName.textContent = id ? tk(`ob.s2.color.${id}`) : t('ob.s2.color.none');
+    swatchName.textContent = id ? t(`ob.s2.color.${id}`) : t('ob.s2.color.none');
   };
-  const swatch = (value: string | null, id: string, hex: string | null): HTMLElement => {
-    const input = h('input', { type: 'radio', name: 'livery', value: value ?? '', checked: f.color?.toLowerCase() === (value ?? '').toLowerCase() && value !== null || (value === null && f.color === null), disabled: locked, 'aria-label': tk(`ob.s2.color.${id}`) });
+  const swatch = (value: string | null, id: LiveryId | 'none', hex: string | null): HTMLElement => {
+    const input = h('input', { type: 'radio', name: 'livery', value: value ?? '', checked: f.color?.toLowerCase() === (value ?? '').toLowerCase() && value !== null || (value === null && f.color === null), disabled: locked, 'aria-label': t(`ob.s2.color.${id}`) });
     input.addEventListener('change', () => { f.color = value; paintSwatch(); });
     return h('label', { class: `ob-swatch${hex ? '' : ' none'}`, style: hex ? `background:${hex}` : null }, input, icon(hex ? 'check' : 'ban', 14));
   };

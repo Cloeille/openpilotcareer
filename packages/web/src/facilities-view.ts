@@ -99,6 +99,7 @@ export function effectOf(f: Pick<FacilityView, 'effect' | 'kind'> | Pick<Buildin
     case 'hangar': return { key: 'fc.effect.maintenance', vars: { pct: MAINTENANCE_DISCOUNT_PCT } };
     case 'desks': return { key: 'fc.effect.office', vars: {} };
     case 'ops': return { key: 'fc.effect.ops', vars: {} };
+    case 'kitchen': return { key: 'fc.effect.kitchen', vars: {} };
     case 'none': return { key: 'fc.effect.none', vars: {} };
   }
 }

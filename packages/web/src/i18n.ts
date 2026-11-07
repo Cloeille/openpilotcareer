@@ -1,4 +1,4 @@
-import { en, fr, type Key } from './messages.ts';
+import { en, fr, messageFor, type Key, type PluralBase } from './messages.ts';
 
 export const LANGS = ['en', 'fr'] as const;
 export type Lang = (typeof LANGS)[number];
@@ -25,12 +25,16 @@ export function translate(lang: Lang, key: Key, vars?: Record<string, string | n
   return lang === 'fr' ? elide(filled) : filled;
 }
 
-/** Plural form chosen with Intl.PluralRules: looks up `${base}.${category}`, then `${base}.other`. `{n}` is filled in. */
-export function translatePlural(lang: Lang, base: string, n: number, vars?: Record<string, string | number>): string {
-  const category = new Intl.PluralRules(lang).select(n);
-  const dict = { ...en, ...dicts[lang] } as Record<string, string>;
-  const key = (`${base}.${category}` in dict ? `${base}.${category}` : `${base}.other`) as Key;
+/** Plural form chosen with Intl.PluralRules: looks up `${base}.${category}`, then `${base}.other`, which every `PluralBase` has. `{n}` is filled in. */
+export function translatePlural(lang: Lang, base: PluralBase, n: number, vars?: Record<string, string | number>): string {
+  const key = messageFor(`${base}.${new Intl.PluralRules(lang).select(n)}`) ?? `${base}.other`;
   return translate(lang, key, { n, ...vars });
+}
+
+/** Label of a code the server sends (a ledger kind, say): the first message `${prefix}.${code}` that exists, else the code spelled in words (`line_fee` -> `line fee`). Never the key. */
+export function translateCode(lang: Lang, code: string, ...prefixes: string[]): string {
+  const key = prefixes.map((p) => messageFor(`${p}.${code}`)).find((k) => k !== null);
+  return key ? translate(lang, key) : code.replaceAll('_', ' ');
 }
 
 let current: Lang | null = null;
@@ -52,4 +56,5 @@ export function setLang(lang: Lang): void {
 }
 
 export const t = (key: Key, vars?: Record<string, string | number>): string => translate(getLang(), key, vars);
-export const tp = (base: string, n: number, vars?: Record<string, string | number>): string => translatePlural(getLang(), base, n, vars);
+export const tp = (base: PluralBase, n: number, vars?: Record<string, string | number>): string => translatePlural(getLang(), base, n, vars);
+export const codeLabel = (code: string, ...prefixes: string[]): string => translateCode(getLang(), code, ...prefixes);

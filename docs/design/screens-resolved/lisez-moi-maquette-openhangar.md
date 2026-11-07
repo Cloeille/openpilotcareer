@@ -15,13 +15,13 @@ Resolved tree (component instances expanded with their overrides; HUD bars refer
       - text «Column Title» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Lire ce fichier
       - frame «Item · Une rangée par domaine» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
         - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Une rangée par domaine
-        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 lineHeight=1.45  TEXT: De 01 à 09 : les écrans principaux à gauche, les états et cas limites à droite de chaque rangée.
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 lineHeight=1.45  TEXT: De 01 à 11 : les écrans principaux à gauche, les états et cas limites à droite de chaque rangée.
       - frame «Item · Un viewport de jeu fixe» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
         - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Un viewport de jeu fixe
         - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 lineHeight=1.45  TEXT: Tous les écrans font 1600 × 900. Ce ne sont pas des pages qui défilent : le contenu tient dans l'écran, le détail passe par des vues secondaires.
       - frame «Item · Les références» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
         - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Les références
-        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 lineHeight=1.45  TEXT: La rangée 10 regroupe la carte des parcours, le schéma d'avion générique et les plans de cabine paramétriques.
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 lineHeight=1.45  TEXT: La rangée 12 regroupe la carte des parcours, le schéma d'avion générique et les plans de cabine paramétriques.
       - frame «Item · Les composants» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
         - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Les composants
         - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 lineHeight=1.45  TEXT: Ils sont en haut du canvas, au-dessus de la rangée 01. Toutes les couleurs, polices et rayons sont des variables.
@@ -43,7 +43,7 @@ Resolved tree (component instances expanded with their overrides; HUD bars refer
       - text «Column Title» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Pour l'implémentation
       - frame «Item · Clavier et manette d'abord» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
         - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Clavier et manette d'abord
-        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 lineHeight=1.45  TEXT: Q / E pour les onglets, Échap pour revenir, Entrée pour l'action principale. Voir la carte des parcours en rangée 10.
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 lineHeight=1.45  TEXT: Q / E pour les onglets, Échap pour revenir, Entrée pour l'action principale. Voir la carte des parcours en rangée 12.
       - frame «Item · Deux scripts à reprendre» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
         - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Trois scripts à reprendre
         - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 lineHeight=1.45  TEXT: scripts/aircraft-schematic.js : avion en nuage de points généré par catégorie. scripts/cabin-layout.js : plan de cabine depuis une configuration JSON. scripts/airport-chart.js : plan 3D d'un aéroport avec ses bâtiments sélectionnables. Du JavaScript simple, réutilisable côté client.
@@ -72,10 +72,10 @@ Resolved tree (component instances expanded with their overrides; HUD bars refer
         - frame «Index · 05» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
           - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 05
           - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Flotte
-      - frame «Index Row 2» width="fill_container" gap=12
         - frame «Index · 06» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
           - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 06
           - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Réseau & lignes
+      - frame «Index Row 2» width="fill_container" gap=12
         - frame «Index · 07» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
           - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 07
           - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Compagnie
@@ -87,4 +87,10 @@ Resolved tree (component instances expanded with their overrides; HUD bars refer
           - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Compétition IA
         - frame «Index · 10» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
           - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 10
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Finance
+        - frame «Index · 11» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+          - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 11
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Groupe & alliances
+        - frame «Index · 12» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+          - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 12
           - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Références

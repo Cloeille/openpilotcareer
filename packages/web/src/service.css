@@ -1,0 +1,154 @@
+/* ---------------------------------------------------------------- service (v3 F6): on-board service and the central kitchen.
+   Widths are those of the mockup frames at 1600x900 (docs/design/screens-resolved/{service-a-bord-confort-repas,cuisine-production-des-repas}.md). */
+
+.sv-screen { display: flex; flex-direction: column; gap: 24px; width: 100%; min-height: 0; position: relative; z-index: 1; }
+.sv-off { align-self: flex-start; }
+.sv-crumb { font-size: 13px; color: var(--text-tertiary); white-space: pre; }
+.sv-status { padding-top: 6px; }
+.sv-header .sv-title { font-size: 40px; line-height: 1.05; }
+.sv-sub { margin: 0; font-size: 15px; color: var(--text-secondary); }
+.sv-header { line-height: 1.2; }
+.sv-header .title-block { gap: 8px; }
+.sv-stats { display: flex; gap: 44px; padding-bottom: 4px; }
+.sv-stats .stat-value { font-size: 32px; white-space: nowrap; }
+.sv-stats .stat-delta { color: var(--success); }
+.sv-stats .stat-delta .dim { color: var(--text-tertiary); }
+.sv-neg { color: var(--danger); }
+.sv-warn { color: var(--warning); }
+.sv-chips { display: flex; gap: 4px; margin-left: 6px; }
+.sv-link { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); }
+
+/* The mockup's backdrop is about half as bright as the shared scrim leaves it (measured against the render: 0.5 of the raw photo against 0.85), which is what makes the header's grey text readable over the cockpit photo. Scoped to these screens, as the onboarding bridge step does. */
+.stage:has(.sv-screen) .scrim { background: linear-gradient(#00000066, #00000066), radial-gradient(circle at 60% 45%, #00000000 0%, #000000A6 100%); }
+
+/* ---- body: the main panel and a side column */
+.sv-body { display: flex; gap: 20px; flex: 1; min-height: 0; }
+.panel.sv-main { flex: 1; min-width: 0; }
+.sv-col { width: 420px; flex: none; display: flex; flex-direction: column; gap: 20px; min-height: 0; }
+.kt-col { width: 520px; }
+.sv-col > .panel { flex: none; }
+.sv-col > .panel:first-child { flex: 1 1 auto; min-height: 0; }
+.panel.sv-main .panel-body { padding: 10px 22px 16px; gap: 0; }
+.sv-scroll { overflow: auto; min-height: 0; flex: 1; }
+
+/* ---- the offer matrix: three haul classes by eight items. The 16 px gaps of the mockup are the cells' left padding, so the row separators run unbroken. */
+.sv-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.sv-table th, .sv-table td { padding: 0; text-align: left; font-weight: 400; }
+.sv-corner, .sv-label { width: 210px; }
+.sv-th, .sv-cell { padding-left: 16px !important; }
+.sv-th { vertical-align: bottom; padding-bottom: 8px !important; }
+.sv-th.idle .sv-head, .sv-cell.idle .sv-cell-in { opacity: .55; }
+.sv-head { display: flex; flex-direction: column; align-items: stretch; gap: 8px; width: 100%; padding: 10px 12px; text-align: left; background: transparent; border: 0; border-radius: var(--radius-md); cursor: pointer; line-height: 1.2; }
+.sv-head[aria-pressed='true'], .sv-head:hover { background: var(--surface-hover); }
+.sv-head-name { font-size: 16px; font-weight: 600; }
+.sv-head-sub { font-size: 12px; color: var(--text-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sv-comfort { display: flex; flex-direction: column; gap: 6px; padding-top: 4px; }
+.sv-comfort-row { display: flex; justify-content: space-between; font-size: 12px; }
+.sv-comfort-label { color: var(--text-secondary); }
+.sv-comfort-level { font-weight: 600; }
+.sv-segments { display: flex; gap: 3px; }
+.sv-segments i { flex: 1; height: 4px; border-radius: 1px; background: var(--neutral-soft); }
+.sv-segments i.on { background: var(--text-primary); }
+.sv-group th { padding: 10px 0 4px; font-size: 13px; line-height: 1.2; font-weight: 500; color: var(--text-tertiary); }
+.sv-row { cursor: pointer; }
+.sv-row > * { height: 36px; border-top: 1px solid var(--border); vertical-align: middle; box-sizing: border-box; }
+.sv-row:focus-visible { outline: none; }
+.sv-label { font-size: 14px; color: var(--text-primary); }
+.sv-cell-in { display: flex; align-items: center; gap: 6px; height: 35px; padding: 0 12px; white-space: nowrap; overflow: hidden; border-radius: 0; }
+.sv-cell-in.on { background: var(--surface-hover); }
+.sv-row.cur .sv-cell-in.on, .sv-row:hover .sv-cell-in.on { background: var(--surface-selected); box-shadow: inset 0 0 0 1px var(--text-primary); }
+.sv-state { font-size: 13px; font-weight: 500; color: var(--text-secondary); flex: none; }
+.sv-state.free { font-weight: 600; color: var(--text-primary); }
+.sv-state.none, .sv-state.unavailable { color: var(--text-tertiary); }
+.sv-detail { font-size: 13px; color: var(--text-tertiary); overflow: hidden; text-overflow: ellipsis; }
+
+/* ---- meal quality and cabin crew */
+.panel.sv-side .panel-body { padding: 12px 22px 20px; gap: 14px; }
+.sv-tiers { display: flex; gap: 4px; }
+.sv-tier { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px; line-height: 1.25; text-align: left; background: transparent; border: 1px solid transparent; border-radius: var(--radius-md); cursor: pointer; }
+.sv-tier:hover { background: var(--surface-hover); }
+.sv-tier.sel { background: var(--surface-selected); border-color: var(--text-primary); }
+.sv-tier.look:not(.sel) { background: #FFFFFF0A; }
+.sv-tier-name { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; }
+.sv-tier.sel .sv-tier-name { font-weight: 600; }
+.sv-now { display: inline-flex; color: var(--text-secondary); }
+.sv-tier-cost, .sv-tier-fact { font-size: 12px; color: var(--text-secondary); }
+.sv-tier-fact { display: flex; align-items: center; gap: 4px; }
+.sv-tier-fact .icon { color: var(--text-tertiary); }
+.sv-trade { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border); min-height: 60px; }
+.sv-trade-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sv-trade-title { font: 600 13px var(--font-ui); }
+.sv-trade .line { font-size: 13px; line-height: 1.35; }
+.sv-effect { font-weight: 500; font-variant-numeric: tabular-nums; }
+.sv-effect.ok { color: var(--success); }
+.sv-effect.bad { color: var(--danger); }
+.sv-effect.warn { color: var(--warning); }
+#sv-cabin .line { font-size: 13px; }
+#sv-cabin .line-value.strong { font-weight: 500; }
+
+/* ---- kitchen: the quality comparison */
+.panel.sv-main#kt-tiers .panel-body { padding: 14px 22px 22px; }
+.sv-tier-host { display: flex; flex-direction: column; justify-content: space-between; gap: 18px; flex: 1; min-height: 0; }
+.kt-table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+.kt-table th, .kt-table td { padding: 0; text-align: left; font-weight: 400; vertical-align: middle; }
+.kt-corner, .kt-label { width: 200px; }
+.kt-th { height: 84px; vertical-align: top !important; border-radius: var(--radius-md) var(--radius-md) 0 0; }
+.kt-th.cur, .kt-cell.cur { background: var(--surface-selected); }
+.kt-th.pick:not(.cur), .kt-cell.pick:not(.cur) { background: var(--surface-hover); }
+.kt-tier { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; height: 84px; padding: 14px 18px 0; text-align: left; background: transparent; border: 0; border-radius: inherit; cursor: pointer; }
+.kt-tier:hover { background: var(--surface-hover); }
+.kt-tier-name { display: flex; align-items: center; gap: 10px; font: 600 22px var(--display); color: var(--text-secondary); }
+.kt-th.cur .kt-tier-name, .kt-th.pick .kt-tier-name { color: var(--text-primary); }
+.kt-current { display: inline-flex; align-items: center; gap: 5px; font: 500 13px var(--ui); color: var(--text-primary); }
+.kt-tier-desc { font-size: 13px; color: var(--text-tertiary); }
+.kt-row > * { height: 58px; border-top: 1px solid var(--border); }
+.kt-label-name { display: block; font-size: 14px; font-weight: 500; }
+.kt-label-sub { display: block; font-size: 12px; color: var(--text-tertiary); }
+.kt-cell { padding: 0 18px !important; }
+.kt-value-row { display: flex; align-items: flex-end; gap: 8px; line-height: 1; }
+.kt-value { font: 500 20px/1 var(--display); font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.kt-cell.cur .kt-value, .kt-cell.pick .kt-value { color: var(--text-primary); }
+.kt-delta { font-size: 12px; color: var(--text-tertiary); }
+.kt-delta.warn { color: var(--warning); }
+.kt-track { display: block; width: 180px; max-width: 100%; height: 3px; margin-top: 7px; background: var(--border); }
+.kt-bar { display: block; height: 100%; background: var(--text-tertiary); }
+.kt-cell.cur .kt-bar, .kt-cell.pick .kt-bar { background: var(--text-primary); }
+.kt-foot { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.kt-note { margin: 0; flex: 1; font-size: 13px; line-height: 1.4; color: var(--text-tertiary); }
+
+/* ---- kitchen: departures, crew, provider. The list scrolls inside its panel, so the crew and the provider stay on screen whatever the day's timetable. */
+#kt-deps .panel-body { overflow: hidden; padding: 8px 22px 14px; gap: 0; }
+.kt-deps { gap: 0; flex: 1 1 auto; min-height: 56px; overflow: auto; }
+.kt-deps:focus-visible { outline-offset: -2px; }
+.kt-dep { display: flex; align-items: center; gap: 16px; min-height: 48px; flex: none; border-bottom: 1px solid var(--border); }
+.kt-dep-time { width: 52px; flex: none; font: 400 13px var(--mono); color: var(--text-primary); }
+.kt-dep.past .kt-dep-time, .kt-dep.past .kt-dep-line { color: var(--text-tertiary); }
+.kt-dep-block { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.kt-dep-line { display: flex; gap: 12px; font: 400 13px var(--mono); color: var(--text-primary); }
+.kt-dep-load { font-size: 12px; color: var(--text-tertiary); }
+.kt-dep-status { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); }
+.kt-dep.past .kt-dep-status { color: var(--text-tertiary); }
+.kt-shift { display: flex; flex-direction: column; gap: 4px; padding-top: 10px; flex: none; }
+.kt-shift-head h3 { font: 600 16px var(--display); }
+.kt-crew { display: flex; align-items: flex-end; gap: 6px; }
+.kt-crew-n { font: 500 20px/1 var(--display); font-variant-numeric: tabular-nums; }
+.kt-crew-n.warn { color: var(--warning); }
+.kt-crew-role { font-size: 13px; color: var(--text-secondary); }
+.kt-shift-note { margin: 0; font-size: 12px; line-height: 1.4; color: var(--text-tertiary); }
+.kt-shift > .btn { align-self: flex-start; }
+.kt-opts { display: flex; gap: 12px; }
+.sv-prov-host { display: contents; }
+.kt-opt { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 9px 14px; text-align: left; background: transparent; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; color: var(--text-secondary); }
+.kt-opt:hover:not(:disabled) { background: var(--surface-hover); }
+.kt-opt.sel { background: var(--surface-selected); border-color: transparent; color: var(--text-primary); }
+.kt-opt:disabled { cursor: default; opacity: .7; }
+.kt-opt-head { display: flex; align-items: center; gap: 8px; max-width: 100%; }
+.kt-opt-name { font: 600 16px var(--display); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kt-opt-cur { font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .04em; }
+.kt-opt-econ { font-size: 13px; }
+.kt-opt-trade { font-size: 12px; line-height: 1.35; color: var(--text-tertiary); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .sv-segments i, .kt-bar { transition: background-color .15s ease, width .25s ease; }
+  .sv-tier, .kt-tier, .kt-opt, .sv-head { transition: background-color .12s ease, border-color .12s ease; }
+}

@@ -1,0 +1,169 @@
+# Finance · nouveau crédit conso
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Finance · nouveau crédit conso» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-11.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 padding=[28, 32, 24, 32] justifyContent="space_between"
+    - frame «Loan Column» width=760 height="fill_container" layout="vertical" gap=24
+      - frame «Title Block» width="fill_container" layout="vertical" gap=6
+        - text «Breadcrumb» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Finance · crédits
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Nouveau crédit conso
+        - text «Sub» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.4  TEXT: Versé sur ton solde et libre d'usage : salaires, installations, creux de trésorerie. Sans avion en garantie, le taux est plus élevé qu'un crédit avion.
+      - instance «Loan Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Montant et durée
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Banque des Alpes · 7,2 %
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=24 padding=[18, 22, 22, 22]
+          - frame «Amount» width="fill_container" layout="vertical" gap=10
+            - frame «Amount Head» width="fill_container" alignItems="end" justifyContent="space_between"
+              - frame «Amount Value» layout="vertical" gap=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Montant emprunté
+                - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600"  TEXT: 450 000 €
+              - frame «Range» padding=[0, 0, 8, 0]
+                - text «Range Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Plafond de 600 000 € avec ta note B+
+            - frame «Slider» width="fill_container" height=18 layout="none"
+              - rectangle «Track» width=716 height=4 fill="$border-strong" cornerRadius=2
+              - rectangle «Level» width=521 height=4 fill="$text-primary" cornerRadius=2
+              - ellipse «Knob» width=18 height=18 fill="$text-primary" effect={"type": "shadow", "shadowType": "outer", "color": "#00000080", "offset": {"x": 0, "y": 2}, "blur": 6}
+            - frame «Scale» width="fill_container" justifyContent="space_between"
+              - text «Min» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 50 000 €
+              - text «Max» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 600 000 €
+          - frame «Duration» width="fill_container" layout="vertical" gap=10
+            - frame «Duration Head» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Durée
+              - text «Hint» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Plus long, mensualité plus basse mais coût plus élevé
+            - frame «Options» width="fill_container" gap=4
+              - frame «Option · 12 mois» width="fill_container" layout="vertical" gap=6 padding=[12, 14] fill="#00000000" cornerRadius=4
+                - frame «Head» gap=10 alignItems="center"
+                  - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+                  - text «Months» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 12 mois
+                - frame «Figures» layout="vertical" gap=2
+                  - text «Payment» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 39 091 € / mois
+                  - text «Cost» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 22 592 € de coût
+              - frame «Option · 24 mois» width="fill_container" layout="vertical" gap=6 padding=[12, 14] fill="$surface-hover" cornerRadius=4
+                - frame «Head» gap=10 alignItems="center"
+                  - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=9
+                    - ellipse «Radio Dot» width=8 height=8 fill="$text-primary"
+                  - text «Months» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 24 mois
+                - frame «Figures» layout="vertical" gap=2
+                  - text «Payment» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 20 300 € / mois
+                  - text «Cost» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 40 700 € de coût
+              - frame «Option · 36 mois» width="fill_container" layout="vertical" gap=6 padding=[12, 14] fill="#00000000" cornerRadius=4
+                - frame «Head» gap=10 alignItems="center"
+                  - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+                  - text «Months» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 36 mois
+                - frame «Figures» layout="vertical" gap=2
+                  - text «Payment» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 14 048 € / mois
+                  - text «Cost» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 59 228 € de coût
+              - frame «Option · 48 mois» width="fill_container" layout="vertical" gap=6 padding=[12, 14] fill="#00000000" cornerRadius=4
+                - frame «Head» gap=10 alignItems="center"
+                  - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+                  - text «Months» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 48 mois
+                - frame «Figures» layout="vertical" gap=2
+                  - text «Payment» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 10 930 € / mois
+                  - text «Cost» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 78 140 € de coût
+              - frame «Option · 60 mois» width="fill_container" layout="vertical" gap=6 padding=[12, 14] fill="#00000000" cornerRadius=4
+                - frame «Head» gap=10 alignItems="center"
+                  - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+                  - text «Months» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 60 mois
+                - frame «Figures» layout="vertical" gap=2
+                  - text «Payment» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 9 065 € / mois
+                  - text «Cost» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 97 400 € de coût
+          - rectangle «Divider» width="fill_container" height=1 fill="$border"
+          - frame «Result» width="fill_container" gap=48 alignItems="end"
+            - frame «Monthly» layout="vertical" gap=4
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Mensualité, assurance comprise
+              - frame «Value Row» gap=12 alignItems="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=56 fontWeight="600" lineHeight=1  TEXT: 20 300 €
+                - frame «Unit» padding=[0, 0, 6, 0]
+                  - text «Unit Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: par mois, 24 fois
+            - frame «Total Cost» width="fill_container" layout="vertical" gap=2
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Coût total du crédit
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: 40 700 €
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Intérêts 34 512 € · frais 3 500 € · assurance 2 688 €
+          - frame «Cash Warning» width="fill_container" gap=14 padding=[14, 18] fill="$warning-soft" cornerRadius=4
+            - icon «Icon» width=18 height=18 fill="$warning" icon="triangle-alert"
+            - frame «Text» width="fill_container" layout="vertical" gap=4
+              - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: La mensualité absorbe 71 % de ton excédent prévu
+              - text «Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: De décembre à février, la basse saison laisse environ 28 400 € d'excédent par mois : il te resterait 8 100 € de marge. Sur 36 mois, la mensualité tombe à 14 048 €.
+    - frame «Offers Column» width=620 height="fill_container" layout="vertical" gap=20
+      - instance «Offers Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Offres pour ta note B+
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 3 banques
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[8, 0, 12, 0]
+          - frame «Offer · Banque des Alpes» width="fill_container" layout="vertical" gap=14 padding=[16, 22, 18, 22] fill="$surface-hover"
+            - frame «Head» width="fill_container" gap=16 alignItems="center"
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=9
+                - ellipse «Radio Dot» width=8 height=8 fill="$text-primary"
+              - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Banque des Alpes
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Taux de 7,2 %, ta banque principale
+              - frame «Outcome» layout="vertical" gap=3 alignItems="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 20 300 € / mois
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: coût 40 700 €
+            - frame «Terms» width="fill_container" layout="vertical" gap=10 padding=[0, 0, 0, 34]
+              - frame «Term · Frais de dossier» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Frais de dossier
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 3 500 €, retenus sur le versement
+              - frame «Term · Remboursement anticipé» width="fill_container" alignItems="center" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Remboursement anticipé
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Sans pénalité après 6 mois
+              - frame «Term · Assurance» width="fill_container" gap=16 alignItems="center"
+                - frame «Text» width="fill_container" layout="vertical" gap=2
+                  - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Assurance emprunteur
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 112 € / mois, couvre les échéances si l'activité s'arrête
+                - instance «Switch · Assurance» of «Switch»
+                  - ellipse «Knob» width=16 height=16 fill="$on-btn-primary"
+          - frame «Offer · Crédit Méridional» width="fill_container" height=76 padding=[0, 22] alignItems="center"
+            - frame «Head» width="fill_container" gap=16 alignItems="center"
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+              - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Crédit Méridional
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Taux de 7,9 %, frais 1 200 €, pénalité de 1 % si remboursé tôt
+              - frame «Outcome» layout="vertical" gap=3 alignItems="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 20 467 € / mois
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: coût 42 408 €
+          - frame «Offer · AéroFinance Direct» width="fill_container" height=76 padding=[0, 22] alignItems="center"
+            - frame «Head» width="fill_container" gap=16 alignItems="center"
+              - frame «Radio» width=18 height=18 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=9
+              - frame «Name Stack» width="fill_container" layout="vertical" gap=3
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: AéroFinance Direct
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Taux de 9,6 %, sans frais ni assurance, sortie libre
+              - frame «Outcome» layout="vertical" gap=3 alignItems="end"
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 20 682 € / mois
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: coût 46 368 €
+      - instance «Recap Panel» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Après signature
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Premier prélèvement le 6 décembre
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=18 padding=[14, 22, 22, 22]
+          - frame «Effects» width="fill_container" layout="vertical" gap=14
+            - frame «Effect · Taux d'endettement» width="fill_container" gap=16 alignItems="center"
+              - frame «Text» width="fill_container" layout="vertical" gap=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Taux d'endettement
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 145 400 € de mensualités, dont 12 700 € pour ton crédit conso actuel
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 6,1 % → 7,1 %
+            - frame «Effect · Note de crédit» width="fill_container" gap=16 alignItems="center"
+              - frame «Text» width="fill_container" layout="vertical" gap=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Note de crédit
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Elle passerait à B au-delà de 9 % d'endettement
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: B+, inchangée
+          - rectangle «Divider» width="fill_container" height=1 fill="$border"
+          - frame «Balance» width="fill_container" alignItems="end" justifyContent="space_between"
+            - frame «Text» layout="vertical" gap=2
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Solde après versement
+              - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=28 fontWeight="600"  TEXT: 1 731 060 €
+            - frame «Delta» padding=[0, 0, 6, 0]
+              - text «Delta Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: +446 500 € aujourd'hui
+          - frame «Actions» width="fill_container" gap=10 padding=[4, 0, 0, 0]
+            - instance «Btn · Annuler» of «Button/Secondary»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Annuler
+            - instance «Btn · Signer le crédit» of «Button/Primary»
+              - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Signer le crédit
+              - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

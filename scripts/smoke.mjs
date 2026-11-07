@@ -193,8 +193,22 @@ expect(need.people === 0 && need.positions > 0, `staff: ${need.positions} positi
 const cand = (await call('GET', '/staff/candidates?family=pilot&base=LFPG&qual=C172', { token: lineTok })).body.candidates[0];
 const hire = await call('POST', '/staff/hire', { token: lineTok, body: { candidateId: cand.id } });
 expect(hire.status === 201 && hire.body.member.state === 'pending', `hired ${cand.name}: starts after the notice, premium ${hire.body.premium}`, hire);
-const interim = await call('POST', '/staff/interim', { token: lineTok, body: { family: 'pilot', qual: 'C172', days: 30 } });
-expect(interim.status === 201 && interim.body.member.state === 'free', `interim pilot ${interim.body.member.name} flies from now`, interim);
+// v3 interim bridge: the line is interrupted for crew; the panel previews the interim (ends when the hire arrives), one click books it and the engine derives "in service"
+const stopped = await call('GET', `/lines/${made.body.id}/problem`, { token: lineTok });
+const bridge = stopped.body.options.interim;
+expect(bridge && bridge.people === 1 && bridge.perSlot[0].defaulted === false && bridge.until > Date.now() && bridge.cost > 0 && stopped.body.options.startNow?.people === 1, `interrupted line previews its interim: ${bridge?.people} pilot until the hire arrives, ${bridge?.cost} EUR; start-now ${stopped.body.options.startNow?.cost} EUR`, stopped.body.options);
+const balanceBefore = (await call('GET', '/me', { token: lineTok })).body.company.balance;
+const bridged = await call('POST', `/lines/${made.body.id}/resolve`, { token: lineTok, body: { option: 'interim' } });
+expect(bridged.status === 200 && bridged.body.status === 'active', `interim booked: the line is ${bridged.body.status}`, bridged);
+const balanceAfter = (await call('GET', '/me', { token: lineTok })).body.company.balance;
+expect(balanceBefore - balanceAfter === bridge.cost, `the preview was the bill: ${balanceBefore - balanceAfter} EUR`, { balanceBefore, balanceAfter, bridge });
+const secondClick = await call('POST', `/lines/${made.body.id}/resolve`, { token: lineTok, body: { option: 'interim' } });
+expect(secondClick.status === 409 && secondClick.body.error === 'nothing_to_cover', 'a second click has nothing to cover (409)', secondClick);
+// the interim the click booked is a real person, employed now: find his card (staff ids are global, a fresh database has few)
+let interim = null;
+for (let id = 1; id <= 20 && !interim; id++) { const r = await call('GET', `/staff/${id}`, { token: lineTok }); if (r.status === 200 && r.body.member.contract === 'cdd') interim = r; }
+expect(interim && interim.body.member.state !== 'pending' && interim.body.member.endsAt === bridge.perSlot[0].until, `the interim ${interim?.body.member.name} is employed now and leaves when the hire arrives`, interim?.body.member);
+interim = { body: { member: interim.body.member } };
 let flown = 0;
 for (let i = 0; i < 90 && flown === 0; i++) {
   await new Promise((r) => setTimeout(r, 1000));
@@ -224,6 +238,28 @@ const rented = await call('POST', `/facilities/${hangar.facilityId}/lease`, { to
 const spotsAfter = (await call('GET', '/me/hubs', { token: lineTok })).body[0].spots;
 expect(rented.status === 201 && rented.body.due === preview.due.today && spotsAfter === spotsBefore + 2, `hangar rented: ${rented.body.due} paid, parking ${spotsBefore} -> ${spotsAfter}`, rented);
 expect((await call('POST', `/facilities/${hangar.facilityId}/lease`, { token: lineTok, body: {} })).body.error === 'occupied', 'the same hangar cannot be rented twice');
+// v3 parts: the warehouse of the hub, a stock policy for the aircraft based there (kit parts bought, none of the shelf yet), one part by hand, and the wear screen of the aircraft
+const lineAircraft = (await call('GET', '/me', { token: lineTok })).body.fleet[0];
+const wh = (await call('GET', '/warehouse/LFPG', { token: lineTok })).body;
+expect(wh.hub === 'LFPG' && wh.facility === null && Array.isArray(wh.policies) && wh.policies.some((p) => p.icao === lineAircraft.icao), `warehouse ${wh.hub}: ${wh.policies.length} type(s), ${wh.capital} tied up, ${wh.expectedGroundDays} ground days a year`, wh);
+const pol = await call('PUT', '/warehouse/LFPG/policy', { token: lineTok, body: { icao: lineAircraft.icao, policy: 'critical' } });
+expect(pol.status === 200 && pol.body.policy === 'critical' && pol.body.deltaGroundDays <= 0, `critical kit for ${lineAircraft.icao}: ${pol.body.capital} tied up, ${pol.body.deltaGroundDays} ground days a year`, pol);
+const ord = await call('POST', '/warehouse/LFPG/order', { token: lineTok, body: { partId: 'piston.wheel', qty: 1 } });
+expect(ord.status === 201 && ord.body.order.eta > ord.body.order.orderedAt, `a part ordered by hand, delivery in ${Math.round((ord.body.order.eta - ord.body.order.orderedAt) / 86_400_000)} day(s)`, ord);
+const wearView = await call('GET', `/me/fleet/${lineAircraft.id}/wear`, { token: lineTok });
+expect(wearView.status === 200 && wearView.body.components.length >= 5 && wearView.body.totals.cashCurve.length > 0, `wear screen: ${wearView.body.components.map((c) => `${c.component} ${c.wearPct}%`).join(', ')}`, wearView);
+// v3 service: the policy table and the meal cards answer, a change is pending until tomorrow, the kitchen hall is on the plan, and the line's legs booked their service
+const service = await call('GET', '/service', { token: lineTok });
+expect(service.status === 200 && service.body.hauls.length === 3 && service.body.qualities.length === 3, `service: ${service.body.network.lines} line(s), satisfaction ${service.body.satisfaction.value ?? 'n/a (no cabin)'}, ${service.body.perDay.sales} sold and ${service.body.perDay.cost} spent today`, service);
+const policy = await call('PUT', '/service/policy', { token: lineTok, body: { haul: 'short', item: 'snack', mode: 'free' } });
+const snackCell = policy.body.hauls[0].cells.find((c) => c.item === 'snack');
+expect(policy.status === 200 && snackCell.mode === 'paid' && snackCell.next === 'free', 'a policy change applies tomorrow (paid now, free next)', snackCell);
+const kitchenHall = hubPlan.buildings.find((b) => b.effect === 'kitchen');
+const kitchen = await call('GET', '/kitchen/LFPG', { token: lineTok });
+expect(kitchen.status === 200 && kitchen.body.hall?.facilityId === kitchenHall?.facilityId && kitchen.body.provider === 'caterer', `kitchen at LFPG: hall ${kitchen.body.hall?.facilityId} on offer, a caterer serves`, kitchen);
+expect((await call('PUT', '/kitchen/LFPG', { token: lineTok, body: { provider: 'own' } })).body.error === 'no_kitchen_hall', 'an own kitchen needs the hall');
+const lineService = (await call('GET', '/me/transactions', { token: lp.body.token })).body.filter((x) => x.kind.startsWith('service_'));
+expect(lineService.length === 0 && service.body.satisfaction.value === null, 'the smoke line flies a C172 (no cabin crew): nothing is served, nothing is booked, no satisfaction term', lineService);
 const off = await call('PUT', '/network/enabled', { token: lp.body.token, body: { enabled: false } });
 expect(off.body.enabled === false && (await call('GET', '/network', { token: lp.body.token })).body.enabled === false, 'the network switch turns the lines off');
 await call('DELETE', '/me', { token: lp.body.token, body: { password } });

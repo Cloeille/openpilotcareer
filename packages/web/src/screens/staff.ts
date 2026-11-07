@@ -60,7 +60,7 @@ export async function staff(ctx: Ctx): Promise<Screen> {
   };
   const availabilityText = (r: FamilyRow): string => {
     const a = r.availability;
-    return [a.onDuty && t('st.avail.duty', { n: a.onDuty }), a.free && t('st.avail.free', { n: a.free }), a.resting && t('st.avail.rest', { n: a.resting }), a.leave && t('st.avail.leave', { n: a.leave }), a.training && t('st.avail.training', { n: a.training }), a.pending && t('st.avail.pending', { n: a.pending }), a.vacant && t('st.avail.vacant', { n: a.vacant })].filter(Boolean).join(' · ');
+    return [a.onDuty && t('st.avail.duty', { n: a.onDuty }), a.free && tp('st.avail.free', a.free), a.resting && t('st.avail.rest', { n: a.resting }), a.leave && t('st.avail.leave', { n: a.leave }), a.training && t('st.avail.training', { n: a.training }), a.pending && t('st.avail.pending', { n: a.pending }), a.vacant && tp('st.avail.vacant', a.vacant)].filter(Boolean).join(' · ');
   };
   const line = (v: VisibleRow): HTMLElement => {
     const r = v.row;
@@ -147,10 +147,10 @@ function sidePanel(data: StaffOverview, v: VisibleRow | null, goHire: (v: Visibl
 
   const arriving = row?.arriving ?? [];
   const arrivals = arriving.length > 0 ? h('section', { 'aria-labelledby': 'st-arrivals' }, h('h3', { class: 'ln-sub-title', id: 'st-arrivals' }, t('st.side.arrivals', { type: row ? rowLabel(row) : '' })),
-    h('ul', { class: 'plain st-members' }, arriving.map((a) => h('li', null, h('button', { type: 'button', class: 'link-btn', onclick: () => go(hashFor('staff', a.id)) }, `${a.name} · ${t(`st.role.${a.role}` as Key)}`),
+    h('ul', { class: 'plain st-members' }, arriving.map((a) => h('li', null, h('button', { type: 'button', class: 'link-btn', onclick: () => go(hashFor('staff', a.id)) }, `${a.name} · ${roleShort(a.role)}`),
       h('span', { class: 'dim small st-arrives' }, ` · ${t('st.arrives', { date: fm.date(a.startsAt) })}`))))) : null;
   const people = members.length > 0 ? h('section', { 'aria-labelledby': 'st-members' }, h('h3', { class: 'ln-sub-title', id: 'st-members' }, t('st.side.members', { type: row?.label ?? '' })),
-    h('ul', { class: 'plain st-members' }, members.map((m) => h('li', null, h('button', { type: 'button', class: 'link-btn', onclick: () => go(hashFor('staff', m.id)) }, `${m.name} · ${t(`st.role.${m.role}` as Key)}`))))) : null;
+    h('ul', { class: 'plain st-members' }, members.map((m) => h('li', null, h('button', { type: 'button', class: 'link-btn', onclick: () => go(hashFor('staff', m.id)) }, `${m.name} · ${roleShort(m.role)}`))))) : null;
 
   return [panel({ title: t('st.side.title'), headless: true, id: 'st-side', class: 'st-side' },
     ...heading, arrivals, people, watchBlock,

@@ -9,7 +9,6 @@ import { ADDON_CATEGORY, defaultDuration, type AddonCategory } from '../finance-
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import { hashFor } from '../keys.ts';
-import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { debounce, h } from '../ui.ts';
 import { categoryName } from './fleet.ts';
@@ -108,7 +107,7 @@ export async function catalogue(ctx: Ctx): Promise<Screen> {
     results.querySelectorAll('tbody tr').forEach((tr) => tr.setAttribute('aria-selected', String((tr as HTMLElement).dataset.icao === selectedIcao)));
   }
   const groupBar = h('div', { class: 'category-row' }, keycap('Z'), h('div', { class: 'seg-host' }), keycap('C'));
-  const drawGroups = (): void => groupBar.querySelector('.seg-host')!.replaceChildren(segments(t('cat.groups'), GROUPS.map((g) => ({ value: g, label: t(`cat.group.${g}` as Key) })), group, setGroup));
+  const drawGroups = (): void => groupBar.querySelector('.seg-host')!.replaceChildren(segments(t('cat.groups'), GROUPS.map((g) => ({ value: g, label: t(`cat.group.${g}`) })), group, setGroup));
   function setGroup(g: Group): void { group = g; drawGroups(); void draw(); }
   drawGroups();
   search.addEventListener('input', debounce(() => { query = (search as HTMLInputElement).value; void draw(); }, 200));
@@ -161,7 +160,7 @@ function addonPanel(ctx: Ctx): HTMLElement {
     else if (known) status.replaceChildren(h('span', { class: 'dot' }), t('fin.addon.known', { name: known.name }));
     else status.replaceChildren(h('span', { class: 'dot warn' }), t('fin.addon.unknown'));
     (add as HTMLButtonElement).disabled = !isIcaoType(c) || known !== null;
-    segHost.replaceChildren(segments(t('fin.addon.pick'), ADDON_GROUPS.map((g) => ({ value: g, label: t(`cat.group.${g}` as Key) })), addonCategory, (g) => { addonCategory = g; refresh(); }));
+    segHost.replaceChildren(segments(t('fin.addon.pick'), ADDON_GROUPS.map((g) => ({ value: g, label: t(`cat.group.${g}`) })), addonCategory, (g) => { addonCategory = g; refresh(); }));
   }
   const lookup = debounce(() => {
     const c = code();

@@ -6,7 +6,7 @@
 import {
   AUTONOMY_FACTOR, CANCELLED_LEG_REPUTATION, DAY_MS, LINE_KEEP_DAYS, LINE_TICK_MS, MAX_LINE_CATCHUP_TICKS, MAX_OFFLINE_DAYS, PAX_KG, PRESENCE_STEP_MS,
   TICKS_PER_DAY, MAX_DELAY_MIN, blockHours, dayStart, distanceNm, fuelPriceFactor, inheritedDelayMin, isoDay, jobPayout, layoutDay, lineTickOf, maskToDays,
-  minToHhmm, pairLoadFactor, realismModifiers, settle, stoppageReputationTotal, weeklyDemand, weeklySeats, wearDelayMin,
+  minToHhmm, pairLoadFactor, realismModifiers, settle, stoppageReputationTotal, weeklyDemand, weeklySeats, wearDelayMin, withSatisfaction, dayNo, SERVICE_KEEP_DAYS,
   type AircraftType, type CancelCause, type DelayCause, type Line, type LineInterruptCause, type PlannedAircraft, type Programme, type ScheduledFlight, type ScheduledFlightStatus,
 } from '@opc/shared';
 import { airports } from './catalog.ts';
@@ -16,6 +16,7 @@ import { accrueWear, flightCosts, isHuman, releaseMaintenance } from './fleet-ex
 import { hasHub, post, snapshot, typeFor, type AircraftRow } from './game.ts';
 import { realismSettingOf } from './realism.ts';
 import { crewDutyMin, rollIncident } from './safety.ts';
+import { bookLeg, lineSatisfaction, planLeg } from './service.ts';
 import { crewLeg, crewShortage, rulesOf } from './staff.ts';
 
 /** Ticks replayed after a long silence; older ones are skipped (a human network lapses after MAX_OFFLINE_DAYS anyway). */
@@ -80,10 +81,17 @@ export function rivalSeats(db: Db, companyId: number, a: string, b: string, excl
   return { seats, best };
 }
 
-export function loadFactorOf(db: Db, p: { companyId: number; a: string; b: string; freqPerDay: number; days: number; fleet: { icao: string }[]; excludeLineId?: number }): number {
-  const demand = weeklyDemand(sizeOf(p.a), sizeOf(p.b), lineDistance(p.a, p.b));
+/** The pair's demand shared with rivals, times the satisfaction term of lot SERVICE (B.7, at most +-6 %): what the company's policy promises its passengers, in force at `at` (default: as it will be, which is
+ *  what the forecast and the line page value). The engine passes the departure, so a replayed tick sees the policy of its own time. Unserved meals do not move it: they show in the satisfaction log
+ *  and the reputation rule (a load that read the log would make the forecast depend on history). */
+export function loadFactorOf(db: Db, p: { companyId: number; a: string; b: string; freqPerDay: number; days: number; fleet: { icao: string }[]; excludeLineId?: number; at?: number }): number {
+  const dist = lineDistance(p.a, p.b);
+  const demand = weeklyDemand(sizeOf(p.a), sizeOf(p.b), dist);
   const own = weeklySeats(p.freqPerDay, p.days, seatsOf(db, p.companyId, p.fleet));
-  return pairLoadFactor(demand, own, rivalSeats(db, p.companyId, p.a, p.b, p.excludeLineId).seats);
+  const lf = pairLoadFactor(demand, own, rivalSeats(db, p.companyId, p.a, p.b, p.excludeLineId).seats);
+  const types = p.fleet.map((x) => typeFor(db, p.companyId, x.icao));
+  const sat = lineSatisfaction(db, p.companyId, types.map((t) => ({ category: t.category, seats: t.seats, blockMin: blockMinutes(t, dist) })), [p.a, p.b], p.at);
+  return sat === null ? lf : withSatisfaction(lf, sat);
 }
 
 export type LegMoney = { pax: number; hours: number; revenue: number; fuel: number; fee: number; maintenance: number };
@@ -178,6 +186,7 @@ function runTick(db: Db, tick: number, r: Run): boolean {
     run(db, 'DELETE FROM scheduled_flights WHERE dep_at < ?', ts - LINE_KEEP_DAYS * DAY_MS);
     run(db, 'DELETE FROM line_ticks WHERE tick < ?', tick - LINE_KEEP_DAYS * TICKS_PER_DAY);
     run(db, 'DELETE FROM staff_duty WHERE dep_at < ?', ts - (CREW_LEDGER_DAYS * DAY_MS)); // the 12-month flight limit needs a year of ledger
+    run(db, 'DELETE FROM service_days WHERE day < ?', dayNo(ts) - SERVICE_KEEP_DAYS);
   }
   return true;
 }
@@ -263,7 +272,7 @@ function resolveLeg(db: Db, leg: LegRow, r: Run): void {
   const type = typeOfRun(db, leg.company_id, ac.icao, r);
   let lf = r.loads.get(line.id);
   if (lf === undefined) {
-    lf = loadFactorOf(db, { companyId: line.company_id, a: line.a, b: line.b, freqPerDay: line.freq_per_day, days: line.days, fleet: lineAircraft(db, line.id).filter((x) => x.returned_at === null), excludeLineId: line.id });
+    lf = loadFactorOf(db, { companyId: line.company_id, a: line.a, b: line.b, freqPerDay: line.freq_per_day, days: line.days, fleet: lineAircraft(db, line.id).filter((x) => x.returned_at === null), excludeLineId: line.id, at: leg.dep_at });
     r.loads.set(line.id, lf);
   }
   const m = legMoney(db, leg.company_id, ac.id, type, { origin, dest, dep: leg.dep_at }, lf);
@@ -275,7 +284,9 @@ function resolveLeg(db: Db, leg: LegRow, r: Run): void {
   const delayCause: DelayCause | null = delay === 0 ? null : inherited > wearDelay ? 'late_inbound' : 'wear';
 
   const memo = `${origin}-${dest} ${isoDay(leg.dep_at)}`;
-  const entries: [string, number][] = [['line_revenue', m.revenue], ['line_fuel', -m.fuel], ['line_fee', -m.fee], ['line_maintenance', -m.maintenance]];
+  // lot SERVICE: what the cabin sells and what the service costs, from the policy and the kitchen of the departure airport (null: no cabin crew, or an AI company)
+  const svc = planLeg(db, { companyId: leg.company_id, category: type.category, seats: type.seats, origin, dep: leg.dep_at, blockMin: (leg.arr_at - leg.dep_at) / 60_000, pax: m.pax });
+  const entries: [string, number][] = [['line_revenue', m.revenue], ['line_fuel', -m.fuel], ['line_fee', -m.fee], ['line_maintenance', -m.maintenance], ['service_sales', svc?.sales ?? 0], ['service_cost', -(svc?.cost ?? 0)]];
   for (const [kind, amount] of entries) {
     if (amount === 0) continue;
     if (!bulk) { post(db, leg.company_id, leg.dep_at, kind, amount, `${memo} ${leg.flight_no}`); continue; }
@@ -284,6 +295,7 @@ function resolveLeg(db: Db, leg: LegRow, r: Run): void {
     b.amount += amount; b.legs++; b.at = Math.max(b.at, leg.dep_at);
     r.books.set(key, b);
   }
+  if (svc) bookLeg(db, svc);
   accrueWear(db, leg.company_id, ac.id, type.category, m.hours, leg.dep_at);
   // B.5: the leg's incident roll, seeded by the leg's own identity (a leg's row id is reused once pruned); `ac` still holds the wear the aircraft flew with.
   rollIncident(db, { ref: `leg:${line.id}:${leg.dep_at}:${leg.flight_no}`, companyId: leg.company_id, aircraftId: ac.id, at: leg.dep_at, airport: dest, flightId: null, flightNo: leg.flight_no,

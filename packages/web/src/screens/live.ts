@@ -54,7 +54,7 @@ function bridgeAlert(f: LiveFacts, onCheck: () => void): { el: HTMLElement; upda
     diagBox.hidden = false;
     diagBox.replaceChildren(...(b === null ? [line(t('live.diag.bridge'), t('live.diag.noAnswer'))] : [
       line(t('live.diag.bridge'), b.version ?? '–'),
-      line(t('live.diag.sim'), b.sim === undefined ? '–' : t(`live.sim.${b.sim}` as 'live.sim.connected')),
+      line(t('live.diag.sim'), b.sim === undefined ? '–' : t(`live.sim.${b.sim}`)),
       line(t('live.diag.phase'), b.phase ?? '–'),
       line(t('live.diag.flags'), b.flags?.length ? b.flags.join(', ') : t('live.diag.none'))]));
   };
@@ -103,7 +103,7 @@ export async function live(ctx: Ctx): Promise<Screen> {
   const dot = h('span', { class: facts.lost ? 'dot warn' : 'dot route' });
   const status = h('span', null);
   const setStatus = (f: LiveFacts): void => {
-    status.textContent = f.lost ? t('live.statusLost', { flight: c.flightLabel }) : t('live.status', { flight: c.flightLabel, phase: t(`live.phase.${f.phase}` as 'live.phase.cruise') });
+    status.textContent = f.lost ? t('live.statusLost', { flight: c.flightLabel }) : t('live.status', { flight: c.flightLabel, phase: t(`live.phase.${f.phase}`) });
     dot.className = f.lost ? 'dot warn' : 'dot route';
   };
   const title = id === 'cabin' ? t('live.cabin.title') : id === 'systems' ? t('live.sys.title') : `${c.from} → ${c.to}`;
@@ -113,7 +113,7 @@ export async function live(ctx: Ctx): Promise<Screen> {
   if (sub === null) setStatus(facts); else status.textContent = sub;
 
   const switcher = h('div', { class: 'view-switcher', role: 'group', 'aria-label': t('live.views') },
-    LIVE_VIEWS.map((v) => h('button', { type: 'button', class: 'view-opt', 'aria-pressed': String(v === id), onclick: () => ctx.go(`#live/${v}`) }, t(`live.view.${v}` as 'live.view.cutaway'))));
+    LIVE_VIEWS.map((v) => h('button', { type: 'button', class: 'view-opt', 'aria-pressed': String(v === id), onclick: () => ctx.go(`#live/${v}`) }, t(`live.view.${v}`))));
 
   const alert = lostShown ? bridgeAlert(facts, () => void tick()) : null;
   const root = h('div', { class: `live-view view-${id}${facts.lost ? ' lost' : ''}` },

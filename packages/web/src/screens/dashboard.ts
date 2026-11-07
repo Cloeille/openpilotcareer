@@ -38,7 +38,7 @@ function currentFlight(f: Flight, ctx: Ctx, others: Flight[], first: LiveFacts, 
   const track = h('div', { class: 'track', 'aria-hidden': 'true' }, done, plane);
   const show = (l: LiveFacts): void => {
     dot.className = l.lost ? 'dot warn' : 'dot route';
-    phase.textContent = l.sample === null && !l.lost ? t('dash.liveSince', { time: fm.zulu(f.acceptedAt) }) : t('dash.liveStatus', { phase: t(`live.phase.${l.phase}` as 'live.phase.cruise') });
+    phase.textContent = l.sample === null && !l.lost ? t('dash.liveSince', { time: fm.zulu(f.acceptedAt) }) : t('dash.liveStatus', { phase: t(`live.phase.${l.phase}`) });
     verif.className = l.lost ? 'verif live-chip warn' : 'verif';
     verif.replaceChildren(icon(l.lost ? 'pause' : 'scan-line', 14), l.lost ? t('dash.verifPaused') : l.sample === null ? t('dash.awaiting') : t('dash.verifRunning'));
     eta.replaceChildren(l.etaAt !== null ? fm.zulu(l.etaAt) : unknownValue());
