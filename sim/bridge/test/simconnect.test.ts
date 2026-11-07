@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { SampleMapper, decode, watchSim } from '../src/simconnect.ts';
+import { GUARD_FIELDS, SampleMapper, TrackSignals, decode, decodeGuard, watchSim } from '../src/simconnect.ts';
 import { FlightTracker } from '../src/tracker.ts';
 
 // A reading as decode() returns it: SimConnect units already converted by the data definition (knots, fpm, kg, degrees).
@@ -83,4 +83,50 @@ test('watchSim without a simulator: node-simconnect loads lazily, says it is wai
   stop();
   assert.equal(lines.length, 1, lines.join('|'));
   assert.match(lines[0]!, /waiting for the simulator.*trying again in 10 s/);
+});
+
+test('guard readings: the SimVars are decoded in order and become the sample\'s height and crash marks', () => {
+  assert.deepEqual(GUARD_FIELDS.map((f) => f[0]), ['PLANE ALT ABOVE GROUND', 'CRASH FLAG', 'CRASH SEQUENCE']);
+  const ints = [4, 0];
+  assert.deepEqual(decodeGuard({ readFloat64: () => 812.5, readInt32: () => ints.shift()! }), { aglFt: 812.5, crashFlag: 4, crashSequence: 0 });
+  const sig = new TrackSignals();
+  assert.deepEqual(sig.marks(), {}, 'before the first guard reading nothing is claimed');
+  sig.guard({ aglFt: 812.5, crashFlag: 0, crashSequence: 0 });
+  assert.deepEqual(sig.marks(), { aglFt: 812.5 });
+  sig.guard({ aglFt: Number.NaN, crashFlag: 0, crashSequence: 0 });
+  assert.deepEqual(sig.marks(), {}, 'a garbage height is left out, not repaired');
+  for (const g of [{ crashFlag: 4, crashSequence: 0 }, { crashFlag: 0, crashSequence: 11 }]) { sig.guard({ aglFt: 10, ...g }); assert.equal(sig.marks().crashed, true); }
+  const m = new SampleMapper().map(reading(), 1_000, false, undefined, { aglFt: 10, crashed: true, resumed: 'reload' });
+  assert.ok('sample' in m && m.sample.aglFt === 10 && m.sample.crashed === true && m.sample.resumed === 'reload');
+});
+
+test('track signals: Crashed is latched, a reload or a lost link is reported once on the next sample, and the lost link wins', () => {
+  const sig = new TrackSignals();
+  sig.crashed();
+  assert.equal(sig.marks().crashed, true);
+  sig.sent();
+  assert.equal(sig.marks().crashed, true, 'still crashed until a flight is loaded');
+  sig.flightLoaded();
+  assert.deepEqual(sig.marks(), { resumed: 'reload' }, 'the first sample after the load shows the new flight, not the crash before it');
+  assert.deepEqual(sig.marks(), { resumed: 'reload' }, 'asking twice changes nothing until the sample is sent');
+  sig.sent();
+  assert.deepEqual(sig.marks(), {}, 'one break, one mark; the crash is forgotten with the flight');
+  sig.flightLoaded(); sig.linkLost(); sig.flightLoaded();
+  assert.equal(sig.marks().resumed, 'reconnect');
+  sig.sent();
+  sig.linkLost();
+  assert.equal(sig.marks().resumed, 'reconnect');
+});
+
+test('mapped marks reach the tracker: a dive, then the host reporting a reload, flags the reload', () => {
+  const m = new SampleMapper(), tr = new FlightTracker(), sig = new TrackSignals();
+  let t = Date.UTC(2026, 10, 4, 9);
+  const feed = (over: Parameters<typeof reading>[0]) => { const r = m.map(reading(over), (t += 1_000), false, undefined, sig.marks()); assert.ok('sample' in r); sig.sent(); tr.feed(r.sample); };
+  const LFPN = { lat: 48.7516, lon: 2.1062 };
+  feed({ ...LFPN }); feed({ ...LFPN, groundSpeedKts: 12 });
+  for (let i = 0; i < 5; i++) feed({ ...LFPN, onGround: 0, groundSpeedKts: 70, verticalSpeedFpm: 700 });
+  feed({ ...LFPN, onGround: 0, groundSpeedKts: 150, verticalSpeedFpm: -7_000 });
+  sig.flightLoaded();
+  feed({ ...LFPN, onGround: 0, groundSpeedKts: 70, verticalSpeedFpm: 700 });
+  assert.deepEqual(tr.flags, ['reload_after_crash']);
 });

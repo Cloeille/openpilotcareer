@@ -322,6 +322,8 @@ export type Flight = {
   id: number; companyId: number; job: Job; aircraftId: number; aircraftIcao: string; status: FlightStatus; rejectReason: string | null;
   acceptedAt: number; completedAt: number | null;
   revenue: number; fuelCost: number; landingFee: number; maintenance: number; net: number;
+  /** From the telemetry report, when the bridge saw reloads or sim restarts: allowed, shown, never punished. */
+  interruptions?: Interruptions;
 };
 export type Transaction = { id: number; at: number; kind: string; amount: number; balanceAfter: number; flightId: number | null; memo: string };
 export type ApiKeyInfo = { id: number; label: string; createdAt: number; lastUsedAt: number | null };
