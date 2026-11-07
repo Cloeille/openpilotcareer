@@ -336,7 +336,17 @@ CREATE TABLE credits (
 CREATE INDEX credits_company ON credits(company_id, status);
 `;
 
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT, SCHEMA_AGENCY, SCHEMA_REPORTS, SCHEMA_CREDIT];
+// v4 GROUP (C21, C32): a subsidiary is a company row with a parent link, owned 100 % by the parent and funded only by transfer. One level deep (the parent is a root, createCompany checks it).
+// ON DELETE CASCADE keeps the "every reference to companies cascades" rule of company-lifecycle.ts, so deleting an account leaves no subsidiary behind; deleting a parent that still has
+// subsidiaries is refused by company-lifecycle.ts before the cascade can fire. `iata` and `activity` are labels: no rule reads them.
+const SCHEMA_GROUP = `
+ALTER TABLE companies ADD COLUMN parent_id INTEGER REFERENCES companies(id) ON DELETE CASCADE;
+ALTER TABLE companies ADD COLUMN iata TEXT;
+ALTER TABLE companies ADD COLUMN activity TEXT CHECK (activity IN ('passengers','cargo','charter'));
+CREATE INDEX companies_parent ON companies(parent_id) WHERE parent_id IS NOT NULL;
+`;
+
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT, SCHEMA_AGENCY, SCHEMA_REPORTS, SCHEMA_CREDIT, SCHEMA_GROUP];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);

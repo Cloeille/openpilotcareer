@@ -409,3 +409,5 @@ export * from './agency.ts';
 export * from './reports.ts';
 // ---- lot credit (v4)
 export * from './credit.ts';
+// ---- lot group (v4)
+export * from './group.ts';

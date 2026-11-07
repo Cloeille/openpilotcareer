@@ -16,6 +16,11 @@ export class HttpError extends Error {
   }
 }
 
+/** The refusal `check` would throw, as a value (a preview shows why an action is refused without refusing). Anything that is not an HttpError is a bug and still throws. */
+export const refusalOf = (check: () => void): HttpError | null => {
+  try { check(); return null; } catch (e) { if (e instanceof HttpError) return e; throw e; }
+};
+
 /** Trust boundary: every request body/query goes through a zod schema here. */
 export function parse<S extends z.ZodType>(schema: S, input: unknown): z.infer<S> {
   const r = schema.safeParse(input ?? {});

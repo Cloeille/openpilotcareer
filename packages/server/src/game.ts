@@ -6,7 +6,7 @@ import {
   HUB_PRICE, MAX_COMPANIES_PER_USER, OVERDRAFT_LIMIT, loanOption, loanPayment, PAX_KG, REJECT_REPUTATION_PENALTY, START_MODES, START_REPUTATION, STARTER_AIRCRAFT, STARTING_BALANCE,
   EXPRESS_AIRCRAFT, EXPRESS_MAX_NM, EXPRESS_MIN_NM, EXPRESS_PAYLOAD_KG, aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, expressPayout, flightDutyMin, fuelPriceFactor, interruptionsSchema, jobPayout, minFlightHours, presetSetting, rankFor, realismModifiers, realismView, seasonOf, settle,
   type AircraftType, type Company, type CompanyProfile, type CustomAircraftInput, type FleetAircraft, type Flight,
-  type Financing, type FlightStatus, type Job, type Leaderboard, type LeaderboardRow, type Me, type Ownership, type Personality, type Pilot, type StartMode, type Telemetry, type Transaction,
+  type Financing, type FlightStatus, type GroupActivity, type Job, type Leaderboard, type LeaderboardRow, type Me, type Ownership, type Personality, type Pilot, type StartMode, type Telemetry, type Transaction,
 } from '@opc/shared';
 import { airports, catalogType } from './catalog.ts';
 import { boardFor, boardJob, windowOf } from './board.ts';
@@ -27,11 +27,13 @@ export const MAX_PENDING_IMPORTS = 25;
 export const IMPORT_TTL_MS = 7 * 24 * 3_600_000;
 // Net worth = cash + aircraft owned or financed (not leased, club or rented) + refundable lease deposits - remaining loan principal (a financed aircraft counts at full value, so the debt must come off).
 // Buildings count the same way: a purchased one at its resale value, a leased one for its deposit, less the credit left.
-const NET_WORTH_SQL = `c.balance + COALESCE((SELECT SUM(value) FROM aircraft WHERE company_id = c.id AND returned_at IS NULL AND ownership IN ('owned','financed')), 0)
-  + COALESCE((SELECT SUM(deposit) FROM contracts WHERE company_id = c.id AND status = 'active'), 0)
-  - COALESCE((SELECT SUM(principal) FROM contracts WHERE company_id = c.id AND status = 'active' AND kind = 'loan'), 0)
-  - COALESCE((SELECT SUM(principal) FROM credits WHERE company_id = c.id AND status = 'active'), 0)
-  + COALESCE((SELECT SUM(value + deposit - principal) FROM facility_contracts WHERE company_id = c.id AND status = 'active'), 0)`;
+const ownNetWorth = (c: string): string => `${c}.balance + COALESCE((SELECT SUM(value) FROM aircraft WHERE company_id = ${c}.id AND returned_at IS NULL AND ownership IN ('owned','financed')), 0)
+  + COALESCE((SELECT SUM(deposit) FROM contracts WHERE company_id = ${c}.id AND status = 'active'), 0)
+  - COALESCE((SELECT SUM(principal) FROM contracts WHERE company_id = ${c}.id AND status = 'active' AND kind = 'loan'), 0)
+  - COALESCE((SELECT SUM(principal) FROM credits WHERE company_id = ${c}.id AND status = 'active'), 0)
+  + COALESCE((SELECT SUM(value + deposit - principal) FROM facility_contracts WHERE company_id = ${c}.id AND status = 'active'), 0)`;
+// v4 GROUP (C21): a parent owns its subsidiaries 100 %, so its net worth is its own plus theirs (a subsidiary has none of its own below it: one level). Subsidiaries are not ranked (leaderboard below).
+const NET_WORTH_SQL = `${ownNetWorth('c')} + COALESCE((SELECT SUM(${ownNetWorth('s')}) FROM companies s WHERE s.parent_id = c.id), 0)`;
 export const SB_PREFIX = 'sb-';
 /** Id prefix of the private job made when the player takes over a line rotation (lines.ts). */
 export const LINE_JOB_PREFIX = 'ln-';
@@ -62,6 +64,8 @@ export type FlightRow = JobColumns & {
 type CustomRow = { icao: string; name: string; category: AircraftType['category']; engines: number; wtc: AircraftType['wtc']; seats: number; cargo_kg: number; cruise_kts: number; range_nm: number };
 
 const round1 = (n: number): number => Math.round(n * 10) / 10;
+/** A parent with subsidiaries: the cascade of `parent_id` would delete them with it, so every path that deletes a company asks first. */
+export const hasSubsidiaries = (db: Db, companyId: number): boolean => !!get(db, 'SELECT 1 AS x FROM companies WHERE parent_id = ?', companyId);
 export const hasHub = (db: Db, companyId: number, icao: string): boolean => !!get(db, 'SELECT 1 AS x FROM hubs WHERE company_id = ? AND icao = ?', companyId, icao);
 
 /** The aircraft record every calculation uses: the company's own custom definition, else the catalog, else the category fallback. */
@@ -108,24 +112,30 @@ export type NewCompany = {
   id?: number;
   /** v2 identity. With `startMode` the company starts from that mode's capital with NO aircraft (the onboarding leases or rents one) and its suggested realism. */
   code?: string; callsign?: string; liveryColor?: string | null; startMode?: StartMode;
+  /** v4 GROUP (C21): founds a subsidiary of this company, which must be the player's own (the caller proves it). A subsidiary is born with NO capital and NO aircraft (it is funded by transfer, group.ts), under its parent's realism and start mode, and it counts in the player's company cap like any other. */
+  parentId?: number; iata?: string; activity?: GroupActivity;
 };
 
-/** Every new company gets the same starting capital and aircraft, so the per-player cap is what limits farming that grant. */
+/** Every new company gets the same starting capital and aircraft, so the per-player cap is what limits farming that grant. A subsidiary gets neither (`parentId`), so it cannot farm it at all. */
 export function createCompany(db: Db, o: NewCompany): number {
   if (!airports.has(o.hub)) throw new HttpError(422, 'unknown_airport', `airport ${o.hub} is not in the airport database`);
+  const parent = o.parentId === undefined ? null : get<{ user_id: number | null; parent_id: number | null; start_mode: StartMode | null; realism: string | null }>(db, 'SELECT user_id, parent_id, start_mode, realism FROM companies WHERE id = ?', o.parentId);
+  if (o.parentId !== undefined && (!parent || parent.user_id !== o.userId)) throw new HttpError(403, 'not_your_company', 'that company is not yours');
+  if (parent?.parent_id) throw new HttpError(409, 'is_subsidiary', 'a subsidiary cannot have subsidiaries');
   if (o.userId !== null && get<{ n: number }>(db, 'SELECT COUNT(*) AS n FROM companies WHERE user_id = ?', o.userId)!.n >= MAX_COMPANIES_PER_USER) {
     throw new HttpError(409, 'limit_reached', `at most ${MAX_COMPANIES_PER_USER} companies per player`);
   }
   assertNameFree(db, o.name);
   if (o.code !== undefined && get(db, 'SELECT 1 AS x FROM companies WHERE code = ?', o.code)) throw new HttpError(409, 'code_taken', `airline code ${o.code} is already taken`);
-  const mode = o.startMode ? START_MODES[o.startMode] : null;
-  const id = run(db, `INSERT INTO companies (id, user_id, name, personality, balance, reputation, created_at, code, callsign, livery_color, start_mode, realism) VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?)`,
-    o.id ?? null, o.userId, o.name, o.personality ? JSON.stringify(o.personality) : null, START_REPUTATION, o.now, o.code ?? null, o.callsign ?? null, o.liveryColor ?? null, o.startMode ?? null,
-    mode ? JSON.stringify(presetSetting(mode.suggestedRealism)) : null).id;
-  post(db, id, o.now, 'grant', mode?.capital ?? STARTING_BALANCE, 'starting capital');
+  const startMode = parent ? parent.start_mode : (o.startMode ?? null);
+  const mode = startMode ? START_MODES[startMode] : null;
+  const realism = parent ? parent.realism : mode ? JSON.stringify(presetSetting(mode.suggestedRealism)) : null;
+  const id = run(db, `INSERT INTO companies (id, user_id, name, personality, balance, reputation, created_at, code, callsign, livery_color, start_mode, realism, parent_id, iata, activity) VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    o.id ?? null, o.userId, o.name, o.personality ? JSON.stringify(o.personality) : null, START_REPUTATION, o.now, o.code ?? null, o.callsign ?? null, o.liveryColor ?? null, startMode, realism, o.parentId ?? null, o.iata ?? null, o.activity ?? null).id;
+  if (!parent) post(db, id, o.now, 'grant', mode?.capital ?? STARTING_BALANCE, 'starting capital');
   if (o.userId !== null) run(db, 'INSERT INTO billing_runs (company_id, month, at) VALUES (?, ?, ?)', id, new Date(o.now).toISOString().slice(0, 7), o.now);
   run(db, 'INSERT INTO hubs (company_id, icao) VALUES (?, ?)', id, o.hub);
-  if (!mode) {
+  if (!mode && !parent) {
     const starter = catalogType(STARTER_AIRCRAFT);
     insertAircraft(db, { companyId: id, icao: starter.icao, hub: o.hub, value: aircraftValue(starter), ownership: 'owned', at: o.now });
   }
@@ -433,9 +443,9 @@ export function leaderboard(db: Db, season: string, now: number): Leaderboard {
   const rows = season === currentSeason(now)
     ? all<Omit<LeaderboardRow, 'rank'>>(db, `SELECT c.id AS companyId, c.name, c.user_id IS NULL AS isAI, ${NET_WORTH_SQL} AS netWorth, c.reputation AS reputation,
         (SELECT COUNT(*) FROM flights f WHERE f.company_id = c.id AND f.season = ?1 AND f.status IN ('verified','unverified')) AS flights
-        FROM companies c ORDER BY netWorth DESC, c.id LIMIT 100`, season)
+        FROM companies c WHERE c.parent_id IS NULL ORDER BY netWorth DESC, c.id LIMIT 100`, season)
     : all<Omit<LeaderboardRow, 'rank'>>(db, `SELECT c.id AS companyId, c.name, c.user_id IS NULL AS isAI, s.net_worth AS netWorth, s.reputation AS reputation, s.flights AS flights
-        FROM season_stats s JOIN companies c ON c.id = s.company_id WHERE s.season = ? ORDER BY s.net_worth DESC, c.id LIMIT 100`, season);
+        FROM season_stats s JOIN companies c ON c.id = s.company_id WHERE s.season = ? AND c.parent_id IS NULL ORDER BY s.net_worth DESC, c.id LIMIT 100`, season);
   return { season, seasons, rows: rows.map((r, i) => ({ ...r, isAI: !!r.isAI, reputation: round1(r.reputation), rank: i + 1 })) };
 }
 
