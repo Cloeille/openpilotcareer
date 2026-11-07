@@ -95,6 +95,8 @@ function assertNameFree(db: Db, name: string, exceptId = 0): void {
 
 export type NewCompany = {
   userId: number | null; name: string; hub: string; personality?: Personality; now: number;
+  /** Re-found a company under its old id (reset, see company-lifecycle.ts); omitted, SQLite picks the next one. */
+  id?: number;
   /** v2 identity. With `startMode` the company starts from that mode's capital with NO aircraft (the onboarding leases or rents one) and its suggested realism. */
   code?: string; callsign?: string; liveryColor?: string | null; startMode?: StartMode;
 };
@@ -108,8 +110,8 @@ export function createCompany(db: Db, o: NewCompany): number {
   assertNameFree(db, o.name);
   if (o.code !== undefined && get(db, 'SELECT 1 AS x FROM companies WHERE code = ?', o.code)) throw new HttpError(409, 'code_taken', `airline code ${o.code} is already taken`);
   const mode = o.startMode ? START_MODES[o.startMode] : null;
-  const id = run(db, `INSERT INTO companies (user_id, name, personality, balance, reputation, created_at, code, callsign, livery_color, start_mode, realism) VALUES (?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?)`,
-    o.userId, o.name, o.personality ? JSON.stringify(o.personality) : null, START_REPUTATION, o.now, o.code ?? null, o.callsign ?? null, o.liveryColor ?? null, o.startMode ?? null,
+  const id = run(db, `INSERT INTO companies (id, user_id, name, personality, balance, reputation, created_at, code, callsign, livery_color, start_mode, realism) VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?)`,
+    o.id ?? null, o.userId, o.name, o.personality ? JSON.stringify(o.personality) : null, START_REPUTATION, o.now, o.code ?? null, o.callsign ?? null, o.liveryColor ?? null, o.startMode ?? null,
     mode ? JSON.stringify(presetSetting(mode.suggestedRealism)) : null).id;
   post(db, id, o.now, 'grant', mode?.capital ?? STARTING_BALANCE, 'starting capital');
   if (o.userId !== null) run(db, 'INSERT INTO billing_runs (company_id, month, at) VALUES (?, ?, ?)', id, new Date(o.now).toISOString().slice(0, 7), o.now);

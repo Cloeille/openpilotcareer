@@ -3,12 +3,13 @@ import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import {
   API_VERSION, acceptJobSchema, apiKeyCreateSchema, buyAircraftSchema, buyHubSchema, checkTelemetry, customAircraftSchema, deleteAccountSchema,
-  flightListQuerySchema, icaoAirportSchema, icaoTypeSchema, listQuerySchema, loginSchema, registerSchema, renameCompanySchema, simbriefImportSchema, telemetrySchema,
+  flightListQuerySchema, icaoAirportSchema, icaoTypeSchema, listQuerySchema, loginSchema, registerSchema, renameCompanySchema, resetCompanySchema, simbriefImportSchema, telemetrySchema,
   type ApiKeyInfo, type ServerInfo,
 } from '@opc/shared';
 import { catchUp, seedAi } from './ai.ts';
-import { apiKeyAuth, COMPANY_HEADER, createSession, defaultCompany, DUMMY_HASH, hashPassword, newToken, ownedCompany, sessionAuth, sessionUser, sha256, verifyPassword, type Principal } from './auth.ts';
+import { apiKeyAuth, COMPANY_HEADER, confirmPassword, createSession, defaultCompany, DUMMY_HASH, hashPassword, newToken, ownedCompany, sessionAuth, sessionUser, sha256, verifyPassword, type Principal } from './auth.ts';
 import { airports, catalogType, searchAircraftTypes, searchAirports } from './catalog.ts';
+import { companyImpact, deleteCompany, resetCompany } from './company-lifecycle.ts';
 import { all, get, run, tx, type Db } from './db.ts';
 import { exportDocument, flightsCsv, transactionsCsv } from './export.ts';
 import {
@@ -32,6 +33,7 @@ import { registerDownloads } from './routes-downloads.ts';
 
 const MAX_API_KEYS = 10;
 const AUTH_ATTEMPTS_PER_MINUTE = 20;
+const PASSWORD_CHECKS_PER_MINUTE = 10;
 const BODY_LIMIT = 64 * 1024;
 const DEFAULT_HUB = 'KJFK';
 const CSV_HEADERS = { 'content-type': 'text/csv; charset=utf-8' } as const;
@@ -66,6 +68,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   const now = o.now ?? Date.now;
   const info: ServerInfo = { name: o.name ?? 'OpenPilotCareer', version: o.version ?? '0.1.0', apiVersion: API_VERSION, registrationOpen: o.registrationOpen ?? true, antiCheat: o.antiCheat ?? true };
   const authLimiter = new Limiter(AUTH_ATTEMPTS_PER_MINUTE, 60_000, now);
+  const passwordLimiter = new Limiter(PASSWORD_CHECKS_PER_MINUTE, 60_000, now);
   const app = Fastify({ logger: false, bodyLimit: BODY_LIMIT, trustProxy: o.trustProxy ?? false });
   const doFetch = o.fetch ?? fetch;
   if (o.ai !== false) seedAi(db, now());
@@ -180,12 +183,39 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   // ---- companies: a player may own several; the client acts as one via the X-OPC-Company header (see auth.ts)
   app.get('/api/v1/me/companies', async (req) => companiesOf(db, account(req).userId));
 
+  /** The password check every destructive action asks for, throttled per account (a stolen session must not be able to guess the password here). */
+  const confirm = (userId: number, password: string): Promise<void> => {
+    passwordLimiter.hit(String(userId));
+    return confirmPassword(db, userId, password);
+  };
+
   app.patch('/api/v1/companies/:id', async (req) => {
     const p = account(req);
     const id = ownedCompany(db, p.userId, idParam(req));
     if (req.body && typeof req.body === 'object' && ('code' in req.body || 'callsign' in req.body)) throw new HttpError(409, 'immutable', 'the airline code and callsign cannot be changed once set');
     const b = parse(renameCompanySchema, req.body);
     return tx(db, () => renameCompany(db, id, b.name));
+  });
+
+  // Deleting or resetting a company: session auth only (an API key is a 401), owner only (403 for another player's or an AI company), refused while it has a flight in progress.
+  app.get('/api/v1/companies/:id/impact', async (req) => companyImpact(db, ownedCompany(db, account(req).userId, idParam(req)), now()));
+
+  app.delete('/api/v1/companies/:id', async (req, reply) => {
+    const p = account(req);
+    const id = ownedCompany(db, p.userId, idParam(req));
+    const b = parse(deleteAccountSchema, req.body);
+    await confirm(p.userId, b.password);
+    tx(db, () => deleteCompany(db, p.userId, ownedCompany(db, p.userId, id), now()));
+    return reply.status(204).send();
+  });
+
+  app.post('/api/v1/companies/:id/reset', async (req) => {
+    const p = account(req);
+    const id = ownedCompany(db, p.userId, idParam(req));
+    const b = parse(resetCompanySchema, req.body);
+    await confirm(p.userId, b.password);
+    tx(db, () => resetCompany(db, p.userId, ownedCompany(db, p.userId, id), b, now()));
+    return meView(db, p.userId, id);
   });
 
   app.get('/api/v1/me/export', async (req, reply) => {
@@ -202,8 +232,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   app.delete('/api/v1/me', async (req, reply) => {
     const p = account(req);
     const b = parse(deleteAccountSchema, req.body);
-    const u = get<{ pass_hash: string }>(db, 'SELECT pass_hash FROM users WHERE id = ?', p.userId)!;
-    if (!(await verifyPassword(b.password, u.pass_hash))) throw new HttpError(403, 'bad_password', 'wrong password');
+    await confirm(p.userId, b.password);
     // ON DELETE CASCADE removes the company, fleet, flights, ledger, API keys, sessions and job claims (those board jobs reopen).
     tx(db, () => run(db, 'DELETE FROM users WHERE id = ?', p.userId));
     return reply.status(204).send();
