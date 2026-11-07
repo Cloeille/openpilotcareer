@@ -6,6 +6,7 @@ import {
 } from '@opc/shared';
 import { all, get, run, type Db } from './db.ts';
 import { hangarEffectFor, hubCapacity } from './facilities.ts';
+import { wearComponents, wornSettlement } from './parts.ts';
 import { wearEnabled } from './realism.ts';
 import { HttpError } from './http.ts';
 import { nextRegistration } from './registrations.ts';
@@ -85,7 +86,7 @@ export function assertFlyable(db: Db, aircraftId: number, now: number): void {
   if (leg) throw new HttpError(409, 'aircraft_busy', `this aircraft is flying a line leg to ${leg.dest} until ${new Date(leg.until).toISOString()}`);
 }
 
-/** Wear accrues per block hour by category, for player companies with `wearEnabled`. At the threshold the aircraft goes to the workshop. */
+/** Wear accrues per block hour by category, for player companies with `wearEnabled`. At the threshold the aircraft goes to the workshop; each of its components wears too (parts.ts). */
 export function accrueWear(db: Db, companyId: number, aircraftId: number, category: AircraftCategory, hours: number, at: number): void {
   if (!isHuman(db, companyId) || !wearEnabled(db, companyId)) return;
   const a = get<{ wear_pct: number }>(db, 'SELECT wear_pct FROM aircraft WHERE id = ?', aircraftId);
@@ -98,6 +99,8 @@ export function accrueWear(db: Db, companyId: number, aircraftId: number, catego
   } else {
     run(db, 'UPDATE aircraft SET wear_pct = ? WHERE id = ?', wear, aircraftId);
   }
+  // v3 parts: the components wear with it, and a mechanical one that reaches its failure wear breaks down (spare parts decide for how long)
+  wearComponents(db, { companyId, aircraftId, category, hours, at });
 }
 
 // ---------------------------------------------------------------- settlement by contract
@@ -119,9 +122,10 @@ function contractCosts(db: Db, aircraftId: number, blockHours: number, s: Settle
   return { settlement: s, fuelKind: 'fuel' };
 }
 
-/** `contractCosts`, then the hangar of the aircraft's base takes its share off what maintenance is still charged (B.4: -35 %, less when short of technicians). */
+/** The worn components first (v3 parts: a worn interior sells fewer seats, worn engines burn more), then `contractCosts`, then the hangar of the aircraft's base takes its share off what maintenance
+ *  is still charged (B.4: -35 %, less when short of technicians). */
 export function flightCosts(db: Db, aircraftId: number, blockHours: number, s: Settlement, category: AircraftCategory, at: number): FlightCosts {
-  const r = contractCosts(db, aircraftId, blockHours, s);
+  const r = contractCosts(db, aircraftId, blockHours, wornSettlement(db, aircraftId, category, s));
   const fx = r.settlement.maintenance > 0 ? hangarEffectFor(db, aircraftId, category, at) : null;
   if (!fx) return r;
   const maintenance = Math.round(r.settlement.maintenance * (1 - fx.discount));

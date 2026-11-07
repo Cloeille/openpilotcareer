@@ -9,6 +9,7 @@ import { hashSeed, mulberry32 } from './board.ts';
 import { all, get, run, type Db } from './db.ts';
 import { isHuman } from './fleet-extras.ts';
 import { post } from './ledger.ts';
+import { reliabilityRisk } from './parts.ts';
 import { wearEnabled } from './realism.ts';
 
 export type IncidentRow = {
@@ -40,7 +41,8 @@ export const crewDutyMin = (db: Db, legId: number): number =>
  *  or when the roll was already recorded (so the money and the reputation are never charged twice). */
 export function rollIncident(db: Db, r: Roll): IncidentRow | null {
   if (!incidentsOn(db, r.companyId)) return null;
-  const risk = incidentRisk(r.dutyMin / 60, r.wearPct, r.riskFactor);
+  // v3 parts (B.6): worn gear and avionics lower the aircraft's reliability, which raises the risk
+  const risk = incidentRisk(r.dutyMin / 60, r.wearPct, r.riskFactor * reliabilityRisk(db, r.aircraftId));
   const draw = drawIncident(risk, mulberry32(hashSeed(`incident:${r.ref}`)));
   if (!draw) return null;
   const ac = get<{ value: number; registration: string | null }>(db, 'SELECT value, registration FROM aircraft WHERE id = ?', r.aircraftId);

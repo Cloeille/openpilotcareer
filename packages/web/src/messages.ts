@@ -2513,6 +2513,9 @@ const table = {
   'err.already_left': ['This person has already left.', 'Cette personne est déjà partie.'],
   'fin.kind.start_now': ['Start-now fee', 'Frais de démarrage immédiat'],
   'fin.kind.interim': ['Interim', 'Intérim'],
+  // ---- parts (S5: the ledger kinds the finance screen shows)
+  'fin.kind.parts_order': ['Spare parts ordered', 'Pièces de rechange commandées'], 'fin.kind.parts_emergency': ['Part for a breakdown', 'Pièce pour une panne'],
+  'fin.kind.parts_sale': ['Spare parts sold back', 'Pièces de rechange revendues'], 'fin.kind.refurbish': ['Refurbishment', 'Remise à neuf'],
 } as const satisfies Record<string, readonly [string, string]>;
 
 export type Key = keyof typeof table;
