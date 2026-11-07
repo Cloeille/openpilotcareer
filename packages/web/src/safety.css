@@ -49,7 +49,6 @@
 .sf-dot.top circle { fill: var(--warning); stroke: none; }
 .sf-dot.top .halo { fill: #E9A04633; }
 .sf-flabel { position: absolute; display: flex; flex-direction: column; gap: 2px; text-align: right; max-width: 46%; pointer-events: none; }
-.sf-flabel.corner { text-align: left; }
 .sf-flabel-title { font-size: 13px; font-weight: 500; color: var(--text-primary); }
 .sf-flabel-detail { font-size: 12px; color: var(--text-secondary); }
 

@@ -70,9 +70,9 @@ export async function safety(ctx: Ctx): Promise<Screen> {
   const detailBtn = h('button', { type: 'button', class: 'link-btn sf-detail-btn', 'aria-expanded': String(explain), 'aria-controls': 'sf-caption',
     onclick: () => { explain = !explain; caption.textContent = explain ? t('sf.risk.detailBody') : t('sf.risk.caption'); detailBtn.setAttribute('aria-expanded', String(explain)); } }, t('sf.risk.detail'));
   const riskPanel = panel({ title: t('sf.risk.title'), action: detailBtn, id: 'sf-risk', class: 'sf-main' },
-    h('div', { class: 'sf-intro' }, caption, h('div', { class: 'sf-legend' },
+    h('div', { class: 'sf-intro' }, caption, chart.curve.length < 2 ? null : h('div', { class: 'sf-legend' },
       h('span', { class: 'ln-legend-item' }, h('i', { class: 'sf-swatch', 'aria-hidden': 'true' }), t('sf.risk.curve')),
-      view.today.some((f) => f.dutyHours !== undefined) ? h('span', { class: 'ln-legend-item' }, h('i', { class: 'sf-swatch dot', 'aria-hidden': 'true' }), t('sf.risk.flights')) : null)),
+      chart.flights.length > 0 ? h('span', { class: 'ln-legend-item' }, h('i', { class: 'sf-swatch dot', 'aria-hidden': 'true' }), t('sf.risk.flights')) : null)),
     chartBox(view, chart, top),
     leverList(view, go));
 
@@ -95,7 +95,7 @@ export async function safety(ctx: Ctx): Promise<Screen> {
   const viewEl = h('div', { class: 'sf-screen' }, header, h('div', { class: 'sf-body' }, riskPanel, incidentPanel));
   return {
     title: t('sf.title'), scene: 'bridge', tab: 'hubs', view: viewEl, back, wide: false,
-    hints: [{ key: t('key.esc'), label: t('st.hint.company') }, { key: '↑ ↓', label: t('sf.hint.factors') }, { key: t('key.enter'), label: t('sf.hint.act') }, { key: 'J', label: t('sf.hint.journal') }],
+    hints: [{ key: t('key.esc'), label: t('st.hint.company') }, ...(levers.length > 0 ? [{ key: '↑ ↓', label: t('sf.hint.factors') }, { key: t('key.enter'), label: t('sf.hint.act') }] : []), { key: 'J', label: t('sf.hint.journal') }],
     keys: { j: () => go('#safety/journal') },
   };
 }
@@ -125,16 +125,15 @@ function chartBox(view: SafetyView, c: ChartModel, top: SafetyView['today'][numb
         : svg('circle', { class: 'sf-dot', cx: f.x, cy: f.y, r: 3.5 }, name);
     }),
     ...c.xTicks.map((x) => svg('text', { class: 'sf-tick', x: x.x, y: CHART.bottom + 22, 'text-anchor': 'middle' }, t('sf.axis.h', { n: x.hours }))));
-  return h('div', { class: 'sf-chart' }, g, top ? flightLabel(top, dot ? { x: dot.x, y: dot.y } : null) : null);
+  return h('div', { class: 'sf-chart' }, g, top && dot ? flightLabel(top, dot) : null);
 }
 
-/** The annotation of the flight at most risk tonight: beside its dot when the server says how long the crew has been on duty, else in the corner of the plot. */
-function flightLabel(f: SafetyView['today'][number], at: { x: number; y: number } | null): HTMLElement {
+/** The annotation of the flight at most risk tonight, above and left of its dot: the curve rises to the right, so that side of the plot is empty. A flight whose duty hours the server did not send has no dot and so no label. */
+function flightLabel(f: SafetyView['today'][number], at: { x: number; y: number }): HTMLElement {
   const fm = fmt();
   const duty = f.dutyHours === undefined ? null : fm.duration(f.dutyHours);
-  // Above and left of the dot: the curve rises to the right, so that side of the plot is empty.
-  const place = at ? `right:${((CHART.width - at.x + 22) / CHART.width * 100).toFixed(2)}%;top:${(Math.max(0, at.y - 30) / CHART.height * 100).toFixed(2)}%` : 'left:5%;top:2%';
-  return h('div', { class: `sf-flabel${at ? '' : ' corner'}`, style: place },
+  const place = `right:${((CHART.width - at.x + 22) / CHART.width * 100).toFixed(2)}%;top:${(Math.max(0, at.y - 30) / CHART.height * 100).toFixed(2)}%`;
+  return h('div', { class: 'sf-flabel', style: place },
     h('span', { class: 'sf-flabel-title' }, t('sf.risk.fTitle', { flight: f.flightNo, crew: f.crew })),
     h('span', { class: 'sf-flabel-detail' }, duty ? t('sf.risk.fDetail', { duty, risk: pct1(f.risk), factor: factorText(f.factor) }) : t('sf.risk.fDetailNoDuty', { risk: pct1(f.risk), factor: factorText(f.factor) })));
 }
