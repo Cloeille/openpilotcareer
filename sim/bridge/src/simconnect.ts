@@ -93,8 +93,10 @@ export class TrackSignals {
     const g = this.#guard;
     const marks: TrackMarks = {};
     if (g && Number.isFinite(g.aglFt)) marks.aglFt = g.aglFt;
-    if (this.#resume) marks.resumed = this.#resume; // the first reading after the break shows the state after it, not the crash before it
-    else if (this.#crashed || (g && (g.crashFlag !== 0 || g.crashSequence !== 0))) marks.crashed = true;
+    if (this.#resume) { // the first reading after a break shows the state after it: only the Crashed event, never the SimVars, speaks for the time before
+      marks.resumed = this.#resume;
+      if (this.#crashed) marks.crashed = true;
+    } else if (this.#crashed || (g && (g.crashFlag !== 0 || g.crashSequence !== 0))) marks.crashed = true;
     return marks;
   }
   sent(): void { if (this.#resume) { this.#resume = undefined; this.#crashed = false; } }

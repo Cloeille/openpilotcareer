@@ -94,6 +94,14 @@ test('finished with anti-cheat flags says so instead of claiming "no anomaly"', 
   assert.match(vm.view.verdict.text, /^Accepted with 1 flag raised: Long pause\.$/);
 });
 
+test('the reload_after_crash flag has a name in both languages, not the raw code', () => {
+  for (const [lang, name] of [[EN, 'Reload after a crash'], [FR, 'Rechargement apr\u00E8s un crash']]) {
+    const vm = VM.fromStatus(bare({ phase: 'parked', verification: 'rejected', reason: 'the simulator client flagged this flight: reload_after_crash', flags: ['reload_after_crash'] }), lang);
+    assert.ok(vm.view.verdict.text.includes(name), vm.view.verdict.text);
+    assert.ok(!vm.view.verdict.text.includes('reload_after_crash'), vm.view.verdict.text);
+  }
+});
+
 test('fields the bridge does not send are a dash, never a made-up number', () => {
   const vm = VM.fromStatus(bare(), EN);
   assert.equal(vm.mode, 'flight');

@@ -38,7 +38,8 @@ export const simSampleSchema = z.object({
   engineKind: z.enum(ENGINE_KINDS),
   /** PLANE ALT ABOVE GROUND. Absent in recordings that predate it, and when the SimVar is garbage: the low-altitude descent rule then does not apply. */
   aglFt: finite.optional(),
-  /** Only present when true: MSFS says the aircraft crashed (Crashed event, CRASH FLAG or CRASH SEQUENCE). Stays set until a flight is loaded. */
+  /** Only present when true: MSFS says the aircraft crashed (Crashed event, CRASH FLAG or CRASH SEQUENCE). Stays set until a flight is loaded.
+   *  On a sample that also has `resumed` it means the crash was BEFORE the break (a Crashed event that no sample saw). */
   crashed: z.boolean().optional(),
   /** Set by the host on the first reading after the track was broken from the host's side: a flight was (re)loaded in the running sim, or the link to the sim was lost and re-established. */
   resumed: z.enum(RESUMES).optional(),

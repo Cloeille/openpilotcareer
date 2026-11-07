@@ -180,6 +180,7 @@ test('a reload right after a violent descent is reload_after_crash (-6000 fpm, o
   const old = run(breakAt(patch(cruiseK - 3, cruiseK - 3, { verticalSpeedFpm: -7_000 }), cruiseK, cruiseJ, 20_000, { resumed: 'reload' })).tr; // the dive was 3 samples (3 min) before the reload
   assert.deepEqual(old.flags, []);
   assert.deepEqual(run(breakAt(patch(cruiseK - 2, cruiseK, { verticalSpeedFpm: -7_000 }), cruiseK, cruiseJ, 20_000)).tr.flags, ['reload_after_crash'], 'without the FlightLoaded event too');
+  assert.deepEqual(run(breakAt(ga, cruiseK, cruiseJ, 20_000, { resumed: 'reload', crashed: true })).tr.flags, ['reload_after_crash'], 'a Crashed event no sample saw');
   const flagged = run(breakAt(patch(cruiseK - 2, cruiseK, { crashed: true }), cruiseK, cruiseJ, 20_000, { resumed: 'reload' })).tr;
   assert.ok(flagged.outcome?.ok && flagged.outcome.report.flags?.includes('reload_after_crash'), 'reported, so the server rejects it');
   assert.equal(serverSays(flagged.outcome!.ok ? flagged.outcome.report : (undefined as never)).ok, false);

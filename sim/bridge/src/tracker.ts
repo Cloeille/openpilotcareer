@@ -113,7 +113,7 @@ export class FlightTracker {
     if (s.resumed || back >= 0) {
       if (s.resumed === 'reconnect') this.#restarts++; else this.#reloads++;
       if (s.resumed) this.#downtimeMs += gapMs;
-      if (this.#badAt !== null && prev.t - this.#badAt <= CRASH_LOOKBACK_MS) this.#flag('reload_after_crash');
+      if ((s.resumed && s.crashed) || (this.#badAt !== null && prev.t - this.#badAt <= CRASH_LOOKBACK_MS)) this.#flag('reload_after_crash');
     }
     this.#badAt = null;
     if (back < 0) return false;

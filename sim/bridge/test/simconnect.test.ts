@@ -107,10 +107,13 @@ test('track signals: Crashed is latched, a reload or a lost link is reported onc
   sig.sent();
   assert.equal(sig.marks().crashed, true, 'still crashed until a flight is loaded');
   sig.flightLoaded();
-  assert.deepEqual(sig.marks(), { resumed: 'reload' }, 'the first sample after the load shows the new flight, not the crash before it');
-  assert.deepEqual(sig.marks(), { resumed: 'reload' }, 'asking twice changes nothing until the sample is sent');
+  assert.deepEqual(sig.marks(), { resumed: 'reload', crashed: true }, 'on the first sample after the load, `crashed` speaks for the time before it');
+  assert.deepEqual(sig.marks(), { resumed: 'reload', crashed: true }, 'asking twice changes nothing until the sample is sent');
   sig.sent();
   assert.deepEqual(sig.marks(), {}, 'one break, one mark; the crash is forgotten with the flight');
+  sig.guard({ aglFt: 10, crashFlag: 4, crashSequence: 11 });
+  sig.flightLoaded();
+  assert.deepEqual(sig.marks(), { aglFt: 10, resumed: 'reload' }, 'the SimVars describe the state after the break, so they never make a reload a crash');
   sig.flightLoaded(); sig.linkLost(); sig.flightLoaded();
   assert.equal(sig.marks().resumed, 'reconnect');
   sig.sent();
