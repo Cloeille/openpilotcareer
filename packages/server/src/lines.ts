@@ -117,17 +117,18 @@ export function ensureNetwork(db: Db, companyId: number, now: number): NetworkRo
 /** Does the company's network run at instant `at`? Switched on, and (for a human) its owner was seen less than MAX_OFFLINE_DAYS before. */
 const runsAt = (n: NetworkRow, human: boolean, at: number): boolean => n.enabled === 1 && (!human || at < n.seen_at + CAP_MS);
 
-/** Every request of a signed-in owner refreshes the presence of all their networks. Returning after the cap restarts the lines from the next tick
- *  (what ran in between never existed, see `layLines`). Must run AFTER `catchUpLines`, which settles the past with the old `seen_at`. */
+/** Every request of a signed-in owner (web session or bridge API key: a player flying through the bridge is here) refreshes the presence of all their networks. Returning after the cap restarts the lines from the next tick
+ *  (what ran in between never existed, see `layLines`) and lays today's timetable at once. Must run AFTER `catchUpLines`, which settles the past with the old `seen_at`. */
 export function touchPresence(db: Db, token: string | null, now: number): void {
   if (!token) return;
-  const stale = all<NetworkRow>(db, `SELECT n.* FROM line_networks n JOIN companies c ON c.id = n.company_id JOIN sessions s ON s.user_id = c.user_id
-    WHERE s.token_hash = ? AND s.expires_at > ? AND n.seen_at < ?`, sha256(token), now, now - PRESENCE_STEP_MS);
+  const hash = sha256(token);
+  const stale = all<NetworkRow>(db, `SELECT n.* FROM line_networks n JOIN companies c ON c.id = n.company_id
+    WHERE n.seen_at < ?2 AND (c.user_id IN (SELECT user_id FROM sessions WHERE token_hash = ?1 AND expires_at > ?3) OR c.user_id IN (SELECT user_id FROM api_keys WHERE key_hash = ?1))`, hash, now - PRESENCE_STEP_MS, now);
   if (stale.length === 0) return;
   tx(db, () => {
     for (const n of stale) {
-      if (now >= n.seen_at + CAP_MS) run(db, 'UPDATE lines SET live_from = ?, laid_through = 0 WHERE company_id = ?', nextBoundary(now), n.company_id);
       run(db, 'UPDATE line_networks SET seen_at = ? WHERE company_id = ?', now, n.company_id);
+      if (now >= n.seen_at + CAP_MS) for (const l of all<{ id: number }>(db, 'SELECT id FROM lines WHERE company_id = ?', n.company_id)) relayLine(db, l.id, now);
     }
   });
 }

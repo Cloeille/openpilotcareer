@@ -159,6 +159,7 @@ test('after 14 days without a request the lines stop earning; the next request r
   assert.equal(w.legs().filter((l) => l.status === 'scheduled' && l.dep_at < w.h.clock.t).length, 0, 'no leg of the lapsed days is left pending');
   const net = (await w.get('/api/v1/network')).body as NetworkView;
   assert.equal(net.lapsedAt, cap);
+  assert.ok(w.legs().some((l) => l.status === 'scheduled' && l.dep_at > w.h.clock.t), 'today\'s timetable is laid at once on the return, not at the next tick');
   const paid = w.lineMoney();
   await w.advance(DAY_MS);
   assert.ok(w.lineMoney() > paid, 'the lines run again after the login');
@@ -472,4 +473,29 @@ test('the two French rivals exist so a player\'s French pair has competition (C1
   seedAi(db, T0);
   const rows = all<{ name: string; hub: string }>(db, "SELECT c.name, h.icao AS hub FROM companies c JOIN hubs h ON h.company_id = c.id WHERE c.name IN ('Alpes Air Link', 'Méridia Cargo') ORDER BY c.name");
   assert.deepEqual(rows.map((r) => [r.name, r.hub]), [['Alpes Air Link', 'LFML'], ['Méridia Cargo', 'LFLL']]);
+});
+
+test('deleting the account removes its lines, timetable and private line jobs with it', async () => {
+  const w = await world();
+  const day = (await w.get(`/api/v1/lines/${w.lineId}`)).body.day as ScheduledFlight[];
+  await w.h.call('POST', `/api/v1/lines/${w.lineId}/rotations/${day.find((l) => l.status === 'scheduled')!.id}/take`, { token: w.tok });
+  await w.advance(DAY_MS);
+  const del = await w.h.call('DELETE', '/api/v1/me', { token: w.tok, body: { password: 'correct horse' } });
+  assert.equal(del.status, 204, del.text);
+  for (const t of ['lines', 'line_aircraft', 'scheduled_flights', 'line_networks', 'custom_jobs']) assert.equal(get<{ n: number }>(w.h.db, `SELECT COUNT(*) AS n FROM ${t}`)!.n, 0, t);
+});
+
+test('presence comes from the owner\'s session or bridge API key, not from anonymous requests', async () => {
+  const w = await world();
+  const key = await w.h.apiKey(w.tok);
+  const seen = () => get<{ s: number }>(w.h.db, 'SELECT seen_at AS s FROM line_networks WHERE company_id = ?', w.cid)!.s;
+  const t0 = seen();
+  w.h.clock.t += 10 * DAY_MS;
+  await w.h.call('GET', '/api/v1/leaderboard');
+  assert.equal(seen(), t0, 'a public request proves nothing');
+  await w.h.call('GET', '/api/v1/flights/active', { token: key });
+  assert.equal(seen(), w.h.clock.t, 'the bridge key refreshes presence');
+  w.h.clock.t += 10 * DAY_MS;
+  await w.h.call('GET', '/api/v1/flights/active', { token: key });
+  assert.equal(((await w.get('/api/v1/network')).body as NetworkView).lapsedAt, null, 'ten days after the last sign of life is within the cap');
 });
