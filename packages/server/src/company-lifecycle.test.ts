@@ -58,6 +58,7 @@ async function fill(h: H, token: string, cid: number): Promise<void> {
   run(h.db, "INSERT INTO staff_leave (staff_id, from_day, to_day, status) VALUES (?, 10, 12, 'granted')", staff);
   run(h.db, "INSERT INTO staff_duty (staff_id, leg_id, day, flight_no, dep_at, arr_at, origin, dest, duty_start, duty_min, flight_min) VALUES (?, NULL, 1, 1, ?, ?, 'LFMN', 'LFML', ?, 60, 40)", staff, at, at + 1, at);
   run(h.db, "INSERT INTO parts_stock (company_id, hub, part, qty) VALUES (?, 'LFMN', 'filter', 2)", cid);
+  run(h.db, "INSERT INTO recruit_missions (company_id, base, qual, count, started_at, ready_at, premium_pct) VALUES (?, 'LFMN', 'AT76', 2, ?, ?, 11)", cid, at, at + 1);
   run(h.db, "INSERT INTO parts_orders (company_id, hub, part, qty, ordered_at, eta, cost) VALUES (?, 'LFMN', 'filter', 1, ?, ?, 100)", cid, at, at + 1);
   run(h.db, "INSERT INTO parts_policy (company_id, hub, icao, cls, policy) VALUES (?, 'LFMN', 'AT76', 'turboprop', 'critical')", cid);
   run(h.db, "INSERT INTO breakdowns (company_id, aircraft_id, hub, component, part, failed_at, eta, ready_at, paid, from_stock) VALUES (?, ?, 'LFMN', 'engines', 'filter', ?, ?, ?, 100, 1)", cid, ac, at, at + 1, at + 2);
