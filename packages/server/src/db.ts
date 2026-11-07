@@ -281,7 +281,28 @@ CREATE TABLE service_days (
 `;
 
 /** Append-only; `PRAGMA user_version` records how many ran. */
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12];
+// OpenHangar v4, lot REPORTS: the ledger remembers what a posting was about. `line_id` / `aircraft_id` are what the statement filters and the profitability reports group on, `counterparty_id` is the
+// other company of an intra-group flow (lot GROUP writes it), `legs` how many flown legs a revenue posting covers (scheduled legs are pruned after 35 days, the ledger is not: it is the only
+// place a closed month's flights can be counted). No foreign keys, like staff_duty.leg_id: a line's id can be reused once its row is gone, so deleting a line clears its links instead of handing
+// its history to the next line. The three backfills are best effort for postings made before this migration: flights give their aircraft, the memo of a line posting gives its pair (the line
+// of that pair) and, for a bulk-booked day, its leg count; the memo of a monthly charge starts with the registration. Line postings of the past keep a NULL aircraft.
+const SCHEMA_V13 = `
+ALTER TABLE transactions ADD COLUMN line_id INTEGER;
+ALTER TABLE transactions ADD COLUMN aircraft_id INTEGER;
+ALTER TABLE transactions ADD COLUMN counterparty_id INTEGER;
+ALTER TABLE transactions ADD COLUMN legs INTEGER NOT NULL DEFAULT 0;
+CREATE INDEX transactions_company_at ON transactions(company_id, at);
+CREATE TRIGGER transactions_line_gone BEFORE DELETE ON lines BEGIN UPDATE transactions SET line_id = NULL WHERE line_id = OLD.id; END;
+UPDATE transactions SET aircraft_id = (SELECT f.aircraft_id FROM flights f WHERE f.id = transactions.flight_id), legs = CASE WHEN kind = 'payout' THEN 1 ELSE 0 END WHERE flight_id IS NOT NULL;
+UPDATE transactions SET
+  line_id = (SELECT l.id FROM lines l WHERE l.company_id = transactions.company_id AND substr(transactions.memo, 1, 9) IN (l.a || '-' || l.b, l.b || '-' || l.a)),
+  legs = CASE WHEN kind <> 'line_revenue' THEN 0 WHEN memo GLOB '* x[0-9]*' THEN CAST(substr(memo, length(rtrim(memo, '0123456789')) + 1) AS INTEGER) ELSE 1 END
+  WHERE flight_id IS NULL AND kind IN ('line_revenue', 'line_fuel', 'line_fee', 'line_maintenance', 'service_sales', 'service_cost');
+UPDATE transactions SET aircraft_id = (SELECT a.id FROM aircraft a WHERE a.company_id = transactions.company_id AND a.registration = substr(memo, 1, instr(memo || ' ', ' ') - 1))
+  WHERE aircraft_id IS NULL AND kind IN ('lease_rent', 'insurance', 'parking', 'loan_installment', 'deposit', 'deposit_refund', 'ferry', 'refurbish', 'incident', 'parts_emergency');
+`;
+
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_V13];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);
