@@ -12,9 +12,12 @@ import type { AddonCategory } from './finance-view.ts';
 import type { RowState } from './simair-view.ts';
 import type { EffectLines } from './parts-view.ts';
 import type { Comfort, Effect } from './service-view.ts';
+import { OWN_WHY, RETRAIN_WHY } from './training-view.ts';
 import { OPTION_HASH, OPTION_NOTE, OPTION_PHASES, OPTION_SUB, OPTION_TITLE, OPTION_UNAVAILABLE, SAVED_AGAINST } from './agency-view.ts';
 import type { KitchenDeparture } from './api-service.ts';
 import type { AgencyOptionId } from './api-agency.ts';
+import type { OwnWhy, RetrainWhy, TrainPlace } from './api-training.ts';
+import type { TrainMode } from './training-view.ts';
 import { METRICS } from './kitchen-view.ts';
 import type { NoAircraftReason } from './board.ts';
 import { GROUPS } from './catalogue.ts';
@@ -34,7 +37,7 @@ import { en, fr, messageFor } from './messages.ts';
  */
 const every = <T extends string>(all: Record<T, unknown>): T[] => Object.keys(all) as T[];
 
-const ROLES = every<StaffRole>({ captain: 0, fo: 0, attendant: 0, agent: 0, clerk: 0, technician: 0, cook: 0 });
+const ROLES = every<StaffRole>({ captain: 0, fo: 0, attendant: 0, agent: 0, clerk: 0, technician: 0, cook: 0, instructor: 0 });
 const STAFF_STATES = every<StaffState>({ pending: 0, free: 0, onDuty: 0, resting: 0, leave: 0, training: 0 });
 const COVERAGES = every<Coverage>({ ok: 0, tight: 0, short: 0, none: 0 });
 const DUTY_RULES = every<DutyRule>({ busy: 0, rest: 0, daily: 0, flight28: 0, flight12: 0, week: 0, streak: 0 });
@@ -61,12 +64,16 @@ const DEPARTURES = every<KitchenDeparture['status']>({ scheduled: 0, done: 0 });
 const CATALOGUES = every<'reduced' | 'full'>({ reduced: 0, full: 0 });
 const AGENCY_OPTIONS = every<AgencyOptionId>({ agency: 0, train: 0, classic: 0 });
 const SIM_STATES = every<RowState>({ offered: 0, hidden: 0, noType: 0 });
+const OWN_WHYS = every<OwnWhy>({ no_training_centre: 0, no_instructor: 0, centre_full: 0 });
+const RETRAIN_WHYS = every<RetrainWhy>({ not_a_pilot: 0, not_employed: 0, temporary_contract: 0, already_instructor: 0, not_a_captain: 0, no_rating: 0 });
+const TRAIN_MODES = every<TrainMode>({ trainees: 0, instructors: 0 });
+const TRAIN_PLACES = every<TrainPlace>({ own: 0, outside: 0 });
 
 /** [message prefix, the values it is followed by, an optional suffix]. */
 const LOOKUPS: readonly (readonly [string, readonly (string | number)[], string?])[] = [
   ['st.fam.', STAFF_FAMILIES], ['st.fam.sub.', STAFF_FAMILIES], ['st.fam.short.', STAFF_FAMILIES],
   ['st.role.', ROLES], ['st.role.', ROLES, 'Full'],
-  ['st.view.', ['staff', 'hire', 'agency']], ['st.level.', LEVELS], ['st.m.state.', STAFF_STATES], ['st.contract.', ['cdi', 'cdd']],
+  ['st.view.', ['staff', 'hire', 'agency', 'training']], ['st.level.', LEVELS], ['st.m.state.', STAFF_STATES], ['st.contract.', ['cdi', 'cdd']],
   ['st.al.rule.', DUTY_RULES], ['st.lim.', METERS], ['st.l.c.', COVERAGES], ['st.l.d.', COVERAGES], ['st.du.l.', ['done', 'flying', 'planned', 'over']],
   ['st.p.', REST_POLICY_NAMES], ['st.p.btn.', REST_POLICY_NAMES],
   ['ln.wd.', WEEKDAYS], ['ln.fs.', FLIGHT_STATUSES], ['ln.part.', PARTS], ['ln.why.', ['aircraft', 'crew']], ['ln.applied.', OPTIONS], ['ln.proj.day.', PROJECTIONS],
@@ -86,6 +93,7 @@ const LOOKUPS: readonly (readonly [string, readonly (string | number)[], string?
   ['ob.s2.color.', [...LIVERY_COLORS.map((c) => c.id), 'none']], ['ob.s6.own.', [...OWNERSHIPS, 'plain']],
   ['rp.cat.', CATEGORIES], ['rp.part.', COST_PARTS], ['rp.sc.', SCENARIOS], ['rp.sc.', SCENARIOS, '.note'], ['rp.f.d.', DECISIONS], ['rp.f.d.', DECISIONS, '.note'],
   ['rp.nav.', FINANCE_SCREENS], ['rp.l.by.', PROFIT_BY], ['rp.l.period.', PERIODS],
+  ['tr.why.', OWN_WHYS], ['err.', OWN_WHYS], ['rt.why.', RETRAIN_WHYS], ['tr.mode.', TRAIN_MODES], ['tr.place.', TRAIN_PLACES],
   ['cr.bank.', CREDIT_BANK_IDS], ['cr.refusal.', CREDIT_REFUSALS], ['err.', CREDIT_REFUSALS],
   ['tx.kind.', ['credit', 'credit_fee', 'credit_installment', 'credit_prepay', 'credit_late_fee', 'overdraft_interest']], ['fin.kind.', ['credit_installment', 'overdraft_interest']],
 ];
@@ -103,6 +111,12 @@ test('every value of every closed set a message is looked up by has a message in
     }
   }
   assert.deepEqual(missing, []);
+});
+
+test('the training reasons map to a message in both languages, every one of them typed', () => {
+  for (const key of [...Object.values(OWN_WHY), ...Object.values(RETRAIN_WHY)]) for (const lang of ['en', 'fr'] as const) assert.notEqual((lang === 'en' ? en : fr)[key].trim(), '', `${key} (${lang})`);
+  assert.deepEqual(Object.keys(OWN_WHY).sort(), OWN_WHYS.slice().sort());
+  assert.deepEqual(Object.keys(RETRAIN_WHY).sort(), RETRAIN_WHYS.slice().sort());
 });
 
 test('every agency option has its title, sub, note, phases, unavailable reason, and a place to go; the keys are typed, so a new option breaks the Record before it reaches here', () => {

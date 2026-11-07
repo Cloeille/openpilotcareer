@@ -1,0 +1,37 @@
+/* ---------------------------------------------------------------- training (v4 lot TRAINING): the centre screen reuses the agency's two-column frame (.ag-screen, .ag-main, .ag-side), these are its own parts. */
+
+.tr-centres, .tr-people, .tr-courses, .rt-gaps { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.tr-centre { display: flex; flex-direction: column; gap: 8px; padding-top: 10px; border-top: 1px solid var(--border); }
+.tr-centre:first-child { border-top: 0; padding-top: 0; }
+.tr-seats { display: flex; flex-direction: column; gap: 6px; }
+
+.tr-offers th, .tr-offers td { white-space: nowrap; }
+.tr-offer { cursor: pointer; }
+.tr-offer[aria-selected='true'] { background: #FFFFFF08; }
+.tr-offer:focus-visible { outline: 2px solid var(--text-primary); outline-offset: -2px; background: var(--surface-hover); }
+.tr-costs { display: flex; gap: 24px; }
+.tr-cost { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.tr-cost-value { font: 600 24px var(--display); font-variant-numeric: tabular-nums; }
+
+.tr-person, .tr-course { display: flex; align-items: center; gap: 12px; padding: 10px 8px; border-top: 1px solid var(--border); border-radius: 4px; }
+.tr-person { cursor: pointer; }
+.tr-person:first-child, .tr-course:first-child { border-top: 0; }
+.tr-person:hover { background: var(--surface-hover); }
+.tr-person:focus-visible { outline: 2px solid var(--text-primary); outline-offset: -2px; background: var(--surface-hover); }
+.tr-person > .dim, .tr-person > .st-warn { margin-left: auto; white-space: nowrap; }
+.tr-course .col.end { margin-left: auto; align-items: flex-end; text-align: right; }
+.tr-course.running .icon { color: var(--info); }
+
+/* ---- reconversion */
+.rt-option { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 8px 16px; padding: 20px 18px; border-radius: 4px; background: #FFFFFF08; outline: 1px solid var(--border-strong); outline-offset: -1px; cursor: pointer; }
+.rt-option:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 2px; }
+.rt-opt-no { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--border-strong); border-radius: 4px; font: 600 16px var(--display); }
+.rt-opt-title { font: 600 20px var(--display); }
+.rt-facts { grid-column: 2; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; margin: 8px 0 0; }
+.rt-facts > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.rt-facts dd { margin: 0; }
+.rt-gap { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-top: 1px solid var(--border); }
+.rt-gap:first-child { border-top: 0; }
+.rt-gap.bad .icon { color: var(--danger); }
+.rt-gap.warn .icon { color: var(--warning); }
+.rt-gap.ok .icon { color: var(--success); }

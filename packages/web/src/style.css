@@ -15,6 +15,7 @@
 @import './agency.css';
 @import './reports.css';
 @import './credit.css';
+@import './training.css';
 
 :root {
   color-scheme: dark;
