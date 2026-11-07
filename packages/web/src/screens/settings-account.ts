@@ -103,7 +103,7 @@ function deleteSection(ctx: Ctx): HTMLElement {
     void act(t('set.delete.done'), async () => {
       await api('/me', { method: 'DELETE', body: { password: pw.control.value } });
       session.company = null;
-      session.set(session.server, null);
+      session.signOut();
       location.hash = '#dashboard';
       location.reload();
     });

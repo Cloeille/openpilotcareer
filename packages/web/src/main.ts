@@ -40,7 +40,7 @@ function signedOut(): void {
   shown = null;
   loginView(root, () => { location.hash = '#dashboard'; void boot(); });
 }
-setUnauthorizedHandler(() => { session.set(session.server, null); signedOut(); notify(t('session.ended'), 'error'); });
+setUnauthorizedHandler(() => { session.signOut(); signedOut(); notify(t('session.ended'), 'error'); });
 setNetworkLostHandler(() => { if (snap && !offline) startOffline(); });
 
 /** Load the account and what the shell needs, showing progress; if the server cannot be reached, fall back to the login screen, whose server check explains why and offers a retry. */
@@ -79,7 +79,7 @@ function beginOnboarding(ob: Onboarding, additional: boolean): void {
     onDone: (dest) => { stopOnboarding(); history.replaceState(null, '', dest); void refresh().catch((e) => { notify(errorText(e), 'error'); signedOut(); }); },
     onQuit: (add) => {
       stopOnboarding();
-      if (add && snap) { session.company = before; history.replaceState(null, '', '#dashboard'); void refresh().catch((e) => notify(errorText(e), 'error')); } else { session.set(session.server, null); signedOut(); }
+      if (add && snap) { session.company = before; history.replaceState(null, '', '#dashboard'); void refresh().catch((e) => notify(errorText(e), 'error')); } else { session.signOut(); signedOut(); }
     },
   }, ob, additional);
 }
@@ -101,7 +101,7 @@ async function switchCompany(id: number): Promise<void> {
 async function logout(remote: boolean): Promise<void> {
   stopOffline();
   if (remote) await api('/auth/logout', { method: 'POST' }).catch(() => undefined);
-  session.set(session.server, null);
+  session.signOut();
   signedOut();
 }
 
