@@ -343,3 +343,5 @@ export type CompanyProfile = Company & {
 export * from './live.ts';
 // ---- lot lines (v3)
 export * from './lines.ts';
+// ---- lot staff (v3)
+export * from './staff.ts';
