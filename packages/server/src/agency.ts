@@ -12,6 +12,7 @@ import { balanceOf } from './game.ts';
 import { HttpError } from './http.ts';
 import { stoppageCostPerDay } from './lines-manage.ts';
 import type { LineRow } from './lines.ts';
+import { FLIES_SQL } from './staff.ts';
 import { basesOf, categoryOf, engage, fleetTypes, lineBase, lineShortage, market, memberRow, nameFrom, openOf, roleOf } from './staff-people.ts';
 import { memberView } from './staff-views.ts';
 
@@ -142,7 +143,7 @@ export function agencyView(db: Db, companyId: number, q: AgencyQuery, now: numbe
   const request: Position = m ? { ...asked, count: m.count } : asked; // an open mission is for the people it was opened for
   const perDay = gaps.find((g) => g.base === request.base && g.qual === request.qual)?.perDay ?? 0;
   const course = TRAINING_COURSE[categoryOf(db, companyId, request.qual)!];
-  const trainable = get<{ n: number }>(db, `SELECT COUNT(*) AS n FROM staff s WHERE s.company_id = ? AND s.family = 'pilot' AND s.base = ? AND s.starts_at <= ? AND (s.ends_at IS NULL OR s.ends_at > ?)
+  const trainable = get<{ n: number }>(db, `SELECT COUNT(*) AS n FROM staff s WHERE s.company_id = ? AND s.family = 'pilot' AND s.base = ? AND s.starts_at <= ? AND (s.ends_at IS NULL OR s.ends_at > ?) AND ${FLIES_SQL}
     AND NOT EXISTS (SELECT 1 FROM staff_quals x WHERE x.staff_id = s.id AND x.type_icao = ?)`, companyId, request.base, now, now, request.qual)!.n;
   const options = optionsOf({
     count: request.count, perDay, now, searchDays: m ? Math.max(0, Math.ceil((m.ready_at - now) / DAY_MS)) : AGENCY_SEARCH_DAYS,

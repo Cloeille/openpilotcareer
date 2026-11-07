@@ -2,7 +2,7 @@
 // people file (deterministically per person and month) so the player has something to decide.
 import {
   DAY_MS, DUTY_MAX_MIN, FIRING_MONTHS, FLIGHT_MAX_28D_MIN, LEAVE_ASK_RATE, LEAVE_DAYS_PER_YEAR, REST_POLICIES, REST_POLICY_NAMES, STAFF_FAMILIES, coverageOf, dayIso, dayNo,
-  dutyViolation, isoDayNo, yearOfDay,
+  ROLE_INSTRUCTOR, ageAt, dutyViolation, flies, isoDayNo, retirementAt, yearOfDay,
   type Arrival, type Blocker, type Candidate, type CandidatesView, type Coverage, type DutyBlock, type FamilyRow, type LeaveRequest, type LeaveView, type PolicyOption, type Qualification,
   type StaffDetail, type StaffFamily, type StaffMember, type StaffOverview, type WatchItem,
   type SORTS,
@@ -27,6 +27,7 @@ export function memberView(db: Db, s: StaffRow, now: number): StaffMember {
   return {
     id: s.id, family: s.family, name: s.name, role: s.role, base: s.base, hiredAt: s.hired_at, startsAt: s.starts_at, endsAt: s.ends_at, salary: s.salary, reliability: s.reliability, morale: s.morale,
     experience: s.experience, contract: s.contract, noticeDays: s.notice_days, state: stateOf(db, s, now, rulesOf(db, s.company_id)), quals: qualsOf(db, s.id).map((q) => q.type_icao),
+    age: ageAt(s.birth_year, now), retiresAt: retirementAt(s.birth_year, s.role),
   };
 }
 
@@ -55,7 +56,7 @@ export function overview(db: Db, companyId: number, now: number, base?: string, 
   const families: FamilyRow[] = [];
   for (const fam of STAFF_FAMILIES) {
     if (family && fam !== family) continue;
-    const people = roster.filter((s) => s.family === fam);
+    const people = roster.filter((s) => s.family === fam && (fam !== 'pilot' || s.role !== ROLE_INSTRUCTOR));
     const need = countOf(demand, fam);
     if (people.length === 0 && need === 0) continue;
     const r = row(fam, people, need);
@@ -83,7 +84,7 @@ const FATIGUE_WATCH = 50;
 function watchList(db: Db, people: StaffRow[], now: number): WatchItem[] {
   const out: WatchItem[] = [];
   for (const s of people) {
-    if (s.family !== 'pilot' && s.family !== 'cabin') continue;
+    if (!flies(s)) continue;
     const f = dutyFacts(db, s, now);
     if (f.fatigue >= FATIGUE_WATCH) out.push({ staffId: s.id, name: s.name, family: s.family, reason: 'fatigue', value: f.fatigue, detail: `fatigue ${f.fatigue}%` });
     else if (f.flight28Min > FLIGHT_MAX_28D_MIN * 0.85) out.push({ staffId: s.id, name: s.name, family: s.family, reason: 'duty', value: Math.round(f.flight28Min / 60), detail: `${Math.round(f.flight28Min / 60)} h of 100 h in 28 days` });
@@ -130,7 +131,7 @@ export function detail(db: Db, s: StaffRow, now: number): StaffDetail {
 
 /** The first of the next scheduled flights this person could fly (at their position, rated) that they could NOT fly legally: which rule and by how much. */
 function alertFor(db: Db, s: StaffRow, now: number): StaffDetail['alert'] {
-  if (s.starts_at > now || (s.ends_at !== null && s.ends_at <= now) || (s.family !== 'pilot' && s.family !== 'cabin')) return null;
+  if (s.starts_at > now || (s.ends_at !== null && s.ends_at <= now) || !flies(s)) return null;
   const rules = rulesOf(db, s.company_id), code = companyCode(db, s.company_id);
   const rated = new Set(qualsOf(db, s.id).map((q) => q.type_icao));
   const legs = all<{ flight_no: number; dep_at: number; arr_at: number; origin: string; dest: string; icao: string }>(db,
@@ -164,7 +165,7 @@ export function vacancy(db: Db, companyId: number, now: number): { count: number
   const roster = rosterOf(db, companyId, now);
   let best: { count: number; label: string } | null = null;
   for (const sl of companyDemand(db, companyId, rulesOf(db, companyId))) {
-    const have = roster.filter((r) => r.family === sl.family && r.base === sl.base && (sl.type === null || qualsOf(db, r.id).some((q) => q.type_icao === sl.type))).length;
+    const have = roster.filter((r) => r.family === sl.family && r.role !== ROLE_INSTRUCTOR && r.base === sl.base && (sl.type === null || qualsOf(db, r.id).some((q) => q.type_icao === sl.type))).length;
     if (sl.count - have > (best?.count ?? 0)) best = { count: sl.count - have, label: `${sl.family}${sl.type ? ` ${sl.type}` : ''} ${sl.base}` };
   }
   return best;
@@ -228,7 +229,7 @@ export function leaveView(db: Db, companyId: number, now: number, fromIso?: stri
     return { family: fam, label: FAMILY_LABEL[fam], headcount: roster.filter((s) => s.family === fam).length, perDay: positions, days: Array.from({ length: span }, (_, i) => coverageOf(availableOn(db, companyId, fam, from + i, now), positions)) };
   });
   const states = roster.map((s) => ({ s, st: stateOf(db, s, now, rules) }));
-  const flyers = roster.filter((s) => s.family === 'pilot' || s.family === 'cabin');
+  const flyers = roster.filter(flies);
   const fatigues = flyers.map((s) => dutyFacts(db, s, now).fatigue);
   const names = new Map(roster.map((s) => [s.id, s]));
   const requests = all<{ id: number; staff_id: number; from_day: number; to_day: number; status: 'pending' | 'granted' | 'refused'; kind: 'leave' | 'rest' | 'training' }>(db,

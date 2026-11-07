@@ -30,10 +30,10 @@ test('signing: one function gives what leaves the account today and what the bui
   assert.ok(credit.instalment > 1_880_000 / 120, 'the instalment carries interest');
 });
 
-test('the catalogue: Nice has the mockup\'s ten buildings and the kitchen hall, every building with an effect is offered at a rent, every other one is not', () => {
+test('the catalogue: Nice has the mockup\'s ten buildings, the kitchen hall and the training centre, every building with an effect is offered at a rent, every other one is not', () => {
   const nice = slotsFor('LFMN', 'large');
-  assert.equal(nice.length, 11);
-  assert.deepEqual(nice.filter((s) => s.owner === 'available').map((s) => s.slot), ['MX1', 'MX2', 'AD', 'OPS', 'KT']);
+  assert.equal(nice.length, 12);
+  assert.deepEqual(nice.filter((s) => s.owner === 'available').map((s) => s.slot), ['MX1', 'MX2', 'AD', 'OPS', 'KT', 'TC']);
   assert.deepEqual(nice.find((s) => s.owner === 'ai'), { slot: 'CG1', name: 'Freight and storage', kind: 'cargo', effect: 'none', areaM2: 3_200, rent: 0, owner: 'ai', holder: 'Méridia Cargo' });
   for (const size of ['large', 'medium', 'small'] as const) {
     const s = slotsFor('LFXX', size);

@@ -10,7 +10,7 @@ import { ApiError } from './errors.ts';
  */
 
 export type StaffFamily = 'pilot' | 'cabin' | 'ground' | 'admin' | 'maintenance' | 'kitchen';
-export type StaffRole = 'captain' | 'fo' | 'attendant' | 'agent' | 'clerk' | 'technician' | 'cook';
+export type StaffRole = 'captain' | 'fo' | 'attendant' | 'agent' | 'clerk' | 'technician' | 'cook' | 'instructor';
 export type StaffState = 'pending' | 'free' | 'onDuty' | 'resting' | 'leave' | 'training';
 export type Coverage = 'ok' | 'tight' | 'short' | 'none';
 export type RestPolicy = 'legal' | 'standard' | 'generous';
@@ -22,6 +22,8 @@ export type StaffMember = {
   /** Flight hours for a pilot, years for the others. */
   experience: number;
   contract: 'cdi' | 'cdd'; noticeDays: number; state: StaffState; quals: string[];
+  /** From the birth year (null: a row from before it was recorded) and the instant the person must retire (v4 TRAINING). */
+  age?: number | null; retiresAt?: number | null;
   /** People the row stands for: 1 for a pilot or a member of cabin crew, the headcount of a pool (ground, admin, maintenance, kitchen). */
   poolCount: number;
 };
@@ -57,7 +59,7 @@ export type Candidate = {
 export type CandidatesView = { market: number; candidates: Candidate[]; suggestion: { count: number; label: string } | null };
 export type CandidateQuery = { family?: StaffFamily; base?: string; qual?: string };
 export type HireResult = { member: StaffMember; startsAt: number; premium: number; balanceAfter: number };
-export type TrainResult = { member: StaffMember; cost: number; days: number; until: number; balanceAfter: number };
+export type TrainResult = { member: StaffMember; place: 'own' | 'outside'; cost: number; saved: number; days: number; until: number; balanceAfter: number };
 export type InterimResult = { member: StaffMember; cost: number; endsAt: number; balanceAfter: number };
 
 export type LeaveRequest = {

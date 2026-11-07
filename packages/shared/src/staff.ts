@@ -8,10 +8,13 @@ import { DAY_MS } from './lines.ts';
 
 export const STAFF_FAMILIES = ['pilot', 'cabin', 'ground', 'admin', 'maintenance', 'kitchen'] as const;
 export type StaffFamily = (typeof STAFF_FAMILIES)[number];
-export type StaffRole = 'captain' | 'fo' | 'attendant' | 'agent' | 'clerk' | 'technician' | 'cook';
+export type StaffRole = 'captain' | 'fo' | 'attendant' | 'agent' | 'clerk' | 'technician' | 'cook' | 'instructor';
 export const ROLE_OF: Record<Exclude<StaffFamily, 'pilot'>, StaffRole> = { cabin: 'attendant', ground: 'agent', admin: 'clerk', maintenance: 'technician', kitchen: 'cook' };
 /** Only pilots and cabin crew fly: the line engine's crew check reads these two families. */
 export const FLYING_FAMILIES: readonly StaffFamily[] = ['pilot', 'cabin'];
+/** A pilot who teaches at the training centre (v4 TRAINING, C26): still a pilot row, with his ratings, but he no longer takes legs. */
+export const ROLE_INSTRUCTOR = 'instructor' satisfies StaffRole;
+export const flies = (s: { family: StaffFamily; role: StaffRole }): boolean => FLYING_FAMILIES.includes(s.family) && s.role !== ROLE_INSTRUCTOR;
 
 /** Crew an aircraft needs on every leg (B.3): two pilots (one below 10 seats), one cabin attendant per 40 seats from 20 seats up (ATR 72: 2, a 130-seater: 4, a C172: none). */
 export const crewNeeded = (seats: number): { pilots: number; cabin: number } => ({ pilots: seats >= 10 ? 2 : 1, cabin: seats >= 20 ? Math.ceil(seats / 40) : 0 });
@@ -187,7 +190,9 @@ export const candidatesQuerySchema = z.object({
 export const staffQuerySchema = z.object({ base: airportCode.optional(), family: z.enum(STAFF_FAMILIES).optional() });
 /** `startNow`: pay START_NOW_FEE too, the hire starts at once. */
 export const hireSchema = z.object({ candidateId: z.string().min(1).max(60), startNow: z.boolean().optional() });
-export const trainSchema = z.object({ type: typeCode });
+/** Where a course is taken: the company's own training centre (v4 TRAINING), or outside at the full price. */
+export type TrainPlace = 'own' | 'outside';
+export const trainSchema = z.object({ type: typeCode, place: z.enum(['own', 'outside']).default('outside') });
 export const transferSchema = z.object({ base: airportCode });
 export const interimSchema = z.object({ family: z.enum(STAFF_FAMILIES), qual: typeCode.optional(), base: airportCode.optional(), days: z.int().min(1).max(MAX_INTERIM_DAYS) })
   .refine((b) => b.family !== 'pilot' || !!b.qual, { message: 'qual: a pilot needs the type to fly', path: ['qual'] });
@@ -205,6 +210,8 @@ export type StaffMember = {
   /** Flight hours for a pilot, years for the others. */
   experience: number;
   contract: 'cdi' | 'cdd'; noticeDays: number; state: StaffState; quals: string[];
+  /** From the birth year (null for a row from before it was recorded), and the instant the person must retire (v4 TRAINING). */
+  age: number | null; retiresAt: number | null;
 };
 export type Qualification = { type: string; name: string; validFrom: number; validUntil: number | null; inTraining: boolean };
 /** `dutyMin`, `limitMin`: minutes; `restHours`, `flight28d`, `flight12m`: hours. */
@@ -247,7 +254,7 @@ export type Candidate = {
 export type CandidatesView = { market: number; candidates: Candidate[]; suggestion: { count: number; label: string } | null };
 export type HireResult = { member: StaffMember; startsAt: number; premium: number; balanceAfter: number };
 export type FireResult = { severance: number; balanceAfter: number };
-export type TrainResult = { member: StaffMember; cost: number; days: number; until: number; balanceAfter: number };
+export type TrainResult = { member: StaffMember; place: TrainPlace; cost: number; saved: number; days: number; until: number; balanceAfter: number };
 export type InterimResult = { member: StaffMember; cost: number; endsAt: number; balanceAfter: number };
 export type StartNowResult = { member: StaffMember; fee: number; balanceAfter: number };
 

@@ -28,7 +28,7 @@ export function facilityContractView(c: FacilityContractRow, at: number): Facili
 }
 
 /** What a held building costs a month: the rent, or the upkeep and the instalment while the credit lasts. */
-const monthlyOf = (c: FacilityContractRow): number => (c.kind === 'lease' ? c.monthly : c.upkeep + (c.principal > 0 && c.months_paid < (c.months ?? 0) ? c.monthly : 0));
+export const monthlyOf = (c: FacilityContractRow): number => (c.kind === 'lease' ? c.monthly : c.upkeep + (c.principal > 0 && c.months_paid < (c.months ?? 0) ? c.monthly : 0));
 
 export function facilityView(db: Db, companyId: number, f: FacilityRow, holder: Holder | undefined, now: number): FacilityView {
   const seed = seedOf(f.hub_icao, f.slot)!;

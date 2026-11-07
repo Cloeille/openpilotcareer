@@ -14,7 +14,7 @@ import type { StaffFamily } from './staff.ts';
 export const FACILITY_KINDS = ['maintenance', 'terminal', 'cargo', 'office', 'airport'] as const;
 export type FacilityKind = (typeof FACILITY_KINDS)[number];
 /** What a building does for the company that holds it. Only a building with an effect is ever offered: `none` stays with the airport or an AI company. */
-export const FACILITY_EFFECTS = ['hangar', 'desks', 'ops', 'kitchen', 'none'] as const;
+export const FACILITY_EFFECTS = ['hangar', 'desks', 'ops', 'kitchen', 'training', 'none'] as const;
 export type FacilityEffect = (typeof FACILITY_EFFECTS)[number];
 /** Who holds a building before any company signs: the airport (never for sale), a fixed AI company (decision C6: seeded, no take-over at runtime), or nobody. */
 export type SeedOwner = 'airport' | 'ai' | 'available';
@@ -42,6 +42,7 @@ const LFMN: readonly SlotSeed[] = [
   offered('AD', 'Administrative offices', 'office', 'desks', 1_600, 6_200),
   offered('OPS', 'Operations centre', 'office', 'ops', 1_100, 9_800),
   offered('KT', 'Central kitchen', 'cargo', 'kitchen', 2_400, 8_500),
+  offered('TC', 'Training centre', 'office', 'training', 1_800, 12_000),
   kept('TWR', 'Control tower', 'airport', 100),
   kept('FUEL', 'Fuel depot', 'airport', 1_300),
 ];
@@ -56,7 +57,7 @@ function generic(size: AirportSize): SlotSeed[] {
     offered('MX1', 'Maintenance hangar 1', 'maintenance', 'hangar', 4_400, scaled(18_500, size)),
     offered('AD', 'Administrative offices', 'office', 'desks', 1_600, scaled(6_200, size)),
   ];
-  if (size !== 'small') s.push(offered('OPS', 'Operations centre', 'office', 'ops', 1_100, scaled(9_800, size)), offered('KT', 'Central kitchen', 'cargo', 'kitchen', 2_400, scaled(8_500, size)));
+  if (size !== 'small') s.push(offered('OPS', 'Operations centre', 'office', 'ops', 1_100, scaled(9_800, size)), offered('KT', 'Central kitchen', 'cargo', 'kitchen', 2_400, scaled(8_500, size)), offered('TC', 'Training centre', 'office', 'training', 1_800, scaled(12_000, size)));
   if (size === 'large') s.push(offered('MX2', 'Maintenance hangar 2', 'maintenance', 'hangar', 4_200, scaled(18_500, size)), kept('TWR', 'Control tower', 'airport', 100));
   return s;
 }
@@ -118,7 +119,7 @@ export function signing(rent: number, kind: FacilityContractKind, level: number,
 
 // ---------------------------------------------------------------- levels and effects
 
-export const FACILITY_MAX_LEVEL: Record<FacilityEffect, number> = { hangar: 3, desks: 3, ops: 1, kitchen: 1, none: 1 };
+export const FACILITY_MAX_LEVEL: Record<FacilityEffect, number> = { hangar: 3, desks: 3, ops: 1, kitchen: 1, training: 1, none: 1 };
 /** A contract can start with the works to level 2; level 3 needs 6 months at level 2 (the mockup: "Après 6 mois au niveau 2"). During works the building keeps the level below. */
 export const MAX_LEVEL_AT_SIGNING = 2;
 export const LEVEL3_AFTER_DAYS = 180;

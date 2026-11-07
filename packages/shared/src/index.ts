@@ -409,3 +409,5 @@ export * from './agency.ts';
 export * from './reports.ts';
 // ---- lot credit (v4)
 export * from './credit.ts';
+// ---- lot training (v4)
+export * from './training.ts';

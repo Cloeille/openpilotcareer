@@ -336,7 +336,22 @@ CREATE TABLE credits (
 CREATE INDEX credits_company ON credits(company_id, status);
 `;
 
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT, SCHEMA_AGENCY, SCHEMA_REPORTS, SCHEMA_CREDIT];
+// v4 TRAINING: a birth year for everybody (age and the retirement at 65, C26) and the courses taken (a type rating is `train()` of staff-people.ts: this is its record, which the centre's seats and the
+// "saved" figure read). Rows from before the column get the age a person would have been hired at: the same formula as shared `hireAge` (a pilot: 24 + a year per 350 flight hours, the others: 22 + their
+// years, plus a spread of `id * 37 % 8` years that makes it deterministic per person, at most HIRE_AGE_MAX = 60), counted from the year of the hire. `base` is where the course was taught (the centre's hub).
+// `saved` is the outside price less what was paid (0 outside).
+const SCHEMA_TRAINING = `
+ALTER TABLE staff ADD COLUMN birth_year INTEGER;
+UPDATE staff SET birth_year = CAST(strftime('%Y', hired_at / 1000, 'unixepoch') AS INTEGER)
+  - MIN(60, CASE WHEN family = 'pilot' THEN 24 + CAST(experience / 350 AS INTEGER) ELSE 22 + CAST(experience AS INTEGER) END + (id * 37) % 8);
+CREATE TABLE training_courses (
+  id INTEGER PRIMARY KEY, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, staff_id INTEGER NOT NULL REFERENCES staff(id) ON DELETE CASCADE,
+  type_icao TEXT NOT NULL, base TEXT NOT NULL, place TEXT NOT NULL CHECK (place IN ('own','outside')), start_at INTEGER NOT NULL, end_at INTEGER NOT NULL, cost INTEGER NOT NULL, saved INTEGER NOT NULL DEFAULT 0);
+CREATE INDEX training_courses_company ON training_courses(company_id, start_at);
+CREATE INDEX training_courses_seats ON training_courses(company_id, base, type_icao, place);
+`;
+
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT, SCHEMA_AGENCY, SCHEMA_REPORTS, SCHEMA_CREDIT, SCHEMA_TRAINING];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);

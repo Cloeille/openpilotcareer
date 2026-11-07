@@ -1,11 +1,11 @@
 // Lot STAFF (v3): what the player does with her people: recruit, let go, train, transfer, rest, interim, the rest policy and the starter crew (C11).
 // Domain operations: callers wrap them in `tx`. Money goes through game.ts `post`; a payment the balance cannot cover is 409 insufficient_funds (like finance.ts).
 import {
-  CAPTAIN_FROM_HOURS, DAY_MS, DEFAULT_NOTICE_DAYS, FIRING_MONTHS, HIRING_PREMIUM_MONTHS, MAX_INTERIM_DAYS, START_NOW_FEE, STAFF_FAMILIES, TRAINING_COURSE, ROLE_OF, dayNo, experienceFactor, interimPrice, salaryFor,
-  type AircraftCategory, type Candidate, type FireResult, type InterimResult, type LineBridge, type LineStartNow, type RestPolicy, type StaffFamily, type StaffRole, type TrainResult,
+  CAPTAIN_FROM_HOURS, DAY_MS, DEFAULT_NOTICE_DAYS, FIRING_MONTHS, HIRING_PREMIUM_MONTHS, MAX_INTERIM_DAYS, START_NOW_FEE, STAFF_FAMILIES, ROLE_OF, ROLE_INSTRUCTOR, RETIREMENT_AGE, birthYearOf, courseOf, dayNo, experienceFactor, interimPrice, ownWhy, retirementAt, salaryFor,
+  type AircraftCategory, type Candidate, type FireResult, type InterimResult, type LineBridge, type LineStartNow, type RestPolicy, type StaffFamily, type StaffRole, type TrainPlace, type TrainResult,
 } from '@opc/shared';
 import { hashSeed, mulberry32 } from './board.ts';
-import { assertSeat } from './facilities.ts';
+import { assertSeat, trainingSeats } from './facilities.ts';
 import { all, get, run, type Db } from './db.ts';
 import { balanceOf, post, snapshot, spend, spendable, typeFor } from './game.ts';
 import { HttpError } from './http.ts';
@@ -52,6 +52,7 @@ function insertStaff(db: Db, o: { companyId: number; family: StaffFamily; name: 
   const id = run(db, `INSERT INTO staff (company_id, family, name, role, base, hired_at, starts_at, ends_at, salary, experience, reliability, morale, contract, notice_days, candidate_id)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, o.companyId, o.family, o.name, roleOf(o.family, o.experience), o.base, o.hiredAt, o.startsAt, o.endsAt ?? null, o.salary, o.experience, o.reliability, o.morale,
     o.contract ?? 'cdi', o.noticeDays ?? DEFAULT_NOTICE_DAYS, o.candidateId ?? null).id;
+  run(db, 'UPDATE staff SET birth_year = ? WHERE id = ?', birthYearOf({ id, family: o.family, experience: o.experience, hiredAt: o.hiredAt }), id);
   if (o.qual) run(db, 'INSERT INTO staff_quals (staff_id, type_icao, valid_from, valid_until) VALUES (?, ?, ?, ?)', id, o.qual, o.startsAt, o.qualUntil ?? null);
   return id;
 }
@@ -150,18 +151,26 @@ export function fire(db: Db, companyId: number, id: number, now: number): FireRe
 
 const employedNow = (s: StaffRow, now: number): boolean => s.starts_at <= now && (s.ends_at === null || s.ends_at > now);
 
-/** A type rating: the pilot is off the roster for the course (21 days and 24 000 euros for a jet airliner) and can fly the type from the day after. */
-export function train(db: Db, companyId: number, id: number, type: string, now: number): TrainResult {
+/** A type rating: the pilot is off the roster for the course and can fly the type from the day after. Outside it is TRAINING_COURSE (21 days and 24 000 euros for a jet airliner);
+ *  `own` takes the company's training centre at his base, which makes the same course cheaper and shorter if an instructor there holds the type and has a seat left (409 `no_training_centre`, `no_instructor`, `centre_full`).
+ *  Every course is recorded (`training_courses`): the centre's seats and what it saved read it. */
+export function train(db: Db, companyId: number, id: number, type: string, now: number, place: TrainPlace = 'outside'): TrainResult {
   const s = ownedStaff(db, companyId, id);
   if (s.family !== 'pilot') throw new HttpError(422, 'not_a_pilot', 'only pilots hold type ratings');
   if (!employedNow(s, now)) throw new HttpError(409, 'not_employed', 'this person is not on your payroll yet');
   if (get(db, 'SELECT 1 AS x FROM staff_quals WHERE staff_id = ? AND type_icao = ?', id, type)) throw new HttpError(409, 'already_qualified', `${s.name} already holds or is training for ${type}`);
-  const course = TRAINING_COURSE[typeFor(db, companyId, type).category];
-  pay(db, companyId, now, 'training', course.cost, `${type} type rating ${s.name}`);
+  const category = typeFor(db, companyId, type).category;
+  const course = courseOf(category, place), saved = courseOf(category, 'outside').cost - course.cost;
+  if (place === 'own') {
+    const seats = trainingSeats(db, companyId, s.base, type, now), why = ownWhy(seats);
+    if (why) throw new HttpError(409, why, `the training centre at ${s.base} cannot take ${s.name} on ${type} now`, { base: s.base, seats: seats.seats, used: seats.used });
+  }
+  pay(db, companyId, now, 'training', course.cost, `${type} type rating ${s.name}${place === 'own' ? ' (training centre)' : ''}`);
   const until = now + course.days * DAY_MS;
   run(db, 'INSERT INTO staff_quals (staff_id, type_icao, valid_from, valid_until) VALUES (?, ?, ?, NULL)', id, type, until);
   run(db, "INSERT INTO staff_leave (staff_id, from_day, to_day, status, kind) VALUES (?, ?, ?, 'granted', 'training') ON CONFLICT DO NOTHING", id, dayNo(now), dayNo(until) - 1);
-  return { member: null as never, cost: course.cost, days: course.days, until, balanceAfter: balanceOf(db, companyId) };
+  run(db, 'INSERT INTO training_courses (company_id, staff_id, type_icao, base, place, start_at, end_at, cost, saved) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', companyId, id, type, s.base, place, now, until, course.cost, saved);
+  return { member: null as never, place, cost: course.cost, saved, days: course.days, until, balanceAfter: balanceOf(db, companyId) };
 }
 
 /** A new base: free, but the person is off for the day and the next one (travel and settling in), so a transfer cannot teleport a crew onto a flight. */
@@ -213,6 +222,20 @@ function bookInterim(db: Db, companyId: number, o: { family: StaffFamily; qual: 
 
 export function setPolicy(db: Db, companyId: number, policy: RestPolicy): void {
   run(db, 'INSERT INTO staff_company (company_id, policy) VALUES (?, ?) ON CONFLICT (company_id) DO UPDATE SET policy = excluded.policy', companyId, policy);
+}
+
+// ---------------------------------------------------------------- retirement (C26)
+
+/** People on the payroll whose retirement instant (shared `retirementAt`: 65, an instructor 70) has passed: they leave on it, not on the day somebody notices. Read-only. */
+export const retirementsDue = (db: Db, now: number): { id: number; at: number }[] =>
+  all<{ id: number; role: StaffRole; birth_year: number }>(db, 'SELECT id, role, birth_year FROM staff WHERE ends_at IS NULL AND birth_year IS NOT NULL AND birth_year <= ?', new Date(now).getUTCFullYear() - RETIREMENT_AGE)
+    .flatMap((r) => { const at = retirementAt(r.birth_year, r.role)!; return at <= now ? [{ id: r.id, at }] : []; });
+
+/** Put them off the payroll on the day of their retirement. Idempotent: a person who has left is no longer due. The caller wraps it in `tx` and runs it before the line ticks. */
+export function retireDue(db: Db, now: number): number {
+  const due = retirementsDue(db, now);
+  for (const r of due) run(db, 'UPDATE staff SET ends_at = ? WHERE id = ? AND ends_at IS NULL', r.at, r.id);
+  return due.length;
 }
 
 // ---------------------------------------------------------------- a stopped line: recruit, interim bridge, start now (B.2 item 6)
@@ -332,7 +355,7 @@ export function grantStarterCrew(db: Db, companyId: number, now: number, lines?:
   const rules = rulesOf(db, companyId);
   const need: Slot[] = lines ? demandOf(db, companyId, lines, rules) : companyDemand(db, companyId, rules);
   const roster = rosterOf(db, companyId, now);
-  const holders = (sl: Slot): number => roster.filter((r) => r.family === sl.family && r.base === sl.base).filter((r) => sl.type === null || get(db, 'SELECT 1 AS x FROM staff_quals WHERE staff_id = ? AND type_icao = ?', r.id, sl.type)).length;
+  const holders = (sl: Slot): number => roster.filter((r) => r.family === sl.family && r.role !== ROLE_INSTRUCTOR && r.base === sl.base).filter((r) => sl.type === null || get(db, 'SELECT 1 AS x FROM staff_quals WHERE staff_id = ? AND type_icao = ?', r.id, sl.type)).length;
   let made = 0;
   for (const sl of need) {
     for (let i = holders(sl); i < sl.count; i++) {

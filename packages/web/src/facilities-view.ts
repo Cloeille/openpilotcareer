@@ -100,6 +100,7 @@ export function effectOf(f: Pick<FacilityView, 'effect' | 'kind'> | Pick<Buildin
     case 'desks': return { key: 'fc.effect.office', vars: {} };
     case 'ops': return { key: 'fc.effect.ops', vars: {} };
     case 'kitchen': return { key: 'fc.effect.kitchen', vars: {} };
+    case 'training': return { key: 'fc.effect.training', vars: {} };
     case 'none': return { key: 'fc.effect.none', vars: {} };
   }
 }

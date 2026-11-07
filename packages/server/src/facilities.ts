@@ -2,8 +2,8 @@
 // operations centre: more lines) and the rows monthly billing reads. It imports the database and the catalogue only, never game.ts or fleet-extras.ts, because those import it.
 // Commands are in facilities-manage.ts, read models in facilities-views.ts. docs/v3-plan.md B.4 and its S3 implementation notes.
 import {
-  DESKS_FREE, DESK_FAMILIES, HANGAR_SELLS_LEVEL, MAX_LINES_PER_COMPANY, MAX_LINES_WITH_OPS, PARKING_SPOTS_PER_HUB, desksFor, hangarAircraft, hangarEffect, maintenanceSale, needsWidebodyHangar, slotsFor, techniciansFor,
-  type AircraftCategory, type FacilityContractKind, type HangarEffect, type PlanFacility, type SlotSeed, type StaffFamily,
+  DESKS_FREE, DESK_FAMILIES, HANGAR_SELLS_LEVEL, MAX_LINES_PER_COMPANY, MAX_LINES_WITH_OPS, PARKING_SPOTS_PER_HUB, ROLE_INSTRUCTOR, SEATS_PER_INSTRUCTOR, desksFor, hangarAircraft, hangarEffect, maintenanceSale, needsWidebodyHangar, slotsFor, techniciansFor,
+  type AircraftCategory, type FacilityContractKind, type HangarEffect, type PlanFacility, type SlotSeed, type StaffFamily, type TrainingSeats,
 } from '@opc/shared';
 import { airports } from './catalog.ts';
 import { all, get, run, type Db } from './db.ts';
@@ -117,6 +117,27 @@ export function assertSeat(db: Db, companyId: number, family: StaffFamily, base:
 
 /** Lines a company may fly: free up to MAX_LINES_PER_COMPANY, more with an operations centre at any of its hubs. */
 export const lineLimit = (db: Db, companyId: number): number => (heldBy(db, companyId).some((h) => effectOf(h) === 'ops') ? MAX_LINES_WITH_OPS : MAX_LINES_PER_COMPANY);
+
+// ---------------------------------------------------------------- training centre: seats for the courses of the company's own pilots (v4 TRAINING, C26)
+
+const INSTRUCTORS_SQL = `FROM staff s WHERE s.company_id = ? AND s.base = ? AND s.role = ? AND s.starts_at <= ? AND (s.ends_at IS NULL OR s.ends_at > ?)`;
+
+/** The company's training centre at `hub` at instant `at`: whether it holds the building (a contract that has started), the seats its instructors give (SEATS_PER_INSTRUCTOR each, employed at the hub)
+ *  and the own courses running there, which share them. */
+export function centreSeats(db: Db, companyId: number, hub: string, at: number): { centre: boolean; instructors: number; seats: number; used: number } {
+  const centre = heldBy(db, companyId, hub).some((h) => h.started_at <= at && effectOf(h) === 'training');
+  const instructors = get<{ n: number }>(db, `SELECT COUNT(*) AS n ${INSTRUCTORS_SQL}`, companyId, hub, ROLE_INSTRUCTOR, at, at)!.n;
+  const used = get<{ n: number }>(db, "SELECT COUNT(*) AS n FROM training_courses WHERE company_id = ? AND base = ? AND place = 'own' AND start_at <= ? AND end_at > ?", companyId, hub, at, at)!.n;
+  return { centre, instructors, seats: instructors * SEATS_PER_INSTRUCTOR, used };
+}
+
+/** What the centre can take for `type`: it also needs an instructor at the hub who holds the rating. */
+export function trainingSeats(db: Db, companyId: number, hub: string, type: string, at: number): TrainingSeats {
+  const teachers = get<{ n: number }>(db, `SELECT COUNT(*) AS n ${INSTRUCTORS_SQL} AND EXISTS (SELECT 1 FROM staff_quals q WHERE q.staff_id = s.id AND q.type_icao = ? AND q.valid_from <= ? AND (q.valid_until IS NULL OR q.valid_until > ?))`,
+    companyId, hub, ROLE_INSTRUCTOR, at, at, type, at, at)!.n;
+  const { centre, seats, used } = centreSeats(db, companyId, hub, at);
+  return { centre, teachers, seats, used };
+}
 
 // ---------------------------------------------------------------- monthly billing rows
 

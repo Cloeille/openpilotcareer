@@ -2,7 +2,7 @@
 // "Today" is a dry run of the line engine's own crew check over the next 24 h: the same `crewLeg` books the legs in order inside a savepoint that is rolled back,
 // so the duty hours shown are the ones the engine will compute, with the crews already chained from leg to leg.
 import {
-  BASE_WEAR_PCT, DAY_MS, DEFERRED_REPAIR_PCT, FLYING_FAMILIES, RISKY_FACTOR, SAFETY_MAX, TIRED_FATIGUE, TODAY_MAX, TRAINING_WARN_DAYS, WEAR_AFTER_SERVICE_PCT,
+  BASE_WEAR_PCT, DAY_MS, DEFERRED_REPAIR_PCT, RISKY_FACTOR, flies, SAFETY_MAX, TIRED_FATIGUE, TODAY_MAX, TRAINING_WARN_DAYS, WEAR_AFTER_SERVICE_PCT,
   dayNo, incidentRisk, insuranceSurcharge, leverPoints, riskCurve, riskMultiple, roundScores, safetyIndex, safetyScores, seasonOf,
   type IncidentKind, type IncidentView, type SafetyInputs, type SafetyLever, type SafetyView, type TodayRisk,
 } from '@opc/shared';
@@ -43,7 +43,7 @@ type Person = { id: number; fatigue: number };
 
 /** Pilots and cabin crew on the payroll now, with their fatigue (the staff lot's own figure). */
 const crewOf = (db: Db, companyId: number, now: number): Person[] =>
-  rosterOf(db, companyId, now).filter((s) => FLYING_FAMILIES.includes(s.family) && isEmployed(s, now)).map((s) => ({ id: s.id, fatigue: dutyFacts(db, s, now).fatigue }));
+  rosterOf(db, companyId, now).filter((s) => flies(s) && isEmployed(s, now)).map((s) => ({ id: s.id, fatigue: dutyFacts(db, s, now).fatigue }));
 
 /** Type ratings of permanent pilots that end within TRAINING_WARN_DAYS (a temporary contract's rating ends with the contract: that is not a check to retake). */
 const expiringRatings = (db: Db, companyId: number, now: number): number =>

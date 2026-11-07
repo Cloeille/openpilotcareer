@@ -2,7 +2,7 @@
 // under the duty rules of shared/staff.ts, books it in `staff_duty` (the ledger the 28-day and 12-month limits are sums over) or names why not.
 // A leaf of the line modules (lines.ts imports it): it never imports lines.ts values.
 import {
-  DAY_MS, DUTY_RELEASE_MIN, DUTY_REPORT_MIN, MAX_CONSECUTIVE_DUTY_DAYS, REPOSITION_H, REST_POLICIES, continuesDuty, crewNeeded, dayNo, dutyIncrementMin, dutyViolation, fatigueOf,
+  DAY_MS, DUTY_RELEASE_MIN, DUTY_REPORT_MIN, MAX_CONSECUTIVE_DUTY_DAYS, REPOSITION_H, REST_POLICIES, ROLE_INSTRUCTOR, continuesDuty, crewNeeded, dayNo, dutyIncrementMin, dutyViolation, fatigueOf,
   type CancelCause, type DutyInput, type RestPolicy, type RestPolicyRules, type StaffFamily, type StaffRole, type StaffState,
 } from '@opc/shared';
 import { all, get, run, type Db } from './db.ts';
@@ -11,7 +11,7 @@ import { typeFor } from './game.ts';
 
 export type StaffRow = {
   id: number; company_id: number; family: StaffFamily; name: string; role: StaffRole; base: string; hired_at: number; starts_at: number; ends_at: number | null;
-  salary: number; experience: number; reliability: number; morale: number; contract: 'cdi' | 'cdd'; notice_days: number; candidate_id: string | null;
+  salary: number; experience: number; reliability: number; morale: number; contract: 'cdi' | 'cdd'; notice_days: number; candidate_id: string | null; birth_year: number | null;
 };
 
 export const policyOf = (db: Db, companyId: number): RestPolicy => get<{ policy: RestPolicy }>(db, 'SELECT policy FROM staff_company WHERE company_id = ?', companyId)?.policy ?? 'standard';
@@ -47,11 +47,13 @@ export const positionOf = (s: Pick<StaffRow, 'base'>, i: DutyInput, at: number):
 
 // ---------------------------------------------------------------- availability
 
+/** An instructor teaches and no longer flies: every query that counts or picks line crew carries this (alias `s`). */
+export const FLIES_SQL = `s.role <> '${ROLE_INSTRUCTOR}'`;
 const qualifiedSql = `AND EXISTS (SELECT 1 FROM staff_quals q WHERE q.staff_id = s.id AND q.type_icao = ? AND q.valid_from <= ? AND (q.valid_until IS NULL OR q.valid_until > ?))`;
 
 /** Employed at `dep`, rated on `qual` (pilots), and not on granted leave, rest or training on a day the leg touches. */
 function availablePeople(db: Db, companyId: number, family: StaffFamily, dep: number, arr: number, qual: string | null): StaffRow[] {
-  return all<StaffRow>(db, `SELECT s.* FROM staff s WHERE s.company_id = ? AND s.family = ? AND s.starts_at <= ? AND (s.ends_at IS NULL OR s.ends_at > ?)
+  return all<StaffRow>(db, `SELECT s.* FROM staff s WHERE s.company_id = ? AND s.family = ? AND s.starts_at <= ? AND (s.ends_at IS NULL OR s.ends_at > ?) AND ${FLIES_SQL}
     ${qual ? qualifiedSql : ''}
     AND NOT EXISTS (SELECT 1 FROM staff_leave l WHERE l.staff_id = s.id AND l.status = 'granted' AND l.from_day <= ? AND l.to_day >= ?) ORDER BY s.id`,
   companyId, family, dep, dep, ...(qual ? [qual, dep, dep] : []), dayNo(arr), dayNo(dep));
@@ -111,7 +113,7 @@ export function crewShortage(db: Db, companyId: number, icaos: readonly string[]
   if (!isHuman(db, companyId)) return [];
   const out: Shortage[] = [];
   const count = (family: StaffFamily, qual: string | null): number =>
-    get<{ n: number }>(db, `SELECT COUNT(*) AS n FROM staff s WHERE s.company_id = ? AND s.family = ? AND s.base IN (?, ?) AND s.starts_at <= ? AND (s.ends_at IS NULL OR s.ends_at > ?) ${qual ? qualifiedSql : ''}`,
+    get<{ n: number }>(db, `SELECT COUNT(*) AS n FROM staff s WHERE s.company_id = ? AND s.family = ? AND s.base IN (?, ?) AND s.starts_at <= ? AND (s.ends_at IS NULL OR s.ends_at > ?) AND ${FLIES_SQL} ${qual ? qualifiedSql : ''}`,
       companyId, family, ends[0], ends[1], ts, ts, ...(qual ? [qual, ts, ts] : []))!.n;
   let cabin = 0;
   for (const icao of new Set(icaos)) {
@@ -127,8 +129,8 @@ export function crewShortage(db: Db, companyId: number, icaos: readonly string[]
 /** People employed now at the two ends of a line: pilots rated on any of its aircraft types, cabin crew, ground agents (in total and per airport). Used by the forecast. */
 export function crewHeadcount(db: Db, companyId: number, ends: readonly [string, string], icaos: readonly string[], ts: number): { pilots: number; cabin: number; ground: number; groundAt: Record<string, number> } {
   const people = (family: StaffFamily, airport?: string): number => get<{ n: number }>(db, `SELECT COUNT(*) AS n FROM staff s WHERE s.company_id = ? AND s.family = ? AND s.base ${airport ? '= ?' : 'IN (?, ?)'}
-    AND s.starts_at <= ? AND (s.ends_at IS NULL OR s.ends_at > ?)`, companyId, family, ...(airport ? [airport] : [ends[0], ends[1]]), ts, ts)!.n;
-  const pilots = icaos.length === 0 ? 0 : get<{ n: number }>(db, `SELECT COUNT(*) AS n FROM staff s WHERE s.company_id = ? AND s.family = 'pilot' AND s.base IN (?, ?) AND s.starts_at <= ? AND (s.ends_at IS NULL OR s.ends_at > ?)
+    AND s.starts_at <= ? AND (s.ends_at IS NULL OR s.ends_at > ?) AND ${FLIES_SQL}`, companyId, family, ...(airport ? [airport] : [ends[0], ends[1]]), ts, ts)!.n;
+  const pilots = icaos.length === 0 ? 0 : get<{ n: number }>(db, `SELECT COUNT(*) AS n FROM staff s WHERE s.company_id = ? AND s.family = 'pilot' AND s.base IN (?, ?) AND s.starts_at <= ? AND (s.ends_at IS NULL OR s.ends_at > ?) AND ${FLIES_SQL}
     AND EXISTS (SELECT 1 FROM staff_quals q WHERE q.staff_id = s.id AND q.type_icao IN (${icaos.map(() => '?').join(',')}) AND q.valid_from <= ? AND (q.valid_until IS NULL OR q.valid_until > ?))`,
     companyId, ends[0], ends[1], ts, ts, ...icaos, ts, ts)!.n;
   return { pilots, cabin: people('cabin'), ground: people('ground'), groundAt: { [ends[0]]: people('ground', ends[0]), [ends[1]]: people('ground', ends[1]) } };
