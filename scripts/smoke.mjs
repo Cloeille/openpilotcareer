@@ -277,6 +277,19 @@ expect((await call('POST', `/agency/missions/${mission.body.id}/sign`, { token: 
 expect((await call('POST', '/agency/missions', { token: lineTok, body: { base: 'LFPG', qual: 'C172', count: 1 } })).body.error === 'mission_open', 'one open mission per post');
 expect((await call('GET', '/agency/options', { token: (await call('POST', '/me/api-keys', { token: lineTok, body: { label: 'agency' } })).body.key })).status === 401, 'an API key cannot read the agency');
 expect((await call('DELETE', `/agency/missions/${mission.body.id}`, { token: lineTok })).status === 204, 'the mission is cancelled, nothing owed');
+// v4 training: the centre is a building of the plan (a facility like the kitchen hall); with none held the centre refuses and charges nothing, the pilots of the company are offered both prices, the retraining view names why a first officer cannot teach
+const centreHall = hubPlan.buildings.find((b) => b.effect === 'training');
+const trainingView = await call('GET', '/training', { token: lineTok });
+expect(centreHall && trainingView.status === 200 && trainingView.body.centres.length === 0 && Array.isArray(trainingView.body.offers) && trainingView.body.offers.every((o) => o.outside.cost > o.own.cost && o.ownWhy === 'no_training_centre'), `training: the centre ${centreHall?.name} is on offer at ${centreHall?.rent} a month, no pilot can use it before it is rented`, trainingView);
+const trainee = trainingView.body.offers[0];
+const trainBalance = (await call('GET', '/me', { token: lineTok })).body.company.balance;
+if (trainee) {
+  expect((await call('POST', '/training/courses', { token: lineTok, body: { staffId: trainee.staffId, type: trainee.type, place: 'own' } })).body.error === 'no_training_centre', 'a course at a centre she does not hold is refused');
+  expect((await call('GET', '/me', { token: lineTok })).body.company.balance === trainBalance, 'and charges nothing');
+}
+expect((await call('POST', '/training/courses', { token: lineTok, body: { staffId: 999999, type: 'C172', place: 'outside' } })).status === 404, "another company's pilot (or none) is a 404");
+expect((await call('GET', '/staff/999999/retrain', { token: lineTok })).status === 404, 'no retraining view for a pilot that is not hers');
+expect((await call('GET', '/training', { token: (await call('POST', '/me/api-keys', { token: lineTok, body: { label: 'training' } })).body.key })).status === 401, 'an API key cannot read the training centre');
 // v4 reports: the cash flow, statement, profitability and forecast read the same ledger the balance comes from
 const cashView = await call('GET', '/finance/cash?months=12', { token: lineTok });
 const meNow = (await call('GET', '/me', { token: lineTok })).body.company.balance;
