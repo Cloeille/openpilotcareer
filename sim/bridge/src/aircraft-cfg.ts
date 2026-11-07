@@ -10,6 +10,8 @@
 //   3. no engine: `icao_engine_count = 0` or `icao_engine_type = None` (gliders, balloons, static objects);
 //   4. `Category` present and not airplane / helicopter.
 // A jet bridge helper declares `icao_type_designator = "B772"` and two jet engines; only rule 1 catches it, which is why the ICAO and engine fields alone prove nothing.
+// Titles with no cfg to read (the official aircraft are archived): `PassiveAircraft` in the title marks the parked / static copies Asobo ships for airports (measured: 274 of
+// the 447 official titles of MSFS 2024); they are not user selectable either (rule 1), so they are dropped by title.
 // Anything that is not under SimObjects/Airplanes or SimObjects/Rotorcraft (AirplaneParts, GroundVehicles, Misc, Boats, Landmarks) never reaches this file: see aircraft-scan.ts.
 import type { SimAircraftEntry } from '@opc/shared';
 import { simAircraftEntrySchema } from '@opc/shared';
@@ -69,6 +71,9 @@ export type CfgRecord = {
 
 const flag = (v: string | undefined): boolean | undefined => (v === undefined ? undefined : v === '1' || v.toLowerCase() === 'true');
 const designator = (v: string | undefined): string | null => { const s = v?.trim().toUpperCase() ?? ''; return /^[A-Z0-9]{2,4}$/.test(s) ? s : null; };
+/** MSFS fills an untranslated manufacturer or type with its localisation key (`TT:AIRCRAFT.UI_MANUFACTURER`): that is no name. */
+const plain = (s: string): string => (s.startsWith('TT:') ? '' : s);
+const PASSIVE = /passiveaircraft/i;
 export const normTitle = (s: string): string => s.trim().toLowerCase();
 
 /** Every titled variation of every cfg, by lower-cased title. The first cfg to declare a title wins (MSFS would do the same with a duplicate). */
@@ -86,8 +91,8 @@ export function indexCfgs(cfgs: AircraftCfg[]): Map<string, CfgRecord> {
       const count = Number(g.icao_engine_count);
       index.set(normTitle(title), {
         title, folder: c.baseFolder ?? c.folder,
-        manufacturer: (v.ui_manufacturer ?? baseUi?.ui_manufacturer ?? g.icao_manufacturer ?? '').trim(),
-        model: (v.ui_type ?? baseUi?.ui_type ?? g.icao_model ?? '').trim(),
+        manufacturer: plain((v.ui_manufacturer ?? baseUi?.ui_manufacturer ?? g.icao_manufacturer ?? '').trim()),
+        model: plain((v.ui_type ?? baseUi?.ui_type ?? g.icao_model ?? '').trim()),
         icao: designator(g.icao_type_designator),
         category: g.category?.trim().toLowerCase() || null,
         engineType: g.icao_engine_type?.trim().toLowerCase() || null,
@@ -124,7 +129,7 @@ export function buildSimAircraft(listing: Listing[], index: Map<string, CfgRecor
   let dropped = 0;
   for (const row of listing) {
     const rec = index.get(normTitle(row.title)) ?? null;
-    if (rec && !isFlyable(rec)) { dropped++; continue; }
+    if ((rec && !isFlyable(rec)) || (!rec && PASSIVE.test(row.title))) { dropped++; continue; }
     const key = rec ? (rec.manufacturer || rec.model ? `${rec.manufacturer}|${rec.model}|${rec.icao ?? ''}`.toLowerCase() : `dir:${rec.folder.toLowerCase()}`) : `title:${normTitle(row.title)}`;
     const m = models.get(key) ?? { titles: [], rec, rows: 0 };
     if (!m.titles.includes(row.title)) m.titles.push(row.title);

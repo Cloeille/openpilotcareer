@@ -43,6 +43,8 @@ test('a PUT replaces the list but keeps what the player hid; an unknown designat
   assert.deepEqual(got.aircraft.map((a) => [a.title, a.icao, a.hidden]), [['Other', null, true], ['PMDG 737-800 House', 'B738', false]]);
   assert.equal(got.scannedAt, h.clock.t);
   assert.equal(matchByName({ title: 'Some Airbus A320neo skin', manufacturer: '', model: '' }), 'A20N');
+  assert.equal(matchByName({ title: 'C172SP G1000 Passengers', manufacturer: '', model: '' }), 'C172', 'default aircraft are named after their designator');
+  assert.equal(matchByName({ title: 'C208B Cargo', manufacturer: '', model: '' }), 'C208');
   assert.equal(matchByName({ title: 'Xyz', manufacturer: '', model: '' }), null);
 });
 

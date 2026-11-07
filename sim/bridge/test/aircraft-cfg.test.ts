@@ -156,9 +156,10 @@ test('buildSimAircraft: liveries fold into one entry per model, official titles 
     { title: 'ApronLife_JetwayHelper_H', livery: '' }, { title: 'ApronLife_JetwayHelper_H AAL', livery: '' },
     { title: 'PMDG 737-800 PMDG House (N738BW | 2022)', livery: '' }, { title: 'PMDG 737-800 PMDG House (N738SW | 2022)', livery: '' },
     { title: 'FlyByWire Airbus A320neo', livery: '' }, { title: 'FlyByWire Airbus A320neo Air France F-HEPH', livery: '' },
+    { title: 'Asobo PassiveAircraft C172RG', livery: '' }, { title: 'Microsoft PassiveAircraft C207 Cargo', livery: '' },
   ];
   const { entries, stats } = buildSimAircraft(listing, index, 2000);
-  assert.deepEqual(stats, { listed: 10, dropped: 2, invalid: 0, cut: 0 });
+  assert.deepEqual(stats, { listed: 12, dropped: 4, invalid: 0, cut: 0 });
   assert.deepEqual(entries.map((e) => [e.title, e.icao, e.source, e.liveries]), [
     ['Airbus A320neo (Asobo)', null, 'official', 1],
     ['Cessna 172 Skyhawk (Asobo)', null, 'official', 3],
@@ -166,6 +167,11 @@ test('buildSimAircraft: liveries fold into one entry per model, official titles 
     ['PMDG 737-800 PMDG House (N738BW | 2022)', null, 'community', 2],
   ]);
   assert.ok(!entries.some((e) => /jetway/i.test(e.title)));
+});
+
+test('an untranslated TT: manufacturer or type is no name', () => {
+  const rec = indexCfgs([cfgOf('[GENERAL]\nicao_type_designator = "F22"\n[FLTSIM.0]\ntitle = "F-22: 7th FS"\nui_manufacturer = "TT:AIRCRAFT.UI_MANUFACTURER"\nui_type = "TT:AIRCRAFT.UI_MODEL"\n', 'f22')]).get('f-22: 7th fs')!;
+  assert.deepEqual([rec.manufacturer, rec.model], ['', '']);
 });
 
 test('buildSimAircraft: the entry is capped at max and an entry the server would refuse is counted, not sent', () => {

@@ -7,11 +7,21 @@ import { all, get, run, tx, type Db } from './db.ts';
 type Row = { title: string; icao: string | null; manufacturer: string; model: string; source: 'official' | 'community'; liveries: number; hidden: number; scanned_at: number };
 
 const norm = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-/** Catalogue names a title can be matched against, longest first (the most specific type wins). Names under 6 characters ("A-1") match too much. */
-const NAMES = [...aircraftTypes.values()].map((t) => [norm(t.name), t.icao] as const).filter(([n]) => n.length >= 6).sort((a, b) => b[0].length - a[0].length);
+/** Catalogue names a title can be matched against, longest first (the most specific type wins): the full name ("Airbus A330-200") and, when it holds a digit, the name without
+ *  its first word ("A330-200": the default aircraft are titled "A330-200 (GE)"; without the digit "Pietenpol Aerial" would match every "Aerial Advertising"). Under 5 characters they match too much. */
+const NAMES = [...aircraftTypes.values()]
+  .flatMap((t) => { const rest = t.name.split(' ').slice(1).join(' '); return [[norm(t.name), t.icao] as const, ...(/\d/.test(rest) ? [[norm(rest), t.icao] as const] : [])]; })
+  .filter(([n]) => n.length >= 5).sort((a, b) => b[0].length - a[0].length);
 
-/** The catalogue type whose name the title (or "manufacturer model") contains, else null. */
+/** Catalogue designators of 4 characters with a digit, longest first: the default aircraft are named after them ("C172SP G1000 Passengers", "C208B Cargo", "A321"). */
+const CODES = [...aircraftTypes.keys()].filter((c) => c.length === 4 && /\d/.test(c) && /^[A-Z]/.test(c));
+
+/** The catalogue type for a title: the designator a word of the title starts with (C172SP -> C172); else the type whose catalogue name the title (or "manufacturer model") contains. Null when neither applies. The match is a suggestion for what to offer, never a price. */
 export function matchByName(e: Pick<SimAircraftEntry, 'title' | 'manufacturer' | 'model'>): string | null {
+  for (const word of e.title.toUpperCase().split(/[^A-Z0-9]+/)) {
+    const code = CODES.find((c) => word.startsWith(c) && (word.length === c.length || /^[A-Z]{1,2}$/.test(word.slice(c.length))));
+    if (code) return code;
+  }
   for (const text of [norm(e.title), norm(`${e.manufacturer} ${e.model}`)]) {
     const hit = NAMES.find(([n]) => text.includes(n));
     if (hit) return hit[1];
