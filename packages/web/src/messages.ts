@@ -15,7 +15,7 @@ const table = {
   'hint.select': ['Select', 'Sélectionner'],
   'hint.browse': ['Browse', 'Parcourir'],
 
-  'tab.dashboard': ['Dashboard', 'Tableau de bord'],
+  'tab.dashboard': ['Home', 'Accueil'],
   'tab.jobs': ['Jobs', 'Jobs'],
   'tab.fleet': ['Fleet', 'Flotte'],
   'tab.history': ['History', 'Historique'],
@@ -235,7 +235,7 @@ const table = {
   'jobs.empty.simbriefSub': ['Creates a private job from your latest flight plan.', 'Crée un job privé à partir de ton dernier plan de vol.'],
   'jobs.empty.wave': ['Next wave of offers at {time}, in {left}.', 'Nouvelle vague d’offres à {time}, dans {left}.'],
   'jobs.accepted': ['Accepted {route}.', 'Job accepté : {route}.'],
-  'hint.dashboard': ['Dashboard', 'Tableau de bord'],
+  'hint.dashboard': ['Home', 'Accueil'],
   'hint.accept': ['Accept', 'Accepter'],
   'hint.briefing': ['Briefing', 'Briefing'],
   'hint.filters': ['Filters', 'Filtres'],
@@ -1422,6 +1422,12 @@ const table = {
   'dash.cutaway': ['Cutaway view', 'Vue en coupe'],
   'hint.follow': ['Follow the flight', 'Suivre le vol'],
   'hint.cutaway': ['Cutaway view', 'Vue en coupe'],
+
+  // ---- v3 hud
+  'tab.network': ['Network', 'Réseau'],
+  'tab.hubs': ['Company', 'Compagnie'],
+  'soon.title': ['Not available yet', 'Pas encore disponible'],
+  'soon.network': ['Autonomous lines and the network map are not available on this server yet.', 'Les lignes autonomes et la carte du réseau ne sont pas encore disponibles sur ce serveur.'],
 } as const satisfies Record<string, readonly [string, string]>;
 
 export type Key = keyof typeof table;

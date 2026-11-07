@@ -41,9 +41,9 @@ a { color: inherit; }
 
 /* ---------------------------------------------------------------- HUD */
 .hud-top, .hud-bottom { position: absolute; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; z-index: 5; }
-.hud-top { top: 0; height: 76px; background: linear-gradient(to bottom, #000000F0, #00000000); }
+.hud-top { top: 0; height: 76px; gap: 16px; background: linear-gradient(to bottom, #000000F0, #00000000); }
 .hud-bottom { bottom: 0; height: 46px; background: linear-gradient(to top, #000000F0, #00000000); font-size: 12px; }
-.brand { display: flex; align-items: center; gap: 12px; width: 250px; }
+.brand { display: flex; align-items: center; gap: 12px; width: 230px; }
 .logo { width: 36px; height: 36px; display: grid; place-items: center; background: var(--text-primary); color: var(--on-btn-primary); border-radius: 2px; flex: none; }
 .brand-stack { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .brand-name { font: 600 20px/1 var(--display); }
@@ -53,11 +53,12 @@ a { color: inherit; }
 .dot.route { background: var(--route); }
 .dot.warn { background: var(--warning); }
 .dot.idle { background: var(--text-tertiary); }
-.hud-tabs { display: flex; align-items: center; gap: 2px; height: 100%; }
-.hud-tabs a { height: 100%; display: flex; align-items: center; gap: 7px; padding: 0 16px; font-weight: 500; color: var(--text-tertiary); text-decoration: none; border-bottom: 2px solid transparent; }
+.hud-tabs { display: flex; flex: none; align-items: center; gap: 2px; height: 100%; }
+.hud-tabs a { height: 100%; display: flex; align-items: center; gap: 7px; padding: 0 13px; white-space: nowrap; font-weight: 500; color: var(--text-tertiary); text-decoration: none; border-bottom: 2px solid transparent; }
 .hud-tabs a:hover { color: var(--text-primary); }
 .hud-tabs a[aria-current='page'] { color: var(--text-primary); border-bottom-color: var(--text-primary); }
 .hud-tabs a:focus-visible { outline-offset: -3px; }
+.hud-tabs a .dot[hidden] { display: none; }
 .tab-count { font: 400 11px var(--mono); }
 .resources { display: flex; align-items: center; gap: 22px; }
 .resource { display: flex; flex-direction: column; gap: 3px; }

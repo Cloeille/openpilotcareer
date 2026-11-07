@@ -5,6 +5,8 @@ import { TABS, type Screen, type Tab } from './screen.ts';
 export type NavState = (Pick<Screen, 'back' | 'keys'> & { tab: Tab | 'settings' | null }) | null;
 export type Nav = { state: () => NavState; go: (hash: string) => void };
 
+/** Elements that act on Enter and Space themselves; a screen's shortcut or primary action must not steal those keys from them. */
+const CONTROL = 'button, a, summary, input, select, textarea';
 const TYPING = 'input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]), textarea, select, [contenteditable=true]';
 
 function rows(): HTMLElement[] {
@@ -40,7 +42,7 @@ function run(action: Action, nav: Nav, target: Element | null): boolean {
     }
     case 'confirm': {
       // Enter on a control keeps its native meaning; on a focused row it opens it; elsewhere it presses the screen's primary button.
-      if (target?.closest('button, a, summary, input, select, textarea')) return false;
+      if (target?.closest(CONTROL)) return false;
       const row = target?.closest<HTMLElement>('[data-row]');
       const press = row ?? document.querySelector<HTMLButtonElement>('[data-primary]:not(:disabled)');
       if (!press) return false;
@@ -53,10 +55,10 @@ function run(action: Action, nav: Nav, target: Element | null): boolean {
 /** Keyboard and gamepad drive the same actions: Q / E tabs, Esc back, Enter primary, arrows in lists. */
 export function installInput(nav: Nav): void {
   document.addEventListener('keydown', (e) => {
-    if (e.defaultPrevented || e.repeat && (e.key === 'q' || e.key === 'e')) return;
+    if (e.defaultPrevented) return;
     const target = e.target instanceof Element ? e.target : null;
     const typing = !!target?.matches(TYPING);
-    const shortcut = nav.state()?.keys?.[shortcutOf(e, typing) ?? ''];
+    const shortcut = nav.state()?.keys?.[shortcutOf(e, typing, !!target?.closest(CONTROL)) ?? ''];
     if (shortcut) { e.preventDefault(); shortcut(); return; }
     const action = keyAction(e, typing);
     if (action && run(action, nav, target)) e.preventDefault();

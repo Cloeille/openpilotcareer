@@ -128,11 +128,3 @@
 .route-line .track { position: relative; }
 .route-line .track .remaining { display: block; height: 1px; background: var(--route); }
 .route-line .track .plane-dot { position: absolute; top: -4px; width: 9px; height: 9px; margin-left: -4px; border-radius: 50%; background: var(--text-primary); }
-
-/* six tabs now share the HUD: labels stay on one line and the bar keeps a gap between its three parts */
-.hud-top { gap: 16px; }
-.hud-top .brand { width: 240px; }
-.hud-tabs { flex: none; }
-.hud-tabs a { white-space: nowrap; padding: 0 9px; }
-.hud-tabs a .dot { margin-left: -1px; }
-.hud-tabs a .dot[hidden] { display: none; }

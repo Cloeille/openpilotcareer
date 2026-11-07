@@ -1,5 +1,5 @@
 import { parseHash } from './keys.ts';
-import type { ScreenFn } from './screen.ts';
+import type { ScreenFn, Tab } from './screen.ts';
 import { companySheet } from './screens/company-sheet.ts';
 import { dashboard } from './screens/dashboard.ts';
 import { duelScreen } from './screens/duel.ts';
@@ -21,11 +21,14 @@ import { lease } from './screens/lease.ts';
 import { live } from './screens/live.ts';
 import { simbrief } from './screens/simbrief.ts';
 import { realism } from './screens/ob-realism.ts';
+import { networkSoon } from './screens/network-soon.ts';
 
-export const routes: Record<string, ScreenFn> = {
+/** Every HUD tab is a route (the HUD links to `#<tab>`), which the type enforces: a tab added to TABS without a screen does not compile. */
+export const routes: Record<Tab, ScreenFn> & Record<string, ScreenFn> = {
   dashboard,
   live,
   jobs,
+  network: networkSoon,
   job: jobDetail,
   simbrief,
   fleet, catalogue, buy, hubs, custom, company: newCompany,
