@@ -11,6 +11,7 @@
 @import './facilities.css';
 @import './safety.css';
 @import './parts.css';
+@import './service.css';
 
 :root {
   color-scheme: dark;
