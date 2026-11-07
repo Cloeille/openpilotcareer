@@ -24,6 +24,7 @@ import { registerStaff } from './routes-staff.ts';
 import { registerFacilities } from './routes-facilities.ts';
 import { registerParts } from './routes-parts.ts';
 import { registerService } from './routes-service.ts';
+import { registerAgency } from './routes-agency.ts';
 import { registerCatalogueStats } from './routes-catalogue-stats.ts';
 import { fetchOfp, type Fetch } from './simbrief.ts';
 import { registerSimbrief } from './routes-simbrief.ts';
@@ -342,6 +343,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   registerSimbrief(app, { db, now, doFetch });
   registerSafety(app, { db, now });
   registerParts(app, { db, now });
+  registerAgency(app, { db, now });
 
   return app;
 }

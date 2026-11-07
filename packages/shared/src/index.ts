@@ -359,3 +359,6 @@ export * from './parts.ts';
 
 // ---- lot service (v3)
 export * from './service.ts';
+
+// ---- lot agency (v4)
+export * from './agency.ts';

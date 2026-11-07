@@ -17,7 +17,7 @@ import type { LineRow } from './lines.ts';
 
 const FIRST = ['Camille', 'Lucas', 'Léa', 'Hugo', 'Manon', 'Louis', 'Chloé', 'Jules', 'Inès', 'Arthur', 'Sarah', 'Nathan', 'Emma', 'Théo', 'Julie', 'Antoine', 'Clara', 'Paul', 'Zoé', 'Maxime', 'Alice', 'Romain', 'Lina', 'Victor', 'Yasmine', 'Mathis', 'Éloïse', 'Samuel'];
 const LAST = ['Lefèvre', 'Martin', 'Bernard', 'Dubois', 'Moreau', 'Laurent', 'Simon', 'Michel', 'Garcia', 'Roux', 'Fournier', 'Girard', 'Bonnet', 'Mercier', 'Blanc', 'Guérin', 'Faure', 'Rousseau', 'Perrin', 'Morel', 'Giraud', 'Andre', 'Lemoine', 'Chevalier', 'Marchand', 'Colin', 'Benoit', 'Renard'];
-const nameFrom = (rand: () => number): string => `${FIRST[Math.floor(rand() * FIRST.length)]} ${LAST[Math.floor(rand() * LAST.length)]}`;
+export const nameFrom = (rand: () => number): string => `${FIRST[Math.floor(rand() * FIRST.length)]} ${LAST[Math.floor(rand() * LAST.length)]}`;
 
 // ---------------------------------------------------------------- shared helpers
 
@@ -44,8 +44,8 @@ export function ownedStaff(db: Db, companyId: number, id: number): StaffRow {
   return s;
 }
 
-const categoryOf = (db: Db, companyId: number, qual: string | null): AircraftCategory | null => (qual ? typeFor(db, companyId, qual).category : null);
-const roleOf = (family: StaffFamily, experience: number): StaffRole => (family === 'pilot' ? (experience >= CAPTAIN_FROM_HOURS ? 'captain' : 'fo') : ROLE_OF[family]);
+export const categoryOf = (db: Db, companyId: number, qual: string | null): AircraftCategory | null => (qual ? typeFor(db, companyId, qual).category : null);
+export const roleOf = (family: StaffFamily, experience: number): StaffRole => (family === 'pilot' ? (experience >= CAPTAIN_FROM_HOURS ? 'captain' : 'fo') : ROLE_OF[family]);
 
 function insertStaff(db: Db, o: { companyId: number; family: StaffFamily; name: string; base: string; experience: number; reliability: number; morale: number; salary: number; hiredAt: number; startsAt: number;
   endsAt?: number | null; contract?: 'cdi' | 'cdd'; noticeDays?: number; candidateId?: string | null; qual?: string | null; qualUntil?: number | null }): number {
@@ -95,6 +95,17 @@ export function market(db: Db, companyId: number, now: number, f: { family?: Sta
 
 export const memberRow = (db: Db, id: number): StaffRow => get<StaffRow>(db, 'SELECT * FROM staff WHERE id = ?', id)!;
 
+/** The one way a candidate becomes an employee, whoever found them (the market, the recruiter agency): a seat at the base, the fee paid now through `pay` (`fee.kind` on the ledger),
+ *  then the person is on the roster and starts after their own notice. A pilot's qualification starts with him. */
+export function engage(db: Db, companyId: number, c: Candidate, now: number, fee: { kind: string; amount: number; memo: string }): number {
+  assertSeat(db, companyId, c.family, c.base, now);
+  pay(db, companyId, now, fee.kind, fee.amount, fee.memo);
+  return insertStaff(db, {
+    companyId, family: c.family, name: c.name, base: c.base, experience: c.experience, reliability: c.reliability, morale: c.morale, salary: c.askingSalary, hiredAt: now, startsAt: now + c.noticeDays * DAY_MS,
+    noticeDays: c.noticeDays, candidateId: c.id, qual: c.qual,
+  });
+}
+
 /** Hire a candidate listed today or yesterday: one month's salary now as the hiring premium (C7), on the payroll from the first month after they start.
  *  `startAtOnce` also pays START_NOW_FEE: the person starts now instead of after the notice (one transaction, so a refused fee leaves no hire behind). */
 export function hire(db: Db, companyId: number, candidateId: string, now: number, startAtOnce = false): { staffId: number; startsAt: number; premium: number } {
@@ -106,14 +117,9 @@ export function hire(db: Db, companyId: number, candidateId: string, now: number
   const listed = c && (STAFF_FAMILIES as readonly string[]).includes(c.family) && (c.family === 'pilot' ? c.qual !== null && fleetTypes(db, companyId).includes(c.qual) : c.qual === null);
   if (!c || !listed) throw new HttpError(404, 'candidate_not_found', 'this candidate is no longer on the market');
   if (get(db, 'SELECT 1 AS x FROM staff WHERE company_id = ? AND candidate_id = ?', companyId, c.id)) throw new HttpError(409, 'candidate_taken', 'you already hired this candidate');
-  assertSeat(db, companyId, c.family, c.base, now);
-  pay(db, companyId, now, 'hire_premium', c.premium, `hiring premium ${c.name}`);
-  const startsAt = now + c.noticeDays * DAY_MS;
-  const staffId = insertStaff(db, {
-    companyId, family: c.family, name: c.name, base: c.base, experience: c.experience, reliability: c.reliability, morale: c.morale, salary: c.askingSalary, hiredAt: now, startsAt, noticeDays: c.noticeDays, candidateId: c.id, qual: c.qual,
-  });
+  const staffId = engage(db, companyId, c, now, { kind: 'hire_premium', amount: c.premium, memo: `hiring premium ${c.name}` });
   if (startAtOnce) startNow(db, companyId, staffId, now);
-  return { staffId, startsAt: startAtOnce ? now : startsAt, premium: c.premium };
+  return { staffId, startsAt: startAtOnce ? now : now + c.noticeDays * DAY_MS, premium: c.premium };
 }
 
 /** Pay START_NOW_FEE and a hire still in notice starts now. His qualifications start with him (`valid_from` follows `starts_at`), so the crew check counts him on the very next leg.
@@ -215,10 +221,10 @@ const lineIcaos = (db: Db, lineId: number): string[] => all<{ icao: string }>(db
 /** What the line lacks to fly now: the positions the three remedies below fill. Empty when the crew is complete. */
 export const lineShortage = (db: Db, l: Pick<LineRow, 'id' | 'company_id' | 'a' | 'b'>, now: number): Shortage[] => crewShortage(db, l.company_id, lineIcaos(db, l.id), [l.a, l.b], now);
 /** Where a line's people are employed: the line end that is one of the company's hubs or bases (else the first). */
-const lineBase = (db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>): string => [l.a, l.b].find((x) => basesOf(db, l.company_id).includes(x)) ?? l.a;
+export const lineBase = (db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>): string => [l.a, l.b].find((x) => basesOf(db, l.company_id).includes(x)) ?? l.a;
 
 /** Positions of each shortage that no hire in notice is going to fill (hiring on top of them would pay premiums for nobody's seat). */
-const openOf = (db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>, x: Shortage, now: number): number =>
+export const openOf = (db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>, x: Shortage, now: number): number =>
   Math.max(0, x.need - x.have - pendingHires(db, l.company_id, x.family, x.type, [l.a, l.b], now).length);
 
 /** The cheapest candidates at the line's base that fill the open positions of each shortage. */

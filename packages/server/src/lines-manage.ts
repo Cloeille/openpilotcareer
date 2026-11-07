@@ -253,6 +253,11 @@ export function expectedPerDay(db: Db, l: LineRow, fleet: LineAircraftRow[], now
   }
   return { revenue, margin: revenue - cost, load: lf };
 }
+/** What the line loses each day it does not fly: one operating day of it with the aircraft it has (the figure of `problem.cost.perDay`, and what the recruiter agency prices a stoppage by). */
+export function stoppageCostPerDay(db: Db, l: LineRow, now: number): number {
+  const fleet = lineAircraft(db, l.id).filter((x) => x.returned_at === null);
+  return expectedPerDay(db, l, fleet.length > 0 ? fleet : lineAircraft(db, l.id), now).revenue;
+}
 const nextOperatingDay = (l: LineRow, now: number): number => {
   let d = dayStart(now);
   for (let i = 0; i < 7 && (l.days & (1 << ((new Date(d).getUTCDay() + 6) % 7))) === 0; i++) d += DAY_MS;
@@ -278,7 +283,7 @@ export function problemView(db: Db, l: LineRow, now: number): LineProblemView {
     const ac = get<AircraftRow>(db, 'SELECT * FROM aircraft WHERE id = ?', leg.aircraft_id);
     return s + (ac ? legMoney(db, l.company_id, ac.id, typeFor(db, l.company_id, ac.icao), { origin: leg.origin, dest: leg.dest, dep: leg.dep_at }, lf).revenue : 0);
   }, 0);
-  const perDay = expectedPerDay(db, l, fleet.length > 0 ? fleet : lineAircraft(db, l.id), now).revenue;
+  const perDay = stoppageCostPerDay(db, l, now);
   const free = freeFor(db, l, now);
   const projection = Array.from({ length: 7 }, (_, i) => {
     const d = dayStart(now) + i * DAY_MS;
