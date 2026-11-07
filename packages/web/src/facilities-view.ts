@@ -1,5 +1,5 @@
 import type { StaffFamily } from '@opc/shared';
-import type { Building, FacilityDetail, FacilityKind, FacilityLevelInfo, FacilityOwner, FacilityPurchase, FacilityView, Hold } from './api-facilities.ts';
+import type { Building, FacilityDetail, FacilityKind, FacilityLevelInfo, FacilityOwner, FacilityPurchase, FacilityView, Hold, Preview } from './api-facilities.ts';
 import type { IconName } from './icons.ts';
 import type { Key } from './messages.ts';
 
@@ -28,8 +28,8 @@ export function holdingOf(f: Pick<FacilityView, 'owner' | 'contract'>): Holding 
 /** The same for a building of the plan (`Building` has no contract; its `monthly` is what she pays, and an owned building is told by the facility screen). */
 export const holdingOfOwner = (owner: FacilityOwner, hold: Hold | null): Holding => holdingOf({ owner, contract: hold ? { kind: hold } as FacilityView['contract'] : null });
 
-export type Tone = 'plain' | 'accent' | 'dim';
-export const HOLDING_TONE: Record<Holding, Tone> = { leased: 'plain', owned: 'plain', available: 'accent', ai: 'dim', airport: 'dim' };
+export type Tone = 'mine' | 'accent' | 'dim';
+export const HOLDING_TONE: Record<Holding, Tone> = { leased: 'mine', owned: 'mine', available: 'accent', ai: 'dim', airport: 'dim' };
 export const HOLDING_KEY: Record<Holding, Key> = { leased: 'fc.h.leased', owned: 'fc.h.owned', available: 'fc.h.available', ai: 'fc.h.ai', airport: 'fc.h.airport' };
 
 const HOLDING_ORDER: Holding[] = ['leased', 'owned', 'ai', 'available', 'airport'];
@@ -131,10 +131,10 @@ export const firstLevel = (levels: readonly FacilityLevelInfo[], states: Readonl
 export const creditLoans = (p: Pick<FacilityPurchase, 'loans' | 'creditPct'>): FacilityPurchase['loans'] => p.loans.filter((l) => l.downPct === 100 - p.creditPct);
 
 export type StaffLine = { need: number; have: number; candidates: number; missing: number };
-/** The technicians the previewed level needs (S3's `required`, else the level's own figure), with how many are on the roster and on the market. */
+/** The technicians the level needs (the level's own figure), with how many are on the roster and on the market (S3's `required`). */
 export function staffLine(d: Pick<FacilityDetail, 'required' | 'levels'>, level: number): StaffLine | null {
   const r = d.required[0];
-  const need = r?.need ?? d.levels.find((l) => l.level === level)?.technicians ?? 0;
+  const need = d.levels.find((l) => l.level === level)?.technicians ?? 0;
   if (need === 0) return null;
   const have = r?.have ?? 0;
   return { need, have, candidates: r?.candidates ?? 0, missing: Math.max(0, need - have) };
@@ -151,3 +151,10 @@ export const leaseMonthsLeft = (startedAt: number, months: number, now: number):
 
 /** Months at the level below before a locked level opens (S3 gives days). */
 export const opensAfterMonths = (days: number): number => Math.round(days / 30);
+
+/** The query string of a preview, in S3's names (`mode` is `lease` or `buy`). */
+export function previewQuery(p: Preview): string {
+  const q = new URLSearchParams({ mode: p.mode === 'lease' ? 'lease' : 'buy', level: String(p.level) });
+  if (p.mode === 'purchase' && p.credit) { q.set('downPct', String(p.credit.downPct)); q.set('months', String(p.credit.months)); }
+  return q.toString();
+}

@@ -1,6 +1,6 @@
 import { act } from '../actions.ts';
 import { buyFacility, fetchFacility, leaseFacility, terminateFacility, upgradeFacility, type FacilityDetail, type Hold, type Preview } from '../api-facilities.ts';
-import { button, icon, signLocation, titleBlock } from '../components.ts';
+import { button, icon, panel, signLocation, titleBlock } from '../components.ts';
 import { facilitiesOff, kindLabel } from '../facilities-ui.ts';
 import { creditLoans, effectOf, firstLevel, MAINTENANCE_DISCOUNT_PCT, leaseMonthsLeft, levelState, opensAfterMonths, staffLine, stepLevel, type LevelState } from '../facilities-view.ts';
 import { fmt } from '../format.ts';
@@ -69,8 +69,7 @@ export async function facilityScreen(ctx: Ctx): Promise<Screen> {
     const loans = creditLoans(p);
     const term = creditTerm(d);
     const loan = loans.find((x) => x.months === term);
-    return h('section', { class: 'panel fc-choice', 'aria-labelledby': 'fc-ch-title' },
-      h('header', { class: 'panel-head' }, h('h2', { id: 'fc-ch-title' }, t('fc.ch.title')), h('div', { class: 'panel-action' }, t('fc.ch.action'))),
+    return panel({ title: t('fc.ch.title'), action: t('fc.ch.action'), id: 'fc-ch', class: 'fc-choice' },
       h('div', { class: 'fc-cards', role: 'radiogroup', 'aria-label': t('fc.ch.title') },
         card('lease', h('div', { class: 'row' }, radio(state.mode === 'lease'), h('span', { class: 'strong' }, t('fc.opt.lease'))),
           h('div', { class: 'fc-price' }, t('fc.opt.perMonth', { amount: fm.money(l.monthly) })), h('div', { class: 'dim small' }, t('fc.ch.leaseTotal', { amount: fm.money(l.totalOverTerm), n: l.months })),
@@ -88,8 +87,7 @@ export async function facilityScreen(ctx: Ctx): Promise<Screen> {
   function staffPanel(): HTMLElement | null {
     const line = staffLine(d, state.level);
     if (!line) return null;
-    return h('section', { class: 'panel fc-staff', 'aria-labelledby': 'fc-st-title' },
-      h('header', { class: 'panel-head' }, h('h2', { id: 'fc-st-title' }, t('fc.st.title')), h('div', { class: 'panel-action' }, t('fc.st.action', { level: state.level }))),
+    return panel({ title: t('fc.st.title'), action: t('fc.st.action', { level: state.level }), id: 'fc-st', class: 'fc-staff' },
       h('div', { class: 'fc-staff-row' }, icon('wrench', 18),
         h('div', { class: 'col tight' }, h('span', { class: 'strong' }, t('fc.r.technicians')), h('span', { class: 'dim small' }, t('fc.st.line', { need: line.need, have: line.have }) + ' · ' + tp('fc.st.candidates', line.candidates))),
         line.missing > 0 ? h('span', { class: 'fc-missing' }, t('fc.st.missing', { n: line.missing })) : h('span', { class: 'dim' }, t('fc.st.complete')),
@@ -101,20 +99,20 @@ export async function facilityScreen(ctx: Ctx): Promise<Screen> {
     const st = states(d);
     const fx = d.facility.effect;
     const eff = effectOf(d.facility);
-    return h('section', { class: 'panel fc-levels', 'aria-labelledby': 'fc-lv-title' },
-      h('header', { class: 'panel-head' }, h('h2', { id: 'fc-lv-title' }, t('fc.lv.title')), h('div', { class: 'panel-action' }, t('fc.lv.action'))),
+    return panel({ title: t('fc.lv.title'), action: t('fc.lv.action'), id: 'fc-lv', class: 'fc-levels' },
       h('div', { class: 'fc-lvs', role: 'radiogroup', 'aria-label': t('fc.lv.group') }, d.levels.map((l) => {
         const s = st.get(l.level)!;
         const on = state.level === l.level;
         const named = fx === 'hangar';
         return h('button', { type: 'button', class: `fc-lv${on ? ' on' : ''}${s === 'locked' ? ' locked' : ''}`, role: 'radio', 'aria-checked': String(on), 'aria-disabled': s === 'pickable' ? null : 'true', onclick: () => { if (s === 'pickable') set({ level: l.level }); } },
           h('div', { class: 'row' }, radio(on), h('span', { class: 'strong' }, t('fc.lv.n', { n: l.level })), s === 'locked' ? icon('lock', 14) : null, s === 'done' && l.level === d.facility.level ? h('span', { class: 'dim small' }, t('fc.lv.current')) : null),
-          named ? h('div', { class: 'fc-lv-name' }, t(`fc.lv.${fx}.${l.level}` as 'fc.lv.maintenance.1')) : null,
+          named ? h('div', { class: 'fc-lv-name' }, t(`fc.lv.maintenance.${l.level}` as 'fc.lv.maintenance.1')) : null,
           l.opensAfterDays !== null ? h('div', { class: 'dim small' }, t('fc.lv.locked', { n: opensAfterMonths(l.opensAfterDays) })) : null,
-          named ? h('ul', { class: 'plain fc-checks' }, (['a', 'b', 'c'] as const).flatMap((k) => { const key = messageFor(`fc.lv.${fx}.${l.level}.${k}`); return key ? [h('li', null, icon('check', 14), t(key, { pct: MAINTENANCE_DISCOUNT_PCT }))] : []; })) : h('p', { class: 'dim small' }, t(eff.key, { ...eff.vars, icao: d.facility.hub })),
-          l.technicians > 0 ? row(t('fc.lv.staff'), `${l.technicians}`) : l.desks > 0 ? row(t('fc.lv.desks'), `${l.desks}`) : null,
-          row(t('fc.lv.works'), l.worksDays === 0 ? t('fc.lv.worksNone') : tp('fc.lv.worksVal', Math.round(l.worksDays / 7))),
-          row(t('fc.lv.cost'), l.cost === 0 ? t('fc.lv.costNone') : fm.money(l.cost)));
+          named ? h('ul', { class: 'plain fc-checks' }, (['a', 'b', 'c'] as const).flatMap((k) => { const key = messageFor(`fc.lv.maintenance.${l.level}.${k}`); return key ? [h('li', null, icon('check', 14), t(key, { pct: MAINTENANCE_DISCOUNT_PCT }))] : []; })) : h('p', { class: 'dim small' }, t(eff.key, { ...eff.vars, icao: d.facility.hub })),
+          h('div', { class: 'fc-lv-stats' },
+            l.technicians > 0 ? row(t('fc.lv.staff'), `${l.technicians}`) : l.desks > 0 ? row(t('fc.lv.desks'), `${l.desks}`) : null,
+            row(t('fc.lv.works'), l.worksDays === 0 ? t('fc.lv.worksNone') : tp('fc.lv.worksVal', Math.round(l.worksDays / 7))),
+            row(t('fc.lv.cost'), l.cost === 0 ? t('fc.lv.costNone') : fm.money(l.cost))));
       })));
   }
 
@@ -125,7 +123,7 @@ export async function facilityScreen(ctx: Ctx): Promise<Screen> {
     const short = due ? Math.max(0, -due.balanceAfter) : 0;
     const lease = state.mode === 'lease';
     const label = lease ? (state.level > 1 ? t('fc.cf.leaseGo', { n: state.level }) : t('fc.cf.leaseAt', { n: 1 })) : (state.level > 1 ? t('fc.cf.buyGo', { n: state.level }) : t('fc.cf.buyAt', { n: 1 }));
-    return h('section', { class: 'panel fc-sum', 'aria-label': t('fc.cf.today') },
+    return panel({ title: t('fc.cf.today'), id: 'fc-sum', class: 'fc-sum', headless: true },
       h('div', { class: 'fc-sum-cols' },
         h('div', { class: 'col tight' }, h('span', { class: 'dim small' }, t('fc.cf.today')), h('span', { class: 'fc-big' }, due ? fm.money(due.today) : '…'), h('span', { class: 'dim small' }, lease ? t('fc.cf.todayLease', { deposit: fm.money(d.offer!.lease.deposit), works: fm.money(works) }) : t('fc.cf.todayBuy', { down: fm.money(Math.max(0, (due?.today ?? 0) - works)), works: fm.money(works) }))),
         h('div', { class: 'col tight' }, h('span', { class: 'dim small' }, t('fc.cf.monthly')), h('span', { class: 'fc-big' }, due ? fm.money(due.monthly + due.staffMonthly) : '…'), h('span', { class: 'dim small' }, due ? t(lease ? 'fc.cf.monthlyLease' : 'fc.cf.monthlyHeld', lease ? { rent: fm.money(due.monthly), salaries: fm.money(due.staffMonthly) } : { contract: fm.money(due.monthly), salaries: fm.money(due.staffMonthly) }) : '')),
@@ -140,8 +138,7 @@ export async function facilityScreen(ctx: Ctx): Promise<Screen> {
     const left = c.months !== null && c.kind === 'lease' ? leaseMonthsLeft(c.startedAt, c.months, ctx.snap.at) : null;
     const st = states(d);
     const nextLv = d.levels.find((l) => st.get(l.level) === 'pickable');
-    return h('section', { class: 'panel fc-contract', 'aria-labelledby': 'fc-ct-title' },
-      h('header', { class: 'panel-head' }, h('h2', { id: 'fc-ct-title' }, t('fc.ct.title')), h('div', { class: 'panel-action' }, t('fc.ct.action', { date: fm.date(c.startedAt) }))),
+    return panel({ title: t('fc.ct.title'), action: t('fc.ct.action', { date: fm.date(c.startedAt) }), id: 'fc-ct', class: 'fc-contract' },
       h('div', { class: 'col tight' },
         row(t('fc.ct.kind'), t(c.kind === 'lease' ? 'fc.opt.lease' : 'fc.opt.buy')),
         row(t('fc.ct.monthly'), fm.money(d.facility.monthly)),

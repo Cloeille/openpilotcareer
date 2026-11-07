@@ -25,6 +25,7 @@
 .fc-fac.dim { color: var(--text-secondary); }
 .fc-fac-cost { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
 .fc-also { padding-top: 4px; }
+.fc-facs { min-height: 0; overflow: auto; }
 .fc-hub-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-secondary); }
 .fc-ac { display: flex; align-items: baseline; gap: 10px; }
 .fc-ac-type { flex: 1; }
@@ -32,17 +33,22 @@
 .fc-ac-status.maintenance { color: var(--warning); }
 .fc-ac-status.flying { color: var(--text-primary); }
 .fc-side { width: 392px; flex: none; display: flex; flex-direction: column; gap: 16px; min-height: 0; }
-.fc-side-list { display: flex; flex-direction: column; gap: 20px; min-height: 0; overflow: auto; }
+.fc-side-list { display: flex; flex-direction: column; gap: 14px; min-height: 0; overflow: auto; }
+.fc-side-list > * { flex: none; }
 .fc-entries { display: flex; flex-direction: column; gap: 16px; flex: none; }
 .fc-entries > .panel { flex: none; }
 .fc-off-screen { display: flex; gap: 24px; width: 100%; min-height: 0; }
 .fc-off-screen > .fc-entries { width: 420px; align-self: flex-start; }
-.fc-base-body { display: flex; flex-direction: column; gap: 14px; padding: 20px 24px; }
-.fc-base-body .line { padding: 3px 0; }
+.fc-base-body { display: flex; flex-direction: column; gap: 10px; padding: 16px 22px; }
+.fc-base-body .line { padding: 1px 0; }
 .fc-base-fleet { padding-top: 10px; border-top: 1px solid var(--border); }
-.fc-sug { display: flex; flex-direction: column; gap: 10px; padding: 4px 4px 0; }
+.fc-sug { display: flex; flex-direction: column; gap: 10px; padding: 16px 20px; background: var(--surface); border-radius: 6px; backdrop-filter: blur(24px); flex: none; }
 .fc-sug h3 { font: 600 18px var(--display); }
 .fc-sug-foot { display: flex; justify-content: space-between; align-items: center; }
+.fc-open summary { cursor: pointer; list-style: none; padding-bottom: 14px; }
+.fc-open summary::-webkit-details-marker { display: none; }
+.fc-open summary h2 { font: 600 18px var(--display); flex: 1; }
+.fc-open:not([open]) .panel-head { padding-bottom: 14px; }
 .fc-open .panel-body { gap: 10px; padding-top: 8px; }
 
 /* ---- shared swatches */
@@ -95,6 +101,7 @@
 .fc-fa { display: flex; flex-direction: column; gap: 18px; width: 100%; min-height: 0; position: relative; z-index: 1; }
 .fc-fa-cols { display: flex; gap: 56px; flex: 1; min-height: 0; }
 .fc-fa-left { width: 700px; flex: none; display: flex; flex-direction: column; gap: 24px; min-height: 0; }
+.fc-fa-left > .panel, .fc-fa-right > .panel { flex: none; }
 .fc-fa-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 24px; min-height: 0; }
 .fc-off { max-width: 640px; }
 .fc-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 14px 10px 14px; }
@@ -105,13 +112,14 @@
 .fc-terms .line { font-size: 13px; }
 .fc-credit { display: flex; align-items: center; gap: 12px; padding: 0 22px 16px; font-size: 13px; }
 .fc-credit select { background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; }
-.fc-staff-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
+.fc-staff-row { display: flex; align-items: center; gap: 14px; }
 .fc-staff-row .col { flex: 1; }
 .fc-missing { color: var(--warning); font-weight: 600; font-size: 13px; }
 .fc-note { display: flex; align-items: center; gap: 8px; margin: 0; }
 .fc-lvs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 14px 12px; }
 .fc-lv { display: flex; flex-direction: column; gap: 8px; text-align: left; padding: 16px; background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); cursor: pointer; font: inherit; }
 .fc-lv .line { font-size: 13px; }
+.fc-lv-stats { margin-top: auto; padding-top: 8px; display: flex; flex-direction: column; gap: 4px; }
 .fc-lv.on { border-color: var(--text-primary); background: #FFFFFF0F; }
 .fc-lv.locked { opacity: .5; cursor: default; }
 .fc-lv-name { font: 600 16px var(--display); }

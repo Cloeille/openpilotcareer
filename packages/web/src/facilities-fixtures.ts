@@ -22,7 +22,7 @@ export const LFMN_FACILITIES: FacilityView[] = [
 ];
 
 export const LFMN: HubOverview = {
-  icao: 'LFMN', name: "Nice Côte d'Azur", city: 'Nice', role: 'main', layout: 'LFMN', facilities: LFMN_FACILITIES.filter((f) => f.owner === 'player' || f.owner === 'available'), monthlyCost: 28_300,
+  icao: 'LFMN', name: "Nice Côte d'Azur", city: 'Nice', role: 'main', layout: 'LFMN', facilities: LFMN_FACILITIES.filter((f) => f.owner === 'player' || f.owner === 'available'), monthlyCost: 24_200,
   team: { total: 37, byFamily: { pilot: 14, cabin: 9, maintenance: 7, ground: 4, admin: 3 } },
   aircraft: [
     { id: 1, reg: 'F-HAZR', icao: 'AT76', typeName: 'ATR 72-600', status: 'flying', location: 'LFMN', maintenanceUntil: null },
@@ -40,7 +40,7 @@ export const LFLL: HubOverview = {
   renewals: [], parking: { spots: 2, used: 1, monthly: 1_800 },
 };
 export const OVERVIEW: HubsOverview = {
-  company: { name: 'Azur Régional', hubs: 2, aircraft: 4, employees: 44 }, monthlyCost: 36_900, hubs: [LFMN, LFLL],
+  company: { name: 'Azur Régional', hubs: 2, aircraft: 4, employees: 44 }, monthlyCost: 32_800, hubs: [LFMN, LFLL],
   suggestion: { icao: 'LFKJ', flightsPerWeek: 12, fromMonthly: 5_400 },
 };
 

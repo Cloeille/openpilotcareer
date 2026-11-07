@@ -79,6 +79,8 @@ const TAG_ROW_H = 52;
 const TAG_H = 44;
 const PAD_TOP_LABELS = 150;
 const DIM = 0.25;
+const TAG_GAP = 10;
+const SHIFT_MAX = 60;
 
 type Pt = { x: number; y: number };
 const r1 = (n: number): number => Math.round(n * 10) / 10;
@@ -104,6 +106,31 @@ export type ChartScene = {
   /** The slots drawn, left to right on the screen: the order the arrow keys step through. */
   order: string[];
 };
+
+type Placed = { x: number; w: number; row: number };
+/**
+ * Where a tag of width `w` that would like to sit at `want` goes: the first row (top down) where it fits without moving more than SHIFT_MAX,
+ * else the (row, x) that moves it least. On a row a tag that collides is pushed to the right of what it hits, left of the right edge.
+ * Never overlaps a tag already placed on the same row (a tag that fits nowhere on any row would be dropped by the caller's three-row band, which the buildings of one airport do not fill).
+ */
+export function slotFor(placed: readonly Placed[], want: number, w: number, W: number): { x: number; row: number } {
+  let best: { x: number; row: number; shift: number } | null = null;
+  for (let row = 0; row < TAG_ROWS; row++) {
+    const mine = placed.filter((q) => q.row === row).sort((p, q) => p.x - q.x);
+    let x = want;
+    for (const q of mine) if (x < q.x + q.w + TAG_GAP && q.x < x + w + TAG_GAP) x = q.x + q.w + TAG_GAP;
+    if (x + w > W) {
+      // No room to the right: try to the left of the first tag it hits.
+      x = want;
+      for (const q of [...mine].reverse()) if (x < q.x + q.w + TAG_GAP && q.x < x + w + TAG_GAP) x = q.x - w - TAG_GAP;
+      if (x < 0 || mine.some((q) => x < q.x + q.w + TAG_GAP && q.x < x + w + TAG_GAP)) continue;
+    }
+    const shift = Math.abs(x - want);
+    if (shift <= SHIFT_MAX) return { x, row };
+    if (!best || shift < best.shift) best = { x, row, shift };
+  }
+  return best ?? { x: want, row: TAG_ROWS - 1 };
+}
 
 export function buildAirportChart(input: ChartInput): ChartScene {
   const { layout: A, size, filter } = input;
@@ -189,7 +216,7 @@ export function buildAirportChart(input: ChartInput): ChartScene {
       prims.push({ kind: 'runway', name: `runway ${r.ends[0]}`, x: a.x - 14, y: a.y - 8, text: r.ends[0] }, { kind: 'runway', name: `runway ${r.ends[1]}`, x: z.x - 4, y: z.y - 8, text: r.ends[1] });
     }
     // Tags for what matters to the player, quiet text for the airport's own buildings. Tags live in a band above the chart, on up to three rows, each tied to its roof by a vertical leader.
-    const placed: { x: number; w: number; row: number }[] = [];
+    const placed: Placed[] = [];
     let leaders = '';
     const tags: ChartPrim[] = [];
     for (const a of [...anchors].sort((p, q) => p.x - q.x)) {
@@ -197,12 +224,12 @@ export function buildAirportChart(input: ChartInput): ChartScene {
       if (bi.owner === 'airport') { prims.push({ kind: 'quiet', slot: a.b.slot, x: a.x - bi.name.length * 3.1, y: a.y - 22, text: bi.name, opacity: o }); continue; }
       const status = bi.owner === 'ai' ? (bi.ownerName ?? '') : bi.owner === 'player' ? input.text.yours : input.text.available;
       const w = Math.max(bi.name.length * 7.1, status.length * 6.4) + 24;
-      const x = Math.max(0, Math.min(W - w, Math.round(a.x - 16)));
-      let row = 0;
-      while (row < TAG_ROWS - 1 && placed.some((q) => q.row === row && x < q.x + q.w + 10 && q.x < x + w + 10)) row++;
+      const want = Math.max(0, Math.min(W - w, Math.round(a.x - 16)));
+      const { x, row } = slotFor(placed, want, w, W);
       const y = row * TAG_ROW_H;
       placed.push({ x, w, row });
-      leaders += `M${r1(a.x)} ${r1(a.y)}L${r1(a.x)} ${r1(y + TAG_H)}`;
+      // The leader runs from the roof to the nearest point of the tag's bottom edge, so a tag pushed aside by its neighbours stays tied to its building.
+      leaders += `M${r1(a.x)} ${r1(a.y)}L${r1(Math.max(x + 8, Math.min(x + w - 8, a.x)))} ${r1(y + TAG_H)}`;
       tags.push({ kind: 'tag', slot: a.b.slot, x, y, w, h: TAG_H, name: bi.name, status, tone: bi.owner === 'ai' ? 'ai' : bi.owner === 'player' ? 'yours' : 'available', selected: a.b.slot === sel, opacity: o, anchor: { x: a.x, y: a.y } });
     }
     if (leaders) path('leaders', leaders, { stroke: '#FFFFFF59', width: 1 });

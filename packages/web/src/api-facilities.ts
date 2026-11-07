@@ -1,6 +1,7 @@
 import type { AircraftStatus, Financing, LoanOption, StaffFamily } from '@opc/shared';
 import { api } from './api.ts';
 import { ApiError } from './errors.ts';
+import { previewQuery } from './facilities-view.ts';
 
 /**
  * Typed client for the FACILITIES section of docs/v3-plan.md (B.4).
@@ -95,12 +96,6 @@ async function optional<T>(path: string): Promise<T | null> {
 
 export const fetchHubsOverview = (): Promise<HubsOverview | null> => optional<HubsOverview>('/hubs/overview');
 export const fetchHubPlan = (icao: string): Promise<HubPlan | null> => optional<HubPlan>(`/hubs/${encodeURIComponent(icao)}/plan`);
-/** The query string of a preview, in S3's names (`mode` is `lease` or `buy`). */
-export function previewQuery(p: Preview): string {
-  const q = new URLSearchParams({ mode: p.mode === 'lease' ? 'lease' : 'buy', level: String(p.level) });
-  if (p.mode === 'purchase' && p.credit) { q.set('downPct', String(p.credit.downPct)); q.set('months', String(p.credit.months)); }
-  return q.toString();
-}
 export const fetchFacility = (id: number, p?: Preview): Promise<FacilityDetail | null> => optional<FacilityDetail>(`/facilities/${id}${p ? `?${previewQuery(p)}` : ''}`);
 
 export const leaseFacility = (id: number, body: SignBody): Promise<FacilitySignResult> => api<FacilitySignResult>(`/facilities/${id}/lease`, { method: 'POST', body });

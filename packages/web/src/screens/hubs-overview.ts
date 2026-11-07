@@ -36,12 +36,14 @@ export async function hubsOverview(ctx: Ctx): Promise<Screen> {
   const doorHints = doors.map((d) => ({ key: d.key.toUpperCase(), label: d.hint }));
   const entries = doors.length > 0 ? h('div', { class: 'fc-entries' }, doors.map((d) => d.card)) : null;
 
-  const openForm = (): HTMLElement => {
+  /** The way to open another hub: folded to its heading (the screen is full), unfolded by the heading or by the suggestion's button. */
+  const openForm = (): HTMLDetailsElement => {
     const canAfford = me.company.balance >= HUB_PRICE;
     const field = airportField(t('hub.code'));
     const submit = button(t('fleet.buyHub'), { variant: 'secondary', type: 'submit', disabled: !canAfford });
-    return panel({ title: t('hub.open'), action: t('hub.openSub', { price: fm.money(HUB_PRICE) }), class: 'fc-open' },
-      h('form', { class: 'col', onsubmit: (e: Event) => {
+    return h('details', { class: 'panel fc-open' },
+      h('summary', { class: 'panel-head' }, h('h2', null, t('hub.open')), h('span', { class: 'panel-action' }, t('hub.openSub', { price: fm.money(HUB_PRICE) }))),
+      h('form', { class: 'panel-body', onsubmit: (e: Event) => {
         e.preventDefault();
         const icao = field.input.value.trim().toUpperCase();
         void act(t('hub.opened', { icao }), () => api('/me/hubs', { method: 'POST', body: { icao } }), ctx.refresh);
@@ -84,7 +86,7 @@ export async function hubsOverview(ctx: Ctx): Promise<Screen> {
   const parkingRow = (hub: HubOverview): HTMLElement | null => {
     const p = hub.parking;
     if (p.spots === 0) return null;
-    return h('li', { class: 'fc-fac plain', 'data-row': '', tabindex: 0, 'aria-label': t('fc.hub.parking'), onclick: () => openPlan(hub.icao) },
+    return h('li', { class: 'fc-fac mine', 'data-row': '', tabindex: 0, 'aria-label': t('fc.hub.parking'), onclick: () => openPlan(hub.icao) },
       icon('square-parking', 16),
       h('span', { class: 'col tight fc-fac-name' }, h('span', { class: 'fc-fac-title' }, t('fc.hub.parking')), h('span', { class: 'dim small' }, t('fc.hub.parkingDetail', { n: p.spots }))),
       h('span', { class: 'fc-fac-status' }, t('fc.hub.parkingUsed', { used: p.used, spots: p.spots })),
@@ -139,7 +141,7 @@ export async function hubsOverview(ctx: Ctx): Promise<Screen> {
     return h('section', { class: 'fc-sug', 'aria-label': t('fc.sug.fromLabel') },
       h('div', { class: 'row' }, signDirection(s.icao), title),
       h('p', { class: 'muted' }, t('fc.sug.text', { n: s.flightsPerWeek })),
-      h('div', { class: 'fc-sug-foot' }, h('span', { class: 'muted' }, t('fc.sug.from', { amount: fm.money(s.fromMonthly) })), button(t('fc.sug.open'), { variant: 'ghost', onclick: () => document.querySelector<HTMLInputElement>('.fc-open input')?.focus() })));
+      h('div', { class: 'fc-sug-foot' }, h('span', { class: 'muted' }, t('fc.sug.from', { amount: fm.money(s.fromMonthly) })), button(t('fc.sug.open'), { variant: 'ghost', onclick: () => { const d = document.querySelector<HTMLDetailsElement>('.fc-open'); if (d) d.open = true; d?.querySelector('input')?.focus(); } })));
   };
 
   const side = h('div', { class: 'fc-side' },
