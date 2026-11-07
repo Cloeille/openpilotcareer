@@ -60,7 +60,7 @@ export function registerFinance(app: FastifyInstance, ctx: FinanceCtx): void {
     return reply.status(201).send(tx(db, () => rentMonthly(db, p.companyId, b.hub, b.icao, now())));
   });
 
-  app.get('/api/v1/me/hubs', async (req) => hubSpots(db, user(req).companyId));
+  app.get('/api/v1/me/hubs', async (req) => hubSpots(db, user(req).companyId, now()));
 
   app.get('/api/v1/me/finance', async (req) => overview(db, billed(user(req)).companyId, now()));
 }

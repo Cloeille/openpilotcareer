@@ -98,7 +98,7 @@ export function legMoney(db: Db, companyId: number, aircraftId: number, type: Ai
     ...realismModifiers(realism.toggles), ...(realism.toggles.realFuelPrice ? { fuelPriceFactor: fuelPriceFactor(o.origin, o.dep) } : {}),
   });
   const revenue = Math.round(s.revenue * AUTONOMY_FACTOR);
-  const { settlement: c } = flightCosts(db, aircraftId, hours, { ...s, revenue, net: revenue - s.fuelCost - s.landingFee - s.maintenance });
+  const { settlement: c } = flightCosts(db, aircraftId, hours, { ...s, revenue, net: revenue - s.fuelCost - s.landingFee - s.maintenance }, type.category, o.dep);
   return { pax, hours, revenue: c.revenue, fuel: c.fuelCost, fee: c.landingFee, maintenance: c.maintenance };
 }
 
