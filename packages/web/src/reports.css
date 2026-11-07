@@ -1,0 +1,105 @@
+/* ---------------------------------------------------------------- reports (v4 REPORTS): cash flow, profitability, statement, forecast.
+   Layout is the mockup's (docs/design/screens-resolved/finance-*.md) on the same panels and tokens as the other Company screens. */
+
+.rp-screen { display: flex; flex-direction: column; gap: 20px; width: 100%; min-height: 0; position: relative; z-index: 1; }
+.rp-header { align-items: flex-end; }
+.rp-figures { display: flex; align-items: flex-end; gap: 36px; padding-bottom: 4px; }
+.rp-figure { display: flex; flex-direction: column; gap: 4px; min-width: 150px; }
+.rp-label { font-size: 13px; color: var(--text-secondary); }
+.rp-value { font: 500 30px/1.12 var(--display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rp-sub { font-size: 12px; color: var(--text-tertiary); }
+.rp-figure.warn .rp-value, .rp-figure.warn .rp-sub { color: var(--warning); }
+.rp-pos { color: var(--success); }
+.rp-neg { color: var(--danger); }
+.rp-nav .seg { gap: 9px; }
+.rp-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.rp-month-name { min-width: 130px; text-align: center; font-weight: 500; text-transform: capitalize; }
+
+.rp-body { display: flex; gap: 20px; flex: 1; min-height: 0; align-items: flex-start; }
+.panel.rp-main { flex: 1; min-width: 0; }
+.rp-side { width: 400px; flex: none; display: flex; flex-direction: column; gap: 16px; }
+.rp-pair { display: flex; gap: 20px; }
+.rp-pair > .panel { flex: 1; min-width: 0; }
+
+/* ---- shares: a label, an amount and a bar */
+.rp-shares { display: flex; flex-direction: column; gap: 12px; }
+.rp-share { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: baseline; }
+.rp-share-label { font-size: 14px; color: var(--text-secondary); }
+.rp-share-amount { font-size: 13px; text-align: right; }
+.rp-share-bar { grid-column: 1 / -1; height: 4px; background: #FFFFFF14; border-radius: 1px; overflow: hidden; }
+.rp-share-bar i { display: block; height: 100%; background: var(--text-secondary); }
+.rp-share-bar.in i { background: var(--success); }
+.rp-share-bar.warn i { background: var(--warning); }
+.rp-upcoming { display: flex; flex-direction: column; gap: 10px; }
+.rp-date { margin-right: 4px; }
+
+/* ---- cash: 12 months of bars */
+.rp-month { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; }
+.rp-month strong { font: 600 18px var(--display); text-transform: capitalize; }
+.rp-month-sums { font-size: 13px; color: var(--text-secondary); }
+.rp-month-sums b { color: var(--text-primary); font-weight: 600; }
+.rp-bars { display: grid; grid-template-columns: repeat(auto-fit, minmax(48px, 1fr)); gap: 6px; align-items: end; height: 250px; }
+.rp-bar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 100%; padding: 6px 2px; background: transparent; border: 1px solid transparent; border-radius: 3px; cursor: pointer; color: var(--text-secondary); }
+.rp-bar:hover { background: var(--surface-hover); }
+.rp-bar.on { background: var(--surface-selected); border-color: var(--border-strong); color: var(--text-primary); }
+.rp-bar:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.rp-bar-pair { display: flex; align-items: flex-end; gap: 3px; flex: 1; width: 100%; justify-content: center; }
+.rp-bar-pair i { display: block; width: 40%; max-width: 16px; min-height: 2px; border-radius: 1px 1px 0 0; }
+.rp-bar-pair .in { background: var(--success); }
+.rp-bar-pair .out { background: var(--text-tertiary); }
+.rp-bar.open .rp-bar-pair i { opacity: .55; }
+.rp-bar-month { font-size: 12px; text-transform: capitalize; }
+.rp-bar-end { font: 500 11px var(--mono); font-variant-numeric: tabular-nums; }
+.rp-legend { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; }
+.rp-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 1px; background: var(--text-tertiary); }
+.rp-legend i.in { background: var(--success); }
+
+/* ---- profitability */
+.rp-group + .rp-group { margin-top: 10px; }
+.rp-group-title { font: 600 14px var(--display); color: var(--text-secondary); padding: 4px 12px; }
+.rp-detail { display: flex; flex-direction: column; gap: 14px; }
+.rp-detail-name { font: 600 20px var(--display); flex: 1; }
+
+/* ---- statement */
+.rp-day + .rp-day { margin-top: 8px; }
+.rp-day-head { display: flex; justify-content: space-between; align-items: baseline; font: 600 14px var(--display); text-transform: capitalize; padding: 8px 0 6px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: #0F1114F2; z-index: 1; }
+.rp-day-head .dim { font: 400 13px var(--font-ui); text-transform: none; }
+.rp-rows { display: flex; flex-direction: column; }
+.rp-row { display: grid; grid-template-columns: 64px 1fr 150px 130px 130px; gap: 12px; align-items: center; min-height: 52px; padding: 6px 4px; border-bottom: 1px solid #FFFFFF0A; }
+.rp-row[data-row] { cursor: default; }
+.rp-row:hover, .rp-row:focus-visible { background: var(--surface-hover); outline: none; }
+.rp-row:focus-visible { box-shadow: inset 2px 0 0 var(--accent); }
+.rp-row-time, .rp-row-balance { font-size: 12px; }
+.rp-row-amount, .rp-row-balance { text-align: right; }
+.rp-links { display: inline-flex; gap: 10px; font-size: 12px; }
+.rp-links .link-btn { color: var(--route); }
+.rp-next { font-size: 13px; padding-top: 8px; border-top: 1px solid var(--border); }
+
+/* ---- forecast */
+.rp-chart { width: 100%; height: auto; display: block; }
+.rp-chart .grid { stroke: #FFFFFF12; }
+.rp-chart .zero { stroke: var(--border-strong); stroke-dasharray: 4 4; }
+.rp-chart .tick { fill: var(--text-tertiary); font: 400 11px var(--font-ui); }
+.rp-chart .overdraft { fill: var(--danger-soft); }
+.rp-chart .band { fill: #FFFFFF0D; }
+.rp-chart .line { fill: none; stroke-width: 1.5; }
+.rp-chart .line.on { stroke-width: 2.5; }
+.rp-chart .central { stroke: var(--text-primary); }
+.rp-chart .prudent { stroke: var(--warning); stroke-dasharray: 5 4; }
+.rp-chart .optimistic { stroke: var(--success); stroke-dasharray: 5 4; }
+.rp-chart .trial { stroke: var(--route); stroke-width: 2.5; }
+.rp-chart .low { fill: var(--text-primary); stroke: var(--bg); stroke-width: 2; }
+.rp-scenarios { display: flex; gap: 12px; flex-wrap: wrap; }
+.rp-scenario { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 200px; padding: 10px 14px; background: transparent; border: 1px solid var(--border); border-radius: 4px; text-align: left; cursor: pointer; }
+.rp-scenario[aria-checked='true'] { background: var(--surface-selected); border-color: var(--border-strong); }
+.rp-scenario i { display: block; width: 16px; height: 0; border-top: 2px solid var(--text-primary); }
+.rp-scenario i.prudent { border-top: 2px dashed var(--warning); }
+.rp-scenario i.optimistic { border-top: 2px dashed var(--success); }
+.rp-scenario-end { margin-left: auto; font-size: 13px; }
+.rp-decisions { display: flex; flex-direction: column; gap: 14px; }
+.rp-decision { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 4px; }
+.rp-decision.on { border-color: var(--route); background: var(--route-soft); }
+.rp-effect { font-size: 13px; }
+.rp-trial { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--route); }
+
+@media (max-width: 1500px) { .rp-side { width: 340px; } .rp-row { grid-template-columns: 56px 1fr 120px 110px 110px; } }

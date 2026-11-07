@@ -277,6 +277,19 @@ expect((await call('POST', `/agency/missions/${mission.body.id}/sign`, { token: 
 expect((await call('POST', '/agency/missions', { token: lineTok, body: { base: 'LFPG', qual: 'C172', count: 1 } })).body.error === 'mission_open', 'one open mission per post');
 expect((await call('GET', '/agency/options', { token: (await call('POST', '/me/api-keys', { token: lineTok, body: { label: 'agency' } })).body.key })).status === 401, 'an API key cannot read the agency');
 expect((await call('DELETE', `/agency/missions/${mission.body.id}`, { token: lineTok })).status === 204, 'the mission is cancelled, nothing owed');
+// v4 reports: the cash flow, statement, profitability and forecast read the same ledger the balance comes from
+const cashView = await call('GET', '/finance/cash?months=12', { token: lineTok });
+const meNow = (await call('GET', '/me', { token: lineTok })).body.company.balance;
+expect(cashView.status === 200 && cashView.body.balance === meNow && cashView.body.months.at(-1).endBalance === meNow, `cash flow: ${cashView.body.months.length} month(s), the running balance ends on the balance ${meNow}`, cashView);
+const stmt = await call('GET', '/finance/ledger?limit=5', { token: lineTok });
+expect(stmt.status === 200 && stmt.body.days[0].rows[0].balanceAfter === meNow && stmt.body.summary.count > 0, `statement: ${stmt.body.summary.count} operations, the newest ends on the balance`, stmt);
+const profit = await call('GET', '/finance/lines', { token: lineTok });
+expect(profit.status === 200 && Array.isArray(profit.body.rows) && profit.body.totals.margin === profit.body.rows.reduce((t, r) => t + r.margin, 0), `profitability ${profit.body.month}: ${profit.body.rows.length} line(s), margin ${profit.body.totals.margin}`, profit);
+const fcast = await call('GET', '/finance/forecast', { token: lineTok });
+expect(fcast.status === 200 && fcast.body.points.length === 12 && fcast.body.points.every((p) => p.prudent <= p.central && p.central <= p.optimistic), `forecast: 12 months, prudent <= central <= optimistic, lowest ${fcast.body.summary.central.lowest.balance}`, fcast);
+const tried = await call('POST', '/finance/forecast/decision', { token: lineTok, body: { decision: 'lease_aircraft' } });
+expect(tried.status === 200 && (await call('GET', '/me', { token: lineTok })).body.company.balance === meNow, 'testing a decision changes nothing', tried);
+expect((await call('GET', '/finance/cash', { token: apiKey })).status === 401, 'an API key cannot read the finance reports');
 const off = await call('PUT', '/network/enabled', { token: lp.body.token, body: { enabled: false } });
 expect(off.body.enabled === false && (await call('GET', '/network', { token: lp.body.token })).body.enabled === false, 'the network switch turns the lines off');
 await call('DELETE', '/me', { token: lp.body.token, body: { password } });

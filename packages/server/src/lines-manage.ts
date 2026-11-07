@@ -240,18 +240,18 @@ const freeFor = (db: Db, l: LineRow, now: number) => {
 };
 
 /** Expected revenue of one operating day of the line with the aircraft it has (or `fleet`), by the engine's own maths. */
-export function expectedPerDay(db: Db, l: LineRow, fleet: LineAircraftRow[], now: number): { revenue: number; margin: number; load: number } {
+export function expectedPerDay(db: Db, l: LineRow, fleet: LineAircraftRow[], now: number): { revenue: number; margin: number; load: number; fuel: number } {
   const live = fleet.filter((x) => x.returned_at === null);
   const lf = loadFactorOf(db, { companyId: l.company_id, a: l.a, b: l.b, freqPerDay: l.freq_per_day, days: l.days, fleet: live, excludeLineId: l.id });
   const homes = planned(db, l, live);
-  let revenue = 0, cost = 0;
+  let revenue = 0, cost = 0, fuel = 0;
   const day = nextOperatingDay(l, now);
   for (const leg of layoutDay(programmeOf(l), homes, day)) {
     const ac = live.find((x) => x.id === leg.aircraftId)!;
     const m = legMoney(db, l.company_id, ac.id, typeFor(db, l.company_id, ac.icao), leg, lf);
-    revenue += m.revenue; cost += m.fuel + m.fee + m.maintenance;
+    revenue += m.revenue; cost += m.fuel + m.fee + m.maintenance; fuel += m.fuel;
   }
-  return { revenue, margin: revenue - cost, load: lf };
+  return { revenue, margin: revenue - cost, load: lf, fuel };
 }
 /** What the line loses each day it does not fly: one operating day of it with the aircraft it has (the figure of `problem.cost.perDay`, and what the recruiter agency prices a stoppage by). */
 export function stoppageCostPerDay(db: Db, l: LineRow, now: number): number {

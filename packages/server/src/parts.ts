@@ -166,7 +166,7 @@ function breakdown(db: Db, o: Wear, component: Mechanical): void {
   const eta = fromStock ? o.at : o.at + days * DAY_MS, readyAt = eta + fix;
   const paid = fromStock || lessorPays(db, o.aircraftId) ? 0 : part.price + freightOf(cls, false);
   run(db, 'INSERT INTO breakdowns (company_id, aircraft_id, hub, component, part, failed_at, eta, ready_at, paid, from_stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', o.companyId, o.aircraftId, hub, component, part.id, o.at, eta, readyAt, paid, fromStock ? 1 : 0);
-  if (paid > 0) post(db, o.companyId, o.at, 'parts_emergency', -paid, `${part.name} for ${ac.registration ?? `#${o.aircraftId}`}`);
+  if (paid > 0) post(db, o.companyId, o.at, 'parts_emergency', -paid, `${part.name} for ${ac.registration ?? `#${o.aircraftId}`}`, null, { aircraftId: o.aircraftId });
   run(db, 'UPDATE aircraft_components SET wear_pct = ? WHERE aircraft_id = ? AND component = ?', RENEWED_WEAR_PCT, o.aircraftId, component);
   // the workshop keeps the aircraft until the repair is over (the later of this and any visit already booked); releaseMaintenance then hands it back as serviced
   run(db, "UPDATE aircraft SET status = 'maintenance', maintenance_until = MAX(COALESCE(maintenance_until, 0), ?) WHERE id = ?", readyAt, o.aircraftId);

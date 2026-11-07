@@ -57,7 +57,7 @@ export const ferryPreview = (db: Db, companyId: number, aircraftId: number, to: 
 export function ferry(db: Db, companyId: number, aircraftId: number, to: string, now: number): FerryBooked {
   const { aircraft, type, preview, refusal } = plan(db, companyId, aircraftId, to, now);
   if (refusal) throw refusal;
-  post(db, companyId, now, 'ferry_flight', -preview.cost, `${aircraft.registration ?? `#${aircraft.id}`} ${aircraft.location}-${to}`); // plan() has checked the funds in this transaction
+  post(db, companyId, now, 'ferry_flight', -preview.cost, `${aircraft.registration ?? `#${aircraft.id}`} ${aircraft.location}-${to}`, null, { aircraftId: aircraft.id }); // plan() has checked the funds in this transaction
   run(db, 'UPDATE aircraft SET location = ?, available_at = ? WHERE id = ?', to, preview.arrivesAt, aircraft.id);
   accrueWear(db, companyId, aircraft.id, type.category, preview.hours, now);
   snapshot(db, companyId, now);

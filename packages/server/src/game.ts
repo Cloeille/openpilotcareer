@@ -160,8 +160,8 @@ export function buyAircraft(db: Db, companyId: number, icao: string, hub: string
   }
   const id = insertAircraft(db, { companyId, icao: t.icao, hub, value: aircraftValue(t), ownership: loan ? 'financed' : 'owned', at: now });
   const registration = get<{ registration: string }>(db, 'SELECT registration FROM aircraft WHERE id = ?', id)!.registration;
-  post(db, companyId, now, 'purchase_aircraft', -(loan ? loan.down : price), `${t.icao} ${t.name} ${registration}`);
-  if (ferry > 0) post(db, companyId, now, 'ferry', -ferry, `convoy and registration ${registration}`);
+  post(db, companyId, now, 'purchase_aircraft', -(loan ? loan.down : price), `${t.icao} ${t.name} ${registration}`, null, { aircraftId: id });
+  if (ferry > 0) post(db, companyId, now, 'ferry', -ferry, `convoy and registration ${registration}`, null, { aircraftId: id });
   if (financing && loan) {
     const principal = price - loan.down;
     run(db, `INSERT INTO contracts (company_id, aircraft_id, kind, started_at, ends_at, months, monthly, principal)
@@ -378,15 +378,16 @@ export function finishFlight(db: Db, f: FlightRow, status: 'verified' | 'unverif
   run(db, 'UPDATE companies SET flights = flights + 1, hours = hours + ?, revenue = revenue + ?, reputation = MIN(100, MAX(0, reputation + ?)) WHERE id = ?',
     hours, s.revenue, s.reputationDelta, f.company_id);
   const memo = `${f.origin}-${f.destination} ${f.aircraft_icao}`;
-  post(db, f.company_id, at, 'payout', s.revenue, memo, f.id);
-  post(db, f.company_id, at, fuelKind, -s.fuelCost, memo, f.id);
-  post(db, f.company_id, at, 'landing_fee', -s.landingFee, memo, f.id);
-  post(db, f.company_id, at, 'maintenance', -s.maintenance, memo, f.id);
+  const on = { aircraftId: f.aircraft_id };
+  post(db, f.company_id, at, 'payout', s.revenue, memo, f.id, { ...on, legs: 1 });
+  post(db, f.company_id, at, fuelKind, -s.fuelCost, memo, f.id, on);
+  post(db, f.company_id, at, 'landing_fee', -s.landingFee, memo, f.id, on);
+  post(db, f.company_id, at, 'maintenance', -s.maintenance, memo, f.id, on);
   // lot SERVICE: a passenger flight with a cabin crew serves its passengers like a line leg does (separate ledger kinds: the flight's own settlement above is the job's)
   const svc = f.kind === 'pax' ? planLeg(db, { companyId: f.company_id, category: type.category, seats: type.seats, origin: f.origin, dep: f.accepted_at, blockMin: hours * 60, pax: f.pax }) : null;
   if (svc) {
-    if (svc.sales > 0) post(db, f.company_id, at, 'service_sales', svc.sales, memo, f.id);
-    if (svc.cost > 0) post(db, f.company_id, at, 'service_cost', -svc.cost, memo, f.id);
+    if (svc.sales > 0) post(db, f.company_id, at, 'service_sales', svc.sales, memo, f.id, on);
+    if (svc.cost > 0) post(db, f.company_id, at, 'service_cost', -svc.cost, memo, f.id, on);
     bookLeg(db, svc);
   }
   const wearBefore = get<{ wear_pct: number }>(db, 'SELECT wear_pct FROM aircraft WHERE id = ?', f.aircraft_id)?.wear_pct ?? 0;

@@ -55,7 +55,7 @@ export function rollIncident(db: Db, r: Roll): IncidentRow | null {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (company_id, ref) DO NOTHING RETURNING *`,
   r.companyId, r.ref, r.at, seasonOf(r.at), r.aircraftId, r.airport, r.flightId, r.flightNo, draw.severity, draw.kind, Math.round(r.dutyMin), r.wearPct, risk, cost, covered, downtimeUntil, reputationDelta);
   if (!row) return null;
-  if (cost > covered) post(db, r.companyId, r.at, 'incident', -(cost - covered), `${draw.kind} ${ac.registration ?? `#${r.aircraftId}`}`, r.flightId);
+  if (cost > covered) post(db, r.companyId, r.at, 'incident', -(cost - covered), `${draw.kind} ${ac.registration ?? `#${r.aircraftId}`}`, r.flightId, { aircraftId: r.aircraftId });
   if (reputationDelta !== 0) run(db, 'UPDATE companies SET reputation = MIN(100, MAX(0, reputation + ?)) WHERE id = ?', reputationDelta, r.companyId);
   // The workshop keeps the aircraft until the repair is over (the later of this and any visit already booked); releaseMaintenance then hands it back as serviced.
   run(db, "UPDATE aircraft SET status = 'maintenance', maintenance_until = MAX(COALESCE(maintenance_until, 0), ?) WHERE id = ?", downtimeUntil, r.aircraftId);

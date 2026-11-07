@@ -29,7 +29,7 @@ const short = (needed: number, extra: Record<string, unknown> = {}): HttpError =
 
 export type PlanContract = Pick<ContractRow, 'id' | 'aircraft_id' | 'kind' | 'started_at' | 'ends_at' | 'months' | 'months_paid' | 'monthly' | 'insurance' | 'deposit' | 'principal'>;
 export type PlanAircraft = { id: number; registration: string; base: string | null; ownership: Ownership; value: number; category: AircraftCategory; acquired_at: number; busy: boolean };
-export type Charge = { kind: string; amount: number; memo: string };
+export type Charge = { kind: string; amount: number; memo: string; /** The aircraft the charge is about (the reports file it under that aircraft). */ aircraftId?: number };
 /** Who is on the payroll: employees on a permanent contract (a temporary one is paid up front when it is booked). */
 /** `since`: the later of the contract start and the day the person was hired, so a starter crew granted at the upgrade is paid from the next month, never retroactively. */
 export type PlanStaff = { salary: number; since: number; ends_at: number | null };
@@ -42,7 +42,7 @@ export function planMonth(start: number, contracts: PlanContract[], fleet: PlanA
   const ended: number[] = [], returned: number[] = [], owned: number[] = [];
   const reg = (id: number): string => fleet.find((a) => a.id === id)?.registration ?? `#${id}`;
   // v3 SAFETY: the premium rises by the share the last month's incidents earned (shared/safety.ts `insuranceSurcharge`), on every insurance charge.
-  const premium = (base: number, who: string): Charge => ({ kind: 'insurance', amount: -Math.round(base * (1 + rise)), memo: `${who} insurance${rise > 0 ? ` +${Math.round(rise * 100)} %` : ''}` });
+  const premium = (base: number, who: string, aircraftId: number): Charge => ({ kind: 'insurance', amount: -Math.round(base * (1 + rise)), memo: `${who} insurance${rise > 0 ? ` +${Math.round(rise * 100)} %` : ''}`, aircraftId });
   const next = contracts.map((c) => {
     if (c.started_at >= start) return { ...c };
     const n = { ...c };
@@ -50,20 +50,20 @@ export function planMonth(start: number, contracts: PlanContract[], fleet: PlanA
     if (c.kind === 'lease') {
       if (n.months_paid < (n.months ?? 0)) {
         n.months_paid++;
-        charges.push({ kind: 'lease_rent', amount: -n.monthly, memo: `${reg(c.aircraft_id)} rent ${n.months_paid}/${n.months}` });
-        if (n.insurance > 0) charges.push(premium(n.insurance, reg(c.aircraft_id)));
+        charges.push({ kind: 'lease_rent', amount: -n.monthly, memo: `${reg(c.aircraft_id)} rent ${n.months_paid}/${n.months}`, aircraftId: c.aircraft_id });
+        if (n.insurance > 0) charges.push(premium(n.insurance, reg(c.aircraft_id), c.aircraft_id));
       } else if (n.ends_at !== null && start >= n.ends_at && !a?.busy) {
         if (n.deposit > 0) charges.push({ kind: 'deposit_refund', amount: n.deposit, memo: `${reg(c.aircraft_id)} deposit returned` });
         ended.push(n.id); returned.push(n.aircraft_id);
       }
     } else if (c.kind === 'rental') {
       n.months_paid++;
-      charges.push({ kind: 'lease_rent', amount: -n.monthly, memo: `${reg(c.aircraft_id)} monthly rental ${n.months_paid}` });
+      charges.push({ kind: 'lease_rent', amount: -n.monthly, memo: `${reg(c.aircraft_id)} monthly rental ${n.months_paid}`, aircraftId: c.aircraft_id });
     } else if (c.kind === 'loan' && n.months_paid < (n.months ?? 0)) {
       const step = loanStep(n.principal, n.monthly, n.months_paid, n.months!);
       n.principal = step.principal;
       n.months_paid++;
-      charges.push({ kind: 'loan_installment', amount: -step.pay, memo: `${reg(c.aircraft_id)} instalment ${n.months_paid}/${n.months}` });
+      charges.push({ kind: 'loan_installment', amount: -step.pay, memo: `${reg(c.aircraft_id)} instalment ${n.months_paid}/${n.months}`, aircraftId: c.aircraft_id });
       if (step.last) { ended.push(n.id); owned.push(n.aircraft_id); }
     }
     return n;
@@ -71,9 +71,9 @@ export function planMonth(start: number, contracts: PlanContract[], fleet: PlanA
   const gone = new Set(returned);
   for (const a of fleet) {
     if (a.acquired_at >= start || gone.has(a.id)) continue;
-    if ((a.ownership === 'owned' || a.ownership === 'financed') ) charges.push(premium(insuranceMonthly(a.value, a.category), a.registration));
+    if ((a.ownership === 'owned' || a.ownership === 'financed') ) charges.push(premium(insuranceMonthly(a.value, a.category), a.registration, a.id));
     if (a.ownership !== 'club' && a.ownership !== 'rented' && a.base) {
-      charges.push({ kind: 'parking', amount: -PARKING_FEE_BY_SIZE[airports.get(a.base)?.size ?? 'small'], memo: `${a.registration} parking ${a.base}` });
+      charges.push({ kind: 'parking', amount: -PARKING_FEE_BY_SIZE[airports.get(a.base)?.size ?? 'small'], memo: `${a.registration} parking ${a.base}`, aircraftId: a.id });
     }
   }
   // C7: payroll is its own charge. Whoever started before the 1st and has not left by it is paid for the month (the hiring premium covered the month they joined).
@@ -85,7 +85,9 @@ export function planMonth(start: number, contracts: PlanContract[], fleet: PlanA
   return { charges, contracts: next, facilities: built.rows, ended, returned, owned };
 }
 
-function planInputs(db: Db, companyId: number, at: number): { contracts: PlanContract[]; fleet: PlanAircraft[]; staff: PlanStaff[]; facilities: PlanFacility[] } {
+export type PlanInputs = { contracts: PlanContract[]; fleet: PlanAircraft[]; staff: PlanStaff[]; facilities: PlanFacility[] };
+
+export function planInputs(db: Db, companyId: number, at: number): PlanInputs {
   const contracts = all<ContractRow>(db, "SELECT * FROM contracts WHERE company_id = ? AND status = 'active' ORDER BY id", companyId);
   const fleet = all<{ id: number; icao: string; registration: string | null; base: string | null; ownership: Ownership; value: number; acquired_at: number; busy: number }>(db,
     `SELECT a.*, EXISTS (SELECT 1 FROM flights f WHERE f.aircraft_id = a.id AND f.status = 'active') AS busy FROM aircraft a WHERE a.company_id = ? AND a.returned_at IS NULL ORDER BY a.id`, companyId)
@@ -113,7 +115,7 @@ export function runBilling(db: Db, companyId: number, now: number): number {
     const at = monthStart(m);
     const { contracts, fleet, staff, facilities } = planInputs(db, companyId, at);
     const plan = planMonth(at, contracts, fleet, staff, facilities, insuranceRise(db, companyId, m));
-    for (const c of plan.charges) post(db, companyId, at, c.kind, c.amount, c.memo);
+    for (const c of plan.charges) post(db, companyId, at, c.kind, c.amount, c.memo, null, c.aircraftId === undefined ? {} : { aircraftId: c.aircraftId });
     savePlanRows(db, facilities, plan.facilities);
     for (const c of plan.contracts) {
       const before = contracts.find((x) => x.id === c.id)!;
@@ -180,9 +182,10 @@ export function signLease(db: Db, companyId: number, o: { offerId: string; month
   const terms: LeaseTerms = { maintenanceIncluded: offer.maintenanceIncluded, purchaseOptionPrice: offer.purchaseOptionPrice, value: aircraftValue(type), earlyExit: offer.earlyExit, minMonths: offer.minMonths };
   run(db, `INSERT INTO contracts (company_id, aircraft_id, kind, started_at, ends_at, months, months_paid, monthly, deposit, insurance, terms)
     VALUES (?, ?, 'lease', ?, ?, ?, 1, ?, ?, ?, ?)`, companyId, aircraftId, now, addMonths(now, term.months), term.months, term.monthlyRent, offer.deposit, offer.insuranceMonthly ?? 0, JSON.stringify({ ...terms, lessor: offer.lessor, year: offer.year, airframeHours: offer.airframeHours }));
-  post(db, companyId, now, 'lease_rent', -term.monthlyRent, `${registration} first rent (${offer.lessor})`);
-  post(db, companyId, now, 'deposit', -offer.deposit, `${registration} security deposit`);
-  post(db, companyId, now, 'ferry', -offer.ferryFee, `convoy and registration ${registration}`);
+  const on = { aircraftId };
+  post(db, companyId, now, 'lease_rent', -term.monthlyRent, `${registration} first rent (${offer.lessor})`, null, on);
+  post(db, companyId, now, 'deposit', -offer.deposit, `${registration} security deposit`, null, on);
+  post(db, companyId, now, 'ferry', -offer.ferryFee, `convoy and registration ${registration}`, null, on);
   snapshot(db, companyId, now);
   return aircraftResult(db, companyId, aircraftId, first, now);
 }
@@ -216,8 +219,8 @@ export function terminateContract(db: Db, companyId: number, id: number, now: nu
   }
   const net = c.deposit - penalty;
   if (balanceOf(db, companyId) + net < 0) throw short(-net - balanceOf(db, companyId), { penalty });
-  if (penalty > 0) post(db, companyId, now, 'lease_rent', -penalty, `${reg} early exit penalty`);
-  if (c.deposit > 0) post(db, companyId, now, 'deposit_refund', c.deposit, `${reg} deposit returned`);
+  if (penalty > 0) post(db, companyId, now, 'lease_rent', -penalty, `${reg} early exit penalty`, null, { aircraftId: c.aircraft_id });
+  if (c.deposit > 0) post(db, companyId, now, 'deposit_refund', c.deposit, `${reg} deposit returned`, null, { aircraftId: c.aircraft_id });
   endContract(db, c, now);
   snapshot(db, companyId, now);
   return { ended: true, penalty, depositRefunded: c.deposit, balanceAfter: balanceOf(db, companyId) };
@@ -233,8 +236,8 @@ export function buyoutLease(db: Db, companyId: number, id: number, now: number):
   const missing = needed - balanceOf(db, companyId);
   if (missing > 0) throw short(needed, { missing, price: t.purchaseOptionPrice, deposit: c.deposit });
   const reg = get<{ registration: string }>(db, 'SELECT registration FROM aircraft WHERE id = ?', c.aircraft_id)!.registration;
-  post(db, companyId, now, 'purchase_aircraft', -t.purchaseOptionPrice, `${reg} purchase option`);
-  if (c.deposit > 0) post(db, companyId, now, 'deposit_refund', c.deposit, `${reg} deposit applied`);
+  post(db, companyId, now, 'purchase_aircraft', -t.purchaseOptionPrice, `${reg} purchase option`, null, { aircraftId: c.aircraft_id });
+  if (c.deposit > 0) post(db, companyId, now, 'deposit_refund', c.deposit, `${reg} deposit applied`, null, { aircraftId: c.aircraft_id });
   endContract(db, c, now, 'owned');
   snapshot(db, companyId, now);
   return aircraftResult(db, companyId, c.aircraft_id, t.purchaseOptionPrice, now);
@@ -258,8 +261,8 @@ function rentAircraft(db: Db, companyId: number, kind: 'club' | 'rental', hub: s
   run(db, `INSERT INTO contracts (company_id, aircraft_id, kind, started_at, ends_at, months, months_paid, monthly, hourly, deposit)
     VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?, ?)`, companyId, aircraftId, kind, now, rental?.minMonths ?? null, rental ? 1 : 0, rental?.monthly ?? 0, kind === 'club' ? CLUB[icao]!.hourly : rental!.hourly, rental?.deposit ?? 0);
   if (rental) {
-    post(db, companyId, now, 'deposit', -rental.deposit, `${registration} rental deposit`);
-    post(db, companyId, now, 'lease_rent', -rental.monthly, `${registration} first month`);
+    post(db, companyId, now, 'deposit', -rental.deposit, `${registration} rental deposit`, null, { aircraftId });
+    post(db, companyId, now, 'lease_rent', -rental.monthly, `${registration} first month`, null, { aircraftId });
   }
   snapshot(db, companyId, now);
   return aircraftResult(db, companyId, aircraftId, first, now);
@@ -271,17 +274,24 @@ export const rentMonthly = (db: Db, companyId: number, hub: string, icao: string
 
 const UPCOMING_MONTHS = 3;
 
-export function overview(db: Db, companyId: number, now: number): FinanceOverview {
-  const { contracts, fleet, staff, facilities } = planInputs(db, companyId, now);
+/** What the next `months` billing runs will post, by the rules billing itself uses (`planMonth` on the contracts as they will be). Each charge is dated the 1st of its month. `inputs` lets the forecast ask "what if" (an extra contract, another fleet). */
+export function projectCharges(db: Db, companyId: number, now: number, months: number, inputs: PlanInputs = planInputs(db, companyId, now)): FinanceCharge[] {
+  const { contracts, fleet, staff, facilities } = inputs;
   const upcoming: FinanceCharge[] = [];
   let state = contracts, buildings = facilities;
-  for (let i = 1; i <= UPCOMING_MONTHS; i++) {
+  for (let i = 1; i <= months; i++) {
     const at = addMonths(now, i);
     const plan = planMonth(at, state, fleet, staff, buildings, insuranceRise(db, companyId, monthKey(at)));
     for (const c of plan.charges) upcoming.push({ at, kind: c.kind, amount: c.amount, memo: c.memo });
     state = plan.contracts.filter((c) => !plan.ended.includes(c.id));
     buildings = plan.facilities;
   }
+  return upcoming;
+}
+
+export function overview(db: Db, companyId: number, now: number): FinanceOverview {
+  const { contracts, fleet } = planInputs(db, companyId, now);
+  const upcoming = projectCharges(db, companyId, now, UPCOMING_MONTHS);
   const regs = new Map(fleet.map((a) => [a.id, a]));
   const icaos = new Map(all<{ id: number; icao: string }>(db, 'SELECT id, icao FROM aircraft WHERE company_id = ?', companyId).map((a) => [a.id, a.icao]));
   return {
