@@ -1,9 +1,9 @@
 // Lot STAFF (v3): read models of the staff screens (docs/v3-plan.md B.3). Nothing here writes except `syncLeaveRequests`, which materialises the leave requests
 // people file (deterministically per person and month) so the player has something to decide.
 import {
-  DAY_MS, DUTY_MAX_MIN, DUTY_REPORT_MIN, FIRING_MONTHS, FLIGHT_MAX_12M_MIN, FLIGHT_MAX_28D_MIN, LEAVE_ASK_RATE, LEAVE_DAYS_PER_YEAR, REST_POLICIES, REST_POLICY_NAMES, STAFF_FAMILIES, coverageOf, dayIso, dayNo,
+  DAY_MS, DUTY_MAX_MIN, FIRING_MONTHS, FLIGHT_MAX_28D_MIN, LEAVE_ASK_RATE, LEAVE_DAYS_PER_YEAR, REST_POLICIES, REST_POLICY_NAMES, STAFF_FAMILIES, coverageOf, dayIso, dayNo,
   dutyViolation, isoDayNo, yearOfDay,
-  type Blocker, type Candidate, type CandidatesView, type Coverage, type DutyBlock, type DutyState, type FamilyRow, type LeaveRequest, type LeaveView, type PolicyOption, type Qualification,
+  type Blocker, type Candidate, type CandidatesView, type Coverage, type DutyBlock, type FamilyRow, type LeaveRequest, type LeaveView, type PolicyOption, type Qualification,
   type StaffDetail, type StaffFamily, type StaffMember, type StaffOverview, type WatchItem,
   type SORTS,
 } from '@opc/shared';
@@ -14,7 +14,7 @@ import { all, get, run, type Db } from './db.ts';
 import { typeFor } from './game.ts';
 import { HttpError } from './http.ts';
 import { companyCode } from './lines.ts';
-import { companyDemand, countOf, type Slot } from './staff-needs.ts';
+import { companyDemand, countOf } from './staff-needs.ts';
 import { market } from './staff-people.ts';
 import { dutyFacts, dutyInput, policyOf, positionOf, rosterOf, rulesOf, stateOf, type StaffRow } from './staff.ts';
 

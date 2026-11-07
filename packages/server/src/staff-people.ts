@@ -1,8 +1,8 @@
 // Lot STAFF (v3): what the player does with her people: recruit, let go, train, transfer, rest, interim, the rest policy and the starter crew (C11).
 // Domain operations: callers wrap them in `tx`. Money goes through game.ts `post`; a payment the balance cannot cover is 409 insufficient_funds (like finance.ts).
 import {
-  CAPTAIN_FROM_HOURS, DAY_MS, DEFAULT_NOTICE_DAYS, FIRING_MONTHS, HIRING_PREMIUM_MONTHS, STAFF_FAMILIES, TRAINING_COURSE, REST_POLICIES, ROLE_OF, dayNo, experienceFactor, interimPrice, salaryFor,
-  type AircraftCategory, type Candidate, type FireResult, type HireResult, type InterimResult, type RestPolicy, type StaffFamily, type StaffRole, type TrainResult,
+  CAPTAIN_FROM_HOURS, DAY_MS, DEFAULT_NOTICE_DAYS, FIRING_MONTHS, HIRING_PREMIUM_MONTHS, STAFF_FAMILIES, TRAINING_COURSE, ROLE_OF, dayNo, experienceFactor, interimPrice, salaryFor,
+  type AircraftCategory, type Candidate, type FireResult, type InterimResult, type RestPolicy, type StaffFamily, type StaffRole, type TrainResult,
 } from '@opc/shared';
 import { hashSeed, mulberry32 } from './board.ts';
 import { all, get, run, type Db } from './db.ts';
@@ -243,4 +243,3 @@ export function grantPendingStarters(db: Db, now: number): void {
   }
 }
 
-export { REST_POLICIES };
