@@ -238,8 +238,9 @@ CREATE TABLE safety_readings (
 `;
 
 // OpenHangar v3, lot PARTS: the wear of each component of an aircraft (rows are made the first time an aircraft wears or is looked at: seeded from the lease offer's airframe hours, else new),
-// the spare parts a company keeps at a hub, the orders on their way, and the stock policy per aircraft type. A part's catalogue (names, prices, kits) is code in shared/src/parts.ts.
-// `parts_orders` also records a breakdown: a row with an `aircraft_id` is the part a failed component needed (cost 0 and received when it was on the shelf, else ordered with its delivery date as `eta`).
+// the spare parts a company keeps at a hub and the orders on their way, the stock policy per aircraft type (a target the shelf is topped up to; `cls` is the part class of the type, so billing and
+// breakdowns need no catalogue lookup), and the breakdowns: a mechanical component that reached its failure wear. The catalogue of parts (names, prices, kits) is code in shared/src/parts.ts.
+// `breakdowns` is unique per (aircraft, component, failed_at): a breakdown that is played twice is recorded once, so its part and its bill are never taken twice.
 const SCHEMA_V11 = `
 CREATE TABLE aircraft_components (
   aircraft_id INTEGER NOT NULL REFERENCES aircraft(id) ON DELETE CASCADE,
@@ -249,12 +250,16 @@ CREATE TABLE parts_stock (
   company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, hub TEXT NOT NULL, part TEXT NOT NULL, qty INTEGER NOT NULL CHECK (qty >= 0), PRIMARY KEY (company_id, hub, part));
 CREATE TABLE parts_orders (
   id INTEGER PRIMARY KEY, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, hub TEXT NOT NULL, part TEXT NOT NULL, qty INTEGER NOT NULL,
-  ordered_at INTEGER NOT NULL, eta INTEGER NOT NULL, cost INTEGER NOT NULL, express INTEGER NOT NULL DEFAULT 0,
-  aircraft_id INTEGER REFERENCES aircraft(id) ON DELETE CASCADE, component TEXT, received INTEGER NOT NULL DEFAULT 0);
+  ordered_at INTEGER NOT NULL, eta INTEGER NOT NULL, cost INTEGER NOT NULL, express INTEGER NOT NULL DEFAULT 0, received INTEGER NOT NULL DEFAULT 0);
 CREATE INDEX parts_orders_open ON parts_orders(company_id, received, eta);
 CREATE TABLE parts_policy (
   company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, hub TEXT NOT NULL, icao TEXT NOT NULL, cls TEXT NOT NULL,
   policy TEXT NOT NULL CHECK (policy IN ('none','critical','full')), PRIMARY KEY (company_id, hub, icao));
+CREATE TABLE breakdowns (
+  id INTEGER PRIMARY KEY, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, aircraft_id INTEGER NOT NULL REFERENCES aircraft(id) ON DELETE CASCADE,
+  hub TEXT NOT NULL, component TEXT NOT NULL, part TEXT NOT NULL, failed_at INTEGER NOT NULL, eta INTEGER NOT NULL, ready_at INTEGER NOT NULL, paid INTEGER NOT NULL, from_stock INTEGER NOT NULL,
+  UNIQUE (aircraft_id, component, failed_at));
+CREATE INDEX breakdowns_company ON breakdowns(company_id, failed_at);
 `;
 
 /** Append-only; `PRAGMA user_version` records how many ran. */

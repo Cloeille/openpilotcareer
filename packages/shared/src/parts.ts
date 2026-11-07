@@ -2,7 +2,7 @@
 // Runtime-imports only sibling leaf files (never ./index.ts), so there is no module cycle.
 import { z } from 'zod';
 import { WEAR_PCT_PER_HOUR } from './finance.ts';
-import { DAY_MS } from './lines.ts';
+import { AUTONOMY_FACTOR, DAY_MS } from './lines.ts';
 import type { AircraftCategory } from './index.ts';
 
 const round = (n: number, step = 1): number => Math.round(n / step) * step;
@@ -19,8 +19,8 @@ export const isMechanical = (c: Component): c is Mechanical => (MECHANICAL as re
 
 /** B.6: the share of the aircraft's wear each component takes. Propellers (rotors) exist on turboprops and helicopters only. */
 export const COMPONENT_WEIGHT: Record<Component, number> = { engines: 0.35, gear: 0.2, propellers: 0.1, avionics: 0.1, interior: 0.15, paint: 0.1 };
-/** A component wears `WEAR_PCT_PER_HOUR[category] * weight * COMPONENT_WEAR_SCALE` percent per block hour. The scale is tuned so a breakdown comes every 1 000 to 3 000 block hours (the whole game runs ten times faster than real wear: B.1). */
-export const COMPONENT_WEAR_SCALE = 0.4;
+/** A component wears `WEAR_PCT_PER_HOUR[category] * weight * COMPONENT_WEAR_SCALE` percent per block hour. The scale is tuned so a breakdown comes every 500 to 1 500 block hours of the airliners and light aircraft the game flies. */
+export const COMPONENT_WEAR_SCALE = 0.5;
 const PROPELLED: readonly AircraftCategory[] = ['turboprop-single', 'turboprop-multi', 'turboprop-airliner', 'helicopter'];
 export const componentsOf = (category: AircraftCategory): Component[] => COMPONENTS.filter((c) => c !== 'propellers' || PROPELLED.includes(category));
 /** Percent of wear per block hour. */
@@ -72,6 +72,9 @@ export const addEffects = (list: readonly Effects[]): Effects =>
 /** The best an aircraft can be once every component is new (the mockup: 91 % now, 96 % with the gear and the avionics put right; 3.4/5 now, 3.9 with the interior). */
 export const BASE_RELIABILITY_PCT = 96;
 export const BASE_SATISFACTION = 4.1;
+/** Each reliability point lost raises the risk of an incident roll by this share (B.6: reliability feeds the incident roll); the mockup's 91 % against 96 % is +25 %. */
+export const RELIABILITY_RISK_PER_PT = 0.05;
+export const reliabilityRiskFactor = (reliabilityLost: number): number => 1 + RELIABILITY_RISK_PER_PT * reliabilityLost;
 /** Money: one reliability point is 1.2 % of the revenue (delays, missed connections), one satisfaction point 4 % (the load-factor term of B.7), a lost passenger share is the same share of revenue, lost speed raises fuel and maintenance by 1/(1-p). */
 export const REVENUE_PER_RELIABILITY_PT = 0.012;
 export const REVENUE_PER_SATISFACTION_PT = 0.04;
@@ -87,6 +90,9 @@ export type Kpi = { performance: number; reliability: number; satisfaction: numb
 /** What the aircraft is like with these effects: performance and load as fractions (-0.04), reliability in percent, satisfaction out of 5. */
 export const kpiOf = (e: Effects): Kpi => ({ performance: -e.performance, reliability: BASE_RELIABILITY_PCT - e.reliability, satisfaction: BASE_SATISFACTION - e.satisfaction, load: -e.load });
 
+/** The stage used to price an hour of the aircraft's work: a 200 NM leg (or four fifths of the range if shorter) at the mockup's 78 % load, earning what a line pays (AUTONOMY_FACTOR, B.8: a ground day is a day of line revenue). */
+export const REFERENCE_STAGE_NM = 200;
+export const REFERENCE_LOAD = 0.78;
 /** What one block hour of the aircraft earns and what its fuel and maintenance cost, at the reference stage (a flown leg: the server computes it with `settle`). */
 export type Economics = { revenuePerHour: number; costPerHour: number };
 /** The mockup's assumption: 80 flight hours a month. */
@@ -98,8 +104,8 @@ export function monthlyLoss(e: Effects, econ: Economics): number {
   const f = moneyFactors(e);
   return Math.round(HOURS_PER_MONTH * (econ.revenuePerHour * (1 - f.revenue) + econ.costPerHour * (f.cost - 1)));
 }
-/** One ground day is a day of the type's flying. */
-export const groundDayValue = (econ: Economics): number => Math.round(econ.revenuePerHour * FLY_HOURS_PER_DAY);
+/** B.8: one ground day is one day of the type's line revenue (a line earns AUTONOMY_FACTOR of what a flown job pays, for the HOURS_PER_MONTH the mockup assumes). */
+export const groundDayValue = (econ: Economics): number => Math.round(econ.revenuePerHour * AUTONOMY_FACTOR * FLY_HOURS_PER_DAY);
 
 // ---------------------------------------------------------------- refurbish, replace, and what it pays back
 
@@ -123,11 +129,14 @@ export const KEEP_VALUE_SHARE = 0.46;
 /** The horizon of an aircraft that is not on a lease, and the payback beyond which the screen says it never pays. */
 export const HORIZON_MONTHS = 24;
 export const NEVER_PAYBACK_MONTHS = 100;
-/** B.4 (level 2 hangar: heavy checks without ferry): the work is done at the base only if a hangar of this level stands there; otherwise the aircraft is ferried to a workshop, which costs the convoy fee and days. */
-export const FERRY_HANGAR_LEVEL = 2;
+/** B.4 (level 2 hangar: heavy checks without ferry): a visit longer than this is a heavy check, done at the base only if a staffed hangar of level 2 stands there; otherwise the aircraft is ferried to a
+ *  workshop, which costs the convoy fee and FERRY_DAYS more. Shorter visits are done wherever the aircraft is. The mockup's six days for the gear, propellers, avionics and seats are not a heavy check. */
+export const HEAVY_CHECK_DAYS = 7;
 export const FERRY_DAYS = 2;
-/** Days the aircraft is in the workshop: the longest item, times the hangar's factor (B.4), plus the ferry. */
-export const worksDays = (itemDays: number, downtimeFactor: number, ferry: boolean): number => (itemDays === 0 ? 0 : Math.ceil(itemDays * downtimeFactor) + (ferry ? FERRY_DAYS : 0));
+export const isHeavyCheck = (itemDays: number): boolean => itemDays > HEAVY_CHECK_DAYS;
+/** Days the aircraft is in the workshop: the longest item times the hangar's downtime factor (B.4: any staffed hangar halves it), plus the ferry of a heavy check without a level-2 hangar. */
+export const worksDays = (itemDays: number, downtimeFactor: number, heavyHangar: boolean): number =>
+  itemDays === 0 ? 0 : Math.ceil(itemDays * downtimeFactor) + (isHeavyCheck(itemDays) && !heavyHangar ? FERRY_DAYS : 0);
 
 export type ChoiceView = {
   action: Choice; cost: number; wearAfter: number;
@@ -135,44 +144,47 @@ export type ChoiceView = {
   monthlyLoss: number;
   /** Months to earn the cost back; null when it never does (no gain, or more than NEVER_PAYBACK_MONTHS). */
   paybackMonths: number | null;
-  /** Over the months left: what is gained minus what is spent. */
+  /** Over the months left: what is gained minus what is spent, plus the new parts' value when the company keeps the aircraft (it owns it). On a lease this is the figure for handing it back. */
   net: number;
-  /** The same, with the new parts kept (the aircraft is bought at the end of the lease). */
+  /** The same for a leased aircraft bought at the end of the term (the new parts stay with the company). Equals `net` when the company owns the aircraft. */
   netIfBought: number;
   days: number;
 };
-export function choiceView(action: Choice, c: Component, wear: number, aircraftValue: number, econ: Economics, months: number): ChoiceView {
+/** `keeps`: the company owns the aircraft (owned or financed), so the new parts are worth something to it at the end of the horizon. */
+export function choiceView(action: Choice, c: Component, wear: number, aircraftValue: number, econ: Economics, months: number, keeps: boolean): ChoiceView {
   const cost = action === 'leave' ? 0 : refurbCost(action, c, aircraftValue), after = wearAfterAction(action, wear);
   const loss = monthlyLoss(wearEffects(c, after), econ), now = monthlyLoss(wearEffects(c, wear), econ), gain = now - loss;
   const payback = action === 'leave' || gain <= 0 ? null : Math.ceil(cost / gain);
-  const net = action === 'leave' ? 0 : gain * months - cost;
+  const base = action === 'leave' ? 0 : gain * months - cost, kept = action === 'leave' ? 0 : Math.round(cost * KEEP_VALUE_SHARE);
   return {
     action, cost, wearAfter: after, monthlyLoss: loss, paybackMonths: payback !== null && payback <= NEVER_PAYBACK_MONTHS ? payback : null,
-    net, netIfBought: action === 'leave' ? 0 : net + Math.round(cost * KEEP_VALUE_SHARE), days: action === 'leave' ? 0 : REFURB_DAYS[action][c],
+    net: keeps ? base + kept : base, netIfBought: base + kept, days: action === 'leave' ? 0 : REFURB_DAYS[action][c],
   };
 }
 /** The recommended choice of a component: the one with the best net over the months left, and only if it is positive. */
-export const bestChoice = (choices: readonly ChoiceView[]): Choice => choices.reduce((b, c) => (c.net > b.net ? c : b), choices.find((c) => c.action === 'leave')!).action;
+export const bestChoice = (choices: Record<Choice, ChoiceView>): Choice =>
+  (['overhaul', 'replace'] as const).reduce<Choice>((b, a) => (choices[a].net > choices[b].net ? a : b), 'leave');
 
 export type Selection = { component: Component; action: Choice }[];
 export type Totals = {
-  cost: number; days: number;
-  /** Net over the months left if the aircraft is handed back / bought. */
+  /** The items' price and the longest item, in days, before the hangar's factor (`WearView.works` has the real days). */
+  cost: number; itemDays: number;
+  /** Net over the months left if the aircraft is handed back / bought (equal when it is owned). */
   give: number; buy: number;
   /** Cumulative cash at the end of each month (month 1 first): what the works cost, then what they save. */
   cashCurve: number[]; breakEvenMonth: number | null;
 };
-export function refurbTotals(rows: readonly { component: Component; wearPct: number; choices: Record<Choice, ChoiceView> }[], selection: Selection, months: number): Totals {
-  let cost = 0, days = 0, give = 0, buy = 0, gain = 0;
+export function refurbTotals(rows: readonly { component: Component; choices: Record<Choice, ChoiceView> }[], selection: Selection, months: number): Totals {
+  let cost = 0, itemDays = 0, give = 0, buy = 0, gain = 0;
   for (const s of selection) {
     const row = rows.find((r) => r.component === s.component);
     if (!row || s.action === 'leave') continue;
-    const c = row.choices[s.action], now = row.choices.leave.monthlyLoss;
-    cost += c.cost; days = Math.max(days, c.days); give += c.net; buy += c.netIfBought; gain += now - c.monthlyLoss;
+    const c = row.choices[s.action];
+    cost += c.cost; itemDays = Math.max(itemDays, c.days); give += c.net; buy += c.netIfBought; gain += row.choices.leave.monthlyLoss - c.monthlyLoss;
   }
   const cashCurve = Array.from({ length: Math.max(0, months) }, (_, i) => gain * (i + 1) - cost);
   const first = cashCurve.findIndex((v) => v >= 0);
-  return { cost, days, give, buy, cashCurve, breakEvenMonth: cost === 0 ? null : first < 0 ? null : first + 1 };
+  return { cost, itemDays, give, buy, cashCurve, breakEvenMonth: cost === 0 || first < 0 ? null : first + 1 };
 }
 
 // ---------------------------------------------------------------- spare parts
@@ -216,7 +228,6 @@ export const kitCapital = (cls: PartClass, policy: PartsPolicy): number => kitOf
 /** B.6: with the part in stock the repair takes six hours (four in a hangar of level 2 that is fully staffed, B.4), without it the aircraft waits for the delivery. */
 export const FIX_HOURS_WITH_PART = 6;
 export const HANGAR_FIX_HOURS = 4;
-export const HANGAR_FIX_LEVEL = 2;
 export const DELIVERY_DAYS = [2, 3, 4, 5] as const;
 export const MEAN_DELIVERY_DAYS = DELIVERY_DAYS.reduce((a, b) => a + b, 0) / DELIVERY_DAYS.length;
 export const EXPRESS_DAYS = 1;
@@ -233,7 +244,10 @@ export function failedPart(cls: PartClass, c: Mechanical, unit: number): Catalog
   const kinds = PARTS_OF_COMPONENT[c];
   return partFor(cls, kinds[Math.min(kinds.length - 1, Math.floor(unit * kinds.length))]!)!;
 }
-export const fixHours = (hangarLevel: number, hangarStaffed: boolean): number => (hangarLevel >= HANGAR_FIX_LEVEL && hangarStaffed ? HANGAR_FIX_HOURS : FIX_HOURS_WITH_PART);
+/** B.4, hangar level 2: a fully staffed hangar of at least this level at the aircraft's base fixes an AOG in four hours and does heavy checks without a ferry. */
+export const HEAVY_HANGAR_LEVEL = 2;
+/** `heavyHangar`: such a hangar stands at the aircraft's base. */
+export const fixHours = (heavyHangar: boolean): number => (heavyHangar ? HANGAR_FIX_HOURS : FIX_HOURS_WITH_PART);
 
 /** Breakdowns a year for one aircraft flown `hoursPerYear`: each mechanical component fails every (FAILURE - RENEWED) / rate hours. */
 const failuresOf = (c: Mechanical, category: AircraftCategory, hoursPerYear: number): number => (componentRate(c, category) * hoursPerYear) / (FAILURE_WEAR_PCT - RENEWED_WEAR_PCT);
@@ -291,6 +305,8 @@ export type WearView = {
   aircraft: { id: number; registration: string; icao: string; typeName: string; ownership: string; value: number; wearPct: number };
   /** False when the company plays without wear and failures: nothing wears, nothing breaks down, and the works are refused. */
   active: boolean;
+  /** The company can send it to the workshop: it is hers (owned, financed or leased) and wear is on. */
+  refurbishable: boolean;
   lease: { endsAt: number | null; monthsLeft: number; purchaseOptionPrice: number; maintenanceIncluded: boolean; lessor: string | null } | null;
   /** The months the gains are counted over: the months left on a lease, else HORIZON_MONTHS. */
   months: number;
@@ -301,20 +317,21 @@ export type WearView = {
   recommended: Selection;
   selection: Selection;
   totals: Totals;
-  /** What the works would be where the aircraft is based: the hangar's factor, and the ferry when no level-2 hangar stands at its base. */
-  works: { days: number; downtimeFactor: number; ferry: boolean; ferryCost: number };
+  /** The works of the selection where the aircraft is based: the hangar's factor, and the ferry of a heavy check when no staffed level-2 hangar stands at its base. */
+  works: { days: number; downtimeFactor: number; heavyHangar: boolean; ferry: boolean; ferryCost: number };
   /** Cash after the works (the selection's cost and the ferry). */
   balanceAfter: number;
 };
-export type RefurbishResult = { cost: number; downUntil: number; balanceAfter: number; items: { component: Component; action: RefurbAction; cost: number }[] };
+/** `cost` is the items and the ferry together. */
+export type RefurbishResult = { cost: number; ferry: number; downUntil: number; balanceAfter: number; items: { component: Component; action: RefurbAction; cost: number }[] };
 
 export type StockLine = {
   part: string; name: string; cls: PartClass; kind: PartKind; unitPrice: number;
   qty: number; inTransit: number; value: number;
-  /** What the policies of the hub's types ask for. */
+  /** What the policies of the hub's types ask the shelf to hold. */
   target: number;
 };
-export type OrderLine = { id: number; part: string; name: string; qty: number; orderedAt: number; eta: number; cost: number; express: boolean; aircraftId: number | null };
+export type OrderLine = { id: number; part: string; name: string; qty: number; orderedAt: number; eta: number; cost: number; express: boolean };
 export type PartsPolicyOption = { policy: PartsPolicy; capital: number; groundDays: number };
 export type TypePolicy = {
   icao: string; name: string; cls: PartClass; aircraft: { id: number; registration: string }[];
@@ -322,16 +339,16 @@ export type TypePolicy = {
   /** Per aircraft of the type: breakdowns a year, and the ground days a year with each policy. */
   failuresPerYear: number;
   options: PartsPolicyOption[];
-  /** The ground days a year of the whole type with the policy it has now. */
+  /** The ground days a year of the whole type with what is on the shelf now (not with what the policy asks: the shelf can be short of it). */
   expectedGroundDays: number;
-  /** The stock at the hub covers the type's critical kit. */
+  /** The shelf holds the type's critical kit. */
   covered: boolean;
 };
 export type AogCase = {
   aircraftId: number; registration: string; icao: string; typeName: string; component: Mechanical;
   part: string; partName: string; failedAt: number; eta: number;
-  /** The aircraft flies again at this instant (the delivery and the fix). */
-  readyAt: number;
+  /** The aircraft flies again at this instant (the delivery and the fix). `fromStock`: the part was on the shelf, so this is the six hours (or four) of the repair. */
+  readyAt: number; fromStock: boolean;
   /** Euros of flying lost by this breakdown from the failure to `readyAt`, and the euros a day. */
   lost: number; dayValue: number;
   /** What the part cost with the freight. */
@@ -343,10 +360,11 @@ export type AogCase = {
 };
 export type WarehouseView = {
   hub: string;
-  /** The warehouse needs no building yet (the facilities catalogue offers no cargo hall): always null. */
+  /** The shelf needs no building (S3's catalogue has no cargo hall to rent): always null, kept for the B.6 contract. */
   facility: null;
   active: boolean;
-  capital: number; capitalShare: number; balance: number;
+  /** Value of the shelf, its share of the balance (a fraction), and what is on its way (paid, not yet immobilised). */
+  capital: number; capitalShare: number; onOrder: number; balance: number;
   expectedGroundDays: number;
   covered: { count: number; of: number };
   aog: AogCase | null;
@@ -354,7 +372,8 @@ export type WarehouseView = {
   inventory: StockLine[];
   orders: OrderLine[];
 };
-export type PolicyResult = { policy: PartsPolicy; capital: number; deltaGroundDays: number; annualSaving: number; ordered: number; refund: number; balanceAfter: number };
+/** `capital` is what the type's kit ties up under the new policy, `ordered` what the change bought (kits come without freight, delivered in 2 to 5 days), `refund` what the parts of the class that no policy asks for any more sold for; `deltaGroundDays` the change in expected ground days a year of the hub (negative: fewer), `annualSaving` what those days are worth. */
+export type PolicyResult = { icao: string; policy: PartsPolicy; capital: number; deltaGroundDays: number; annualSaving: number; ordered: number; refund: number; balanceAfter: number };
 export type OrderResult = { order: OrderLine; cost: number; balanceAfter: number };
 
 export const MONTH_MS = 30.4375 * DAY_MS;
