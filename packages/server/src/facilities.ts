@@ -2,7 +2,7 @@
 // operations centre: more lines) and the rows monthly billing reads. It imports the database and the catalogue only, never game.ts or fleet-extras.ts, because those import it.
 // Commands are in facilities-manage.ts, read models in facilities-views.ts. docs/v3-plan.md B.4 and its S3 implementation notes.
 import {
-  DESKS_FREE, DESK_FAMILIES, HANGAR_SELLS_LEVEL, MAX_LINES_PER_COMPANY, MAX_LINES_WITH_OPS, PARKING_SPOTS_PER_HUB, desksFor, hangarAircraft, hangarEffect, maintenanceSale, slotsFor, techniciansFor,
+  DESKS_FREE, DESK_FAMILIES, HANGAR_SELLS_LEVEL, MAX_LINES_PER_COMPANY, MAX_LINES_WITH_OPS, PARKING_SPOTS_PER_HUB, desksFor, hangarAircraft, hangarEffect, maintenanceSale, needsWidebodyHangar, slotsFor, techniciansFor,
   type AircraftCategory, type FacilityContractKind, type HangarEffect, type PlanFacility, type SlotSeed, type StaffFamily,
 } from '@opc/shared';
 import { airports } from './catalog.ts';
@@ -91,7 +91,7 @@ export function hangarEffectFor(db: Db, aircraftId: number, category: AircraftCa
   const a = get<{ company_id: number; base: string | null }>(db, 'SELECT company_id, base FROM aircraft WHERE id = ?', aircraftId);
   if (!a?.base) return null;
   const levels = hangarLevels(db, a.company_id, a.base, at);
-  return levels.length === 0 ? null : hangarEffect(levels, technicianCount(db, a.company_id, a.base, at), category === 'jet-widebody');
+  return levels.length === 0 ? null : hangarEffect(levels, technicianCount(db, a.company_id, a.base, at), needsWidebodyHangar(category));
 }
 
 /** Parking spots of a hub: the airport's ten, plus the aircraft each hangar houses. Players only (AI companies are not capped). */

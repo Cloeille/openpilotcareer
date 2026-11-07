@@ -33,7 +33,7 @@ export const liveSampleSchema = z.object({
   lat: range(-90, 90),
   lon: range(-180, 180),
   altFt: range(-2_000, 100_000),
-  gsKts: range(0, 3_000),
+  gsKts: range(0, 10_000), // the Quasar cruises at 5 000 kts
   vsFpm: range(-30_000, 30_000),
   headingDeg: range(0, 360),
   fuelKg: range(0, 1_000_000),

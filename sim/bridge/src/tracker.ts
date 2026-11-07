@@ -2,6 +2,7 @@
 // raises anti-cheat flags, and at `parked` produces the Telemetry report (or the reason there is none).
 // No I/O and no SimConnect: everything here is testable from recorded sample streams.
 import { distanceNm, icaoTypeSchema, telemetrySchema } from '@opc/shared';
+import { cruiseKtsOf } from './aircraft-types.ts';
 import { nearestAirport } from './airports.ts';
 import type { Flag, Outcome, Phase, SimSample, TrackerOptions } from './types.ts';
 
@@ -13,7 +14,8 @@ const PARKED_KTS = 1;
 const PARK_HOLD_MS = 30_000;
 const AIRPORT_MATCH_NM = 10;        // takeoff/landing farther than this from every known airport is off-airport
 const TELEPORT_NM = 50;
-const TELEPORT_MIN_KTS = 1_500;     // jump must also be faster than anything flyable, so a long sample gap is not a teleport
+const TELEPORT_MIN_KTS = 1_500;     // a position jump must be faster than this to be a teleport, so a long sample gap is not one...
+const TELEPORT_MARGIN = 1.5;        // ...and faster than this times the cruise speed of the type: a Quasar cruises at 5 000 kts, an A320 at 447
 const LONG_PAUSE_MS = 15 * 60_000;
 const RATE_EPSILON = 1.01;
 // Reloads and game crashes are allowed (a flight can be reloaded from an earlier save, a sim can crash), see #checkTrack.
@@ -106,7 +108,8 @@ export class FlightTracker {
     const nm = distanceNm(prev.lat, prev.lon, s.lat, s.lon);
     if (!s.resumed && gapMs > LONG_PAUSE_MS) this.#flag('long_pause'); // the sim (or the bridge) was away for a long time, and the host did not say why
     const moved = nm > RELOAD_NM;
-    if (!s.resumed && !(moved && nm / (gapMs / 3_600_000) > TELEPORT_MIN_KTS)) return false;
+    const flyableKts = Math.max(TELEPORT_MIN_KTS, TELEPORT_MARGIN * (cruiseKtsOf(designatorOf(s.atcModel) ?? this.#opts.aircraftIcao) ?? 0));
+    if (!s.resumed && !(moved && nm / (gapMs / 3_600_000) > flyableKts)) return false;
     // back on the track? A break that left the aircraft where it was has nothing to rewind, except that a reload before takeoff starts over
     const back = moved ? this.#nearestCrumb(s) : this.#takeoff ? -1 : 0;
     if (moved && back < 0 && nm > TELEPORT_NM) this.#flag('teleport_jump_over_50nm'); // forward, off the track: the sim jumped too fast to have flown it

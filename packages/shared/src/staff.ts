@@ -130,7 +130,7 @@ export const BASE_SALARY: Record<StaffFamily, number> = { pilot: 6_200, cabin: 3
 /** Pilot pay by the category of the type: the ATR captain of the mockup is 6 200 euros, a jet captain earns more. */
 const TYPE_PAY: Record<AircraftCategory, number> = {
   'piston-single': 0.45, 'piston-multi': 0.6, 'turboprop-single': 0.7, 'turboprop-multi': 0.85, 'turboprop-airliner': 1,
-  'jet-business': 1.3, 'jet-airliner': 1.6, 'jet-widebody': 2.2, helicopter: 0.9, other: 0.7,
+  'jet-business': 1.3, 'jet-airliner': 1.6, 'jet-widebody': 2.2, spaceplane: 3.5, helicopter: 0.9, other: 0.7,
 };
 /** Experience is flight hours for a pilot and years for the others; this maps it to 0..1 (10 000 h, 20 years). */
 export const experienceFactor = (family: StaffFamily, experience: number): number => clamp(experience / (family === 'pilot' ? 10_000 : 20), 0, 1);
@@ -164,7 +164,7 @@ export const START_NOW_FEE = 5_000;
 export const TRAINING_COURSE: Record<AircraftCategory, { days: number; cost: number }> = {
   'piston-single': { days: 7, cost: 3_500 }, 'piston-multi': { days: 10, cost: 6_000 }, 'turboprop-single': { days: 14, cost: 9_000 }, 'turboprop-multi': { days: 14, cost: 12_000 },
   'turboprop-airliner': { days: 21, cost: 18_000 }, 'jet-business': { days: 21, cost: 20_000 }, 'jet-airliner': { days: 21, cost: 24_000 }, 'jet-widebody': { days: 28, cost: 36_000 },
-  helicopter: { days: 14, cost: 12_000 }, other: { days: 14, cost: 8_000 },
+  spaceplane: { days: 56, cost: 120_000 }, helicopter: { days: 14, cost: 12_000 }, other: { days: 14, cost: 8_000 },
 };
 
 /** Days are numbered from the epoch (UTC). */

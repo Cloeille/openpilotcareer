@@ -108,7 +108,7 @@ const DAY_MS = 86_400_000;
 export function jobsNearby(a: Airport, now: number): number {
   const first = Math.floor(now / DAY_MS) * 4;
   let n = 0;
-  for (let w = first; w < first + 4; w++) n += boardFor(a, w).filter((j) => j.distanceNm <= NEARBY_NM).length;
+  for (let w = first; w < first + 4; w++) n += boardFor(a, w).filter((j) => !j.requiredAircraft && j.distanceNm <= NEARBY_NM).length;
   return n;
 }
 

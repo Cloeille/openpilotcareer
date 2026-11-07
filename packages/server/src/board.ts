@@ -1,5 +1,5 @@
 // Deterministic shared job board: a pure function of (airport, 6-hour window). Nothing is stored until a job is claimed.
-import { PAX_KG, distanceNm, jobPayout, type Airport, type AirportSize, type Job } from '@opc/shared';
+import { EXPRESS_AIRCRAFT, EXPRESS_MAX_NM, EXPRESS_MIN_NM, EXPRESS_PAYLOAD_KG, PAX_KG, distanceNm, expressPayout, jobPayout, type Airport, type AirportSize, type Job } from '@opc/shared';
 import { airportList, airports } from './catalog.ts';
 
 export const JOB_WINDOW_MS = 6 * 3_600_000;
@@ -17,6 +17,8 @@ const TIERS = [
 /** Smaller airports only offer the lighter classes. */
 const TIERS_AT: Record<AirportSize, number> = { large: 3, medium: 2, small: 1 };
 const DEST_WEIGHT: Record<AirportSize, number> = { large: 4, medium: 2, small: 1 };
+/** Spaceplane express jobs (a Quasar only) are offered at large airports, the only runways it uses, between large airports; a few per board keeps them rare. */
+const EXPRESS_PER_BOARD = 2;
 const MIN_RANGE_NM = 25;
 const FALLBACK_DESTINATIONS = 10;
 const CACHE_LIMIT = 4000;
@@ -44,17 +46,33 @@ const logUniform = (rand: number, min: number, max: number): number => Math.exp(
 
 type Candidate = { a: Airport; d: number };
 
-/** Airports reachable from `origin`, nearest first. Remote origins fall back to their nearest airports so no board is ever empty. */
-function candidatesFor(origin: Airport): Candidate[] {
+/** Airports of `list` at least MIN_RANGE_NM from `origin`, nearest first. */
+function distancesFrom(origin: Airport, list: readonly Airport[]): Candidate[] {
   const all: Candidate[] = [];
-  for (const a of airportList) {
+  for (const a of list) {
     if (a.icao === origin.icao) continue;
     const d = distanceNm(origin.lat, origin.lon, a.lat, a.lon);
     if (d >= MIN_RANGE_NM) all.push({ a, d });
   }
-  all.sort((x, y) => x.d - y.d);
+  return all.sort((x, y) => x.d - y.d);
+}
+
+/** Airports reachable from `origin`, nearest first. Remote origins fall back to their nearest airports so no board is ever empty. */
+function candidatesFor(origin: Airport): Candidate[] {
+  const all = distancesFrom(origin, airportList);
   const inRange = all.filter((c) => c.d <= MAX_RANGE_NM[origin.size]);
   return inRange.length > 0 ? inRange : all.slice(0, FALLBACK_DESTINATIONS);
+}
+
+const largeAirports = airportList.filter((a) => a.size === 'large');
+
+/** A destination at about `target` nm (within 15 %, else the nearest to it), larger airports preferred. `cands` is sorted and not empty. */
+function pickDestination(cands: readonly Candidate[], target: number, rand: () => number): Candidate {
+  const near = cands.filter((c) => c.d >= target * 0.85 && c.d <= target * 1.15);
+  const pool = near.length > 0 ? near : [cands.reduce((best, c) => (Math.abs(c.d - target) < Math.abs(best.d - target) ? c : best))];
+  let pick = rand() * pool.reduce((sum, c) => sum + DEST_WEIGHT[c.a.size], 0);
+  for (const c of pool) if ((pick -= DEST_WEIGHT[c.a.size]) < 0) return c;
+  return pool[pool.length - 1]!;
 }
 
 const cache = new Map<string, Job[]>();
@@ -72,16 +90,23 @@ export function boardFor(origin: Airport, window: number): Job[] {
     const reach = cands[cands.length - 1]!.d;
     const lo = Math.min(tier.nm[0], reach), hi = Math.max(lo + 1, Math.min(tier.nm[1], reach));
     const target = logUniform(rand(), lo, hi);
-    const near = cands.filter((c) => c.d >= target * 0.85 && c.d <= target * 1.15);
-    const pool = near.length > 0 ? near : [cands.reduce((best, c) => (Math.abs(c.d - target) < Math.abs(best.d - target) ? c : best))];
-    let pick = rand() * pool.reduce((sum, c) => sum + DEST_WEIGHT[c.a.size], 0);
-    let dest = pool[pool.length - 1]!;
-    for (const c of pool) if ((pick -= DEST_WEIGHT[c.a.size]) < 0) { dest = c; break; }
+    const dest = pickDestination(cands, target, rand);
     const kind = rand() < 0.65 ? 'pax' : 'cargo';
     const pax = kind === 'pax' ? Math.round(logUniform(rand(), tier.pax[0], tier.pax[1])) : 0;
     const payloadKg = kind === 'pax' ? pax * PAX_KG : Math.round(logUniform(rand(), tier.cargoKg[0], tier.cargoKg[1]) / 10) * 10;
     const distance = Math.round(dest.d);
     jobs.push({ id: boardJobId(origin.icao, window, i), source: 'board', kind, origin: origin.icao, destination: dest.a.icao, distanceNm: distance, payloadKg, pax, payout: jobPayout(kind, distance, payloadKg) });
+  }
+  if (origin.size === 'large') {
+    const far = distancesFrom(origin, largeAirports).filter((c) => c.d >= EXPRESS_MIN_NM && c.d <= EXPRESS_MAX_NM);
+    for (let k = 0; far.length > 0 && k < EXPRESS_PER_BOARD; k++) {
+      const dest = pickDestination(far, logUniform(rand(), EXPRESS_MIN_NM, Math.min(EXPRESS_MAX_NM, far[far.length - 1]!.d)), rand);
+      const distance = Math.round(dest.d);
+      jobs.push({
+        id: boardJobId(origin.icao, window, jobs.length), source: 'board', kind: 'cargo', origin: origin.icao, destination: dest.a.icao, distanceNm: distance,
+        payloadKg: EXPRESS_PAYLOAD_KG, pax: 0, payout: expressPayout(distance), requiredAircraft: EXPRESS_AIRCRAFT,
+      });
+    }
   }
   if (cache.size >= CACHE_LIMIT) cache.clear();
   cache.set(key, jobs);

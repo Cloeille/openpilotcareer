@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { checkTelemetry, deriveAircraft, distanceNm, telemetrySchema, type Telemetry } from '@opc/shared';
+import { checkTelemetry, deriveAircraft, distanceNm, resolveCatalogEntry, telemetrySchema, type Telemetry } from '@opc/shared';
+import { CRAFT, simulate } from '../scripts/make-fixtures.ts';
 import { readSamples } from '../src/fixture.ts';
 import { designatorOf, FlightTracker } from '../src/tracker.ts';
 import type { Phase, SimSample, TrackerOptions } from '../src/types.ts';
@@ -216,4 +217,26 @@ test('a reload to the departure gate before takeoff is accepted and the tracker 
   assert.deepEqual(airborne.tr.flags, []);
   assert.ok(airborne.tr.outcome?.ok && Math.abs(airborne.tr.outcome.report.distanceNm - jobNm) < 3, 'the abandoned leg is not flown distance');
   assert.equal(serverSays(airborne.tr.outcome.report).ok, true);
+});
+
+// ---- a spaceplane is not a teleport: the speed that proves a jump is the type's own
+const quasar = { ...CRAFT.airliner!, atcModel: 'QASR', title: 'Flying Fries Quasar', cruiseKts: 5_000, liftoffKts: 220, landingKts: 190, emptyKg: 130_000, payloadKg: 2_000, fuelKg: 40_000, burnKgPerHour: 28_000 };
+const quasarFlight = simulate({ from: 'LFPG', to: 'KJFK', craft: quasar, startMs: Date.UTC(2026, 10, 4, 9, 0, 0) });
+const quasarNm = distanceNm(49.0097, 2.5479, 40.6398, -73.7789);
+
+test('a QASR cruising at 5000 kts is not flagged, and the server verifies the flight', () => {
+  const { tr } = run(quasarFlight);
+  assert.deepEqual(tr.flags, []);
+  assert.ok(tr.outcome?.ok, JSON.stringify(tr.outcome));
+  assert.equal(tr.outcome.report.aircraftIcao, 'QASR');
+  const qasr = resolveCatalogEntry({ icao: 'QASR', name: 'Flying Fries Quasar', category: 'spaceplane', engines: 4, wtc: 'H', perf: { seats: 0, cargoKg: 2000, cruiseKts: 5000, rangeNm: 9999 } });
+  const verdict = checkTelemetry(tr.outcome.report, { origin: 'LFPG', destination: 'KJFK', distanceNm: quasarNm, payloadKg: 2_000, aircraftIcao: 'QASR', aircraft: qasr, acceptedAt: quasarFlight[0]!.t - 3_600_000, now: quasarFlight.at(-1)!.t + 3_600_000, antiCheat: true });
+  assert.deepEqual(verdict.ok, true, JSON.stringify(verdict));
+});
+
+test('the same 5000 kts in an A20N is a teleport, and a QASR is still caught by a jump that is far above its cruise', () => {
+  assert.deepEqual(run(quasarFlight.map((s) => ({ ...s, atcModel: 'A20N' }))).tr.flags, ['teleport_jump_over_50nm']);
+  const at = quasarFlight.findIndex((s) => !s.onGround && s.lat < 47) + 1; // airborne over France, 60 s per sample
+  const jumped = [...quasarFlight.slice(0, at), ...quasarFlight.slice(at).map((s) => ({ ...s, lat: s.lat + 4 }))]; // 240 nm sideways in one sample: over 14 000 kts
+  assert.ok(run(jumped).tr.flags.includes('teleport_jump_over_50nm'));
 });

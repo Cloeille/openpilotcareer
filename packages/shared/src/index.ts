@@ -19,7 +19,7 @@ export const OPC_GLOBAL_URL = 'https://global.openpilotcareer.org';
 
 export const AIRCRAFT_CATEGORIES = [
   'piston-single', 'piston-multi', 'turboprop-single', 'turboprop-multi', 'turboprop-airliner',
-  'jet-business', 'jet-airliner', 'jet-widebody', 'helicopter', 'other',
+  'jet-business', 'jet-airliner', 'jet-widebody', 'spaceplane', 'helicopter', 'other',
 ] as const;
 export type AircraftCategory = (typeof AIRCRAFT_CATEGORIES)[number];
 
@@ -68,6 +68,9 @@ const CATEGORY_DEFAULTS: Record<AircraftCategory, {
   'jet-business':       { engines: 2, seats: 8,   cargoKg: 700,    cruiseKts: 440, rangeNm: 2800, burnKgNmPerTonne: 1.8,  maintPerHourPerTonne: 330 },
   'jet-airliner':       { engines: 2, seats: 150, cargoKg: 3_000,  cruiseKts: 450, rangeNm: 2800, burnKgNmPerTonne: 0.3,  maintPerHourPerTonne: 55 },
   'jet-widebody':       { engines: 2, seats: 280, cargoKg: 15_000, cruiseKts: 490, rangeNm: 6500, burnKgNmPerTonne: 0.43, maintPerHourPerTonne: 75 },
+  // Flying Fries Quasar (Mach 7 add-on). 6 kg/nm: 1.8 t for a 300 nm hop (climb and acceleration burn most of it), 48 t for 8 000 nm (its real tank is 18 t), so checkTelemetry's
+  // 0.25x-3x fuel window accepts both. Maintenance is 12 000 per block hour (a 777 costs 1 650): with the 40 M price and the landing fee, what the express premiums pay for.
+  'spaceplane':         { engines: 4, seats: 0,   cargoKg: 2_000,  cruiseKts: 5000, rangeNm: 9999, burnKgNmPerTonne: 3,    maintPerHourPerTonne: 6_000 },
   'helicopter':         { engines: 1, seats: 4,   cargoKg: 300,    cruiseKts: 120, rangeNm: 300,  burnKgNmPerTonne: 1.5,  maintPerHourPerTonne: 300 },
   'other':              { engines: 1, seats: 4,   cargoKg: 400,    cruiseKts: 150, rangeNm: 600,  burnKgNmPerTonne: 1.0,  maintPerHourPerTonne: 150 },
 };
@@ -115,7 +118,10 @@ export type FlightStatus = 'active' | 'verified' | 'unverified' | 'rejected' | '
 
 export const capacityKg = (a: AircraftType): number => Math.max(a.seats * PAX_KG, a.cargoKg);
 /** Price follows earning power (capacity x speed), so every type pays back in a comparable number of flight hours. */
-export const aircraftPrice = (a: AircraftType): number => Math.round(PRICE_PER_KG_KT * capacityKg(a) * a.cruiseKts);
+/** A spaceplane earns from premiums, not from its load: capacity x speed would price the Quasar (2 t, Mach 7) at 10 M, under a 777. Four times that makes it 40 M, above an A380. */
+const SPACEPLANE_PRICE_FACTOR = 4;
+export const aircraftPrice = (a: AircraftType): number =>
+  Math.round(PRICE_PER_KG_KT * (a.category === 'spaceplane' ? SPACEPLANE_PRICE_FACTOR : 1) * capacityKg(a) * a.cruiseKts);
 export const aircraftValue = (a: AircraftType): number => Math.round(aircraftPrice(a) * RESALE_FACTOR);
 
 export function distanceNm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -130,6 +136,19 @@ export function jobRate(kind: JobKind, payloadKg: number): number {
   return base * (1 + (3 * 300) / (300 + payloadKg));
 }
 export const jobPayout = (kind: JobKind, dist: number, payloadKg: number): number => Math.round(dist * payloadKg * jobRate(kind, payloadKg));
+
+// Spaceplane express: 2 t of cargo that only a Quasar can carry, between large airports (the runway it needs).
+// payout = EXPRESS_BASE + regular 2 t cargo payout x EXPRESS_PREMIUM x (1 + dist / EXPRESS_PREMIUM_DOUBLES_NM): a flat fee plus the regular cargo rate under a premium that grows with the distance.
+// 200 nm pays 8 900, 300 nm 10 700, 1 000 nm 29 000, 5 000 nm 330 000 (what a long-haul widebody flight nets), 8 000 nm 770 000.
+export const EXPRESS_AIRCRAFT = 'QASR';
+export const EXPRESS_PAYLOAD_KG = 2_000;
+export const EXPRESS_MIN_NM = 200;
+export const EXPRESS_MAX_NM = 8_000;
+const EXPRESS_BASE = 6_000;
+const EXPRESS_PREMIUM = 1.5;
+const EXPRESS_PREMIUM_DOUBLES_NM = 1_200;
+export const expressPayout = (dist: number): number =>
+  Math.round(EXPRESS_BASE + jobPayout('cargo', dist, EXPRESS_PAYLOAD_KG) * EXPRESS_PREMIUM * (1 + dist / EXPRESS_PREMIUM_DOUBLES_NM));
 
 export type JobShape = { kind: JobKind; pax: number; payloadKg: number; distanceNm: number; requiredAircraft?: string };
 

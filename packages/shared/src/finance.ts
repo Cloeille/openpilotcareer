@@ -69,12 +69,12 @@ export const WEAR_AFTER_MAINTENANCE_PCT = 5;
 /** Wear gained per block hour. A light piston single hits the threshold after 100 h, an airliner after about 270 h. */
 export const WEAR_PCT_PER_HOUR: Record<AircraftCategory, number> = {
   'piston-single': 0.8, 'piston-multi': 0.7, 'turboprop-single': 0.5, 'turboprop-multi': 0.45, 'turboprop-airliner': 0.4,
-  'jet-business': 0.35, 'jet-airliner': 0.3, 'jet-widebody': 0.25, 'helicopter': 0.8, 'other': 0.6,
+  'jet-business': 0.35, 'jet-airliner': 0.3, 'jet-widebody': 0.25, 'spaceplane': 0.5, 'helicopter': 0.8, 'other': 0.6,
 };
 /** Hours in the workshop once the threshold is crossed. */
 export const MAINTENANCE_HOURS: Record<AircraftCategory, number> = {
   'piston-single': 12, 'piston-multi': 18, 'turboprop-single': 24, 'turboprop-multi': 24, 'turboprop-airliner': 36,
-  'jet-business': 36, 'jet-airliner': 48, 'jet-widebody': 72, 'helicopter': 24, 'other': 24,
+  'jet-business': 36, 'jet-airliner': 48, 'jet-widebody': 72, 'spaceplane': 96, 'helicopter': 24, 'other': 24,
 };
 export const wearAfter = (wearPct: number, category: AircraftCategory, hours: number): number =>
   Math.min(100, Math.round((wearPct + WEAR_PCT_PER_HOUR[category] * hours) * 100) / 100);

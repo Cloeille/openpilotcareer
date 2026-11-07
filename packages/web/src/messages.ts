@@ -294,6 +294,7 @@ const table = {
   'cat.jet-business': ['Business jet', 'Jet d’affaires'],
   'cat.jet-airliner': ['Jet airliner', 'Jet de ligne'],
   'cat.jet-widebody': ['Widebody jet', 'Gros-porteur'],
+  'cat.spaceplane': ['Spaceplane', 'Avion spatial'],
   'cat.helicopter': ['Helicopter', 'Hélicoptère'],
   'cat.other': ['Other', 'Autre'],
   'wtc.L': ['Light', 'Légère'], 'wtc.M': ['Medium', 'Moyenne'], 'wtc.H': ['Heavy', 'Lourde'], 'wtc.J': ['Super', 'Super'],

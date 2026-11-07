@@ -193,7 +193,7 @@ export function refurbTotals(rows: readonly { component: Component; choices: Rec
 export const PART_CLASSES = ['piston', 'turboprop', 'regional', 'jet'] as const;
 export type PartClass = (typeof PART_CLASSES)[number];
 export const partClassOf = (category: AircraftCategory): PartClass =>
-  category === 'turboprop-airliner' ? 'regional' : category.startsWith('jet') ? 'jet' : category.startsWith('turboprop') || category === 'helicopter' ? 'turboprop' : 'piston';
+  category === 'turboprop-airliner' ? 'regional' : category.startsWith('jet') || category === 'spaceplane' ? 'jet' : category.startsWith('turboprop') || category === 'helicopter' ? 'turboprop' : 'piston';
 export const PART_KINDS = ['engine', 'starter', 'propeller', 'avionics', 'brake', 'wheel'] as const;
 export type PartKind = (typeof PART_KINDS)[number];
 /** The parts whose failure is a failure of this component; a breakdown picks one of them (seeded). */

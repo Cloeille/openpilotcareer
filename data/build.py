@@ -98,8 +98,10 @@ def build_aircraft() -> None:
     curated = list(csv.DictReader(open(HERE / "aircraft-curated.csv", encoding="utf-8")))
     for row in curated:
         t = types.get(row["icao"])
+        if t is None and row["engines"] and row["wtc"]:  # add-on aircraft the FAA order does not list (Flying Fries Quasar): the row carries engines and wake class
+            t = types[row["icao"]] = {"icao": row["icao"], "name": row["name"], "category": row["category"], "engines": int(row["engines"]), "wtc": row["wtc"]}
         if t is None:
-            sys.exit(f"curated type {row['icao']} is not in FAA Order JO 7360.1K")
+            sys.exit(f"curated type {row['icao']} is not in FAA Order JO 7360.1K (give engines and wtc for an add-on type)")
         t["perf"] = {k: int(row[k]) for k in ("seats", "cargoKg", "cruiseKts", "rangeNm")}
         for k in ("name", "category"):
             if row.get(k):

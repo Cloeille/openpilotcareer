@@ -3,7 +3,7 @@
 // because those import it. Commands are in parts-manage.ts, read models in parts-views.ts. docs/v3-plan.md B.6 and its S5 implementation notes.
 import {
   DAY_MS, FAILURE_WEAR_PCT, HEAVY_HANGAR_LEVEL, RENEWED_WEAR_PCT, TRANSPORT_COST, addEffects, componentWearAfter, componentsOf, deliveryDays, failedPart, fixHours, hangarEffect, isMechanical, kitOf,
-  moneyFactors, partClassOf, reliabilityRiskFactor, seedWear, wearEffects,
+  moneyFactors, needsWidebodyHangar, partClassOf, reliabilityRiskFactor, seedWear, wearEffects,
   type AircraftCategory, type CatalogPart, type Component, type Effects, type Mechanical, type PartClass, type PartsPolicy, type Settlement,
 } from '@opc/shared';
 import { hashSeed, mulberry32 } from './board.ts';
@@ -97,7 +97,7 @@ export function wearComponents(db: Db, o: Wear): void {
 
 /** A fully staffed hangar of level HEAVY_HANGAR_LEVEL or more stands at the hub (one that can service the aircraft: a wide-body needs a level-3 hangar): AOG fixed in 4 h, heavy checks without a ferry. */
 export function heavyHangarAt(db: Db, companyId: number, hub: string, at: number, category: AircraftCategory): boolean {
-  const levels = hangarLevels(db, companyId, hub, at), fx = hangarEffect(levels, technicianCount(db, companyId, hub, at), category === 'jet-widebody');
+  const levels = hangarLevels(db, companyId, hub, at), fx = hangarEffect(levels, technicianCount(db, companyId, hub, at), needsWidebodyHangar(category));
   return !!fx && !fx.understaffed && Math.max(...levels) >= HEAVY_HANGAR_LEVEL;
 }
 

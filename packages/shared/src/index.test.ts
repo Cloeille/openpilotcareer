@@ -210,3 +210,15 @@ test('interruptions: optional in the report, bounded, and the downtime is excuse
   const r = checkTelemetry({ ...report, flags: ['reload_after_crash'], interruptions }, flight);
   assert.ok(!r.ok && /flagged.*reload_after_crash/.test(r.reason), 'the interruptions never tolerate the flag');
 });
+
+test('checkTelemetry: 5000 kts is a normal cruise for a QASR and too short a flight for an A20N', () => {
+  const qasr = resolveCatalogEntry({ icao: 'QASR', name: 'Flying Fries Quasar', category: 'spaceplane', engines: 4, wtc: 'H', perf: { seats: 0, cargoKg: 2000, cruiseKts: 5000, rangeNm: 9999 } });
+  const a20n = resolveCatalogEntry({ icao: 'A20N', name: 'Airbus A320neo', category: 'jet-airliner', engines: 2, wtc: 'M', perf: { seats: 180, cargoKg: 4000, cruiseKts: 447, rangeNm: 3400 } });
+  const hours = 3000 / 5000 + 0.1, landedAt = new Date(Date.parse('2026-11-04T10:30:00Z') + hours * 3_600_000).toISOString();
+  const fast = (aircraft: AircraftType, icao: string): ReturnType<typeof checkTelemetry> => checkTelemetry(
+    { ...report, aircraftIcao: icao, landedAt, payloadKg: 2000, distanceNm: 3005, fuelUsedKg: fuelBurnKg(aircraft, 3000) },
+    { ...flight, aircraftIcao: icao, aircraft, distanceNm: 3000, payloadKg: 2000 });
+  assert.equal(fast(qasr, 'QASR').ok, true);
+  const r = fast(a20n, 'A20N');
+  assert.ok(!r.ok && /flight too short/.test(r.reason));
+});

@@ -4,7 +4,7 @@
 import { randomUUID } from 'node:crypto';
 import {
   HUB_PRICE, MAX_COMPANIES_PER_USER, loanOption, loanPayment, PAX_KG, REJECT_REPUTATION_PENALTY, START_MODES, START_REPUTATION, STARTER_AIRCRAFT, STARTING_BALANCE,
-  aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, flightDutyMin, fuelPriceFactor, interruptionsSchema, jobPayout, minFlightHours, presetSetting, rankFor, realismModifiers, realismView, seasonOf, settle,
+  EXPRESS_AIRCRAFT, aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, flightDutyMin, fuelPriceFactor, interruptionsSchema, jobPayout, minFlightHours, presetSetting, rankFor, realismModifiers, realismView, seasonOf, settle,
   type AircraftType, type Company, type CompanyProfile, type CustomAircraftInput, type FleetAircraft, type Flight,
   type Financing, type FlightStatus, type Job, type Leaderboard, type LeaderboardRow, type Me, type Ownership, type Personality, type Pilot, type StartMode, type Telemetry, type Transaction,
 } from '@opc/shared';
@@ -178,6 +178,7 @@ export const addMonths = (at: number, n: number): number => {
 };
 
 export function addCustomAircraft(db: Db, companyId: number, a: CustomAircraftInput): AircraftType {
+  if (a.icao === EXPRESS_AIRCRAFT) throw new HttpError(409, 'reserved_designator', `${a.icao} is the catalogue spaceplane: the express jobs that need it cannot be flown by a custom definition`);
   const n = get<{ n: number }>(db, 'SELECT COUNT(*) AS n FROM custom_aircraft WHERE company_id = ?', companyId)!.n;
   if (n >= MAX_CUSTOM_AIRCRAFT) throw new HttpError(409, 'limit_reached', `at most ${MAX_CUSTOM_AIRCRAFT} custom aircraft`);
   if (get(db, 'SELECT 1 AS x FROM custom_aircraft WHERE company_id = ? AND icao = ?', companyId, a.icao)) throw new HttpError(409, 'custom_aircraft_exists', `custom aircraft ${a.icao} already exists`);

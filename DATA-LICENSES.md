@@ -6,7 +6,7 @@ OpenPilotCareer's code is under the GNU AGPL-3.0 (see `LICENSE`). The datasets i
 |---|---|---|
 | `data/aircraft-types.json` | **FAA Order JO 7360.1K, *Aircraft Type Designators*, Appendix A** (effective 2025-06-12). <https://www.faa.gov/documentLibrary/media/Order/FAA_Order_JO_7360.1K_Aircraft_Type_Designators.pdf> | Work of the US federal government, not subject to copyright in the United States (17 U.S.C. § 105). Only ICAO type designator, manufacturer/model name, class, engine count/type and wake class are extracted. |
 | `data/airports.json` | **OurAirports** `airports.csv`, <https://ourairports.com/data/> | Released into the **public domain** by its maintainer ("All data is released to the Public Domain"). Filtered to large/medium/small airports with a 4-letter ICAO code. |
-| `data/aircraft-curated.csv` | Hand-written for this project: approximate seats, cargo capacity, cruise speed and range of about 70 common types, rounded from manufacturers' public specifications. | Original work of this project, released under the project licence (GNU AGPL-3.0). Figures are gameplay approximations, **not** certified performance data. |
+| `data/aircraft-curated.csv` | Hand-written for this project: approximate seats, cargo capacity, cruise speed and range of about 70 common types, rounded from manufacturers' public specifications, plus the add-on Flying Fries Quasar (`QASR`, not in the FAA order), whose figures are read from its MSFS package. | Original work of this project, released under the project licence (GNU AGPL-3.0). Figures are gameplay approximations, **not** certified performance data. |
 
 ## What is derived, not sourced
 

@@ -7,7 +7,7 @@ export type Group = (typeof GROUPS)[number];
 export function groupOf(c: AircraftCategory): Exclude<Group, 'all'> | null {
   if (c.startsWith('piston')) return 'piston';
   if (c.startsWith('turboprop')) return 'turboprop';
-  if (c.startsWith('jet')) return 'jet';
+  if (c.startsWith('jet') || c === 'spaceplane') return 'jet';
   if (c === 'helicopter') return 'helicopter';
   return null;
 }

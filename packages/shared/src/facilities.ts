@@ -151,6 +151,9 @@ export const hangarAircraft = (level: number): number => byLevel(HANGAR_AIRCRAFT
 export const desksFor = (level: number): number => byLevel(DESKS_BY_LEVEL, level);
 
 export type HangarEffect = { discount: number; downtimeFactor: number; understaffed: boolean };
+/** Wide-bodies and the spaceplane are only serviced by a level-3 hangar. */
+export const needsWidebodyHangar = (category: string): boolean => category === 'jet-widebody' || category === 'spaceplane';
+
 /** The effect of the hangars a company holds at one hub (their levels in force), given the technicians it employs there. They are staffed as a pool: short of the sum, every hangar gives half.
  *  A wide-body is only serviced by a level-3 hangar. null: no hangar that can take the aircraft. */
 export function hangarEffect(levels: readonly number[], technicians: number, widebody: boolean): HangarEffect | null {

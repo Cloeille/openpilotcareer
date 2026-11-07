@@ -28,7 +28,7 @@ export const RULES = {
 export const TRAINING_COURSE: Record<AircraftCategory, { days: number; cost: number }> = {
   'piston-single': { days: 7, cost: 3_500 }, 'piston-multi': { days: 10, cost: 6_000 }, 'turboprop-single': { days: 14, cost: 9_000 }, 'turboprop-multi': { days: 14, cost: 12_000 },
   'turboprop-airliner': { days: 21, cost: 18_000 }, 'jet-business': { days: 21, cost: 20_000 }, 'jet-airliner': { days: 21, cost: 24_000 }, 'jet-widebody': { days: 28, cost: 36_000 },
-  helicopter: { days: 14, cost: 12_000 }, other: { days: 14, cost: 8_000 },
+  spaceplane: { days: 56, cost: 120_000 }, helicopter: { days: 14, cost: 12_000 }, other: { days: 14, cost: 8_000 },
 };
 /** The rest policies' promised effects (S2's `REST_POLICIES`): the factor on today's mean fatigue and on the incident risk. The server sends the risk factor too and it wins; fatigue has no wire field. */
 export const FATIGUE_FACTOR: Record<RestPolicy, number> = { legal: 1, standard: 0.8, generous: 0.63 };

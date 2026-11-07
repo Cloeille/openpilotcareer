@@ -26,7 +26,7 @@ const LESSORS_JET = ['AerCap', 'SMBC Aviation', 'Azorra'];
 const LESSORS_OTHER = ['Viking Air Leasing', 'Azorra'];
 
 const roundTo = (n: number, step: number): number => Math.round(n / step) * step;
-const isJet = (t: AircraftType): boolean => t.category === 'jet-airliner' || t.category === 'jet-widebody' || t.category === 'jet-business';
+const isJet = (t: AircraftType): boolean => t.category === 'jet-airliner' || t.category === 'jet-widebody' || t.category === 'jet-business' || t.category === 'spaceplane';
 
 export const offerId = (icao: string, day: number): string => `L-${icao}-${day}`;
 export function parseOfferId(id: string): { icao: string; day: number } | null {

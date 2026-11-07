@@ -31,7 +31,7 @@ export function schematicCategory(a: Pick<AircraftType, 'category' | 'seats' | '
     case 'piston-single': case 'turboprop-single': return 'piston-single';
     case 'piston-multi': case 'turboprop-multi': return 'piston-twin';
     case 'turboprop-airliner': return 'turboprop';
-    case 'jet-business': return 'bizjet';
+    case 'jet-business': case 'spaceplane': return 'bizjet';
     case 'jet-airliner': return a.seats <= REGIONAL_JET_MAX_SEATS ? 'regional-jet' : 'narrowbody';
     case 'jet-widebody': return 'widebody';
     case 'helicopter': return 'helicopter';
