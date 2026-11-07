@@ -98,6 +98,9 @@ export function snapshot(db: Db, companyId: number, at: number): void {
     SELECT ?1, c.id, ${NET_WORTH_SQL}, (SELECT COUNT(*) FROM flights f WHERE f.company_id = c.id AND f.season = ?1 AND f.status IN ('verified','unverified')), c.reputation
     FROM companies c WHERE c.id = ?2
     ON CONFLICT (season, company_id) DO UPDATE SET net_worth = excluded.net_worth, flights = excluded.flights, reputation = excluded.reputation`, season, companyId);
+  // The parent's net worth holds its subsidiaries' (NET_WORTH_SQL): when one moves, the parent's season line moves with it, or a closed season would rank a stale group.
+  const parent = get<{ parent_id: number | null }>(db, 'SELECT parent_id FROM companies WHERE id = ?', companyId)?.parent_id;
+  if (parent) snapshot(db, parent, at);
 }
 
 // ---------------------------------------------------------------- company, hubs, fleet
