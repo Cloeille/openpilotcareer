@@ -237,8 +237,18 @@ CREATE TABLE safety_readings (
   company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, day INTEGER NOT NULL, idx INTEGER NOT NULL, PRIMARY KEY (company_id, day));
 `;
 
-/** Append-only; `PRAGMA user_version` records how many ran. */
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10];
+// Lot SIM-AIRCRAFT: the aircraft models a player's simulator has installed, as scanned by the bridge (one row per model, liveries folded into `liveries`).
+// A PUT replaces the player's rows but keeps `hidden` of the titles that are still there. `icao` is the designator the buy and lease screens use (the bridge's, else matched
+// against the catalogue by title; NULL = cannot be bought). Client input: it filters what is offered and never prices anything.
+const SCHEMA_SIM_AIRCRAFT = `
+CREATE TABLE sim_aircraft (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, title TEXT NOT NULL COLLATE NOCASE, icao TEXT, manufacturer TEXT NOT NULL, model TEXT NOT NULL,
+  source TEXT NOT NULL CHECK (source IN ('official','community')), liveries INTEGER NOT NULL, hidden INTEGER NOT NULL DEFAULT 0, scanned_at INTEGER NOT NULL,
+  PRIMARY KEY (user_id, title));
+`;
+
+/** Append-only; `PRAGMA user_version` records how many ran. Other lots append theirs here too: never pin MIGRATIONS.length. */
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_SIM_AIRCRAFT];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);

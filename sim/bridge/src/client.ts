@@ -1,6 +1,6 @@
 // Client of the OpenPilotCareer API (docs/telemetry-api.md). Every response is validated; the API key is only ever put in
 // the Authorization header, never in a URL, error message or log line.
-import { icaoAirportSchema, icaoTypeSchema, infoSchema, type LiveSample, type ServerInfo, type Telemetry } from '@opc/shared';
+import { icaoAirportSchema, icaoTypeSchema, infoSchema, type LiveSample, type ServerInfo, type SimAircraftEntry, type SimAircraftSaved, type Telemetry } from '@opc/shared';
 import { z } from 'zod';
 
 /** network/server: worth retrying. refused: the server answered 4xx. protocol: it answered 2xx with a body we cannot trust. */
@@ -34,6 +34,8 @@ export type ActiveFlight = z.infer<typeof activeFlightSchema>;
 export const verifyResponseSchema = z.object({ verification: z.enum(['verified', 'unverified', 'rejected']), reason: z.string().nullable() });
 export type VerifyResponse = z.infer<typeof verifyResponseSchema>;
 
+const simAircraftSavedSchema = z.object({ count: z.number().int(), scannedAt: z.number().int() });
+
 const errorBodySchema = z.object({ error: z.string(), message: z.string() });
 
 export class ServerClient {
@@ -54,6 +56,10 @@ export class ServerClient {
   /** POST /flights/:id/live (204). Throws ApiError like every call; 429 means "too soon", the caller just drops the sample. */
   postLive = (flightId: number, sample: LiveSample): Promise<null> =>
     this.#call('POST', `/api/v1/flights/${flightId}/live`, sample, z.null(), true, LIVE_TIMEOUT_MS);
+
+  /** PUT /me/sim-aircraft: replaces the list of aircraft models of this player's simulator. */
+  putSimAircraft = (aircraft: SimAircraftEntry[]): Promise<SimAircraftSaved> =>
+    this.#call('PUT', '/api/v1/me/sim-aircraft', { aircraft }, simAircraftSavedSchema, true);
 
   async #call<T>(method: string, path: string, body: unknown, schema: z.ZodType<T>, auth: boolean, timeoutMs: number = REQUEST_TIMEOUT_MS): Promise<T> {
     let res: Response;

@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 // opc-bridge command line: setup, flights, fly (live sim), replay (recorded stream).
+import { writeFileSync } from 'node:fs';
 import { createInterface } from 'node:readline/promises';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { Writable } from 'node:stream';
 import { parseArgs } from 'node:util';
+import { describe, reportAircraft, scanInstall } from './aircraft-sync.ts';
 import { ApiError, ServerClient, type ActiveFlight } from './client.ts';
 import { configSchema, defaultConfigDir, loadConfig, normalizeServerUrl, saveConfig, sendsKeyInClear } from './config.ts';
 import { readSamples, rebaseToStart } from './fixture.ts';
@@ -11,7 +13,7 @@ import { flushOutbox } from './deliver.ts';
 import { LiveReporter } from './live.ts';
 import { Outbox } from './outbox.ts';
 import { Session, type Status } from './session.ts';
-import { watchSim, type SimLink } from './simconnect.ts';
+import { enumerateAircraft, watchAircraft, watchSim, type SimLink } from './simconnect.ts';
 import { BRIDGE_VERSION, serveStatus, STATUS_PORT } from './status.ts';
 import { FlightTracker } from './tracker.ts';
 
@@ -22,6 +24,8 @@ const USAGE = `usage: opc-bridge [command]
                                       active flight it checks every 15 s until you accept a job in the web app.
   setup [--server URL] [--key KEY]    save the server and your API key (asked for what is missing; the key is typed hidden)
   flights                             list the active flights you can report on
+  scan-aircraft [--dry-run] [--out F] list the aircraft installed in MSFS (it must be running; official and Community) and send them to the server
+                                      as the aircraft you can buy. --dry-run only prints them (--out F writes them to the file F as JSON). Auto mode does it once per sim session.
   fly <flightId>                      follow MSFS (Windows, SimConnect) and report that flight when you park; leave it running.
                                       The in-sim panel reads http://127.0.0.1:${STATUS_PORT}/status. Ctrl+C quits.
   replay <fixture.json> [--flight ID] [--speed N]
@@ -110,6 +114,20 @@ async function flights(f: Flags): Promise<void> {
   for (const x of list) console.log(`${String(x.id).padStart(6)}  ${x.job.origin} -> ${x.job.destination}  ${x.aircraftIcao.padEnd(5)} ${Math.round(x.job.distanceNm)} nm  ${Math.round(x.job.payloadKg)} kg`);
 }
 
+/** The aircraft of the simulator: SimConnect's titles plus the Community cfg files. */
+async function scanAircraft(f: Flags & { 'dry-run'?: boolean | undefined; out?: string | undefined }): Promise<void> {
+  const listing = await enumerateAircraft({ log });
+  if (f['dry-run']) {
+    const scanned = scanInstall(listing);
+    log(describe(scanned));
+    if (f.out) { writeFileSync(f.out, `${JSON.stringify(scanned.entries, null, 1)}\n`); log(`written to ${f.out}`); }
+    else for (const e of scanned.entries) console.log(`${e.source.padEnd(9)} ${(e.icao ?? '-').padEnd(5)} ${String(e.liveries).padStart(4)}  ${e.title}`);
+    return;
+  }
+  const { client } = connect(f);
+  await reportAircraft(client, listing, log);
+}
+
 type Conn = ReturnType<typeof connect>;
 const statusPort = (): number => Number(process.env.OPC_STATUS_PORT) || STATUS_PORT; // OPC_STATUS_PORT: tests only
 
@@ -161,6 +179,9 @@ async function auto(f: Flags): Promise<number> {
   await warnIfAntiCheatOff(conn.client);
   const quit = new AbortController();
   process.once('SIGINT', () => quit.abort());
+  // once per simulator session, whatever the flights are doing; a failure only costs the list, never the flight
+  const stopAircraft = await watchAircraft((listing) => reportAircraft(conn.client, listing, log).then(() => undefined), { log });
+  quit.signal.addEventListener('abort', stopAircraft);
   const pollMs = Number(process.env.OPC_POLL_MS) || 15_000; // OPC_POLL_MS: tests only
   let idle: Awaited<ReturnType<typeof serveStatus>> | null = null;
   let flight = pickFlight(await conn.client.activeFlights());
@@ -229,7 +250,7 @@ async function replay(path: string, f: Flags & { flight?: string | undefined; sp
 async function main(argv: string[]): Promise<number> {
   const { values, positionals } = parseArgs({
     args: argv, allowPositionals: true,
-    options: { server: { type: 'string' }, key: { type: 'string' }, flight: { type: 'string' }, speed: { type: 'string' }, help: { type: 'boolean', short: 'h' } },
+    options: { server: { type: 'string' }, key: { type: 'string' }, flight: { type: 'string' }, speed: { type: 'string' }, 'dry-run': { type: 'boolean' }, out: { type: 'string' }, help: { type: 'boolean', short: 'h' } },
   });
   const [command, arg, ...extra] = positionals;
   if (values.help || extra.length > 0) {
@@ -240,6 +261,7 @@ async function main(argv: string[]): Promise<number> {
   switch (command) {
     case 'setup': await setup(values); return 0;
     case 'flights': await flights(values); return 0;
+    case 'scan-aircraft': await scanAircraft(values); return 0;
     case 'fly': return fly(arg, values);
     case 'replay':
       if (!arg) throw new Error('replay needs a fixture file');

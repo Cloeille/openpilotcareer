@@ -8,8 +8,21 @@
 //     SimStart/SimStop are documented too but not used: the docs say a flight reset sends SimStop, SimStart, SimStop, SimStart, so they are too noisy to mean "reloaded".
 //   SimVars        https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-miscellaneous-variables/  (PLANE ALT ABOVE GROUND, feet)
 //                  https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/miscellaneous-variables/  (CRASH FLAG: cause of a crash, 0 = none; CRASH SEQUENCE: 0 = off; both legacy but supported)
-// NOT VERIFIED AGAINST A LIVE SIMULATOR: the field list follows the MSFS SDK documentation, nothing here has met a running MSFS.
+// Aircraft enumeration (enumerateAircraft / watchAircraft below), checked against the MSFS 2024 SDK documentation:
+//   https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/AI_Object/SimConnect_EnumerateSimObjectsAndLiveries.htm
+//   (also listed under .../API_Reference/Events_And_Data/SimConnect_EnumerateSimObjectsAndLiveries.htm)
+//     (SimObject types: SIMCONNECT_SIMOBJECT_TYPE_AIRCRAFT = airplanes only, _HELICOPTER = helicopters only; answered in SIMCONNECT_RECV_ENUMERATE_SIMOBJECT_AND_LIVERY_LIST packets,
+//      or a SIMCONNECT_EXCEPTION with SIMCONNECT_EXCEPTION_INTERNAL)
+//   https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Structures_And_Enumerations/SIMCONNECT_RECV_ENUMERATE_SIMOBJECT_AND_LIVERY_LIST.htm
+//     (each entry is one unique combination of SimObject title and livery name)
+//   https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Structures_And_Enumerations/SIMCONNECT_ENUMERATE_SIMOBJECT_LIVERY.htm  (AircraftTitle, LiveryName: 256 chars each)
+//   https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Structures_And_Enumerations/SIMCONNECT_RECV_LIST_TEMPLATE.htm
+//     (a long list is split in packets: dwArraySize entries in this packet, dwEntryNumber 0..dwOutOf-1, dwOutOf packets in all)
+// This function needs node-simconnect's Protocol.SunRise (MSFS 2024); MSFS 2020 refuses it.
+// The older notes below: NOT VERIFIED AGAINST A LIVE SIMULATOR: the field list follows the MSFS SDK documentation, nothing here has met a running MSFS.
+import { setTimeout as sleep } from 'node:timers/promises';
 import type { ConnectionHandle, ConnectionOptions, RawBuffer } from 'node-simconnect';
+import type { Listing } from './aircraft-cfg.ts';
 import { simSampleSchema, type EngineKind, type Resume, type SimSample } from './types.ts';
 
 type Kind = 'f64' | 'i32' | 's32' | 's64' | 's256';
@@ -259,4 +272,118 @@ export async function watchSim(onSample: (s: SimSample) => void, o: WatchOptions
 
   void connect();
   return () => { stopped = true; if (timer) clearTimeout(timer); handle?.close(); };
+}
+
+// ---------------------------------------------------------------- the aircraft the simulator offers
+
+/** The SimObject types asked for, with their request ids (any ids that differ from the flight readings' own). */
+const ENUM_REQUESTS = [{ id: 10, type: 'AIRCRAFT' }, { id: 11, type: 'HELICOPTER' }] as const;
+const ENUM_TIMEOUT_MS = 30_000;
+
+export type ListPacket = { requestID: number; entryNumber: number; outOf: number; simobjectLiveries: { aircraftTitle: string; liveryName: string }[] };
+
+/** Puts the packets of the requested lists back together: a request is complete when all `outOf` of its packets arrived. */
+export class ListAssembly {
+  readonly rows: Listing[] = [];
+  readonly #state = new Map<number, { got: number; outOf: number; rows: number }>();
+  readonly #ids: readonly number[];
+  constructor(ids: readonly number[]) { this.#ids = ids; }
+
+  add(p: ListPacket): void {
+    if (!this.#ids.includes(p.requestID)) return;
+    const s = this.#state.get(p.requestID) ?? { got: 0, outOf: p.outOf, rows: 0 };
+    s.got++;
+    s.outOf = p.outOf;
+    for (const r of p.simobjectLiveries) { this.rows.push({ title: r.aircraftTitle, livery: r.liveryName }); s.rows++; }
+    this.#state.set(p.requestID, s);
+  }
+  get complete(): boolean { return this.#ids.every((id) => { const s = this.#state.get(id); return s !== undefined && s.got >= s.outOf; }); }
+  rowsOf(id: number): number { return this.#state.get(id)?.rows ?? 0; }
+}
+
+type Sc = typeof import('node-simconnect');
+
+/** Asks the open connection for every airplane and helicopter title with its liveries (official and community). */
+export function enumerateOn(sc: Sc, h: ConnectionHandle, o: { log: (line: string) => void; timeoutMs?: number }): Promise<Listing[]> {
+  return new Promise((resolve, reject) => {
+    const assembly = new ListAssembly(ENUM_REQUESTS.map((r) => r.id));
+    const sent = new Set<number>();
+    const finish = (err?: Error): void => {
+      clearTimeout(timer);
+      h.off('enumerateSimobjectAndLiveryList', onList);
+      h.off('exception', onException);
+      if (err) return reject(err);
+      o.log(`simulator lists ${assembly.rows.length} aircraft and livery rows (${ENUM_REQUESTS.map((r) => `${r.type.toLowerCase()}: ${assembly.rowsOf(r.id)}`).join(', ')})`);
+      resolve(assembly.rows);
+    };
+    const onList = (p: ListPacket): void => { assembly.add(p); if (assembly.complete) finish(); };
+    const onException = (e: { exception: number; sendId: number }): void => { if (sent.has(e.sendId)) finish(new Error(`SimConnect refused the aircraft list (exception ${e.exception})`)); };
+    const timer = setTimeout(() => (assembly.rows.length > 0 ? (o.log('the simulator did not finish its aircraft list in time; using what arrived'), finish()) : finish(new Error('the simulator did not answer the aircraft list'))), o.timeoutMs ?? ENUM_TIMEOUT_MS);
+    h.on('enumerateSimobjectAndLiveryList', onList);
+    h.on('exception', onException);
+    try {
+      for (const r of ENUM_REQUESTS) sent.add(h.enumerateSimObjectsAndLiveries(r.id, sc.SimObjectType[r.type]));
+    } catch (e) {
+      finish(e as Error);
+    }
+  });
+}
+
+const loadSimConnect = async (log: (line: string) => void): Promise<Sc | null> => {
+  try { return await import('node-simconnect'); } catch (e) { log(`no SimConnect client on this machine (${(e as Error).message})`); return null; }
+};
+
+/** One shot (`opc-bridge scan-aircraft`): connect, list, disconnect. Throws when MSFS is not running or does not answer. */
+export async function enumerateAircraft(o: { log: (line: string) => void; connection?: ConnectionOptions; timeoutMs?: number }): Promise<Listing[]> {
+  const sc = await loadSimConnect(o.log);
+  if (!sc) throw new Error('no SimConnect client on this machine: run it on the PC that runs MSFS');
+  let opened;
+  try {
+    opened = await sc.open('OpenPilotCareer bridge', sc.Protocol.SunRise, o.connection);
+  } catch (e) {
+    throw new Error(`MSFS is not running (${(e instanceof AggregateError ? e.errors[0] : e)?.message ?? 'no answer'}): start it, then scan again`);
+  }
+  try {
+    return await enumerateOn(sc, opened.handle, o);
+  } finally {
+    opened.handle.close();
+  }
+}
+
+export type AircraftWatchOptions = { log: (line: string) => void; connection?: ConnectionOptions; retryMs?: number; settleMs?: number; attempts?: number };
+
+/**
+ * Auto mode: once per simulator session (from its start to its quit) list the aircraft and hand the list to `onListing`. The simulator may still be
+ * loading its content when SimConnect first answers, so the first try waits `settleMs`; a failed try is repeated up to `attempts` times, then given up until the next session.
+ */
+export async function watchAircraft(onListing: (l: Listing[]) => Promise<void>, o: AircraftWatchOptions): Promise<() => void> {
+  const { retryMs = 15_000, settleMs = 20_000, attempts = 3 } = o;
+  const sc = await loadSimConnect(o.log);
+  if (!sc) return () => {};
+  const stop = new AbortController();
+  void (async () => {
+    while (!stop.signal.aborted) {
+      let opened;
+      try {
+        opened = await sc.open('OpenPilotCareer bridge', sc.Protocol.SunRise, o.connection);
+      } catch {
+        await sleep(retryMs, undefined, { signal: stop.signal }).catch(() => undefined);
+        continue;
+      }
+      const h = opened.handle;
+      const gone = new Promise<void>((resolve) => { h.on('quit', resolve); h.on('close', resolve); h.on('error', () => resolve()); stop.signal.addEventListener('abort', () => resolve()); });
+      for (let attempt = 1; attempt <= attempts && !stop.signal.aborted; attempt++) {
+        await sleep(attempt === 1 ? settleMs : retryMs * 2, undefined, { signal: stop.signal }).catch(() => undefined);
+        try {
+          await onListing(await enumerateOn(sc, h, o));
+          break;
+        } catch (e) {
+          o.log(`aircraft scan ${attempt}/${attempts}: ${(e as Error).message}`);
+        }
+      }
+      await gone; // one scan per session: wait for the simulator to quit before looking again
+      h.close();
+    }
+  })();
+  return () => { stop.abort(); };
 }

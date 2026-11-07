@@ -25,6 +25,7 @@ import { registerFacilities } from './routes-facilities.ts';
 import { registerCatalogueStats } from './routes-catalogue-stats.ts';
 import { fetchOfp, type Fetch } from './simbrief.ts';
 import { registerSimbrief } from './routes-simbrief.ts';
+import { registerSimAircraft } from './routes-sim-aircraft.ts';
 import { maintenanceTick } from './finance.ts';
 import { registerFinance } from './routes-finance.ts';
 import { onboardingOf, toleratedFlags } from './start.ts';
@@ -338,6 +339,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   registerLive(app, { db, now });
   registerSimbrief(app, { db, now, doFetch });
   registerSafety(app, { db, now });
+  registerSimAircraft(app, { db, now });
 
   return app;
 }
