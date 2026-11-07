@@ -6,7 +6,7 @@ import type { NavState } from './input.ts';
 import { t } from './i18n.ts';
 import { bridgeStatus } from './api-onboarding.ts';
 import { START_FACTS, clampStep, emptyForm, readDraft, resumeStep, toDraft, type Draft } from './onboarding-model.ts';
-import { obBottom, obTop, type BottomBar, type StepResult, type Wizard } from './onboarding-shell.ts';
+import { obBottom, obTop, STEP_KEYS, type BottomBar, type StepResult, type Wizard } from './onboarding-shell.ts';
 import type { BridgeStatus, Me, Onboarding, OnboardingStep, StartMode } from './onboarding-types.ts';
 import { step1, step2 } from './screens/ob-start.ts';
 import { step3a, step3b } from './screens/ob-aircraft.ts';
@@ -134,7 +134,7 @@ export function runOnboarding(host: OnboardingHost, initial: Onboarding, additio
     });
     host.root.replaceChildren(stage(result.scene, main,
       obTop(n, n, (s) => void render(s), () => void quit()), bottom.el));
-    document.title = `${t(`ob.step.${['depart', 'company', 'aircraft', 'realism', 'bridge', 'go'][n - 1]}` as 'ob.step.depart')} - ${PRODUCT_NAME}`;
+    document.title = `${t(STEP_KEYS[n - 1] ?? STEP_KEYS[0])} - ${PRODUCT_NAME}`;
     // Q / E would cycle the app's tabs, which do not exist yet: claim them. The screen's own keys win over the defaults.
     host.setNav({ tab: null, back: result.back ?? (() => w.prev()), keys: { q: NOOP, e: NOOP, ...(result.keys ?? {}) } });
     void bridgeStatus().then((p) => { if (id === rendering && alive) bottom?.setBridge(p); });

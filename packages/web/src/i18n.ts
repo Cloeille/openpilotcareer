@@ -31,6 +31,12 @@ export function translatePlural(lang: Lang, base: PluralBase, n: number, vars?: 
   return translate(lang, key, { n, ...vars });
 }
 
+/** Label of a code the server sends (a ledger kind, say): the first message `${prefix}.${code}` that exists, else the code spelled in words (`line_fee` -> `line fee`). Never the key. */
+export function translateCode(lang: Lang, code: string, ...prefixes: string[]): string {
+  const key = prefixes.map((p) => messageFor(`${p}.${code}`)).find((k) => k !== null);
+  return key ? translate(lang, key) : code.replaceAll('_', ' ');
+}
+
 let current: Lang | null = null;
 function initialLang(): Lang {
   let stored: string | null = null;
@@ -51,3 +57,4 @@ export function setLang(lang: Lang): void {
 
 export const t = (key: Key, vars?: Record<string, string | number>): string => translate(getLang(), key, vars);
 export const tp = (base: PluralBase, n: number, vars?: Record<string, string | number>): string => translatePlural(getLang(), base, n, vars);
+export const codeLabel = (code: string, ...prefixes: string[]): string => translateCode(getLang(), code, ...prefixes);

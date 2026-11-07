@@ -2,7 +2,6 @@ import { button, icon, panel } from './components.ts';
 import { fmt } from './format.ts';
 import { t, tp } from './i18n.ts';
 import type { StaffFamily, StaffOverview, StaffRole } from './api-staff.ts';
-import type { Key } from './messages.ts';
 import { nextArrival, type Tone } from './staff-view.ts';
 import { h } from './ui.ts';
 

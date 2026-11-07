@@ -6,9 +6,9 @@ import { airportInfo } from '../airports.ts';
 import { fleetSummary } from '../catalogue.ts';
 import { badge, button, dataTable, line, panel, unknownValue } from '../components.ts';
 import { aircraftName, byRegistration, monthLabel, nextCharges, parkingSummary, statusOf, wearOf, type ActiveFlightInfo } from '../finance-view.ts';
-import { chargeKind, locale, perform, tidyCity } from '../finance-ui.ts';
+import { locale, perform, tidyCity } from '../finance-ui.ts';
 import { fmt } from '../format.ts';
-import { t, tp } from '../i18n.ts';
+import { codeLabel, t, tp } from '../i18n.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
 import { starter } from './starter.ts';
@@ -117,7 +117,7 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
   const financePanel = finance === null ? null : panel({ title: t('fin.money.title'), action: t('fin.money.sub'), id: 'fin-money' },
     upcoming.length === 0 ? h('p', { class: 'dim small' }, t('fin.money.none'))
       : h('div', { class: 'fin-panel-list' }, upcoming.map((u) => h('div', { class: 'fin-charge' },
-        h('span', { class: 'what' }, h('span', null, chargeKind(u.kind)), h('span', { class: 'when' }, `${fm.date(u.at)}${u.memo ? ` · ${u.memo}` : ''}`)),
+        h('span', { class: 'what' }, h('span', null, codeLabel(u.kind, 'fin.kind')), h('span', { class: 'when' }, `${fm.date(u.at)}${u.memo ? ` · ${u.memo}` : ''}`)),
         h('span', { class: 'strong' }, fm.money(-Math.abs(u.amount)))))));
 
   const parkNote = parking

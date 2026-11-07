@@ -69,8 +69,8 @@ export function systemsBody(c: LiveCtx): Body {
       row(t('live.sys.rate'), `${fm.num(s.simRate, 2)}×`), row(t('live.sys.state'), s.paused ? t('live.sys.paused') : t('live.sys.running'))));
 
     checksBox.replaceChildren(h('span', { class: 'checks-label' }, t('live.sys.checks')), ...f.checks.map((k) => {
-      const name = k.id === 'other' ? k.raw ?? '' : t(`live.check.${k.id satisfies CheckId}` as 'live.check.slew');
-      return h('span', { class: `check ${k.state}` }, icon(CHECK_ICON[k.state], 15), name, h('span', { class: 'sr' }, ` (${t(`live.check.${k.state}` as 'live.check.ok')})`));
+      const name = k.id === 'other' ? k.raw ?? '' : t(`live.check.${k.id satisfies CheckId}`);
+      return h('span', { class: `check ${k.state}` }, icon(CHECK_ICON[k.state], 15), name, h('span', { class: 'sr' }, ` (${t(`live.check.${k.state}`)})`));
     }));
   };
 

@@ -20,7 +20,7 @@ export async function settings(ctx: Ctx): Promise<Screen> {
   const server = session.server === GLOBAL_URL ? t('set.serverGlobal') : new URL(session.server).host;
 
   const nav = h('nav', { class: 'settings-nav-list', 'aria-label': t('set.nav.label') }, SECTIONS.map((s) =>
-    h('a', { href: hashOf(s), 'aria-current': s === section ? 'page' : null }, t(`set.nav.${s}` as 'set.nav.keys'))));
+    h('a', { href: hashOf(s), 'aria-current': s === section ? 'page' : null }, t(`set.nav.${s}`))));
   const head = h('div', { class: 'settings-nav' }, titleBlock(t('set.status', { user: me.username, server }), t('set.title')), nav);
 
   const step = (by: number): (() => void) => () => ctx.go(hashOf(SECTIONS[(SECTIONS.indexOf(section) + by + SECTIONS.length) % SECTIONS.length]!));

@@ -4,15 +4,11 @@ import { button, dataTable, keycap, segments } from '../components.ts';
 import { loadFlights, loadLedger } from '../flights-data.ts';
 import { flightBadge } from '../flight-view.ts';
 import { fmt } from '../format.ts';
-import { t, tp } from '../i18n.ts';
+import { codeLabel, t, tp } from '../i18n.ts';
 import { loadLabel } from '../job-view.ts';
 import { hashFor } from '../keys.ts';
-import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
-
-const TX_KIND: Record<string, Key> = { grant: 'tx.kind.grant', payout: 'tx.kind.payout', fuel: 'tx.kind.fuel', landing_fee: 'tx.kind.landing_fee', maintenance: 'tx.kind.maintenance', purchase_aircraft: 'tx.kind.purchase_aircraft', purchase_hub: 'tx.kind.purchase_hub' };
-const txKind = (kind: string): string => (TX_KIND[kind] ? t(TX_KIND[kind]!) : kind.replaceAll('_', ' '));
 
 let filter: FlightFilter = { ...NO_FILTER };
 let view: 'flights' | 'ledger' = 'flights';
@@ -62,7 +58,7 @@ export async function history(ctx: Ctx): Promise<Screen> {
   if (view === 'flights') body.append(flightLog());
   else void loadLedger().then((ledger) => body.replaceChildren(dataTable(t('hist.ledger'), [
     { label: t('hist.ledger.col.date') }, { label: t('hist.ledger.col.type') }, { label: t('hist.ledger.col.memo') }, { label: t('hist.ledger.col.amount'), align: 'end' }, { label: t('hist.ledger.col.balance'), align: 'end' },
-  ], ledger.map((x) => ({ cells: [fm.dateTime(x.at), txKind(x.kind), x.memo, h('span', { class: 'strong' }, fm.signedMoney(x.amount)), fm.money(x.balanceAfter)] })),
+  ], ledger.map((x) => ({ cells: [fm.dateTime(x.at), codeLabel(x.kind, 'tx.kind', 'fin.kind'), x.memo, h('span', { class: 'strong' }, fm.signedMoney(x.amount)), fm.money(x.balanceAfter)] })),
     h('p', { class: 'dim', style: 'padding:22px' }, t('hist.ledgerEmpty')))));
 
   const fact = (label: string, value: string): HTMLElement => h('div', { class: 'fact' }, h('span', { class: 'fact-label' }, label), h('span', { class: 'fact-value' }, value));

@@ -3,7 +3,6 @@ import { cityOf } from './airports.ts';
 import { ApiError } from './errors.ts';
 import { errorText } from './error-text.ts';
 import { getLang, t, tp } from './i18n.ts';
-import { messageFor } from './messages.ts';
 import { h, notify } from './ui.ts';
 
 /** Small DOM pieces shared by the finance screens (lease, purchase, starter list). */
@@ -33,12 +32,6 @@ export function tidyCity(a: Airport): string {
   return (c.match(/\(/g)?.length ?? 0) > (c.match(/\)/g)?.length ?? 0) ? c.replace(/\s*\(.*$/, '') : c;
 }
 export const hubCity = (a: Airport | null, icao: string): string => (a ? tidyCity(a) : icao);
-
-/** Localised label of a ledger kind (`kind` is free server text). A kind with no message reads as words (`line_fee` -> `line fee`), never as a key. */
-export function chargeKind(kind: string): string {
-  const key = messageFor(`fin.kind.${kind}`);
-  return key ? t(key) : kind.replaceAll('_', ' ');
-}
 
 const RELOAD_ON = new Set(['hub_full', 'insufficient_funds', 'aircraft_busy']);
 /** Run a finance action: announce the outcome, reload the shell on success or when the screen showed something that is no longer true (a hub that filled up, a balance that changed). */
