@@ -1,7 +1,7 @@
 // Shared contract of OpenPilotCareer: domain types, zod schemas (trust boundary) and economy rules.
 // Everything the server, the AI companies and the web UI must agree on lives here.
 import { z } from 'zod';
-import type { Realism, StartMode } from './career.ts';
+import { START_MODE_IDS, type Realism, type StartMode } from './career.ts';
 import { financingSchema, type FleetAircraftFinance } from './finance.ts';
 import type { FlightSimbrief } from './simbrief.ts';
 
@@ -281,6 +281,10 @@ export const createCompanySchema = z.object({ name: companyNameSchema, hub: icao
 export const renameCompanySchema = z.object({ name: companyNameSchema });
 export const loginSchema = z.object({ username: z.string().min(1).max(64), password: z.string().min(1).max(128) });
 export const deleteAccountSchema = z.object({ password: z.string().min(1).max(128) });
+/** `POST /companies/:id/reset`: the password, the start the company restarts from (the onboarding's `startMode`) and optionally a new main hub (default: the current one). */
+export const resetCompanySchema = deleteAccountSchema.extend({ startMode: z.enum(START_MODE_IDS), hub: icaoAirportSchema.optional() });
+/** `GET /companies/:id/impact`: what a delete or a reset would erase, and whether one is refused right now (a flight is in progress). */
+export type CompanyImpact = { aircraft: number; lines: number; staff: number; balance: number; flights: number; flightActive: boolean };
 export const buyAircraftSchema = z.object({ icao: icaoTypeSchema, hub: icaoAirportSchema, financing: financingSchema.optional() });
 export const buyHubSchema = z.object({ icao: icaoAirportSchema });
 export const acceptJobSchema = z.object({ aircraftId: z.int().positive() });

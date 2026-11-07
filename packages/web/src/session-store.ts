@@ -38,6 +38,8 @@ export function createSession(storage: Store, fallbackServer: string) {
     },
     /** The company requests act as (sent as X-OPC-Company); null = the server's default, the player's oldest. */
     get company() { return company; },
+    /** The company was deleted: if it is the remembered one, forget it (the next request acts as the player's oldest). */
+    forget(id: number) { if (company === id) this.company = null; },
     set company(id: number | null) {
       company = id;
       if (state.username !== null) writeCompany(storage, state.server, state.username, id);

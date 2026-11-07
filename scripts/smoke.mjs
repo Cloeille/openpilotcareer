@@ -270,6 +270,23 @@ const off = await call('PUT', '/network/enabled', { token: lp.body.token, body: 
 expect(off.body.enabled === false && (await call('GET', '/network', { token: lp.body.token })).body.enabled === false, 'the network switch turns the lines off');
 await call('DELETE', '/me', { token: lp.body.token, body: { password } });
 
+// --- company reset and delete (password, session only, owner only)
+const companiesBefore = (await call('GET', '/me', { token })).body.companies.length;
+const spare = await call('POST', '/me/companies', { token, body: { name: `${username} Spare`, hub: 'LFPG' } });
+const spareId = spare.body.company.id;
+expect(spare.status === 201, `a second company ${spareId} to reset and delete`, spare);
+const liveKey = (await call('POST', '/me/api-keys', { token, body: { label: 'reset-check' } })).body.key; // the first key was revoked above: a 401 from it would prove nothing
+const resetBody = (pw) => ({ password: pw, startMode: 'hardcore' });
+expect((await call('POST', `/companies/${spareId}/reset`, { token, body: resetBody('not the password') })).status === 403, 'reset with a wrong password is refused');
+expect((await call('POST', `/companies/${spareId}/reset`, { token: liveKey, body: resetBody(password) })).status === 401, 'an API key cannot reset a company');
+expect((await call('POST', `/companies/${rival.body.company.id}/reset`, { token, body: resetBody(password) })).status === 403, "another player's company cannot be reset");
+const fresh = await call('POST', `/companies/${spareId}/reset`, { token, body: resetBody(password) });
+expect(fresh.status === 200 && fresh.body.company.id === spareId && fresh.body.company.balance === 45000 && fresh.body.fleet.length === 0, `reset: same company ${spareId}, hardcore capital ${fresh.body?.company?.balance}, no aircraft`, fresh);
+expect((await call('DELETE', `/companies/${spareId}`, { token, body: { password: 'not the password' } })).status === 403, 'company deletion with a wrong password is refused');
+expect((await call('DELETE', `/companies/${spareId}`, { token: liveKey, body: { password } })).status === 401, 'an API key cannot delete a company');
+expect((await call('DELETE', `/companies/${spareId}`, { token, body: { password } })).status === 204 && (await call('GET', '/me', { token, company: spareId })).status === 403, 'company deleted: its id is no longer the player\'s');
+expect((await call('GET', '/me', { token })).body.companies.length === companiesBefore, 'the other companies are untouched');
+
 // --- delete
 expect((await call('DELETE', '/me', { token, body: { password: 'not the password' } })).status === 403, 'account deletion with a wrong password is refused');
 expect((await call('DELETE', '/me', { token, body: { password } })).status === 204, 'account deleted with the right password');
