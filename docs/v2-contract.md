@@ -120,6 +120,15 @@ Implementation notes (be-live; details in `docs/telemetry-api.md` "Live position
 - `LiveSample` and the helpers (`liveSampleSchema`, `liveProgress`, `isBridgeLost`, constants) live in `packages/shared/src/live.ts`. Engine gauges that an aircraft does not have are omitted from `engines[n]` (never 0); `engines` is `[]` for none.
 - `/status` of the bridge: `sim` is `connected` (SimConnect session open), `waiting` (no simulator yet, or it quit), `unavailable` (no SimConnect client could be loaded on this machine). The panel fields are unchanged.
 
+## Lot SIMBRIEF-LINK: saved SimBrief connection, dispatch and plan fetch (owner: simbrief-link)
+
+Full description, with the live SimBrief answers: `docs/simbrief.md`.
+- Migration `SCHEMA_SIMBRIEF`, appended after `SCHEMA_V7` (position 7 in `MIGRATIONS`): `users.simbrief_username|simbrief_pilot_id|simbrief_verified_at`, `flights.simbrief_static_id|simbrief_ofp_id`.
+- Shared (`packages/shared/src/simbrief.ts`): `SimbriefLink = { username, pilotId, verifiedAt }` (nullable fields), `FlightSimbrief = { staticId, ofpId }`, `Flight.simbrief?`, `dispatchUrl()`, `simbriefIdentifier()`, `simbriefConnectSchema`, `simbriefImportSchema`.
+- `GET|PUT|DELETE /me/simbrief` (session only; PUT body is exactly `{ username }` or `{ pilotId }`; unknown account is `422 simbrief_user_not_found`).
+- `POST /flights/:id/simbrief/fetch` returns the `Flight`; errors `409 simbrief_not_connected`, `404 ofp_not_found`, `422 ofp_mismatch`.
+- `POST /jobs/import-simbrief` also takes `{ pilotId }`; an unknown SimBrief account is now `422 simbrief_user_not_found` (was `404 simbrief_not_found`).
+
 ## Merge plan (orchestrator only)
 Merge order into `career-v2-base`: be-start, be-finance, be-live, fe-onboarding, fe-finance, fe-live, bridge, efb. Conflicts in `packages/web/src/messages.ts` and `routes.ts` are expected (each lot appends): resolve by keeping both sides.
 To keep conflicts trivial every lot follows these rules:

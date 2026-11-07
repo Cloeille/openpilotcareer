@@ -1,4 +1,79 @@
-# SimBrief import
+# SimBrief link and import
+
+Two features share one fetcher (`packages/server/src/simbrief.ts`, `fetchOfp`):
+
+1. **The link** (this section): the player saves a SimBrief identifier on the account, gets a SimBrief dispatch page prefilled from each accepted flight, and fetches the generated plan back onto the flight.
+2. **The import** (the rest of this file): a typed username becomes a private job. Unchanged in behaviour; it now also accepts a Pilot ID.
+
+## The link
+
+**There is no SimBrief or Navigraph sign-in for third parties.** SimBrief has no public OAuth; Navigraph's OIDC needs a `client_id` that Navigraph must issue to the app, and this project has none. So the "connection" is only the player's SimBrief **username** or numeric **Pilot ID** (SimBrief, Account Settings). Both are public identifiers, not secrets: nothing here signs in for the player. Plans are generated on simbrief.com, in the player's own browser session (which stays signed in on their side).
+
+### Routes (session auth only; an API key gets `401`)
+
+| Route | What |
+|---|---|
+| `GET /api/v1/me/simbrief` | `{ username, pilotId, verifiedAt }`, all `null` while nothing is connected. Works without a company. |
+| `PUT /api/v1/me/simbrief` | Body `{ username }` **or** `{ pilotId }` (exactly one, strict; username `^[A-Za-z0-9._ -]{1,64}$`, trimmed; Pilot ID 1 to 9 999 999). Asks SimBrief first. Unknown account → `422 simbrief_user_not_found`. An account **without a plan yet counts as valid.** SimBrief down → `502/504 simbrief_unavailable` and the saved connection is untouched. A username lookup also stores the **Pilot ID** SimBrief reports. 12 calls per minute per account (`429 rate_limited`). |
+| `DELETE /api/v1/me/simbrief` | Clears the three columns. `204`. |
+| `POST /api/v1/flights/:id/simbrief/fetch` | Active flight of the active company. See below. |
+
+Stored on `users`: `simbrief_username`, `simbrief_pilot_id`, `simbrief_verified_at`. It lives in the database, so it persists across logins and devices. It is **not** part of the export file.
+
+### What SimBrief answers (checked live, 2026-11-07)
+
+| Request | HTTP | Body |
+|---|---|---|
+| `username=<unknown>&json=1` | **400** | `{"fetch":{"userid":"","static_id":"","status":"Error: Unknown UserID","time":"0.0004"}}` → `422 simbrief_user_not_found` |
+| `username=SpeedMaintenance746&json=1` (a real account) | 200 | `fetch.status` `"Success"`, `fetch.userid`/`params.user_id` `"1423851"`, `params.units` `"kgs"`, `params.request_id` = the plan id. About 1.1 MB. |
+| `userid=1423851&json=1` | 200 | the same plan |
+
+The code matches on the text `Unknown UserID` only. Any other `Error:` status on an HTTP 400 (for example "no flight plan on file") is read as "the account exists, nothing to fetch": `404 simbrief_not_found` for a fetch, and valid for a connect. The exact "no plan yet" wording is **unverified** (no account without a plan was available to test). Never stored or logged: the OFP body. Only planned fuel, route and the plan id are kept, on the flight.
+
+### Generating a plan for a flight
+
+`flights.simbrief_static_id` = `opc_<flightId>_<12 hex>`, set when a **player** accepts a job (board job, SimBrief import or a line rotation, `source = 'line'`; AI companies get none). Flights already active when the migration ran got one too. It is on the flight as `Flight.simbrief = { staticId, ofpId }`.
+
+The web app builds the dispatch address with `dispatchUrl` (`packages/shared/src/simbrief.ts`, the only place that does):
+
+```
+https://dispatch.simbrief.com/options/custom?type=<ICAO>&orig=<ICAO>&dest=<ICAO>[&airline=<code>][&callsign=<cs>][&reg=<registration>][&pax=<n> | &cargo=<thousands of kg>]&units=KGS&static_id=<id>
+```
+
+Only these keys are ever written, every value is percent-encoded, `airline`/`callsign` come from the company's `code`/`callsign` (omitted when it has none), `reg` is the aircraft's registration. Passengers win over cargo; cargo is in thousands of kilograms. The user must be signed in on simbrief.com and presses Generate there. The API-key flow (`simbrief.apiv1`) is not available to this project.
+
+### Fetching it back: `POST /flights/:id/simbrief/fetch`
+
+| Step | Result |
+|---|---|
+| Not the player's, unknown, or not an integer id | `404 flight_not_found` |
+| Flight already closed | `409 flight_closed` |
+| Nothing connected | `409 simbrief_not_connected` |
+| More than 12 calls a minute | `429 rate_limited` |
+| Pilot ID known | `GET xml.fetcher.php?userid=<id>&static_id=<flight static id>&json=1`. The answer must echo that same `fetch.static_id`, else `404 ofp_not_found` ("generate it on SimBrief first"). The plan of the exact flight, never "the latest". |
+| Only a username | the account's **latest** plan (`username=`); with no static id to check, the next step is the guard |
+| Origin, destination or aircraft type differ from the flight | `422 ofp_mismatch`, the message names both sides |
+| Plan fine | `flights.planned_fuel_kg`, `flights.route` and `flights.simbrief_ofp_id` are set (the same fields an imported job carries); the flight is returned. Pay is not touched. |
+
+lbs are converted to kg (0.45359237). The web app shows the result on the dashboard's current flight card (key **B** opens the dispatch page; with nothing connected it goes to Settings › SimBrief).
+
+### Where in the app
+
+- Settings › **SimBrief / Navigraph** (`#settings/simbrief`): status, connect, change, disconnect, and the plain statement that it is a public identifier and not a Navigraph login.
+- Dashboard current flight: *Generate the SimBrief plan* (B) and *Fetch the plan*.
+- Import screen: the field starts with the saved identifier (a username, or digits for a Pilot ID).
+
+### Not done
+
+- No Navigraph OAuth (no `client_id`).
+- A flight accepted on the **job** screen opens the dashboard right after; the SimBrief button is on the dashboard card, not on the accept screen itself.
+- Only the first active flight of the dashboard has the SimBrief block (the others are listed small).
+- The username-only fetch cannot tell two plans of the same route apart; a Pilot ID fixes that.
+
+---
+
+# The import
+
 
 How a SimBrief flight plan becomes an OpenPilotCareer job, what can go wrong, what leaves your server, and where the importer differs from SimBrief's own documentation.
 
@@ -6,7 +81,7 @@ Describes the code at commit `94f807c` (`packages/server/src/simbrief.ts`, `impo
 
 ## What it does
 
-`POST /api/v1/jobs/import-simbrief` makes **the server** (never the browser) fetch the pilot's *latest* SimBrief flight plan (OFP), reads seven fields from it, and stores them as a private pending job. The pilot then accepts that job like any board job.
+`POST /api/v1/jobs/import-simbrief` (body `{ simbriefUsername }` or `{ pilotId }`) makes **the server** (never the browser) fetch the pilot's *latest* SimBrief flight plan (OFP), reads seven fields from it, and stores them as a private pending job. The pilot then accepts that job like any board job.
 
 ```
 browser ──POST {simbriefUsername}──▶ OPC server ──GET xml.fetcher.php?username=…&json=1──▶ simbrief.com
@@ -91,7 +166,7 @@ Every error is `{ "error": "<code>", "message": "<text>" }`. Checks run in this 
 | 3 | Network error, DNS/TLS failure, redirect, or timeout | 504 | `simbrief_unavailable` ("did not answer in time" / "could not be reached") |
 | 4 | `content-length` > 4 MiB, no body, or streamed body > 4 MiB | 502 | `simbrief_invalid` |
 | 5 | Body is not JSON (this includes an HTML maintenance page, whatever its status) | 502 | `simbrief_invalid` |
-| 6 | HTTP 400 whose JSON has `fetch.status` (e.g. `Error: Unknown UserID`) | 404 | `simbrief_not_found`, message `SimBrief: Unknown UserID` |
+| 6 | HTTP 400 whose JSON has `fetch.status`: `Error: Unknown UserID` → **422** `simbrief_user_not_found` (was 404 `simbrief_not_found` before the link); any other refusal → 404 `simbrief_not_found` | 422 / 404 | see left |
 | 7 | Any other non-2xx with a JSON body | 502 | `simbrief_unavailable` ("SimBrief answered HTTP n") |
 | 8 | JSON does not match the schema above | 502 | `simbrief_invalid` ("a flight plan this server cannot read") |
 | 9 | Airport not in the database | 422 | `unknown_airport` |
