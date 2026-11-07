@@ -1,0 +1,244 @@
+// Lot STAFF (v3): what the player does with her people: recruit, let go, train, transfer, rest, interim, the rest policy and the starter crew (C11).
+// Domain operations: callers wrap them in `tx`. Money goes through game.ts `post`; a payment the balance cannot cover is 409 insufficient_funds (like finance.ts).
+import {
+  CAPTAIN_FROM_HOURS, DAY_MS, DEFAULT_NOTICE_DAYS, FIRING_MONTHS, HIRING_PREMIUM_MONTHS, STAFF_FAMILIES, TRAINING_COURSE, REST_POLICIES, ROLE_OF, dayNo, experienceFactor, interimPrice, salaryFor,
+  type AircraftCategory, type Candidate, type FireResult, type HireResult, type InterimResult, type RestPolicy, type StaffFamily, type StaffRole, type TrainResult,
+} from '@opc/shared';
+import { hashSeed, mulberry32 } from './board.ts';
+import { all, get, run, type Db } from './db.ts';
+import { post, typeFor, snapshot } from './game.ts';
+import { HttpError } from './http.ts';
+import { companyDemand, demandOf, type DemandLine, type Slot } from './staff-needs.ts';
+import { crewShortage, rosterOf, rulesOf, stateOf, type Shortage, type StaffRow } from './staff.ts';
+import type { LineRow } from './lines.ts';
+
+// ---------------------------------------------------------------- names
+
+const FIRST = ['Camille', 'Lucas', 'Léa', 'Hugo', 'Manon', 'Louis', 'Chloé', 'Jules', 'Inès', 'Arthur', 'Sarah', 'Nathan', 'Emma', 'Théo', 'Julie', 'Antoine', 'Clara', 'Paul', 'Zoé', 'Maxime', 'Alice', 'Romain', 'Lina', 'Victor', 'Yasmine', 'Mathis', 'Éloïse', 'Samuel'];
+const LAST = ['Lefèvre', 'Martin', 'Bernard', 'Dubois', 'Moreau', 'Laurent', 'Simon', 'Michel', 'Garcia', 'Roux', 'Fournier', 'Girard', 'Bonnet', 'Mercier', 'Blanc', 'Guérin', 'Faure', 'Rousseau', 'Perrin', 'Morel', 'Giraud', 'Andre', 'Lemoine', 'Chevalier', 'Marchand', 'Colin', 'Benoit', 'Renard'];
+const nameFrom = (rand: () => number): string => `${FIRST[Math.floor(rand() * FIRST.length)]} ${LAST[Math.floor(rand() * LAST.length)]}`;
+
+// ---------------------------------------------------------------- shared helpers
+
+const balanceOf = (db: Db, companyId: number): number => get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId)?.balance ?? 0;
+
+/** Pay `amount` now or refuse with 409 insufficient_funds. */
+export function pay(db: Db, companyId: number, at: number, kind: string, amount: number, memo: string): void {
+  if (amount === 0) return;
+  const balance = balanceOf(db, companyId);
+  if (balance < amount) throw new HttpError(409, 'insufficient_funds', `needs ${amount - balance} more`, { needed: amount, balance });
+  post(db, companyId, at, kind, -amount, memo);
+  snapshot(db, companyId, at);
+}
+
+/** The airports where the company may employ people: its hubs and the bases of its aircraft. */
+export const basesOf = (db: Db, companyId: number): string[] =>
+  all<{ icao: string }>(db, `SELECT icao FROM hubs WHERE company_id = ? UNION SELECT base FROM aircraft WHERE company_id = ? AND returned_at IS NULL AND base IS NOT NULL ORDER BY 1`, companyId, companyId).map((r) => r.icao);
+
+/** Aircraft types the company flies (candidates are listed for them). */
+export const fleetTypes = (db: Db, companyId: number): string[] =>
+  all<{ icao: string }>(db, 'SELECT DISTINCT icao FROM aircraft WHERE company_id = ? AND returned_at IS NULL ORDER BY icao', companyId).map((r) => r.icao);
+
+export function ownedStaff(db: Db, companyId: number, id: number): StaffRow {
+  const s = get<StaffRow>(db, 'SELECT * FROM staff WHERE id = ? AND company_id = ?', id, companyId);
+  if (!s) throw new HttpError(404, 'staff_not_found', 'no such employee');
+  return s;
+}
+
+const categoryOf = (db: Db, companyId: number, qual: string | null): AircraftCategory | null => (qual ? typeFor(db, companyId, qual).category : null);
+const roleOf = (family: StaffFamily, experience: number): StaffRole => (family === 'pilot' ? (experience >= CAPTAIN_FROM_HOURS ? 'captain' : 'fo') : ROLE_OF[family]);
+
+function insertStaff(db: Db, o: { companyId: number; family: StaffFamily; name: string; base: string; experience: number; reliability: number; morale: number; salary: number; hiredAt: number; startsAt: number;
+  endsAt?: number | null; contract?: 'cdi' | 'cdd'; noticeDays?: number; candidateId?: string | null; qual?: string | null; qualUntil?: number | null }): number {
+  const id = run(db, `INSERT INTO staff (company_id, family, name, role, base, hired_at, starts_at, ends_at, salary, experience, reliability, morale, contract, notice_days, candidate_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, o.companyId, o.family, o.name, roleOf(o.family, o.experience), o.base, o.hiredAt, o.startsAt, o.endsAt ?? null, o.salary, o.experience, o.reliability, o.morale,
+    o.contract ?? 'cdi', o.noticeDays ?? DEFAULT_NOTICE_DAYS, o.candidateId ?? null).id;
+  if (o.qual) run(db, 'INSERT INTO staff_quals (staff_id, type_icao, valid_from, valid_until) VALUES (?, ?, ?, ?)', id, o.qual, o.startsAt, o.qualUntil ?? null);
+  return id;
+}
+
+// ---------------------------------------------------------------- the market: deterministic per company, per day, per base
+
+const ID_RE = /^(\d+)\.([A-Z]{4})\.([a-z]+)\.([A-Z0-9]{2,4}|-)\.(\d+)$/;
+
+/** 6 to 10 candidates for one (base, family, qualification) on one day. The same call always returns the same people (the `board.ts` approach). */
+export function candidatesFor(db: Db, companyId: number, day: number, base: string, family: StaffFamily, qual: string | null): Candidate[] {
+  const rand = mulberry32(hashSeed(`cand:${companyId}:${day}:${base}:${family}:${qual ?? '-'}`));
+  const n = 6 + Math.floor(rand() * 5);
+  const category = categoryOf(db, companyId, qual);
+  const out: Candidate[] = [];
+  for (let i = 0; i < n; i++) {
+    const experience = family === 'pilot' ? Math.round(500 + rand() ** 2 * 11_500) : Math.round(rand() * 20);
+    const role = roleOf(family, experience);
+    const salary = salaryFor(family, role, experienceFactor(family, experience), category);
+    out.push({
+      id: `${day}.${base}.${family}.${qual ?? '-'}.${i}`, family, role, name: nameFrom(rand), base, qual, experience, reliability: 60 + Math.floor(rand() * 39), morale: 50 + Math.floor(rand() * 46),
+      askingSalary: salary, noticeDays: DEFAULT_NOTICE_DAYS, premium: salary * HIRING_PREMIUM_MONTHS,
+    });
+  }
+  return out;
+}
+
+/** Everyone on the market today at the company's bases (or `base`), for the filters given, minus those already hired. */
+export function market(db: Db, companyId: number, now: number, f: { family?: StaffFamily | undefined; base?: string | undefined; qual?: string | undefined }): Candidate[] {
+  const day = dayNo(now);
+  const hired = new Set(all<{ candidate_id: string }>(db, 'SELECT candidate_id FROM staff WHERE company_id = ? AND candidate_id IS NOT NULL', companyId).map((r) => r.candidate_id));
+  const bases = f.base ? [f.base] : basesOf(db, companyId);
+  const types = f.qual ? [f.qual] : fleetTypes(db, companyId);
+  const out: Candidate[] = [];
+  for (const base of bases) {
+    for (const family of f.family ? [f.family] : STAFF_FAMILIES) {
+      for (const qual of family === 'pilot' ? types : [null]) out.push(...candidatesFor(db, companyId, day, base, family, qual));
+    }
+  }
+  return out.filter((c) => !hired.has(c.id));
+}
+
+export const memberRow = (db: Db, id: number): StaffRow => get<StaffRow>(db, 'SELECT * FROM staff WHERE id = ?', id)!;
+
+/** Hire a candidate listed today or yesterday: one month's salary now as the hiring premium (C7), on the payroll from the first month after they start. */
+export function hire(db: Db, companyId: number, candidateId: string, now: number): { staffId: number; startsAt: number; premium: number } {
+  const m = ID_RE.exec(candidateId);
+  const day = m ? Number(m[1]) : NaN, today = dayNo(now);
+  if (!m || day > today || day < today - 1 || !basesOf(db, companyId).includes(m[2]!)) throw new HttpError(404, 'candidate_not_found', 'this candidate is no longer on the market');
+  const c = candidatesFor(db, companyId, day, m[2]!, m[3] as StaffFamily, m[4] === '-' ? null : m[4]!).find((x) => x.id === candidateId);
+  if (!c || !(STAFF_FAMILIES as readonly string[]).includes(c.family)) throw new HttpError(404, 'candidate_not_found', 'this candidate is no longer on the market');
+  if (get(db, 'SELECT 1 AS x FROM staff WHERE company_id = ? AND candidate_id = ?', companyId, c.id)) throw new HttpError(409, 'candidate_taken', 'you already hired this candidate');
+  pay(db, companyId, now, 'hire_premium', c.premium, `hiring premium ${c.name}`);
+  const startsAt = now + c.noticeDays * DAY_MS;
+  const staffId = insertStaff(db, {
+    companyId, family: c.family, name: c.name, base: c.base, experience: c.experience, reliability: c.reliability, morale: c.morale, salary: c.askingSalary, hiredAt: now, startsAt, noticeDays: c.noticeDays, candidateId: c.id, qual: c.qual,
+  });
+  return { staffId, startsAt, premium: c.premium };
+}
+
+// ---------------------------------------------------------------- letting go, training, transfer, rest, interim
+
+/** C7: firing costs three months of salary, paid now, and takes the person off the payroll at once. A hire that has not started yet is cancelled for free (the premium is lost). */
+export function fire(db: Db, companyId: number, id: number, now: number): FireResult {
+  const s = ownedStaff(db, companyId, id);
+  if (s.ends_at !== null && s.ends_at <= now) throw new HttpError(409, 'already_left', 'this person has already left');
+  if (s.contract === 'cdd') throw new HttpError(409, 'temporary_contract', 'a temporary contract ends by itself');
+  const severance = s.starts_at > now ? 0 : s.salary * FIRING_MONTHS;
+  pay(db, companyId, now, 'severance', severance, `severance ${s.name}`);
+  run(db, 'UPDATE staff SET ends_at = ? WHERE id = ?', now, id);
+  return { severance, balanceAfter: balanceOf(db, companyId) };
+}
+
+const employedNow = (s: StaffRow, now: number): boolean => s.starts_at <= now && (s.ends_at === null || s.ends_at > now);
+
+/** A type rating: the pilot is off the roster for the course (21 days and 24 000 euros for a jet airliner) and can fly the type from the day after. */
+export function train(db: Db, companyId: number, id: number, type: string, now: number): TrainResult {
+  const s = ownedStaff(db, companyId, id);
+  if (s.family !== 'pilot') throw new HttpError(422, 'not_a_pilot', 'only pilots hold type ratings');
+  if (!employedNow(s, now)) throw new HttpError(409, 'not_employed', 'this person is not on your payroll yet');
+  if (get(db, 'SELECT 1 AS x FROM staff_quals WHERE staff_id = ? AND type_icao = ?', id, type)) throw new HttpError(409, 'already_qualified', `${s.name} already holds or is training for ${type}`);
+  const course = TRAINING_COURSE[typeFor(db, companyId, type).category];
+  pay(db, companyId, now, 'training', course.cost, `${type} type rating ${s.name}`);
+  const until = now + course.days * DAY_MS;
+  run(db, 'INSERT INTO staff_quals (staff_id, type_icao, valid_from, valid_until) VALUES (?, ?, ?, NULL)', id, type, until);
+  run(db, "INSERT INTO staff_leave (staff_id, from_day, to_day, status, kind) VALUES (?, ?, ?, 'granted', 'training') ON CONFLICT DO NOTHING", id, dayNo(now), dayNo(until) - 1);
+  return { member: null as never, cost: course.cost, days: course.days, until, balanceAfter: balanceOf(db, companyId) };
+}
+
+/** A new base: free, but the person is off for the day and the next one (travel and settling in), so a transfer cannot teleport a crew onto a flight. */
+export function transfer(db: Db, companyId: number, id: number, base: string, now: number): StaffRow {
+  const s = ownedStaff(db, companyId, id);
+  if (!basesOf(db, companyId).includes(base)) throw new HttpError(422, 'not_a_base', `${base} is not one of your hubs or bases`);
+  if (s.base === base) throw new HttpError(409, 'already_there', 'this person is already based there');
+  if (!employedNow(s, now) && s.starts_at <= now) throw new HttpError(409, 'already_left', 'this person has left');
+  if (stateOf(db, s, now, rulesOf(db, companyId)) === 'onDuty') throw new HttpError(409, 'on_duty', 'this person is flying now');
+  run(db, 'UPDATE staff SET base = ? WHERE id = ?', base, id);
+  run(db, "INSERT INTO staff_leave (staff_id, from_day, to_day, status, kind) VALUES (?, ?, ?, 'granted', 'rest') ON CONFLICT DO NOTHING", id, dayNo(now), dayNo(now) + 1);
+  return memberRow(db, id);
+}
+
+/** Send the person home for the rest of today: they take no leg that touches today. */
+export function rest(db: Db, companyId: number, id: number, now: number): StaffRow {
+  const s = ownedStaff(db, companyId, id);
+  if (!employedNow(s, now)) throw new HttpError(409, 'not_employed', 'this person is not on your payroll');
+  run(db, "INSERT INTO staff_leave (staff_id, from_day, to_day, status, kind) VALUES (?, ?, ?, 'granted', 'rest') ON CONFLICT DO NOTHING", id, dayNo(now), dayNo(now));
+  return memberRow(db, id);
+}
+
+/** A temporary hire who starts now, paid up front for the days booked; off the payroll when the contract ends. */
+export function interim(db: Db, companyId: number, o: { family: StaffFamily; qual?: string | undefined; base?: string | undefined; days: number }, now: number): InterimResult & { staffId: number } {
+  const bases = basesOf(db, companyId);
+  const base = o.base ?? bases[0];
+  if (!base || !bases.includes(base)) throw new HttpError(422, 'not_a_base', `${base ?? 'no airport'} is not one of your hubs or bases`);
+  const rand = mulberry32(hashSeed(`interim:${companyId}:${now}:${o.family}:${o.qual ?? '-'}`));
+  const experience = o.family === 'pilot' ? 3_500 : 8;
+  const salary = salaryFor(o.family, roleOf(o.family, experience), experienceFactor(o.family, experience), categoryOf(db, companyId, o.qual ?? null));
+  const cost = interimPrice(salary, o.days);
+  const name = `${nameFrom(rand)} (interim)`;
+  pay(db, companyId, now, 'interim', cost, `${o.days} days of interim ${o.family}${o.qual ? ` ${o.qual}` : ''}`);
+  const endsAt = now + o.days * DAY_MS;
+  const staffId = insertStaff(db, { companyId, family: o.family, name, base, experience, reliability: 75, morale: 70, salary, hiredAt: now, startsAt: now, endsAt, contract: 'cdd', noticeDays: 0, qual: o.family === 'pilot' ? o.qual! : null, qualUntil: endsAt });
+  return { staffId, member: null as never, cost, endsAt, balanceAfter: balanceOf(db, companyId) };
+}
+
+export function setPolicy(db: Db, companyId: number, policy: RestPolicy): void {
+  run(db, 'INSERT INTO staff_company (company_id, policy) VALUES (?, ?) ON CONFLICT (company_id) DO UPDATE SET policy = excluded.policy', companyId, policy);
+}
+
+// ---------------------------------------------------------------- recruiting for a stopped line (B.2 item 6)
+
+/** The cheapest candidates at the line's base that fill each shortage. The base is the line end that is one of the company's hubs (else the first). */
+export function recruitPlan(db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>, short: readonly Shortage[], now: number): Candidate[] {
+  const bases = basesOf(db, l.company_id);
+  const base = [l.a, l.b].find((x) => bases.includes(x)) ?? l.a;
+  const taken = new Set(all<{ candidate_id: string }>(db, 'SELECT candidate_id FROM staff WHERE company_id = ? AND candidate_id IS NOT NULL', l.company_id).map((r) => r.candidate_id));
+  const day = dayNo(now);
+  return short.flatMap((x) => candidatesFor(db, l.company_id, day, base, x.family, x.type).filter((c) => !taken.has(c.id)).sort((p, q) => p.askingSalary - q.askingSalary || p.id.localeCompare(q.id)).slice(0, x.need - x.have));
+}
+
+/** What `resolve {option: 'recruit'}` would do, for the problem screen: how many people, what they cost a month, when the first one starts. */
+export function recruitOffer(db: Db, l: LineRow, short: readonly Shortage[], now: number): { candidates: number; monthly: number; readyAt: number | null } {
+  const plan = recruitPlan(db, l, short, now);
+  return { candidates: plan.length, monthly: plan.reduce((t, c) => t + c.askingSalary, 0), readyAt: plan.length === 0 ? null : now + DEFAULT_NOTICE_DAYS * DAY_MS };
+}
+
+/** Hire the plan above (the premiums are paid now). The line resumes by itself when they have started: the next tick finds a crew. */
+export function recruitForLine(db: Db, l: LineRow, now: number): number {
+  const short = crewShortage(db, l.company_id, lineIcaos(db, l.id), [l.a, l.b], now);
+  const plan = recruitPlan(db, l, short, now);
+  if (plan.length === 0) throw new HttpError(409, 'no_candidates', 'nobody is on the market for this position today');
+  for (const c of plan) hire(db, l.company_id, c.id, now);
+  return plan.length;
+}
+const lineIcaos = (db: Db, lineId: number): string[] => all<{ icao: string }>(db, 'SELECT DISTINCT a.icao FROM line_aircraft la JOIN aircraft a ON a.id = la.aircraft_id WHERE la.line_id = ? AND a.returned_at IS NULL', lineId).map((r) => r.icao);
+
+// ---------------------------------------------------------------- the starter crew (C11)
+
+/** Top up the company's people to what its timetable needs, at no cost, employed from the beginning of time so that no leg of a catch-up is ever cancelled for want of a crew they would have had.
+ *  They are paid like everybody from the next month (the payroll starts the month after `hired_at`). Idempotent: it only adds what is missing. */
+export function grantStarterCrew(db: Db, companyId: number, now: number, lines?: readonly DemandLine[]): number {
+  const rules = rulesOf(db, companyId);
+  const need: Slot[] = lines ? demandOf(db, companyId, lines, rules) : companyDemand(db, companyId, rules);
+  const roster = rosterOf(db, companyId, now);
+  const holders = (sl: Slot): number => roster.filter((r) => r.family === sl.family && r.base === sl.base).filter((r) => sl.type === null || get(db, 'SELECT 1 AS x FROM staff_quals WHERE staff_id = ? AND type_icao = ?', r.id, sl.type)).length;
+  let made = 0;
+  for (const sl of need) {
+    for (let i = holders(sl); i < sl.count; i++) {
+      const rand = mulberry32(hashSeed(`starter:${companyId}:${sl.family}:${sl.type ?? '-'}:${sl.base}:${i}`));
+      const experience = sl.family === 'pilot' ? Math.round(1_500 + rand() * 6_000) : Math.round(2 + rand() * 12);
+      const role = roleOf(sl.family, experience);
+      insertStaff(db, {
+        companyId, family: sl.family, name: nameFrom(rand), base: sl.base, experience, reliability: 70 + Math.floor(rand() * 25), morale: 65 + Math.floor(rand() * 25),
+        salary: salaryFor(sl.family, role, experienceFactor(sl.family, experience), categoryOf(db, companyId, sl.type)), hiredAt: now, startsAt: 0, qual: sl.type,
+      });
+      made++;
+    }
+  }
+  return made;
+}
+
+/** Companies whose upgrade left them a crew to receive (SCHEMA_V8 marks them): grant it once, at the first request after the upgrade. Must run before the line ticks. */
+export function grantPendingStarters(db: Db, now: number): void {
+  for (const r of all<{ company_id: number }>(db, 'SELECT company_id FROM staff_company WHERE starter_pending = 1')) {
+    grantStarterCrew(db, r.company_id, now);
+    run(db, 'UPDATE staff_company SET starter_pending = 0 WHERE company_id = ?', r.company_id);
+  }
+}
+
+export { REST_POLICIES };

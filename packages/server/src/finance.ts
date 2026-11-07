@@ -29,11 +29,14 @@ const short = (needed: number, extra: Record<string, unknown> = {}): HttpError =
 export type PlanContract = Pick<ContractRow, 'id' | 'aircraft_id' | 'kind' | 'started_at' | 'ends_at' | 'months' | 'months_paid' | 'monthly' | 'insurance' | 'deposit' | 'principal'>;
 export type PlanAircraft = { id: number; registration: string; base: string | null; ownership: Ownership; value: number; category: AircraftCategory; acquired_at: number; busy: boolean };
 export type Charge = { kind: string; amount: number; memo: string };
+/** Who is on the payroll: employees on a permanent contract (a temporary one is paid up front when it is booked). */
+/** `since`: the later of the contract start and the day the person was hired, so a starter crew granted at the upgrade is paid from the next month, never retroactively. */
+export type PlanStaff = { salary: number; since: number; ends_at: number | null };
 export type MonthPlan = { charges: Charge[]; contracts: PlanContract[]; ended: number[]; returned: number[]; owned: number[] };
 
 /** What the month starting at `start` (UTC, the 1st) costs. Everything signed or bought before `start` is billed; things signed this month were paid at signing.
  *  Returns the new contract states without touching the input, so `GET /me/finance` can project several months with the same rules billing uses. */
-export function planMonth(start: number, contracts: PlanContract[], fleet: PlanAircraft[]): MonthPlan {
+export function planMonth(start: number, contracts: PlanContract[], fleet: PlanAircraft[], staff: PlanStaff[] = []): MonthPlan {
   const charges: Charge[] = [];
   const ended: number[] = [], returned: number[] = [], owned: number[] = [];
   const reg = (id: number): string => fleet.find((a) => a.id === id)?.registration ?? `#${id}`;
@@ -72,15 +75,19 @@ export function planMonth(start: number, contracts: PlanContract[], fleet: PlanA
       charges.push({ kind: 'parking', amount: -PARKING_FEE_BY_SIZE[airports.get(a.base)?.size ?? 'small'], memo: `${a.registration} parking ${a.base}` });
     }
   }
+  // C7: payroll is its own charge. Whoever started before the 1st and has not left by it is paid for the month (the hiring premium covered the month they joined).
+  const paid = staff.filter((p) => p.since < start && (p.ends_at === null || p.ends_at > start));
+  if (paid.length > 0) charges.push({ kind: 'payroll', amount: -paid.reduce((t, p) => t + p.salary, 0), memo: `payroll ${paid.length} people` });
   return { charges, contracts: next, ended, returned, owned };
 }
 
-function planInputs(db: Db, companyId: number): { contracts: PlanContract[]; fleet: PlanAircraft[] } {
+function planInputs(db: Db, companyId: number): { contracts: PlanContract[]; fleet: PlanAircraft[]; staff: PlanStaff[] } {
   const contracts = all<ContractRow>(db, "SELECT * FROM contracts WHERE company_id = ? AND status = 'active' ORDER BY id", companyId);
   const fleet = all<{ id: number; icao: string; registration: string | null; base: string | null; ownership: Ownership; value: number; acquired_at: number; busy: number }>(db,
     `SELECT a.*, EXISTS (SELECT 1 FROM flights f WHERE f.aircraft_id = a.id AND f.status = 'active') AS busy FROM aircraft a WHERE a.company_id = ? AND a.returned_at IS NULL ORDER BY a.id`, companyId)
     .map((a) => ({ id: a.id, registration: a.registration ?? `#${a.id}`, base: a.base, ownership: a.ownership, value: a.value, category: typeFor(db, companyId, a.icao).category, acquired_at: a.acquired_at, busy: !!a.busy }));
-  return { contracts, fleet };
+  const staff = all<PlanStaff>(db, "SELECT salary, MAX(starts_at, hired_at) AS since, ends_at FROM staff WHERE company_id = ? AND contract = 'cdi'", companyId);
+  return { contracts, fleet, staff };
 }
 
 // ---------------------------------------------------------------- monthly billing (lazy, idempotent per company and UTC month)
@@ -100,8 +107,8 @@ export function runBilling(db: Db, companyId: number, now: number): number {
   for (const m of months.slice(-MAX_CATCHUP_MONTHS)) {
     if (run(db, 'INSERT INTO billing_runs (company_id, month, at) VALUES (?, ?, ?) ON CONFLICT DO NOTHING', companyId, m, now).changes === 0) continue;
     const at = monthStart(m);
-    const { contracts, fleet } = planInputs(db, companyId);
-    const plan = planMonth(at, contracts, fleet);
+    const { contracts, fleet, staff } = planInputs(db, companyId);
+    const plan = planMonth(at, contracts, fleet, staff);
     for (const c of plan.charges) post(db, companyId, at, c.kind, c.amount, c.memo);
     for (const c of plan.contracts) {
       const before = contracts.find((x) => x.id === c.id)!;
@@ -260,12 +267,12 @@ export const rentMonthly = (db: Db, companyId: number, hub: string, icao: string
 const UPCOMING_MONTHS = 3;
 
 export function overview(db: Db, companyId: number, now: number): FinanceOverview {
-  const { contracts, fleet } = planInputs(db, companyId);
+  const { contracts, fleet, staff } = planInputs(db, companyId);
   const upcoming: FinanceCharge[] = [];
   let state = contracts;
   for (let i = 1; i <= UPCOMING_MONTHS; i++) {
     const at = addMonths(now, i);
-    const plan = planMonth(at, state, fleet);
+    const plan = planMonth(at, state, fleet, staff);
     for (const c of plan.charges) upcoming.push({ at, kind: c.kind, amount: c.amount, memo: c.memo });
     state = plan.contracts.filter((c) => !plan.ended.includes(c.id));
   }

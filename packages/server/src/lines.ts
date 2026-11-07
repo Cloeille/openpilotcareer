@@ -15,10 +15,12 @@ import { all, get, run, tx, type Db } from './db.ts';
 import { accrueWear, flightCosts, isHuman, releaseMaintenance } from './fleet-extras.ts';
 import { hasHub, post, snapshot, typeFor, type AircraftRow } from './game.ts';
 import { realismSettingOf } from './realism.ts';
+import { crewLeg, crewShortage } from './staff.ts';
 
 /** Ticks replayed after a long silence; older ones are skipped (a human network lapses after MAX_OFFLINE_DAYS anyway). */
 const MAX_REPLAY_TICKS = (MAX_OFFLINE_DAYS + 1) * TICKS_PER_DAY;
 const CAP_MS = MAX_OFFLINE_DAYS * DAY_MS;
+const CREW_LEDGER_DAYS = 366;
 
 // ---------------------------------------------------------------- rows
 
@@ -30,15 +32,10 @@ export type LineRow = {
 export type LegRow = {
   id: number; line_id: number; company_id: number; aircraft_id: number; flight_no: number; dep_at: number; arr_at: number; origin: string; dest: string;
   status: 'scheduled' | 'done' | 'cancelled'; delay_min: number; delay_cause: DelayCause | null; cancel_cause: CancelCause | null; taken_job: string | null;
-  pax: number | null; revenue: number | null; fuel_cost: number | null; landing_fee: number | null; maintenance: number | null;
+  pax: number | null; revenue: number | null; fuel_cost: number | null; landing_fee: number | null; maintenance: number | null; crew_family: 'pilot' | 'cabin' | null;
 };
 export type NetworkRow = { company_id: number; enabled: number; seen_at: number; lapsed_at: number | null };
 export type LineAircraftRow = AircraftRow & { home: string };
-
-/** Lot STAFF replaces this. Until crews are modelled (decision C11) every leg has one. */
-export function crewCheck(_db: Db, _leg: LegRow): Extract<CancelCause, 'no_crew' | 'duty_limit'> | null {
-  return null;
-}
 
 // ---------------------------------------------------------------- small helpers
 
@@ -179,6 +176,7 @@ function runTick(db: Db, tick: number, r: Run): boolean {
   if (tick % TICKS_PER_DAY === 0) {
     run(db, 'DELETE FROM scheduled_flights WHERE dep_at < ?', ts - LINE_KEEP_DAYS * DAY_MS);
     run(db, 'DELETE FROM line_ticks WHERE tick < ?', tick - LINE_KEEP_DAYS * TICKS_PER_DAY);
+    run(db, 'DELETE FROM staff_duty WHERE dep_at < ?', ts - (CREW_LEDGER_DAYS * DAY_MS)); // the 12-month flight limit needs a year of ledger
   }
   return true;
 }
@@ -254,9 +252,10 @@ function resolveLeg(db: Db, leg: LegRow, r: Run): void {
   const [origin, dest] = ac && ac.location === leg.dest ? [leg.dest, leg.origin] : [leg.origin, leg.dest];
   const grounded = !ac || ac.returned_at !== null || ac.status !== 'available' || ac.location !== origin
     || !!get(db, "SELECT 1 AS x FROM flights WHERE aircraft_id = ? AND status = 'active' AND accepted_at <= ?", leg.aircraft_id, leg.dep_at);
-  const cause: CancelCause | null = grounded ? 'aircraft_unavailable' : crewCheck(db, leg);
+  const crew = grounded || !ac ? null : crewLeg(db, { id: leg.id, companyId: leg.company_id, flightNo: leg.flight_no, dep: leg.dep_at, arr: leg.arr_at, origin, dest, icao: ac.icao });
+  const cause: CancelCause | null = grounded ? 'aircraft_unavailable' : crew?.cause ?? null;
   if (cause || !ac) {
-    run(db, "UPDATE scheduled_flights SET status = 'cancelled', cancel_cause = ? WHERE id = ?", cause ?? 'aircraft_unavailable', leg.id);
+    run(db, "UPDATE scheduled_flights SET status = 'cancelled', cancel_cause = ?, crew_family = ? WHERE id = ?", cause ?? 'aircraft_unavailable', crew?.family ?? null, leg.id);
     run(db, 'UPDATE companies SET reputation = MAX(0, reputation - ?) WHERE id = ?', CANCELLED_LEG_REPUTATION, leg.company_id);
     return;
   }
@@ -308,14 +307,20 @@ export function refreshLine(db: Db, lineId: number, ts: number): void {
 }
 
 function refreshRow(db: Db, l: LineRow, ts: number): void {
-  const usable = lineAircraft(db, l.id).some((x) => x.returned_at === null && (x.location === l.a || x.location === l.b) && !(x.status === 'maintenance' && (x.maintenance_until ?? 0) > ts + DAY_MS));
-  if (usable) {
+  const fleet = lineAircraft(db, l.id).filter((x) => x.returned_at === null);
+  const aircraftOk = fleet.some((x) => (x.location === l.a || x.location === l.b) && !(x.status === 'maintenance' && (x.maintenance_until ?? 0) > ts + DAY_MS));
+  // a crew exists when SOME aircraft type of the line has a flight deck and a cabin crew employed at one end of it (duty limits and leave pass, a missing person does not)
+  const crewOk = fleet.length === 0 || [...new Set(fleet.map((x) => x.icao))].some((icao) => crewShortage(db, l.company_id, [icao], [l.a, l.b], ts).length === 0);
+  if (aircraftOk && crewOk) {
     if (l.status === 'interrupted') run(db, "UPDATE lines SET status = 'active', interrupted_since = NULL, interrupt_cause = NULL, stoppage_charged = 0 WHERE id = ?", l.id);
     return;
   }
+  const cause: LineInterruptCause = !aircraftOk && !crewOk ? 'both' : !aircraftOk ? 'aircraft' : 'crew';
   const since = l.interrupted_since ?? ts;
-  if (l.status === 'active') run(db, "UPDATE lines SET status = 'interrupted', interrupted_since = ?, interrupt_cause = 'aircraft' WHERE id = ?", since, l.id);
-  const due = stoppageReputationTotal(since, ts);
+  if (l.status === 'active') run(db, "UPDATE lines SET status = 'interrupted', interrupted_since = ?, interrupt_cause = ? WHERE id = ?", since, cause, l.id);
+  else if (l.interrupt_cause !== cause) run(db, 'UPDATE lines SET interrupt_cause = ? WHERE id = ?', cause, l.id);
+  // A new line still waiting for its crew has let nobody down yet: crew-only stoppages cost reputation once the line has flown.
+  const due = cause === 'crew' && !get(db, "SELECT 1 AS x FROM scheduled_flights WHERE line_id = ? AND status = 'done' LIMIT 1", l.id) ? 0 : stoppageReputationTotal(since, ts);
   if (due > l.stoppage_charged) {
     run(db, 'UPDATE companies SET reputation = MAX(0, reputation - ?) WHERE id = ?', due - l.stoppage_charged, l.company_id);
     run(db, 'UPDATE lines SET stoppage_charged = ? WHERE id = ?', due, l.id);

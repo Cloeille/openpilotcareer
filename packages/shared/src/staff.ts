@@ -30,6 +30,8 @@ export const DUTY_REPORT_MIN = 45;
 export const DUTY_RELEASE_MIN = 15;
 /** Two legs of one person less than this apart belong to the same duty period; farther apart, the second one needs the full rest first. */
 export const DUTY_BREAK_MIN = 6 * 60;
+/** A person who has not flown for this long is back at their base (the company positions its crews for free), so a cancelled return never strands anyone for good. */
+export const REPOSITION_H = 24;
 
 export type RestPolicy = 'legal' | 'standard' | 'generous';
 export type RestPolicyRules = { restBaseH: number; restAwayH: number; extraHeadcountPct: number; riskFactor: number };
@@ -130,6 +132,10 @@ const TYPE_PAY: Record<AircraftCategory, number> = {
   'piston-single': 0.45, 'piston-multi': 0.6, 'turboprop-single': 0.7, 'turboprop-multi': 0.85, 'turboprop-airliner': 1,
   'jet-business': 1.3, 'jet-airliner': 1.6, 'jet-widebody': 2.2, helicopter: 0.9, other: 0.7,
 };
+/** Experience is flight hours for a pilot and years for the others; this maps it to 0..1 (10 000 h, 20 years). */
+export const experienceFactor = (family: StaffFamily, experience: number): number => clamp(experience / (family === 'pilot' ? 10_000 : 20), 0, 1);
+/** A pilot is captain from 3 000 hours. */
+export const CAPTAIN_FROM_HOURS = 3_000;
 /** Monthly asking salary, rounded to 50 euros. `experience` is 0 to 1 and moves it from 0.8 to 1.2 of the base. */
 export function salaryFor(family: StaffFamily, role: StaffRole, experience: number, category: AircraftCategory | null): number {
   const pay = family === 'pilot' ? (category ? TYPE_PAY[category] : 1) * (role === 'fo' ? 0.7 : 1) : 1;
@@ -137,11 +143,16 @@ export function salaryFor(family: StaffFamily, role: StaffRole, experience: numb
 }
 
 export const HIRING_PREMIUM_MONTHS = 1;
-/** Support families (ground, maintenance) need this many people per aircraft flying a line; admin needs one per base with a line (docs/v3-plan.md B.3 leaves it to the lot). */
-export const SUPPORT_PER_AIRCRAFT = { ground: 1, maintenance: 1 } as const;
+/** Support families (docs/v3-plan.md B.3 leaves their sizing to the lot; tuning constants, not enforced by the crew check): one ground agent at every airport a line serves,
+ *  one technician per two aircraft on a line, one administrator per 25 other people (at least one as soon as a line flies). */
+export const GROUND_PER_AIRPORT = 1;
+export const AIRCRAFT_PER_TECHNICIAN = 2;
+export const PEOPLE_PER_ADMIN = 25;
 /** C7: firing costs three months of salary. */
 export const FIRING_MONTHS = 3;
 export const LEAVE_DAYS_PER_YEAR = 25;
+/** A person asks for leave in a given month with this probability (deterministic per person and month), for 3 to 10 days starting between the 4th and the 25th. */
+export const LEAVE_ASK_RATE = 0.3;
 export const DEFAULT_NOTICE_DAYS = 7;
 export const MAX_INTERIM_DAYS = 30;
 /** An interim costs 1.2 x the daily salary x 1.5, for each day, paid up front [NO MODEL for the mockup's 1 450 euros]. */
@@ -183,7 +194,7 @@ export const restPolicySchema = z.object({ policy: z.enum(REST_POLICY_NAMES) });
 
 // ---------------------------------------------------------------- wire types
 
-export type StaffState = 'pending' | 'free' | 'onDuty' | 'resting' | 'leave' | 'training';
+export type StaffState = 'pending' | 'free' | 'onDuty' | 'resting' | 'leave' | 'training' | 'left';
 export type StaffMember = {
   id: number; family: StaffFamily; name: string; role: StaffRole; base: string; hiredAt: number; startsAt: number; endsAt: number | null;
   /** Euros a month. */
@@ -191,11 +202,9 @@ export type StaffMember = {
   /** Flight hours for a pilot, years for the others. */
   experience: number;
   contract: 'cdi' | 'cdd'; noticeDays: number; state: StaffState; quals: string[];
-  /** People the row stands for: 1 for a pilot or a member of cabin crew, the headcount of a pool (ground, admin, maintenance, kitchen). */
-  poolCount: number;
 };
 export type Qualification = { type: string; name: string; validFrom: number; validUntil: number | null; inTraining: boolean };
-/** Minutes everywhere except `restHours` and `medicalDays`. `endsAt`: the latest the current duty period may end (null when not on duty). */
+/** `dutyMin`, `limitMin`: minutes; `restHours`, `flight28d`, `flight12m`: hours. */
 export type DutyState = { dutyMin: number; limitMin: number; endsAt: number | null; restHours: number; flight28d: number; flight12m: number; fatigue: number; medicalDays: number };
 /** A leg the person flew (or will fly: the engine books crews at the departure tick). */
 export type DutyBlock = { flightNo: string; dep: number; arr: number; origin: string; dest: string };
@@ -205,7 +214,7 @@ export type FamilyRow = {
   /** The aircraft type of a child row of the pilots. */
   type?: string;
   headcount: number; need: number;
-  availability: { onDuty: number; resting: number; leave: number; training: number; free: number; vacant: number };
+  availability: { onDuty: number; resting: number; leave: number; training: number; free: number; pending: number; vacant: number };
   salaries: number; note: string | null; children?: FamilyRow[];
 };
 /** Today's flights cancelled for want of crew: `family` is what ran short (null when unknown), `type` the aircraft type. */
@@ -242,6 +251,7 @@ export type LeaveRequest = {
 export type PolicyOption = { policy: RestPolicy; restBaseH: number; restAwayH: number; extraHeadcount: number; payrollDelta: number; riskFactor: number };
 export type LeaveView = {
   balance: number; resting: number; restingPilots: number; avgFatigue: number;
+  /** `perDay`: people the timetable needs every day (the positions of the family); `days[i]` is the coverage of day `from` + i. */
   coverage: { family: StaffFamily; label: string; headcount: number; perDay: number; days: Coverage[] }[];
   /** The first day each family is `short` or `none`. */
   alerts: { family: StaffFamily; day: string; coverage: Coverage }[];

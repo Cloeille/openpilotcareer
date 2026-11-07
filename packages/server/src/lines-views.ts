@@ -7,6 +7,7 @@ import { all, get, type Db } from './db.ts';
 import type { AircraftRow, FlightRow } from './game.ts';
 import { typeFor } from './game.ts';
 import { expectedPerDay } from './lines-manage.ts';
+import { crewCost, crewShortage, pilotNames, type Shortage } from './staff.ts';
 import { companyCode, legStatus, legView, lineAircraft, lineView, loadFactorOf, networkOf, type LegRow, type LineRow } from './lines.ts';
 
 const NOTE: Record<CancelCause, string> = {
@@ -88,7 +89,7 @@ export function lineDetail(db: Db, l: LineRow, now: number, date?: string): Line
   const dayLegs = legsFrom(day, day + DAY_MS);
   const flownDay = dayLegs.filter((x) => x.status === 'done');
   const sum = (k: 'revenue' | 'fuel_cost' | 'landing_fee' | 'maintenance' | 'pax') => flownDay.reduce((s, x) => s + (x[k] ?? 0), 0);
-  const pnl = { revenue: sum('revenue'), fuel: sum('fuel_cost'), fees: sum('landing_fee'), crews: 0, maintenance: sum('maintenance'), margin: 0, flights: flownDay.length, pax: sum('pax') };
+  const pnl = { revenue: sum('revenue'), fuel: sum('fuel_cost'), fees: sum('landing_fee'), crews: crewCost(db, flownDay.map((x) => x.id)), maintenance: sum('maintenance'), margin: 0, flights: flownDay.length, pax: sum('pax') };
   pnl.margin = pnl.revenue - pnl.fuel - pnl.fees - pnl.crews - pnl.maintenance;
 
   const window = (from: number, to: number) => legsFrom(from, to).filter((x) => x.status === 'done');
@@ -98,11 +99,12 @@ export function lineDetail(db: Db, l: LineRow, now: number, date?: string): Line
   const measured = last7.length > 0;
   const exp = measured ? null : expectedPerDay(db, l, fleet, now);
   const revenue7 = last7.reduce((s, x) => s + (x.revenue ?? 0), 0);
-  const margin7 = last7.reduce((s, x) => s + (x.revenue ?? 0) - (x.fuel_cost ?? 0) - (x.landing_fee ?? 0) - (x.maintenance ?? 0), 0);
+  const margin7 = last7.reduce((s, x) => s + (x.revenue ?? 0) - (x.fuel_cost ?? 0) - (x.landing_fee ?? 0) - (x.maintenance ?? 0), 0) - crewCost(db, last7.map((x) => x.id));
 
   const usable = fleet.filter((x) => x.returned_at === null);
   const worst = usable.reduce((m, x) => Math.max(m, x.wear_pct), 0);
   const n = networkOf(db, l.company_id);
+  const short: Shortage[] = crewShortage(db, l.company_id, [...new Set(usable.map((x) => x.icao))], [l.a, l.b], now);
   return {
     line: lineView(db, l), week, day: dayLegs.map((x) => legView(x, code, now)),
     kpis: {
@@ -112,6 +114,7 @@ export function lineDetail(db: Db, l: LineRow, now: number, date?: string): Line
     },
     pnl,
     depends: [
+      { key: 'crew', label: 'crew', value: short.length === 0 ? 'ok' : short.map((x) => `${x.family === 'pilot' ? x.type : 'cabin'} ${x.have}/${x.need}`).join(', '), ok: short.length === 0 },
       { key: 'aircraft', label: 'aircraft', value: `${usable.filter((x) => x.status === 'available').length}/${usable.length}`, ok: usable.some((x) => x.status === 'available') },
       { key: 'maintenance', label: 'wear', value: `${Math.round(worst)}%`, ok: worst < 70 },
       { key: 'network', label: 'network', value: (n?.enabled ?? 1) === 1 ? 'on' : 'off', ok: (n?.enabled ?? 1) === 1 },
@@ -131,7 +134,7 @@ export function opsView(db: Db, companyId: number, now: number): OpsView {
   const row = (l: LegRow): OpsRow => {
     const a = aircraft.get(l.aircraft_id);
     const view: ScheduledFlight = legView(l, code, now);
-    return { ...view, reg: a?.registration ?? `#${l.aircraft_id}`, typeName: a ? typeFor(db, companyId, a.icao).name : '', crew: null, note: l.cancel_cause ? NOTE[l.cancel_cause] : l.delay_cause === 'wear' ? 'aircraft wear' : l.delay_cause === 'late_inbound' ? 'late inbound aircraft' : null, own: false };
+    return { ...view, reg: a?.registration ?? `#${l.aircraft_id}`, typeName: a ? typeFor(db, companyId, a.icao).name : '', crew: l.status === 'done' ? pilotNames(db, l.id) : null, note: l.cancel_cause ? NOTE[l.cancel_cause] : l.delay_cause === 'wear' ? 'aircraft wear' : l.delay_cause === 'late_inbound' ? 'late inbound aircraft' : null, own: false };
   };
   const flying = rows.filter((l) => isFlying(l, now)).map(row);
   for (const f of handFlights(db, companyId, now)) {

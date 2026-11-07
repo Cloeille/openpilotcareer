@@ -14,6 +14,8 @@ import { airports, catalogType } from './catalog.ts';
 import { all, get, MIGRATIONS, openDb, run } from './db.ts';
 import { insertAircraft } from './fleet-extras.ts';
 import { finishFlight, type FlightRow } from './game.ts';
+import { grantStarterCrew } from './staff-people.ts';
+import { refreshLine } from './lines.ts';
 import { harness } from './harness.ts';
 
 const T0 = Date.UTC(2026, 10, 4, 12, 0, 0); // Wednesday 4 Nov 2026, 12:00Z (the harness clock)
@@ -34,6 +36,9 @@ async function world(o: { line?: boolean; ai?: boolean } = {}) {
     const r = await h.call('POST', '/api/v1/lines', { token: tok, body: lineBody });
     assert.equal(r.status, 201, r.text);
     lineId = r.body.id;
+    // C11: a new company hires its crew; these fixtures start with the starter crew the migration grants to existing companies
+    grantStarterCrew(h.db, cid, h.clock.t);
+    refreshLine(h.db, lineId, h.clock.t);
   }
   /** Move the clock and make the one request that plays the ticks. */
   const advance = async (ms: number) => { h.clock.t += ms; await get_('/api/v1/network'); };
@@ -326,7 +331,7 @@ test('line creation validates in one place and the forecast reports the same pro
 
   const ok = await w.h.call('POST', '/api/v1/lines/forecast', { token: w.tok, body: w.lineBody });
   assert.equal(ok.body.valid, true);
-  assert.equal(ok.body.crewModelled, false);
+  assert.equal(ok.body.crewModelled, true);
   assert.equal(ok.body.forecast.estimated, true);
   assert.ok(ok.body.forecast.revenue > 0 && ok.body.forecast.profit === ok.body.forecast.revenue - ok.body.forecast.costs);
   assert.ok(ok.body.forecast.loadFactor >= 0.35 && ok.body.forecast.loadFactor <= 0.95);
@@ -372,7 +377,7 @@ test('a line is edited, paused, resumed and deleted; pausing keeps no unflown le
   assert.equal((await w.get(url)).status, 404);
 });
 
-test('the reassign remedy puts a free aircraft on a stopped line; the recruit remedy is not available before crews exist', async () => {
+test('the reassign remedy puts a free aircraft on a stopped line; recruiting is refused while the crew is complete', async () => {
   const w = await world();
   run(w.h.db, "UPDATE aircraft SET status = 'maintenance', maintenance_until = ? WHERE id = ?", T0 + 10 * DAY_MS, w.ac);
   await w.advance(DAY_MS);
@@ -380,7 +385,7 @@ test('the reassign remedy puts a free aircraft on a stopped line; the recruit re
   const p = (await w.get(`/api/v1/lines/${w.lineId}/problem`)).body;
   assert.ok(p.options.reassign.aircraft.some((a: { id: number }) => a.id === spare), 'the spare is offered');
   assert.ok(p.options.reassign.aircraft.every((a: { id: number }) => a.id !== w.ac), 'the grounded aircraft is not');
-  assert.equal((await w.h.call('POST', `/api/v1/lines/${w.lineId}/resolve`, { token: w.tok, body: { option: 'recruit' } })).status, 409);
+  assert.equal((await w.h.call('POST', `/api/v1/lines/${w.lineId}/resolve`, { token: w.tok, body: { option: 'recruit' } })).body.error, 'nothing_to_recruit');
   assert.equal((await w.h.call('POST', `/api/v1/lines/${w.lineId}/resolve`, { token: w.tok, body: { option: 'reassign', aircraftId: 9999 } })).body.error, 'aircraft_not_free');
   const r = await w.h.call('POST', `/api/v1/lines/${w.lineId}/resolve`, { token: w.tok, body: { option: 'reassign', aircraftId: spare } });
   assert.equal(r.status, 200, r.text);

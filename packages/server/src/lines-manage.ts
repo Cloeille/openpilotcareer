@@ -2,7 +2,7 @@
 // (which reports every problem) and by create/patch (which throw the first). Domain operations: callers wrap them in `tx`.
 import { randomUUID } from 'node:crypto';
 import {
-  DAY_MS, DEFAULT_TURNAROUND_MIN, FIRST_FLIGHT_NO, FLIGHT_NO_BLOCK, MAX_LINES_PER_COMPANY, PAX_KG, PAUSED_LINE_COST_PER_DAY, crewNeeded, daysToMask, dayStart, hhmmToMin, jobPayout,
+  DAY_MS, DEFAULT_TURNAROUND_MIN, FIRST_FLIGHT_NO, FLIGHT_NO_BLOCK, MAX_LINES_PER_COMPANY, PAX_KG, PAUSED_LINE_COST_PER_DAY, daysToMask, dayStart, hhmmToMin, jobPayout,
   SIZE_WEIGHT, layoutDay, minToHhmm, overlappingLegs, programmeProblem, weeklyDemand, weeklySeats,
   type Job, type LineBody, type LineForecastView, type LineProblemView, type PlannedLeg,
 } from '@opc/shared';
@@ -10,6 +10,9 @@ import { airportList, airports } from './catalog.ts';
 import { all, get, run, type Db } from './db.ts';
 import { LINE_JOB_PREFIX, hasHub, jobView, typeFor, type AircraftRow } from './game.ts';
 import { HttpError } from './http.ts';
+import { countOf, demandOf } from './staff-needs.ts';
+import { recruitForLine, recruitOffer } from './staff-people.ts';
+import { crewHeadcount, crewShortage, pendingStart, rulesOf } from './staff.ts';
 import {
   blockMinutes, companyCode, ensureNetwork, layLine, legMoney, lineAircraft, lineDistance, loadFactorOf, networkOf, planned, programmeOf, refreshLine, relayLine, rivalSeats, seatsOf, sizeOf,
   type LegRow, type LineAircraftRow, type LineRow,
@@ -118,19 +121,30 @@ export function forecast(db: Db, companyId: number, b: LineBody, now: number): L
       }
     }
   }
-  // crews are not modelled until lot STAFF (decision C11): the need is computed from the type, availability mirrors it
-  const crew = types.reduce((s, t) => { const n = crewNeeded(t.seats); return { pilots: s.pilots + n.pilots, cabin: s.cabin + n.cabin }; }, { pilots: 0, cabin: 0 });
+  // crews: what the programme needs under the duty rules and what the company employs at the two ends of the line (ground: at each end)
+  const needs = crewNeeds(db, companyId, { a, z, b, fleet, types, days, dist }, now);
   return {
     forecast: {
       weeklyDemand: demand, loadFactor: lf, seatsPerWeek, revenue, costs, profit: revenue - costs, estimated: true,
       competition: rival.best ? { company: rival.best.company, flightsPerDay: rival.best.flightsPerDay } : null,
     },
     conflicts, problems: problems.map((x) => x.code),
-    needs: {
-      pilots: { required: crew.pilots, available: crew.pilots }, cabin: { required: crew.cabin, available: crew.cabin },
-      ground: { required: 0, available: 0, missingAt: [] }, maintenance: fleet.some((x) => x.wear_pct >= 70) ? 'wear' : 'ok',
-    },
-    crewModelled: false, valid: problems.length === 0,
+    needs: { ...needs, maintenance: fleet.some((x) => x.wear_pct >= 70) ? 'wear' : 'ok' },
+    crewModelled: true, valid: problems.length === 0,
+  };
+}
+
+function crewNeeds(db: Db, companyId: number, c: { a: string; z: string; b: LineBody; fleet: AircraftRow[]; types: { icao: string }[]; days: number; dist: number }, now: number) {
+  const empty = { pilots: { required: 0, available: 0 }, cabin: { required: 0, available: 0 }, ground: { required: 0, available: 0, missingAt: [] as string[] } };
+  if (c.dist === 0 || c.fleet.length !== c.b.aircraftIds.length || c.fleet.length === 0) return empty;
+  const prog = { a: c.a, b: c.z, flightBase: 0, freqPerDay: c.b.freqPerDay, days: c.days, windowStartMin: hhmmToMin(c.b.windowStart), windowEndMin: hhmmToMin(c.b.windowEnd), turnaroundMin: c.b.turnaroundMin ?? DEFAULT_TURNAROUND_MIN };
+  const aircraft = c.fleet.map((x, i) => ({ id: x.id, icao: x.icao, blockMin: blockMinutes(typeFor(db, companyId, x.icao), c.dist), home: x.location === c.z ? c.z : c.a, i }));
+  const slots = demandOf(db, companyId, [{ prog, aircraft }], rulesOf(db, companyId));
+  const have = crewHeadcount(db, companyId, [c.a, c.z], c.types.map((t) => t.icao), now);
+  const missingAt = [c.a, c.z].filter((icao) => (have.groundAt[icao] ?? 0) < 1);
+  return {
+    pilots: { required: countOf(slots, 'pilot'), available: have.pilots }, cabin: { required: countOf(slots, 'cabin'), available: have.cabin },
+    ground: { required: countOf(slots, 'ground'), available: have.ground, missingAt },
   };
 }
 
@@ -245,10 +259,16 @@ const nextOperatingDay = (l: LineRow, now: number): number => {
 
 export function problemView(db: Db, l: LineRow, now: number): LineProblemView {
   const fleet = lineAircraft(db, l.id).filter((x) => x.returned_at === null);
-  const problem = fleet.filter((x) => x.status === 'maintenance' || (x.location !== l.a && x.location !== l.b)).map((x) => ({
+  const aircraftProblems = fleet.filter((x) => x.status === 'maintenance' || (x.location !== l.a && x.location !== l.b)).map((x) => ({
     kind: 'aircraft' as const, ready: false, until: x.status === 'maintenance' ? x.maintenance_until : null,
     detail: x.status === 'maintenance' ? `${x.registration} maintenance` : `${x.registration} at ${x.location}`,
   }));
+  const short = crewShortage(db, l.company_id, [...new Set(fleet.map((x) => x.icao))], [l.a, l.b], now);
+  const crewProblems = short.map((x) => ({
+    kind: 'crew' as const, ready: false, until: pendingStart(db, l.company_id, x.family, x.type, [l.a, l.b], now),
+    detail: `${x.family === 'pilot' ? `${x.type} pilots` : 'cabin crew'} ${x.have}/${x.need}`,
+  }));
+  const problem = [...aircraftProblems, ...crewProblems];
   const since = l.interrupted_since ?? now;
   const cancelled = all<LegRow>(db, "SELECT * FROM scheduled_flights WHERE line_id = ? AND status = 'cancelled' AND taken_job IS NULL AND dep_at >= ?", l.id, since);
   const lf = loadFactorOf(db, { companyId: l.company_id, a: l.a, b: l.b, freqPerDay: l.freq_per_day, days: l.days, fleet, excludeLineId: l.id });
@@ -269,7 +289,7 @@ export function problemView(db: Db, l: LineRow, now: number): LineProblemView {
     cost: { cancelled: cancelled.length, lostRevenue: lost, perDay, reputation: -l.stoppage_charged, slotsLostAt: l.interrupted_since === null ? null : l.interrupted_since + 14 * DAY_MS },
     options: {
       reassign: free.length > 0 ? { aircraft: free, flightsPerDay: l.freq_per_day * 2, deltaPerDay: perDay } : null,
-      recruit: null, // opens with lot STAFF
+      recruit: short.length === 0 ? null : recruitOffer(db, l, short, now),
       pause: { fixedCostPerDay: PAUSED_LINE_COST_PER_DAY },
     },
     projection,
@@ -279,7 +299,11 @@ export function problemView(db: Db, l: LineRow, now: number): LineProblemView {
 export function resolveLine(db: Db, companyId: number, id: number, o: { option: 'reassign' | 'recruit' | 'pause'; aircraftId?: number }, now: number): LineRow {
   const l = ownedLine(db, companyId, id);
   if (o.option === 'pause') return setPaused(db, companyId, id, true, now);
-  if (o.option === 'recruit') throw new HttpError(409, 'recruit_unavailable', 'crews are not modelled yet: nothing to recruit');
+  if (o.option === 'recruit') {
+    if (crewShortage(db, l.company_id, [...new Set(lineAircraft(db, id).filter((x) => x.returned_at === null).map((x) => x.icao))], [l.a, l.b], now).length === 0) throw new HttpError(409, 'nothing_to_recruit', 'the line has all the crew it needs');
+    recruitForLine(db, l, now);
+    return ownedLine(db, companyId, id);
+  }
   if (o.aircraftId === undefined) throw new HttpError(400, 'invalid_request', 'aircraftId: required to reassign');
   if (!freeFor(db, l, now).some((x) => x.id === o.aircraftId)) throw new HttpError(409, 'aircraft_not_free', 'that aircraft cannot serve this line now');
   const ids = [...lineAircraft(db, id).map((x) => x.id), o.aircraftId];
