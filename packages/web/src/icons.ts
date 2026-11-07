@@ -87,5 +87,8 @@ export const ICONS = {
   'minus': [['path', { d: 'M5 12h14' }]],
   'trending-up': [['path', { d: 'M16 7h6v6' }], ['path', { d: 'm22 7-8.5 8.5-5-5L2 17' }]],
   zap: [['path', { d: 'M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z' }]],
+  'door-open': [['path', { d: 'M11 20H2' }], ['path', { d: 'M11 4.562v16.157a1 1 0 0 0 1.242.97L19 20V5.562a2 2 0 0 0-1.515-1.94l-4-1A2 2 0 0 0 11 4.561z' }], ['path', { d: 'M11 4H8a2 2 0 0 0-2 2v14' }], ['path', { d: 'M14 12h.01' }], ['path', { d: 'M22 20h-3' }]],
+  'hard-hat': [['path', { d: 'M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5' }], ['path', { d: 'M14 6a6 6 0 0 1 6 6v3' }], ['path', { d: 'M4 15v-3a6 6 0 0 1 6-6' }], ['rect', { x: '2', y: '15', width: '20', height: '4', rx: '1' }]],
+  'square-parking': [['rect', { width: '18', height: '18', x: '3', y: '3', rx: '2' }], ['path', { d: 'M9 17V7h4a3 3 0 0 1 0 6H9' }]],
 } as const satisfies Record<string, readonly Shape[]>;
 export type IconName = keyof typeof ICONS;
