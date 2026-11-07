@@ -3,6 +3,7 @@ import { act } from '../actions.ts';
 import { api } from '../api.ts';
 import { airportField } from '../airport-field.ts';
 import { fetchHubsOverview } from '../api-facilities.ts';
+import { fetchWarehouse } from '../api-parts.ts';
 import { fetchSafety } from '../api-safety.ts';
 import { fetchStaff } from '../api-staff.ts';
 import { airportInfo, cityOf } from '../airports.ts';
@@ -13,6 +14,7 @@ import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { safetyEntry } from '../safety-ui.ts';
+import { warehouseEntry } from '../parts-ui.ts';
 import { famLabel, staffEntry } from '../staff-ui.ts';
 import { h } from '../ui.ts';
 
@@ -25,12 +27,13 @@ export async function hubsOverview(ctx: Ctx): Promise<Screen> {
   const { me } = snap;
   const fm = fmt();
   const data = await fetchHubsOverview();
-  const [people, safety] = await Promise.all([fetchStaff().catch(() => null), fetchSafety().catch(() => null)]);
+  const [people, safety, parts] = await Promise.all([fetchStaff().catch(() => null), fetchSafety().catch(() => null), me.hubs[0] ? fetchWarehouse(me.hubs[0]).catch(() => null) : null]);
   const infos = new Map(await Promise.all(me.hubs.map(async (icao) => [icao, await airportInfo(icao)] as const)));
   // The doors to the other Company screens (C8): a card, its key, where it leads, its hint. A door whose server feature is off has no card and no key.
   const doors = [
     { card: staffEntry(people, go), key: 's', hash: '#staff', hint: t('st.hint.openStaff') },
     { card: safetyEntry(safety, go), key: 'f', hash: '#safety', hint: t('sf.hint.open') },
+    { card: warehouseEntry(me.hubs[0] ?? '', parts, go), key: 'w', hash: `#warehouse/${me.hubs[0]}`, hint: t('pt.hint.open') },
   ].filter((d): d is typeof d & { card: HTMLElement } => d.card !== null);
   const doorKeys: Record<string, () => void> = Object.fromEntries(doors.map((d) => [d.key, () => go(d.hash)]));
   const doorHints = doors.map((d) => ({ key: d.key.toUpperCase(), label: d.hint }));
