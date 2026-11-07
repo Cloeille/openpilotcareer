@@ -300,6 +300,24 @@ const creditBalance = (await call('GET', '/me', { token: lineTok })).body.compan
 const creditSigned = await call('POST', '/credits', { token: lineTok, body: creditAsk });
 expect(creditSigned.status === 409 && creditSigned.body.error === 'over_ceiling' && (await call('GET', '/me', { token: lineTok })).body.company.balance === creditBalance, 'signing over the ceiling is refused and books nothing', creditSigned);
 expect((await call('GET', '/credits', { token: apiKey })).status === 401 && (await call('POST', '/credits', { token: apiKey, body: creditAsk })).status === 401, 'an API key cannot read or sign credits');
+// v4 group: a subsidiary is funded by transfer only (no grant), moves cash both ways with the money of the two balances unchanged, stays off the leaderboard, and a parent that still has one cannot be deleted
+// (a fresh player: the line company above earns and spends while the server clock runs, which would blur the balances)
+const gp = await call('POST', '/auth/register', { body: { username: `${username}g`, password, hub: 'LFPG' } });
+const groupTok = gp.body.token, parentId = gp.body.company.id;
+const balanceOf = async (cid) => (await call('GET', '/me', { token: groupTok, company: cid })).body.company.balance;
+const parentBefore = await balanceOf(parentId);
+const founded = await call('POST', '/group/subsidiaries', { token: groupTok, body: { name: `${username} Cargo`, hub: 'LFPG', code: 'SMK', activity: 'cargo', funding: 50000 } });
+expect(founded.status === 201 && (await balanceOf(founded.body.id)) === 50000 && (await balanceOf(parentId)) === parentBefore - 50000, 'group: a subsidiary is founded with no grant, only the 50 000 the parent wired', founded);
+const subId = founded.body.id;
+const wired = await call('POST', '/group/transfers', { token: groupTok, body: { from: subId, to: parentId, cash: 20000 } });
+expect(wired.status === 200 && (await balanceOf(subId)) === 30000 && (await balanceOf(parentId)) === parentBefore - 30000, 'group: 20 000 wired back, the two balances still add up to what the parent had', wired);
+expect((await call('POST', '/group/transfers', { token: groupTok, body: { from: subId, to: parentId, cash: 10_000_000 } })).status === 409, "group: a transfer over the sender's spendable is refused");
+expect((await call('POST', '/group/transfers', { token: rival.body.token, body: { from: parentId, to: subId, cash: 1 } })).status === 403, "group: another player cannot move the group's money");
+expect((await call('GET', '/leaderboard', { token: groupTok })).body.rows.every((r) => r.companyId !== subId), 'group: the subsidiary is not on the leaderboard');
+expect((await call('GET', '/group', { token: apiKey })).status === 401, 'group: an API key cannot read the group');
+const parentDelete = await call('DELETE', `/companies/${parentId}`, { token: groupTok, body: { password } });
+expect(parentDelete.status === 409 && parentDelete.body.error === 'has_subsidiaries', 'group: a parent with a subsidiary cannot be deleted', parentDelete);
+await call('DELETE', '/me', { token: groupTok, body: { password } });
 const off = await call('PUT', '/network/enabled', { token: lp.body.token, body: { enabled: false } });
 expect(off.body.enabled === false && (await call('GET', '/network', { token: lp.body.token })).body.enabled === false, 'the network switch turns the lines off');
 await call('DELETE', '/me', { token: lp.body.token, body: { password } });

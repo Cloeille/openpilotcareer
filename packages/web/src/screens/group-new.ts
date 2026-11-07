@@ -39,6 +39,7 @@ export async function groupNew(ctx: Ctx): Promise<Screen> {
   const hub = airportField(t('gr.new.hub'), { name: 'sub-hub' });
   hub.input.addEventListener('input', () => { d.hub = hub.input.value; });
   hub.input.value = d.hub;
+  if (d.hub) hub.input.dispatchEvent(new Event('input'));
   const activity = segments(t('gr.new.activity'), GROUP_ACTIVITIES.map((value) => ({ value, label: t(ACTIVITY_KEY[value]) })), d.activity, (v) => { d.activity = v; redraw(); });
   const identity = panel({ title: t('gr.new.identity'), id: 'gr-identity', class: 'rp-main' },
     h('div', { class: 'col' }, name.root, h('div', { class: 'gp-pair' }, code.root, iata.root), hub.root,
