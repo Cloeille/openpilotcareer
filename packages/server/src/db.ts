@@ -237,8 +237,26 @@ CREATE TABLE safety_readings (
   company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, day INTEGER NOT NULL, idx INTEGER NOT NULL, PRIMARY KEY (company_id, day));
 `;
 
+// OpenHangar v3, lot SERVICE: cabin service and the central kitchen. `service_policy` is a history, not a state: one row per change, `since` the first instant it is in force (the next UTC midnight,
+// "applique le lendemain"), so the configuration at any instant is a read and a replayed tick sees the one of its own time. The policy cells are (haul, item); the meal quality is the row (`all`, `meal_quality`).
+// `kitchen` is the same history for who makes the meals at an airport. `service_days` is the log the satisfaction, the kitchen's day and the service figures read: one row per company, day and departure airport.
+// `sat_pax` is the sum of passengers x satisfaction of the legs, so a mean over any window is a ratio of sums.
+const SCHEMA_V12 = `
+CREATE TABLE service_policy (
+  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, haul TEXT NOT NULL, item TEXT NOT NULL, mode TEXT NOT NULL, since INTEGER NOT NULL,
+  PRIMARY KEY (company_id, haul, item, since));
+CREATE TABLE kitchen (
+  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, hub TEXT NOT NULL, provider TEXT NOT NULL CHECK (provider IN ('own','caterer')), since INTEGER NOT NULL,
+  PRIMARY KEY (company_id, hub, since));
+CREATE TABLE service_days (
+  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, day INTEGER NOT NULL, hub TEXT NOT NULL,
+  pax INTEGER NOT NULL DEFAULT 0, sat_pax REAL NOT NULL DEFAULT 0, sales INTEGER NOT NULL DEFAULT 0, cost INTEGER NOT NULL DEFAULT 0,
+  snacks INTEGER NOT NULL DEFAULT 0, hot INTEGER NOT NULL DEFAULT 0, unserved INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (company_id, day, hub));
+`;
+
 /** Append-only; `PRAGMA user_version` records how many ran. */
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10];
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V12];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);

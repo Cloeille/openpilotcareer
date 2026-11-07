@@ -2451,6 +2451,8 @@ const table = {
   'st.ov.empty': ['Your company has no employees. Lines need pilots and cabin crew to fly: recruit a first crew.', 'Ta compagnie n’a aucun employé. Les lignes ont besoin de pilotes et de personnel de cabine pour voler : recrute un premier équipage.'],
   'st.ov.emptyBaseTitle': ['No staff at {base}', 'Personne n’est basé à {base}'],
   'st.ov.emptyBase': ['Nobody is based at this airport. Pick another base below, or recruit here.', 'Personne n’est basé sur cet aéroport. Choisis une autre base ci-dessous, ou recrute ici.'],
+  // ---- service (v3 lot S6: the kitchen hall is a facility, so its effect sentence belongs to the facilities screens; F6 appends the rest of its block)
+  'fc.effect.kitchen': ['Runs your central kitchen at {icao}: your own cooks make the meals of the flights that leave from here.', 'Fait tourner ta cuisine centrale à {icao} : tes cuisiniers préparent les repas des vols au départ d’ici.'],
 } as const satisfies Record<string, readonly [string, string]>;
 
 export type Key = keyof typeof table;

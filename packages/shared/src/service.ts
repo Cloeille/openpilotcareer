@@ -37,8 +37,8 @@ export type KitchenProvider = 'own' | 'caterer';
 export type MealSpec = { price: number; rating: number; prepMin: number; team: number; maxOutput: number; foodShare: number };
 export const MEALS: Record<MealQuality, MealSpec> = {
   economy: { price: 9, rating: 3.6, prepMin: 4, team: 4, maxOutput: 980, foodShare: 0.3 },
-  soigne: { price: 14, rating: 4.2, prepMin: 9, team: 6, maxOutput: 620, foodShare: 0.38 },
-  gastronomique: { price: 23, rating: 4.7, prepMin: 18, team: 9, maxOutput: 310, foodShare: 0.48 },
+  soigne: { price: 14, rating: 4.2, prepMin: 9, team: 6, maxOutput: 620, foodShare: 0.39 },
+  gastronomique: { price: 23, rating: 4.7, prepMin: 18, team: 9, maxOutput: 310, foodShare: 0.52 },
 };
 export const DEFAULT_QUALITY: MealQuality = 'soigne';
 /** A caterer cannot do the chef's menu (the Cuisine screen: "sans plafond de volume, pas de Gastronomique"). */
@@ -127,7 +127,7 @@ export const unitOf = (item: ServiceItem, haul: HaulClass, quality: MealQuality)
 export const SAT_BASE = 2.5;
 export const SAT_MIN = 1;
 export const SAT_MAX = 5;
-export type OfferLine = { item: ServiceItem; mode: 'free' | 'paid'; take: number; price: number; cost: number; food: 'snack' | 'hot' | null };
+export type OfferLine = { item: ServiceItem; mode: 'free' | 'paid'; take: number; price: number; cost: number; bonus: number; food: 'snack' | 'hot' | null };
 export type Offer = { satisfaction: number; lines: OfferLine[] };
 
 /** What a flight of this haul class and aircraft category offers under `policy`, with hot meals of `quality`. An item the aircraft cannot carry, or that is not allowed in that mode, is not offered. */
@@ -138,8 +138,9 @@ export function offerFor(policyOf: Readonly<Policy>, haul: HaulClass, category: 
     const mode = policyOf[item];
     if (mode === 'none' || !itemAvailable(item, category) || !modeAllowed(item, mode)) continue;
     const u = unitOf(item, haul, quality), paid = mode === 'paid';
-    satisfaction += u.bonus * (paid ? PAID_BONUS_SHARE : 1);
-    lines.push({ item, mode, take: paid ? ITEMS[item].paidTake : ITEMS[item].take, price: u.price, cost: ITEMS[item].cost[haul], food: item === 'snack' ? 'snack' : item === 'hot_meal' ? 'hot' : null });
+    const bonus = u.bonus * (paid ? PAID_BONUS_SHARE : 1);
+    satisfaction += bonus;
+    lines.push({ item, mode, take: paid ? ITEMS[item].paidTake : ITEMS[item].take, price: u.price, cost: ITEMS[item].cost[haul], bonus, food: item === 'snack' ? 'snack' : item === 'hot_meal' ? 'hot' : null });
   }
   return { satisfaction: cents(clamp(satisfaction, SAT_MIN, SAT_MAX)), lines };
 }
@@ -164,9 +165,10 @@ export function legService(o: Offer, pax: number, kitchen: { share: number; food
   return { sales: Math.round(sales), cost: Math.round(cost + sales * CREW_SALES_BONUS), snacks, hot };
 }
 
-/** B.7: meals not made lower the satisfaction of the leg by one point, in proportion. */
+/** B.7: a meal not made gives none of its bonus and costs the leg one point of satisfaction, in proportion to the meals missing (so a kitchen cannot buy satisfaction with a menu it cannot cook). */
 export const UNSERVED_PENALTY = 1;
-export const legSatisfaction = (o: Offer, share: number): number => cents(clamp(o.satisfaction - UNSERVED_PENALTY * (1 - share), SAT_MIN, SAT_MAX));
+export const legSatisfaction = (o: Offer, share: number): number =>
+  cents(clamp(o.satisfaction - o.lines.reduce((t, l) => (l.food ? t + l.bonus * (1 - share) : t), 0) - UNSERVED_PENALTY * (1 - share), SAT_MIN, SAT_MAX));
 
 // ---------------------------------------------------------------- satisfaction and the load factor
 
@@ -185,9 +187,6 @@ export const LOW_SATISFACTION_REPUTATION = 0.02;
 /** The satisfaction shown is the passenger-weighted mean of this many days, its trend the difference with the window before. The log is kept for two windows. */
 export const SATISFACTION_WINDOW_DAYS = 30;
 export const SERVICE_KEEP_DAYS = 2 * SATISFACTION_WINDOW_DAYS;
-
-/** A pending change takes effect at the first UTC midnight after it was asked (B.7: "applique le lendemain"). */
-export const effectiveAt = <T>(cur: T, next: T | null, nextFrom: number | null, at: number): T => (next !== null && nextFrom !== null && nextFrom <= at ? next : cur);
 
 // ---------------------------------------------------------------- request schemas
 
