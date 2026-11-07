@@ -62,13 +62,12 @@ export type ChartInput = {
   layout: Layout; buildings: ChartBuilding[];
   /** Parking spaces of the hub and how many the player uses; null draws none. */
   stands: { spots: number; used: number } | null;
-  /** A slot, or a stand (`PK3`). */
   selected: string | null;
   /** `all`, or the kind of building that stays lit. */
   filter: ChartFilter;
   size: { w: number; h: number };
-  /** The status words of the tags and the name of a stand. */
-  text: { yours: string; available: string; stand: (n: number) => string };
+  /** The status words of the tags. */
+  text: { yours: string; available: string };
   yaw?: number; elevation?: number; heightScale?: number; labels?: boolean;
 };
 
@@ -94,7 +93,7 @@ const SELECTED = 'var(--text-primary)';
 
 export type ChartPrim =
   | { kind: 'path'; name: string; d: string; fill?: string; stroke?: string; width?: number; opacity?: number }
-  | { kind: 'stand'; id: string; n: number; d: string; owner: 'player' | 'available'; selected: boolean; opacity: number }
+  | { kind: 'stand'; id: string; d: string; owner: 'player' | 'available'; opacity: number }
   | { kind: 'solid'; slot: string; name: string; faces: { d: string; fill: string }[]; roof: string; roofFill: string; stroke: string; width: number; opacity: number }
   | { kind: 'runway'; name: string; x: number; y: number; text: string }
   | { kind: 'quiet'; slot: string; x: number; y: number; text: string; opacity: number }
@@ -102,7 +101,7 @@ export type ChartPrim =
 
 export type ChartScene = {
   w: number; h: number; prims: ChartPrim[];
-  /** Selectable things left to right on the screen: the keyboard's order. Stands are not in it. */
+  /** The slots drawn, left to right on the screen: the order the arrow keys step through. */
   order: string[];
 };
 
@@ -164,8 +163,7 @@ export function buildAirportChart(input: ChartInput): ChartScene {
     const g = A.stands;
     const pitch = Math.min(g.maxPitch, g.width / spots);
     for (let i = 0; i < spots; i++) {
-      const id = `PK${i + 1}`;
-      prims.push({ kind: 'stand', id, n: i + 1, d: rect(g.x + i * pitch, g.y, pitch * 0.67, g.d), owner: i < used ? 'player' : 'available', selected: id === sel, opacity: dim('parking') });
+      prims.push({ kind: 'stand', id: `PK${i + 1}`, d: rect(g.x + i * pitch, g.y, pitch * 0.67, g.d), owner: i < used ? 'player' : 'available', opacity: dim('parking') });
     }
   }
 
@@ -215,7 +213,7 @@ export function buildAirportChart(input: ChartInput): ChartScene {
 
 export type ChartHandlers = { onSelect: (id: string) => void };
 
-/** The scene as SVG. A building or a stand is a button for the mouse; the keyboard goes through the screen (←→ and the list view), so the drawing itself is one labelled image. */
+/** The scene as SVG. A building is clickable for the mouse; the keyboard goes through the screen (←→ and the list view), so the drawing itself is one labelled image. Stands are drawn, not selectable: they are the hub's parking spaces, not buildings. */
 export function drawAirportChart(scene: ChartScene, label: string, on: ChartHandlers): SVGSVGElement {
   const root = svg('svg', { viewBox: `0 0 ${scene.w} ${scene.h}`, class: 'airport-chart', role: 'img', 'aria-label': label, preserveAspectRatio: 'xMidYMid meet' });
   const pick = (id: string) => (): void => on.onSelect(id);
@@ -226,10 +224,7 @@ export function drawAirportChart(scene: ChartScene, label: string, on: ChartHand
         break;
       case 'stand': {
         const free = p.owner === 'available';
-        const g = svg('g', { class: 'ac-hit', opacity: p.opacity });
-        g.append(svg('path', { d: p.d, fill: free ? '#E6BE4C1A' : '#ECEAE51A', stroke: p.selected ? SELECTED : free ? '#E6BE4C' : '#ECEAE566', 'stroke-width': p.selected ? 2 : 1 }));
-        g.addEventListener('click', pick(p.id));
-        root.append(g);
+        root.append(svg('path', { d: p.d, fill: free ? '#E6BE4C1A' : '#ECEAE51A', stroke: free ? '#E6BE4C' : '#ECEAE566', 'stroke-width': 1, opacity: p.opacity }));
         break;
       }
       case 'solid': {

@@ -1,4 +1,4 @@
-import type { StaffFamily, StaffRole } from '@opc/shared';
+import type { AircraftStatus, StaffFamily, StaffRole } from '@opc/shared';
 import { api } from './api.ts';
 import { ApiError } from './errors.ts';
 
@@ -34,11 +34,10 @@ export type HubOverview = {
   icao: string; name: string; role: 'main' | 'secondary';
   facilities: FacilityRow[]; monthlyCost: number;
   team: { total: number; byFamily: Partial<Record<StaffFamily, number>>; chief: { name: string; since: number } | null };
-  aircraft: { id: number; reg: string; typeName: string; status: AircraftState; note: string | null }[];
+  /** `note` is the server's own words for what the aircraft is doing ("En vol", "Au sol · PK3"); the screen falls back to `status`. */
+  aircraft: { id: number; reg: string; typeName: string; status: AircraftStatus; note: string | null }[];
   renewals: { text: string; before: number }[];
 };
-/** What a based aircraft is doing. Unknown values are shown as the server's `note` alone. */
-export type AircraftState = 'yours' | 'flying' | 'delayed' | 'ready' | 'ground' | 'inspection';
 export type HubSuggestion = { icao: string; flightsPerWeek: number; fromMonthly: number; text: string };
 export type HubsOverview = { company: { name: string }; monthlyCost: number; hubs: HubOverview[]; suggestion: HubSuggestion | null };
 
@@ -51,8 +50,8 @@ export type LeaseTerms = { monthly: number; months: number; deposit: number; not
 /** `monthsOfRent`: the price expressed in months of rent (127 in the mockup). `resalePct` is 0..1. */
 export type PurchaseTerms = { price: number; monthsOfRent: number; upkeep: number; resalePct: number; creditPct: number };
 export type StaffNeed = { family: StaffFamily; role: 'chief' | StaffRole; need: number };
-/** `locked`: the level opens after this many months at the level below. `salaries`: monthly payroll of the people the level needs. */
-export type LevelInfo = { level: number; works: { weeks: number; cost: number } | null; staff: StaffNeed[]; salaries: number; locked: { months: number } | null };
+/** `locked`: the level opens after this many months at the level below. `salaries` (asked of S3; 0 when absent): the monthly payroll of the people the level needs. */
+export type LevelInfo = { level: number; works: { weeks: number; cost: number } | null; staff: StaffNeed[]; salaries?: number; locked: { months: number } | null };
 export type RequiredRole = StaffNeed & { have: number; candidates: number };
 export type ContractInfo = { kind: Hold; monthly: number; months: number; startedAt: number; deposit: number; principal: number; noticeMonths: number };
 

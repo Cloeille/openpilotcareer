@@ -8,7 +8,7 @@ const names: Record<string, [string, string]> = {
 const buildings = (slots = Object.keys(names)): ChartBuilding[] => slots.map((slot) => ({ slot, name: names[slot]![0], kind: slot.startsWith('MX') ? 'maintenance' : slot === 'CG1' ? 'cargo' : 'office', owner: names[slot]![1] as ChartBuilding['owner'], ...(slot === 'CG1' ? { ownerName: 'Méridia Cargo' } : {}) }));
 const input = (o: Partial<ChartInput> = {}): ChartInput => ({
   layout: LAYOUTS.LFMN!, buildings: buildings(), stands: { spots: 10, used: 4 }, selected: 'MX2', filter: 'all', size: { w: 1100, h: 640 },
-  text: { yours: 'À toi', available: 'Disponible', stand: (n) => `PK${n}` }, ...o,
+  text: { yours: 'À toi', available: 'Disponible' }, ...o,
 });
 const of = <K extends ChartPrim['kind']>(kind: K, prims: ChartPrim[]): Extract<ChartPrim, { kind: K }>[] => prims.filter((p): p is Extract<ChartPrim, { kind: K }> => p.kind === kind);
 
@@ -64,7 +64,6 @@ test('there is one stand per parking space of the hub, the first ones taken by t
   assert.deepEqual(stands.map((s) => s.owner), [...Array(4).fill('player'), ...Array(6).fill('available')]);
   assert.equal(of('stand', buildAirportChart(input({ stands: null })).prims).length, 0);
   assert.equal(of('stand', buildAirportChart(input({ stands: { spots: 0, used: 0 } })).prims).length, 0);
-  assert.equal(of('stand', buildAirportChart(input({ stands: { spots: 4, used: 4 }, selected: 'PK2' })).prims).filter((s) => s.selected).length, 1);
 });
 
 test('every drawn point falls inside the picture, and turning the labels off frees the band for the plan', () => {
