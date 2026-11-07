@@ -7,7 +7,7 @@
 .fc-head .stat { align-items: flex-end; text-align: right; }
 .fc-head .stat-value { font-size: 24px; }
 .fc-hubs { display: flex; gap: 24px; flex: 1; min-height: 0; }
-.fc-hub { flex: 1; min-width: 0; }
+.fc-hub { flex: 1; min-width: 0; align-self: flex-start; max-height: 100%; }
 .fc-hub-body { display: flex; flex-direction: column; gap: 16px; padding: 22px 28px 18px; min-height: 0; flex: 1; }
 .fc-hub-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
 .fc-hub-name, .fc-base-name { font: 600 24px/1.15 var(--display); }
@@ -35,8 +35,14 @@
 .fc-side { width: 392px; flex: none; display: flex; flex-direction: column; gap: 16px; min-height: 0; }
 .fc-side-list { display: flex; flex-direction: column; gap: 14px; min-height: 0; overflow: auto; }
 .fc-side-list > * { flex: none; }
-.fc-entries { display: flex; flex-direction: column; gap: 16px; flex: none; }
+.fc-entries { display: flex; flex-direction: column; gap: 10px; flex: none; }
 .fc-entries > .panel { flex: none; }
+.panel.fc-door { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 12px; padding: 10px 16px 12px; }
+.fc-door-head { grid-area: 1 / 1; display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.fc-door-head h2 { font: 600 16px var(--display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fc-door-tag { flex: none; font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+.fc-door-body { grid-area: 2 / 1 / 3 / -1; min-width: 0; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fc-door .btn { grid-area: 1 / 2; height: 34px; padding: 0 10px 0 14px; gap: 8px; font-size: 14px; }
 .fc-off-screen { display: flex; gap: 24px; width: 100%; min-height: 0; }
 .fc-off-screen > .fc-entries { width: 420px; align-self: flex-start; }
 .fc-base-body { display: flex; flex-direction: column; gap: 10px; padding: 16px 22px; }

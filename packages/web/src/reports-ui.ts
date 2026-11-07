@@ -1,6 +1,7 @@
 import { FINANCE_SCREENS, type FinanceScreen } from '@opc/shared';
 import type { CashView } from '@opc/shared';
-import { button, icon, keycap, panel } from './components.ts';
+import { icon, keycap, panel } from './components.ts';
+import { doorCard } from './facilities-ui.ts';
 import { fmt } from './format.ts';
 import { t } from './i18n.ts';
 import type { Hint } from './screen.ts';
@@ -49,7 +50,5 @@ export function upcomingPanel(cash: Pick<CashView, 'upcoming' | 'upcomingTotal'>
 /** The door to the finance reports on the company screen (`C`); no card when the server has none. */
 export function financeEntry(cash: Pick<CashView, 'balance'> | null, go: (hash: string) => void): HTMLElement | null {
   if (!cash) return null;
-  return panel({ title: t('rp.entry.title'), action: t('rp.entry.tag'), id: 'rp-entry' },
-    h('p', { class: 'muted' }, t('rp.entry.body', { balance: fmt().money(cash.balance) })),
-    h('div', { class: 'row' }, button(t('rp.entry.open'), { variant: 'secondary', icon: 'wallet', key: 'C', onclick: () => go('#finance') })));
+  return doorCard({ id: 'rp-entry', title: t('rp.entry.title'), tag: t('rp.entry.tag'), body: t('rp.entry.body', { balance: fmt().money(cash.balance) }), open: t('rp.entry.open'), icon: 'wallet', key: 'C', onopen: () => go('#finance') });
 }

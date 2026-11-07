@@ -1,0 +1,41 @@
+{
+  "fetch": {
+    "userid": "1423851",
+    "static_id": "",
+    "status": "Success"
+  },
+  "params": {
+    "units": "kgs",
+    "request_id": "192761341",
+    "user_id": "1423851"
+  },
+  "general": {
+    "route": "ARSI1W ARSIL B13 RLP G21 EPL DCT BEGAR DCT TRA XAC1A"
+  },
+  "origin": {
+    "icao_code": "LFOK"
+  },
+  "destination": {
+    "icao_code": "RJTT"
+  },
+  "aircraft": {
+    "icaocode": "B788",
+    "base_type": "B788",
+    "name": "QUASAR",
+    "reg": "F-QSAR",
+    "fin": "QSAR",
+    "is_custom": "1"
+  },
+  "fuel": {
+    "plan_ramp": "58149"
+  },
+  "weights": {
+    "payload": "-37650",
+    "pax_count_actual": "-216",
+    "oew": "130000",
+    "est_zfw": "92350",
+    "max_zfw": "145000",
+    "cargo": "0",
+    "pax_count": "0"
+  }
+}

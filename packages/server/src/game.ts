@@ -4,7 +4,7 @@
 import { randomUUID } from 'node:crypto';
 import {
   HUB_PRICE, MAX_COMPANIES_PER_USER, OVERDRAFT_LIMIT, loanOption, loanPayment, PAX_KG, REJECT_REPUTATION_PENALTY, START_MODES, START_REPUTATION, STARTER_AIRCRAFT, STARTING_BALANCE,
-  EXPRESS_AIRCRAFT, aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, flightDutyMin, fuelPriceFactor, interruptionsSchema, jobPayout, minFlightHours, presetSetting, rankFor, realismModifiers, realismView, seasonOf, settle,
+  EXPRESS_AIRCRAFT, EXPRESS_MAX_NM, EXPRESS_MIN_NM, EXPRESS_PAYLOAD_KG, aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, expressPayout, flightDutyMin, fuelPriceFactor, interruptionsSchema, jobPayout, minFlightHours, presetSetting, rankFor, realismModifiers, realismView, seasonOf, settle,
   type AircraftType, type Company, type CompanyProfile, type CustomAircraftInput, type FleetAircraft, type Flight,
   type Financing, type FlightStatus, type Job, type Leaderboard, type LeaderboardRow, type Me, type Ownership, type Personality, type Pilot, type StartMode, type Telemetry, type Transaction,
 } from '@opc/shared';
@@ -295,14 +295,16 @@ export function importJob(db: Db, companyId: number, ofp: Ofp, now: number): Job
   if (!from || !to) throw new HttpError(422, 'unknown_airport', `${!from ? ofp.origin : ofp.destination} is not in the airport database`);
   if (from.icao === to.icao) throw new HttpError(422, 'invalid_plan', 'origin and destination are the same airport');
   const kind = ofp.pax > 0 ? 'pax' : 'cargo';
-  const payloadKg = kind === 'pax' ? ofp.pax * PAX_KG : ofp.payloadKg;
+  // A Quasar plan with no load is an express job: SimBrief cannot hold the Quasar's real load, so it carries the express payload, and pays the express fee within the distances the board offers it.
+  const express = ofp.aircraftIcao === EXPRESS_AIRCRAFT && ofp.pax <= 0 && ofp.payloadKg <= 0;
+  const payloadKg = express ? EXPRESS_PAYLOAD_KG : kind === 'pax' ? ofp.pax * PAX_KG : ofp.payloadKg;
   if (payloadKg <= 0) throw new HttpError(422, 'invalid_plan', 'the flight plan carries no passengers or cargo');
   run(db, 'DELETE FROM custom_jobs WHERE company_id = ? AND created_at <= ?', companyId, now - IMPORT_TTL_MS);
   const n = get<{ n: number }>(db, `SELECT COUNT(*) AS n FROM custom_jobs j WHERE j.company_id = ? AND j.source = 'simbrief' AND NOT EXISTS (SELECT 1 FROM job_claims c WHERE c.job_id = j.id)`, companyId)!.n;
   if (n >= MAX_PENDING_IMPORTS) throw new HttpError(409, 'limit_reached', `at most ${MAX_PENDING_IMPORTS} imported jobs can wait; fly or let some expire`);
   const dist = Math.round(distanceNm(from.lat, from.lon, to.lat, to.lon));
   const pax = kind === 'pax' ? ofp.pax : 0;
-  const payout = jobPayout(kind, dist, payloadKg);
+  const payout = express && dist >= EXPRESS_MIN_NM && dist <= EXPRESS_MAX_NM ? expressPayout(dist) : jobPayout(kind, dist, payloadKg);
   const id = SB_PREFIX + randomUUID();
   run(db, `INSERT INTO custom_jobs (id, company_id, created_at, kind, origin, destination, distance_nm, payload_kg, pax, payout, required_aircraft, planned_fuel_kg, route)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, id, companyId, now, kind, ofp.origin, ofp.destination, dist, payloadKg, pax, payout, ofp.aircraftIcao, ofp.plannedFuelKg, ofp.route);

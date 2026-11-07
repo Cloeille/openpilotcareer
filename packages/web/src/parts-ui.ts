@@ -1,4 +1,5 @@
-import { button, icon, panel } from './components.ts';
+import { icon } from './components.ts';
+import { doorCard } from './facilities-ui.ts';
 import { locale } from './finance-ui.ts';
 import { fmt } from './format.ts';
 import { t } from './i18n.ts';
@@ -21,9 +22,7 @@ export const whenOf = (ms: number): string => t('pt.at', { day: dayOf(ms), time:
 export function warehouseEntry(hub: string, view: Pick<WarehouseView, 'capital' | 'expectedGroundDays' | 'covered' | 'policies'> | null, go: (hash: string) => void): HTMLElement | null {
   if (!view || view.policies.length === 0) return null;
   const fm = fmt();
-  return panel({ title: t('pt.entry.title'), action: hub, id: 'pt-entry' },
-    h('p', { class: 'muted' }, t('pt.entry.body', { capital: fm.money(view.capital), hub, days: fm.num(Math.round(view.expectedGroundDays)), covered: view.covered.count, of: view.covered.of })),
-    h('div', { class: 'row' }, button(t('pt.entry.open'), { variant: 'secondary', icon: 'wrench', key: 'W', onclick: () => go(`#warehouse/${hub}`) })));
+  return doorCard({ id: 'pt-entry', title: t('pt.entry.title'), tag: hub, body: t('pt.entry.body', { capital: fm.money(view.capital), hub, days: fm.num(Math.round(view.expectedGroundDays)), covered: view.covered.count, of: view.covered.of }), open: t('pt.entry.open'), icon: 'wrench', key: 'W', onopen: () => go(`#warehouse/${hub}`) });
 }
 
 /** `382,5 k€`, `65 k€`, `0 €`: the compact money of the policy rows. */
