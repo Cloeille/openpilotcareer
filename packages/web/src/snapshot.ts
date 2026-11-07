@@ -8,7 +8,7 @@ import { remember, type Board } from './board.ts';
 export type SeasonRank = { position: number; of: number } | null;
 export type Snapshot = { me: Me; board: Board; lastFlight: Flight | null; seasonRank: SeasonRank; antiCheat: boolean; at: number };
 
-/** The account as the remembered company: if that company is gone or was never ours (another account on this server), fall back to the default. */
+/** The account as the remembered company: if that company was deleted meanwhile (the choice is remembered per account, so it is never another player's), fall back to the default. */
 async function loadMe(): Promise<Me> {
   let m: Me;
   try {
