@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { DAY_MS, DEFAULT_NOTICE_DAYS, MAX_INTERIM_DAYS, START_NOW_FEE, type LineProblemView } from '@opc/shared';
+import { DAY_MS, DEFAULT_NOTICE_DAYS, MAX_INTERIM_DAYS, OVERDRAFT_LIMIT, START_NOW_FEE, type LineProblemView } from '@opc/shared';
 import { all, get, run } from './db.ts';
 import { insertAircraft } from './fleet-extras.ts';
 import { harness } from './harness.ts';
@@ -177,7 +177,7 @@ test('start now: a hire in notice starts at once for START_NOW_FEE, 409 when sta
   const left = await w.call('POST', `/api/v1/staff/${gone}/start-now`);
   assert.equal(left.status, 409);
   assert.equal(left.body.error, 'already_left');
-  run(w.h.db, 'UPDATE companies SET balance = ? WHERE id = ?', START_NOW_FEE - 1, w.cid);
+  run(w.h.db, 'UPDATE companies SET balance = ? WHERE id = ?', START_NOW_FEE - 1 - OVERDRAFT_LIMIT, w.cid);
   const poor = await w.call('POST', `/api/v1/staff/${pending[2]!.id}/start-now`);
   assert.equal(poor.status, 402);
   assert.equal(poor.body.error, 'insufficient_funds');
@@ -210,9 +210,9 @@ test('hiring with startNow pays the premium and the fee, and the hire is employe
   assert.equal(r.body.startsAt, w.h.clock.t);
   assert.equal(r.body.member.state, 'free');
   assert.equal(before - w.balance(), cands[0]!.premium + START_NOW_FEE);
-  run(w.h.db, 'UPDATE companies SET balance = ? WHERE id = ?', cands[1]!.premium + 10, w.cid);
+  run(w.h.db, 'UPDATE companies SET balance = ? WHERE id = ?', cands[1]!.premium + 10 - OVERDRAFT_LIMIT, w.cid);
   const poor = await w.call('POST', '/api/v1/staff/hire', { candidateId: cands[1]!.id, startNow: true });
   assert.ok(poor.status === 402 || poor.status === 409, poor.text);
   assert.equal(get<{ n: number }>(w.h.db, 'SELECT COUNT(*) AS n FROM staff WHERE candidate_id = ?', cands[1]!.id)!.n, 0, 'rolled back whole');
-  assert.equal(w.balance(), cands[1]!.premium + 10);
+  assert.equal(w.balance(), cands[1]!.premium + 10 - OVERDRAFT_LIMIT);
 });

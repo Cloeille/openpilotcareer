@@ -5,7 +5,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  DAY_MS, DUTY_MAX_MIN, FIRING_MONTHS, FLIGHT_MAX_28D_MIN, LINE_TICK_MS, REST_POLICIES, TRAINING_COURSE, crewNeeded, dayNo,
+  DAY_MS, DUTY_MAX_MIN, FIRING_MONTHS, OVERDRAFT_LIMIT, FLIGHT_MAX_28D_MIN, LINE_TICK_MS, REST_POLICIES, TRAINING_COURSE, crewNeeded, dayNo,
   type CandidatesView, type LeaveView, type StaffDetail, type StaffOverview,
 } from '@opc/shared';
 import { buildApp } from './app.ts';
@@ -236,12 +236,12 @@ test('candidates are the same people all day, differ between days, and hiring pa
 
 test('hiring with an empty purse is refused and charges nothing', async () => {
   const w = await world();
-  run(w.h.db, 'UPDATE companies SET balance = 100 WHERE id = ?', w.cid);
+  run(w.h.db, 'UPDATE companies SET balance = ? WHERE id = ?', 100 - OVERDRAFT_LIMIT, w.cid);
   const c = ((await w.call('GET', '/api/v1/staff/candidates?family=cabin&base=LFPG')).body as CandidatesView).candidates[0]!;
   const r = await w.call('POST', '/api/v1/staff/hire', { candidateId: c.id });
   assert.equal(r.status, 409);
   assert.equal(r.body.error, 'insufficient_funds');
-  assert.equal(w.balance(), 100);
+  assert.equal(w.balance(), 100 - OVERDRAFT_LIMIT);
   assert.equal(get<{ n: number }>(w.h.db, 'SELECT COUNT(*) AS n FROM staff')!.n, 0);
 });
 

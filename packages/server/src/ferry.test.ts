@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blockHours, settle, type FerryBooked, type FerryPreview } from '@opc/shared';
+import { OVERDRAFT_LIMIT, blockHours, settle, type FerryBooked, type FerryPreview } from '@opc/shared';
 import { catalogType } from './catalog.ts';
 import { get, run } from './db.ts';
 import { insertAircraft } from './fleet-extras.ts';
@@ -105,7 +105,7 @@ test('ferry refusals: same airport, unknown airport, bad code, out of range, not
   assert.equal((await w.call('POST', w.ferryUrl(w.plane), { to: 'lfll' })).status, 400, 'a malformed code is a validation error');
   assert.equal((await w.call('GET', w.ferryUrl(w.plane))).status, 400);
 
-  run(w.h.db, 'UPDATE companies SET balance = 10 WHERE id = ?', w.cid);
+  run(w.h.db, 'UPDATE companies SET balance = ? WHERE id = ?', 10 - OVERDRAFT_LIMIT, w.cid);
   await refuse(w.plane, 'LFLL', 402, 'insufficient_funds');
   run(w.h.db, 'UPDATE companies SET balance = 1000000 WHERE id = ?', w.cid);
 

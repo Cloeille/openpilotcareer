@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CLUB, MONTHLY_RENTAL, PARKING_FEE_BY_SIZE, PARKING_SPOTS_PER_HUB, loanPayment, type LeaseOffer } from '@opc/shared';
+import { CLUB, MONTHLY_RENTAL, OVERDRAFT_LIMIT, PARKING_FEE_BY_SIZE, PARKING_SPOTS_PER_HUB, loanPayment, type LeaseOffer } from '@opc/shared';
 import { get, run, tx } from './db.ts';
 import { planMonth, runBilling } from './finance.ts';
 import { dayOf, leaseOffer } from './leasing.ts';
@@ -58,9 +58,10 @@ test('cash purchase pays price + convoy fee; short funds: 409 insufficient_funds
   assert.equal(ok.body.fleet.at(-1).ownership, 'owned');
   const l = await ledger(h, token);
   assert.deepEqual([ofKind(l, 'purchase_aircraft')[0]!.amount, ofKind(l, 'ferry')[0]!.amount], [-204_600, -600]);
+  setBalance(h, m0.company.id, 10_000 - OVERDRAFT_LIMIT); // 10 000 spendable
   const short = await h.call('POST', `${V1}/me/fleet`, { token, body: { icao: 'DHC6', hub: 'LFPG' } });
   assert.equal(short.status, 409);
-  assert.deepEqual({ error: short.body.error, needed: short.body.needed, options: short.body.options, missing: short.body.missing }, { error: 'insufficient_funds', needed: 280_850, options: ['loan', 'lease'], missing: 280_850 - ok.body.company.balance });
+  assert.deepEqual({ error: short.body.error, needed: short.body.needed, options: short.body.options, missing: short.body.missing }, { error: 'insufficient_funds', needed: 280_850, options: ['loan', 'lease'], missing: 280_850 - 10_000 });
   assert.equal((await me(h, token)).fleet.length, m0.fleet.length + 1, 'a refused purchase changes nothing');
 });
 
@@ -83,7 +84,7 @@ test('financed purchase: down payment + convoy now, annuity contract, debt off t
   assert.equal(ofKind(l, 'loan_installment')[0]!.amount, -3_370);
   assert.equal(ofKind(l, 'loan_installment')[0]!.at, Date.UTC(2026, 11, 1));
   const poor = await h.register('poorloan');
-  setBalance(h, poor.me.company.id, 1_000);
+  setBalance(h, poor.me.company.id, 1_000 - OVERDRAFT_LIMIT);
   const no = await h.call('POST', `${V1}/me/fleet`, { token: poor.token, body });
   assert.deepEqual({ s: no.status, e: no.body.error, needed: no.body.needed, options: no.body.options }, { s: 409, e: 'insufficient_funds', needed: 56_850, options: undefined });
   assert.equal((await h.call('POST', `${V1}/me/fleet`, { token, body: { ...body, financing: { downPct: 10, months: 84 } } })).status, 400, 'down payment 20-50 %');
@@ -127,7 +128,7 @@ test('signing a lease debits first rent + deposit + convoy fee; short funds: 409
   const after = await me(h, token);
   assert.equal(after.company.netWorth, m0.company.netWorth + (3_000_000 - 400_000) - 38_000 - 850, 'leased aircraft are not assets; the deposit is');
   const poor = await h.register('poorlessee');
-  setBalance(h, poor.me.company.id, 100_000);
+  setBalance(h, poor.me.company.id, 100_000 - OVERDRAFT_LIMIT);
   const no = await h.call('POST', `${V1}/me/leases`, { token: poor.token, body: leaseBody(o, 24) });
   assert.deepEqual({ s: no.status, e: no.body.error, needed: no.body.needed }, { s: 409, e: 'insufficient_funds', needed: 114_850 });
   assert.equal((await h.call('POST', `${V1}/me/leases`, { token, body: leaseBody(o, 18) })).body.error, 'invalid_term');

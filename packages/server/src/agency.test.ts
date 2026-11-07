@@ -4,7 +4,7 @@ import { mkdtempSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { AGENCY_NOTICE_DAYS, AGENCY_SEARCH_DAYS, DAY_MS, START_NOW_FEE, type AgencyView, type LineProblemView, type MissionView, type SignResult } from '@opc/shared';
+import { AGENCY_NOTICE_DAYS, AGENCY_SEARCH_DAYS, DAY_MS, OVERDRAFT_LIMIT, START_NOW_FEE, type AgencyView, type LineProblemView, type MissionView, type SignResult } from '@opc/shared';
 import { all, get, MIGRATIONS, openDb, run } from './db.ts';
 import { insertAircraft } from './fleet-extras.ts';
 import { harness } from './harness.ts';
@@ -162,10 +162,11 @@ test('refusals: a payment the balance cannot cover rolls the whole signature bac
   const sign = (ids: string[]) => w.call('POST', `/agency/missions/${m.id}/sign`, { candidateIds: ids });
   const untouched = () => assert.deepEqual([w.staff().length, w.tx('agency_fee').length, get<{ status: string }>(w.h.db, 'SELECT status FROM recruit_missions WHERE id = ?', m.id)!.status], [0, 0, 'searching']);
 
-  run(w.h.db, 'UPDATE companies SET balance = ? WHERE id = ?', list[0]!.premium + 1, w.cid); // the first is payable, the second is not
+  const poorBalance = list[0]!.premium + 1 - OVERDRAFT_LIMIT; // spendable (balance + overdraft): the first is payable, the second is not
+  run(w.h.db, 'UPDATE companies SET balance = ? WHERE id = ?', poorBalance, w.cid);
   const poor = await sign([list[0]!.id, list[1]!.id]);
   assert.deepEqual([poor.status, poor.body.error], [409, 'insufficient_funds']);
-  assert.equal(w.balance(), list[0]!.premium + 1, 'not a cent left the account');
+  assert.equal(w.balance(), poorBalance, 'not a cent left the account');
   untouched();
 
   run(w.h.db, 'UPDATE companies SET balance = 5000000 WHERE id = ?', w.cid);

@@ -70,7 +70,7 @@ test('walkBalance finds the lowest day of each month, the overdraft days and the
 
 test('SCHEMA_V13 adds the ledger links and backfills what the old rows say: flights give their aircraft, line memos their line and leg count, charges their registration', () => {
   const v13 = MIGRATIONS.findIndex((m) => m.includes('counterparty_id'));
-  assert.ok(v13 > 0 && v13 === MIGRATIONS.length - 1, 'the migration is the last one (position = deployed version)');
+  assert.ok(v13 > 0, 'found by content, not by position (later lots append after it)');
   const file = join(mkdtempSync(join(tmpdir(), 'opc-v13-')), 'v12.sqlite');
   const raw = new DatabaseSync(file);
   for (let i = 0; i < v13; i++) raw.exec(MIGRATIONS[i]!);

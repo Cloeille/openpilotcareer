@@ -5,7 +5,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  DAY_MS, DELIVERY_DAYS, FAILURE_WEAR_PCT, FERRY_DAYS, FIX_HOURS_WITH_PART, HANGAR_FIX_HOURS, OVERHAUL_WEAR_PCT, PARTS, PARTS_OF_COMPONENT, PARTS_RESALE_FACTOR, REFURB_DAYS, RENEWED_WEAR_PCT, TRANSPORT_COST,
+  DAY_MS, DELIVERY_DAYS, FAILURE_WEAR_PCT, OVERDRAFT_LIMIT, FERRY_DAYS, FIX_HOURS_WITH_PART, HANGAR_FIX_HOURS, OVERHAUL_WEAR_PCT, PARTS, PARTS_OF_COMPONENT, PARTS_RESALE_FACTOR, REFURB_DAYS, RENEWED_WEAR_PCT, TRANSPORT_COST,
   componentRate, groundDaysPerYear, incidentRisk, kitCapital, kitCovers, partById, presetSetting, refurbCost, reliabilityRiskFactor, seedWear, settle,
   type OrderResult, type PolicyResult, type RefurbishResult, type WarehouseView, type WearView,
 } from '@opc/shared';
@@ -343,14 +343,14 @@ test('lowering a policy sells back what only the old one asked for, at 80 %; wha
 });
 
 test('a policy is refused for a type with no aircraft at the hub, for a hub that is not hers, and when the balance cannot carry the kit; nothing is half-booked', async () => {
-  const w = await world({ money: 100_000 });
+  const w = await world({ money: 100_000 - OVERDRAFT_LIMIT }); // 100 000 spendable
   assert.equal((await w.call('PUT', '/warehouse/LFPG/policy', { icao: 'A20N', policy: 'full' })).body.error, 'no_aircraft');
   assert.equal((await w.call('PUT', '/warehouse/EGLL/policy', { icao: 'AT76', policy: 'full' })).body.error, 'not_a_hub');
   const r = await w.call('PUT', '/warehouse/LFPG/policy', { icao: 'AT76', policy: 'full' });
   assert.equal(r.status, 409, r.text);
   assert.equal(r.body.error, 'insufficient_funds');
   assert.equal(r.body.missing, 382_500 - 100_000);
-  assert.equal(w.balance(), 100_000);
+  assert.equal(w.balance(), 100_000 - OVERDRAFT_LIMIT);
   assert.deepEqual(all(w.h.db, 'SELECT * FROM parts_policy'), [], 'the refused policy is not stored');
   assert.deepEqual(all(w.h.db, 'SELECT * FROM parts_orders'), []);
   assert.equal((await w.call('PUT', '/warehouse/LFPG/policy', { icao: 'AT76', policy: 'rich' })).status, 400);
@@ -382,10 +382,10 @@ test('ordering a part: the price and the freight leave now, it arrives in 2 to 5
   assert.equal((await w.call('POST', '/warehouse/LFPG/order', { partId: 'regional.nope', qty: 1 })).body.error, 'unknown_part');
   assert.equal((await w.call('POST', '/warehouse/LFPG/order', { partId: part.id, qty: 0 })).status, 400);
   assert.equal((await w.call('POST', '/warehouse/EGLL/order', { partId: part.id, qty: 1 })).body.error, 'not_a_hub');
-  run(w.h.db, 'UPDATE companies SET balance = 100 WHERE id = ?', w.cid);
+  run(w.h.db, 'UPDATE companies SET balance = ? WHERE id = ?', 100 - OVERDRAFT_LIMIT, w.cid);
   const poor = await w.call('POST', '/warehouse/LFPG/order', { partId: part.id, qty: 1 });
   assert.deepEqual([poor.status, poor.body.error], [409, 'insufficient_funds']);
-  assert.equal(w.balance(), 100);
+  assert.equal(w.balance(), 100 - OVERDRAFT_LIMIT);
 });
 
 test('the AOG case of the warehouse: the aircraft on the ground, its part and delivery date, what the days cost, when the part would have had it flying, and what the critical kit would have tied up', async () => {
@@ -523,10 +523,10 @@ test('refurbishing is refused for another company\'s aircraft, an unknown compon
   run(w.h.db, "INSERT INTO flights (company_id, aircraft_id, aircraft_icao, job_id, source, kind, origin, destination, distance_nm, payload_kg, pax, payout, status, accepted_at) VALUES (?, ?, 'AT76', 'JX', 'board', 'pax', 'LFPG', 'LFLL', 200, 100, 2, 1000, 'active', ?)", w.cid, w.atr, T0);
   assert.equal((await w.call('POST', `/me/fleet/${w.atr}/refurbish`, body)).body.error, 'aircraft_busy');
   run(w.h.db, "DELETE FROM flights WHERE job_id = 'JX'");
-  run(w.h.db, 'UPDATE companies SET balance = 1000 WHERE id = ?', w.cid);
+  run(w.h.db, 'UPDATE companies SET balance = ? WHERE id = ?', 1000 - OVERDRAFT_LIMIT, w.cid);
   const poor = await w.call('POST', `/me/fleet/${w.atr}/refurbish`, body);
   assert.deepEqual([poor.status, poor.body.error], [409, 'insufficient_funds']);
-  assert.equal(w.balance(), 1000);
+  assert.equal(w.balance(), 1000 - OVERDRAFT_LIMIT);
   assert.equal(get<{ n: number }>(w.h.db, "SELECT COUNT(*) AS n FROM transactions WHERE kind = 'refurbish' AND company_id = ?", w.cid)!.n, 0);
   assert.equal(w.aircraft().status, 'available');
 });

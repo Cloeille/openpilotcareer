@@ -5,7 +5,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  DAY_MS, HANGAR_MAINTENANCE_DISCOUNT, MAINTENANCE_HOURS, MAX_LINES_PER_COMPANY, MAX_LINES_WITH_OPS, PARKING_SPOTS_PER_HUB, leaseExitFee, maintenanceSale, settle,
+  DAY_MS, HANGAR_MAINTENANCE_DISCOUNT, MAINTENANCE_HOURS, MAX_LINES_PER_COMPANY, MAX_LINES_WITH_OPS, OVERDRAFT_LIMIT, PARKING_SPOTS_PER_HUB, leaseExitFee, maintenanceSale, settle,
   type FacilityDetail, type FacilitySignResult, type FacilityTerminateResult, type FacilityUpgradeResult, type HubPlan, type HubsOverview,
 } from '@opc/shared';
 import { catalogType } from './catalog.ts';
@@ -129,11 +129,11 @@ test('leasing at level 2 books the deposit and the works at once, previewed by t
 });
 
 test('refusals leave nothing booked: occupied, not for sale, not a hub, not enough money, a level the building cannot start at', async () => {
-  const w = await world({ money: 30_000 });
+  const w = await world({ money: 30_000 - OVERDRAFT_LIMIT }); // 30 000 spendable once the overdraft is counted
   const mx = await w.id('MX1');
   const poor = await w.call('POST', `/facilities/${mx}/lease`, {});
   assert.deepEqual({ s: poor.status, e: poor.body.error, missing: poor.body.missing }, { s: 409, e: 'insufficient_funds', missing: 7_000 });
-  assert.equal(w.balance(), 30_000);
+  assert.equal(w.balance(), 30_000 - OVERDRAFT_LIMIT);
   assert.deepEqual(all(w.h.db, 'SELECT * FROM facility_contracts'), []);
   assert.equal((await w.ledger()).filter((t) => t.kind.startsWith('facility')).length, 0);
 
@@ -376,16 +376,16 @@ test('ending a lease pays the notice or the rest of the term, returns the deposi
   const view = ((await w.call('GET', `/facilities/${mx}`)).body as FacilityDetail);
   assert.deepEqual({ owner: view.facility.owner, contract: view.facility.contract, level: view.facility.level }, { owner: 'available', contract: null, level: 1 });
   assert.equal((await w.call('POST', `/facilities/${mx}/terminate`)).body.error, 'not_held');
-  run(w.h.db, 'UPDATE companies SET balance = 1000 WHERE id = ?', w.cid);
+  run(w.h.db, 'UPDATE companies SET balance = ? WHERE id = ?', 1000 - OVERDRAFT_LIMIT, w.cid);
   await w.call('POST', `/facilities/${await w.id('MX2')}/lease`, {}).then((r) => assert.equal(r.body.error, 'insufficient_funds'));
 });
 
-test('exit fee of a lease that has run its course is the notice alone; ending it cannot overdraw the account', async () => {
+test('exit fee of a lease that has run its course is the notice alone; ending it cannot take the account below the overdraft limit', async () => {
   const w = await world();
   const mx = await w.id('MX1');
   await w.lease('MX1');
   run(w.h.db, 'UPDATE facility_contracts SET months_paid = 36 WHERE facility_id = ?', mx);
-  run(w.h.db, 'UPDATE companies SET balance = ? WHERE id = ?', 3 * MX - 37_000 - 1, w.cid);
+  run(w.h.db, 'UPDATE companies SET balance = ? WHERE id = ?', 3 * MX - 37_000 - 1 - OVERDRAFT_LIMIT, w.cid);
   assert.equal((await w.call('POST', `/facilities/${mx}/terminate`)).body.error, 'insufficient_funds', 'the net of the notice and the deposit is what must be covered');
   run(w.h.db, 'UPDATE companies SET balance = ? WHERE id = ?', 3 * MX, w.cid);
   const out = (await w.call('POST', `/facilities/${mx}/terminate`)).body as FacilityTerminateResult;
