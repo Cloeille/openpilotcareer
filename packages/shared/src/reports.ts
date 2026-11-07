@@ -48,6 +48,10 @@ export const PROFIT_KINDS = {
   fixed: ['lease_rent', 'insurance', 'parking'],
 } as const;
 
+/** The four report screens, in the order the digits 1 to 4 jump between them. */
+export const FINANCE_SCREENS = ['cash', 'lines', 'ledger', 'forecast'] as const;
+export type FinanceScreen = (typeof FINANCE_SCREENS)[number];
+
 // ---------------------------------------------------------------- cash flow
 
 export type CategoryTotal = { category: Category; in: number; out: number };
