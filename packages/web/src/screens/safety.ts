@@ -70,7 +70,9 @@ export async function safety(ctx: Ctx): Promise<Screen> {
   const detailBtn = h('button', { type: 'button', class: 'link-btn sf-detail-btn', 'aria-expanded': String(explain), 'aria-controls': 'sf-caption',
     onclick: () => { explain = !explain; caption.textContent = explain ? t('sf.risk.detailBody') : t('sf.risk.caption'); detailBtn.setAttribute('aria-expanded', String(explain)); } }, t('sf.risk.detail'));
   const riskPanel = panel({ title: t('sf.risk.title'), action: detailBtn, id: 'sf-risk', class: 'sf-main' },
-    h('div', { class: 'sf-intro' }, caption, h('span', { class: 'ln-legend-item' }, h('i', { class: 'sf-swatch', 'aria-hidden': 'true' }), t('sf.risk.curve'))),
+    h('div', { class: 'sf-intro' }, caption, h('div', { class: 'sf-legend' },
+      h('span', { class: 'ln-legend-item' }, h('i', { class: 'sf-swatch', 'aria-hidden': 'true' }), t('sf.risk.curve')),
+      view.today.some((f) => f.dutyHours !== undefined) ? h('span', { class: 'ln-legend-item' }, h('i', { class: 'sf-swatch dot', 'aria-hidden': 'true' }), t('sf.risk.flights')) : null)),
     chartBox(view, chart, top),
     leverList(view, go));
 
@@ -116,9 +118,12 @@ function chartBox(view: SafetyView, c: ChartModel, top: SafetyView['today'][numb
     svg('line', { class: 'sf-limit', x1: c.limitX, x2: c.limitX, y1: CHART.top, y2: CHART.bottom }),
     svg('text', { class: 'sf-limit-label', x: c.limitX - 8, y: CHART.top + 14, 'text-anchor': 'end' }, t('sf.risk.limit', { h: 13 })),
     svg('path', { class: 'sf-curve', d: pathOf(c.curve) }),
-    ...c.flights.map((f) => f === dot
-      ? svg('g', { class: 'sf-dot top' }, svg('circle', { class: 'halo', cx: f.x, cy: f.y, r: 12 }), svg('circle', { cx: f.x, cy: f.y, r: 5 }))
-      : svg('circle', { class: 'sf-dot', cx: f.x, cy: f.y, r: 3.5 })),
+    ...c.flights.map((f) => {
+      const name = svg('title', {}, `${f.flight.flightNo} · ${f.flight.crew} · ${pct1(f.flight.risk)} · ${factorText(f.flight.factor)}`);
+      return f === dot
+        ? svg('g', { class: 'sf-dot top' }, name, svg('circle', { class: 'halo', cx: f.x, cy: f.y, r: 12 }), svg('circle', { cx: f.x, cy: f.y, r: 5 }))
+        : svg('circle', { class: 'sf-dot', cx: f.x, cy: f.y, r: 3.5 }, name);
+    }),
     ...c.xTicks.map((x) => svg('text', { class: 'sf-tick', x: x.x, y: CHART.bottom + 22, 'text-anchor': 'middle' }, t('sf.axis.h', { n: x.hours }))));
   return h('div', { class: 'sf-chart' }, g, top ? flightLabel(top, dot ? { x: dot.x, y: dot.y } : null) : null);
 }
@@ -127,7 +132,8 @@ function chartBox(view: SafetyView, c: ChartModel, top: SafetyView['today'][numb
 function flightLabel(f: SafetyView['today'][number], at: { x: number; y: number } | null): HTMLElement {
   const fm = fmt();
   const duty = f.dutyHours === undefined ? null : fm.duration(f.dutyHours);
-  const place = at ? `right:${((CHART.width - at.x + 18) / CHART.width * 100).toFixed(2)}%;top:${((at.y + 12) / CHART.height * 100).toFixed(2)}%` : 'left:5%;top:2%';
+  // Above and left of the dot: the curve rises to the right, so that side of the plot is empty.
+  const place = at ? `right:${((CHART.width - at.x + 22) / CHART.width * 100).toFixed(2)}%;top:${(Math.max(0, at.y - 30) / CHART.height * 100).toFixed(2)}%` : 'left:5%;top:2%';
   return h('div', { class: `sf-flabel${at ? '' : ' corner'}`, style: place },
     h('span', { class: 'sf-flabel-title' }, t('sf.risk.fTitle', { flight: f.flightNo, crew: f.crew })),
     h('span', { class: 'sf-flabel-detail' }, duty ? t('sf.risk.fDetail', { duty, risk: pct1(f.risk), factor: factorText(f.factor) }) : t('sf.risk.fDetailNoDuty', { risk: pct1(f.risk), factor: factorText(f.factor) })));
@@ -139,24 +145,25 @@ function leverList(view: SafetyView, go: (hash: string) => void): HTMLElement {
   const levers = view.levers;
   const total = leversTotal(levers, view.index);
   const rows: HTMLElement[] = [];
+  /** The selected lever's button is the screen's primary action (what Enter presses), drawn as in the mockup: filled, no icon, with the key. The others are secondary. */
+  const paint = (btn: HTMLButtonElement, l: Lever, primary: boolean): void => {
+    btn.className = `btn ${primary ? 'primary' : 'secondary'}`;
+    if (primary) btn.setAttribute('data-primary', ''); else btn.removeAttribute('data-primary');
+    btn.replaceChildren(...(primary ? [] : [icon(LEVER_BTN_ICON[l.action], 16)]), h('span', null, t(`sf.act.${l.action}` as const)), ...(primary ? [h('span', { class: 'btn-key' }, t('key.enter'))] : []));
+  };
   const select = (i: number): void => {
     picked = i;
-    rows.forEach((r, k) => {
-      r.classList.toggle('sel', k === i);
-      const b = r.querySelector('button')!;
-      if (k === i) b.setAttribute('data-primary', ''); else b.removeAttribute('data-primary');
-    });
+    rows.forEach((r, k) => { r.classList.toggle('sel', k === i); if (k === i) r.setAttribute('aria-current', 'true'); else r.removeAttribute('aria-current'); paint(r.querySelector('button')!, levers[k]!, k === i); });
   };
   levers.forEach((l, i) => {
-    const act = (): void => go(leverHash(l));
-    const label = t(`sf.act.${l.action}` as const);
-    rows.push(h('li', { class: `sf-lever${i === picked ? ' sel' : ''}`, 'data-row': '', tabindex: -1, 'aria-label': `${l.label}, ${tp('sf.lev.pts', Math.round(l.points))}`, onfocus: () => select(i), onclick: act },
+    const btn = h('button', { type: 'button', onfocus: () => select(i) });
+    rows.push(h('li', { class: 'sf-lever', 'data-row': '', tabindex: -1, 'aria-label': `${l.label}, ${tp('sf.lev.pts', Math.round(l.points))}`, onfocus: () => select(i), onclick: () => go(leverHash(l)) },
       icon(LEVER_ICON[l.action], 18),
       h('div', { class: 'sf-lever-text' }, h('span', { class: 'sf-lever-title' }, l.label), h('span', { class: 'sf-lever-detail' }, l.detail)),
       h('span', { class: 'sf-lever-pts' }, tp('sf.lev.pts', Math.round(l.points))),
-      h('div', { class: 'sf-lever-act' },
-        h('button', { type: 'button', class: 'btn secondary', 'data-primary': i === picked ? '' : null, onfocus: () => select(i) }, icon(LEVER_BTN_ICON[l.action], 16), h('span', null, label), h('span', { class: 'btn-key' }, t('key.enter'))))));
+      h('div', { class: 'sf-lever-act' }, btn)));
   });
+  if (levers.length > 0) select(picked);
   return h('section', { class: 'sf-levers', 'aria-labelledby': 'sf-lev-title' },
     h('div', { class: 'sf-lev-head' }, h('h3', { class: 'sf-lev-title', id: 'sf-lev-title' }, t('sf.lev.title')),
       levers.length > 0 ? h('span', { class: 'sf-lev-summary' }, tp('sf.lev.summary', levers.length, { points: fmt().num(total) })) : null),

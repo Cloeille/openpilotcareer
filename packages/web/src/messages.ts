@@ -2144,6 +2144,7 @@ const table = {
   'sf.risk.caption': ['Share of flights that end in an incident, by crew duty time', 'Part des vols qui finissent en incident, selon le temps de service de l’équipage'],
   'sf.risk.curve': ['Risk by duty time', 'Risque selon le temps de service'],
   'sf.risk.limit': ['Duty limit · {h} h', 'Limite de service · {h} h'],
+  'sf.risk.flights': ['Tonight’s flights', 'Vols de ce soir'],
   'sf.risk.none': ['The server has not sent a risk curve yet.', 'Le serveur n’a pas encore envoyé de courbe de risque.'],
   'sf.risk.alt': ['Incident risk per flight rises from {from} at 0 h of duty to {to} at {h} h.', 'Le risque d’incident par vol passe de {from} à 0 h de service à {to} à {h} h.'],
   'sf.risk.fTitle': ['{flight} tonight · {crew}', '{flight} ce soir · {crew}'],

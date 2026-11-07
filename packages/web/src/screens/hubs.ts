@@ -28,11 +28,12 @@ export async function hubs(ctx: Ctx): Promise<Screen> {
   } }, field.root, after, h('div', { class: 'row' }, submit));
   const people = staffEntry(await fetchStaff().catch(() => null), ctx.go);
   const safe = safetyEntry(await fetchSafety().catch(() => null), ctx.go);
-  const view = h('div', { class: 'briefing-column' },
+  const column = h('div', { class: 'briefing-column' },
     titleBlock(t('hub.status', { company: me.company.name }), t('hub.title')),
     panel({ title: t('hub.list'), action: t('hub.listSub') }, h('ul', { class: 'plain hub-rows' }, infos.map(({ code, info }, i) =>
       h('li', { class: 'hub-row' }, h('span', { class: 'mono strong' }, code), h('span', { class: 'col tight' }, h('span', null, info?.name ?? code), h('span', { class: 'dim small' }, info ? `${cityOf(info)} · ${t(`hub.size.${info.size}`)}` : '')), i === 0 ? h('span', { class: 'dim small' }, t('hub.main')) : null)))),
-    panel({ title: t('hub.open'), action: t('hub.openSub', { price: fm.money(HUB_PRICE) }) }, form),
-    people, safe);
+    panel({ title: t('hub.open'), action: t('hub.openSub', { price: fm.money(HUB_PRICE) }) }, form));
+  // Staff and Safety (C8) sit in their own column: stacked under the hubs they pushed the buttons out of the screen.
+  const view = people || safe ? h('div', { class: 'hubs-screen' }, column, h('div', { class: 'co-entries' }, people, safe)) : column;
   return { title: t('hub.title'), scene: 'hubs', tab: 'hubs', view, back: '#dashboard', hints: [{ key: t('key.esc'), label: t('hint.dashboard') }, { key: t('key.enter'), label: t('hint.create') }, ...(people ? [{ key: 'S', label: t('st.hint.openStaff') }] : []), ...(safe ? [{ key: 'F', label: t('sf.hint.open') }] : [])], keys: { ...(people ? { s: () => ctx.go('#staff') } : {}), ...(safe ? { f: () => ctx.go('#safety') } : {}) } };
 }

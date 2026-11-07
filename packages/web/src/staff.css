@@ -17,6 +17,9 @@
 .st-mid { font: 500 20px/1.2 var(--display); }
 .st-mid.warn { color: var(--warning); }
 .st-empty { padding: 24px 0; }
+.st-empty-state { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 28px 12px; max-width: 520px; }
+.st-empty-state .icon { color: var(--text-secondary); }
+.st-empty-title { font: 600 20px var(--display); }
 .st-kpis { display: flex; gap: 36px; }
 .st-chip { height: 30px; padding: 0 12px; background: transparent; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; }
 .st-chip[aria-pressed='true'] { background: var(--surface-selected); border-color: var(--border-strong); color: var(--text-primary); }

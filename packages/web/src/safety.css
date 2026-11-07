@@ -30,7 +30,9 @@
 .panel.sf-main .panel-body { gap: 14px; padding-top: 16px; overflow: auto; }
 .sf-intro { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .sf-caption { margin: 0; font-size: 13px; color: var(--text-secondary); max-width: 62ch; }
+.sf-legend { display: flex; align-items: center; gap: 20px; flex: none; }
 .sf-swatch { display: inline-block; width: 18px; height: 2px; background: var(--text-primary); flex: none; }
+.sf-swatch.dot { width: 9px; height: 9px; border-radius: 50%; background: transparent; border: 2px solid var(--text-primary); }
 .sf-detail-btn { font-size: 13px; color: var(--text-secondary); }
 
 /* ---- the risk chart */
@@ -43,7 +45,7 @@
 .sf-limit { stroke: var(--warning); stroke-width: 1; }
 .sf-limit-label { fill: var(--warning); font: 500 12px var(--font-ui); }
 .sf-curve { fill: none; stroke: var(--text-primary); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
-.sf-dot { fill: var(--bg, #0B0F15); stroke: var(--text-primary); stroke-width: 2; }
+.sf-dot { fill: #0B0F15; stroke: var(--text-primary); stroke-width: 2; }
 .sf-dot.top circle { fill: var(--warning); stroke: none; }
 .sf-dot.top .halo { fill: #E9A04633; }
 .sf-flabel { position: absolute; display: flex; flex-direction: column; gap: 2px; text-align: right; max-width: 46%; pointer-events: none; }
@@ -66,9 +68,7 @@
 .sf-lever-title { font-size: 14px; font-weight: 500; }
 .sf-lever-detail { font-size: 13px; color: var(--text-secondary); }
 .sf-lever-pts { width: 90px; text-align: right; font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; flex: none; }
-.sf-lever-act { width: 250px; display: flex; justify-content: flex-end; flex: none; }
-.sf-lever:not(.sel) .btn-key { display: none; }
-.sf-lever.sel .btn.secondary { border-color: var(--text-primary); }
+.sf-lever-act { width: 280px; display: flex; justify-content: flex-end; flex: none; }
 
 /* ---- incidents */
 .panel.sf-side .panel-body, .panel.sf-journal .panel-body { padding-top: 2px; overflow: auto; }
@@ -99,3 +99,8 @@
   .sf-lever { transition: background-color .12s ease, border-color .12s ease; }
   .sf-bar span { transition: width .35s ease; }
 }
+
+/* ---- the Compagnie tab (C8): Staff and Safety open from cards in a column beside the hubs. */
+.hubs-screen { display: flex; gap: 24px; width: 100%; min-height: 0; }
+.co-entries { width: 420px; flex: none; display: flex; flex-direction: column; gap: 20px; align-self: flex-start; }
+.co-entries > .panel { flex: none; }
