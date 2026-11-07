@@ -1,5 +1,5 @@
-import type { StaffFamily } from '@opc/shared';
-import type { Building, FacilityDetail, FacilityKind, FacilityLevelInfo, FacilityOwner, FacilityPurchase, FacilityView, Hold, Preview } from './api-facilities.ts';
+import type { Building, FacilityContractKind, FacilityDetail, FacilityKind, FacilityLevelInfo, FacilityOwner, FacilityPurchase, FacilityView, StaffFamily } from '@opc/shared';
+import type { Preview } from './api-facilities.ts';
 import type { IconName } from './icons.ts';
 import type { Key } from './messages.ts';
 
@@ -26,7 +26,7 @@ export function holdingOf(f: Pick<FacilityView, 'owner' | 'contract'>): Holding 
   }
 }
 /** The same for a building of the plan (`Building` has no contract; its `monthly` is what she pays, and an owned building is told by the facility screen). */
-export const holdingOfOwner = (owner: FacilityOwner, hold: Hold | null): Holding => holdingOf({ owner, contract: hold ? { kind: hold } as FacilityView['contract'] : null });
+export const holdingOfOwner = (owner: FacilityOwner, hold: FacilityContractKind | null): Holding => holdingOf({ owner, contract: hold ? { kind: hold } as FacilityView['contract'] : null });
 
 export type Tone = 'mine' | 'accent' | 'dim';
 export const HOLDING_TONE: Record<Holding, Tone> = { leased: 'mine', owned: 'mine', available: 'accent', ai: 'dim', airport: 'dim' };

@@ -1,5 +1,6 @@
 import { act } from '../actions.ts';
-import { buyFacility, fetchFacility, fetchHubPlan, leaseFacility, type Building, type FacilityDetail, type Hold } from '../api-facilities.ts';
+import type { Building, FacilityContractKind, FacilityDetail } from '@opc/shared';
+import { buyFacility, fetchFacility, fetchHubPlan, leaseFacility } from '../api-facilities.ts';
 import { airportInfo } from '../airports.ts';
 import { buildAirportChart, drawAirportChart, LAYOUTS, type ChartBuilding, type ChartScene } from '../airport-chart.ts';
 import { button, dataTable, icon, signLocation, titleBlock } from '../components.ts';
@@ -11,7 +12,7 @@ import type { Ctx, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
 
 /** What the plan remembers across its own redraws (a purchase, a language change); a different airport starts again. */
-const memo: { icao: string | null; slot: string | null; filter: string; view: 'plan' | 'list'; mode: Hold } = { icao: null, slot: null, filter: 'all', view: 'plan', mode: 'lease' };
+const memo: { icao: string | null; slot: string | null; filter: string; view: 'plan' | 'list'; mode: FacilityContractKind } = { icao: null, slot: null, filter: 'all', view: 'plan', mode: 'lease' };
 
 const CHART = { w: 1100, h: 560 };
 
@@ -70,7 +71,7 @@ export async function hubPlan(ctx: Ctx): Promise<Screen> {
         })))));
   };
 
-  const sign = async (b: Building, d: FacilityDetail, hold: Hold): Promise<void> => {
+  const sign = async (b: Building, d: FacilityDetail, hold: FacilityContractKind): Promise<void> => {
     const o = d.offer!;
     const balance = d.due?.balanceAfter ?? ctx.snap.me.company.balance;
     const ask = hold === 'lease'
@@ -93,7 +94,7 @@ export async function hubPlan(ctx: Ctx): Promise<Screen> {
     const status = b.owner === 'player' ? (d ? statusText(owned ? 'owned' : 'leased') : t('fc.sel.yours')) : statusText(b.owner === 'available' ? 'available' : b.owner === 'ai' ? 'ai' : 'airport', b.ownerName);
     const offer = b.owner === 'available' ? d?.offer ?? null : null;
     const fact = (label: string, value: string): HTMLElement => h('div', { class: 'line' }, h('span', { class: 'line-label' }, label), h('span', { class: 'line-value strong' }, value));
-    const optionCard = (hold: Hold): HTMLElement => {
+    const optionCard = (hold: FacilityContractKind): HTMLElement => {
       const lease = hold === 'lease';
       const price = lease ? (offer?.lease.monthly ?? b.rent) : offer?.purchase.price ?? null;
       const sub = lease ? (offer ? t('fc.opt.leaseSub', { deposit: fm.money(offer.lease.deposit), months: offer.lease.months }) : '') : t('fc.opt.buySub');

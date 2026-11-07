@@ -1,8 +1,7 @@
-import type { FacilityKind, FacilityOwner } from './api-facilities.ts';
+import type { FacilityKind, FacilityOwner, FacilityView } from '@opc/shared';
 import { icon } from './components.ts';
 import { t } from './i18n.ts';
 import { HOLDING_KEY, holdingOf, type Holding } from './facilities-view.ts';
-import type { FacilityView } from './api-facilities.ts';
 import { h } from './ui.ts';
 
 /** DOM pieces shared by the FACILITIES screens. The logic they show lives in facilities-view.ts. */

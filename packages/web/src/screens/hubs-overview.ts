@@ -1,8 +1,8 @@
-import { HUB_PRICE } from '@opc/shared';
+import { HUB_PRICE, type FacilityView, type HubOverview, type HubsOverview } from '@opc/shared';
 import { act } from '../actions.ts';
 import { api } from '../api.ts';
 import { airportField } from '../airport-field.ts';
-import { fetchHubsOverview, type FacilityView, type HubOverview, type HubsOverview } from '../api-facilities.ts';
+import { fetchHubsOverview } from '../api-facilities.ts';
 import { fetchSafety } from '../api-safety.ts';
 import { fetchStaff } from '../api-staff.ts';
 import { airportInfo, cityOf } from '../airports.ts';

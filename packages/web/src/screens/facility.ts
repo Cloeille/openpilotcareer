@@ -1,5 +1,6 @@
 import { act } from '../actions.ts';
-import { buyFacility, fetchFacility, leaseFacility, terminateFacility, upgradeFacility, type FacilityDetail, type Hold, type Preview } from '../api-facilities.ts';
+import type { FacilityContractKind, FacilityDetail } from '@opc/shared';
+import { buyFacility, fetchFacility, leaseFacility, terminateFacility, upgradeFacility, type Preview } from '../api-facilities.ts';
 import { button, icon, panel, signLocation, titleBlock } from '../components.ts';
 import { facilitiesOff, kindLabel } from '../facilities-ui.ts';
 import { creditLoans, effectOf, firstLevel, MAINTENANCE_DISCOUNT_PCT, leaseMonthsLeft, levelState, opensAfterMonths, staffLine, stepLevel, type LevelState } from '../facilities-view.ts';
@@ -23,7 +24,7 @@ export async function facilityScreen(ctx: Ctx): Promise<Screen> {
   const held = f0.owner === 'player';
   const states = (d: FacilityDetail): Map<number, LevelState> => new Map(d.levels.map((l) => [l.level, levelState(l, d.facility, ctx.snap.at)]));
   const s0 = states(first);
-  const state = { mode: (f0.contract?.kind ?? 'lease') as Hold, level: held ? Math.min(f0.maxLevel, f0.level + 1) : firstLevel(first.levels, s0), credit: false, months: 0 };
+  const state = { mode: (f0.contract?.kind ?? 'lease') as FacilityContractKind, level: held ? Math.min(f0.maxLevel, f0.level + 1) : firstLevel(first.levels, s0), credit: false, months: 0 };
   const creditTerm = (d: FacilityDetail): number => { const loans = d.offer ? creditLoans(d.offer.purchase) : []; return loans.find((l) => l.months === state.months)?.months ?? loans[Math.floor(loans.length / 2)]?.months ?? 0; };
   let d = first;
 
@@ -65,7 +66,7 @@ export async function facilityScreen(ctx: Ctx): Promise<Screen> {
   function choice(): HTMLElement {
     const o = d.offer!;
     const l = o.lease, p = o.purchase;
-    const card = (hold: Hold, ...kids: (HTMLElement | null)[]): HTMLElement => h('button', { type: 'button', class: `fc-card${state.mode === hold ? ' on' : ''}`, role: 'radio', 'aria-checked': String(state.mode === hold), onclick: () => set({ mode: hold }) }, ...kids);
+    const card = (hold: FacilityContractKind, ...kids: (HTMLElement | null)[]): HTMLElement => h('button', { type: 'button', class: `fc-card${state.mode === hold ? ' on' : ''}`, role: 'radio', 'aria-checked': String(state.mode === hold), onclick: () => set({ mode: hold }) }, ...kids);
     const loans = creditLoans(p);
     const term = creditTerm(d);
     const loan = loans.find((x) => x.months === term);

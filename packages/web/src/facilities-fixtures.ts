@@ -1,12 +1,12 @@
-import type { Building, FacilityDetail, FacilityLevelInfo, FacilityView, HubOverview, HubPlan, HubsOverview } from './api-facilities.ts';
+import type { Building, FacilityDetail, FacilityLevelInfo, FacilityView, HubOverview, HubPlan, HubsOverview } from '@opc/shared';
 
 /** The mockup's Nice and Lyon, as S3's routes answer them (B.4). Used by the view-model tests and to look at the screens before S3 is merged; never shipped to the UI. */
 
 const view = (o: Partial<FacilityView> & Pick<FacilityView, 'id' | 'slot' | 'name' | 'kind'>): FacilityView => ({
   hub: 'LFMN', effect: 'none', areaM2: 4_200, owner: 'available', ownerName: null, rent: 0, level: 1, maxLevel: 1, contract: null, works: null, nextLevelAt: null, understaffed: false, monthly: 0, ...o,
 });
-const lease = (monthly: number, startedAt = Date.parse('2026-02-06T00:00:00Z')) => ({ id: 1, kind: 'lease' as const, startedAt, months: 36, monthsPaid: 9, monthly, upkeep: 0, deposit: monthly * 2, price: 0, principal: 0, noticeMonths: 3, levelSince: startedAt });
-const bought = { id: 2, kind: 'purchase' as const, startedAt: Date.parse('2025-09-06T00:00:00Z'), months: null, monthsPaid: 0, monthly: 0, upkeep: 2_400, deposit: 0, price: 2_350_000, principal: 0, noticeMonths: 0, levelSince: Date.parse('2025-09-06T00:00:00Z') };
+const lease = (monthly: number, startedAt = Date.parse('2026-02-06T00:00:00Z')) => ({ id: 1, kind: 'lease' as const, startedAt, months: 36, monthsPaid: 9, monthly, upkeep: 0, deposit: monthly * 2, price: 0, principal: 0, noticeMonths: 3, levelSince: startedAt, exit: { fee: monthly * 3, refund: monthly * 2 } });
+const bought = { id: 2, kind: 'purchase' as const, startedAt: Date.parse('2025-09-06T00:00:00Z'), months: null, monthsPaid: 0, monthly: 0, upkeep: 2_400, deposit: 0, price: 2_350_000, principal: 0, noticeMonths: 0, levelSince: Date.parse('2025-09-06T00:00:00Z'), exit: { fee: 0, refund: 1_762_500 } };
 
 export const LFMN_FACILITIES: FacilityView[] = [
   view({ id: 1, slot: 'T1', name: 'Terminal 1', kind: 'terminal', owner: 'airport', areaM2: 9_300 }),
