@@ -205,8 +205,22 @@ ALTER TABLE scheduled_flights ADD COLUMN crew_family TEXT;
 INSERT INTO staff_company (company_id, starter_pending) SELECT DISTINCT l.company_id, 1 FROM lines l JOIN companies c ON c.id = l.company_id WHERE c.user_id IS NOT NULL;
 `;
 
+// OpenHangar v3, lot SAFETY: the incident journal and one reading of the safety index per company and day (the "since Monday" delta needs a past to compare with).
+// `ref` is the roll's identity (`flight:<id>` or `leg:<line>:<departure>:<number>`), unique per company: a roll that is played twice is recorded once, so its money and reputation are never charged twice.
+const SCHEMA_V10 = `
+CREATE TABLE incidents (
+  id INTEGER PRIMARY KEY, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, ref TEXT NOT NULL, at INTEGER NOT NULL, season TEXT NOT NULL,
+  aircraft_id INTEGER NOT NULL REFERENCES aircraft(id) ON DELETE CASCADE, airport TEXT NOT NULL, flight_id INTEGER, flight_no INTEGER,
+  severity TEXT NOT NULL CHECK (severity IN ('minor','serious','grave')), kind TEXT NOT NULL, duty_min INTEGER NOT NULL, wear_pct REAL NOT NULL, risk REAL NOT NULL,
+  cost INTEGER NOT NULL, covered INTEGER NOT NULL, downtime_until INTEGER NOT NULL, reputation_delta REAL NOT NULL,
+  UNIQUE (company_id, ref));
+CREATE INDEX incidents_season ON incidents(company_id, season, at);
+CREATE TABLE safety_readings (
+  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, day INTEGER NOT NULL, idx INTEGER NOT NULL, PRIMARY KEY (company_id, day));
+`;
+
 /** Append-only; `PRAGMA user_version` records how many ran. */
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8];
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V10];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);

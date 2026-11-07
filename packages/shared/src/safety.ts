@@ -97,9 +97,8 @@ export const FATIGUE_LOSS_PER_POINT = 0.35;
 export const TIRED_FATIGUE = 50;
 /** A flight carrying at least this many times the average risk calls for a crew change. */
 export const RISKY_FACTOR = 2;
-/** A lever worth less than this is not worth a line. */
-export const LEVER_MIN_POINTS = 1;
-export const LEVER_WEAR_AFTER_SERVICE_PCT = WEAR_AFTER_MAINTENANCE_PCT;
+/** A visit to the workshop leaves the aircraft at this wear (the lever "schedule the service" is worth the difference). */
+export const WEAR_AFTER_SERVICE_PCT = WEAR_AFTER_MAINTENANCE_PCT;
 /** An aircraft over this wear has a repair put off (the chart's "usé"). */
 export const DEFERRED_REPAIR_PCT = 60;
 /** A rating that ends within this many days is a check to retake: 4 points each (the mockup's 16 of 20 for one simulator check). */
@@ -162,6 +161,11 @@ export type SafetyLever =
   | { action: 'leave'; points: number; ref: ''; tired: number };
 
 export type RiskPoint = { dutyHours: number; risk: number; good: number; worn: number };
+export const riskCurve = (worstWearPct: number, riskFactor: number): RiskPoint[] =>
+  Array.from({ length: Math.round(CURVE_MAX_H / CURVE_STEP_H) + 1 }, (_, i) => {
+    const h = i * CURVE_STEP_H;
+    return { dutyHours: h, risk: incidentRisk(h, worstWearPct, riskFactor), good: incidentRisk(h, CURVE_WEAR_GOOD), worn: incidentRisk(h, CURVE_WEAR_WORN) };
+  });
 
 export type SafetyView = {
   now: number;
@@ -177,7 +181,7 @@ export type SafetyView = {
   };
   /** The rest policy's factor on the risk of a crewed flight (1 / 0.9 / 0.7). */
   riskFactor: number;
-  /** `risk`: at the wear of the worst aircraft of the fleet; `good` and `worn`: the chart's two reference curves (CURVE_WEAR_GOOD, CURVE_WEAR_WORN). No rest policy factor. */
+  /** `risk`: the company's own curve (wear of its worst aircraft, rest policy factor); `good` and `worn`: the chart's two reference curves (CURVE_WEAR_GOOD, CURVE_WEAR_WORN, factor 1). */
   riskCurve: RiskPoint[];
   today: TodayRisk[];
   levers: SafetyLever[];
