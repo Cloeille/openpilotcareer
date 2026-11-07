@@ -46,6 +46,7 @@ Needs Node.js ≥ 26 (it runs the TypeScript sources directly) and, for flying, 
 ```
 npm ci                                         # from the repository root
 node sim/bridge/src/cli.ts setup               # server URL + API key (web app → Settings → API keys); checked against the server, then saved
+node sim/bridge/src/cli.ts scan-aircraft       # list the aircraft installed in MSFS (running) and send them to the server (docs/sim-aircraft.md); --dry-run only prints
 node sim/bridge/src/cli.ts flights             # your active flights; accept a job in the web app first
 node sim/bridge/src/cli.ts fly 42              # follow MSFS and report flight 42 when you park. Ctrl+C quits
 node sim/bridge/src/cli.ts replay sim/bridge/fixtures/ga-c172-lfpn-lfaq.json --server URL --key KEY

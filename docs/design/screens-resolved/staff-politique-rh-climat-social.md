@@ -1,0 +1,280 @@
+# Staff · politique RH & climat social
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Staff · politique RH & climat social» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=24 padding=[28, 32, 24, 32]
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Identity» layout="vertical" gap=8
+        - frame «Breadcrumb» gap=10 alignItems="center"
+          - instance «Base Sign» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+          - text «Crumb Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Staff  ›  Politique RH
+        - frame «Status» gap=8 padding=[6, 0, 0, 0] alignItems="center"
+          - ellipse «Status Dot» width=7 height=7 fill="$warning"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Les PNC se plaignent de leurs plannings · 3 plaintes ce mois
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600" lineHeight=1.05  TEXT: Politique RH
+        - text «Subtitle» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Le ton de ta directrice RH, et ce qu'il change au moral, à la productivité et au risque juridique
+      - frame «Key Stats» gap=44 padding=[0, 0, 4, 0]
+        - instance «Stat · Effectif» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Effectif
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 70 / 77
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: 7 postes vacants
+        - instance «Stat · Masse salariale» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Masse salariale
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 345 500 €
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: par mois
+        - instance «Stat · Fatigue moyenne» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Fatigue moyenne
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 38 %
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: stable
+    - frame «Body» width="fill_container" height="fill_container" gap=20
+      - instance «Panel · Style RH» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Style de ta directrice RH
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Sophie Garnier · chez Azur Régional depuis 2019
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=12 padding=[12, 22, 22, 22]
+          - frame «Slider · Sympathie» width="fill_container" layout="vertical" gap=12 padding=[14, 18] fill="#FFFFFF08" stroke="$border-strong" strokeWidth=1 cornerRadius=4
+            - frame «Head» width="fill_container" alignItems="end" justifyContent="space_between"
+              - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Sympathie
+              - frame «Value» gap=10 alignItems="end"
+                - text «Hint» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.6  TEXT: pousse vers le crunch
+                - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Stricte
+            - frame «Track» width="fill_container"
+              - frame «Notch · Glaciale» width="fill_container" layout="vertical" gap=8 alignItems="center"
+                - frame «Line» width="fill_container" height=20 alignItems="center"
+                  - rectangle «Left» width="fill_container" height=3 fill="#00000000"
+                  - rectangle «Tick» width=2 height=10 fill="$text-tertiary"
+                  - rectangle «Right» width="fill_container" height=3 fill="$border-strong"
+                - frame «Label» layout="vertical" gap=2 alignItems="center"
+                  - text «Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Glaciale
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: crunch permanent
+              - frame «Notch · Stricte» width="fill_container" layout="vertical" gap=8 alignItems="center"
+                - frame «Line» width="fill_container" height=20 alignItems="center"
+                  - rectangle «Left» width="fill_container" height=3 fill="$border-strong"
+                  - ellipse «Knob» width=20 height=20 fill="$text-primary" stroke="#0B0C0E" strokeWidth=3
+                  - rectangle «Right» width="fill_container" height=3 fill="$text-primary"
+                - frame «Label» layout="vertical" gap=2 alignItems="center"
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Stricte
+                  - text «Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: aperçu
+              - frame «Notch · Équilibrée» width="fill_container" layout="vertical" gap=8 alignItems="center"
+                - frame «Line» width="fill_container" height=20 alignItems="center"
+                  - rectangle «Left» width="fill_container" height=3 fill="$text-primary"
+                  - ellipse «Applied» width=12 height=12 fill="#0B0C0E" stroke="$text-secondary" strokeWidth=2
+                  - rectangle «Right» width="fill_container" height=3 fill="$border-strong"
+                - frame «Label» layout="vertical" gap=2 alignItems="center"
+                  - text «Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Équilibrée
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: en place
+              - frame «Notch · Chaleureuse» width="fill_container" layout="vertical" gap=8 alignItems="center"
+                - frame «Line» width="fill_container" height=20 alignItems="center"
+                  - rectangle «Left» width="fill_container" height=3 fill="$border-strong"
+                  - rectangle «Tick» width=2 height=10 fill="$text-tertiary"
+                  - rectangle «Right» width="fill_container" height=3 fill="$border-strong"
+                - frame «Label» layout="vertical" gap=2 alignItems="center"
+                  - text «Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Chaleureuse
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT:  
+              - frame «Notch · Protectrice» width="fill_container" layout="vertical" gap=8 alignItems="center"
+                - frame «Line» width="fill_container" height=20 alignItems="center"
+                  - rectangle «Left» width="fill_container" height=3 fill="$border-strong"
+                  - rectangle «Tick» width=2 height=10 fill="$text-tertiary"
+                  - rectangle «Right» width="fill_container" height=3 fill="#00000000"
+                - frame «Label» layout="vertical" gap=2 alignItems="center"
+                  - text «Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Protectrice
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: détente totale
+            - text «Effect» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.4  TEXT: Heures sup imposées, repos ramené au minimum légal, congés accordés au compte-gouttes.
+          - frame «Slider · Rapport à la loi» width="fill_container" layout="vertical" gap=12 padding=[14, 18] cornerRadius=4
+            - frame «Head» width="fill_container" alignItems="end" justifyContent="space_between"
+              - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Rapport à la loi
+              - frame «Value» gap=10 alignItems="end"
+                - text «Hint» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.6  TEXT: illégal par moments
+                - text «Value» fill="$warning" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Zone grise
+            - frame «Track» width="fill_container"
+              - frame «Notch · Irréprochable» width="fill_container" layout="vertical" gap=8 alignItems="center"
+                - frame «Line» width="fill_container" height=20 alignItems="center"
+                  - rectangle «Left» width="fill_container" height=3 fill="#00000000"
+                  - rectangle «Tick» width=2 height=10 fill="$text-tertiary"
+                  - rectangle «Right» width="fill_container" height=3 fill="$text-primary"
+                - frame «Label» layout="vertical" gap=2 alignItems="center"
+                  - text «Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Irréprochable
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: tout est déclaré
+              - frame «Notch · Conforme» width="fill_container" layout="vertical" gap=8 alignItems="center"
+                - frame «Line» width="fill_container" height=20 alignItems="center"
+                  - rectangle «Left» width="fill_container" height=3 fill="$text-primary"
+                  - ellipse «Applied» width=12 height=12 fill="#0B0C0E" stroke="$text-secondary" strokeWidth=2
+                  - rectangle «Right» width="fill_container" height=3 fill="$text-primary"
+                - frame «Label» layout="vertical" gap=2 alignItems="center"
+                  - text «Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Conforme
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: en place
+              - frame «Notch · Zone grise» width="fill_container" layout="vertical" gap=8 alignItems="center"
+                - frame «Line» width="fill_container" height=20 alignItems="center"
+                  - rectangle «Left» width="fill_container" height=3 fill="$text-primary"
+                  - ellipse «Knob» width=20 height=20 fill="$text-primary" stroke="#0B0C0E" strokeWidth=3
+                  - rectangle «Right» width="fill_container" height=3 fill="#E5625B59"
+                - frame «Label» layout="vertical" gap=2 alignItems="center"
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Zone grise
+                  - text «Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: aperçu
+              - frame «Notch · Illégal» width="fill_container" layout="vertical" gap=8 alignItems="center"
+                - frame «Line» width="fill_container" height=20 alignItems="center"
+                  - rectangle «Left» width="fill_container" height=3 fill="#E5625B59"
+                  - rectangle «Tick» width=2 height=10 fill="$danger"
+                  - rectangle «Right» width="fill_container" height=3 fill="#E5625B59"
+                - frame «Label» layout="vertical" gap=2 alignItems="center"
+                  - text «Name» fill="$danger" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Illégal
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: amendes
+              - frame «Notch · Hors la loi» width="fill_container" layout="vertical" gap=8 alignItems="center"
+                - frame «Line» width="fill_container" height=20 alignItems="center"
+                  - rectangle «Left» width="fill_container" height=3 fill="#E5625B59"
+                  - rectangle «Tick» width=2 height=10 fill="$danger"
+                  - rectangle «Right» width="fill_container" height=3 fill="#00000000"
+                - frame «Label» layout="vertical" gap=2 alignItems="center"
+                  - text «Name» fill="$danger" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Hors la loi
+                  - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: risque pénal
+            - text «Effect» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.4  TEXT: Heures sup en partie non déclarées, limites de service dépassées d'1 h en cas de retard, congés laissés sans réponse.
+          - frame «Consequences» width="fill_container" layout="vertical" gap=12 padding=[10, 18, 0, 18]
+            - frame «Head» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="600"  TEXT: Si tu appliques ce réglage
+              - text «Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: effet complet en 3 semaines
+            - frame «Metrics» width="fill_container"
+              - frame «Metric · Moral moyen» width="fill_container" layout="vertical" gap=4 padding=[0, 16, 0, 0]
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Moral moyen
+                - frame «Values» gap=8 alignItems="center"
+                  - text «From» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.7  TEXT: 64 %
+                  - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+                  - text «To» fill="$danger" fontFamily="$font-display" fontSize=24 fontWeight="600"  TEXT: 52 %
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: −12 points
+              - frame «Metric · Productivité» width="fill_container" layout="vertical" gap=4 padding=[0, 16] stroke="$border" strokeWidth={"left": 1}
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Productivité
+                - frame «Values» gap=8 alignItems="center"
+                  - text «From» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.7  TEXT: 100 %
+                  - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+                  - text «To» fill="$success" fontFamily="$font-display" fontSize=24 fontWeight="600"  TEXT: 109 %
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: +9 %, plus d'heures volées
+              - frame «Metric · Départs par an» width="fill_container" layout="vertical" gap=4 padding=[0, 16] stroke="$border" strokeWidth={"left": 1}
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Départs par an
+                - frame «Values» gap=8 alignItems="center"
+                  - text «From» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.7  TEXT: 8
+                  - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+                  - text «To» fill="$danger" fontFamily="$font-display" fontSize=24 fontWeight="600"  TEXT: 15
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: dont 4 pilotes
+              - frame «Metric · Risque de grève» width="fill_container" layout="vertical" gap=4 padding=[0, 16] stroke="$border" strokeWidth={"left": 1}
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Risque de grève
+                - frame «Values» gap=8 alignItems="center"
+                  - text «From» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.7  TEXT: faible
+                  - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+                  - text «To» fill="$danger" fontFamily="$font-display" fontSize=24 fontWeight="600"  TEXT: élevé
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: PNC en premier
+              - frame «Metric · Économie» width="fill_container" layout="vertical" gap=4 padding=[0, 16] stroke="$border" strokeWidth={"left": 1}
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Économie mensuelle
+                - frame «Values» gap=8 alignItems="end"
+                  - text «To» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="600"  TEXT: 21 400 €
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: heures sup non payées
+          - frame «Actions» width="fill_container" padding=[6, 18, 0, 18] alignItems="center" justifyContent="space_between"
+            - frame «Warning» gap=8 alignItems="center"
+              - icon «Icon» width=15 height=15 fill="$warning" icon="scale"
+              - text «Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Zone grise : la responsabilité est la tienne, pas celle de Sophie
+            - frame «Buttons» gap=16 alignItems="center"
+              - instance «Revert» of «Button/Ghost»
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Revenir au réglage actuel
+              - instance «Apply» of «Button/Primary»
+                - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Appliquer la politique
+                - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                  - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+      - frame «Side Column» width=420 height="fill_container" layout="vertical" gap=20
+        - instance «Panel · Moral par famille» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Moral par famille
+            - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: maintenant → avec ce réglage
+          - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[6, 22, 16, 22]
+            - frame «Family · PNC» width="fill_container" gap=14 padding=[7, 0] alignItems="center"
+              - frame «Label» width="fill_container" layout="vertical" gap=1
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: PNC
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 3 plaintes ce mois
+              - frame «Bar» width=110 height=6 layout="none" fill="$neutral-soft" cornerRadius=1
+                - rectangle «Was» width=64 height=6 fill="#FFFFFF26"
+                - rectangle «Will» width=47 height=6 fill="$danger"
+              - frame «Values» width=84 gap=6 alignItems="center" justifyContent="end"
+                - text «From» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 58 →
+                - text «To» fill="$danger" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 43 %
+            - frame «Family · Pilotes ATR» width="fill_container" gap=14 padding=[7, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Label» width="fill_container" layout="vertical" gap=1
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Pilotes ATR
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Camille Lefèvre à 71 %
+              - frame «Bar» width=110 height=6 layout="none" fill="$neutral-soft" cornerRadius=1
+                - rectangle «Was» width=75 height=6 fill="#FFFFFF26"
+                - rectangle «Will» width=63 height=6 fill="$text-primary"
+              - frame «Values» width=84 gap=6 alignItems="center" justifyContent="end"
+                - text «From» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 68 →
+                - text «To» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 57 %
+            - frame «Family · Pilotes A220» width="fill_container" gap=14 padding=[7, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Label» width="fill_container" layout="vertical" gap=1
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Pilotes A220
+              - frame «Bar» width=110 height=6 layout="none" fill="$neutral-soft" cornerRadius=1
+                - rectangle «Was» width=77 height=6 fill="#FFFFFF26"
+                - rectangle «Will» width=67 height=6 fill="$text-primary"
+              - frame «Values» width=84 gap=6 alignItems="center" justifyContent="end"
+                - text «From» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 70 →
+                - text «To» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 61 %
+            - frame «Family · Maintenance» width="fill_container" gap=14 padding=[7, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Label» width="fill_container" layout="vertical" gap=1
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Maintenance
+              - frame «Bar» width=110 height=6 layout="none" fill="$neutral-soft" cornerRadius=1
+                - rectangle «Was» width=69 height=6 fill="#FFFFFF26"
+                - rectangle «Will» width=61 height=6 fill="$text-primary"
+              - frame «Values» width=84 gap=6 alignItems="center" justifyContent="end"
+                - text «From» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 63 →
+                - text «To» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 55 %
+            - frame «Family · Agents au sol» width="fill_container" gap=14 padding=[7, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Label» width="fill_container" layout="vertical" gap=1
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Agents au sol
+              - frame «Bar» width=110 height=6 layout="none" fill="$neutral-soft" cornerRadius=1
+                - rectangle «Was» width=67 height=6 fill="#FFFFFF26"
+                - rectangle «Will» width=59 height=6 fill="$text-primary"
+              - frame «Values» width=84 gap=6 alignItems="center" justifyContent="end"
+                - text «From» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 61 →
+                - text «To» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 54 %
+            - frame «Family · Administratif» width="fill_container" gap=14 padding=[7, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - frame «Label» width="fill_container" layout="vertical" gap=1
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Administratif
+              - frame «Bar» width=110 height=6 layout="none" fill="$neutral-soft" cornerRadius=1
+                - rectangle «Was» width=79 height=6 fill="#FFFFFF26"
+                - rectangle «Will» width=73 height=6 fill="$text-primary"
+              - frame «Values» width=84 gap=6 alignItems="center" justifyContent="end"
+                - text «From» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 72 →
+                - text «To» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: 66 %
+        - instance «Panel · Risque juridique» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Risque juridique
+            - text «Action» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: en zone grise
+          - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[6, 22, 16, 22]
+            - frame «Risk · Inspection du travail» width="fill_container" gap=12 padding=[9, 0]
+              - icon «Icon» width=15 height=15 fill="$text-tertiary" icon="search"
+              - frame «Text» width="fill_container" layout="vertical" gap=2
+                - frame «Head» width="fill_container" justifyContent="space_between"
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Inspection du travail
+                  - text «Now» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 1 contrôle tous les 8 mois
+                - text «Then» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1 tous les 3 mois
+            - frame «Risk · Amendes» width="fill_container" gap=12 padding=[9, 0] stroke="$border" strokeWidth={"top": 1}
+              - icon «Icon» width=15 height=15 fill="$text-tertiary" icon="receipt-euro"
+              - frame «Text» width="fill_container" layout="vertical" gap=2
+                - frame «Head» width="fill_container" justifyContent="space_between"
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Amendes
+                  - text «Now» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: aucune
+                - text «Then» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: jusqu'à 45 000 € par contrôle
+            - frame «Risk · Action syndicale» width="fill_container" gap=12 padding=[9, 0] stroke="$border" strokeWidth={"top": 1}
+              - icon «Icon» width=15 height=15 fill="$text-tertiary" icon="megaphone"
+              - frame «Text» width="fill_container" layout="vertical" gap=2
+                - frame «Head» width="fill_container" justifyContent="space_between"
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Action syndicale
+                  - text «Now» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: aucune
+                - text «Then» fill="$danger" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: préavis probable chez les PNC
+            - frame «Risk · Réputation» width="fill_container" gap=12 padding=[9, 0] stroke="$border" strokeWidth={"top": 1}
+              - icon «Icon» width=15 height=15 fill="$text-tertiary" icon="star"
+              - frame «Text» width="fill_container" layout="vertical" gap=2
+                - frame «Head» width="fill_container" justifyContent="space_between"
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Réputation
+                  - text «Now» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 4,6
+                - text «Then» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: −0,4 si l'affaire sort
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

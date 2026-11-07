@@ -1,0 +1,156 @@
+# Réglages · avions du simulateur
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Réglages · avions du simulateur» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-1.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 gap=64 padding=[28, 32, 24, 32]
+    - frame «Settings Nav» width=220 layout="vertical" gap=28
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Compte lmoreau · serveur global
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Réglages
+      - frame «Nav List» width="fill_container" layout="vertical"
+        - frame «Nav · Clés API» width="fill_container" padding=[11, 16] stroke="$border-strong" strokeWidth={"left": 2}
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Clés API
+        - frame «Nav · Compte et données» width="fill_container" padding=[11, 16] stroke="$border-strong" strokeWidth={"left": 2}
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Compte et données
+        - frame «Nav · Avions du simulateur» width="fill_container" padding=[11, 16] stroke="$text-primary" strokeWidth={"left": 2}
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Avions du simulateur
+    - frame «Center Column» width="fill_container" height="fill_container" layout="vertical"
+      - instance «Panel · Avions détectés» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[26, 28, 0, 28] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: Avions détectés dans MSFS 2024
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=14 padding=[12, 16, 24, 16]
+          - frame «Intro Wrap» width="fill_container" padding=[0, 12, 20, 12]
+            - text «Intro» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.45  TEXT: Associe chaque avion installé à un type de la carrière. C'est lui que tu piloteras quand tu prends les commandes d'un appareil de ce type dans ta flotte.
+          - frame «Column Header» width="fill_container" gap=16 padding=[0, 12, 10, 12] stroke="$border" strokeWidth={"bottom": 1}
+            - text «Col · Simulateur» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Dans le simulateur
+            - frame «Col · Spacer» width=14 height=1
+            - text «Col · Type» width=210 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Type de la carrière
+            - text «Col · État» width=130 fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" textAlign="right"  TEXT: État
+          - frame «Rows» width="fill_container" layout="vertical"
+            - frame «Row · ATR 72-600» width="fill_container" gap=16 padding=[14, 12] alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+              - frame «Sim» width="fill_container" layout="vertical" gap=3
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: ATR 72-600
+                - text «Source» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Asobo · inclus dans MSFS 2024
+              - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+              - frame «Match» width=210 layout="vertical" gap=3
+                - text «Type» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: ATR 72-600
+                - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 4 livrées
+              - frame «State» width=130 gap=6 alignItems="center" justifyContent="end"
+                - icon «Icon» width=14 height=14 fill="$text-secondary" icon="check"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Associé
+            - frame «Row · ATR 42-600» width="fill_container" gap=16 padding=[14, 12] alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+              - frame «Sim» width="fill_container" layout="vertical" gap=3
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: ATR 42-600
+                - text «Source» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Asobo · inclus dans MSFS 2024
+              - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+              - frame «Match» width=210 layout="vertical" gap=3
+                - text «Type» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: ATR 42-600
+                - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 1 livrée
+              - frame «State» width=130 gap=6 alignItems="center" justifyContent="end"
+                - icon «Icon» width=14 height=14 fill="$text-secondary" icon="check"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Associé
+            - frame «Row · A320neo V2» width="fill_container" gap=16 padding=[14, 12] alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+              - frame «Sim» width="fill_container" layout="vertical" gap=3
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: A320neo V2
+                - text «Source» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: iniBuilds · Marketplace
+              - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+              - frame «Match» width=210 layout="vertical" gap=3
+                - text «Type» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: A320neo
+                - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 2 livrées
+              - frame «State» width=130 gap=6 alignItems="center" justifyContent="end"
+                - icon «Icon» width=14 height=14 fill="$text-secondary" icon="check"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Associé
+            - frame «Row · DHC-6 Twin Otter» width="fill_container" gap=16 padding=[14, 12] alignItems="center" fill="$surface-selected" stroke="$border" strokeWidth={"bottom": 1}
+              - frame «Sim» width="fill_container" layout="vertical" gap=3
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: DHC-6 Twin Otter
+                - text «Source» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Aerosoft · dossier Community
+              - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+              - frame «Match» width=210 layout="vertical" gap=3
+                - text «Type» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: DHC-6 Twin Otter 400
+                - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Suggéré, série 300 installée
+              - frame «State» width=130 gap=6 alignItems="center" justifyContent="end"
+                - icon «Icon» width=14 height=14 fill="$warning" icon="circle-alert"
+                - text «Label» fill="$warning" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: À confirmer
+            - frame «Row · Cessna 172 Skyhawk» width="fill_container" gap=16 padding=[14, 12] alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+              - frame «Sim» width="fill_container" layout="vertical" gap=3
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Cessna 172 Skyhawk
+                - text «Source» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Asobo · inclus dans MSFS 2024
+              - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+              - frame «Match» width=210 layout="vertical" gap=3
+                - text «Type» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Aucun type
+                - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Aviation légère, hors carrière
+              - frame «State» width=130 gap=6 alignItems="center" justifyContent="end"
+                - icon «Icon» width=14 height=14 fill="$text-tertiary" icon="minus"
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Ignoré
+            - frame «Row · A310-300» width="fill_container" gap=16 padding=[14, 12] alignItems="center" stroke="$border"
+              - frame «Sim» width="fill_container" layout="vertical" gap=3
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: A310-300
+                - text «Source» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: iniBuilds · Marketplace
+              - icon «Arrow» width=14 height=14 fill="$text-tertiary" icon="arrow-right"
+              - frame «Match» width=210 layout="vertical" gap=3
+                - text «Type» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Pas au catalogue
+                - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Aucun type équivalent
+              - frame «State» width=130 gap=6 alignItems="center" justifyContent="end"
+                - icon «Icon» width=14 height=14 fill="$text-tertiary" icon="minus"
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Hors catalogue
+          - frame «Scan Footer» width="fill_container" gap=16 padding=[18, 12, 0, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - text «Last Scan» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Dernière analyse aujourd'hui à 18:12, 214 paquets lus
+            - instance «Button · Relancer l'analyse» of «Button/Secondary»
+              - icon «Icon» width=14 height=14 fill="$text-secondary" icon="refresh-cw"
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Relancer l'analyse
+    - frame «Side Column» width=420 height="fill_container" layout="vertical" gap=20
+      - instance «Panel · DHC-6 Twin Otter» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[26, 28, 0, 28] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="600"  TEXT: DHC-6 Twin Otter
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Aerosoft
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=22 padding=[14, 28, 28, 28]
+          - instance «Input · Type de la carrière» of «Input»
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Type de la carrière
+            - frame «Field» width="fill_container" height=44 gap=10 padding=[0, 12] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+              - icon «Icon» width=16 height=16 fill="$text-tertiary" icon="plane"
+              - text «Value» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: DHC-6 Twin Otter 400
+              - icon «Chevron» width=16 height=16 fill="$text-secondary" icon="chevrons-up-down"
+            - text «Hint» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.45  TEXT: Suggéré : seule la série 300 existe dans le simulateur. La carrière garde les performances et la consommation de la 400.
+          - frame «Liveries» width="fill_container" layout="vertical"
+            - frame «Liveries Head» width="fill_container" padding=[0, 0, 10, 0]
+              - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="600"  TEXT: Livrées de tes avions
+            - frame «Livery · F-HAZG» width="fill_container" gap=14 padding=[10, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - text «Tail» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: F-HAZG
+              - text «Livery» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Azur Régional, livrée perso
+              - text «Change» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Changer
+            - frame «Livery · F-HAZF» width="fill_container" gap=14 padding=[10, 0] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+              - text «Tail» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: F-HAZF
+              - text «Livery» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Blanche, livrée par défaut
+              - text «Change» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Changer
+          - frame «Auto Livery» width="fill_container" gap=16 alignItems="center"
+            - text «Label» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.4  TEXT: Prendre la livrée de la compagnie dès qu'elle est installée
+            - instance «Switch · Livrée auto» of «Switch»
+              - ellipse «Knob» width=16 height=16 fill="$on-btn-primary"
+          - frame «Actions» width="fill_container" gap=16 alignItems="center"
+            - instance «Button · Confirmer» of «Button/Primary»
+              - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Confirmer l'association
+              - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+            - instance «Button · Autre type» of «Button/Ghost»
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Autre type
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+      - instance «Panel · Manquant» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[22, 28, 0, 28] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Manquant dans le simulateur
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=14 padding=[12, 28, 22, 28]
+          - frame «Missing · CRJ700» width="fill_container" gap=12
+            - frame «Icon Wrap» padding=[2, 0, 0, 0]
+              - icon «Icon» width=16 height=16 fill="$warning" icon="triangle-alert"
+            - frame «Stack» width="fill_container" layout="vertical" gap=4
+              - text «Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: CRJ700, utilisé par F-HAZC
+              - text «Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.45  TEXT: Aucun avion installé ne correspond. Tu ne peux pas le piloter toi-même, tes équipages continuent de l'exploiter.
+          - frame «Link Wrap» padding=[0, 0, 0, 28]
+            - instance «Button · Voir les CRJ700» of «Button/Ghost»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Voir les CRJ700 compatibles
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

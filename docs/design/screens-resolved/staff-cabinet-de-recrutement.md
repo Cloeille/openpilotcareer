@@ -1,0 +1,205 @@
+# Staff · cabinet de recrutement
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Staff · cabinet de recrutement» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=24 padding=[28, 32, 24, 32]
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Identity» layout="vertical" gap=8
+        - frame «Breadcrumb» gap=10 alignItems="center"
+          - instance «Base Sign» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+          - text «Crumb Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Staff  ›  Cabinet de recrutement
+        - frame «Status» gap=8 padding=[6, 0, 0, 0] alignItems="center"
+          - ellipse «Status Dot» width=7 height=7 fill="$danger"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: LFLL ⇄ LFML suspendue, aucun pilote CRJ disponible
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600" lineHeight=1.05  TEXT: Cabinet de recrutement
+        - text «Subtitle» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Des pilotes déjà qualifiés en quelques jours, contre une commission et des salaires plus hauts
+      - frame «Key Stats» gap=44 padding=[0, 0, 4, 0]
+        - instance «Stat · Pilotes CRJ» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Pilotes CRJ
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 0 / 2
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: pour rouvrir la ligne
+        - instance «Stat · Ligne à l'arrêt» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Ligne à l'arrêt
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 5 400 €
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: de marge perdue par jour
+        - instance «Stat · Effectif» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Effectif
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 70 / 77
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: 7 postes vacants
+    - frame «Body» width="fill_container" height="fill_container" gap=20
+      - instance «Panel · Trois options» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Trois façons d'avoir tes 2 pilotes CRJ
+          - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: à partir d'aujourd'hui, ven. 6 novembre
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=6 padding=[12, 22, 22, 22]
+          - frame «Columns» width="fill_container" gap=24 padding=[0, 18, 6, 18] alignItems="end"
+            - text «Option» width=250 fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Option
+            - frame «Axis» width=539
+              - frame «Week · 6 nov.» width=49 padding=[0, 0, 0, 5] stroke="$border-strong" strokeWidth={"left": 1}
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 6 nov.
+              - frame «Week · 13 nov.» width=49 padding=[0, 0, 0, 5] stroke="$border-strong" strokeWidth={"left": 1}
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT:  
+              - frame «Week · 20 nov.» width=49 padding=[0, 0, 0, 5] stroke="$border-strong" strokeWidth={"left": 1}
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 20 nov.
+              - frame «Week · 27 nov.» width=49 padding=[0, 0, 0, 5] stroke="$border-strong" strokeWidth={"left": 1}
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT:  
+              - frame «Week · 4 déc.» width=49 padding=[0, 0, 0, 5] stroke="$border-strong" strokeWidth={"left": 1}
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 4 déc.
+              - frame «Week · 11 déc.» width=49 padding=[0, 0, 0, 5] stroke="$border-strong" strokeWidth={"left": 1}
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT:  
+              - frame «Week · 18 déc.» width=49 padding=[0, 0, 0, 5] stroke="$border-strong" strokeWidth={"left": 1}
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 18 déc.
+              - frame «Week · 25 déc.» width=49 padding=[0, 0, 0, 5] stroke="$border-strong" strokeWidth={"left": 1}
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT:  
+              - frame «Week · 1 janv.» width=49 padding=[0, 0, 0, 5] stroke="$border-strong" strokeWidth={"left": 1}
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 1 janv.
+              - frame «Week · 8 janv.» width=49 padding=[0, 0, 0, 5] stroke="$border-strong" strokeWidth={"left": 1}
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT:  
+              - frame «Week · 15 janv.» width=49 padding=[0, 0, 0, 5] stroke="$border-strong" strokeWidth={"left": 1}
+                - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 15 janv.
+            - text «Cost» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" textAlign="right"  TEXT: Coût sur un an
+          - frame «Option · Cabinet de recrutement» width="fill_container" gap=24 padding=[20, 18] alignItems="center" fill="#FFFFFF08" stroke="$border-strong" strokeWidth=1 cornerRadius=4
+            - frame «Label» width=250 layout="vertical" gap=3
+              - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Cabinet de recrutement
+              - text «Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Isabelle Roche trouve 2 pilotes déjà qualifiés
+              - frame «Note» gap=6 padding=[4, 0, 0, 0] alignItems="center"
+                - icon «Icon» width=13 height=13 fill="$text-tertiary" icon="info"
+                - text «Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Salaires 11 % au-dessus de ta grille
+            - frame «Timeline» width=539 layout="vertical" gap=10
+              - frame «Bar» width=539 height=12 fill="#FFFFFF0A" cornerRadius=1
+                - rectangle «Phase 1» width=28 height=12 fill="$text-primary"
+                - rectangle «Phase 2» width=28 height=12 fill="#ECEAE599"
+              - frame «Caption» gap=10 alignItems="center"
+                - text «End» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="600"  TEXT: Reprise le sam. 14 nov.
+                - text «Phases» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 4 j de recherche, 4 j de contrôle en ligne
+            - frame «Cost» width="fill_container" layout="vertical" gap=2 alignItems="end"
+              - text «Total» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="600"  TEXT: 94 080 €
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 50 880 € de commission et surcoût salarial
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 43 200 € de ligne à l'arrêt
+          - frame «Option · Former deux pilotes ATR» width="fill_container" gap=24 padding=[20, 18] alignItems="center" stroke="$border" strokeWidth={"top": 1} cornerRadius=4
+            - frame «Label» width=250 layout="vertical" gap=3
+              - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Former deux pilotes ATR
+              - text «Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Qualification CRJ700 puis vols supervisés
+              - frame «Note» gap=6 padding=[4, 0, 0, 0] alignItems="center"
+                - icon «Icon» width=13 height=13 fill="$warning" icon="triangle-alert"
+                - text «Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 2 pilotes ATR en moins pendant 6 semaines
+            - frame «Timeline» width=539 layout="vertical" gap=10
+              - frame «Bar» width=539 height=12 fill="#FFFFFF0A" cornerRadius=1
+                - rectangle «Phase 1» width=147 height=12 fill="#FFFFFF66"
+                - rectangle «Phase 2» width=147 height=12 fill="#FFFFFF33"
+              - frame «Caption» gap=10 alignItems="center"
+                - text «End» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="600"  TEXT: Reprise le ven. 18 déc.
+                - text «Phases» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 3 sem. de qualification, 3 sem. de vols supervisés
+            - frame «Cost» width="fill_container" layout="vertical" gap=2 alignItems="end"
+              - text «Total» fill="$text-secondary" fontFamily="$font-display" fontSize=26 fontWeight="600"  TEXT: 310 800 €
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 84 000 € de formation
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 226 800 € de ligne à l'arrêt
+          - frame «Option · Recrutement classique» width="fill_container" gap=24 padding=[20, 18] alignItems="center" stroke="$border" strokeWidth={"top": 1} cornerRadius=4
+            - frame «Label» width=250 layout="vertical" gap=3
+              - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Recrutement classique
+              - text «Sub» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Annonce sur la bourse aux pilotes
+              - frame «Note» gap=6 padding=[4, 0, 0, 0] alignItems="center"
+                - icon «Icon» width=13 height=13 fill="$warning" icon="triangle-alert"
+                - text «Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Peu de pilotes CRJ libres, délai incertain
+            - frame «Timeline» width=539 layout="vertical" gap=10
+              - frame «Bar» width=539 height=12 fill="#FFFFFF0A" cornerRadius=1
+                - rectangle «Phase 1» width=245 height=12 fill="#FFFFFF66"
+                - rectangle «Phase 2» width=196 height=12 fill="#FFFFFF33"
+              - frame «Caption» gap=10 alignItems="center"
+                - text «End» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="600"  TEXT: Reprise le ven. 8 janv. au mieux
+                - text «Phases» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 5 sem. d'annonce, 4 sem. de préavis
+            - frame «Cost» width="fill_container" layout="vertical" gap=2 alignItems="end"
+              - text «Total» fill="$text-secondary" fontFamily="$font-display" fontSize=26 fontWeight="600"  TEXT: 343 700 €
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 3 500 € d'annonce
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 340 200 € de ligne à l'arrêt
+          - frame «Spacer» width="fill_container" height="fill_container"
+          - frame «Footer» width="fill_container" padding=[0, 18] alignItems="center" justifyContent="space_between"
+            - frame «Summary» gap=40 alignItems="end"
+              - frame «Saved · 34 jours» layout="vertical" gap=2
+                - text «Value» fill="$success" fontFamily="$font-display" fontSize=32 fontWeight="600"  TEXT: 34 jours
+                - text «Line 1» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: de ligne en service en plus
+                - text «Line 2» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: par rapport à la formation
+              - frame «Saved · 216 720 €» layout="vertical" gap=2
+                - text «Value» fill="$success" fontFamily="$font-display" fontSize=32 fontWeight="600"  TEXT: 216 720 €
+                - text «Line 1» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: économisés sur un an
+                - text «Line 2» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: manque à gagner compris
+            - frame «Buttons» gap=16 alignItems="center"
+              - instance «Negotiate» of «Button/Ghost»
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Négocier la commission
+              - instance «Launch» of «Button/Primary»
+                - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Lancer la mission
+                - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                  - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+      - frame «Side Column» width=420 height="fill_container" layout="vertical" gap=20
+        - instance «Panel · Mission» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Mission confiée
+            - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Modifier
+          - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=6 padding=[8, 22, 18, 22]
+            - frame «Row · Poste» width="fill_container" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Poste
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 1 commandant, 1 OPL
+            - frame «Row · Base» width="fill_container" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Base
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Lyon · LFLL
+            - frame «Row · Qualification» width="fill_container" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Qualification
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: CRJ700, contrôle en ligne valide
+            - frame «Row · Prise de poste» width="fill_container" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Prise de poste
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: avant le lun. 16 nov.
+            - frame «Row · Recruteuse» width="fill_container" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Recruteuse
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Isabelle Roche · Altitude Talents
+        - instance «Panel · Shortlist» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Candidats proposés
+            - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: trouvés en 4 jours
+          - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[4, 22, 16, 22]
+            - frame «Candidate · Cdt. Marc Delaunay» width="fill_container" gap=12 padding=[10, 0]
+              - icon «Pick» width=16 height=16 fill="$text-primary" icon="circle-check"
+              - frame «Who» width="fill_container" layout="vertical" gap=3
+                - frame «Head» width="fill_container" justifyContent="space_between"
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Cdt. Marc Delaunay
+                  - text «Salary» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 8 300 € / mois
+                - frame «Detail» width="fill_container" justifyContent="space_between"
+                  - text «Experience» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 7 400 h dont 2 100 h sur CRJ · ex-HOP!
+                  - text «Grid» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: grille 7 500 €
+                - text «Fit» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Adéquation 92 %
+            - frame «Candidate · Léa Vasseur · OPL» width="fill_container" gap=12 padding=[10, 0] stroke="$border" strokeWidth={"top": 1}
+              - icon «Pick» width=16 height=16 fill="$text-primary" icon="circle-check"
+              - frame «Who» width="fill_container" layout="vertical" gap=3
+                - frame «Head» width="fill_container" justifyContent="space_between"
+                  - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Léa Vasseur · OPL
+                  - text «Salary» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 5 900 € / mois
+                - frame «Detail» width="fill_container" justifyContent="space_between"
+                  - text «Experience» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 2 900 h dont 1 400 h sur CRJ
+                  - text «Grid» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: grille 5 300 €
+                - text «Fit» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Adéquation 88 %
+            - frame «Candidate · Hugo Barret · OPL» width="fill_container" gap=12 padding=[10, 0] stroke="$border" strokeWidth={"top": 1}
+              - icon «Pick» width=16 height=16 fill="$text-tertiary" icon="circle"
+              - frame «Who» width="fill_container" layout="vertical" gap=3
+                - frame «Head» width="fill_container" justifyContent="space_between"
+                  - text «Name» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Hugo Barret · OPL
+                  - text «Salary» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 5 400 € / mois
+                - frame «Detail» width="fill_container" justifyContent="space_between"
+                  - text «Experience» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 1 600 h dont 600 h sur CRJ · préavis 3 sem.
+                  - text «Grid» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: grille 5 300 €
+                - text «Fit» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Adéquation 74 %
+            - frame «Spacer» width="fill_container" height="fill_container"
+            - frame «Fee» width="fill_container" layout="vertical" gap=6 padding=[12, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+              - frame «Row · Commission · 20 % du salaire annuel» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Commission · 20 % du salaire annuel
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 34 080 €
+              - frame «Row · Surcoût salarial» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Surcoût salarial
+                - text «Value» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: +1 400 € / mois
+              - frame «Row · Payable» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Payable
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: à la signature
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

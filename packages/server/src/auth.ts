@@ -26,6 +26,12 @@ export async function verifyPassword(password: string, stored: string): Promise<
   return expected.length === actual.length && timingSafeEqual(expected, actual);
 }
 
+/** Re-check the account password before a destructive action (company deletion or reset, account deletion): 403 `bad_password`. */
+export async function confirmPassword(db: Db, userId: number, password: string): Promise<void> {
+  const u = get<{ pass_hash: string }>(db, 'SELECT pass_hash FROM users WHERE id = ?', userId)!;
+  if (!(await verifyPassword(password, u.pass_hash))) throw new HttpError(403, 'bad_password', 'wrong password');
+}
+
 /** Verified against when the username is unknown, so login time does not reveal which usernames exist. */
 export const DUMMY_HASH = hashPassword('not-a-real-password');
 

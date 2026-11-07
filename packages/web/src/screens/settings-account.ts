@@ -3,6 +3,9 @@ import { API_VERSION } from '@opc/shared';
 import { act } from '../actions.ts';
 import { api, downloadExport, fetchInfo, session, GLOBAL_URL } from '../api.ts';
 import { button, icon, inputField, panel } from '../components.ts';
+import { openCompanyDialog } from '../company-dialog.ts';
+import type { CompanyAction } from '../company-actions-model.ts';
+import { fmt } from '../format.ts';
 import { getLang, setLang, t, tp } from '../i18n.ts';
 import type { Ctx } from '../screen.ts';
 import { formatBytes, listOf, numericDate, pageAll, readLastExport, recordExport, spanOf, type ExportFormat, type Span } from '../settings-model.ts';
@@ -114,6 +117,24 @@ function deleteSection(ctx: Ctx): HTMLElement {
     form);
 }
 
+/** One row per company, each with Réinitialiser and Supprimer; both open the same danger confirmation (company-dialog.ts). */
+function companiesSection(ctx: Ctx): HTMLElement {
+  const { companies } = ctx.snap.me;
+  const row = (c: (typeof companies)[number]): HTMLElement => {
+    const open = (action: CompanyAction) => (e: MouseEvent): void => openCompanyDialog({
+      company: c, action, opener: e.currentTarget as HTMLElement, remaining: companies.length - 1,
+      exportJson: () => void runExport('json'), refresh: ctx.refresh, go: ctx.go,
+    });
+    return h('li', { class: 'company-row' },
+      h('div', { class: 'export-stack' }, h('span', { class: 'export-title' }, c.name), h('span', { class: 'dim small' }, t('co.row.meta', { code: c.code ?? '–', money: fmt().money(c.balance) }))),
+      button(t('co.reset'), { variant: 'secondary', icon: 'refresh-cw', label: t('co.resetLabel', { name: c.name }), onclick: open('reset') }),
+      button(t('co.delete'), { variant: 'danger', icon: 'trash-2', label: t('co.deleteLabel', { name: c.name }), onclick: open('delete') }));
+  };
+  return panel({ title: t('co.title'), id: 'companies-panel' },
+    h('p', { class: 'muted intro-text' }, t('co.intro')),
+    h('ul', { class: 'plain company-list' }, companies.map(row)));
+}
+
 const detail = (label: string, value: string | HTMLElement): HTMLElement => h('div', { class: 'detail-row' }, h('span', { class: 'dim' }, label), h('span', { class: 'detail-value' }, value));
 
 function serverSection(ctx: Ctx, info: ServerInfo | null): HTMLElement {
@@ -148,6 +169,6 @@ function languagePicker(): HTMLElement {
 export async function accountSection(ctx: Ctx): Promise<HTMLElement> {
   const info = await fetchInfo(session.server).catch(() => null);
   return h('div', { class: 'settings-account' },
-    h('div', { class: 'settings-center' }, exportSection(ctx), deleteSection(ctx)),
+    h('div', { class: 'settings-center' }, exportSection(ctx), companiesSection(ctx), deleteSection(ctx)),
     h('div', { class: 'settings-side' }, serverSection(ctx, info)));
 }
