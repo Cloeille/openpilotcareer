@@ -5,7 +5,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  DAY_MS, INCIDENT_DOWNTIME_DAYS, INCIDENT_REPUTATION, REST_POLICIES, drawIncident, incidentRisk, insuranceSurcharge, isInsured, presetSetting,
+  DAY_MS, INCIDENT_DOWNTIME_DAYS, INCIDENT_REPUTATION, REST_POLICIES, drawIncident, flightDutyMin, incidentRisk, insuranceSurcharge, isInsured, presetSetting,
   type IncidentView, type SafetyView,
 } from '@opc/shared';
 import { hashSeed, mulberry32 } from './board.ts';
@@ -139,13 +139,14 @@ test('a flight the player flew is rolled once at the wear it flew with; the jour
   const flight = (await h.call('POST', `/api/v1/jobs/${job.id}/accept`, { token, body: { aircraftId } })).body;
   assert.equal(flight.id, id);
   const rep0 = get<{ r: number }>(h.db, 'SELECT reputation AS r FROM companies WHERE id = ?', cid)!.r;
-  const r = await h.call('POST', `/api/v1/flights/${flight.id}/telemetry-verify`, { token: key, body: h.goodReport(job) });
+  const report = h.goodReport(job);
+  const r = await h.call('POST', `/api/v1/flights/${flight.id}/telemetry-verify`, { token: key, body: report });
   assert.equal(r.body.verification, 'verified');
   const inc = all<{ ref: string; flight_id: number; cost: number; covered: number; severity: string; duty_min: number; reputation_delta: number }>(h.db, 'SELECT * FROM incidents');
   assert.equal(inc.length, 1);
   assert.equal(inc[0]!.ref, `flight:${id}`);
   assert.equal(inc[0]!.flight_id, id);
-  assert.equal(inc[0]!.duty_min, 45 + Math.round((job.distanceNm / 122) * 60) + 15 > 0 ? inc[0]!.duty_min : -1, 'duty is the flight\'s own block time plus report and release');
+  assert.equal(inc[0]!.duty_min, flightDutyMin((Date.parse(report.landedAt) - Date.parse(report.takeoffAt)) / 3_600_000), 'the player is not crew: the duty is the flight\'s own block time plus the report and the release');
 
   const season = (await h.call('GET', '/api/v1/safety', { token })).body as SafetyView;
   assert.deepEqual(season.season, { total: inc[0]!.cost, covered: inc[0]!.covered, borne: inc[0]!.cost - inc[0]!.covered, insuranceFrom: season.season.insuranceDelta > 0 ? '2026-12' : null, insuranceDelta: insuranceSurcharge(all(h.db, 'SELECT severity, kind FROM incidents')) });
