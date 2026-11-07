@@ -29,11 +29,11 @@ export type Altitude = { kind: 'fl'; level: number } | { kind: 'ft'; ft: number 
 export const altitudeOf = (altFt: number): Altitude => (altFt >= TRANSITION_FT ? { kind: 'fl', level: Math.round(altFt / 100) } : { kind: 'ft', ft: Math.max(0, Math.round(altFt / 10) * 10) });
 export const flightLevelLabel = (level: number): string => `FL${String(level).padStart(3, '0')}`;
 
-export const CHECK_IDS = ['slew', 'timeAccel', 'pause', 'jumps'] as const;
+export const CHECK_IDS = ['slew', 'timeAccel', 'pause', 'jumps', 'reload'] as const;
 export type CheckId = (typeof CHECK_IDS)[number];
 export type CheckState = 'ok' | 'flagged' | 'unknown';
 export type Check = { id: CheckId | 'other'; state: CheckState; raw?: string };
-const FLAG_CHECK: Record<string, CheckId> = { slew_detected: 'slew', time_acceleration_above_1x: 'timeAccel', long_pause: 'pause', teleport_jump_over_50nm: 'jumps' };
+const FLAG_CHECK: Record<string, CheckId> = { slew_detected: 'slew', time_acceleration_above_1x: 'timeAccel', long_pause: 'pause', teleport_jump_over_50nm: 'jumps', reload_after_crash: 'reload' };
 
 /** The anti-cheat checks list: one row per known flag, red once the bridge raised it; flags this client does not know are listed as they came. */
 export function checksOf(s: Pick<LiveSample, 'flags' | 'simRate'> | null): Check[] {

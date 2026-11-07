@@ -4,7 +4,7 @@
 import { randomUUID } from 'node:crypto';
 import {
   HUB_PRICE, MAX_COMPANIES_PER_USER, loanOption, loanPayment, PAX_KG, REJECT_REPUTATION_PENALTY, START_MODES, START_REPUTATION, STARTER_AIRCRAFT, STARTING_BALANCE,
-  aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, fuelPriceFactor, jobPayout, minFlightHours, presetSetting, rankFor, realismModifiers, realismView, seasonOf, settle,
+  aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, fuelPriceFactor, interruptionsSchema, jobPayout, minFlightHours, presetSetting, rankFor, realismModifiers, realismView, seasonOf, settle,
   type AircraftType, type Company, type CompanyProfile, type CustomAircraftInput, type FleetAircraft, type Flight,
   type Financing, type FlightStatus, type Job, type Leaderboard, type LeaderboardRow, type Me, type Ownership, type Personality, type Pilot, type StartMode, type Telemetry, type Transaction,
 } from '@opc/shared';
@@ -224,10 +224,16 @@ export function jobView(r: JobColumns & { id: string }): Job {
   return j;
 }
 
-export const flightView = (r: FlightRow): Flight => ({
-  id: r.id, companyId: r.company_id, job: jobView({ ...r, id: r.job_id }), aircraftId: r.aircraft_id, aircraftIcao: r.aircraft_icao, status: r.status, rejectReason: r.reject_reason,
-  acceptedAt: r.accepted_at, completedAt: r.completed_at, revenue: r.revenue, fuelCost: r.fuel_cost, landingFee: r.landing_fee, maintenance: r.maintenance, net: r.net,
-});
+export function flightView(r: FlightRow): Flight {
+  const f: Flight = {
+    id: r.id, companyId: r.company_id, job: jobView({ ...r, id: r.job_id }), aircraftId: r.aircraft_id, aircraftIcao: r.aircraft_icao, status: r.status, rejectReason: r.reject_reason,
+    acceptedAt: r.accepted_at, completedAt: r.completed_at, revenue: r.revenue, fuelCost: r.fuel_cost, landingFee: r.landing_fee, maintenance: r.maintenance, net: r.net,
+  };
+  const stored = r.telemetry ? (JSON.parse(r.telemetry) as { interruptions?: unknown }).interruptions : undefined; // validated when it was ingested
+  const interruptions = interruptionsSchema.safeParse(stored);
+  if (interruptions.success && interruptions.data.reloads + interruptions.data.simRestarts > 0) f.interruptions = interruptions.data;
+  return f;
+}
 
 export function flightsOf(db: Db, companyId: number, limit: number, before?: number, status?: FlightStatus): FlightRow[] {
   return all<FlightRow>(db, 'SELECT * FROM flights WHERE company_id = ?1 AND id < ?2 AND (?3 IS NULL OR status = ?3) ORDER BY id DESC LIMIT ?4', companyId, before ?? Number.MAX_SAFE_INTEGER, status ?? null, limit);

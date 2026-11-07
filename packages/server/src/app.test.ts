@@ -182,6 +182,29 @@ test('telemetry carrying client anti-cheat flags is rejected with the flags in t
   assert.match(r.body.reason, /flagged.*slew_detected/);
 });
 
+test('reloads and sim restarts are shown on the flight and never punished; reload_after_crash is rejected even with pause tolerance', async () => {
+  const h = await harness();
+  const { token, me } = await h.register('reloader');
+  const key = await h.apiKey(token);
+  const send = async (extra: Record<string, unknown>) => {
+    const job = await h.flyableJob(token, me.fleet[0].id);
+    const flight = (await h.call('POST', `/api/v1/jobs/${job.id}/accept`, { token, body: { aircraftId: me.fleet[0].id } })).body;
+    return h.call('POST', `/api/v1/flights/${flight.id}/telemetry-verify`, { token: key, body: { ...h.goodReport(job), ...extra } });
+  };
+  const interruptions = { reloads: 2, simRestarts: 1, downtimeMs: 25 * 60_000 };
+  const ok = await send({ interruptions });
+  assert.equal(ok.body.verification, 'verified', ok.text);
+  assert.deepEqual(ok.body.flight.interruptions, interruptions);
+  const plain = await send({});
+  assert.equal(plain.body.verification, 'verified');
+  assert.equal(plain.body.flight.interruptions, undefined, 'a flight with no interruption says nothing');
+  assert.equal(plain.body.flight.revenue > 0 && ok.body.flight.revenue > 0, true, 'pay is unchanged');
+  const crash = await send({ flags: ['reload_after_crash'], interruptions });
+  assert.equal(crash.body.verification, 'rejected');
+  assert.match(crash.body.reason, /reload_after_crash/);
+  assert.equal((await send({ interruptions: { reloads: -1, simRestarts: 0, downtimeMs: 0 } })).status, 400);
+});
+
 test('a server with anti-cheat off says so, pays flagged and too-fast flights in full, but still ties the report to the job', async () => {
   const h = await harness({ antiCheat: false });
   assert.equal((await h.call('GET', '/api/v1/info')).body.antiCheat, false);
