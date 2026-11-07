@@ -153,7 +153,8 @@ export function stateOf(db: Db, s: StaffRow, now: number, rules: RestPolicyRules
   if (!last) return 'free';
   const released = last.arr_at + DUTY_RELEASE_MIN * 60_000;
   if (now < released) return 'onDuty';
-  return now < released + (last.dest === s.base ? rules.restBaseH : rules.restAwayH) * 3_600_000 - DUTY_REPORT_MIN * 60_000 ? 'resting' : 'free';
+  // rest runs from the release to the next report time (the same measure as shared dutyViolation)
+  return now < released + (last.dest === s.base ? rules.restBaseH : rules.restAwayH) * 3_600_000 ? 'resting' : 'free';
 }
 
 // ---------------------------------------------------------------- facts about one person (fatigue, windows)
@@ -169,7 +170,7 @@ export function dutyFacts(db: Db, s: StaffRow, now: number): DutyFacts {
   while (lastDay > today - 8 && !days.has(lastDay)) lastDay--;
   let streak = 0;
   while (days.has(lastDay - streak)) streak++;
-  const fatigue = days.size === 0 ? 0 : fatigueOf({ duty7Min: i.duty7Min, streakDays: streak, restDays: Math.max(0, today - lastDay - (days.has(today) ? 0 : 0)) });
+  const fatigue = days.size === 0 ? 0 : fatigueOf({ duty7Min: i.duty7Min, streakDays: streak, restDays: Math.max(0, today - lastDay - 1) });
   return { fatigue, flight28Min: i.flight28Min, flight12Min: i.flight12Min, duty7Min: i.duty7Min, dutyStart: i.dutyStart, lastEnd: i.lastEnd, lastAt: i.lastAt };
 }
 

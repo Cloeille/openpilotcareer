@@ -16,6 +16,7 @@ import { planMonth, runBilling } from './finance.ts';
 import { harness } from './harness.ts';
 import { catchUpLines, refreshLine } from './lines.ts';
 import { grantStarterCrew } from './staff-people.ts';
+import { stateOf, type StaffRow } from './staff.ts';
 
 const T0 = Date.UTC(2026, 10, 4, 12, 0, 0); // Wednesday 4 Nov 2026, 12:00Z (the harness clock)
 const body = (over: Record<string, unknown> = {}) => ({ a: 'LFPG', b: 'LFLL', freqPerDay: 3, days: Array(7).fill(true), windowStart: '06:00', windowEnd: '18:00', aircraftIds: [] as number[], ...over });
@@ -322,6 +323,42 @@ test('billing posts the payroll once per month through runBilling (idempotent); 
 
 // ---------------------------------------------------------------- read models and leave
 
+test('fatigue comes from the duty actually worked; the card alerts on the next flight the person could not fly, naming the rule; tired people are on the watch list', async () => {
+  const w = await world({ crew: true });
+  const p = get<{ id: number }>(w.h.db, "SELECT id FROM staff WHERE family = 'pilot' ORDER BY id LIMIT 1")!;
+  const today = dayNo(w.h.clock.t);
+  // six consecutive duty days of 7 h 40 (46 h in 7 days: the mockup's Camille Lefèvre) and 99 h flown in 28 days
+  for (let i = 1; i <= 6; i++) {
+    const dep = (today - i) * DAY_MS + 6 * 3_600_000;
+    run(w.h.db, 'INSERT INTO staff_duty (staff_id, leg_id, day, flight_no, dep_at, arr_at, origin, dest, duty_start, duty_min, flight_min) VALUES (?, ?, ?, 1100, ?, ?, ?, ?, ?, 460, 990)', p.id, -i, today - i, dep, dep + 3_600_000, 'LFPG', 'LFPG', dep - 45 * 60_000);
+  }
+  const d = (await w.call('GET', `/api/v1/staff/${p.id}`)).body as StaffDetail;
+  assert.equal(d.duty.fatigue, 55, 'the mockup\'s 46 h in 7 days and 6 duty days in a row');
+  assert.equal(d.duty.flight28d, 99);
+  assert.equal(d.last7d.filter((x) => x.kind === 'duty').length, 6);
+  assert.ok(d.alert && d.alert.rule === 'streak' && d.alert.overBy === 1 && /^\w{3} \d+$/.test(d.alert.flightNo), 'six days in a row: the next flight would be a seventh');
+  run(w.h.db, 'DELETE FROM staff_duty WHERE leg_id = -1');
+  run(w.h.db, 'UPDATE staff_duty SET flight_min = 1000 WHERE leg_id = -2');
+  const over = (await w.call('GET', `/api/v1/staff/${p.id}`)).body as StaffDetail;
+  assert.ok(over.alert && over.alert.rule === 'flight28' && over.alert.overBy > 0, JSON.stringify(over.alert));
+  const o = (await w.call('GET', '/api/v1/staff')).body as StaffOverview;
+  assert.ok(o.watch.some((x) => x.staffId === p.id && x.reason === 'fatigue' && x.value === 55), JSON.stringify(o.watch));
+});
+
+test('a person is on duty until the release after the landing, resting until the rest policy\'s hours are over, then free', async () => {
+  const w = await world({ crew: true });
+  await w.advance(2 * DAY_MS);
+  const last = get<{ staff_id: number; arr_at: number; dest: string }>(w.h.db, "SELECT staff_id, arr_at, dest FROM staff_duty d JOIN staff s ON s.id = d.staff_id WHERE s.family = 'pilot' ORDER BY arr_at DESC LIMIT 1")!;
+  const s = get<StaffRow>(w.h.db, 'SELECT * FROM staff WHERE id = ?', last.staff_id)!;
+  const rules = REST_POLICIES.standard;
+  const state = (t: number) => stateOf(w.h.db, s, t, rules);
+  const released = last.arr_at + 15 * 60_000;
+  assert.equal(state(last.arr_at - 60_000), 'onDuty');
+  assert.equal(state(released + 3_600_000), 'resting');
+  const restH = last.dest === s.base ? rules.restBaseH : rules.restAwayH;
+  assert.equal(state(released + restH * 3_600_000 - 60_000), 'resting');
+  assert.equal(state(released + restH * 3_600_000 + 60_000), 'free');
+});
 test('the overview counts people, positions and payroll by family with pilots by type, and the watch list names tired people', async () => {
   const w = await world({ crew: true });
   await w.advance(3 * DAY_MS);
