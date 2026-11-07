@@ -42,3 +42,6 @@ export function staffEntry(overview: { people: number; positions: number; payrol
     h('p', { class: 'muted' }, t('st.ov.sub.other', { n: fm.num(overview.people), positions: fm.num(overview.positions), payroll: fm.money(overview.payroll) })),
     h('div', { class: 'row' }, button(t('st.entry.open'), { variant: 'secondary', icon: 'users', key: 'S', onclick: () => go('#staff') })));
 }
+
+/** What the recruitment screen is filtered on. The overview presets it (its `R` key and buttons) and the screen keeps it while the player moves around. */
+export const hireFilter: { family: StaffFamily; base: string | null; qual: string | null } = { family: 'pilot', base: null, qual: null };

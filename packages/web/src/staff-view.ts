@@ -22,6 +22,7 @@ export const RULES = {
   reportMin: 45, releaseMin: 15,
   /** Two legs less than this apart belong to the same duty period. */
   breakMin: 6 * 60,
+  maxStreakDays: 6, weeklyRestH: 36,
 } as const;
 /** Type rating course by aircraft category: days off the roster and price (S2's TRAINING_COURSE). */
 export const TRAINING_COURSE: Record<AircraftCategory, { days: number; cost: number }> = {

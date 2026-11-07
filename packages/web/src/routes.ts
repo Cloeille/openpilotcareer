@@ -25,6 +25,7 @@ import { network } from './screens/network.ts';
 import { lineScreen } from './screens/line.ts';
 import { lineNew } from './screens/line-new.ts';
 import { ops } from './screens/ops.ts';
+import { staffRoute } from './screens/staff-route.ts';
 
 /** Every HUD tab is a route (the HUD links to `#<tab>`), which the type enforces: a tab added to TABS without a screen does not compile. */
 export const routes: Record<Tab, ScreenFn> & Record<string, ScreenFn> = {
@@ -41,6 +42,8 @@ export const routes: Record<Tab, ScreenFn> & Record<string, ScreenFn> = {
   realism,
   // ---- lines (v3 F1)
   network, line: lineScreen, 'line-new': lineNew, ops,
+  // ---- staff (v3 F2)
+  staff: staffRoute,
 };
 
 /** Old bookmarks (`#flights`) keep working. */
