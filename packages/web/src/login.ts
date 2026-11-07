@@ -104,8 +104,8 @@ export function loginView(root: HTMLElement, done: () => void, draft: Draft = { 
     error.textContent = '';
     try {
       const server = await check();
-      const r = await api<{ token: string }>(path, { server, auth: false, body: { username: username.value, password: passwordInput.value, ...(path === '/auth/register' ? { onboarding: true } : {}) } });
-      session.set(server, r.token);
+      const r = await api<{ token: string; username: string }>(path, { server, auth: false, body: { username: username.value, password: passwordInput.value, ...(path === '/auth/register' ? { onboarding: true } : {}) } });
+      session.signIn(server, r.token, r.username);
       passwordInput.value = '';
       done();
     } catch (e) {
