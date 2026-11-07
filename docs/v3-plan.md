@@ -433,6 +433,18 @@ Routes:
 
 Frontend (owner: fe-parts): `warehouse.ts`, `lease-wear.ts`; `api-parts.ts`. Hash routes `#warehouse/<hub>`, `#wear/<aircraftId>`.
 
+#### Implementation notes (F5)
+
+Written against S5's wire types (`shared/src/parts.ts` at `5f671d7` on `feature/v3-s5-parts`), because S5 had pushed by the time the screens were finished.
+
+- **Types.** `api-parts.ts` copies S5's wire types field for field instead of importing them: S5 is not merged into this branch's base, so `@opc/shared` has no `parts.ts` here. After the merge, replace the type block by `import type { ... } from '@opc/shared'`; nothing else changes. `parts-view.ts` is runtime-free (types only), so tests need no Vite.
+- **Entries (C8, B.10).** The Compagnie tab shows a "Pièces de rechange" card with the real capital, ground days and cover, and key `W` (one line of the `doors` list in `hubs-overview.ts`), for the main hub; absent when the server has no parts routes or the company has no aircraft. `#warehouse/<hub>` has no hub-plan entry: S3 has no cargo hall, so S5 answers `facility: null` and the building does not exist. Back from `#warehouse/<hub>` is `#hub/<hub>`. `#wear/<aircraftId>` opens from the leased aircraft's detail in `#fleet` ("Usure & remise à neuf") and from the Safety lever (`leverHash`: `maintenance` now leads to `#wear/<ref>`, its label is "Programmer la visite" again).
+- **The server prices, the screen lays out.** The wear screen never computes money. Each change of choice asks `GET /me/fleet/:id/wear?pick=gear:overhaul,...` and shows what comes back (`kpi.after`, `totals`, `works`, `balanceAfter`), so the header gauges, the verdict, the chart and the balance are S5's figures. The starting selection is S5's `selection` (its recommendation). `Entrée` on a row or a radio starts the works after a `confirm` that states cost, days and balance.
+- **Warehouse.** One shelf serves a class of parts (S5), so the right panel groups stock by class, not by type; the policy rows are per type. Changing a policy always asks first (more stock orders parts and ties up money, less sells parts back at 80 %) and the toast tells what was ordered and sold back. `Entrée` orders the critical kit of the grounded type (the same `PUT .../policy` with `critical`; S5's `POST .../order` is for one part and is not used). "Pièce attendue" is `AogCase.eta`; the track "avec la pièce" is `withPartBackAt`.
+- **Numbers not drawn as in the mockup.** The mockup's 4 / 5 / 4 / 11 ground days are S5's own figures here (C10). "Détail" captions under a component ("2 910 h depuis révision") have no field and are not drawn. The mockup's "Satisfaction passagers" is S5's component-derived figure. "Tout laisser" resets the selection and re-prices it.
+- **Honest states.** Server without the routes: a "not available" panel. `active: false` (wear and failures off): a line says nothing breaks down; the works button is off. `refurbishable: false` (club, rental): a line says why. Works under way (`worksUntil`): the choices are locked and the end date is shown.
+- **Not done.** `GET .../order` for single parts, the inventory-detail link, `F1` help (no help screen exists, as in R1).
+
 ### B.7 Lot SERVICE: cabin service and catering (owner: be-service)
 
 **Simplest model.** Service is a **policy table** that sets a **per-passenger revenue**, a **per-passenger cost** and a **satisfaction** per haul class. Satisfaction feeds the load factor by a small term. The kitchen is a **capacity-limited cost line** on the meals the timetable consumes. Polish: ship last.
