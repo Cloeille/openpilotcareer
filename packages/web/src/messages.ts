@@ -2106,6 +2106,10 @@ const table = {
   'st.p.current': ['This is the policy in force.', 'C’est la politique en vigueur.'],
   'st.p.done': ['Rest policy changed', 'Politique de repos modifiée'],
   'err.candidate_taken': ['Another airline hired this candidate first.', 'Une autre compagnie a recruté ce candidat avant toi.'],
+  // ---- facilities (S3: the ledger kinds the finance screen shows until the facilities screens exist)
+  'fin.kind.facility_rent': ['Building rent', 'Loyer de bâtiment'], 'fin.kind.facility_upkeep': ['Building upkeep', 'Entretien de bâtiment'], 'fin.kind.facility_loan': ['Building instalment', 'Mensualité de bâtiment'],
+  'fin.kind.facility_income': ['Maintenance sold', 'Maintenance vendue'], 'fin.kind.facility_deposit': ['Building deposit', 'Caution de bâtiment'], 'fin.kind.facility_deposit_refund': ['Building deposit returned', 'Caution de bâtiment rendue'],
+  'fin.kind.facility_works': ['Building works', 'Travaux de bâtiment'], 'fin.kind.facility_purchase': ['Building purchase', 'Achat de bâtiment'], 'fin.kind.facility_sale': ['Building sold', 'Vente de bâtiment'],
 } as const satisfies Record<string, readonly [string, string]>;
 
 export type Key = keyof typeof table;

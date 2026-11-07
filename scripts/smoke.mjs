@@ -207,6 +207,18 @@ const staffNow = await call('GET', `/staff/${interim.body.member.id}`, { token: 
 expect(staffNow.status === 200 && staffNow.body.week.length > 0 && staffNow.body.duty.flight28d > 0, `the interim pilot's card shows the legs flown: ${staffNow.body.duty.flight28d} h in 28 days`, staffNow.body.duty);
 const ops = await call('GET', '/ops', { token: lp.body.token });
 expect(ops.status === 200 && ops.body.enabled === true, `operations board: ${ops.body.counts.flying} flying, ${ops.body.counts.upcoming} upcoming`, ops);
+// v3 facilities: the plan of the hub, the contract preview, renting a hangar (deposit booked, one more aircraft fits), the overview carrying it
+const hubsView = (await call('GET', '/hubs/overview', { token: lineTok })).body;
+expect(hubsView.hubs[0].icao === 'LFPG' && hubsView.hubs[0].facilities.some((f) => f.owner === 'available'), `hubs overview: ${hubsView.hubs[0].facilities.length} buildings at LFPG, ${hubsView.monthlyCost} a month`, hubsView);
+const hubPlan = (await call('GET', '/hubs/LFPG/plan', { token: lineTok })).body;
+const hangar = hubPlan.buildings.find((b) => b.effect === 'hangar' && b.owner === 'available');
+const preview = (await call('GET', `/facilities/${hangar.facilityId}?mode=lease&level=1`, { token: lineTok })).body;
+expect(preview.due.today === 2 * hangar.rent && preview.offer.purchase.price > 100 * hangar.rent, `${hangar.name}: ${hangar.rent} a month, ${preview.due.today} due at signing`, preview);
+const spotsBefore = (await call('GET', '/me/hubs', { token: lineTok })).body[0].spots;
+const rented = await call('POST', `/facilities/${hangar.facilityId}/lease`, { token: lineTok, body: {} });
+const spotsAfter = (await call('GET', '/me/hubs', { token: lineTok })).body[0].spots;
+expect(rented.status === 201 && rented.body.due === preview.due.today && spotsAfter === spotsBefore + 2, `hangar rented: ${rented.body.due} paid, parking ${spotsBefore} -> ${spotsAfter}`, rented);
+expect((await call('POST', `/facilities/${hangar.facilityId}/lease`, { token: lineTok, body: {} })).body.error === 'occupied', 'the same hangar cannot be rented twice');
 const off = await call('PUT', '/network/enabled', { token: lp.body.token, body: { enabled: false } });
 expect(off.body.enabled === false && (await call('GET', '/network', { token: lp.body.token })).body.enabled === false, 'the network switch turns the lines off');
 await call('DELETE', '/me', { token: lp.body.token, body: { password } });
