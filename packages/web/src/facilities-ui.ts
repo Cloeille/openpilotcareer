@@ -1,7 +1,8 @@
 import type { FacilityKind, FacilityOwner, FacilityView } from '@opc/shared';
-import { icon } from './components.ts';
+import { button, icon } from './components.ts';
 import { t } from './i18n.ts';
 import { HOLDING_KEY, holdingOf, type Holding } from './facilities-view.ts';
+import type { IconName } from './icons.ts';
 import { h } from './ui.ts';
 
 /** DOM pieces shared by the FACILITIES screens. The logic they show lives in facilities-view.ts. */
@@ -29,3 +30,11 @@ export function statusText(holding: Holding, ownerName?: string | null): string 
 
 /** The building the plan opens on when the player came from a row of the overview. Read once by the plan. */
 export const planFocus: { slot: string | null } = { slot: null };
+
+type DoorOpts = { id: string; title: string; tag: string; body: string; open: string; icon: IconName; key: string; onopen: () => void };
+/** A door of the Compagnie tab to another Company screen (C8): title, tag, a one-line summary (all of it in the tooltip) and a short button with its key. Compact on purpose, the five of them share a 392px column with the other bases. */
+export const doorCard = (o: DoorOpts): HTMLElement =>
+  h('section', { class: 'panel fc-door', id: o.id, 'aria-labelledby': `${o.id}-title` },
+    h('div', { class: 'fc-door-head' }, h('h2', { id: `${o.id}-title` }, o.title), h('span', { class: 'fc-door-tag' }, o.tag)),
+    h('p', { class: 'muted fc-door-body', title: o.body }, o.body),
+    button(t('hint.open'), { variant: 'secondary', icon: o.icon, key: o.key, label: o.open, onclick: o.onopen }));

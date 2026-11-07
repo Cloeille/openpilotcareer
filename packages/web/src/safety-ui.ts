@@ -1,5 +1,6 @@
 import type { Incident, SafetyView } from './api-safety.ts';
-import { button, icon, panel } from './components.ts';
+import { icon } from './components.ts';
+import { doorCard } from './facilities-ui.ts';
 import { fmt } from './format.ts';
 import { t, tp } from './i18n.ts';
 import { incidentFacts, type IncidentFacts } from './safety-view.ts';
@@ -51,7 +52,5 @@ export function incidentRow(i: Incident, registration: string): HTMLElement {
 /** The Compagnie tab's door to Safety (C8). Null while the server has no safety routes or cannot be asked: no dead button. */
 export function safetyEntry(view: Pick<SafetyView, 'index'> | null, go: (hash: string) => void): HTMLElement | null {
   if (!view) return null;
-  return panel({ title: t('sf.entry.title'), action: t('sf.entry.tag'), id: 'sf-entry' },
-    h('p', { class: 'muted' }, t('sf.entry.body', { index: fmt().num(Math.round(view.index)) })),
-    h('div', { class: 'row' }, button(t('sf.entry.open'), { variant: 'secondary', icon: 'shield-check', key: 'F', onclick: () => go('#safety') })));
+  return doorCard({ id: 'sf-entry', title: t('sf.entry.title'), tag: t('sf.entry.tag'), body: t('sf.entry.body', { index: fmt().num(Math.round(view.index)) }), open: t('sf.entry.open'), icon: 'shield-check', key: 'F', onopen: () => go('#safety') });
 }

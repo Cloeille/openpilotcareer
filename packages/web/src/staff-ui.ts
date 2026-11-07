@@ -1,4 +1,5 @@
-import { button, icon, panel } from './components.ts';
+import { icon } from './components.ts';
+import { doorCard } from './facilities-ui.ts';
 import { fmt } from './format.ts';
 import { t, tp } from './i18n.ts';
 import type { StaffFamily, StaffOverview, StaffRole } from './api-staff.ts';
@@ -44,9 +45,7 @@ export function arrivalNote(o: Pick<StaffOverview, 'pending' | 'families'>): str
 export function staffEntry(overview: StaffOverview | null, go: (hash: string) => void): HTMLElement | null {
   if (!overview) return null;
   const fm = fmt();
-  return panel({ title: t('st.entry.title'), action: t('st.crumb'), id: 'st-entry' },
-    h('p', { class: 'muted' }, t('st.ov.sub.other', { n: fm.num(overview.people), positions: fm.num(overview.positions), payroll: fm.money(overview.payroll) }), arrivalNote(overview)),
-    h('div', { class: 'row' }, button(t('st.entry.open'), { variant: 'secondary', icon: 'users', key: 'S', onclick: () => go('#staff') })));
+  return doorCard({ id: 'st-entry', title: t('st.entry.title'), tag: t('st.crumb'), body: t('st.ov.sub.other', { n: fm.num(overview.people), positions: fm.num(overview.positions), payroll: fm.money(overview.payroll) }) + arrivalNote(overview), open: t('st.entry.open'), icon: 'users', key: 'S', onopen: () => go('#staff') });
 }
 
 /** What the recruitment screen is filtered on. The overview presets it (its `R` key and buttons) and the screen keeps it while the player moves around. */

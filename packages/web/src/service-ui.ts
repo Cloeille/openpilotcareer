@@ -1,5 +1,6 @@
 import type { MealQuality } from './api-service.ts';
-import { button, icon, panel } from './components.ts';
+import { icon } from './components.ts';
+import { doorCard } from './facilities-ui.ts';
 import { fmt } from './format.ts';
 import { t } from './i18n.ts';
 import { h } from './ui.ts';
@@ -33,7 +34,5 @@ export const priceLine = (price: number): string => t('sv.meals.perMeal', { pric
 export function serviceEntry(view: { satisfaction: { value: number | null } } | null, go: (hash: string) => void): HTMLElement | null {
   if (!view) return null;
   const sat = view.satisfaction.value;
-  return panel({ title: t('sv.entry.title'), action: t('sv.entry.tag'), id: 'sv-entry' },
-    h('p', { class: 'muted' }, sat === null ? t('sv.entry.bodyNone') : t('sv.entry.body', { sat: fmt().num(sat, 1) })),
-    h('div', { class: 'row' }, button(t('sv.entry.open'), { variant: 'secondary', icon: 'chef-hat', key: 'B', onclick: () => go('#service') })));
+  return doorCard({ id: 'sv-entry', title: t('sv.entry.title'), tag: t('sv.entry.tag'), body: sat === null ? t('sv.entry.bodyNone') : t('sv.entry.body', { sat: fmt().num(sat, 1) }), open: t('sv.entry.open'), icon: 'chef-hat', key: 'B', onopen: () => go('#service') });
 }
