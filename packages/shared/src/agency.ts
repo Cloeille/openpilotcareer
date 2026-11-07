@@ -69,9 +69,9 @@ export function optionsOf(i: OptionInputs): AgencyOption[] {
 }
 
 /** What the agency saves against the cheapest other route that can be taken (the mockup's footer compares with training); null when it saves no money. */
-export function agencySavings(options: readonly AgencyOption[]): { against: AgencyOptionId; days: number; amount: number } | null {
+export function agencySavings(options: readonly AgencyOption[]): { against: Exclude<AgencyOptionId, 'agency'>; days: number; amount: number } | null {
   const agency = options.find((o) => o.id === 'agency');
-  const other = options.filter((o) => o.id !== 'agency' && o.available).sort((p, q) => p.total - q.total)[0];
+  const other = options.flatMap((o) => (o.id !== 'agency' && o.available ? [{ ...o, id: o.id }] : [])).sort((p, q) => p.total - q.total)[0];
   return agency && other && other.total > agency.total ? { against: other.id, days: other.days - agency.days, amount: other.total - agency.total } : null;
 }
 

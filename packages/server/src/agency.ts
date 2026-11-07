@@ -131,14 +131,15 @@ export type AgencyQuery = { base?: string | undefined; qual?: string | undefined
 export function agencyView(db: Db, companyId: number, q: AgencyQuery, now: number): AgencyView {
   const gaps = gapsOf(db, companyId, now);
   const mission0 = q.base === undefined ? openMissions(db, companyId)[0] : undefined;
-  const request: Position | null = q.base !== undefined ? { base: q.base, qual: q.qual!, count: q.count! }
+  const asked: Position | null = q.base !== undefined ? { base: q.base, qual: q.qual!, count: q.count! }
     : mission0 ? { base: mission0.base, qual: mission0.qual, count: mission0.count }
       : gaps[0] ? { base: gaps[0].base, qual: gaps[0].qual, count: Math.min(gaps[0].open, AGENCY_MAX_COUNT) } : null;
   const view = { gaps, commissionPct: AGENCY_COMMISSION_PCT, premiumPct: AGENCY_PREMIUM_PCT };
-  if (!request) return { ...view, request, perDay: 0, options: [], savings: null, mission: null };
-  if (q.base !== undefined) assertPosition(db, companyId, request.base, request.qual);
+  if (!asked) return { ...view, request: null, perDay: 0, options: [], savings: null, mission: null };
+  if (q.base !== undefined) assertPosition(db, companyId, asked.base, asked.qual);
 
-  const m = openMissionAt(db, companyId, request.base, request.qual);
+  const m = openMissionAt(db, companyId, asked.base, asked.qual);
+  const request: Position = m ? { ...asked, count: m.count } : asked; // an open mission is for the people it was opened for
   const perDay = gaps.find((g) => g.base === request.base && g.qual === request.qual)?.perDay ?? 0;
   const course = TRAINING_COURSE[categoryOf(db, companyId, request.qual)!];
   const trainable = get<{ n: number }>(db, `SELECT COUNT(*) AS n FROM staff s WHERE s.company_id = ? AND s.family = 'pilot' AND s.base = ? AND s.starts_at <= ? AND (s.ends_at IS NULL OR s.ends_at > ?)

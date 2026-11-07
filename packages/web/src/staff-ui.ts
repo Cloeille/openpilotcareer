@@ -17,11 +17,11 @@ export const roleFull = (role: StaffRole): string => t(`st.role.${role}Full`);
 /** Shown when the server has no staff routes yet (404): the screen says so instead of failing. */
 export const staffOff = (): HTMLElement => h('div', { class: 'ln-off st-off panel' }, h('div', { class: 'panel-body' }, icon('users', 20), h('h1', { class: 'ln-off-title' }, t('st.off.title')), h('p', { class: 'muted' }, t('st.off.body'))));
 
-/** The Effectifs / Recrutement switch at the top right of the staffing screens. */
-export function viewSwitch(current: 'staff' | 'hire', go: (hash: string) => void): HTMLElement {
-  const opt = (id: 'staff' | 'hire', hash: string): HTMLElement =>
+/** The Effectifs / Recrutement / Cabinet switch at the top right of the staffing screens. */
+export function viewSwitch(current: 'staff' | 'hire' | 'agency', go: (hash: string) => void): HTMLElement {
+  const opt = (id: 'staff' | 'hire' | 'agency', hash: string): HTMLElement =>
     h('button', { type: 'button', class: 'view-opt', 'aria-pressed': String(id === current), onclick: () => go(hash) }, t(`st.view.${id}`), id === 'hire' ? h('kbd', { class: 'keycap' }, 'R') : null);
-  return h('div', { class: 'view-switcher', role: 'group', 'aria-label': t('st.views') }, opt('staff', '#staff'), opt('hire', '#staff/hire'));
+  return h('div', { class: 'view-switcher', role: 'group', 'aria-label': t('st.views') }, opt('staff', '#staff'), opt('hire', '#staff/hire'), opt('agency', '#staff/agency'));
 }
 
 /** A thin bar showing how full a limit is: the fill is the fraction, the tone is carried by the label beside it as well. */
