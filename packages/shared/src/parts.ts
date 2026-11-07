@@ -19,8 +19,8 @@ export const isMechanical = (c: Component): c is Mechanical => (MECHANICAL as re
 
 /** B.6: the share of the aircraft's wear each component takes. Propellers (rotors) exist on turboprops and helicopters only. */
 export const COMPONENT_WEIGHT: Record<Component, number> = { engines: 0.35, gear: 0.2, propellers: 0.1, avionics: 0.1, interior: 0.15, paint: 0.1 };
-/** A component wears `WEAR_PCT_PER_HOUR[category] * weight * COMPONENT_WEAR_SCALE` percent per block hour. The scale is tuned so a breakdown comes every 500 to 1 500 block hours of the airliners and light aircraft the game flies. */
-export const COMPONENT_WEAR_SCALE = 0.5;
+/** A component wears `WEAR_PCT_PER_HOUR[category] * weight * COMPONENT_WEAR_SCALE` percent per block hour. The scale is tuned so a mechanical component fails every 700 to 2 000 block hours. */
+export const COMPONENT_WEAR_SCALE = 0.35;
 const PROPELLED: readonly AircraftCategory[] = ['turboprop-single', 'turboprop-multi', 'turboprop-airliner', 'helicopter'];
 export const componentsOf = (category: AircraftCategory): Component[] => COMPONENTS.filter((c) => c !== 'propellers' || PROPELLED.includes(category));
 /** Percent of wear per block hour. */
@@ -144,21 +144,21 @@ export type ChoiceView = {
   monthlyLoss: number;
   /** Months to earn the cost back; null when it never does (no gain, or more than NEVER_PAYBACK_MONTHS). */
   paybackMonths: number | null;
-  /** Over the months left: what is gained minus what is spent, plus the new parts' value when the company keeps the aircraft (it owns it). On a lease this is the figure for handing it back. */
+  /** Over the months left: what is gained minus what is spent. On a lease this is the figure for handing the aircraft back (the new parts stay with the lessor). */
   net: number;
-  /** The same for a leased aircraft bought at the end of the term (the new parts stay with the company). Equals `net` when the company owns the aircraft. */
+  /** The same when the aircraft is bought at the end of the lease: the new parts stay with the company (KEEP_VALUE_SHARE of what they cost). Equals `net` when the aircraft is not on a lease. */
   netIfBought: number;
   days: number;
 };
-/** `keeps`: the company owns the aircraft (owned or financed), so the new parts are worth something to it at the end of the horizon. */
-export function choiceView(action: Choice, c: Component, wear: number, aircraftValue: number, econ: Economics, months: number, keeps: boolean): ChoiceView {
+/** `leased`: the aircraft is on a lease, so the new parts are only worth something to the company if it buys the aircraft at the end. */
+export function choiceView(action: Choice, c: Component, wear: number, aircraftValue: number, econ: Economics, months: number, leased: boolean): ChoiceView {
   const cost = action === 'leave' ? 0 : refurbCost(action, c, aircraftValue), after = wearAfterAction(action, wear);
   const loss = monthlyLoss(wearEffects(c, after), econ), now = monthlyLoss(wearEffects(c, wear), econ), gain = now - loss;
   const payback = action === 'leave' || gain <= 0 ? null : Math.ceil(cost / gain);
   const base = action === 'leave' ? 0 : gain * months - cost, kept = action === 'leave' ? 0 : Math.round(cost * KEEP_VALUE_SHARE);
   return {
     action, cost, wearAfter: after, monthlyLoss: loss, paybackMonths: payback !== null && payback <= NEVER_PAYBACK_MONTHS ? payback : null,
-    net: keeps ? base + kept : base, netIfBought: base + kept, days: action === 'leave' ? 0 : REFURB_DAYS[action][c],
+    net: base, netIfBought: leased ? base + kept : base, days: action === 'leave' ? 0 : REFURB_DAYS[action][c],
   };
 }
 /** The recommended choice of a component: the one with the best net over the months left, and only if it is positive. */
@@ -202,15 +202,15 @@ export const PARTS_OF_COMPONENT: Record<Mechanical, readonly PartKind[]> = { eng
 export type CatalogPart = { id: string; cls: PartClass; kind: PartKind; name: string; price: number; critical: number; full: number };
 const part = (cls: PartClass, kind: PartKind, name: string, price: number, critical: number, full: number): CatalogPart => ({ id: `${cls}.${kind}`, cls, kind, name, price, critical, full });
 /** Unit prices and kit quantities. The regional class is the mockup's ATR (full kit 382 500: engine module 245 000, 2 blades 37 000, 2 computers 36 500, starter-generator 32 000, 2 brakes 19 600, 4 wheels 12 400);
- *  the jet class its A220 (MAU 30 800, brake 24 600, 2 wheels 9 600) and CRJ (starter 31 000); the turboprop class its Caravan (fuel regulator 18 400). The rest is estimated. */
+ *  the jet class its A220 (critical kit 65 000: MAU 30 800, brake 24 600, 2 wheels 9 600) and CRJ (starter 31 000); the turboprop class its Caravan (critical kit: the 18 400 fuel regulator). The rest is estimated. */
 export const PARTS: readonly CatalogPart[] = [
-  part('piston', 'engine', 'Engine overhaul exchange', 22_000, 0, 1), part('piston', 'starter', 'Starter and alternator', 650, 1, 1), part('piston', 'propeller', 'Propeller', 3_600, 0, 1),
+  part('piston', 'engine', 'Engine overhaul exchange', 12_000, 0, 1), part('piston', 'starter', 'Starter and alternator', 650, 1, 1), part('piston', 'propeller', 'Propeller', 3_600, 0, 1),
   part('piston', 'avionics', 'Avionics unit', 2_400, 0, 1), part('piston', 'brake', 'Brake set', 280, 1, 2), part('piston', 'wheel', 'Wheel and tyre', 150, 2, 3),
   part('turboprop', 'engine', 'PT6A engine module, exchange', 280_000, 0, 1), part('turboprop', 'starter', 'Fuel regulator', 18_400, 1, 1), part('turboprop', 'propeller', 'Propeller', 9_800, 0, 1),
   part('turboprop', 'avionics', 'Avionics unit', 7_400, 0, 1), part('turboprop', 'brake', 'Brake set', 2_300, 0, 2), part('turboprop', 'wheel', 'Wheel and tyre', 650, 0, 4),
   part('regional', 'engine', 'PW127M engine module, exchange', 245_000, 0, 1), part('regional', 'starter', 'Starter-generator', 32_000, 1, 1), part('regional', 'propeller', 'Propeller blade', 18_500, 0, 2),
   part('regional', 'avionics', 'ADC and VHF computer', 18_250, 1, 2), part('regional', 'brake', 'Carbon brake', 9_800, 1, 2), part('regional', 'wheel', 'Main wheel and tyre', 3_100, 2, 4),
-  part('jet', 'engine', 'Engine module, exchange', 900_000, 0, 1), part('jet', 'starter', 'Engine starter', 31_000, 1, 1), part('jet', 'avionics', 'MAU avionics module', 30_800, 1, 2),
+  part('jet', 'engine', 'Engine module, exchange', 900_000, 0, 1), part('jet', 'starter', 'Engine starter', 31_000, 0, 1), part('jet', 'avionics', 'MAU avionics module', 30_800, 1, 2),
   part('jet', 'brake', 'Carbon brake', 24_600, 1, 2), part('jet', 'wheel', 'Main wheel and tyre', 4_800, 2, 4),
 ];
 export const partById = (id: string): CatalogPart | undefined => PARTS.find((p) => p.id === id);

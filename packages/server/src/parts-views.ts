@@ -40,11 +40,11 @@ export function wearView(db: Db, companyId: number, aircraftId: number, pick: Se
   const a = ownAircraft(db, companyId, aircraftId), type = typeFor(db, companyId, a.icao), active = wearEnabled(db, companyId);
   const contract = contractOf(db, a.id), lease = contract?.active && contract.kind === 'lease' ? contract : null;
   const months = lease?.endsAt ? Math.max(0, Math.round((lease.endsAt - now) / MONTH_MS)) : HORIZON_MONTHS;
-  const keeps = a.ownership === 'owned' || a.ownership === 'financed', econ = economicsOf(type);
+  const econ = economicsOf(type);
   const rows = loadComponents(db, a.id, type.category);
   const components: ComponentWear[] = rows.map((r) => ({
     component: r.component, wearPct: round1(r.wear_pct), effects: wearEffects(r.component, r.wear_pct), worksUntil: r.refurb_until !== null && r.refurb_until > now ? r.refurb_until : null,
-    choices: Object.fromEntries(CHOICES.map((c) => [c, choiceView(c, r.component, r.wear_pct, a.value, econ, months, keeps)])) as Record<Choice, ChoiceView>,
+    choices: Object.fromEntries(CHOICES.map((c) => [c, choiceView(c, r.component, r.wear_pct, a.value, econ, months, !!lease)])) as Record<Choice, ChoiceView>,
   }));
   const recommended: Selection = components.map((c) => ({ component: c.component, action: bestChoice(c.choices) }));
   const selection = pick ?? recommended;
