@@ -212,18 +212,23 @@ export type DutyState = { dutyMin: number; limitMin: number; endsAt: number | nu
 /** A leg the person flew (or will fly: the engine books crews at the departure tick). */
 export type DutyBlock = { flightNo: string; dep: number; arr: number; origin: string; dest: string };
 
+/** A hire in notice: signed and paid for, on the roster, but not working before `startsAt`. */
+export type Arrival = { id: number; name: string; role: StaffRole; startsAt: number };
+/** `headcount`: people working now (what the crew check can use). `availability.pending` and `arriving` (soonest first): hires in notice, who already fill a post, so `vacant` = `need` - `headcount` - `pending`. */
 export type FamilyRow = {
   family: StaffFamily; label: string;
   /** The aircraft type of a child row of the pilots. */
   type?: string;
   headcount: number; need: number;
   availability: { onDuty: number; resting: number; leave: number; training: number; free: number; pending: number; vacant: number };
+  arriving: Arrival[];
   salaries: number; note: string | null; children?: FamilyRow[];
 };
 /** Today's flights cancelled for want of crew: `family` is what ran short (null when unknown), `type` the aircraft type. */
 export type Blocker = { kind: 'no_crew' | 'duty_limit'; family: 'pilot' | 'cabin' | null; type: string; flights: number };
 export type WatchItem = { staffId: number; name: string; family: StaffFamily; reason: 'fatigue' | 'duty'; value: number; detail: string };
-export type StaffOverview = { people: number; positions: number; payroll: number; policy: RestPolicy; families: FamilyRow[]; blockers: Blocker[]; watch: WatchItem[] };
+/** `people` and `payroll` are the people working now; `pending` counts the hires still in notice (listed per row in `arriving`). */
+export type StaffOverview = { people: number; pending: number; positions: number; payroll: number; policy: RestPolicy; families: FamilyRow[]; blockers: Blocker[]; watch: WatchItem[] };
 
 export type StaffDetail = {
   member: StaffMember; duty: DutyState; week: DutyBlock[];

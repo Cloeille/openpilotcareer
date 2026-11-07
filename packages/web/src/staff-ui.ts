@@ -1,9 +1,9 @@
 import { button, icon, panel } from './components.ts';
 import { fmt } from './format.ts';
-import { t } from './i18n.ts';
-import type { StaffFamily, StaffRole } from './api-staff.ts';
+import { t, tp } from './i18n.ts';
+import type { StaffFamily, StaffOverview, StaffRole } from './api-staff.ts';
 import type { Key } from './messages.ts';
-import type { Tone } from './staff-view.ts';
+import { nextArrival, type Tone } from './staff-view.ts';
 import { h } from './ui.ts';
 
 /** DOM pieces shared by the STAFF screens. The logic they show lives in staff-view.ts. */
@@ -34,12 +34,18 @@ export const toneIcon = (tone: Tone): SVGSVGElement => icon(tone === 'ok' ? 'cir
 export const longDay = (iso: string, locale: string): string => new Intl.DateTimeFormat(locale, { timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long' }).format(Date.parse(`${iso}T12:00:00Z`));
 export const shortDate = (iso: string, locale: string): string => new Intl.DateTimeFormat(locale, { timeZone: 'UTC', day: 'numeric', month: 'short' }).format(Date.parse(`${iso}T12:00:00Z`));
 
+/** ` · 18 hires in notice, arriving from 14 Nov`: what the head count leaves out. Empty when nobody is in notice. */
+export function arrivalNote(o: Pick<StaffOverview, 'pending' | 'families'>): string {
+  const first = nextArrival(o.families);
+  return first === null ? '' : ` · ${tp('st.ov.arriving', o.pending, { date: fmt().date(first) })}`;
+}
+
 /** The Compagnie tab's door to Staff (C8). Null while the server has no staff routes or cannot be asked: no dead button. */
-export function staffEntry(overview: { people: number; positions: number; payroll: number } | null, go: (hash: string) => void): HTMLElement | null {
+export function staffEntry(overview: StaffOverview | null, go: (hash: string) => void): HTMLElement | null {
   if (!overview) return null;
   const fm = fmt();
   return panel({ title: t('st.entry.title'), action: t('st.crumb'), id: 'st-entry' },
-    h('p', { class: 'muted' }, t('st.ov.sub.other', { n: fm.num(overview.people), positions: fm.num(overview.positions), payroll: fm.money(overview.payroll) })),
+    h('p', { class: 'muted' }, t('st.ov.sub.other', { n: fm.num(overview.people), positions: fm.num(overview.positions), payroll: fm.money(overview.payroll) }), arrivalNote(overview)),
     h('div', { class: 'row' }, button(t('st.entry.open'), { variant: 'secondary', icon: 'users', key: 'S', onclick: () => go('#staff') })));
 }
 
