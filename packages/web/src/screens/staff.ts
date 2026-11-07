@@ -6,7 +6,7 @@ import { hashFor } from '../keys.ts';
 import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { availabilitySegments, blockerFamily, blockerOf, defaultExpanded, defaultRow, presetFor, rowBadge, toggleAll, visibleRows, type RowBadge, type VisibleRow } from '../staff-view.ts';
-import { famLabel, famSub, hireFilter, roleShort, staffOff, toneIcon, viewSwitch } from '../staff-ui.ts';
+import { arrivalNote, famLabel, famSub, hireFilter, roleShort, staffOff, toneIcon, viewSwitch } from '../staff-ui.ts';
 import { h } from '../ui.ts';
 
 /** The families the player has opened and the base filter survive a redraw (a poll or a language change), not a new visit. */
@@ -20,11 +20,14 @@ const BADGE_TEXT = (b: RowBadge): string => {
     case 'none': return t('st.b.none');
     case 'note': return b.note;
     case 'missing': return tp('st.b.missing', b.n);
+    case 'arriving': return t('st.b.arriving', { date: fmt().date(b.at) });
     case 'complete': return t('st.b.complete');
   }
 };
 
 const rowLabel = (r: FamilyRow): string => (r.type ? r.label : famLabel(r.family));
+/** `0 (+10 in notice) / 12`: the people working now, the hires who will join them, the posts. */
+const countText = (r: FamilyRow): string => `${fmt().num(r.headcount)}${r.availability.pending > 0 ? ` (${t('st.have.arriving', { n: fmt().num(r.availability.pending) })})` : ''} / ${fmt().num(r.need)}`;
 
 /** `#staff`: headcount against the timetable, family by family, with what blocks flights beside it. */
 export async function staff(ctx: Ctx): Promise<Screen> {
@@ -45,7 +48,7 @@ export async function staff(ctx: Ctx): Promise<Screen> {
   const bases = me.hubs;
   const header = h('div', { class: 'ln-header' },
     titleBlock(h('span', { class: 'row tight' }, bases.map(signLocation), h('span', null, t('st.ov.company', { company: me.company.name }))), t('st.ov.title'),
-      h('p', { class: 'muted', style: 'font-size:14px' }, tp('st.ov.sub', data.people, { positions: fm.num(data.positions), payroll: fm.money(data.payroll) }))),
+      h('p', { class: 'muted', style: 'font-size:14px' }, `${tp('st.ov.sub', data.people, { positions: fm.num(data.positions), payroll: fm.money(data.payroll) })}${arrivalNote(data)}`)),
     viewSwitch('staff', go));
 
   // ------------------------------------------------------------ the table
@@ -57,7 +60,7 @@ export async function staff(ctx: Ctx): Promise<Screen> {
   };
   const availabilityText = (r: FamilyRow): string => {
     const a = r.availability;
-    return [a.onDuty && t('st.avail.duty', { n: a.onDuty }), a.free && tp('st.avail.free', a.free), a.resting && t('st.avail.rest', { n: a.resting }), a.leave && t('st.avail.leave', { n: a.leave }), a.training && t('st.avail.training', { n: a.training }), a.vacant && tp('st.avail.vacant', a.vacant)].filter(Boolean).join(' · ');
+    return [a.onDuty && t('st.avail.duty', { n: a.onDuty }), a.free && tp('st.avail.free', a.free), a.resting && t('st.avail.rest', { n: a.resting }), a.leave && t('st.avail.leave', { n: a.leave }), a.training && t('st.avail.training', { n: a.training }), a.pending && t('st.avail.pending', { n: a.pending }), a.vacant && tp('st.avail.vacant', a.vacant)].filter(Boolean).join(' · ');
   };
   const line = (v: VisibleRow): HTMLElement => {
     const r = v.row;
@@ -66,12 +69,13 @@ export async function staff(ctx: Ctx): Promise<Screen> {
     const child = v.depth === 1;
     const on = (): void => { focused = v.key; panelHost.replaceChildren(...side(v)); markFocused(); };
     const el = h('div', { class: `st-row${child ? ' child' : ''}${v.expanded ? ' open' : ''}${b.tone === 'bad' && child ? ' bad' : ''}`, 'data-row': '', 'data-key': v.key, role: 'row', tabindex: 0, 'aria-selected': String(focused === v.key),
-      'aria-expanded': v.expandable ? String(v.expanded) : null, 'aria-label': `${name}, ${r.headcount} / ${r.need}, ${BADGE_TEXT(b)}`,
+      'aria-expanded': v.expandable ? String(v.expanded) : null, 'aria-label': `${name}, ${countText(r)}, ${BADGE_TEXT(b)}`,
       onfocus: on, onclick: () => { on(); if (v.expandable) toggle(v.key); },
       onkeydown: (e: KeyboardEvent) => { if (e.key === 'Enter' && v.expandable) { e.preventDefault(); toggle(v.key); } } },
       h('span', { class: 'st-fam' }, v.expandable ? icon(v.expanded ? 'chevron-down' : 'chevron-right', 16) : (child ? null : h('span', { class: 'st-chev-gap' })),
         h('span', { class: 'col tight' }, h('span', { class: child ? 'st-name child' : 'st-name' }, name), child ? null : h('span', { class: 'dim small' }, famSub(r.family)))),
-      h('span', { class: 'st-count' }, h('span', { class: child ? 'st-have child' : 'st-have' }, fm.num(r.headcount)), h('span', { class: 'dim' }, `/ ${fm.num(r.need)}`)),
+      h('span', { class: 'st-count' }, h('span', { class: child ? 'st-have child' : 'st-have' }, fm.num(r.headcount)), h('span', { class: 'dim' }, `/ ${fm.num(r.need)}`),
+        r.availability.pending > 0 ? h('span', { class: 'st-incoming small' }, t('st.have.arriving', { n: fm.num(r.availability.pending) })) : null),
       h('span', { class: 'st-avail' }, bar(r), child ? null : h('span', { class: 'dim small' }, availabilityText(r))),
       h('span', { class: `st-pay${child ? ' muted' : ''}` }, fm.money(r.salaries)),
       h('span', { class: `st-state ${b.tone}` }, toneIcon(b.tone), h('span', null, BADGE_TEXT(b))));
@@ -91,7 +95,7 @@ export async function staff(ctx: Ctx): Promise<Screen> {
     ...(empty ? [emptyState] : [head, h('div', { class: 'st-rows', role: 'table', 'aria-label': t('st.ov.panel') }, rows().map(line))]));
 
   // ------------------------------------------------------------ legend and base filter
-  const legendItems: [string, Key][] = [['duty', 'st.leg.duty'], ['rest', 'st.leg.rest'], ['leave', 'st.leg.leave'], ['training', 'st.leg.training'], ['vacant', 'st.leg.vacant'], ['blocks', 'st.leg.blocks']];
+  const legendItems: [string, Key][] = [['duty', 'st.leg.duty'], ['rest', 'st.leg.rest'], ['leave', 'st.leg.leave'], ['training', 'st.leg.training'], ['pending', 'st.leg.pending'], ['vacant', 'st.leg.vacant'], ['blocks', 'st.leg.blocks']];
   const legend = h('div', { class: 'st-legend' }, legendItems.map(([k, key]) => h('span', { class: 'ln-legend-item' }, h('i', { class: `st-seg ${k} sw`, 'aria-hidden': 'true' }), t(key))));
   const baseChip = (value: string | null, label: string): HTMLElement =>
     h('button', { type: 'button', class: 'seg st-chip', 'aria-pressed': String(base === value), onclick: () => { base = value; opened = null; focused = null; redraw(); } }, label);
@@ -133,7 +137,7 @@ function sidePanel(data: StaffOverview, v: VisibleRow | null, goHire: (v: Visibl
       h('dl', { class: 'st-facts' }, h('dt', null, t('st.side.cancelled')), h('dd', null, tp('st.side.flights', blocker.flights)))]
     : row
       ? [h('span', { class: 'st-eyebrow' }, icon('users', 14), t('st.side.row')), h('h2', { class: 'st-side-title' }, rowLabel(row)),
-        h('dl', { class: 'st-facts' }, h('dt', null, t('st.col.count')), h('dd', null, `${fm.num(row.headcount)} / ${fm.num(row.need)}`), h('dt', null, t('st.col.pay')), h('dd', null, fm.money(row.salaries)))]
+        h('dl', { class: 'st-facts' }, h('dt', null, t('st.col.count')), h('dd', null, countText(row)), h('dt', null, t('st.col.pay')), h('dd', null, fm.money(row.salaries)))]
       : [h('h2', { class: 'st-side-title' }, t('st.ov.title'))];
 
   const watchBlock = h('section', { class: 'st-watch', 'aria-labelledby': 'st-watch-title' }, h('h3', { class: 'ln-sub-title', id: 'st-watch-title' }, t('st.side.watch')),
@@ -141,11 +145,15 @@ function sidePanel(data: StaffOverview, v: VisibleRow | null, goHire: (v: Visibl
       : h('ul', { class: 'plain' }, watch.map((w) => h('li', { class: 'st-watch-item' }, icon('triangle-alert', 14), h('div', { class: 'col tight' }, h('span', null, w.name), h('span', { class: 'dim small' }, w.detail),
         w.staffId ? h('button', { type: 'button', class: 'link-btn', onclick: () => go(hashFor('staff', w.staffId)) }, t('st.side.sheet', { name: w.name })) : null)))));
 
+  const arriving = row?.arriving ?? [];
+  const arrivals = arriving.length > 0 ? h('section', { 'aria-labelledby': 'st-arrivals' }, h('h3', { class: 'ln-sub-title', id: 'st-arrivals' }, t('st.side.arrivals', { type: row ? rowLabel(row) : '' })),
+    h('ul', { class: 'plain st-members' }, arriving.map((a) => h('li', null, h('button', { type: 'button', class: 'link-btn', onclick: () => go(hashFor('staff', a.id)) }, `${a.name} · ${roleShort(a.role)}`),
+      h('span', { class: 'dim small st-arrives' }, ` · ${t('st.arrives', { date: fm.date(a.startsAt) })}`))))) : null;
   const people = members.length > 0 ? h('section', { 'aria-labelledby': 'st-members' }, h('h3', { class: 'ln-sub-title', id: 'st-members' }, t('st.side.members', { type: row?.label ?? '' })),
     h('ul', { class: 'plain st-members' }, members.map((m) => h('li', null, h('button', { type: 'button', class: 'link-btn', onclick: () => go(hashFor('staff', m.id)) }, `${m.name} · ${roleShort(m.role)}`))))) : null;
 
   return [panel({ title: t('st.side.title'), headless: true, id: 'st-side', class: 'st-side' },
-    ...heading, people, watchBlock,
+    ...heading, arrivals, people, watchBlock,
     h('div', { class: 'st-actions' }, button(recruitLabel, { variant: 'primary', key: 'R', onclick: () => goHire(v) }),
       row?.type ? button(t('st.side.train', { type: row.label }), { variant: 'ghost', onclick: () => { Object.assign(hireFilter, presetFor(row, blocker), { base: null }); go('#staff/hire'); } }) : null))];
 }

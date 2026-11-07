@@ -5,7 +5,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  DAY_MS, DUTY_MAX_MIN, FIRING_MONTHS, FLIGHT_MAX_28D_MIN, LINE_TICK_MS, REST_POLICIES, TRAINING_COURSE, dayNo,
+  DAY_MS, DUTY_MAX_MIN, FIRING_MONTHS, FLIGHT_MAX_28D_MIN, LINE_TICK_MS, REST_POLICIES, TRAINING_COURSE, crewNeeded, dayNo,
   type CandidatesView, type LeaveView, type StaffDetail, type StaffOverview,
 } from '@opc/shared';
 import { buildApp } from './app.ts';
@@ -15,8 +15,9 @@ import { insertAircraft } from './fleet-extras.ts';
 import { planMonth, runBilling } from './finance.ts';
 import { harness } from './harness.ts';
 import { catchUpLines, refreshLine } from './lines.ts';
+import { typeFor } from './game.ts';
 import { grantStarterCrew } from './staff-people.ts';
-import { stateOf, type StaffRow } from './staff.ts';
+import { crewLeg, planCrew, stateOf, type LegCtx, type StaffRow } from './staff.ts';
 
 const T0 = Date.UTC(2026, 10, 4, 12, 0, 0); // Wednesday 4 Nov 2026, 12:00Z (the harness clock)
 const body = (over: Record<string, unknown> = {}) => ({ a: 'LFPG', b: 'LFLL', freqPerDay: 3, days: Array(7).fill(true), windowStart: '06:00', windowEnd: '18:00', aircraftIds: [] as number[], ...over });
@@ -37,8 +38,9 @@ async function world(o: { crew?: boolean; freq?: number } = {}) {
   const advance = async (ms: number) => { h.clock.t += ms; await call('GET', '/api/v1/network'); };
   const legs = () => all<{ id: number; status: string; dep_at: number; cancel_cause: string | null; crew_family: string | null }>(h.db, 'SELECT * FROM scheduled_flights ORDER BY dep_at, id');
   const balance = () => get<{ balance: number }>(h.db, 'SELECT balance FROM companies WHERE id = ?', cid)!.balance;
+  const role = (id: number) => get<{ role: string }>(h.db, 'SELECT role FROM staff WHERE id = ?', id)!.role;
   const tx = (kind: string) => all<{ amount: number; memo: string; at: number }>(h.db, 'SELECT amount, memo, at FROM transactions WHERE company_id = ? AND kind = ? ORDER BY id', cid, kind);
-  return { h, u, cid, ac, tok, lineId, call, advance, legs, balance, tx };
+  return { h, u, cid, ac, tok, lineId, call, advance, legs, balance, tx, role };
 }
 
 // ---------------------------------------------------------------- migration and the starter crew (C11)
@@ -225,7 +227,9 @@ test('candidates are the same people all day, differ between days, and hiring pa
   assert.equal((await w.call('POST', '/api/v1/staff/hire', { candidateId: 'nonsense' })).status, 404);
   const after = (await w.call('GET', '/api/v1/staff/candidates?family=pilot&base=LFPG&qual=AT76')).body as CandidatesView;
   assert.equal(after.market, a.market - 1, 'the hired candidate is gone from the market');
-  assert.equal(((await w.call('GET', '/api/v1/staff')).body as StaffOverview).people, 0, 'not counted until they start');
+  const noticed = (await w.call('GET', '/api/v1/staff')).body as StaffOverview;
+  assert.equal(noticed.people, 0, 'not working until they start');
+  assert.equal(noticed.pending, 1, 'but counted as arriving');
   await w.advance(8 * DAY_MS);
   assert.equal(((await w.call('GET', `/api/v1/staff/${r.body.member.id}`)).body as StaffDetail).member.state, 'free');
 });
@@ -466,4 +470,78 @@ test('the staff routes need a signed-in player with a company and validate their
   assert.equal((await h.call('GET', '/api/v1/staff/leave?days=2', t)).status, 400);
   const empty = (await h.call('GET', '/api/v1/staff', t)).body as StaffOverview;
   assert.deepEqual([empty.people, empty.positions, empty.payroll], [0, 0, 0], 'a company without lines has no need and no payroll');
+});
+
+// ---------------------------------------------------------------- hires in notice
+
+/** Hire `n` of the market's candidates of a family (the pilots rated on AT76) at LFPG; returns the ids of the new people. */
+async function hireSome(w: Awaited<ReturnType<typeof world>>, family: 'pilot' | 'cabin', n: number): Promise<number[]> {
+  const list = (await w.call('GET', `/api/v1/staff/candidates?family=${family}&base=LFPG${family === 'pilot' ? '&qual=AT76' : ''}`)).body as CandidatesView;
+  const ids: number[] = [];
+  for (const c of list.candidates.slice(0, n)) {
+    const r = await w.call('POST', '/api/v1/staff/hire', { candidateId: c.id });
+    assert.equal(r.status, 201, r.text);
+    ids.push(r.body.member.id as number);
+  }
+  assert.equal(ids.length, n, 'the market had enough candidates');
+  return ids;
+}
+const rowOf = (o: StaffOverview, family: string) => o.families.find((f) => f.family === family)!;
+
+test('a hire in notice is on the roster: the post is filled, the person is listed with the day they start, and nobody works before then', async () => {
+  const w = await world();
+  const before = (await w.call('GET', '/api/v1/staff')).body as StaffOverview;
+  const need = { pilot: rowOf(before, 'pilot').need, cabin: rowOf(before, 'cabin').need };
+  assert.ok(need.pilot >= 2 && need.cabin >= 2);
+  assert.deepEqual([rowOf(before, 'pilot').availability.vacant, rowOf(before, 'cabin').availability.vacant], [need.pilot, need.cabin], 'nobody hired: every post is vacant');
+
+  const pilots = await hireSome(w, 'pilot', 2), cabin = await hireSome(w, 'cabin', 3);
+  const o = (await w.call('GET', '/api/v1/staff')).body as StaffOverview;
+  const startsAt = w.h.clock.t + 7 * DAY_MS;
+  const p = rowOf(o, 'pilot'), c = rowOf(o, 'cabin');
+  assert.deepEqual([o.people, o.payroll, o.pending], [0, 0, 5], 'working now: nobody; arriving: five');
+  assert.deepEqual([p.headcount, p.availability.pending, p.availability.vacant], [0, 2, need.pilot - 2], 'pilots in notice fill posts');
+  assert.deepEqual([c.headcount, c.availability.pending, c.availability.vacant], [0, 3, need.cabin - 3]);
+  assert.equal(p.availability.onDuty + p.availability.free, 0, 'headcount stays the people working');
+  assert.deepEqual(p.arriving.map((a) => [a.id, a.role, a.startsAt]), pilots.map((id) => [id, w.role(id), startsAt]));
+  assert.deepEqual(c.arriving.map((a) => a.id), cabin);
+  assert.deepEqual(p.children![0]!.arriving.map((a) => a.id), pilots, 'the AT76 row lists the same pilots');
+  assert.equal(p.children![0]!.availability.vacant, rowOf(before, 'pilot').children![0]!.need - 2);
+  assert.equal(p.note, `${need.pilot - 2} vacant`);
+  const filtered = (await w.call('GET', '/api/v1/staff?family=cabin')).body as StaffOverview;
+  assert.equal(filtered.pending, 3, 'the family filter applies to the arrivals too');
+
+  await w.advance(8 * DAY_MS);
+  const after = (await w.call('GET', '/api/v1/staff')).body as StaffOverview;
+  assert.deepEqual([after.people, after.pending], [5, 0], 'they have started');
+  assert.deepEqual([rowOf(after, 'pilot').headcount, rowOf(after, 'pilot').arriving.length, rowOf(after, 'pilot').availability.vacant], [2, 0, need.pilot - 2], 'the post stays filled as the hire starts');
+});
+
+test('a family with only hires in notice is still listed (nothing to hide behind the empty state)', async () => {
+  const h = await harness();
+  const u = await h.register('kim', 'LFPG');
+  run(h.db, 'UPDATE companies SET balance = 1000000 WHERE id = ?', u.me.company.id);
+  const list = (await h.call('GET', '/api/v1/staff/candidates?family=cabin&base=LFPG', { token: u.token })).body as CandidatesView;
+  assert.equal((await h.call('POST', '/api/v1/staff/hire', { token: u.token, body: { candidateId: list.candidates[0]!.id } })).status, 201);
+  const o = (await h.call('GET', '/api/v1/staff', { token: u.token })).body as StaffOverview;
+  assert.deepEqual([o.people, o.positions, o.pending], [0, 0, 1]);
+  assert.deepEqual(o.families.map((f) => [f.family, f.headcount, f.need, f.availability.pending, f.arriving.length]), [['cabin', 0, 0, 1, 1]]);
+});
+
+test('the crew check does not use a hire in notice before the day they start', async () => {
+  const w = await world();
+  const need = crewNeeded(typeFor(w.h.db, w.cid, 'AT76').seats);
+  await hireSome(w, 'pilot', need.pilots);
+  await hireSome(w, 'cabin', need.cabin);
+  const startsAt = w.h.clock.t + 7 * DAY_MS;
+  const leg = (dep: number): LegCtx => ({ id: 987_654, companyId: w.cid, flightNo: 1, dep, arr: dep + 2 * 3_600_000, origin: 'LFPG', dest: 'LFLL', icao: 'AT76' });
+  const duty = () => get<{ n: number }>(w.h.db, 'SELECT COUNT(*) AS n FROM staff_duty')!.n;
+
+  const early = leg(startsAt - 3_600_000);
+  assert.deepEqual(planCrew(w.h.db, early), { ok: false, cause: 'no_crew', family: 'pilot' });
+  assert.deepEqual(crewLeg(w.h.db, early), { cause: 'no_crew', family: 'pilot' });
+  assert.equal(duty(), 0, 'nobody is booked on the leg');
+
+  assert.equal(crewLeg(w.h.db, leg(startsAt + 3_600_000)), null, 'the same people fly it once they have started');
+  assert.equal(duty(), need.pilots + need.cabin);
 });

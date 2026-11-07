@@ -3,7 +3,7 @@
 import {
   DAY_MS, DUTY_MAX_MIN, FIRING_MONTHS, FLIGHT_MAX_28D_MIN, LEAVE_ASK_RATE, LEAVE_DAYS_PER_YEAR, REST_POLICIES, REST_POLICY_NAMES, STAFF_FAMILIES, coverageOf, dayIso, dayNo,
   dutyViolation, isoDayNo, yearOfDay,
-  type Blocker, type Candidate, type CandidatesView, type Coverage, type DutyBlock, type FamilyRow, type LeaveRequest, type LeaveView, type PolicyOption, type Qualification,
+  type Arrival, type Blocker, type Candidate, type CandidatesView, type Coverage, type DutyBlock, type FamilyRow, type LeaveRequest, type LeaveView, type PolicyOption, type Qualification,
   type StaffDetail, type StaffFamily, type StaffMember, type StaffOverview, type WatchItem,
   type SORTS,
 } from '@opc/shared';
@@ -34,6 +34,7 @@ export function memberView(db: Db, s: StaffRow, now: number): StaffMember {
 
 const emptyAvailability = () => ({ onDuty: 0, resting: 0, leave: 0, training: 0, free: 0, pending: 0, vacant: 0 });
 
+/** The roster is everyone employed or in notice. `headcount` is who works now (what the crew check can use); a hire in notice already fills a post, so it leaves `vacant` and is listed in `arriving`. */
 export function overview(db: Db, companyId: number, now: number, base?: string, family?: StaffFamily): StaffOverview {
   const rules = rulesOf(db, companyId);
   const demand = companyDemand(db, companyId, rules).filter((d) => !base || d.base === base);
@@ -44,9 +45,10 @@ export function overview(db: Db, companyId: number, now: number, base?: string, 
     const availability = emptyAvailability();
     for (const s of people) { const st = states.get(s.id)!; if (st !== 'left') availability[st]++; }
     const headcount = people.length - availability.pending;
-    availability.vacant = Math.max(0, need - headcount);
+    availability.vacant = Math.max(0, need - headcount - availability.pending);
+    const arriving = people.filter((s) => states.get(s.id) === 'pending').sort((a, b) => a.starts_at - b.starts_at || a.id - b.id).map((s): Arrival => ({ id: s.id, name: s.name, role: s.role, startsAt: s.starts_at }));
     return {
-      family: fam, label: type ?? FAMILY_LABEL[fam], ...(type ? { type } : {}), headcount, need, availability, salaries: people.filter((s) => states.get(s.id) !== 'pending').reduce((t, s) => t + s.salary, 0),
+      family: fam, label: type ?? FAMILY_LABEL[fam], ...(type ? { type } : {}), headcount, need, availability, arriving, salaries: people.filter((s) => states.get(s.id) !== 'pending').reduce((t, s) => t + s.salary, 0),
       note: availability.vacant > 0 ? `${availability.vacant} vacant` : null,
     };
   };
@@ -64,7 +66,7 @@ export function overview(db: Db, companyId: number, now: number, base?: string, 
     families.push(r);
   }
   return {
-    people: hereNow.length, positions: demand.reduce((n, d) => n + d.count, 0), payroll: hereNow.filter((s) => s.contract === 'cdi').reduce((t, s) => t + s.salary, 0), policy: policyOf(db, companyId),
+    people: hereNow.length, pending: roster.length - hereNow.length, positions: demand.reduce((n, d) => n + d.count, 0), payroll: hereNow.filter((s) => s.contract === 'cdi').reduce((t, s) => t + s.salary, 0), policy: policyOf(db, companyId),
     families, blockers: blockersToday(db, companyId, now), watch: watchList(db, hereNow, now),
   };
 }
