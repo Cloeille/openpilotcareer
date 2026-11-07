@@ -205,6 +205,11 @@ const lineTx = (await call('GET', '/me/transactions', { token: lp.body.token }))
 expect(flown > 0 && lineTx.some((x) => x.kind === 'line_revenue' && x.amount > 0), `the line flew on its own: ${lineTx.length} ledger lines (line_revenue ${lineTx.find((x) => x.kind === 'line_revenue')?.amount})`, lineTx);
 const staffNow = await call('GET', `/staff/${interim.body.member.id}`, { token: lineTok });
 expect(staffNow.status === 200 && staffNow.body.week.length > 0 && staffNow.body.duty.flight28d > 0, `the interim pilot's card shows the legs flown: ${staffNow.body.duty.flight28d} h in 28 days`, staffNow.body.duty);
+// v3 safety: the index, tonight's crews and the journal answer the B.5 shapes (a new company with wear off has no incident to show)
+const safety = await call('GET', '/safety', { token: lineTok });
+expect(safety.status === 200 && safety.body.index === safety.body.parts.fatigue.points + safety.body.parts.aircraft.points + safety.body.parts.training.points && safety.body.riskCurve.length > 0, `safety index ${safety.body.index}/100, ${safety.body.today.length} flights tonight, ${safety.body.levers.length} levers`, safety);
+const journal = await call('GET', '/safety/incidents', { token: lineTok });
+expect(journal.status === 200 && Array.isArray(journal.body), `incident journal: ${journal.body.length} this season`, journal);
 const ops = await call('GET', '/ops', { token: lp.body.token });
 expect(ops.status === 200 && ops.body.enabled === true, `operations board: ${ops.body.counts.flying} flying, ${ops.body.counts.upcoming} upcoming`, ops);
 const off = await call('PUT', '/network/enabled', { token: lp.body.token, body: { enabled: false } });
