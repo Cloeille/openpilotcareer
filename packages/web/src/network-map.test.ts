@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { arcHeight, arcLift, buildNetworkMap, dashed, DEFAULT_CAMERA, pathOf, tagWidth, type MapInput } from './network-map.ts';
+import { arcHeight, arcLift, buildNetworkMap, dashed, DEFAULT_CAMERA, freeSide, overlaps, pathOf, tagBox, tagWidth, type MapInput } from './network-map.ts';
 
 const AP = [
   { icao: 'LFMN', city: 'Nice', lat: 43.665, lon: 7.215, hub: 'player' as const },
@@ -114,4 +114,28 @@ test('pure helpers: paths, dashes, arc heights and tag widths', () => {
   assert.ok(arcHeight(0, true) > arcHeight(0));
   assert.notEqual(arcHeight(0), arcHeight(1));
   assert.ok(tagWidth('F-HAZA', 'AZR 1136 → LFMN', '+14 min') > tagWidth('F-HAZA', 'AZR 1136 → LFMN'));
+});
+
+test('tag boxes: placed around the aircraft, and a side is free only when it clears the tags already placed', () => {
+  const p = { x: 500, y: 400 };
+  const above = tagBox(p, 'above', 120), below = tagBox(p, 'below', 120);
+  assert.ok(above.y + above.h < p.y && below.y > p.y, 'above is above the aircraft, below is below');
+  assert.ok(above.x < p.x && above.x + above.w > p.x, 'centred on it');
+  assert.ok(tagBox(p, 'right', 120).x > p.x && tagBox(p, 'left', 120).x + 120 < p.x);
+  assert.ok(overlaps({ x: 0, y: 0, w: 10, h: 10 }, { x: 8, y: 8, w: 10, h: 10 }));
+  assert.ok(!overlaps({ x: 0, y: 0, w: 10, h: 10 }, { x: 40, y: 0, w: 10, h: 10 }));
+  assert.equal(freeSide(p, 120, [], ['above', 'below']), 'above');
+  assert.equal(freeSide(p, 120, [above], ['above', 'below', 'right']), 'below');
+  assert.equal(freeSide(p, 120, [above, below], ['above', 'below']), 'above', 'nothing is free: the first choice');
+  assert.equal(freeSide(p, 120, [{ x: 480, y: 330, w: 100, h: 36 }], ['above', 'right']), 'right', 'a tag that is close but clear of the first choice is not in the way');
+  assert.ok(overlaps(tagBox(p, 'right', 120), above), 'a side tag is within the clearance of the tag above');
+});
+
+test('two aircraft side by side get tags that do not cover each other', () => {
+  const near = { reg: 'F-AAAA', info: 'AZR 1 → LFMN', from: 'LFLL', to: 'LFMN', t: 0.5, owner: 'player' as const, line: 'LFLL-LFMN' };
+  const m = buildNetworkMap(input({ flights: [near, { ...near, reg: 'F-BBBB', info: 'AZR 2 → LFMN', t: 0.52 }] }));
+  const tags = m.prims.filter((p) => p.kind === 'tag');
+  assert.equal(tags.length, 2);
+  const [a, b] = tags.map((t) => (t.kind === 'tag' ? tagBox({ x: t.x, y: t.y }, t.side, tagWidth(t.reg, t.info, t.late)) : null));
+  assert.ok(a && b && !overlaps(a, b, 0));
 });

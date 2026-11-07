@@ -28,8 +28,15 @@ export function lineVisual(line: Pick<Line, 'id' | 'status'>, flying: readonly P
 export const lineDelay = (line: Pick<Line, 'id'>, flying: readonly Pick<FlyingNow, 'lineId' | 'delayMin'>[]): number =>
   Math.max(0, ...flying.filter((f) => f.lineId === line.id).map((f) => f.delayMin));
 
-/** `LFMN-LFLL`: the map's and the selection's id of a line. */
-export const pairId = (l: Pick<Line, 'a' | 'b'>): string => `${l.a}-${l.b}`;
+/** The id of a pair of airports, whichever way round it is given: `LFLL-LFMN`. A line is its pair, so two companies' lines on it share this id. */
+export const pairId = (l: Pick<Line, 'a' | 'b'>): string => (l.a < l.b ? `${l.a}-${l.b}` : `${l.b}-${l.a}`);
+
+/** AI networks in the order the player cares about: those that share most pairs with hers first, then by name. */
+export function rivalOrder<T extends { name: string; lines: readonly Pick<Line, 'a' | 'b'>[] }>(own: readonly Pick<Line, 'a' | 'b'>[], rivals: readonly T[]): T[] {
+  const mine = new Set(own.map(pairId));
+  const shared = (r: T): number => r.lines.filter((l) => mine.has(pairId(l))).length;
+  return [...rivals].sort((x, y) => shared(y) - shared(x) || x.name.localeCompare(y.name));
+}
 
 /** Spacing of the departures from A: the programme window shared by the day's departures (the line list says "toutes les 2 h"). */
 export function everyHours(l: Pick<Line, 'freqPerDay' | 'windowStart' | 'windowEnd'>): number {
@@ -65,6 +72,9 @@ export function mapFlights(own: Network, rival: Network | null, text: (f: Flying
 const lineId = (lines: readonly Line[], id: number): string | null => { const l = lines.find((x) => x.id === id); return l ? pairId(l) : null; };
 
 /** Every airport the map must place: the ends of every line, every flight and the hubs. */
+/** The airports of the network being looked at: what the camera frames. */
+export function networkAirports(n: Network): string[] { return [...new Set([...n.lines.flatMap((l) => [l.a, l.b]), ...n.flying.flatMap((f) => [f.from, f.to])])]; }
+
 export function mapAirportCodes(own: Network, rival: Network | null, hubs: readonly string[]): string[] {
   const set = new Set<string>(hubs);
   for (const n of rival ? [own, rival] : [own]) {
@@ -102,6 +112,9 @@ export const hhmm = (minutes: number): string => `${String(Math.floor(minutes / 
 export const isoDay = (ms: number): string => new Date(ms).toISOString().slice(0, 10);
 /** Minutes since 00:00 UTC of the day the instant falls in. */
 export const minuteOfDay = (ms: number): number => Math.floor((ms % DAY_MS) / 60_000);
+/** When something started, for a row: the time alone if it was today (UTC), the date and time otherwise. */
+export const sinceToday = (ms: number, now: number): boolean => isoDay(ms) === isoDay(now);
+
 /** The shown clock: the server's `now` plus the time spent since the answer arrived, so the clock keeps going between polls. */
 export const clockNow = (serverNow: number, fetchedAt: number, now: number): number => serverNow + Math.max(0, now - fetchedAt);
 
@@ -119,9 +132,11 @@ export const dayKind = (date: string, today: string): DayKind => (date === today
 // ---------------------------------------------------------------- the day's timetable (line detail)
 
 export type SegmentKind = 'done' | 'flying' | 'scheduled' | 'delayed' | 'cancelled';
-export type Segment = { id: number; flightNo: string; to: string; left: number; width: number; kind: SegmentKind; takenByPlayer: boolean; status: FlightStatus; delayMin: number };
+/** `left` / `width` are percents of the 24 h track; `delay` is the width of the late part before the flight actually leaves (the flight itself is drawn from `dep + delay`). */
+export type Segment = { id: number; flightNo: string; to: string; left: number; width: number; delayLeft: number; delay: number; kind: SegmentKind; takenByPlayer: boolean; status: FlightStatus; delayMin: number };
 export type Lane = { aircraftId: number; segments: Segment[]; rotations: number };
 
+const round2 = (n: number): number => Math.round(n * 100) / 100;
 const pct = (minutes: number): number => Math.round((Math.min(MINUTES_PER_DAY, Math.max(0, minutes)) / MINUTES_PER_DAY) * 10_000) / 100;
 const flightKind = (f: Pick<ScheduledFlight, 'status'>): SegmentKind => f.status;
 
@@ -132,12 +147,23 @@ export function ganttLanes(flights: readonly ScheduledFlight[], aircraftIds: rea
   return aircraftIds.map((id) => {
     const mine = onDay.filter((f) => f.aircraftId === id).sort((a, b) => a.dep - b.dep);
     const segments = mine.map((f): Segment => {
-      const from = (f.dep - dayStart) / 60_000, to = (f.arr - dayStart) / 60_000;
+      const late = f.status === 'cancelled' ? 0 : f.delayMin;
+      const planned = (f.dep - dayStart) / 60_000, from = planned + late, to = (f.arr - dayStart) / 60_000 + late;
       const left = pct(from);
-      return { id: f.id, flightNo: f.flightNo.split(' ').pop() ?? f.flightNo, to: f.dest, left, width: Math.max(0.6, Math.round((pct(to) - left) * 100) / 100), kind: flightKind(f), takenByPlayer: f.takenByPlayer, status: f.status, delayMin: f.delayMin };
+      const delayLeft = pct(planned);
+      return { id: f.id, flightNo: f.flightNo.split(' ').pop() ?? f.flightNo, to: f.dest, left, width: Math.max(0.6, round2(pct(to) - left)), delayLeft, delay: late > 0 ? round2(left - delayLeft) : 0, kind: flightKind(f), takenByPlayer: f.takenByPlayer, status: f.status, delayMin: f.delayMin };
     });
     return { aircraftId: id, segments, rotations: Math.ceil(mine.length / 2) };
   });
+}
+
+/** The fill of a dependency meter from the server's text (`84 %`, `4 sur 4`, `4 of 4`), 0..1; null when the text is not a measure. */
+export function meterFraction(value: string): number | null {
+  const percent = /^\s*(\d+(?:[.,]\d+)?)\s*%\s*$/.exec(value);
+  if (percent) return Math.min(1, Number(percent[1]!.replace(',', '.')) / 100);
+  const ratio = /^\s*(\d+)\s*(?:sur|of)\s*(\d+)\s*$/.exec(value);
+  if (ratio && Number(ratio[2]) > 0) return Math.min(1, Number(ratio[1]) / Number(ratio[2]));
+  return null;
 }
 
 /** Ticks of the hour ruler: every 2 h, as the mockup. */
@@ -265,7 +291,10 @@ export type Phase = 'climb' | 'cruise' | 'descent';
 export const phaseOf = (progress: number): Phase => (progress < 0.15 ? 'climb' : progress > 0.8 ? 'descent' : 'cruise');
 
 /** Where an in-flight row is along its flight, as a percentage. */
-export const progressPct = (f: Pick<ScheduledFlight, 'dep' | 'arr'>, now: number): number => Math.round(Math.min(1, Math.max(0, (now - f.dep) / Math.max(1, f.arr - f.dep))) * 100);
+export const progressPct = (f: Pick<ScheduledFlight, 'dep' | 'arr'> & { delayMin?: number }, now: number): number => {
+  const late = (f.delayMin ?? 0) * 60_000;
+  return Math.round(Math.min(1, Math.max(0, (now - f.dep - late) / Math.max(1, f.arr - f.dep))) * 100);
+};
 
 /** "Enter treats the alert": the first cancelled flight of the board, whose line the player should open. */
 export const firstAlert = (rows: readonly OpsRow[]): OpsRow | null => rows.find((r) => r.status === 'cancelled') ?? null;

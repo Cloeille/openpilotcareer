@@ -3,10 +3,10 @@ import { act } from '../actions.ts';
 import { fetchLine, fetchProblem, pauseLine, resolveLine, resumeLine, takeRotation, type LineDetail, type ProblemView, type ResolveOption, type ScheduledFlight } from '../api-lines.ts';
 import { button, icon, panel, signLocation, stat, unknownValue } from '../components.ts';
 import { fmt } from '../format.ts';
-import { t } from '../i18n.ts';
+import { t, tp } from '../i18n.ts';
 import { dayMedium, dayShort, dayTime, fill, typeNames } from '../lines-ui.ts';
 import {
-  causeKey, causesOf, dayKind, daysBetween, ganttLanes, isoDay, minuteOfDay, MINUTES_PER_DAY, NETWORK_TAB, pnlParts, progressPct, projectionKind, RULER_HOURS, stepDay, type Lane, type Segment,
+  causeKey, causesOf, dayKind, meterFraction, daysBetween, ganttLanes, isoDay, minuteOfDay, MINUTES_PER_DAY, NETWORK_TAB, pnlParts, progressPct, projectionKind, RULER_HOURS, stepDay, type Lane, type Segment,
 } from '../lines-view.ts';
 import type { Key } from '../messages.ts';
 import { pollWhileShown } from '../live-poll.ts';
@@ -91,14 +91,14 @@ function planning(d: LineDetail, fleet: FleetAircraft[], code: string): Screen {
       f.takenByPlayer ? h('span', { class: 'ln-mine' }, icon('user', 12), t('ln.rot.taken')) : null,
       f.status === 'cancelled' && f.cancelCause ? h('span', { class: 'ln-down' }, t(`ln.cause.${causeKey(f.cancelCause)}` as Key)) : null,
       f.status === 'flying' ? h('span', { class: 'muted' }, t('ln.rot.progress', { pct: progressPct(f, Date.now()) })) : null,
-      canTake(f) ? button(t('ln.rot.take'), { variant: 'secondary', key: t('key.enter'), onclick: () => take(f) }) : null);
+      canTake(f) ? button(t('ln.rot.take'), { variant: 'secondary', onclick: () => take(f) }) : null);
   };
   const seg = (s: Segment): HTMLElement => {
     const f = d.day.find((x) => x.id === s.id)!;
     return h('button', { type: 'button', class: `ln-seg ${s.kind}${s.takenByPlayer ? ' mine' : ''}${f === rotation.selected ? ' picked' : ''}`, style: `left:${s.left}%;width:${s.width}%`, 'data-row': '', 'data-flight': s.id,
       'aria-label': t('ln.seg.label', { no: s.flightNo, to: s.to, status: t(`ln.fs.${s.status}` as Key) }),
-      onclick: () => pickRotation(f), onfocus: () => pickRotation(f), onmouseenter: () => pickRotation(f),
-      onkeydown: (e: KeyboardEvent) => { if (e.key === 'Enter' && canTake(f)) { e.preventDefault(); take(f); } } },
+      // Enter on a segment selects it and moves to the button that takes it: taking cancels a scheduled flight, so it takes a second press.
+      onclick: (e: MouseEvent) => { pickRotation(f); if (e.detail === 0) detailPanel.querySelector<HTMLElement>('button')?.focus(); }, onfocus: () => pickRotation(f), onmouseenter: () => pickRotation(f) },
     h('span', { class: 'ln-seg-no' }, s.flightNo), h('span', { class: 'ln-seg-to' }, `→ ${s.to}`));
   };
   const pickRotation = (f: ScheduledFlight): void => {
@@ -114,8 +114,8 @@ function planning(d: LineDetail, fleet: FleetAircraft[], code: string): Screen {
     typeCells.set(a.id, type);
     return h('div', { class: 'ln-lane' },
       h('div', { class: 'ln-lane-label' }, h('div', { class: 'row tight' }, h('span', { class: 'mono' }, a.registration), type),
-        h('span', { class: 'dim small' }, wear === undefined ? t('ln.lane.rot', { n: lane.rotations }) : t('ln.lane.rotWear', { n: lane.rotations, wear: Math.round(100 - wear) }))),
-      h('div', { class: 'ln-track' }, nowPct === null ? null : h('span', { class: 'ln-now-line', style: `left:${nowPct}%` }), lane.segments.map(seg),
+        h('span', { class: 'dim small' }, wear === undefined ? tp('ln.lane.rot', lane.rotations) : tp('ln.lane.rotWear', lane.rotations, { wear: Math.round(100 - wear) }))),
+      h('div', { class: 'ln-track' }, nowPct === null ? null : h('span', { class: 'ln-now-line', style: `left:${nowPct}%` }), lane.segments.flatMap((s) => [s.delay > 0 ? h('span', { class: 'ln-delay', style: `left:${s.delayLeft}%;width:${s.delay}%`, 'aria-hidden': 'true' }) : null, seg(s)]),
         lane.segments.length === 0 ? h('span', { class: 'ln-track-empty dim small' }, t('ln.lane.idle')) : null));
   };
   const legend = h('div', { class: 'ln-gantt-legend' }, (['done', 'flying', 'scheduled', 'delayed', 'cancelled'] as const).map((k) => h('span', { class: 'ln-legend-item' }, h('span', { class: `ln-legend-seg ${k}`, 'aria-hidden': 'true' }), t(`ln.fs.${k}` as Key))));
@@ -133,7 +133,13 @@ function planning(d: LineDetail, fleet: FleetAircraft[], code: string): Screen {
     h('div', { class: 'ln-econ-legend' }, parts.map((p) => h('div', { class: 'ln-econ-item' }, h('span', { class: 'dim small' }, t(`ln.part.${p.part}` as Key)), h('span', { class: p.part === 'margin' ? 'strong' : 'muted' }, fm.money(p.value))))));
   const deps = h('div', { class: 'ln-deps' },
     h('div', { class: 'ln-econ-head' }, h('h3', { class: 'ln-sub-title' }, t('ln.deps.title')), h('span', { class: 'dim small' }, t('ln.deps.note'))),
-    d.depends.length ? h('ul', { class: 'plain ln-meters' }, d.depends.map((m) => h('li', { class: `ln-meter${m.ok ? '' : ' bad'}` }, icon(m.ok ? 'circle-check' : 'triangle-alert', 14), h('span', { class: 'muted' }, m.label), h('span', { class: 'strong' }, m.value)))) : unknownValue());
+    d.depends.length ? h('ul', { class: 'plain ln-meters' }, d.depends.map((m) => {
+      const fraction = meterFraction(m.value);
+      return h('li', { class: `ln-meter${m.ok ? '' : ' bad'}` },
+        h('div', { class: 'ln-meter-head' }, h('span', { class: 'muted' }, m.label), h('span', { class: 'strong' }, m.value)),
+        fraction === null ? null : h('div', { class: 'ln-meter-bar', role: 'presentation' }, h('span', { style: `width:${Math.round(fraction * 100)}%` })),
+        m.ok ? null : h('span', { class: 'ln-meter-warn' }, icon('triangle-alert', 12), t('ln.deps.risk')));
+    })) : unknownValue());
 
   const pauseBtn = paused
     ? button(t('ln.resume'), { variant: 'primary', key: t('key.space'), onclick: () => void act(t('ln.resumed'), () => resumeLine(line.id), async () => { redraw(); }) })

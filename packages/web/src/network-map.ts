@@ -26,6 +26,8 @@ export type MapCamera = { azimuth: number; elevation: number; distance: number }
 export type MapBox = { left: number; top: number; right: number; bottom: number };
 export type MapInput = {
   airports: MapAirport[]; lines: MapLine[]; flights: MapFlight[]; selected?: string | null;
+  /** Airports that frame the map (the network being looked at). Lines of the other network are drawn only when both their ends land inside the picture; default: every airport. */
+  focus?: readonly string[];
   camera?: MapCamera; fit: MapBox; size: { w: number; h: number };
   text: { interrupted: string; contested: string };
 };
@@ -100,7 +102,8 @@ export function buildNetworkMap(input: MapInput): MapScene {
   const known = (code: string): boolean => ap.has(code);
 
   // Plane coordinates in degrees of latitude, centred on the network; then a camera orbiting at azimuth `az` and looking down at `el`.
-  const lons = airports.map((a) => a.lon), lats = airports.map((a) => a.lat);
+  const focus = input.focus ? airports.filter((a) => input.focus!.includes(a.icao)) : airports;
+  const lons = focus.map((a) => a.lon), lats = focus.map((a) => a.lat);
   const LON0 = lons.length ? (Math.min(...lons) + Math.max(...lons)) / 2 : 0;
   const LAT0 = lats.length ? (Math.min(...lats) + Math.max(...lats)) / 2 : 0;
   const KX = Math.cos(rad(LAT0));
@@ -121,13 +124,13 @@ export function buildNetworkMap(input: MapInput): MapScene {
   };
 
   // Arc heights come from the line's rank in the list, so lines that share a city pair (yours and a rival's) never coincide.
-  const drawn = lines.filter((l) => known(l.a) && known(l.b)).map((l, i) => ({ ...l, k: arcHeight(i, l.contested) }));
-  const byId = new Map(drawn.map((l) => [l.id, l]));
+  const framed = (l: { a: string; b: string }): boolean => !input.focus || (input.focus.includes(l.a) && input.focus.includes(l.b));
+  const placed = lines.filter((l) => known(l.a) && known(l.b)).map((l, i) => ({ ...l, k: arcHeight(i, l.contested) }));
 
-  // Fit every airport and arc into the fit box.
+  // Fit the airports and arcs of the framed network into the fit box.
   const probe: Pt[] = [];
-  for (const a of airports) { const p = toRF(a.lon, a.lat); probe.push(camRF(p[0], p[1], 0)); }
-  for (const l of drawn) for (let i = 0; i <= 10; i++) { const p = arcPoint(l.a, l.b, l.k, i / 10); probe.push(camRF(p[0], p[1], p[2])); }
+  for (const a of focus) { const p = toRF(a.lon, a.lat); probe.push(camRF(p[0], p[1], 0)); }
+  for (const l of placed) if (framed(l)) for (let i = 0; i <= 10; i++) { const p = arcPoint(l.a, l.b, l.k, i / 10); probe.push(camRF(p[0], p[1], p[2])); }
   let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
   for (const p of probe) { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); }
   if (!probe.length) { x0 = y0 = -MIN_SPAN / 2; x1 = y1 = MIN_SPAN / 2; }
@@ -139,8 +142,13 @@ export function buildNetworkMap(input: MapInput): MapScene {
   const S = (lon: number, lat: number, z = 0): Pt => { const p = toRF(lon, lat); return SR(p[0], p[1], z); };
   const onGround = (code: string): Pt => S(ap.get(code)!.lon, ap.get(code)!.lat);
 
+  // Lines of the other network are kept only when they fall inside the picture: a far-away line would draw an arc to nowhere.
+  const inside = (code: string): boolean => { const p = onGround(code); return p.x >= 0 && p.x <= size.w && p.y >= 0 && p.y <= size.h; };
+  const drawn = placed.filter((l) => framed(l) || (inside(l.a) && inside(l.b)));
+  const byId = new Map(drawn.map((l) => [l.id, l]));
+
   // Plate: a camera-aligned rectangle of ground around the network.
-  const net = airports.map((a) => toRF(a.lon, a.lat));
+  const net = focus.map((a) => toRF(a.lon, a.lat));
   const PL = net.length
     ? { r0: Math.min(...net.map((p) => p[0])) - PLATE.side, r1: Math.max(...net.map((p) => p[0])) + PLATE.side, f0: Math.min(...net.map((p) => p[1])) - PLATE.near, f1: Math.max(...net.map((p) => p[1])) + PLATE.far }
     : { r0: -PLATE.side, r1: PLATE.side, f0: -PLATE.near, f1: PLATE.far };
@@ -261,7 +269,7 @@ export function buildNetworkMap(input: MapInput): MapScene {
   // Airports, with the label on the side away from the other airports.
   const shown = new Set<string>();
   for (const l of drawn) { shown.add(l.a); shown.add(l.b); }
-  for (const a of airports) if (a.hub) shown.add(a.icao);
+  for (const a of focus) if (a.hub) shown.add(a.icao);
   const where = new Map<string, Pt>();
   for (const c of shown) where.set(c, onGround(c));
   for (const c of shown) {
@@ -274,10 +282,14 @@ export function buildNetworkMap(input: MapInput): MapScene {
     labels.push({ kind: 'label', name: `label ${c}`, x: p.x, y: p.y, side, lines: [{ text: c, cls: a.hub ? 'code-hub' : 'code' }, { text: a.city, cls: 'city' }] });
   }
 
-  planes.forEach((pl, i) => {
+  // Tags: the player's own flight first, then the others; each takes the first side that does not cover a tag already placed.
+  const taken: Rect[] = [];
+  [...planes].sort((a, b) => Number(b.f.owner === 'me') - Number(a.f.owner === 'me')).forEach((pl) => {
     prims.push({ kind: 'plane', name: pl.f.reg, x: pl.p.x, y: pl.p.y, size: pl.f.owner === 'me' ? 22 : 18, heading: pl.heading, color: pl.col });
-    const tagSide: Side = pl.f.owner === 'me' ? 'above' : i % 2 === 0 ? 'above' : 'below';
-    labels.push({ kind: 'tag', name: pl.f.reg, x: pl.p.x, y: pl.p.y, side: tagSide, reg: pl.f.reg, info: pl.f.info, ...(pl.f.late ? { late: pl.f.late } : {}), mine: pl.f.owner === 'me' });
+    const w = tagWidth(pl.f.reg, pl.f.info, pl.f.late);
+    const side = freeSide(pl.p, w, taken, ['above', 'below', 'right', 'left']);
+    taken.push(tagBox(pl.p, side, w));
+    labels.push({ kind: 'tag', name: pl.f.reg, x: pl.p.x, y: pl.p.y, side, reg: pl.f.reg, info: pl.f.info, ...(pl.f.late ? { late: pl.f.late } : {}), mine: pl.f.owner === 'me' });
   });
   prims.push(...labels);
   return { w: size.w, h: size.h, prims, airports: where, focus: fc };
@@ -286,6 +298,19 @@ export function buildNetworkMap(input: MapInput): MapScene {
 /** Text width estimates for the label boxes (the map is drawn without measuring the DOM so it can be built anywhere). */
 const MONO_W = 7.4, UI_W = 6.2;
 export const tagWidth = (reg: string, info: string, late?: string): number => Math.max(reg.length * MONO_W, info.length * UI_W + (late ? late.length * UI_W + 6 : 0)) + 18;
+const TAG_H = 36;
+export type Rect = { x: number; y: number; w: number; h: number };
+/** The box of a tag whose aircraft is at `p`, on the given side of it. */
+export const tagBox = (p: Pt, side: Side, w: number): Rect => ({
+  x: side === 'right' ? p.x + 16 : side === 'left' ? p.x - 16 - w : p.x - w / 2,
+  y: side === 'above' ? p.y - 16 - TAG_H - 8 : side === 'below' ? p.y + 16 : p.y - 22,
+  w, h: TAG_H,
+});
+export const overlaps = (a: Rect, b: Rect, pad = 4): boolean => a.x < b.x + b.w + pad && b.x < a.x + a.w + pad && a.y < b.y + b.h + pad && b.y < a.y + a.h + pad;
+/** The first side whose box clears every box already placed; the first choice when none does. */
+export function freeSide(p: Pt, w: number, taken: readonly Rect[], order: readonly Side[]): Side {
+  return order.find((s) => !taken.some((r) => overlaps(tagBox(p, s, w), r))) ?? order[0]!;
+}
 
 export function drawNetworkMap(scene: MapScene, label: string): SVGSVGElement {
   const root = svg('svg', { viewBox: `0 0 ${scene.w} ${scene.h}`, width: scene.w, height: scene.h, class: 'network-map', role: 'img', 'aria-label': label });
@@ -346,11 +371,10 @@ function drawLabel(p: Extract<Prim, { kind: 'label' }>): SVGElement {
 }
 
 function drawTag(p: Extract<Prim, { kind: 'tag' }>): SVGElement {
-  const w = tagWidth(p.reg, p.info, p.late), hgt = 36;
-  const x = p.side === 'right' ? 16 : p.side === 'left' ? -16 - w : -w / 2;
-  const y = p.side === 'above' ? -16 - hgt - 8 : p.side === 'below' ? 16 : -22;
+  const w = tagWidth(p.reg, p.info, p.late);
+  const { x, y } = tagBox({ x: 0, y: 0 }, p.side, w);
   const g = svg('g', { class: `nm-tag${p.mine ? ' mine' : ''}`, transform: `translate(${r1(p.x)} ${r1(p.y)})` });
-  g.append(svg('rect', { x: r1(x), y: r1(y), width: r1(w), height: hgt, rx: 3, class: 'nm-tag-box' }),
+  g.append(svg('rect', { x: r1(x), y: r1(y), width: r1(w), height: TAG_H, rx: 3, class: 'nm-tag-box' }),
     svg('text', { x: r1(x + 9), y: r1(y + 15), class: 'nm-text reg' }, p.reg),
     svg('text', { x: r1(x + 9), y: r1(y + 30), class: 'nm-text info' }, p.info, p.late ? svg('tspan', { dx: 6, class: 'late' }, p.late) : null));
   return g;

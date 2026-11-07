@@ -5,7 +5,7 @@ import { icon, switchControl } from './components.ts';
 import { locale } from './finance-ui.ts';
 import { fmt } from './format.ts';
 import { t } from './i18n.ts';
-import type { LineVisual, AirportFact } from './lines-view.ts';
+import { sinceToday, type LineVisual, type AirportFact } from './lines-view.ts';
 import type { Key } from './messages.ts';
 import { h } from './ui.ts';
 
@@ -44,6 +44,8 @@ export const dayShort = (iso: string): string => dayFormat({ weekday: 'short', d
 export const dayMedium = (ms: number): string => dayFormat({ weekday: 'short', day: 'numeric', month: 'short' })(ms);
 /** `jeu. 5 novembre 14:00Z` */
 export const dayTime = (ms: number): string => `${dayLabel(ms)} ${fmt().zulu(ms)}`;
+/** `14:20Z` if it was today, `jeu. 5 nov. 14:20Z` otherwise. */
+export const sinceLabel = (ms: number, now: number): string => (sinceToday(ms, now) ? fmt().zulu(ms) : `${dayMedium(ms)} ${fmt().zulu(ms)}`);
 
 /** The header block of the network and operations screens: the 24/7 switch and the simulated clock. */
 export function clockGroup(enabled: boolean, onToggle: (on: boolean) => void): { root: HTMLElement; set: (now: number, enabled: boolean) => void } {

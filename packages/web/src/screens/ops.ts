@@ -83,8 +83,9 @@ export async function ops(ctx: Ctx): Promise<Screen> {
   const alert = firstAlert(current.upcoming);
   const treat = (): void => { const a = firstAlert(current.upcoming); if (a?.lineId) go(hashFor('line', a.lineId)); };
   const view = h('div', { class: 'ln-ops' }, header,
-    panel({ title: t('ln.ops.board'), action: filterBar, id: 'ln-ops-board', class: 'ln-ops-panel' }, counts, body,
-      alert ? h('div', { class: 'ln-alert' }, icon('triangle-alert', 16), h('span', null, t('ln.ops.alert', { no: alert.flightNo })), button(t('ln.ops.treat'), { variant: 'primary', key: t('key.enter'), onclick: treat })) : null));
+    panel({ title: t('ln.ops.board'), action: filterBar, id: 'ln-ops-board', class: 'ln-ops-panel' },
+      alert ? h('div', { class: 'ln-alert', role: 'status' }, icon('triangle-alert', 16), h('span', null, t('ln.ops.alert', { no: alert.flightNo })), button(t('ln.ops.treat'), { variant: 'secondary', key: t('key.enter'), onclick: treat })) : null,
+      counts, body));
 
   pollWhileShown('ln-clock', view, async () => paintClock(), 1000);
   pollWhileShown('ln-ops', view, async () => {

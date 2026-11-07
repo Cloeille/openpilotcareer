@@ -6,9 +6,9 @@ import { aiRivals } from '../competition.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import { hashFor } from '../keys.ts';
-import { airportFacts, clockGroup, featureOff, pairLabel, stateLabel, swatch, typeNames } from '../lines-ui.ts';
+import { airportFacts, clockGroup, featureOff, pairLabel, sinceLabel, stateLabel, swatch, typeNames } from '../lines-ui.ts';
 import {
-  aircraftOfLine, clockNow, everyHours, faceToFace, flightsPerDay, inService, lineDelay, lineVisual, mapAirportCodes, mapAirports, mapFlights, mapLines, NETWORK_TAB, pairId, reopenTarget,
+  aircraftOfLine, clockNow, everyHours, faceToFace, flightsPerDay, inService, lineDelay, networkAirports, lineVisual, mapAirportCodes, mapAirports, mapFlights, mapLines, NETWORK_TAB, pairId, reopenTarget, rivalOrder,
   type FaceToFace,
 } from '../lines-view.ts';
 import { pollWhileShown } from '../live-poll.ts';
@@ -20,17 +20,18 @@ import { h } from '../ui.ts';
 const POLL_NETWORK_MS = 5000;
 const POLL_CLOCK_MS = 1000;
 const MAP_SIZE = { w: 1600, h: 778 };
-const MAP_FIT = { left: 110, top: 215, right: 1100, bottom: 680 };
+const MAP_FIT = { left: 110, top: 205, right: 1090, bottom: 650 };
 
 /** The line the keyboard has selected. Kept across redraws so the list does not jump back to the first line. */
 let selected: string | null = null;
 
-type Rival = { profile: CompanyProfile; net: Network };
+type Rival = { profile: CompanyProfile; net: Network; name: string; lines: Network['lines'] };
 /** The AI companies that fly lines. A server without the route, or a company without lines, is left out. */
-async function loadRivals(): Promise<Rival[]> {
+async function loadRivals(mine: Network['lines']): Promise<Rival[]> {
   const { profiles } = await aiRivals();
   const nets = await Promise.all(profiles.map((p) => fetchNetwork(p.id).catch(() => null)));
-  return profiles.flatMap((profile, i) => (nets[i]?.lines.length ? [{ profile, net: nets[i]! }] : []));
+  const found = profiles.flatMap((profile, i) => (nets[i]?.lines.length ? [{ profile, net: nets[i]!, name: profile.name, lines: nets[i]!.lines }] : []));
+  return rivalOrder(mine, found);
 }
 
 const fact = (label: string, value: Node | string): HTMLElement => h('div', { class: 'ln-fact' }, h('span', { class: 'muted' }, label), h('span', { class: 'ln-fact-value' }, value));
@@ -40,9 +41,10 @@ export async function network(ctx: Ctx): Promise<Screen> {
   const { me } = snap;
   const fm = fmt();
   const asked = ctx.arg === null ? NaN : Number(ctx.arg);
-  const [own, rivals] = await Promise.all([fetchNetwork(), loadRivals()]);
+  const own = await fetchNetwork();
   if (!own) return { title: t('ln.net.title', { company: me.company.name }), scene: 'jobs', tab: NETWORK_TAB, back: '#dashboard', hints: [{ key: t('key.esc'), label: t('hint.back') }], view: featureOff('ln.off.title') };
 
+  const rivals = await loadRivals(own.lines);
   const rival = rivals.find((r) => r.profile.id === asked) ?? null;
   /** What is on screen, replaced by each poll. */
   const data = { own, rival: rival?.net ?? null, at: Date.now() };
@@ -62,7 +64,7 @@ export async function network(ctx: Ctx): Promise<Screen> {
   const paintMap = (): void => {
     const net = shown();
     const flights = mapFlights(data.own, data.rival, (f, mine) => (mine ? t('ln.map.yours', { no: f.flightNo }) : t('ln.map.flight', { no: f.flightNo, to: f.to })));
-    const scene = buildNetworkMap({ airports, lines: mapLines(data.own, data.rival), flights, selected: rival ? null : selected, fit: MAP_FIT, size: MAP_SIZE, text: { interrupted: t('ln.state.interrupted', { n: 0 }), contested: t('ln.contested') } });
+    const scene = buildNetworkMap({ airports, lines: mapLines(data.own, data.rival), flights, selected: rival ? null : selected, focus: networkAirports(shown()), fit: MAP_FIT, size: MAP_SIZE, text: { interrupted: t('ln.state.interrupted', { n: 0 }), contested: t('ln.contested') } });
     mapHost.replaceChildren(drawNetworkMap(scene, t('ln.map.label', { n: net.lines.length })));
   };
 
@@ -79,7 +81,7 @@ export async function network(ctx: Ctx): Promise<Screen> {
   const paintClock = (): void => clock.set(clockNow(data.own.now, data.at, Date.now()), data.own.enabled);
   const fleetSize = rival ? rival.profile.fleet.reduce((s, f) => s + f.count, 0) : 0;
   const sub = rival
-    ? t('ln.net.rivalSub', { hub: city.get(rival.profile.hubs[0] ?? '') ?? rival.profile.hubs[0] ?? '–', lines: rival.net.lines.length, aircraft: fleetSize, flying: rival.net.flying.length })
+    ? t('ln.net.rivalSub', { hub: city.get(rival.profile.hubs[0] ?? '') ?? rival.profile.hubs[0] ?? '–', lines: tp('ln.count', rival.net.lines.length), aircraft: tp('ln.net.rivalAircraft', fleetSize), flying: tp('ln.net.rivalFlying', rival.net.flying.length) })
     : t('ln.net.sub');
   const title = rival ? t('ln.net.rivalTitle', { company: rival.profile.name }) : t('ln.net.title', { company: me.company.name });
   const header = h('div', { class: 'ln-header' }, titleBlock(h('span', { class: 'row tight' }, dot, status), title, h('p', { class: 'dim ln-sub' }, sub)), clock.root);
@@ -100,7 +102,7 @@ export async function network(ctx: Ctx): Promise<Screen> {
     const id = pairId(l);
     const state = h('span', { class: 'ln-state-host' }, stateLabel(visual, lineDelay(l, own.flying)));
     states.set(l.id, state);
-    const when = visual === 'interrupted' && l.interruptedSince !== null ? t('ln.row.suspended', { at: fm.zulu(l.interruptedSince) })
+    const when = visual === 'interrupted' && l.interruptedSince !== null ? t('ln.row.suspended', { at: sinceLabel(l.interruptedSince, data.own.now) })
       : visual === 'paused' ? t('ln.row.paused') : t('ln.row.cadence', { every: everyHours(l), perDay: flightsPerDay(l) });
     const [first = '', ...rest] = aircraftOfLine(l, nameOf);
     const down = l.aircraft.some((a) => inspection.has(a.registration)) ? ` · ${t('ln.row.inspection')}` : '';
@@ -142,7 +144,7 @@ export async function network(ctx: Ctx): Promise<Screen> {
   // ------------------------------------------------------------ the right-hand panel
   const faceRow = (s: FaceToFace, name: string): HTMLElement => {
     const down = s.own.status !== 'active';
-    const youState = down ? `${t(`ln.state.${s.own.status}` as Key, { n: 0 })}${s.own.interruptedSince === null ? '' : ` · ${t('ln.row.since', { at: fm.zulu(s.own.interruptedSince) })}`}` : t('ln.row.every', { every: everyHours(s.own) });
+    const youState = down ? `${t(`ln.state.${s.own.status}` as Key, { n: 0 })}${s.own.interruptedSince === null ? '' : ` · ${t('ln.row.since', { at: sinceLabel(s.own.interruptedSince, data.own.now) })}`}` : t('ln.row.every', { every: everyHours(s.own) });
     return h('li', null, h('button', { type: 'button', class: 'ln-face-row', 'data-row': '', 'aria-label': pairLabel(s.own.a, s.own.b), onclick: () => go(hashFor('line', s.own.id)) },
       h('span', { class: 'ln-face-head' }, h('span', { class: 'mono strong' }, pairLabel(s.own.a, s.own.b)), h('span', { class: 'dim small' }, `${city.get(s.own.a) ?? s.own.a} – ${city.get(s.own.b) ?? s.own.b}`)),
       h('span', { class: 'ln-face-line' }, h('span', { class: 'ln-face-who' }, t('ln.face.you')), h('span', { class: down ? 'ln-down' : 'muted' }, youState)),
@@ -176,7 +178,7 @@ export async function network(ctx: Ctx): Promise<Screen> {
     h('span', { class: 'ln-legend-item' }, kind === 'plane' ? icon('plane', 16) : h('span', { class: `ln-legend-swatch ${kind}`, 'aria-hidden': 'true' }, kind === 'down' ? [h('i'), h('i'), h('i')] : null), label)));
 
   paintStatus(); paintClock(); paintToday(); paintPrimary(); paintMap();
-  const view = h('div', { class: 'ln-net' }, mapHost, header, h('div', { class: 'ln-body' }, h('div', { class: 'ln-map-col' }, h('div', { class: 'ln-map-foot' }, switcher, legend)), side));
+  const view = h('div', { class: 'ln-net' }, mapHost, header, h('div', { class: 'ln-body' }, h('div', { class: 'ln-map-col' }, h('div', { class: 'ln-map-foot' }, switcher, legend)), h('div', { class: 'ln-side' }, side)));
 
   // ------------------------------------------------------------ live: the clock runs, the network refreshes
   const signature = (n: Network): string => n.lines.map((l) => `${l.id}:${l.status}:${lineDelay(l, n.flying)}`).join();

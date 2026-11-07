@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import type { FlyingNow, Line, Network, OpsRow, ScheduledFlight } from './api-lines.ts';
 import {
   asProgramme, causesOf, clockNow, dayKind, draftProblem, everyHours, faceToFace, filterOps, firstAlert, ganttLanes, hhmm, isoDay, lineDelay, lineVisual, mapAirportCodes, mapFlights, mapLines,
-  minuteOfDay, minutesOf, nextFilter, opsBadge, pairId, phaseOf, perHour, freqFromPerHour, windowHours, isRoundTheClock, ROUND_THE_CLOCK, previewProgramme, pnlParts, progressPct, projectionKind, reopenTarget, stepDay, DEFAULT_DRAFT, forecastShare, candidateAircraft,
+  minuteOfDay, minutesOf, nextFilter, opsBadge, pairId, meterFraction, rivalOrder, sinceToday, phaseOf, perHour, freqFromPerHour, windowHours, isRoundTheClock, ROUND_THE_CLOCK, previewProgramme, pnlParts, progressPct, projectionKind, reopenTarget, stepDay, DEFAULT_DRAFT, forecastShare, candidateAircraft,
 } from './lines-view.ts';
 
 const line = (o: Partial<Line> = {}): Line => ({
@@ -63,7 +63,8 @@ test('face to face: shared pairs, the rival\'s own lines, and which shared line 
   const theirs = [line({ id: 8, a: 'LFLL', b: 'LFML' }), line({ id: 9, a: 'LFMN', b: 'LFPG' }), line({ id: 10, a: 'LFML', b: 'LEBL' })];
   const { shared, alone } = faceToFace(mine, theirs);
   assert.deepEqual(shared.map((s) => s.pair), ['LFLL-LFML', 'LFMN-LFPG']);
-  assert.deepEqual(alone.map((l) => pairId(l)), ['LFML-LEBL']);
+  assert.deepEqual(alone.map((l) => pairId(l)), ['LEBL-LFML']);
+  assert.equal(pairId({ a: 'LFMN', b: 'LFLL' }), pairId({ a: 'LFLL', b: 'LFMN' }));
   assert.equal(reopenTarget(shared)?.own.id, 2);
   assert.equal(reopenTarget(shared.filter((s) => s.own.id === 1)), null);
 });
@@ -98,11 +99,49 @@ test('gantt: one lane per aircraft with positions in percent of 24 h, flights cu
   ];
   const lanes = ganttLanes(flights, [7, 8], '2026-11-06');
   assert.equal(lanes.length, 2);
-  assert.deepEqual(lanes[0]!.segments.map((s) => [s.flightNo, s.left, s.kind]), [['1131', 25, 'scheduled'], ['1132', 32.99, 'delayed']]);
+  assert.deepEqual(lanes[0]!.segments.map((s) => [s.flightNo, s.left, s.kind]), [['1131', 25, 'scheduled'], ['1132', 33.68, 'delayed']]);
   assert.equal(lanes[0]!.segments[0]!.width, 5.21);
   assert.equal(lanes[0]!.rotations, 1);
   assert.equal(lanes[1]!.segments[0]!.left, 0);
   assert.equal(lanes[1]!.segments[0]!.width, 4.17);
+});
+
+test('gantt: a delayed flight leaves late: a warning bar from the planned departure, the flight drawn after it', () => {
+  const late = ganttLanes([leg({ status: 'delayed', delayMin: 36 })], [7], '2026-11-06')[0]!.segments[0]!;
+  assert.equal(late.delayLeft, 25);
+  assert.equal(late.delay, 2.5);
+  assert.equal(late.left, 27.5);
+  assert.equal(late.width, 5.21);
+  const cancelled = ganttLanes([leg({ status: 'cancelled', delayMin: 36 })], [7], '2026-11-06')[0]!.segments[0]!;
+  assert.equal(cancelled.delay, 0);
+  assert.equal(cancelled.left, 25);
+  assert.equal(ganttLanes([leg()], [7], '2026-11-06')[0]!.segments[0]!.delay, 0);
+});
+
+test('dependency meters: filled from a percentage or an a-of-b text, none for anything else', () => {
+  assert.equal(meterFraction('84 %'), 0.84);
+  assert.equal(meterFraction('84,5 %'), 0.845);
+  assert.equal(meterFraction('140 %'), 1);
+  assert.equal(meterFraction('4 sur 4'), 1);
+  assert.equal(meterFraction('3 of 4'), 0.75);
+  assert.equal(meterFraction('0 of 0'), null);
+  assert.equal(meterFraction('9 h 13 / 13 h'), null);
+  assert.equal(meterFraction('ok'), null);
+});
+
+test('rival networks: the ones that share pairs with the player come first, then by name', () => {
+  const own = [{ a: 'LFMN', b: 'LFPG' }, { a: 'LFLL', b: 'LFML' }];
+  const rivals = [
+    { name: 'Zeta', lines: [{ a: 'LFML', b: 'LEBL' }] }, { name: 'Alpha', lines: [{ a: 'LFML', b: 'LEBL' }] },
+    { name: 'Meridia', lines: [{ a: 'LFMN', b: 'LFPG' }, { a: 'LFLL', b: 'LFML' }] }, { name: 'Link', lines: [{ a: 'LFMN', b: 'LFPG' }] },
+  ];
+  assert.deepEqual(rivalOrder(own, rivals).map((r) => r.name), ['Meridia', 'Link', 'Alpha', 'Zeta']);
+});
+
+test('"since" shows the date only when it was not today', () => {
+  const now = Date.parse('2026-11-06T04:50:00Z');
+  assert.ok(sinceToday(Date.parse('2026-11-06T01:00:00Z'), now));
+  assert.ok(!sinceToday(Date.parse('2026-11-05T14:00:00Z'), now));
 });
 
 test('the day\'s bar splits costs and margin as shares of the whole; a loss shows costs only', () => {
@@ -193,6 +232,8 @@ test('progress along a flight is clamped to 0-100', () => {
   assert.equal(progressPct(f, 500), 0);
   assert.equal(progressPct(f, 2000), 50);
   assert.equal(progressPct(f, 9000), 100);
+  assert.equal(progressPct({ ...f, delayMin: 1 }, 1000 + 60_000 + 1000), 50, 'a late flight has flown less at the same instant');
+  assert.equal(progressPct({ ...f, delayMin: 1 }, 1000 + 30_000), 0, 'and has not left yet');
 });
 
 test('frequency per hour: round trips per hour of the window, converted both ways and capped', () => {
