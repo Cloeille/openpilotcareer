@@ -98,7 +98,7 @@ test('SCHEMA_SIMBRIEF runs after V7 (position 7) on a database that already ran 
   raw.exec('PRAGMA user_version = 6');
   raw.exec(`INSERT INTO users VALUES (1, 'a', 'h', 1);
     INSERT INTO companies (id, user_id, name, balance, reputation, created_at) VALUES (1, 1, 'A Air', 1, 50, 1);
-    INSERT INTO aircraft VALUES (1, 1, 'C172', 'LFPG', 100000, 0);
+    INSERT INTO aircraft (id, company_id, icao, location, value) VALUES (1, 1, 'C172', 'LFPG', 100000);
     INSERT INTO flights (id, company_id, aircraft_id, aircraft_icao, job_id, source, kind, origin, destination, distance_nm, payload_kg, pax, payout, status, accepted_at)
       VALUES (1, 1, 1, 'C172', 'J1', 'board', 'pax', 'LFPG', 'EGLL', 195, 300, 3, 3000, 'active', 40), (2, 1, 1, 'C172', 'J2', 'board', 'pax', 'LFPG', 'EGLL', 195, 300, 3, 3000, 'verified', 41);`);
   raw.close();
