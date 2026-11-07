@@ -11,12 +11,13 @@ export const SIM_AIRCRAFT_SOURCES = ['official', 'community'] as const;
 export type SimAircraftSource = (typeof SIM_AIRCRAFT_SOURCES)[number];
 
 const title = z.string().trim().min(1).max(200);
+const icaoType = z.string().regex(/^[A-Z0-9]{2,4}$/, 'ICAO type designator: 2-4 chars A-Z/0-9');
 
 /** One aircraft model of the simulator (its liveries are folded into `liveries`). `title` is a real SimObject title: it is the identity of the entry. */
 export const simAircraftEntrySchema = z.object({
   title,
   /** ICAO type designator from aircraft.cfg, or null when the bridge could not tell: the server then tries to match the title against its catalogue. */
-  icao: z.string().regex(/^[A-Z0-9]{2,4}$/, 'ICAO type designator: 2-4 chars A-Z/0-9').nullable(),
+  icao: icaoType.nullable(),
   manufacturer: z.string().trim().max(80),
   model: z.string().trim().max(80),
   source: z.enum(SIM_AIRCRAFT_SOURCES),
@@ -30,14 +31,17 @@ export const simAircraftPutSchema = z.object({
     .refine((a) => new Set(a.map((x) => x.title)).size === a.length, { message: 'titles must be unique' }),
 });
 
-/** PATCH /api/v1/me/sim-aircraft (session): hide an aircraft from the buy and lease screens, or show it again. */
-export const simAircraftHideSchema = z.object({ title, hidden: z.boolean() });
+/** PATCH /api/v1/me/sim-aircraft (session), on one of the player's own entries: `hidden` hides it from the buy and lease screens or shows it again;
+ *  `icao` sets the type the player picked by hand (a rescan never erases it), `null` clears it. A field left out is not touched. */
+export const simAircraftPatchSchema = z.object({ title, hidden: z.boolean().optional(), icao: icaoType.nullable().optional() })
+  .refine((b) => b.hidden !== undefined || b.icao !== undefined, { message: 'hidden or icao is required' });
+export type SimAircraftPatch = z.infer<typeof simAircraftPatchSchema>;
 
 /** What a PUT answers. */
 export type SimAircraftSaved = { count: number; scannedAt: number };
 
-/** `icao` is the resolved designator: the one the bridge read, else the catalogue type whose name the title contains, else null (cannot be bought). */
-export type SimAircraftView = Omit<SimAircraftEntry, 'icao'> & { icao: string | null; hidden: boolean };
+/** `icao` is the effective designator: the one the player picked (`manual`), else the one the scan resolved (the bridge's, else the catalogue type whose name the title contains), else null (cannot be bought). */
+export type SimAircraftView = Omit<SimAircraftEntry, 'icao'> & { icao: string | null; manual: boolean; hidden: boolean };
 
 /** GET /api/v1/me/sim-aircraft. `types` holds the catalogue type of each distinct resolved `icao` (derived: true when the catalogue only has a category estimate). */
 export type SimAircraftList = { scannedAt: number | null; aircraft: SimAircraftView[]; types: AircraftType[] };

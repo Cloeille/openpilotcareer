@@ -13,10 +13,11 @@ The aircraft MSFS can really fly are what the buy and lease screens offer ("Mes 
 ## Server
 
 - `sim_aircraft` (migration `SCHEMA_SIM_AIRCRAFT`, appended at the end of `MIGRATIONS`), one row per (user, title). A PUT replaces the rows and keeps `hidden` of titles still present.
-- `PUT /me/sim-aircraft` (API key), `GET /me/sim-aircraft` and `PATCH /me/sim-aircraft {title, hidden}` (session). At most 2 000 entries, 1 MiB body, unique titles, `icao` 2-4 chars A-Z/0-9 or null.
+- `sim_aircraft.icao_override` (migration `SCHEMA_SIM_AIRCRAFT_OVERRIDE`, appended at the end of `MIGRATIONS`): the type the player picked by hand. `icao` stays the scan's value; a PUT rewrites it and keeps `hidden` and `icao_override` of the titles still present. The effective type (`icao` in the GET, `manual: true` when it is the override) is the override, else the scanned one.
+- `PUT /me/sim-aircraft` (API key), `GET /me/sim-aircraft` and `PATCH /me/sim-aircraft {title, hidden?, icao?}` (session; at least one of `hidden`, `icao`). `icao` is a curated (non-derived) catalogue type, else 422 `sim_aircraft_type_unknown`; `null` clears it; an unknown title is 404. At most 2 000 entries, 1 MiB body, unique titles, `icao` 2-4 chars A-Z/0-9 or null.
 - The designator an entry is bought as: the bridge's when the catalogue knows it; else the catalogue type whose name the title contains; else the bridge's own code (category estimate, shown "estimé"); else none. **Prices are never read from the list**: `GET` returns the catalogue type of each designator and the buy/lease routes price from the catalogue as always.
 
 ## Web
 
-- Settings › "Avions du simulateur": the list, last scan, counts, per-aircraft hide/show, the "scan again" hint (`opc-bridge scan-aircraft`).
+- Settings › "Avions du simulateur": the list, last scan, counts, a "Sans type (N)" filter, per-aircraft hide/show, a type picker (search over the curated catalogue types) on each untyped row and a "manuel" badge with a clear button on the types picked by hand, the "scan again" hint (`opc-bridge scan-aircraft`).
 - Catalogue (buy and lease start here): filter "Mes avions du simulateur", on by default when the list has an offer; each type shows its simulator titles; estimated types carry the "≈ estimé" badge.

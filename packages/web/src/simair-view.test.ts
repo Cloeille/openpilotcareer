@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { AircraftType, SimAircraftList, SimAircraftView } from '@opc/shared';
-import { filterIsOn, narrow, offersOf, rowsOf, summaryOf, titlesLabel } from './simair-view.ts';
+import { filterIsOn, filterRows, narrow, offersOf, rowsOf, summaryOf, titlesLabel } from './simair-view.ts';
 
 const type = (icao: string, name: string, over: Partial<AircraftType> = {}): AircraftType => ({ icao, name, category: 'jet-airliner', engines: 2, wtc: 'M', seats: 150, cargoKg: 3000, cruiseKts: 450, rangeNm: 2800, derived: false, ...over });
-const a = (title: string, icao: string | null, over: Partial<SimAircraftView> = {}): SimAircraftView => ({ title, icao, manufacturer: '', model: '', source: 'official', liveries: 1, hidden: false, ...over });
+const a = (title: string, icao: string | null, over: Partial<SimAircraftView> = {}): SimAircraftView => ({ title, icao, manual: false, manufacturer: '', model: '', source: 'official', liveries: 1, hidden: false, ...over });
 const list = (aircraft: SimAircraftView[], types: AircraftType[]): SimAircraftList => ({ scannedAt: 1, aircraft, types });
 const A20N = type('A20N', 'Airbus A320neo');
 const C172 = type('C172', 'Cessna 172 Skyhawk', { category: 'piston-single', engines: 1, wtc: 'L', seats: 4 });
@@ -54,5 +54,21 @@ test('titlesLabel names the first title and counts the others', () => {
 test('settings rows: offered, hidden, or no type; the summary counts them and the sources', () => {
   const rows = rowsOf(list([a('A', 'A20N', { manufacturer: 'Airbus', model: 'A320neo', source: 'community' }), a('B', 'C172', { hidden: true }), a('C', null), a('D', 'XXX1')], [A20N, C172, XXX1]));
   assert.deepEqual(rows.map((r) => [r.title, r.state, r.estimated, r.detail]), [['A', 'offered', false, 'Airbus A320neo'], ['B', 'hidden', false, ''], ['C', 'noType', false, ''], ['D', 'offered', true, '']]);
-  assert.deepEqual(summaryOf(rows), { total: 4, offered: 2, hidden: 1, official: 3, community: 1 });
+  assert.deepEqual(summaryOf(rows), { total: 4, offered: 2, hidden: 1, noType: 1, official: 3, community: 1 });
+});
+
+test('the "no type" filter keeps only the rows still to be typed; a type picked by hand shows as manual and counts as typed', () => {
+  const rows = rowsOf(list([a('Fenix A320', 'A20N', { manual: true }), a('iniBuilds A350', null), a('Cessna', 'C172')], [A20N, C172]));
+  assert.deepEqual(rows.map((r) => [r.title, r.manual, r.state]), [['Fenix A320', true, 'offered'], ['iniBuilds A350', false, 'noType'], ['Cessna', false, 'offered']]);
+  assert.deepEqual(filterRows(rows, 'noType').map((r) => r.title), ['iniBuilds A350']);
+  assert.deepEqual(filterRows(rows, 'all').map((r) => r.title), ['Fenix A320', 'iniBuilds A350', 'Cessna']);
+  assert.equal(summaryOf(rows).noType, 1);
+});
+
+test('the buy filter offers an aircraft by its effective type: the one the player picked by hand, under its simulator title', () => {
+  const list_ = list([a('Fenix A320', 'A20N', { manual: true }), a('Airbus A320neo (Asobo)', 'A20N'), a('iniBuilds A350', null), a('Cessna', 'C172')], [A20N, C172]);
+  const offers = offersOf(list_);
+  assert.deepEqual(offers.map((o) => [o.type.icao, o.titles]), [['A20N', ['Fenix A320', 'Airbus A320neo (Asobo)']], ['C172', ['Cessna']]]);
+  assert.deepEqual(narrow(offers, 'fenix', 'all').map((o) => o.type.icao), ['A20N'], 'found by the title she knows it by');
+  assert.deepEqual(offersOf(list([a('Fenix A320', null)], [])), [], 'cleared: not offered again');
 });

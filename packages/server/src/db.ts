@@ -290,6 +290,11 @@ CREATE TABLE sim_aircraft (
   PRIMARY KEY (user_id, title));
 `;
 
+// Lot SIMAC-REMAP: the type a player picked by hand for a scanned aircraft the scan could not type. Kept apart from `icao` (the scan's value) so a PUT, which rewrites `icao`, never erases it.
+// The effective designator is COALESCE(icao_override, icao).
+const SCHEMA_SIM_AIRCRAFT_OVERRIDE = `
+ALTER TABLE sim_aircraft ADD COLUMN icao_override TEXT;
+`;
 
 // v4 AGENCY: a recruiter mission. The shortlist is not stored: it is a function of the mission (company, start day, base, type, count), like the market's candidates.
 // `commission` is what the signature paid (0 while the mission is open); `premium_pct` is the salary premium the mission was opened at.
@@ -336,7 +341,7 @@ CREATE TABLE credits (
 CREATE INDEX credits_company ON credits(company_id, status);
 `;
 
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT, SCHEMA_AGENCY, SCHEMA_REPORTS, SCHEMA_CREDIT];
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT, SCHEMA_AGENCY, SCHEMA_REPORTS, SCHEMA_CREDIT, SCHEMA_SIM_AIRCRAFT_OVERRIDE];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);
