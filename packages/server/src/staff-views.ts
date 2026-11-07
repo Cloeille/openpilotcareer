@@ -36,7 +36,7 @@ const emptyAvailability = () => ({ onDuty: 0, resting: 0, leave: 0, training: 0,
 
 export function overview(db: Db, companyId: number, now: number, base?: string, family?: StaffFamily): StaffOverview {
   const rules = rulesOf(db, companyId);
-  const demand = companyDemand(db, companyId, rules, base);
+  const demand = companyDemand(db, companyId, rules).filter((d) => !base || d.base === base);
   const roster = rosterOf(db, companyId, now).filter((s) => !base || s.base === base).filter((s) => !family || s.family === family);
   const states = new Map(roster.map((s) => [s.id, stateOf(db, s, now, rules)]));
   const hereNow = roster.filter((s) => states.get(s.id) !== 'pending');

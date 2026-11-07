@@ -65,10 +65,9 @@ export function demandOf(db: Db, companyId: number, lines: readonly DemandLine[]
   return slots.filter((s) => s.count > 0);
 }
 
-/** The company's whole timetable (paused lines fly nothing). `onlyBase`: only the lines that touch that airport. */
-export function companyDemand(db: Db, companyId: number, rules: RestPolicyRules, onlyBase?: string): Slot[] {
-  const lines = (db.prepare("SELECT * FROM lines WHERE company_id = ? AND status != 'paused' ORDER BY id").all(companyId) as LineRow[])
-    .filter((l) => !onlyBase || l.a === onlyBase || l.b === onlyBase);
+/** The company's whole timetable (paused lines fly nothing). */
+export function companyDemand(db: Db, companyId: number, rules: RestPolicyRules): Slot[] {
+  const lines = db.prepare("SELECT * FROM lines WHERE company_id = ? AND status != 'paused' ORDER BY id").all(companyId) as LineRow[];
   return demandOf(db, companyId, lines.map((l) => demandLine(db, l)), rules);
 }
 

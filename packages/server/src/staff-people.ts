@@ -102,7 +102,9 @@ export function hire(db: Db, companyId: number, candidateId: string, now: number
   const day = m ? Number(m[1]) : NaN, today = dayNo(now);
   if (!m || day > today || day < today - 1 || !basesOf(db, companyId).includes(m[2]!)) throw new HttpError(404, 'candidate_not_found', 'this candidate is no longer on the market');
   const c = candidatesFor(db, companyId, day, m[2]!, m[3] as StaffFamily, m[4] === '-' ? null : m[4]!).find((x) => x.id === candidateId);
-  if (!c || !(STAFF_FAMILIES as readonly string[]).includes(c.family)) throw new HttpError(404, 'candidate_not_found', 'this candidate is no longer on the market');
+  // only what the market lists: a pilot for a type the company flies, nobody else with a type rating
+  const listed = c && (STAFF_FAMILIES as readonly string[]).includes(c.family) && (c.family === 'pilot' ? c.qual !== null && fleetTypes(db, companyId).includes(c.qual) : c.qual === null);
+  if (!c || !listed) throw new HttpError(404, 'candidate_not_found', 'this candidate is no longer on the market');
   if (get(db, 'SELECT 1 AS x FROM staff WHERE company_id = ? AND candidate_id = ?', companyId, c.id)) throw new HttpError(409, 'candidate_taken', 'you already hired this candidate');
   pay(db, companyId, now, 'hire_premium', c.premium, `hiring premium ${c.name}`);
   const startsAt = now + c.noticeDays * DAY_MS;

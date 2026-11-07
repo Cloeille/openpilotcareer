@@ -60,8 +60,9 @@ test('upgrading a v7 database: companies that fly lines are owed a starter crew,
     INSERT INTO hubs VALUES (1, 'LFPG'), (2, 'LFPG'), (3, 'LFPG');
     INSERT INTO aircraft (id, company_id, icao, location, value, registration, base, acquired_at) VALUES (1, 1, 'AT76', 'LFPG', 1, 'F-HAAA', 'LFPG', 1), (2, 2, 'AT76', 'LFPG', 1, 'F-HBBB', 'LFPG', 1), (3, 3, 'AT76', 'LFPG', 1, 'F-HCCC', 'LFPG', 1);
     INSERT INTO billing_runs VALUES (1, '2026-11', 1), (2, '2026-11', 1);
-    INSERT INTO lines (id, company_id, a, b, created_at, freq_per_day, days, window_start_min, window_end_min, turnaround_min, flight_base) VALUES (1, 1, 'LFLL', 'LFPG', 1, 3, 127, 360, 1080, 30, 1100), (2, 3, 'LFLL', 'LFPG', 1, 3, 127, 360, 1080, 30, 1100);
-    INSERT INTO line_aircraft VALUES (1, 1, 'LFPG'), (2, 3, 'LFPG');`);
+    INSERT INTO lines (id, company_id, a, b, created_at, freq_per_day, days, window_start_min, window_end_min, turnaround_min, flight_base, live_from, laid_through) VALUES (1, 1, 'LFLL', 'LFPG', 1, 3, 127, 360, 1080, 30, 1100, ${T0}, ${T0}), (2, 3, 'LFLL', 'LFPG', 1, 3, 127, 360, 1080, 30, 1100, ${T0}, ${T0});
+    INSERT INTO line_aircraft VALUES (1, 1, 'LFPG'), (2, 3, 'LFPG');
+    INSERT INTO line_networks VALUES (1, 1, ${T0}, NULL), (3, 1, ${T0}, NULL);`);
   raw.close();
   const db = openDb(file);
   assert.deepEqual(all<{ company_id: number; starter_pending: number }>(db, 'SELECT company_id, starter_pending FROM staff_company ORDER BY company_id').map((r) => ({ company_id: r.company_id, starter_pending: r.starter_pending })), [{ company_id: 1, starter_pending: 1 }], 'only the human company with a line; Bob has no line, the bot has no staff model');
@@ -103,6 +104,17 @@ test('a starter crew flies a month of the line without one cancellation for want
 });
 
 // ---------------------------------------------------------------- the invariants of the duty rules, checked on the ledger
+
+test('deleting a line keeps the hours its crews flew and never lets a reused leg id inherit them', async () => {
+  const w = await world({ crew: true });
+  await w.advance(DAY_MS);
+  const hours = () => get<{ m: number }>(w.h.db, 'SELECT SUM(flight_min) AS m FROM staff_duty')!.m;
+  const before = hours();
+  assert.ok(before > 0 && get<{ n: number }>(w.h.db, 'SELECT COUNT(*) AS n FROM staff_duty WHERE leg_id IS NULL')!.n === 0);
+  assert.equal((await w.call('DELETE', `/api/v1/lines/${w.lineId}`)).status, 204);
+  assert.equal(hours(), before, 'the ledger keeps the hours: the 28-day and 12-month limits still count them');
+  assert.equal(get<{ n: number }>(w.h.db, 'SELECT COUNT(*) AS n FROM staff_duty WHERE leg_id IS NOT NULL')!.n, 0, 'no booking points at a deleted leg');
+});
 
 test('across 30 days no person ever exceeds the duty limits: 13 h a day, 28-day flight time, 6 days in a row, rest between periods', async () => {
   const w = await world({ crew: true, freq: 4 });
@@ -284,7 +296,7 @@ test('an interim pilot starts now for the days booked and leaves by himself; tra
   assert.equal((await w.call('POST', `/api/v1/staff/${cabin.id}/transfer`, { base: 'LFLL' })).status, 422, 'LFLL is not a hub or base of the company');
   const rested = await w.call('POST', `/api/v1/staff/${cabin.id}/rest`);
   assert.equal(rested.status, 200, rested.text);
-  assert.equal(rested.body.state, 'leave');
+  assert.equal(rested.body.state, 'resting');
 });
 
 // ---------------------------------------------------------------- payroll (C7)

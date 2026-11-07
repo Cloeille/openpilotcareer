@@ -147,8 +147,8 @@ export function stateOf(db: Db, s: StaffRow, now: number, rules: RestPolicyRules
   if (s.ends_at !== null && s.ends_at <= now) return 'left';
   if (s.starts_at > now) return 'pending';
   const today = dayNo(now);
-  const leave = get<{ kind: string }>(db, "SELECT kind FROM staff_leave WHERE staff_id = ? AND status = 'granted' AND from_day <= ? AND to_day >= ? ORDER BY kind = 'training' DESC LIMIT 1", s.id, today, today);
-  if (leave) return leave.kind === 'training' ? 'training' : 'leave';
+  const leave = get<{ kind: string }>(db, "SELECT kind FROM staff_leave WHERE staff_id = ? AND status = 'granted' AND from_day <= ? AND to_day >= ? ORDER BY kind = 'training' DESC, kind = 'leave' DESC LIMIT 1", s.id, today, today);
+  if (leave) return leave.kind === 'training' ? 'training' : leave.kind === 'rest' ? 'resting' : 'leave';
   const last = get<{ arr_at: number; dest: string }>(db, 'SELECT arr_at, dest FROM staff_duty WHERE staff_id = ? AND dep_at <= ? ORDER BY dep_at DESC, arr_at DESC LIMIT 1', s.id, now);
   if (!last) return 'free';
   const released = last.arr_at + DUTY_RELEASE_MIN * 60_000;
