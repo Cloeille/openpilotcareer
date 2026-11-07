@@ -9,8 +9,8 @@ import { monthKey, projectCharges } from './finance.ts';
 import { addMonths, balanceOf } from './game.ts';
 
 const UPCOMING_MAX = 6;
-/** One-off purchases are not what a company burns: they stay out of the runway (an aircraft bought last month must not read as "two days of cash"). */
-const NOT_BURN: readonly Category[] = ['investment'];
+/** One-off purchases and capital movements are not what a company burns: they stay out of the runway (an aircraft bought last month must not read as "two days of cash", nor a transfer to a subsidiary). */
+const NOT_BURN: readonly Category[] = ['investment', 'capital'];
 
 const monthStart = (key: string): number => Date.parse(`${key}-01T00:00:00Z`);
 const sumOf = <T>(rows: readonly T[], pick: (r: T) => number): number => rows.reduce((t, r) => t + pick(r), 0);

@@ -87,6 +87,13 @@ export function assertFlyable(db: Db, aircraftId: number, now: number): void {
   if (leg) throw new HttpError(409, 'aircraft_busy', `this aircraft is flying a line leg to ${leg.dest} until ${new Date(leg.until).toISOString()}`);
 }
 
+/** The aircraft is doing nothing and is bound to nothing: flyable (`assertFlyable`), not on a flight in progress and not on a line. What a ferry and a cession of the aircraft to another company both need. */
+export function assertIdle(db: Db, aircraftId: number, now: number): void {
+  assertFlyable(db, aircraftId, now);
+  if (get(db, "SELECT 1 AS x FROM flights WHERE aircraft_id = ? AND status = 'active'", aircraftId)) throw new HttpError(409, 'aircraft_busy', `aircraft ${aircraftId} is on a flight`);
+  if (get(db, 'SELECT 1 AS x FROM line_aircraft WHERE aircraft_id = ?', aircraftId)) throw new HttpError(409, 'aircraft_on_line', 'this aircraft flies a line: take it off the line first');
+}
+
 /** Wear accrues per block hour by category, for player companies with `wearEnabled`. At the threshold the aircraft goes to the workshop; each of its components wears too (parts.ts). */
 export function accrueWear(db: Db, companyId: number, aircraftId: number, category: AircraftCategory, hours: number, at: number): void {
   if (!isHuman(db, companyId) || !wearEnabled(db, companyId)) return;

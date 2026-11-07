@@ -6,9 +6,19 @@
 // Season history (`season_stats`, the leaderboard's past months) hangs off the company and goes with it: a deleted company leaves no ranking behind.
 import type { CompanyImpact, StartMode } from '@opc/shared';
 import { all, get, run, type Db } from './db.ts';
-import { createCompany } from './game.ts';
+import { createCompany, hasSubsidiaries } from './game.ts';
 import { HttpError } from './http.ts';
+import { post } from './ledger.ts';
+import { debtOf } from './reports.ts';
 import { onboardingOf, save } from './start.ts';
+
+/** A parent with subsidiaries is neither deleted nor reset (409 `has_subsidiaries`): the cascade of `companies.parent_id` would take them with it, and detaching them would hand each one a life of its own
+ *  (on the leaderboard, outside the cap logic of the group). The player deletes the subsidiaries first, which shows what each one holds. A subsidiary is not reset either (409 `is_subsidiary`):
+ *  re-founding it through the start modes would give it the starting capital a subsidiary never gets (C21); she deletes it and founds a new one. */
+function assertGroupIntact(db: Db, companyId: number, action: 'delete' | 'reset'): void {
+  if (hasSubsidiaries(db, companyId)) throw new HttpError(409, 'has_subsidiaries', `delete its subsidiaries before you ${action} this company`);
+  if (action === 'reset' && get(db, 'SELECT 1 AS x FROM companies WHERE id = ? AND parent_id IS NOT NULL', companyId)) throw new HttpError(409, 'is_subsidiary', 'a subsidiary cannot be reset: delete it and found a new one');
+}
 
 function assertNoActiveFlight(db: Db, companyId: number): void {
   if (get(db, "SELECT 1 AS x FROM flights WHERE company_id = ? AND status = 'active'", companyId)) {
@@ -29,11 +39,25 @@ export function companyImpact(db: Db, companyId: number, now: number): CompanyIm
   };
 }
 
+/** Deleting a subsidiary dissolves it into its parent, which owns it 100 %: the cash (a debt included, so an overdraft is never wiped) and the aircraft it owns outright go back to the parent;
+ *  what it leases ends with its contracts, its people and lines with it, like any deleted company. One with debt left (a loan, a credit, a building credit) is refused (409 `has_debt`): the cascade
+ *  would wipe the debt while the parent keeps the cash it borrowed. */
+function dissolveIntoParent(db: Db, companyId: number, now: number): void {
+  const c = get<{ parent_id: number | null; name: string; balance: number }>(db, 'SELECT parent_id, name, balance FROM companies WHERE id = ?', companyId)!;
+  if (c.parent_id === null) return;
+  if (debtOf(db, companyId).total > 0) throw new HttpError(409, 'has_debt', 'repay the subsidiary\'s loans and credits before you delete it');
+  if (c.balance !== 0) post(db, c.parent_id, now, 'group_transfer', c.balance, `closing ${c.name}`, null, { counterpartyId: companyId });
+  const base = get<{ icao: string }>(db, 'SELECT icao FROM hubs WHERE company_id = ? ORDER BY rowid LIMIT 1', c.parent_id)!.icao;
+  run(db, "UPDATE aircraft SET company_id = ?, base = ? WHERE company_id = ? AND ownership = 'owned' AND returned_at IS NULL", c.parent_id, base, companyId);
+}
+
 /** The caller has proven `companyId` is the player's own (auth.ts `ownedCompany`: AI companies never are) and wraps this in `tx`.
  *  The player's last company going away puts the account back before the onboarding: its row is dropped so `GET /onboarding` says "not completed" again. */
 export function deleteCompany(db: Db, userId: number, companyId: number, now: number): void {
   assertNoActiveFlight(db, companyId);
+  assertGroupIntact(db, companyId, 'delete');
   const pointedAt = !!get(db, 'SELECT 1 AS x FROM onboarding WHERE company_id = ?', companyId);
+  dissolveIntoParent(db, companyId, now);
   run(db, 'DELETE FROM companies WHERE id = ?', companyId);
   if (!get(db, 'SELECT 1 AS x FROM companies WHERE user_id = ?', userId)) run(db, 'DELETE FROM onboarding WHERE user_id = ?', userId);
   // `onboarding.company_id` is the one reference without a cascade (ON DELETE SET NULL). Left alone, an unfinished onboarding of the deleted company would keep a mode and a step with no company behind it.
@@ -49,6 +73,7 @@ export function deleteCompany(db: Db, userId: number, companyId: number, now: nu
  *  `hub`: the new main hub, by default the company's first one. */
 export function resetCompany(db: Db, userId: number, companyId: number, b: { startMode: StartMode; hub?: string | undefined }, now: number): void {
   assertNoActiveFlight(db, companyId);
+  assertGroupIntact(db, companyId, 'reset');
   const founding = onboardingOf(db, userId);
   if (!founding.completed && founding.companyId !== null && founding.companyId !== companyId) throw new HttpError(409, 'onboarding_pending', 'finish or drop the company you are founding first');
   const c = get<{ name: string; code: string | null; callsign: string | null; livery_color: string | null }>(db, 'SELECT name, code, callsign, livery_color FROM companies WHERE id = ?', companyId)!;

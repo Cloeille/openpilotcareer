@@ -4,9 +4,9 @@
 import { blockHours, fuelPriceFactor, settle, type AircraftType, type FerryBooked, type FerryPreview } from '@opc/shared';
 import { airports } from './catalog.ts';
 import { get, run, type Db } from './db.ts';
-import { accrueWear, assertFlyable, flightCosts } from './fleet-extras.ts';
+import { accrueWear, assertIdle, flightCosts } from './fleet-extras.ts';
 import { assertFunds, hasHub, snapshot, typeFor, type AircraftRow } from './game.ts';
-import { HttpError } from './http.ts';
+import { HttpError, refusalOf } from './http.ts';
 import { post } from './ledger.ts';
 import { lineDistance, sizeOf } from './lines.ts';
 import { ownAircraft } from './parts.ts';
@@ -15,10 +15,6 @@ import { realismSettingOf } from './realism.ts';
 const HOUR = 3_600_000;
 
 type Plan = { aircraft: AircraftRow; type: AircraftType; preview: FerryPreview; refusal: HttpError | null };
-
-const refusalOf = (check: () => void): HttpError | null => {
-  try { check(); return null; } catch (e) { if (e instanceof HttpError) return e; throw e; }
-};
 
 /** Cost of an empty leg of `distanceNm` for this aircraft, by the flight model: what finishFlight would charge a flight that paid nothing. */
 function emptyLegCost(db: Db, a: AircraftRow, type: AircraftType, to: string, distanceNm: number, hours: number, now: number): number {
@@ -42,9 +38,7 @@ function plan(db: Db, companyId: number, aircraftId: number, to: string, now: nu
   const refusal =
     (!airports.has(to) ? new HttpError(422, 'unknown_airport', `airport ${to} is not in the airport database`) : null)
     ?? (to === aircraft.location ? new HttpError(422, 'same_airport', `${aircraft.icao} is already at ${to}`) : null)
-    ?? refusalOf(() => assertFlyable(db, aircraft.id, now))
-    ?? (get(db, "SELECT 1 AS x FROM flights WHERE aircraft_id = ? AND status = 'active'", aircraft.id) ? new HttpError(409, 'aircraft_busy', `aircraft ${aircraft.id} is on a flight`) : null)
-    ?? (get(db, 'SELECT 1 AS x FROM line_aircraft WHERE aircraft_id = ?', aircraft.id) ? new HttpError(409, 'aircraft_on_line', 'this aircraft flies a line: take it off the line first') : null)
+    ?? refusalOf(() => assertIdle(db, aircraft.id, now))
     ?? (distanceNm > type.rangeNm ? new HttpError(422, 'out_of_range', `${distanceNm} nm exceeds the ${type.rangeNm} nm range of ${aircraft.icao}`) : null)
     ?? refusalOf(() => assertFunds(db, companyId, cost));
   return { aircraft, type, refusal, preview: { distanceNm, cost, hours, arrivesAt, ok: refusal === null, ...(refusal ? { reason: refusal.code } : {}) } };

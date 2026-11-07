@@ -1,0 +1,28 @@
+/* ---------------------------------------------------------------- group (v4 GROUP): the overview, the new subsidiary and the transfers.
+   Same panels, figures and tokens as the reports (reports.css); only what they do not have is here. */
+
+.gp-cards { display: flex; flex-direction: column; gap: 10px; list-style: none; margin: 0; padding: 0; }
+.gp-card { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 3px; background: transparent; cursor: pointer; }
+.gp-card:hover { background: var(--surface-hover); }
+.gp-card.on { background: var(--surface-selected); border-color: var(--border-strong); }
+.gp-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.gp-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.gp-name { font: 600 18px var(--display); margin: 0; }
+.gp-figs { display: flex; flex-wrap: wrap; gap: 8px 32px; }
+.gp-figs .rp-value { font-size: 20px; }
+.gp-figs .rp-figure { min-width: 110px; }
+
+.gp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.gp-aclist { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
+.gp-ac { display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: 10px; padding: 8px 10px; background: transparent; border: 1px solid var(--border); border-radius: 3px; color: var(--text-primary); text-align: left; cursor: pointer; }
+.gp-ac:hover:not(:disabled) { background: var(--surface-hover); }
+.gp-ac.on { background: var(--surface-selected); border-color: var(--border-strong); }
+.gp-ac:disabled { opacity: .55; cursor: not-allowed; }
+.gp-ac:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.gp-ac-note { text-align: right; }
+
+.gp-sides { display: flex; align-items: stretch; gap: 16px; }
+.gp-sides > .panel { flex: 1; min-width: 0; }
+.gp-arrow { display: flex; align-items: center; color: var(--text-secondary); }
+.gp-side .rp-value { font-size: 22px; }
+.gp-side .rp-figure { min-width: 100px; }

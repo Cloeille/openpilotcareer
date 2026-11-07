@@ -411,3 +411,5 @@ export * from './reports.ts';
 export * from './credit.ts';
 // ---- lot training (v4)
 export * from './training.ts';
+// ---- lot group (v4)
+export * from './group.ts';

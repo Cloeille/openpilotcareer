@@ -8,7 +8,7 @@ import {
 import { boardFor } from './board.ts';
 import { airports, searchAirports } from './catalog.ts';
 import { all, get, run, type Db } from './db.ts';
-import { createCompany, openBoard, post, typeFor, type AircraftRow } from './game.ts';
+import { createCompany, hasSubsidiaries, openBoard, post, typeFor, type AircraftRow } from './game.ts';
 import { HttpError } from './http.ts';
 import { realismOf, realismSettingOf, saveRealism } from './realism.ts';
 import { release, reservationOf, reserve } from './reservations.ts';
@@ -47,6 +47,7 @@ export function save(db: Db, userId: number, o: Onboarding, at: number): void {
 function dropOnboardingCompany(db: Db, userId: number, companyId: number): void {
   if (!get(db, 'SELECT 1 AS x FROM companies WHERE id = ? AND user_id = ?', companyId, userId)) return;
   if (get(db, 'SELECT 1 AS x FROM flights WHERE company_id = ?', companyId)) throw new HttpError(409, 'company_exists', 'the onboarding company has already flown and cannot be replaced');
+  if (hasSubsidiaries(db, companyId)) throw new HttpError(409, 'has_subsidiaries', 'the onboarding company already has subsidiaries and cannot be replaced');
   run(db, 'DELETE FROM companies WHERE id = ?', companyId);
 }
 
@@ -154,9 +155,11 @@ export function setRealism(db: Db, companyId: number, u: { preset: 'relaxed' | '
 }
 
 /** Monthly billing calls this once per billed month: with `bankruptcyBailout` on, a negative balance is cleared once per season.
+ *  Never for a subsidiary (C21): its overdraft is the group's debt, and a bailout per subsidiary would be a grant per subsidiary.
  *  Returns the amount written off (0: nothing to do). Posts a `bailout` ledger line; the caller wraps it in its transaction. */
 export function applyBailout(db: Db, companyId: number, at: number): number {
   if (!realismSettingOf(db, companyId).toggles.bankruptcyBailout) return 0;
+  if (get(db, 'SELECT 1 AS x FROM companies WHERE id = ? AND parent_id IS NOT NULL', companyId)) return 0;
   const balance = get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId)?.balance ?? 0;
   if (balance >= 0) return 0;
   const season = seasonOf(at);
