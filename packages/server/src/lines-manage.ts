@@ -3,10 +3,10 @@
 import { randomUUID } from 'node:crypto';
 import {
   DAY_MS, DEFAULT_TURNAROUND_MIN, FIRST_FLIGHT_NO, FLIGHT_NO_BLOCK, MAX_LINES_PER_COMPANY, PAX_KG, PAUSED_LINE_COST_PER_DAY, crewNeeded, daysToMask, dayStart, hhmmToMin, jobPayout,
-  layoutDay, minToHhmm, overlappingLegs, programmeProblem, weeklyDemand, weeklySeats,
+  SIZE_WEIGHT, layoutDay, minToHhmm, overlappingLegs, programmeProblem, weeklyDemand, weeklySeats,
   type Job, type LineBody, type LineForecastView, type LineProblemView, type PlannedLeg,
 } from '@opc/shared';
-import { airports } from './catalog.ts';
+import { airportList, airports } from './catalog.ts';
 import { all, get, run, type Db } from './db.ts';
 import { LINE_JOB_PREFIX, hasHub, jobView, typeFor, type AircraftRow } from './game.ts';
 import { HttpError } from './http.ts';
@@ -310,6 +310,35 @@ export function takeRotation(db: Db, companyId: number, lineId: number, legId: n
     job: jobView({ id, source: 'line', kind: 'pax', origin: leg.origin, destination: leg.dest, distance_nm: dist, payload_kg: pax * PAX_KG, pax, payout, required_aircraft: ac.icao, planned_fuel_kg: null, route: null }),
     reservedUntil: leg.arr_at,
   };
+}
+
+// ---------------------------------------------------------------- AI companies (B.2 item 10)
+
+/** A bought aircraft with at least this many seats flies a line for its AI company; smaller ones keep taking board jobs (ai.ts). */
+export const AI_LINE_MIN_SEATS = 9;
+const AI_LINE_TARGET_NM = 250;
+
+/** Give a newly bought AI aircraft a line out of its hub: the biggest airport that is 120 nm away and within 60 % of the aircraft's range, nearest to
+ *  250 nm first. Three, then two, then one rotation a day, whichever has no overlap. No random numbers, so it replays identically. */
+export function assignAiLine(db: Db, companyId: number, aircraft: AircraftRow, now: number): LineRow | null {
+  const hub = airports.get(aircraft.location);
+  const type = typeFor(db, companyId, aircraft.icao);
+  if (!hub || type.seats < AI_LINE_MIN_SEATS) return null;
+  const reach = type.rangeNm * 0.6;
+  const options = airportList
+    .filter((x) => x.icao !== hub.icao)
+    .map((x) => ({ x, d: lineDistance(hub.icao, x.icao) }))
+    .filter((c) => c.d >= 120 && c.d <= reach)
+    .sort((p, q) => SIZE_WEIGHT[q.x.size] - SIZE_WEIGHT[p.x.size] || Math.abs(p.d - AI_LINE_TARGET_NM) - Math.abs(q.d - AI_LINE_TARGET_NM) || p.x.icao.localeCompare(q.x.icao))
+    .slice(0, 5);
+  for (const { x } of options) {
+    const [a, b] = [hub.icao, x.icao].sort() as [string, string];
+    for (const freqPerDay of [3, 2, 1]) {
+      const body: LineBody = { a, b, freqPerDay, days: Array(7).fill(true), windowStart: '06:00', windowEnd: '18:00', aircraftIds: [aircraft.id] };
+      if (programmeProblems(db, companyId, { a, b, programme: body, excludeLineId: 0 }).problems.length === 0) return createLine(db, companyId, body, now);
+    }
+  }
+  return null;
 }
 
 export { companyCode, networkOf, seatsOf, layLine };
