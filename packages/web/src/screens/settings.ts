@@ -38,10 +38,11 @@ export async function settings(ctx: Ctx): Promise<Screen> {
     };
   }
   if (section === 'simbrief') {
+    const body = await simbriefSection();
     return {
       title: t('set.title'), scene: 'settings', tab: 'settings',
-      view: h('div', { class: 'settings-layout' }, head, h('div', { class: 'settings-keys-col' }, await simbriefSection())),
-      hints: [{ key: t('key.esc'), label: t('hint.back') }, { key: '← →', label: t('hint.section') }, { key: t('key.enter'), label: t('sb.hint.connect') }],
+      view: h('div', { class: 'settings-layout' }, head, h('div', { class: 'settings-keys-col' }, body.panel)),
+      hints: [{ key: t('key.esc'), label: t('hint.back') }, { key: '← →', label: t('hint.section') }, { key: t('key.enter'), label: body.connected ? t('sb.set.change') : t('sb.hint.connect') }],
       back: common.back, keys: common.keys,
     };
   }
