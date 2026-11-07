@@ -1,6 +1,7 @@
 import { z } from 'zod';
-import { icaoAirportSchema, icaoTypeSchema } from '@opc/shared';
+import { EXPRESS_AIRCRAFT, icaoAirportSchema, icaoTypeSchema } from '@opc/shared';
 import type { SimbriefLink } from '@opc/shared';
+import { aircraftTypes } from './catalog.ts';
 import { get, run, type Db } from './db.ts';
 import { HttpError } from './http.ts';
 
@@ -9,13 +10,21 @@ const MAX_BYTES = 4 * 1024 * 1024;
 const LBS_TO_KG = 0.45359237;
 
 const num = z.coerce.number().finite().min(0);
+/** A load weight. A custom airframe whose empty weight exceeds the plan's zero-fuel weight makes SimBrief report a negative payload and passenger count: that means "no load", not an unreadable plan. */
+const load = z.coerce.number().finite().transform((n) => Math.max(0, n));
 /** SimBrief writes numeric ids as strings and empty elements as `{}` (with `json=1`): anything that is not a positive integer is "absent". */
 const optionalId = z.coerce.number().int().positive().optional().catch(undefined);
 const ofpSchema = z.object({
   origin: z.object({ icao_code: icaoAirportSchema }),
   destination: z.object({ icao_code: icaoAirportSchema }),
-  aircraft: z.object({ icaocode: icaoTypeSchema }),
-  weights: z.object({ payload: num, pax_count_actual: num.default(0) }),
+  /** `is_custom`, `fin` and `name` only identify a custom airframe (see `careerType`): when they are absent or odd the plan is still readable. */
+  aircraft: z.object({
+    icaocode: icaoTypeSchema,
+    is_custom: z.coerce.number().optional().catch(undefined),
+    fin: z.string().optional().catch(undefined),
+    name: z.string().optional().catch(undefined),
+  }),
+  weights: z.object({ payload: load, pax_count_actual: load.default(0) }),
   fuel: z.object({ plan_ramp: num }),
   general: z.object({ route: z.string().max(4000).default('') }),
   params: z.object({ units: z.string(), request_id: optionalId }),
@@ -29,6 +38,7 @@ const accountSchema = z.object({ params: z.object({ user_id: optionalId }) });
 export type OfpQuery = { username: string } | { pilotId: number; staticId?: string | undefined };
 
 export type Ofp = {
+  /** `aircraftIcao` is the career type (`careerType`), which is what jobs require and flights are compared with. */
   origin: string; destination: string; aircraftIcao: string; payloadKg: number; pax: number; plannedFuelKg: number; route: string;
   /** SimBrief's id of this plan (`params.request_id`), when the answer carries it. */
   ofpId: string | null;
@@ -83,6 +93,20 @@ const refused = (reason: string): HttpError => UNKNOWN_USER.test(reason)
   ? new HttpError(422, 'simbrief_user_not_found', `SimBrief: ${reason}`)
   : new HttpError(404, 'simbrief_not_found', `SimBrief: ${reason}`);
 
+/** Custom airframes whose name is not a catalogue designator but is known to be one of our types. SimBrief has no `QASR`, so the Quasar is built on a 787-8 base and named `QUASAR`. */
+const CUSTOM_ALIASES: Record<string, string> = { QUASAR: EXPRESS_AIRCRAFT };
+
+/** The career aircraft type a plan is for. A custom SimBrief airframe reports its base type (`icaocode`), which is not the aircraft flown, so its `fin` then its `name` are tried as an exact, non-derived catalogue designator, then `name` as an alias. Anything else keeps `icaocode`: no fuzzy guessing, and a non-custom plan is never remapped. */
+function careerType(a: { icaocode: string; is_custom?: number | undefined; fin?: string | undefined; name?: string | undefined }): string {
+  if (a.is_custom !== 1) return a.icaocode;
+  for (const label of [a.fin, a.name]) {
+    const designator = label?.trim().toUpperCase();
+    if (designator && aircraftTypes.get(designator)?.derived === false) return designator;
+  }
+  const alias = CUSTOM_ALIASES[a.name?.trim().toUpperCase() ?? ''];
+  return alias ?? a.icaocode;
+}
+
 /** Fetch and validate a SimBrief plan: the latest of an account, or the one made with a static id. */
 export async function fetchOfp(q: OfpQuery, doFetch: Fetch): Promise<Ofp> {
   const r = await ask(q, doFetch);
@@ -94,7 +118,7 @@ export async function fetchOfp(q: OfpQuery, doFetch: Fetch): Promise<Ofp> {
   if ('staticId' in q && q.staticId !== undefined && o.fetch?.static_id !== q.staticId) throw new HttpError(404, 'ofp_not_found', 'SimBrief has no plan for this flight yet: generate it on SimBrief first');
   const toKg = /^k/i.test(o.params.units) ? 1 : LBS_TO_KG;
   return {
-    origin: o.origin.icao_code, destination: o.destination.icao_code, aircraftIcao: o.aircraft.icaocode,
+    origin: o.origin.icao_code, destination: o.destination.icao_code, aircraftIcao: careerType(o.aircraft),
     payloadKg: Math.round(o.weights.payload * toKg), pax: Math.round(o.weights.pax_count_actual),
     plannedFuelKg: Math.round(o.fuel.plan_ramp * toKg), route: o.general.route,
     ofpId: o.params.request_id === undefined ? null : String(o.params.request_id),
