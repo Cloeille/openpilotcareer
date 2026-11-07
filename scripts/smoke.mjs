@@ -229,6 +229,7 @@ expect(off.body.enabled === false && (await call('GET', '/network', { token: lp.
 await call('DELETE', '/me', { token: lp.body.token, body: { password } });
 
 // --- company reset and delete (password, session only, owner only)
+const companiesBefore = (await call('GET', '/me', { token })).body.companies.length;
 const spare = await call('POST', '/me/companies', { token, body: { name: `${username} Spare`, hub: 'LFPG' } });
 const spareId = spare.body.company.id;
 expect(spare.status === 201, `a second company ${spareId} to reset and delete`, spare);
@@ -242,7 +243,7 @@ expect(fresh.status === 200 && fresh.body.company.id === spareId && fresh.body.c
 expect((await call('DELETE', `/companies/${spareId}`, { token, body: { password: 'not the password' } })).status === 403, 'company deletion with a wrong password is refused');
 expect((await call('DELETE', `/companies/${spareId}`, { token: liveKey, body: { password } })).status === 401, 'an API key cannot delete a company');
 expect((await call('DELETE', `/companies/${spareId}`, { token, body: { password } })).status === 204 && (await call('GET', '/me', { token, company: spareId })).status === 403, 'company deleted: its id is no longer the player\'s');
-expect((await call('GET', '/me', { token })).body.companies.length === 1, 'the first company is untouched');
+expect((await call('GET', '/me', { token })).body.companies.length === companiesBefore, 'the other companies are untouched');
 
 // --- delete
 expect((await call('DELETE', '/me', { token, body: { password: 'not the password' } })).status === 403, 'account deletion with a wrong password is refused');
