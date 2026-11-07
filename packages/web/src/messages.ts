@@ -2559,7 +2559,7 @@ const table = {
   'pt.r.pay': ['pays back in {n} months', 'rentable en {n} mois'],
   'pt.r.never': ['never pays back', 'jamais rentable'],
   'pt.r.loss': ['−{amount} / month', '−{amount} / mois'],
-  'pt.r.noLoss': ['no loss measured', 'aucune perte mesurée'],
+  'pt.r.noLoss': ['no monthly loss counted', 'aucune perte mensuelle chiffrée'],
   'pt.r.netBuy': ['{amount} if bought', '{amount} si racheté'],
   'pt.r.netNone': ['nothing invested', 'rien d’investi'],
   'pt.r.foot': ['Gains estimated on {h} flight hours a month.', 'Gains estimés sur {h} h de vol par mois.'],

@@ -67,7 +67,7 @@ export async function leaseWear(ctx: Ctx): Promise<Screen> {
     const chart = bars.length === 0 || totals.works === 0 ? null : h('div', { class: 'pt-cash' },
       h('div', { class: 'pt-cash-head' }, h('span', { class: 'muted' }, t('pt.r.cash')), h('span', { class: 'strong' }, even ? t('pt.r.breakEven', { n: fm.ordinal(even) }) : t('pt.r.noBreak'))),
       h('div', { class: 'pt-bars', role: 'img', 'aria-label': t('pt.r.chartAlt', { from: monthYear(first, true), to: monthYear(a.endsAt, true) }) },
-        bars.map((b) => h('div', { class: 'pt-bar-col' }, h('div', { class: 'pt-up' }, b.up > 0 ? h('i', { style: `height:${Math.max(2, Math.round(b.up * 72))}px` }) : null), h('i', { class: 'pt-zero' }), h('div', { class: 'pt-down' }, b.down > 0 ? h('i', { style: `height:${Math.max(2, Math.round(b.down * 48))}px` }) : null)))),
+        bars.map((b) => h('div', { class: 'pt-bar-col' }, h('div', { class: 'pt-up' }, b.up > 0 ? h('i', { style: `height:${Math.max(2, Math.round(b.up * 60))}px` }) : null), h('i', { class: 'pt-zero' }), h('div', { class: 'pt-down' }, b.down > 0 ? h('i', { style: `height:${Math.max(2, Math.round(b.down * 40))}px` }) : null)))),
       h('div', { class: 'pt-cash-axis dim' }, h('span', null, monthYear(first, false)), h('span', null, t('pt.r.chartEnd', { month: monthYear(a.endsAt, false) }))));
     const run = (): void => {
       if (working || totals.works === 0 || !affordable || underway) return;
@@ -106,15 +106,15 @@ export async function leaseWear(ctx: Ctx): Promise<Screen> {
   const optionCell = (c: ComponentWear, o: WearAction): HTMLElement => {
     const opt = view.choices[c.component][o];
     const on = choices[c.component] === o;
-    const note = o === 'leave' ? (opt.monthlyGain < 0 ? t('pt.r.loss', { amount: fm.money(-opt.monthlyGain) }) : c.suggested === 'leave' && c.refurbUntil === null ? t('pt.r.noLoss') : t('pt.r.noLoss'))
+    /** Leaving a component costs what overhauling it would earn each month; when that is nothing the server counts no loss. */
+    const lost = view.choices[c.component].overhaul.monthlyGain;
+    const note = o === 'leave' ? (lost > 0 ? t('pt.r.loss', { amount: fm.money(lost) }) : t('pt.r.noLoss'))
       : opt.paybackMonths === null ? t('pt.r.never') : t('pt.r.pay', { n: fm.num(opt.paybackMonths) });
-    const lose = o === 'leave' ? view.choices[c.component].overhaul.monthlyGain : 0;
-    const leaveNote = o === 'leave' && lose > 0 ? t('pt.r.loss', { amount: fm.money(lose) }) : note;
     return h('label', { class: `pt-op${on ? ' on' : ''}` },
       h('span', { class: 'pt-op-head' },
         h('input', { type: 'radio', class: 'pt-radio', name: `pt-${c.component}`, value: o, checked: on, disabled: !!underway, onchange: () => choose(c, o) }),
         h('span', { class: 'pt-cost' }, fm.money(opt.cost))),
-      h('span', { class: `pt-op-note${on ? ' sel' : ''}` }, leaveNote));
+      h('span', { class: `pt-op-note${on ? ' sel' : ''}` }, note));
   };
   const rowOf = (c: ComponentWear, i: number): HTMLElement => {
     const worn = wearTone(c.wearPct) === 'warn';
@@ -127,6 +127,8 @@ export async function leaseWear(ctx: Ctx): Promise<Screen> {
       class: `pt-row${memo.row === i ? ' sel' : ''}`, 'data-row': '', tabindex: 0, role: 'group',
       'aria-label': t('pt.r.group', { component: t(`pt.c.${c.component}`) }),
       onfocus: () => { memo.row = i; rowHosts.forEach((r, k) => r.classList.toggle('sel', k === c.component)); },
+      /** Enter on the row or on one of its radios starts the works, as the hint says: the global handler would only click the row, or leave a radio alone. */
+      onkeydown: (e: KeyboardEvent) => { const el = e.target as HTMLElement; if (e.key === 'Enter' && (el === row || el.matches('input[type=radio]'))) { e.preventDefault(); launch(); } },
     },
       h('div', { class: 'pt-comp' },
         h('div', { class: 'pt-comp-head' }, h('span', { class: 'pt-comp-name' }, t(`pt.c.${c.component}`)), h('span', { class: `pt-wear${worn ? ' warn' : ''}` }, t('pt.r.worn', { n: fm.num(Math.round(c.wearPct)) }))),
@@ -155,7 +157,7 @@ export async function leaseWear(ctx: Ctx): Promise<Screen> {
   const left = panel({ title: t('pt.r.table'), action: h('span', { class: 'dim' }, t('pt.r.calc', { month: monthYear(a.endsAt, true) })), id: 'pt-table', class: 'pt-main' }, table, h('p', { class: 'dim small pt-foot' }, t('pt.r.foot', { h: fm.num(a.hoursPerMonth) })));
   const identity = titleBlock(h('span', { class: 'row tight' }, signLocation(a.hub), h('span', { class: 'pt-crumb' }, t('pt.r.crumb', { reg: a.registration }))), t('pt.r.title'),
     h('p', { class: 'muted pt-sub' }, t('pt.r.sub', { type: a.typeName, reg: a.registration, year: a.year, hours: fm.num(a.airframeHours), lessor: a.lessor, left: tp('pt.r.left', a.monthsLeft) })));
-  const screen = h('div', { class: 'pt-screen' }, h('div', { class: 'pt-head' }, identity, gaugeHost), h('div', { class: 'pt-body wear' }, left, sideHost));
+  const screen = h('div', { class: 'pt-screen' }, h('div', { class: 'pt-head' }, identity, gaugeHost), h('div', { class: 'pt-body lease' }, left, sideHost));
 
   const nextAction = (dir: 1 | -1) => (): void => {
     const c = parts[memo.row];

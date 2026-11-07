@@ -12,6 +12,8 @@ import { h } from '../ui.ts';
 /** The type on show survives a redraw (a policy change, a language change), not a visit to another hub. */
 const memo: { hub: string | null; type: string | null } = { hub: null, type: null };
 let busy = false;
+/** Length of the longest bar of the policy rows, in px: each side of the axis is 230 px wide with its figure beside the bar. */
+const BAR_PX = 143;
 
 /** `#warehouse/<hub>`: what the spare-parts stock of a hub ties up against the ground days it saves, the breakdown waiting for a part, the policy per aircraft type and the stock itself. */
 export async function warehouse(ctx: Ctx): Promise<Screen> {
@@ -111,9 +113,9 @@ export async function warehouse(ctx: Ctx): Promise<Screen> {
       h('div', { class: 'pt-pol-type' }, h('span', { class: 'pt-pol-name' }, p.typeName), h('span', { class: `pt-pol-meta${isDown ? ' bad' : ''}` }, meta)),
       choice,
       h('div', { class: 'pt-trade-off' },
-        h('div', { class: 'pt-side cap' }, h('span', { class: 'pt-val' }, kEuro(cur.capital)), b.capital > 0 ? h('i', { class: 'pt-bar cap', style: `width:${Math.max(3, Math.round(b.capital * 100))}%`, 'aria-hidden': 'true' }) : null),
+        h('div', { class: 'pt-side cap' }, h('span', { class: 'pt-val' }, kEuro(cur.capital)), b.capital > 0 ? h('i', { class: 'pt-bar cap', style: `width:${Math.max(3, Math.round(b.capital * BAR_PX))}px`, 'aria-hidden': 'true' }) : null),
         h('i', { class: 'pt-axis', 'aria-hidden': 'true' }),
-        h('div', { class: 'pt-side gnd' }, h('i', { class: `pt-bar gnd${isDown ? ' hot' : ''}`, style: `width:${Math.max(3, Math.round(b.ground * 100))}%`, 'aria-hidden': 'true' }), h('span', { class: `pt-val${isDown ? ' bad' : ''}` }, t('pt.w.groundValue', { n: fm.num(Math.round(cur.groundDays)) })))));
+        h('div', { class: 'pt-side gnd' }, h('i', { class: `pt-bar gnd${isDown ? ' hot' : ''}`, style: `width:${Math.max(3, Math.round(b.ground * BAR_PX))}px`, 'aria-hidden': 'true' }), h('span', { class: `pt-val${isDown ? ' bad' : ''}` }, t('pt.w.groundValue', { n: fm.num(Math.round(cur.groundDays)) })))));
     rows.push(row);
   });
   polHost.append(...rows);
