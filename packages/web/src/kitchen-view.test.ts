@@ -81,6 +81,7 @@ test('the status line: the latest meals first, then a day the kitchen cannot mak
   assert.deepEqual(headline(calm), { kind: 'short', demand: 548, capacity: 515, tone: 'warn' });
   assert.deepEqual(headline({ ...calm, capacityNow: 620 }), { kind: 'ok', tone: 'ok' });
   assert.deepEqual(headline({ ...calm, capacity: null, capacityNow: null }), { kind: 'ok', tone: 'ok' });
+  assert.deepEqual(headline({ ...calm, demand: { snacks: 0, hot: 0 }, departures: [] }), { kind: 'idle', tone: 'ok' });
   assert.equal(isLate({ lateMin: 12 }), true);
   assert.equal(isLate({ lateMin: 0 }), false);
 });

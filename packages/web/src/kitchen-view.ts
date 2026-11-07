@@ -89,15 +89,15 @@ export const canPickCaterer = (k: Pick<Offer, 'caterer'>): boolean => k.caterer 
 /** The tonight list: the order the server sent is the departure order; a departure is late when its meals are behind plan. */
 export const isLate = (d: Pick<KitchenDeparture, 'lateMin'>): boolean => d.lateMin > 0;
 
-export type Headline = { kind: 'late'; departure: KitchenDeparture; tone: Tone } | { kind: 'short'; demand: number; capacity: number; tone: Tone } | { kind: 'ok'; tone: Tone };
-/** The status line under the breadcrumb: the latest-running meal first, then a day the kitchen cannot make, else on schedule. */
+export type Headline = { kind: 'late'; departure: KitchenDeparture; tone: Tone } | { kind: 'short'; demand: number; capacity: number; tone: Tone } | { kind: 'idle' | 'ok'; tone: Tone };
+/** The status line under the breadcrumb: the latest-running meal first, then a day the kitchen cannot make, then a day with no meal at all, else on schedule. */
 export function headline(k: Pick<KitchenView, 'departures' | 'demand' | 'capacity' | 'capacityNow'>): Headline {
   const late = [...k.departures].filter(isLate).sort((a, b) => b.lateMin - a.lateMin)[0];
   if (late) return { kind: 'late', departure: late, tone: 'warn' };
   const demand = k.demand.snacks + k.demand.hot;
   const cap = k.capacityNow ?? k.capacity;
   if (cap !== null && demand > cap) return { kind: 'short', demand, capacity: cap, tone: 'warn' };
-  return { kind: 'ok', tone: 'ok' };
+  return demand === 0 ? { kind: 'idle', tone: 'ok' } : { kind: 'ok', tone: 'ok' };
 }
 
 /** Cooks missing on duty against the people employed: the absence the capacity note explains. */

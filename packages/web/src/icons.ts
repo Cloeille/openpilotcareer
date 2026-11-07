@@ -90,5 +90,10 @@ export const ICONS = {
   'door-open': [['path', { d: 'M11 20H2' }], ['path', { d: 'M11 4.562v16.157a1 1 0 0 0 1.242.97L19 20V5.562a2 2 0 0 0-1.515-1.94l-4-1A2 2 0 0 0 11 4.561z' }], ['path', { d: 'M11 4H8a2 2 0 0 0-2 2v14' }], ['path', { d: 'M14 12h.01' }], ['path', { d: 'M22 20h-3' }]],
   'hard-hat': [['path', { d: 'M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5' }], ['path', { d: 'M14 6a6 6 0 0 1 6 6v3' }], ['path', { d: 'M4 15v-3a6 6 0 0 1 6-6' }], ['rect', { x: '2', y: '15', width: '20', height: '4', rx: '1' }]],
   'square-parking': [['rect', { width: '18', height: '18', x: '3', y: '3', rx: '2' }], ['path', { d: 'M9 17V7h4a3 3 0 0 1 0 6H9' }]],
+  'chef-hat': [['path', { d: 'M10 11v5' }], ['path', { d: 'M14 11v5' }], ['path', { d: 'M6 12.65c0-.457-.316-.844-.727-1.041A4 4 0 0 1 7.52 4.034a1.53 1.53 0 0 0 1.367-.547 4 4 0 0 1 6.225 0 1.53 1.53 0 0 0 1.367.547 4 4 0 0 1 2.248 7.575c-.411.197-.727.584-.727 1.04V19a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z' }], ['path', { d: 'M6 16h12' }]],
+  'check-check': [['path', { d: 'M18 6 7 17l-5-5' }], ['path', { d: 'm22 10-7.5 7.5L13 16' }]],
+  'clock-alert': [['path', { d: 'M12 6v6l4 2' }], ['path', { d: 'M20 12v5' }], ['path', { d: 'M20 21h.01' }], ['path', { d: 'M21.25 8.2A10 10 0 1 0 16 21.16' }]],
+  smile: [['path', { d: 'M15 10V9' }], ['path', { d: 'M16.472 15a6 6 0 0 1-8.943 0' }], ['path', { d: 'M9 10V9' }], ['circle', { cx: '12', cy: '12', r: '10' }]],
+  percent: [['line', { x1: '19', x2: '5', y1: '5', y2: '19' }], ['circle', { cx: '6.5', cy: '6.5', r: '2.5' }], ['circle', { cx: '17.5', cy: '17.5', r: '2.5' }]],
 } as const satisfies Record<string, readonly Shape[]>;
 export type IconName = keyof typeof ICONS;
