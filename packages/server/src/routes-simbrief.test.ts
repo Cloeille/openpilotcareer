@@ -128,7 +128,7 @@ test('fetching the plan: needs a connection, asks for exactly this flight\'s pla
   answer = () => plan({ origin: { icao_code: job.origin }, destination: { icao_code: job.destination } }, 'opc_other_plan');
   const stale = await fetchPlan();
   assert.equal(stale.status, 404, 'a plan made under another static id is not this flight\'s plan');
-  assert.equal(stale.body.error, 'simbrief_not_found');
+  assert.equal(stale.body.error, 'ofp_not_found');
   const asked = sb.urls.at(-1)!;
   assert.equal(asked.searchParams.get('userid'), '1423851');
   assert.equal(asked.searchParams.get('static_id'), staticId);

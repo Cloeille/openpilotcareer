@@ -69,7 +69,7 @@ test('the lookup by Pilot ID and static id asks for exactly that plan, and reads
 
 test('a plan made under another static id (or none) is not the one asked for', async () => {
   for (const echoed of [{ static_id: 'opc_99_other' }, { static_id: {} }, {}]) {
-    await assert.rejects(fetchOfp({ pilotId: 5, staticId: 'opc_12_mine' }, reply(ofp({ fetch: echoed }))), (e: unknown) => e instanceof HttpError && e.status === 404 && e.code === 'simbrief_not_found');
+    await assert.rejects(fetchOfp({ pilotId: 5, staticId: 'opc_12_mine' }, reply(ofp({ fetch: echoed }))), (e: unknown) => e instanceof HttpError && e.status === 404 && e.code === 'ofp_not_found');
   }
 });
 

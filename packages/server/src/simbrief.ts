@@ -91,7 +91,7 @@ export async function fetchOfp(q: OfpQuery, doFetch: Fetch): Promise<Ofp> {
   if (!ofp.success) throw new HttpError(502, 'simbrief_invalid', 'SimBrief returned a flight plan this server cannot read');
   const o = ofp.data;
   // The answer echoes the static id of the plan it holds: a plan made under another id (or none) is not the one that was asked for.
-  if ('staticId' in q && q.staticId !== undefined && o.fetch?.static_id !== q.staticId) throw new HttpError(404, 'simbrief_not_found', 'SimBrief has no plan for this flight yet: generate it on SimBrief first');
+  if ('staticId' in q && q.staticId !== undefined && o.fetch?.static_id !== q.staticId) throw new HttpError(404, 'ofp_not_found', 'SimBrief has no plan for this flight yet: generate it on SimBrief first');
   const toKg = /^k/i.test(o.params.units) ? 1 : LBS_TO_KG;
   return {
     origin: o.origin.icao_code, destination: o.destination.icao_code, aircraftIcao: o.aircraft.icaocode,
