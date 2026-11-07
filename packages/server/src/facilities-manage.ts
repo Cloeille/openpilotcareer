@@ -4,7 +4,7 @@ import {
   DAY_MS, FACILITY_MAX_LEVEL, LEASE_MONTHS, LEASE_NOTICE_MONTHS, LEVEL_WORKS_DAYS, MAX_LEVEL_AT_SIGNING, facilityLevelCost, leaseExitFee, nextLevelAt, resaleValue, signing,
   type FacilityContractKind, type FacilitySignResult, type FacilityTerminateResult, type FacilityUpgradeResult, type Financing,
 } from '@opc/shared';
-import { get, run, type Db } from './db.ts';
+import { run, type Db } from './db.ts';
 import { assertHub, facilityById, forRent, heldFacility, holderOf, hubCapacity, labelOf, levelAt, levelSinceAt, seedOf, worksAt, type Held } from './facilities.ts';
 import { facilityContractView } from './facilities-views.ts';
 import { hubUsed } from './fleet-extras.ts';
@@ -90,5 +90,3 @@ export function terminateFacility(db: Db, companyId: number, facilityId: number,
   run(db, "UPDATE facility_contracts SET status = 'ended', ended_at = ? WHERE id = ?", now, h.id);
   return { ended: true, kind: h.kind, fee, refund, balanceAfter: balanceOf(db, companyId) };
 }
-
-export const heldCount = (db: Db, companyId: number): number => get<{ n: number }>(db, "SELECT COUNT(*) AS n FROM facility_contracts WHERE company_id = ? AND status = 'active'", companyId)!.n;
