@@ -86,10 +86,10 @@ async function sheet(ctx: Ctx, d: StaffDetail, overview: Awaited<ReturnType<type
   const chart = gantt.bars.length === 0 ? null : h('div', { class: 'st-gantt', role: 'img', 'aria-label': t('st.du.chart', { day: day ? shortDate(day, loc) : '' }) },
     h('div', { class: 'st-ruler', 'aria-hidden': 'true' }, gantt.ticks.map((tk) => h('span', { style: `left:${tk.pct}%` }, tk.label)),
       gantt.nowPct === null ? null : h('span', { class: 'st-mark now', style: `left:${gantt.nowPct}%` }, t('st.du.now', { at: fm.zulu(now) })),
-      gantt.limitPct === null ? null : h('span', { class: 'st-mark limit', style: `left:${gantt.limitPct}%` }, t('st.du.limit', { at: fm.zulu(periods.find((p) => isoDay(p.start) === day)!.limitAt) }))),
+      gantt.limitPct === null ? null : h('span', { class: `st-mark limit${gantt.limitPct > 80 ? ' end' : ''}`, style: `left:${gantt.limitPct}%` }, t('st.du.limit', { at: fm.zulu(periods.find((p) => isoDay(p.start) === day)!.limitAt) }))),
     h('div', { class: 'st-track' }, gantt.nowPct === null ? null : h('i', { class: 'st-vline now', style: `left:${gantt.nowPct}%` }), gantt.limitPct === null ? null : h('i', { class: 'st-vline limit', style: `left:${gantt.limitPct}%` }),
       gantt.bars.map((b) => h('span', { class: `st-block ${b.block.kind} ${b.block.status}${b.over ? ' has-over' : ''}`, style: `left:${b.left}%;width:${b.width}%`, title: barLabel(b) },
-        h('span', { class: 'st-block-no' }, b.block.kind === 'flight' ? (b.block.flightNo ?? '') : b.block.kind === 'pause' ? t('st.du.pause', { time: hoursText((b.block.end - b.block.start) / 60_000) }) : t('st.du.brief')),
+        h('span', { class: 'st-block-no' }, b.block.kind === 'flight' ? (b.block.flightNo ?? '') : barLabel(b)),
         b.block.kind === 'flight' ? h('span', { class: 'st-block-route' }, `${b.block.origin ?? ''} → ${b.block.dest ?? ''}`) : null,
         b.over ? h('i', { class: 'st-over', style: `left:${((b.over.left - b.left) / (b.width || 1)) * 100}%;width:${(b.over.width / (b.width || 1)) * 100}%` }) : null))),
     h('div', { class: 'st-legend' }, (['done', 'flying', 'planned', 'over'] as const).map((k) => h('span', { class: 'ln-legend-item' }, h('i', { class: `st-lg ${k}`, 'aria-hidden': 'true' }), t(`st.du.l.${k}` as Key)))));

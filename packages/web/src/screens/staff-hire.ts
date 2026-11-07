@@ -32,7 +32,7 @@ export async function staffHire(ctx: Ctx): Promise<Screen> {
 
   // ------------------------------------------------------------ header and filters
   const header = h('div', { class: 'ln-header' },
-    titleBlock(h('span', { class: 'row tight' }, h('span', { class: 'dot' }), t('st.hire.market', { n: fm.num(list.market) })), t('st.hire.title'), h('p', { class: 'dim', style: 'font-size:14px' }, tp('st.hire.sub', list.candidates.length))),
+    titleBlock(h('span', { class: 'row tight' }, h('span', { class: 'dot' }), t('st.hire.market', { n: fm.num(list.market) })), t('st.hire.title'), h('p', { class: 'muted', style: 'font-size:14px' }, tp('st.hire.sub', list.candidates.length))),
     viewSwitch('hire', go));
   const chip = (group: string, value: string, label: string, on: boolean, pick: () => void): HTMLElement =>
     h('button', { type: 'button', id: `st-f-${group}-${value || 'all'}`, class: `st-chip${group === 'base' ? ' mono' : ''}`, 'aria-pressed': String(on), onclick: pick }, label);
@@ -56,7 +56,8 @@ export async function staffHire(ctx: Ctx): Promise<Screen> {
   };
   const rowOf = (c: Candidate): HTMLElement =>
     h('tr', { class: 'st-cand', 'data-row': '', 'data-id': c.id, tabindex: 0, 'aria-selected': String(c.id === selected), 'aria-label': t('st.hire.row', { name: c.name, role: roleShort(c.role), pay: fm.money(c.askingSalary) }),
-      onfocus: () => pick(c), onclick: () => pick(c), onkeydown: (e: KeyboardEvent) => { if (e.key === 'Enter') { e.preventDefault(); void hire(c); } } },
+      onfocus: () => pick(c), onclick: () => pick(c), // Enter moves to the hire button: signing costs a month of salary, so it takes a second press (as taking a rotation does on the line screen).
+      onkeydown: (e: KeyboardEvent) => { if (e.key === 'Enter') { e.preventDefault(); pick(c); sidePanel.querySelector<HTMLElement>('[data-primary]')?.focus(); } } },
     h('th', { scope: 'row' }, h('span', { class: 'col tight' }, h('span', { class: 'st-name' }, c.name), h('span', { class: 'dim small' }, c.family === 'pilot' ? t('st.hire.fromMarket') : famLabel(c.family)))),
     h('td', { class: 'mono' }, c.family === 'pilot' ? `${roleShort(c.role)}${c.qual ? ` ${c.qual}` : ''}` : roleShort(c.role)),
     h('td', { class: 'mono' }, expOf(c)), h('td', { class: 'mono' }, c.base),

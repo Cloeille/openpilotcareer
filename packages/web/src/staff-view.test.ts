@@ -124,11 +124,13 @@ test('duty periods: legs close together share one period that starts 45 min befo
   assert.deepEqual(p[0]!.blocks.filter((b) => b.kind === 'flight').map((b) => b.status), ['done', 'done', 'done', 'flying', 'planned', 'planned']);
 });
 
-test('duty periods: only the flight whose release passes the limit is over, from where it passes', () => {
+test('duty periods: only the flight whose release passes the limit is over, from the limit itself', () => {
   const [p] = dutyPeriods(mockupDay, at(17.97), at(21.75));
   const over = p!.blocks.filter((b) => b.over);
   assert.deepEqual(over.map((b) => b.flightNo), ['AZR 1138']);
-  assert.equal(over[0]!.over!.from, at(21.75) - 15 * M);
+  assert.equal(over[0]!.over!.from, at(21.75));
+  const [edge] = dutyPeriods([leg('AZR 9', 20, 21.6)], at(20.5), at(21.75));
+  assert.equal(edge!.blocks.find((b) => b.kind === 'flight')!.over!.from, at(21.6), 'landing 9 min before the limit: breached by the release only, nothing flies past the limit');
 });
 
 test('duty periods: without a duty in progress the limit is 13 h after the report; a long gap starts another period', () => {
@@ -160,7 +162,7 @@ test('duty chart: an even-hour axis around the blocks, bars in percent, the part
   assert.ok(Math.abs(brief.left - (0.75 / 14) * 100) < 1e-9);
   const last = g.bars.at(-1)!;
   assert.ok(last.over);
-  assert.ok(Math.abs(last.over.left - ((21.5 - 8) / 14) * 100) < 1e-9);
+  assert.ok(Math.abs(last.over.left - ((21.75 - 8) / 14) * 100) < 1e-9);
   assert.ok(Math.abs(last.over.left + last.over.width - 100) < 1e-9);
   assert.ok(Math.abs(g.nowPct! - ((17.97 - 8) / 14) * 100) < 1e-9);
   assert.ok(Math.abs(g.limitPct! - ((21.75 - 8) / 14) * 100) < 1e-9);

@@ -45,7 +45,7 @@ export async function staff(ctx: Ctx): Promise<Screen> {
   const bases = me.hubs;
   const header = h('div', { class: 'ln-header' },
     titleBlock(h('span', { class: 'row tight' }, bases.map(signLocation), h('span', null, t('st.ov.company', { company: me.company.name }))), t('st.ov.title'),
-      h('p', { class: 'dim', style: 'font-size:14px' }, tp('st.ov.sub', data.people, { positions: fm.num(data.positions), payroll: fm.money(data.payroll) }))),
+      h('p', { class: 'muted', style: 'font-size:14px' }, tp('st.ov.sub', data.people, { positions: fm.num(data.positions), payroll: fm.money(data.payroll) }))),
     viewSwitch('staff', go));
 
   // ------------------------------------------------------------ the table
@@ -80,7 +80,7 @@ export async function staff(ctx: Ctx): Promise<Screen> {
   const markFocused = (): void => { for (const el of document.querySelectorAll<HTMLElement>('.st-row')) el.setAttribute('aria-selected', String(el.dataset.key === focused)); };
   const allOpen = data.families.filter((f) => f.children?.length).every((f) => expanded.has(f.family));
   const expandAll = h('button', { type: 'button', class: 'link-btn st-expand-all', onclick: () => { opened = toggleAll(data.families, expanded); redraw(); } }, allOpen ? t('st.ov.collapseAll') : t('st.ov.expandAll'));
-  const head = h('div', { class: 'st-head', 'aria-hidden': 'true' }, [t('st.col.family'), t('st.col.count'), t('st.col.avail'), t('st.col.pay'), ''].map((c, i) => h('span', { class: i === 3 ? 'end' : '' }, c)));
+  const head = h('div', { class: 'st-head', 'aria-hidden': 'true' }, [t('st.col.family'), t('st.col.count'), t('st.col.avail'), t('st.col.pay'), ''].map((c, i) => h('span', { class: i === 1 || i === 3 ? 'end' : '' }, c)));
   const table = panel({ title: t('st.ov.panel'), action: data.families.some((f) => f.children?.length) ? expandAll : null, id: 'st-table', class: 'st-panel' },
     head, h('div', { class: 'st-rows', role: 'table', 'aria-label': t('st.ov.panel') }, rows().map(line)));
 
@@ -140,6 +140,6 @@ function sidePanel(data: StaffOverview, v: VisibleRow | null, goHire: (v: Visibl
 
   return [panel({ title: t('st.side.title'), headless: true, id: 'st-side', class: 'st-side' },
     ...heading, people, watchBlock,
-    h('div', { class: 'st-actions' }, button(recruitLabel, { variant: 'primary', key: t('key.enter'), onclick: () => goHire(v) }),
+    h('div', { class: 'st-actions' }, button(recruitLabel, { variant: 'primary', key: 'R', onclick: () => goHire(v) }),
       row?.type ? button(t('st.side.train', { type: row.label }), { variant: 'ghost', onclick: () => { Object.assign(hireFilter, presetFor(row, blocker), { base: null }); go('#staff/hire'); } }) : null))];
 }

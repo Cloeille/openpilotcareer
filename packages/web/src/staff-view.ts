@@ -152,7 +152,7 @@ const statusAt = (b: { dep: number; arr: number }, now: number): ViewBlock['stat
 
 /**
  * Duty periods of the week from the member's flights: legs less than `breakMin` apart share a period, which starts `reportMin` before its first departure, can last `dutyMaxMin`, and is drawn with a brief
- * and a break wherever two legs are `PAUSE_MIN` or more apart. A leg is `over` from where its landing plus the release would pass the limit. `endsAt` (the server's limit of the period in progress) wins over the computed one.
+ * and a break wherever two legs are `PAUSE_MIN` or more apart. A leg is `over` when its landing plus the release would pass the limit; the part flown after the limit itself is what the chart paints red. `endsAt` (the server's limit of the period in progress) wins over the computed one.
  */
 export function dutyPeriods(week: readonly DutyBlock[], now: number, endsAt: number | null): DutyPeriod[] {
   const legs = [...week].sort((a, b) => a.dep - b.dep);
@@ -170,8 +170,9 @@ export function dutyPeriods(week: readonly DutyBlock[], now: number, endsAt: num
     g.forEach((leg, i) => {
       const prev = g[i - 1];
       if (prev && leg.dep - prev.arr >= PAUSE_MIN * MINUTE_MS) blocks.push({ kind: 'pause', flightNo: null, origin: null, dest: null, start: prev.arr, end: leg.dep, status: statusAt({ dep: prev.arr, arr: leg.dep }, now), over: null });
-      const releaseAt = limitAt - RULES.releaseMin * MINUTE_MS;
-      blocks.push({ kind: 'flight', flightNo: leg.flightNo, origin: leg.origin, dest: leg.dest, start: leg.dep, end: leg.arr, status: statusAt(leg, now), over: leg.arr > releaseAt ? { from: Math.max(leg.dep, releaseAt) } : null });
+      // The release after landing counts in the duty (S2's rule), so a leg landing inside the last 15 minutes breaches too; the red part is what flies past the limit itself.
+      const breach = leg.arr + RULES.releaseMin * MINUTE_MS > limitAt;
+      blocks.push({ kind: 'flight', flightNo: leg.flightNo, origin: leg.origin, dest: leg.dest, start: leg.dep, end: leg.arr, status: statusAt(leg, now), over: breach ? { from: Math.min(leg.arr, Math.max(leg.dep, limitAt)) } : null });
     });
     return { start, limitAt, blocks };
   });

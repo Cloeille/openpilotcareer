@@ -1970,7 +1970,7 @@ const table = {
   'st.7.rest.one': ['{n} rest day in the last 7', '{n} jour de repos sur les 7 derniers'],
   'st.7.rest.other': ['{n} rest days in the last 7', '{n} jours de repos sur les 7 derniers'],
   'st.7.rest': ['rest', 'repos'],
-  'st.7.planned': ['{h} + {p} planned', '{h} + {p} prévues'],
+  'st.7.planned': ['{h} h + {p} h planned', '{h} h + {p} h prévues'],
   'st.7.day': ['{day}: {what}', '{day} : {what}'],
   'st.lim.28': ['Flight · last 28 days', 'Vol · 28 derniers jours'],
   'st.lim.7': ['Duty · last 7 days', 'Service · 7 derniers jours'],

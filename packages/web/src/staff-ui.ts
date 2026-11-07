@@ -15,7 +15,7 @@ export const roleShort = (role: StaffRole): string => t(`st.role.${role}` as Key
 export const roleFull = (role: StaffRole): string => t(`st.role.${role}Full` as Key);
 
 /** Shown when the server has no staff routes yet (404): the screen says so instead of failing. */
-export const staffOff = (): HTMLElement => h('div', { class: 'ln-off panel' }, h('div', { class: 'panel-body' }, icon('users', 20), h('h1', { class: 'ln-off-title' }, t('st.off.title')), h('p', { class: 'muted' }, t('st.off.body'))));
+export const staffOff = (): HTMLElement => h('div', { class: 'ln-off st-off panel' }, h('div', { class: 'panel-body' }, icon('users', 20), h('h1', { class: 'ln-off-title' }, t('st.off.title')), h('p', { class: 'muted' }, t('st.off.body'))));
 
 /** The Effectifs / Recrutement switch at the top right of the staffing screens. */
 export function viewSwitch(current: 'staff' | 'hire', go: (hash: string) => void): HTMLElement {

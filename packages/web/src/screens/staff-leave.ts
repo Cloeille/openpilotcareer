@@ -40,7 +40,7 @@ export async function staffLeave(ctx: Ctx): Promise<Screen> {
     ? h('span', { class: 'row tight' }, h('span', { class: 'dot warn' }), [missing > 0 ? tp('st.l.short', missing, { date: shortDate(cols.at(-1)!.iso, loc) }) : null, none.length > 0 ? t('st.l.nobody', { names: none.join(', ') }) : null].filter(Boolean).join(', '))
     : h('span', { class: 'row tight' }, h('span', { class: 'dot' }), t('st.l.allCovered'));
   const header = h('div', { class: 'ln-header' },
-    titleBlock(status, t('st.l.title'), h('p', { class: 'dim', style: 'font-size:14px' }, t('st.l.sub'))),
+    titleBlock(status, t('st.l.title'), h('p', { class: 'muted', style: 'font-size:14px' }, t('st.l.sub'))),
     h('div', { class: 'ln-kpis st-kpis' },
       stat(t('st.l.balance'), t('st.l.balanceVal', { n: fm.num(data.balance) }), t('st.l.balanceSub')),
       stat(t('st.l.resting'), fm.num(data.resting), t('st.l.restingSub', { n: data.restingPilots })),
@@ -56,8 +56,8 @@ export async function staffLeave(ctx: Ctx): Promise<Screen> {
       'aria-label': `${rowLabel(r)}, ${longDay(iso, loc)}: ${t(`st.l.c.${state}` as Key)}`, 'aria-pressed': String(at.row === ri && at.day === di), onclick: () => select({ row: ri, day: di }) },
     state === 'short' ? h('span', null, '−1') : null);
   };
-  const dayHead = h('div', { class: 'st-grid-head', 'aria-hidden': 'true' }, h('span', { class: 'dim small st-grid-span' }, monthSpan(cols, loc)),
-    cols.map((c) => h('span', { class: `st-dh${c.weekend ? ' we' : ''}` }, h('i', null, c.weekday), h('b', null, String(c.date)))));
+  const dayHead = h('div', { class: 'st-grid-row st-grid-head', 'aria-hidden': 'true' }, h('span', { class: 'dim small st-grid-span' }, monthSpan(cols, loc)),
+    h('div', { class: 'st-cells' }, cols.map((c) => h('span', { class: `st-dh${c.weekend ? ' we' : ''}` }, h('i', null, c.weekday), h('b', null, String(c.date))))));
   const grid = h('div', { class: 'st-grid', role: 'group', 'aria-label': t('st.l.grid') }, dayHead,
     rows.map((r, ri) => h('div', { class: 'st-grid-row' },
       h('div', { class: 'st-grid-label' }, h('span', { class: 'strong' }, rowLabel(r)), h('span', { class: 'dim small' }, r.days.every((d) => d === 'none') ? t('st.l.rowNone', { n: r.headcount }) : t('st.l.rowSub', { n: r.headcount, per: r.perDay }))),
