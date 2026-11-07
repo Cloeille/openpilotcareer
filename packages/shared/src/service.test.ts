@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   DEFAULT_POLICY, ITEMS, MEALS, MEAL_QUALITIES, SAT_BASE, SATISFACTION_STREAK_DAYS, HAULS, SERVICE_ITEMS, catererPrice, catererQuality, haulOf, hasCabin, cabinMinimum, cooksFor, kitchenCapacity,
-  foodCost, itemAvailable, legSatisfaction, legService, mealCost, mealIngredients, mealMargin, mealsAsked, modeAllowed, offerFor, policyBodySchema, satisfactionFactor, withSatisfaction,
+  foodCost, itemAvailable, legSatisfaction, legService, mealCost, mealIngredients, mealMargin, mealsAsked, modeAllowed, offerFor, servicePolicyBodySchema, satisfactionFactor, withSatisfaction,
   kitchenBodySchema, LOAD_FACTOR_MAX, LOAD_FACTOR_MIN, BASE_SALARY,
 } from './index.ts';
 
@@ -83,9 +83,9 @@ test('free pleases more than paid, a better meal pleases more, and giving more n
 
 test('duty-free is sold, never given; the policy body refuses a mode the item cannot have', () => {
   assert.equal(modeAllowed('duty_free', 'free'), false);
-  assert.equal(policyBodySchema.safeParse({ haul: 'short', item: 'duty_free', mode: 'free' }).success, false);
-  assert.equal(policyBodySchema.safeParse({ haul: 'short', item: 'duty_free', mode: 'paid' }).success, true);
-  assert.equal(policyBodySchema.safeParse({ haul: 'weekly', item: 'snack', mode: 'paid' }).success, false);
+  assert.equal(servicePolicyBodySchema.safeParse({ haul: 'short', item: 'duty_free', mode: 'free' }).success, false);
+  assert.equal(servicePolicyBodySchema.safeParse({ haul: 'short', item: 'duty_free', mode: 'paid' }).success, true);
+  assert.equal(servicePolicyBodySchema.safeParse({ haul: 'weekly', item: 'snack', mode: 'paid' }).success, false);
   assert.equal(kitchenBodySchema.safeParse({}).success, false);
   assert.equal(kitchenBodySchema.safeParse({ provider: 'caterer' }).success, true);
 });

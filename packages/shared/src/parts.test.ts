@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   COMPONENTS, DELIVERY_DAYS, REFURB_DAYS, isHeavyCheck, FAILURE_WEAR_PCT, FERRY_DAYS, FIX_HOURS_WITH_PART, HANGAR_FIX_HOURS, HEAVY_CHECK_DAYS, HOURS_PER_MONTH, KEEP_VALUE_SHARE, NEVER_PAYBACK_MONTHS, OVERHAUL_WEAR_PCT, PARTS, PART_CLASSES,
   RENEWED_WEAR_PCT, SEED_WEAR_MAX_PCT, addEffects, bestChoice, choiceView, componentRate, componentWearAfter, componentsOf, deliveryDays, failedPart, failuresPerYear, fixHours, groundDayValue,
-  groundDaysPerYear, kitCapital, kitCovers, kitOf, kpiOf, moneyFactors, monthlyLoss, orderBodySchema, partClassOf, policyBodySchema, refurbCost, refurbTotals, refurbishBodySchema, reliabilityRiskFactor,
+  groundDaysPerYear, kitCapital, kitCovers, kitOf, kpiOf, moneyFactors, monthlyLoss, orderBodySchema, partClassOf, stockPolicyBodySchema, refurbCost, refurbTotals, refurbishBodySchema, reliabilityRiskFactor,
   seedWear, wearEffects, wearQuerySchema, worksDays, type Choice, type Economics,
 } from './index.ts';
 
@@ -149,8 +149,8 @@ test('workshop days: a hangar halves them (B.4), a heavy check without a staffed
 });
 
 test('request schemas: a policy needs a type and a known policy, an order a catalogue-shaped id and 1 to 20, a refurbishment one action per component, ?pick= a component:action list', () => {
-  assert.equal(policyBodySchema.safeParse({ icao: 'AT76', policy: 'full' }).success, true);
-  assert.equal(policyBodySchema.safeParse({ icao: 'AT76', policy: 'lots' }).success, false);
+  assert.equal(stockPolicyBodySchema.safeParse({ icao: 'AT76', policy: 'full' }).success, true);
+  assert.equal(stockPolicyBodySchema.safeParse({ icao: 'AT76', policy: 'lots' }).success, false);
   assert.equal(orderBodySchema.safeParse({ partId: 'regional.engine', qty: 1 }).success, true);
   assert.deepEqual([0, 21, 1.5].map((qty) => orderBodySchema.safeParse({ partId: 'regional.engine', qty }).success), [false, false, false]);
   assert.equal(orderBodySchema.safeParse({ partId: 'DROP TABLE', qty: 1 }).success, false);

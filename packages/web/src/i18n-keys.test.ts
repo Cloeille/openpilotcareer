@@ -2,14 +2,19 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { AIRCRAFT_CATEGORIES, FACILITY_KINDS, REALISM_TOGGLES, RANKS, REST_POLICY_NAMES, STAFF_FAMILIES, WTCS, type AirportSize, type Ownership } from '@opc/shared';
+import { AIRCRAFT_CATEGORIES, COMPONENTS, FACILITY_KINDS, HAULS, MECHANICAL, MEAL_QUALITIES, PARTS_POLICIES, PART_CLASSES, REALISM_TOGGLES, RANKS, REST_POLICY_NAMES, SERVICE_ITEMS, SERVICE_MODES, STAFF_FAMILIES, WTCS, type AirportSize, type Ownership } from '@opc/shared';
 import type { Coverage, DutyRule, StaffRole, StaffState } from './api-staff.ts';
 import type { Meter, Level } from './staff-view.ts';
 import type { DuelKey, Kind } from './standings.ts';
 import type { OpsBadge, LineVisual, Part, Phase } from './lines-view.ts';
 import type { ProjectionStatus, ResolveOption, ScheduledFlightStatus } from './api-lines.ts';
 import type { AddonCategory } from './finance-view.ts';
+import type { EffectLines } from './parts-view.ts';
+import type { Comfort, Effect } from './service-view.ts';
+import type { KitchenDeparture } from './api-service.ts';
+import { METRICS } from './kitchen-view.ts';
 import { GROUPS } from './catalogue.ts';
+import { GROUPS as SERVICE_GROUPS } from './service-view.ts';
 import { STATUS_FILTERS } from './history.ts';
 import { LADDER, LIVERY_COLORS, PRESETS } from './onboarding-model.ts';
 import { CAUSE_KEYS, OPS_FILTERS, WEEKDAYS } from './lines-view.ts';
@@ -43,6 +48,11 @@ const OWNERSHIPS = every<Ownership>({ owned: 0, leased: 0, financed: 0, club: 0,
 const AIRPORT_SIZES = every<AirportSize>({ large: 0, medium: 0, small: 0 });
 const ADDONS = every<AddonCategory>({ piston: 0, turboprop: 0, jet: 0, helicopter: 0 });
 const STYLES = ['cautious', 'aggressive'] as const;
+const EFFECT_KINDS = every<NonNullable<EffectLines['main']>['kind']>({ performance: 0, reliability: 0, satisfaction: 0 });
+const COMFORTS = every<Comfort['level']>({ basic: 0, comfort: 0, premium: 0 });
+const TRADES = every<Effect['label']>({ sat: 0, margin: 0, meals: 0, cooks: 0 });
+const DEPARTURES = every<KitchenDeparture['status']>({ scheduled: 0, done: 0 });
+const CATALOGUES = every<'reduced' | 'full'>({ reduced: 0, full: 0 });
 
 /** [message prefix, the values it is followed by, an optional suffix]. */
 const LOOKUPS: readonly (readonly [string, readonly (string | number)[], string?])[] = [
@@ -59,6 +69,10 @@ const LOOKUPS: readonly (readonly [string, readonly (string | number)[], string?
   ['fc.kind.', [...FACILITY_KINDS, 'all', 'parking']], ['fc.lv.maintenance.', [1, 2, 3]],
   ['rank.', RANKS.map((_, i) => i)],
   ['ob.s3b.rung.', LADDER.map((l) => l.id)], ['ob.s4.', PRESETS], ['ob.s4.', PRESETS, 'Desc'], ['ob.s4.t.', REALISM_TOGGLES], ['ob.s4.d.', REALISM_TOGGLES],
+  ['pt.c.', COMPONENTS], ['pt.cls.', PART_CLASSES], ['pt.w.pol.', PARTS_POLICIES], ['pt.w.aog.fail.', MECHANICAL], ['pt.r.eff.', EFFECT_KINDS],
+  ['sv.haul.', HAULS], ['sv.haul.on.', HAULS], ['sv.haul.sub.', HAULS], ['sv.mode.', [...SERVICE_MODES, 'unavailable']], ['sv.item.', SERVICE_ITEMS],
+  ['sv.group.', SERVICE_GROUPS.map((g) => g.id)], ['sv.comfort.', COMFORTS], ['sv.q.', MEAL_QUALITIES], ['sv.trade.', TRADES], ['sv.cell.catalogue.', CATALOGUES],
+  ['kt.m.', METRICS.map((m) => m.id)], ['kt.m.', METRICS.map((m) => m.id), '.sub'], ['kt.q.', MEAL_QUALITIES, '.desc'], ['kt.dep.', DEPARTURES],
   ['ob.s2.color.', [...LIVERY_COLORS.map((c) => c.id), 'none']], ['ob.s6.own.', [...OWNERSHIPS, 'plain']],
 ];
 

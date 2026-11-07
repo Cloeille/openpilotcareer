@@ -1,6 +1,6 @@
 // Lot SERVICE routes (docs/v3-plan.md B.7). Registered from app.ts with one line. Every change applies from the next UTC midnight (service.ts `applyFrom`).
 import type { FastifyInstance, FastifyRequest } from 'fastify';
-import { icaoAirportSchema, kitchenBodySchema, mealQualityBodySchema, mealQualityQuerySchema, policyBodySchema, quoteBodySchema } from '@opc/shared';
+import { icaoAirportSchema, kitchenBodySchema, mealQualityBodySchema, mealQualityQuerySchema, servicePolicyBodySchema, quoteBodySchema } from '@opc/shared';
 import { sessionAuth, type Principal } from './auth.ts';
 import { tx, type Db } from './db.ts';
 import { assertHub } from './facilities.ts';
@@ -20,7 +20,7 @@ export function registerService(app: FastifyInstance, ctx: ServiceCtx): void {
   app.get('/api/v1/service/preview', async (req) => servicePreview(db, user(req).companyId, parse(mealQualityQuerySchema, req.query).quality, now()));
 
   app.put('/api/v1/service/policy', async (req) => {
-    const p = user(req), b = parse(policyBodySchema, req.body);
+    const p = user(req), b = parse(servicePolicyBodySchema, req.body);
     return tx(db, () => { setPolicy(db, p.companyId, b, now()); return serviceView(db, p.companyId, now()); });
   });
 

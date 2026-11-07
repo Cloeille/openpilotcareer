@@ -34,7 +34,7 @@ export const AOG: AogCase = {
 const shelf = INVENTORY.reduce((s, l) => s + l.value, 0);
 export const WAREHOUSE: WarehouseView = {
   hub: 'LFMN', facility: null, active: true, capital: shelf, capitalShare: 0.35, onOrder: 4_800, balance: 1_284_560,
-  expectedGroundDays: 24, covered: { count: 5, of: 6 }, aog: AOG, policies: POLICIES, inventory: INVENTORY,
+  expectedGroundDays: 24, covered: { count: 5, of: 6 }, aog: AOG, policies: POLICIES, inventory: INVENTORY, orders: [],
 };
 
 // ---------------------------------------------------------------- the leased DHC-6

@@ -2,7 +2,6 @@ import type { MealQuality } from './api-service.ts';
 import { button, icon, panel } from './components.ts';
 import { fmt } from './format.ts';
 import { t } from './i18n.ts';
-import type { Key } from './messages.ts';
 import { h } from './ui.ts';
 
 /** DOM pieces shared by the SERVICE screens. The logic they show lives in service-view.ts and kitchen-view.ts. */
@@ -16,7 +15,7 @@ export const kitchenOff = (): HTMLElement => h('div', { class: 'ln-off sv-off pa
 /** True while the kitchen on show was opened from the Service screen (which clears it each time it draws): Esc then goes back there. B.10 sends the kitchen's Esc to the hub plan, but no building of the plan leads to a kitchen yet, so the Service screen is its door. */
 export const kitchenTrail = { fromService: false };
 
-export const qualityName = (q: MealQuality): string => t(`sv.q.${q}` as Key);
+export const qualityName = (q: MealQuality): string => t(`sv.q.${q}`);
 
 /** A price per meal: whole euros stay whole (`14 €`), the others have cents (`6,40 €`), as the mockup writes them. */
 export const money2 = (n: number): string => (Number.isInteger(n) ? fmt().money(n) : `${fmt().num(n, 2)}${NBSP}\u20ac`);

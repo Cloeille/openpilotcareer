@@ -1,6 +1,6 @@
 // Lot PARTS routes (docs/v3-plan.md B.6). Registered from app.ts with one line. Anything that moves money first settles the company's month (lazy, idempotent), as the finance routes do.
 import type { FastifyInstance, FastifyRequest } from 'fastify';
-import { icaoAirportSchema, orderBodySchema, policyBodySchema, refurbishBodySchema, wearQuerySchema } from '@opc/shared';
+import { icaoAirportSchema, orderBodySchema, stockPolicyBodySchema, refurbishBodySchema, wearQuerySchema } from '@opc/shared';
 import { sessionAuth, type Principal } from './auth.ts';
 import { tx, type Db } from './db.ts';
 import { runBilling } from './finance.ts';
@@ -29,7 +29,7 @@ export function registerParts(app: FastifyInstance, ctx: PartsCtx): void {
 
   app.put('/api/v1/warehouse/:hub/policy', async (req) => {
     const p = billed(user(req));
-    const b = parse(policyBodySchema, req.body);
+    const b = parse(stockPolicyBodySchema, req.body);
     return tx(db, () => setPolicy(db, p.companyId, hub(req), b.icao, b.policy, now()));
   });
 

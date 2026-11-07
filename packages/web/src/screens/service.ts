@@ -1,10 +1,9 @@
 import { act } from '../actions.ts';
-import { fetchQualityPreview, fetchService, setMealQuality, setPolicy, type HaulClass, type HaulView, type MealQuality, type ServiceItem, type ServicePreview } from '../api-service.ts';
+import { fetchQualityPreview, fetchService, setMealQuality, setPolicy, type HaulClass, type HaulView, type MealQuality, type ServiceItem, type ServiceMode, type ServicePreview } from '../api-service.ts';
 import { button, icon, panel, signLocation, stat, unknownValue } from '../components.ts';
 import { stepOf } from '../facilities-view.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
-import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { candidateOf, cellFacts, cellOf, comfortOf, defaultHaul, effectsOf, GROUPS, HAULS, MEAL_QUALITIES, nextMode, operated } from '../service-view.ts';
 import { kitchenTrail, outOf5, priceLine, qualityName, serviceOff, signed } from '../service-ui.ts';
@@ -53,7 +52,7 @@ export async function service(ctx: Ctx): Promise<Screen> {
       stat(t('sv.stat.cost'), fm.money(view.perDay.cost), h('span', { class: 'dim' }, t('sv.stat.cost.sub')))));
 
   // ------------------------------------------------------------ the matrix
-  const haulName = (c: HaulClass): string => t(`sv.haul.${c}` as Key);
+  const haulName = (c: HaulClass): string => t(`sv.haul.${c}`);
   const markColumn = (): void => {
     document.querySelectorAll<HTMLElement>('.sv-table .sv-head[data-haul], .sv-table .sv-cell-in[data-haul]').forEach((el) => {
       const on = el.dataset.haul === col;
@@ -68,7 +67,7 @@ export async function service(ctx: Ctx): Promise<Screen> {
     document.querySelectorAll<HTMLElement>('.sv-row').forEach((r) => { const on = r.dataset.item === item; r.classList.toggle('cur', on); if (on) r.setAttribute('data-primary', ''); else r.removeAttribute('data-primary'); });
   };
 
-  const modeName = (m: string): string => t(`sv.mode.${m}` as Key);
+  const modeName = (m: ServiceMode | 'unavailable'): string => t(`sv.mode.${m}`);
   const cellText = (item: ServiceItem, haul: HaulClass): { state: string; detail: string | null; mode: string } => {
     const cell = cellOf(view.hauls, haul, item);
     if (!cell) return { state: modeName('none'), detail: null, mode: 'none' };
@@ -76,7 +75,7 @@ export async function service(ctx: Ctx): Promise<Screen> {
     const parts = [
       f.price === null ? null : f.perFlight ? t('sv.cell.perFlight', { price: fm.money(f.price) }) : fm.money(f.price),
       f.quality ? qualityName(f.quality).toLowerCase() : null,
-      f.catalogue ? t(`sv.cell.catalogue.${f.catalogue}` as Key) : null,
+      f.catalogue ? t(`sv.cell.catalogue.${f.catalogue}`) : null,
       f.state === 'unavailable' ? t('sv.cell.noEquip') : null,
       f.next ? t('sv.cell.next', { mode: modeName(f.next).toLowerCase() }) : null,
     ].filter((x): x is string => x !== null);
@@ -86,15 +85,15 @@ export async function service(ctx: Ctx): Promise<Screen> {
   const cycle = (item: ServiceItem, haul: HaulClass): void => {
     const cell = cellOf(view.hauls, haul, item);
     const next = cell ? nextMode(cell) : null;
-    const names = { item: t(`sv.item.${item}` as Key), haul: t(`sv.haul.on.${haul}` as Key) };
+    const names = { item: t(`sv.item.${item}`), haul: t(`sv.haul.on.${haul}`) };
     if (next === null) { notify(t(cell?.unavailable ? 'sv.unavailable' : 'sv.fixed', names), 'error'); return; }
     void act(t('sv.saved', { ...names, mode: modeName(next).toLowerCase() }), () => setPolicy({ haul, item, mode: next }), redraw);
   };
 
   const head = (v: HaulView): HTMLElement => {
     const c = comfortOf(v.satisfaction);
-    const word = t(`sv.comfort.${c.level}` as Key);
-    const sub = `${t(`sv.haul.sub.${v.haul}` as Key)} · ${operated(v) ? v.operated.map((x) => x.name).join(', ') : t('sv.haul.notOperated')}`;
+    const word = t(`sv.comfort.${c.level}`);
+    const sub = `${t(`sv.haul.sub.${v.haul}`)} · ${operated(v) ? v.operated.map((x) => x.name).join(', ') : t('sv.haul.notOperated')}`;
     return h('th', { scope: 'col', class: `sv-th${operated(v) ? '' : ' idle'}`, 'data-haul': v.haul },
       h('button', { type: 'button', class: 'sv-head', 'data-haul': v.haul, 'aria-pressed': String(v.haul === col), onclick: () => pickColumn(v.haul) },
         h('span', { class: 'sv-head-name' }, haulName(v.haul)),
@@ -106,7 +105,7 @@ export async function service(ctx: Ctx): Promise<Screen> {
   };
 
   const itemRow = (item: ServiceItem): HTMLElement => {
-    const label = t(`sv.item.${item}` as Key);
+    const label = t(`sv.item.${item}`);
     const texts = HAULS.map((c) => ({ c, ...cellText(item, c) }));
     return h('tr', {
       class: `sv-row${item === cursor ? ' cur' : ''}`, id: `sv-row-${item}`, 'data-row': '', tabindex: 0, 'data-item': item, 'data-primary': item === cursor ? '' : null, onfocus: () => moveCursor(item),
@@ -118,7 +117,7 @@ export async function service(ctx: Ctx): Promise<Screen> {
   };
 
   const rows = GROUPS.flatMap((g) => [
-    h('tr', { class: 'sv-group' }, h('th', { scope: 'rowgroup', colspan: 4 }, t(`sv.group.${g.id}` as Key))),
+    h('tr', { class: 'sv-group' }, h('th', { scope: 'rowgroup', colspan: 4 }, t(`sv.group.${g.id}`))),
     ...g.items.filter((i) => rowItems.includes(i)).map(itemRow),
   ]);
   const matrix = h('table', { class: 'sv-table' },
@@ -135,7 +134,7 @@ export async function service(ctx: Ctx): Promise<Screen> {
     if (q === current) { tradeHost.replaceChildren(h('p', { class: 'dim small' }, t(view.quality.next ? 'sv.trade.pending' : 'sv.trade.same', view.quality.next ? { quality: qualityName(view.quality.next).toLowerCase() } : undefined))); return; }
     const preview: ServicePreview | null = await fetchQualityPreview(q).catch(() => null);
     if (seq !== tradeSeq) return;
-    const effect = (e: ReturnType<typeof effectsOf>[number]): HTMLElement => h('div', { class: 'line' }, h('span', { class: 'line-label' }, t(`sv.trade.${e.label}` as Key)),
+    const effect = (e: ReturnType<typeof effectsOf>[number]): HTMLElement => h('div', { class: 'line' }, h('span', { class: 'line-label' }, t(`sv.trade.${e.label}`)),
       h('span', { class: `sv-effect ${e.tone}` }, e.value.kind === 'move' ? t('sv.trade.move', { from: fm.num(e.value.from), to: fm.num(e.value.to) }) : e.value.unit === 'sat' ? signed(e.value.n, 1) : tp('sv.trade.points', Math.abs(e.value.n), { n: signed(e.value.n) })));
     tradeHost.replaceChildren(
       h('div', { class: 'sv-trade-head' },

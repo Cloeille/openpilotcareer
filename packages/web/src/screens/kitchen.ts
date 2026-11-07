@@ -6,7 +6,6 @@ import { fmt } from '../format.ts';
 import { locale } from '../finance-ui.ts';
 import { t, tp } from '../i18n.ts';
 import type { IconName } from '../icons.ts';
-import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { absentCooks, changeOf, configured, hallState, headline, mealEconomics, METRICS, noPending, quoteFor, selection, stepQuality, tierTable, type Cell, type MetricId, type Pending } from '../kitchen-view.ts';
 import { MEAL_QUALITIES } from '../service-view.ts';
@@ -68,7 +67,6 @@ export async function kitchen(ctx: Ctx): Promise<Screen> {
       stat(t('kt.stat.margin'), fm.percent(eco.margin), h('span', { class: 'dim' }, t('kt.stat.marginSub', { cost: money2(eco.cost), price: money2(eco.price) })))));
 
   // ------------------------------------------------------------ the comparison of the quality levels
-  const metricName = (id: MetricId): Key => `kt.m.${id}` as Key;
   const valueText = (id: MetricId, v: number): string => id === 'prep' ? t('kt.min', { n: fm.num(v) }) : id === 'cost' ? money2(v) : id === 'margin' ? fm.percent(v) : id === 'sat' ? t('sv.stat.of5', { n: fm.num(v, 1) }) : fm.num(v);
   const deltaText = (id: MetricId, d: number): string => id === 'prep' ? t('kt.min', { n: signed(d) }) : id === 'cost' ? `${d > 0 ? '+' : ''}${money2(d)}` : id === 'margin' ? t('kt.pts', { n: signed(Math.round(d * 100)) }) : id === 'sat' ? signed(d, 1) : signed(d);
   const problemText = (c: Cell): string | null => (c.problem === null ? null : c.problem.kind === 'recruit' ? t('kt.problem.recruit', { n: fm.num(c.problem.n) }) : t('kt.problem.demand', { n: fm.num(c.problem.n) }));
@@ -88,7 +86,7 @@ export async function kitchen(ctx: Ctx): Promise<Screen> {
       return h('th', { scope: 'col', class: `kt-th${q === cur ? ' cur' : ''}${change && q === sel.quality ? ' pick' : ''}` },
         h('button', { type: 'button', class: 'kt-tier', 'aria-pressed': String(q === sel.quality), onclick: () => pick(q) },
           h('span', { class: 'kt-tier-name' }, qualityName(q), m ? h('span', { class: 'kt-current' }, q === cur ? icon('check', 14) : null, m) : null),
-          h('span', { class: 'kt-tier-desc' }, t(`kt.q.${q}.desc` as Key))));
+          h('span', { class: 'kt-tier-desc' }, t(`kt.q.${q}.desc`))));
     };
     const cell = (c: Cell): HTMLElement => {
       const problem = problemText(c);
@@ -98,7 +96,7 @@ export async function kitchen(ctx: Ctx): Promise<Screen> {
         h('span', { class: 'kt-track', 'aria-hidden': 'true' }, h('span', { class: 'kt-bar', style: `width:${Math.round(c.bar * 100)}%` })));
     };
     const rows = METRICS.map((m, i) => h('tr', { class: 'kt-row' },
-      h('th', { scope: 'row', class: 'kt-label' }, h('span', { class: 'kt-label-name' }, t(metricName(m.id))), h('span', { class: 'kt-label-sub' }, t(`${metricName(m.id)}.sub` as Key))),
+      h('th', { scope: 'row', class: 'kt-label' }, h('span', { class: 'kt-label-name' }, t(`kt.m.${m.id}`)), h('span', { class: 'kt-label-sub' }, t(`kt.m.${m.id}.sub`))),
       table[i]!.map(cell)));
     const comparison = h('table', { class: 'kt-table' },
       h('caption', { class: 'sr' }, t('kt.tiers.title')),
@@ -154,7 +152,7 @@ export async function kitchen(ctx: Ctx): Promise<Screen> {
     return h('li', { class: `kt-dep${d.status === 'done' ? ' past' : ''}` },
       h('time', { class: 'kt-dep-time', datetime: new Date(d.dep).toISOString() }, fm.zulu(d.dep)),
       h('div', { class: 'kt-dep-block' }, h('span', { class: 'kt-dep-line' }, h('span', null, d.flightNo), h('span', null, `${icao} → ${d.dest}`)), h('span', { class: 'kt-dep-load' }, load)),
-      h('span', { class: `kt-dep-status ${d.status}` }, icon(DEP_ICON[d.status], 14), t(`kt.dep.${d.status}` as Key)));
+      h('span', { class: `kt-dep-status ${d.status}` }, icon(DEP_ICON[d.status], 14), t(`kt.dep.${d.status}`)));
   };
   const short = k.cooks.employed < k.cooks.needed;
   const shift = h('div', { class: 'kt-shift' },

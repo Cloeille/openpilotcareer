@@ -1,7 +1,7 @@
 // Lot PARTS (v3): per-component wear, spare parts and the refurbishment of an aircraft. Pure rules, constants, request schemas and wire types (docs/v3-plan.md B.6, B.8).
 // Runtime-imports only sibling leaf files (never ./index.ts), so there is no module cycle.
 import { z } from 'zod';
-import { WEAR_PCT_PER_HOUR } from './finance.ts';
+import { WEAR_PCT_PER_HOUR, type Ownership } from './finance.ts';
 import { AUTONOMY_FACTOR, DAY_MS } from './lines.ts';
 import type { AircraftCategory } from './index.ts';
 
@@ -271,7 +271,7 @@ export const kitCovers = (cls: PartClass, policy: PartsPolicy): ((kind: PartKind
 // ---------------------------------------------------------------- request schemas
 
 const typeCode = z.string().regex(/^[A-Z0-9]{2,4}$/, 'ICAO type designator: 2-4 chars A-Z/0-9');
-export const policyBodySchema = z.object({ icao: typeCode, policy: z.enum(PARTS_POLICIES) });
+export const stockPolicyBodySchema = z.object({ icao: typeCode, policy: z.enum(PARTS_POLICIES) });
 export const orderBodySchema = z.object({ partId: z.string().regex(/^[a-z]+\.[a-z]+$/), qty: z.int().min(1).max(MAX_ORDER_QTY), express: z.boolean().optional() });
 /** `?pick=gear:overhaul,avionics:replace` previews a selection of the wear screen. */
 export const wearQuerySchema = z.object({
@@ -302,7 +302,7 @@ export type ComponentWear = {
   choices: Record<Choice, ChoiceView>;
 };
 export type WearView = {
-  aircraft: { id: number; registration: string; icao: string; typeName: string; ownership: string; value: number; wearPct: number };
+  aircraft: { id: number; registration: string; icao: string; typeName: string; ownership: Ownership; value: number; wearPct: number };
   /** False when the company plays without wear and failures: nothing wears, nothing breaks down, and the works are refused. */
   active: boolean;
   /** The company can send it to the workshop: it is hers (owned, financed or leased) and wear is on. */

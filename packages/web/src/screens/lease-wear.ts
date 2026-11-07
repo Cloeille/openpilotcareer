@@ -160,7 +160,7 @@ export async function leaseWear(ctx: Ctx): Promise<Screen> {
   const end = lease?.endsAt ?? null;
   const sub = lease
     ? t('pt.r.subLease', { type: a.typeName, reg: a.registration, lessor: lease.lessor ?? '–', left: tp('pt.r.left', lease.monthsLeft) })
-    : t('pt.r.subOwn', { type: a.typeName, reg: a.registration, own: t(`fin.own.${a.ownership}` as 'fin.own.owned'), wear: fm.num(Math.round(a.wearPct)) });
+    : t('pt.r.subOwn', { type: a.typeName, reg: a.registration, own: t(`fin.own.${a.ownership}`), wear: fm.num(Math.round(a.wearPct)) });
   const left = panel({ title: t('pt.r.table'), action: h('span', { class: 'dim' }, end ? t('pt.r.calc', { month: monthYear(end, true) }) : t('pt.r.calcOwn', { n: months })), id: 'pt-table', class: 'pt-main' }, table, h('p', { class: 'dim small pt-foot' }, t('pt.r.foot', { h: fm.num(view.hoursPerMonth) })));
   const identity = titleBlock(h('span', { class: 'row tight' }, signLocation(snap.me.fleet.find((x) => x.id === id)?.location ?? snap.me.hubs[0] ?? ''), h('span', { class: 'pt-crumb' }, t(lease ? 'pt.r.crumb' : 'pt.r.crumbOwn', { reg: a.registration }))), t('pt.r.title'), h('p', { class: 'muted pt-sub' }, sub));
   const screen = h('div', { class: 'pt-screen' }, h('div', { class: 'pt-head' }, identity, gaugeHost), h('div', { class: 'pt-body lease' }, left, sideHost));

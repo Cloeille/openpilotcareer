@@ -191,7 +191,7 @@ export const SERVICE_KEEP_DAYS = 2 * SATISFACTION_WINDOW_DAYS;
 
 // ---------------------------------------------------------------- request schemas
 
-export const policyBodySchema = z.object({ haul: z.enum(HAULS), item: z.enum(SERVICE_ITEMS), mode: z.enum(SERVICE_MODES) })
+export const servicePolicyBodySchema = z.object({ haul: z.enum(HAULS), item: z.enum(SERVICE_ITEMS), mode: z.enum(SERVICE_MODES) })
   .refine((b) => modeAllowed(b.item, b.mode), { message: 'this item cannot be offered that way', path: ['mode'] });
 export const mealQualityBodySchema = z.object({ quality: z.enum(MEAL_QUALITIES) });
 export const mealQualityQuerySchema = mealQualityBodySchema;
