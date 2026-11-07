@@ -179,7 +179,7 @@ test('with the failed part on the shelf the repair takes six hours, costs nothin
   const w = await world();
   assert.equal((await w.call('PUT', '/warehouse/LFPG/policy', { icao: 'AT76', policy: 'full' })).status, 200);
   w.warp(T0 + 6 * DAY_MS); await w.warehouse(); // the kit has arrived
-  const engineId = 'regional.engine', starterId = 'regional.starter';
+  const engineId = 'regional.engine';
   const stock = (id: string) => get<{ qty: number }>(w.h.db, 'SELECT qty FROM parts_stock WHERE company_id = ? AND hub = ? AND part = ?', w.cid, 'LFPG', id)?.qty ?? 0;
   assert.equal(stock(engineId), 1);
   w.setComponent(w.atr, 'engines', FAILURE_WEAR_PCT - 0.01);
@@ -219,7 +219,7 @@ test('a staffed level-2 hangar fixes an AOG in four hours; without technicians i
   assert.equal(b.ready_at - b.failed_at, HANGAR_FIX_HOURS * HOUR, 'B.4: AOG fixed in 4 h');
 });
 
-test('a lessor with maintenance included, the club and a monthly rental pay for the part themselves', async () => {
+test('a lessor with maintenance included and the club pay for the part themselves; the aircraft still waits for it', async () => {
   const w = await world();
   const offers = (await w.call('GET', '/leasing/offers?icao=DHC6')).body[0];
   const lease = (await w.call('POST', '/me/leases', { offerId: offers.id, months: 24, hub: 'LFPG' })).body.aircraft.id as number;
@@ -231,6 +231,20 @@ test('a lessor with maintenance included, the club and a monthly rental pay for 
   assert.equal(b.paid, 0, 'the lessor pays');
   assert.equal(w.balance(), before);
   assert.ok(b.ready_at > b.failed_at, 'the aircraft is still out of service for the delivery');
+
+  const club = await w.call('POST', '/me/club-rental', { icao: 'C172', hub: 'LFPG' });
+  assert.equal(club.status, 201, club.text);
+  const cessna = club.body.aircraft.id as number;
+  w.setComponent(cessna, 'engines', FAILURE_WEAR_PCT - 0.01);
+  const cash = w.balance();
+  accrueWear(w.h.db, w.cid, cessna, 'piston-single', 1, T0);
+  const c = breakdowns(w).find((x) => x.component === 'engines' && x.failed_at === T0 && x.hub === 'LFPG' && x.paid === 0 && x.part.startsWith('piston'))!;
+  assert.ok(c, 'the club\'s Cessna broke down');
+  assert.equal(w.balance(), cash, 'the club pays');
+  const own = insertAircraft(w.h.db, { companyId: w.cid, icao: 'C172', hub: 'LFPG', value: 40_000, ownership: 'owned', at: T0 });
+  w.setComponent(own, 'engines', FAILURE_WEAR_PCT - 0.01);
+  accrueWear(w.h.db, w.cid, own, 'piston-single', 1, T0);
+  assert.ok(w.balance() < cash, 'her own Cessna pays for its part');
 });
 
 test('a breakdown played twice is recorded once and billed once; the same world gives the same breakdown', async () => {
@@ -247,6 +261,20 @@ test('a breakdown played twice is recorded once and billed once; the same world 
   a.fly(a.atr, 1, T0);
   assert.equal(breakdowns(a).length, 1, 'the same instant is the same breakdown');
   assert.equal(a.balance(), bal, 'and costs nothing twice');
+});
+
+test('a breakdown replayed with the part on the shelf takes the part once', async () => {
+  const w = await world();
+  shelve(w, 'regional.avionics', 3); shelve(w, 'regional.engine', 3); shelve(w, 'regional.starter', 3);
+  w.setComponent(w.atr, 'engines', FAILURE_WEAR_PCT - 0.01);
+  w.fly(w.atr, 1, T0);
+  const shelf = () => get<{ n: number }>(w.h.db, 'SELECT SUM(qty) AS n FROM parts_stock')!.n;
+  const after = shelf();
+  assert.equal(after, 8, 'one part left the shelf');
+  w.setComponent(w.atr, 'engines', FAILURE_WEAR_PCT + 1);
+  w.fly(w.atr, 1, T0);
+  assert.equal(shelf(), after, 'the replay took nothing');
+  assert.equal(breakdowns(w).length, 1);
 });
 
 test('the interior and the paint wear but never break down', async () => {
@@ -482,7 +510,6 @@ test('refurbishing is refused for another company\'s aircraft, an unknown compon
   const w = await world();
   const other = await world({ h: w.h, name: 'zed' });
   const body = { items: [{ component: 'gear', action: 'overhaul' }] };
-  const bal = w.balance();
   assert.equal((await other.call('POST', `/me/fleet/${w.atr}/refurbish`, body)).status, 404, 'not hers');
   assert.equal((await w.call('POST', `/me/fleet/${w.atr}/refurbish`, { items: [{ component: 'wings', action: 'overhaul' }] })).status, 400);
   const jet = insertAircraft(w.h.db, { companyId: w.cid, icao: 'A20N', hub: 'LFPG', value: 5_000_000, ownership: 'owned', at: T0 });
@@ -501,7 +528,6 @@ test('refurbishing is refused for another company\'s aircraft, an unknown compon
   assert.deepEqual([poor.status, poor.body.error], [409, 'insufficient_funds']);
   assert.equal(w.balance(), 1000);
   assert.equal(get<{ n: number }>(w.h.db, "SELECT COUNT(*) AS n FROM transactions WHERE kind = 'refurbish' AND company_id = ?", w.cid)!.n, 0);
-  assert.equal(bal > 1000, true);
   assert.equal(w.aircraft().status, 'available');
 });
 

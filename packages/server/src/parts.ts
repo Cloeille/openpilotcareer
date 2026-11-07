@@ -153,10 +153,11 @@ export const onTheWay = (db: Db, companyId: number, hub: string, part: string): 
 
 /** A mechanical component reached its failure wear. The part that failed is on the shelf (six hours of repair, four in a staffed level-2 hangar, B.4) or it is bought on the spot, delivered after 2 to 5 days.
  *  The aircraft stays in the workshop until the repair is over, the component starts again from RENEWED_WEAR_PCT, and a shelf that was drawn on is topped up to its policy. The club, a monthly rental and a lease
- *  with maintenance included pay for the part themselves. Seeded by the aircraft, the component and the instant, and unique on them: replaying a breakdown records it once and bills it once. */
+ *  with maintenance included pay for the part themselves. Seeded by the aircraft, the component and the instant, and unique on them: replaying a breakdown records it once, takes one part and bills it once. */
 function breakdown(db: Db, o: Wear, component: Mechanical): void {
   const ac = get<{ base: string | null; location: string; registration: string | null }>(db, 'SELECT base, location, registration FROM aircraft WHERE id = ?', o.aircraftId);
   if (!ac) return;
+  if (get(db, 'SELECT 1 AS x FROM breakdowns WHERE aircraft_id = ? AND component = ? AND failed_at = ?', o.aircraftId, component, o.at)) return; // replayed: its part is already off the shelf and billed
   const hub = ac.base ?? ac.location, cls = partClassOf(o.category), rand = mulberry32(hashSeed(`breakdown:${o.aircraftId}:${component}:${o.at}`));
   const part = failedPart(cls, component, rand()), days = deliveryDays(rand());
   receiveOrders(db, o.companyId, o.at);
@@ -164,9 +165,7 @@ function breakdown(db: Db, o: Wear, component: Mechanical): void {
   const fromStock = takeStock(db, o.companyId, hub, part.id, 1);
   const eta = fromStock ? o.at : o.at + days * DAY_MS, readyAt = eta + fix;
   const paid = fromStock || lessorPays(db, o.aircraftId) ? 0 : part.price + freightOf(cls, false);
-  const row = get<{ id: number }>(db, `INSERT INTO breakdowns (company_id, aircraft_id, hub, component, part, failed_at, eta, ready_at, paid, from_stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ON CONFLICT (aircraft_id, component, failed_at) DO NOTHING RETURNING id`, o.companyId, o.aircraftId, hub, component, part.id, o.at, eta, readyAt, paid, fromStock ? 1 : 0);
-  if (!row) return;
+  run(db, 'INSERT INTO breakdowns (company_id, aircraft_id, hub, component, part, failed_at, eta, ready_at, paid, from_stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', o.companyId, o.aircraftId, hub, component, part.id, o.at, eta, readyAt, paid, fromStock ? 1 : 0);
   if (paid > 0) post(db, o.companyId, o.at, 'parts_emergency', -paid, `${part.name} for ${ac.registration ?? `#${o.aircraftId}`}`);
   run(db, 'UPDATE aircraft_components SET wear_pct = ? WHERE aircraft_id = ? AND component = ?', RENEWED_WEAR_PCT, o.aircraftId, component);
   // the workshop keeps the aircraft until the repair is over (the later of this and any visit already booked); releaseMaintenance then hands it back as serviced
