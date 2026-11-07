@@ -97,7 +97,7 @@ export type StatementView = {
   /** The biggest debit of the next billing date (the mockup's "next scheduled posting"). */
   scheduled: UpcomingDebit | null;
 };
-const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((s) => new Date(`${s}T00:00:00Z`).toISOString().startsWith(s), 'not a calendar date');
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((s) => !Number.isNaN(Date.parse(`${s}T00:00:00Z`)) && new Date(`${s}T00:00:00Z`).toISOString().slice(0, 10) === s, 'not a calendar date');
 export const statementQuerySchema = z.object({
   from: isoDate.optional(), to: isoDate.optional(), category: z.enum(CATEGORIES).optional(), line: z.coerce.number().int().positive().optional(),
   before: z.coerce.number().int().positive().optional(), limit: z.coerce.number().int().min(1).max(200).default(50),
