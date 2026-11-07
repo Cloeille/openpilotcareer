@@ -3,62 +3,114 @@ import { ApiError } from './errors.ts';
 
 /**
  * Typed client for the PARTS section of docs/v3-plan.md (B.6).
- * The wire types are declared here because lot S5's `shared/src/parts.ts` is not merged yet (see "Implementation notes (F5)"); switching is an import change.
+ * The wire types are S5's `shared/src/parts.ts`, field for field (read from `feature/v3-s5-parts` at 5f671d7). That branch is not merged into this one's base,
+ * so a copy keeps this branch building alone; once S5 is merged, replace the type block by `import type { ... } from '@opc/shared'` (see "Implementation notes (F5)").
  * A route the server does not have answers 404/405: `null` means "feature off", any other failure still throws.
  * Money is euros, instants are epoch milliseconds, ICAO codes are upper case, a share is a fraction (0.37 is 37 %).
  */
 
-// ---------------------------------------------------------------- warehouse
+// ---------------------------------------------------------------- components and what their wear costs
 
-export const STOCK_POLICIES = ['none', 'critical', 'full'] as const;
-export type StockPolicy = (typeof STOCK_POLICIES)[number];
-/** What one policy immobilises and the ground days a year it leaves, for a type. */
-export type PolicyOption = { capital: number; groundDays: number };
-export type TypePolicy = {
-  icao: string; typeName: string; registrations: string[]; policy: StockPolicy;
-  /** What one day on the ground costs: a day of the type's expected line revenue (B.8). */
-  groundDayValue: number;
-  options: Record<StockPolicy, PolicyOption>;
+export type Component = 'engines' | 'gear' | 'propellers' | 'avionics' | 'interior' | 'paint';
+export type Mechanical = 'engines' | 'gear' | 'propellers' | 'avionics';
+export type RefurbAction = 'overhaul' | 'replace';
+export type Choice = 'leave' | RefurbAction;
+/** What a component costs at its wear: a fraction of speed (0.03 is -3 %), points of reliability, points of satisfaction (out of 5), a fraction of passengers. */
+export type Effects = { performance: number; reliability: number; satisfaction: number; load: number };
+/** The aircraft as it is or would be: performance and load as fractions (-0.04), reliability in percent, satisfaction out of 5. */
+export type Kpi = { performance: number; reliability: number; satisfaction: number; load: number };
+export type ChoiceView = {
+  action: Choice; cost: number; wearAfter: number;
+  /** What the component's wear takes a month once this choice is made. */
+  monthlyLoss: number;
+  /** Months to earn the cost back; null when it never does. */
+  paybackMonths: number | null;
+  /** Over the months left: gained minus spent. On a lease: handing the aircraft back (the new parts stay with the lessor). */
+  net: number;
+  /** The same when the aircraft is bought at the end of the lease; equals `net` when the aircraft is not on a lease. */
+  netIfBought: number;
+  days: number;
 };
-/** One part in stock at the hub, for the aircraft type it serves. */
-export type StockLine = { icao: string; partId: string; name: string; qty: number; value: number };
-/** An aircraft down for want of a part. `eta` is when the part arrives; `expressCost` the freight on top. */
-export type AogCase = { registration: string; icao: string; failedAt: number; failure: string; partName: string; eta: number; expressCost: number };
+export type Selection = { component: Component; action: Choice }[];
+export type Totals = {
+  cost: number; itemDays: number;
+  give: number; buy: number;
+  /** Cumulative cash at the end of each month (month 1 first). */
+  cashCurve: number[]; breakEvenMonth: number | null;
+};
+export type ComponentWear = { component: Component; wearPct: number; effects: Effects; worksUntil: number | null; choices: Record<Choice, ChoiceView> };
+export type WearView = {
+  aircraft: { id: number; registration: string; icao: string; typeName: string; ownership: string; value: number; wearPct: number };
+  /** False when the company plays without wear and failures: nothing wears, and the works are refused. */
+  active: boolean;
+  /** The company can send it to the workshop: it is hers (owned, financed or leased) and wear is on. */
+  refurbishable: boolean;
+  lease: { endsAt: number | null; monthsLeft: number; purchaseOptionPrice: number; maintenanceIncluded: boolean; lessor: string | null } | null;
+  /** The months the gains are counted over: the months left on a lease, else 24. */
+  months: number;
+  hoursPerMonth: number;
+  components: ComponentWear[];
+  kpi: { now: Kpi; after: Kpi };
+  recommended: Selection;
+  /** The selection asked by `?pick=`, else the recommended one. Everything below it follows it. */
+  selection: Selection;
+  totals: Totals;
+  works: { days: number; downtimeFactor: number; heavyHangar: boolean; ferry: boolean; ferryCost: number };
+  /** Cash after the works (the selection's cost and the ferry). */
+  balanceAfter: number;
+};
+export type RefurbishResult = { cost: number; ferry: number; downUntil: number; balanceAfter: number; items: { component: Component; action: RefurbAction; cost: number }[] };
+
+// ---------------------------------------------------------------- spare parts
+
+export type PartClass = 'piston' | 'turboprop' | 'regional' | 'jet';
+export type PartKind = 'engine' | 'starter' | 'propeller' | 'avionics' | 'brake' | 'wheel';
+export type PartsPolicy = 'none' | 'critical' | 'full';
+/** A part on the hub's shelf. One shelf serves every type of the part's class. */
+export type StockLine = { part: string; name: string; cls: PartClass; kind: PartKind; unitPrice: number; qty: number; inTransit: number; value: number; target: number };
+export type PartsPolicyOption = { policy: PartsPolicy; capital: number; groundDays: number };
+export type TypePolicy = {
+  icao: string; name: string; cls: PartClass; aircraft: { id: number; registration: string }[];
+  policy: PartsPolicy;
+  /** What one day on the ground costs: a day of the type's line revenue (B.8). */
+  dayValue: number;
+  failuresPerYear: number;
+  /** What each policy ties up and the ground days a year it leaves, for the whole type. */
+  options: PartsPolicyOption[];
+  /** The ground days a year of the whole type with what is on the shelf now (a kit still on its way does not count). */
+  expectedGroundDays: number;
+  /** The shelf holds the type's critical kit. */
+  covered: boolean;
+};
+export type AogCase = {
+  aircraftId: number; registration: string; icao: string; typeName: string; component: Mechanical;
+  part: string; partName: string; failedAt: number; eta: number;
+  /** The aircraft flies again at this instant. `fromStock`: the part was on the shelf, so this is the hours of the repair. */
+  readyAt: number; fromStock: boolean;
+  /** Euros of flying lost from the failure to `readyAt`, and the euros a day. */
+  lost: number; dayValue: number;
+  /** What the part cost with the freight. */
+  paid: number;
+  /** With the part on the shelf the aircraft would be back at this instant. */
+  withPartBackAt: number;
+  /** The critical kit of the type: what it ties up. */
+  criticalKit: number;
+};
 export type WarehouseView = {
-  facility: { name: string; areaM2: number; monthly: number } | null;
-  capital: number; capitalShare: number; expectedGroundDays: number;
+  hub: string;
+  /** The shelf needs no building: always null. */
+  facility: null;
+  /** False when the company plays without wear and failures: nothing breaks down. */
+  active: boolean;
+  /** Value of the shelf, its share of the balance (a fraction), and what is on its way (paid, not yet immobilised). */
+  capital: number; capitalShare: number; onOrder: number; balance: number;
+  expectedGroundDays: number;
   covered: { count: number; of: number };
   aog: AogCase | null;
   policies: TypePolicy[];
   inventory: StockLine[];
 };
-export type PolicyResult = { capital: number; deltaGroundDays: number; annualSaving: number };
-
-// ---------------------------------------------------------------- lease wear
-
-export const COMPONENTS = ['engines', 'gear', 'propellers', 'avionics', 'interior', 'paint'] as const;
-export type ComponentId = (typeof COMPONENTS)[number];
-export const WEAR_ACTIONS = ['leave', 'overhaul', 'replace'] as const;
-export type WearAction = (typeof WEAR_ACTIONS)[number];
-/** What a worn component costs: `value` is a magnitude, in points of performance (%), of reliability (points) or of satisfaction (stars); `fuelPct` (more fuel) and `loadPct` (fewer passengers) are the side effects. */
-export type WearEffect = { kind: 'performance' | 'reliability' | 'satisfaction'; value: number; fuelPct?: number; loadPct?: number };
-/** `detail` is the server's own line on the component ("2 910 h since overhaul, of 3 600"), shown as sent when there is one (asked of S5, optional). */
-export type ComponentWear = { component: ComponentId; wearPct: number; effect: WearEffect; refurbUntil: number | null; suggested: WearAction; detail?: string };
-/** One choice for one component. `monthlyGain` is what it earns a month against leaving the component as it is; `netReturn` and `netBuy` are over the months left, handing the aircraft back or taking the purchase option. */
-export type ChoiceOption = { cost: number; monthlyGain: number; paybackMonths: number | null; downDays: number; netReturn: number; netBuy: number };
-export type ChoiceTable = Record<ComponentId, Record<WearAction, ChoiceOption>>;
-export type WearView = {
-  aircraft: { id: number; registration: string; typeName: string; hub: string; year: number; airframeHours: number; lessor: string; monthsLeft: number; endsAt: number; purchaseOptionPrice: number; hoursPerMonth: number };
-  components: ComponentWear[];
-  /** Reliability (%) and satisfaction (out of 5) with every component as new; performance starts at 0. */
-  effects: { reliability: number; satisfaction: number };
-  choices: ChoiceTable;
-  /** The server's own total for its suggested choices; the screen sums the player's choices itself. */
-  totals: { give: number; buy: number; cashCurve: number[] };
-  balanceAfter: number;
-};
-export type RefurbishItem = { component: ComponentId; action: Exclude<WearAction, 'leave'> };
-export type RefurbishResult = { cost: number; downUntil: number; balanceAfter: number };
+export type PolicyResult = { icao: string; policy: PartsPolicy; capital: number; deltaGroundDays: number; annualSaving: number; ordered: number; refund: number; balanceAfter: number };
 
 async function optional<T>(path: string): Promise<T | null> {
   try {
@@ -70,8 +122,10 @@ async function optional<T>(path: string): Promise<T | null> {
 }
 
 export const fetchWarehouse = (hub: string): Promise<WarehouseView | null> => optional<WarehouseView>(`/warehouse/${encodeURIComponent(hub)}`);
-export const setPolicy = (hub: string, icao: string, policy: StockPolicy): Promise<PolicyResult> =>
+export const setPolicy = (hub: string, icao: string, policy: PartsPolicy): Promise<PolicyResult> =>
   api<PolicyResult>(`/warehouse/${encodeURIComponent(hub)}/policy`, { method: 'PUT', body: { icao, policy } });
-export const fetchWear = (aircraftId: number): Promise<WearView | null> => optional<WearView>(`/me/fleet/${aircraftId}/wear`);
-export const refurbish = (aircraftId: number, items: RefurbishItem[]): Promise<RefurbishResult> =>
+/** `pick` is the player's selection as `gear:overhaul,avionics:leave` (see `pickOf`): the server answers with everything below it (kpi, totals, works, balance) for that selection. */
+export const fetchWear = (aircraftId: number, pick?: string): Promise<WearView | null> =>
+  optional<WearView>(`/me/fleet/${aircraftId}/wear${pick ? `?pick=${encodeURIComponent(pick)}` : ''}`);
+export const refurbish = (aircraftId: number, items: { component: Component; action: RefurbAction }[]): Promise<RefurbishResult> =>
   api<RefurbishResult>(`/me/fleet/${aircraftId}/refurbish`, { method: 'POST', body: { items } });
