@@ -59,12 +59,12 @@ export function activeContractsOf(db: Db, companyId: number): Map<number, Contra
 
 export const contractView = (c: ContractRow): AircraftContract => ({ kind: c.kind, id: c.id, monthly: c.monthly, hourly: c.hourly, endsAt: c.ends_at });
 
-export function financeFields(a: { registration: string | null; ownership: Ownership; wear_pct: number; status: string; maintenance_until: number | null }, busy: boolean, contract: ContractRow | undefined): FleetAircraftFinance {
+export function financeFields(a: { registration: string | null; ownership: Ownership; wear_pct: number; status: string; maintenance_until: number | null; available_at: number }, busy: boolean, contract: ContractRow | undefined, now: number): FleetAircraftFinance {
   const maintenance = a.status === 'maintenance';
   return {
     registration: a.registration ?? '', ownership: a.ownership, wearPct: Math.round(a.wear_pct * 10) / 10,
     status: maintenance ? 'maintenance' : busy ? 'flying' : 'available', maintenanceUntil: maintenance ? a.maintenance_until : null,
-    contract: contract ? contractView(contract) : null,
+    contract: contract ? contractView(contract) : null, ferryUntil: a.available_at > now ? a.available_at : null,
   };
 }
 
@@ -75,12 +75,13 @@ export function releaseMaintenance(db: Db, now: number): void {
   run(db, `UPDATE aircraft SET status = 'available', maintenance_until = NULL, wear_pct = ? WHERE status = 'maintenance' AND maintenance_until <= ?`, WEAR_AFTER_MAINTENANCE_PCT, now);
 }
 
-/** 409 when the aircraft is in the workshop or already handed back. */
+/** 409 when the aircraft is in the workshop, on a ferry flight or on a line leg; 404 when it is already handed back. */
 export function assertFlyable(db: Db, aircraftId: number, now: number): void {
   releaseMaintenance(db, now);
-  const a = get<{ status: string; maintenance_until: number | null; returned_at: number | null }>(db, 'SELECT status, maintenance_until, returned_at FROM aircraft WHERE id = ?', aircraftId);
+  const a = get<{ status: string; maintenance_until: number | null; returned_at: number | null; available_at: number }>(db, 'SELECT status, maintenance_until, returned_at, available_at FROM aircraft WHERE id = ?', aircraftId);
   if (!a || a.returned_at !== null) throw new HttpError(404, 'aircraft_not_found', 'aircraft not found');
   if (a.status === 'maintenance') throw new HttpError(409, 'in_maintenance', `this aircraft is in maintenance until ${new Date(a.maintenance_until ?? now).toISOString()}`);
+  if (a.available_at > now) throw new HttpError(409, 'aircraft_busy', `this aircraft is on a ferry flight until ${new Date(a.available_at).toISOString()}`);
   // v3: an aircraft in the air on one of the company's autonomous lines (lines.ts) cannot be taken for a flown job.
   const leg = get<{ dest: string; until: number }>(db, "SELECT dest, arr_at + delay_min * 60000 AS until FROM scheduled_flights WHERE aircraft_id = ?1 AND status = 'done' AND dep_at <= ?2 AND arr_at + delay_min * 60000 > ?2", aircraftId, now);
   if (leg) throw new HttpError(409, 'aircraft_busy', `this aircraft is flying a line leg to ${leg.dest} until ${new Date(leg.until).toISOString()}`);

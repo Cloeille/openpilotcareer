@@ -133,13 +133,25 @@ export const jobPayout = (kind: JobKind, dist: number, payloadKg: number): numbe
 
 export type JobShape = { kind: JobKind; pax: number; payloadKg: number; distanceNm: number; requiredAircraft?: string };
 
+/** Why an aircraft cannot fly a job, as a code: the first check that fails, in this order. */
+export type CannotFlyCause = 'type' | 'seats' | 'cargo' | 'range';
+export function cannotFlyCause(a: AircraftType, j: JobShape): CannotFlyCause | null {
+  if (j.requiredAircraft && j.requiredAircraft !== a.icao) return 'type';
+  if (j.kind === 'pax' && j.pax > a.seats) return 'seats';
+  if (j.kind === 'cargo' && j.payloadKg > a.cargoKg) return 'cargo';
+  if (j.distanceNm > a.rangeNm) return 'range';
+  return null;
+}
+
 /** null when the aircraft can fly the job, otherwise the reason it cannot. Uses only the aircraft record. */
 export function cannotFly(a: AircraftType, j: JobShape): string | null {
-  if (j.requiredAircraft && j.requiredAircraft !== a.icao) return `job requires a ${j.requiredAircraft}`;
-  if (j.kind === 'pax' && j.pax > a.seats) return `needs ${j.pax} seats, ${a.icao} has ${a.seats}`;
-  if (j.kind === 'cargo' && j.payloadKg > a.cargoKg) return `needs ${j.payloadKg} kg cargo capacity, ${a.icao} has ${a.cargoKg}`;
-  if (j.distanceNm > a.rangeNm) return `${Math.round(j.distanceNm)} nm exceeds the ${a.rangeNm} nm range of ${a.icao}`;
-  return null;
+  switch (cannotFlyCause(a, j)) {
+    case 'type': return `job requires a ${j.requiredAircraft}`;
+    case 'seats': return `needs ${j.pax} seats, ${a.icao} has ${a.seats}`;
+    case 'cargo': return `needs ${j.payloadKg} kg cargo capacity, ${a.icao} has ${a.cargoKg}`;
+    case 'range': return `${Math.round(j.distanceNm)} nm exceeds the ${a.rangeNm} nm range of ${a.icao}`;
+    case null: return null;
+  }
 }
 
 export const blockHours = (a: AircraftType, dist: number): number => dist / a.cruiseKts + TAXI_HOURS;
@@ -284,6 +296,11 @@ export const deleteAccountSchema = z.object({ password: z.string().min(1).max(12
 export const buyAircraftSchema = z.object({ icao: icaoTypeSchema, hub: icaoAirportSchema, financing: financingSchema.optional() });
 export const buyHubSchema = z.object({ icao: icaoAirportSchema });
 export const acceptJobSchema = z.object({ aircraftId: z.int().positive() });
+/** `POST` and `GET /me/fleet/:id/ferry`: where to reposition an empty aircraft. */
+export const ferrySchema = z.object({ to: icaoAirportSchema });
+/** What a ferry flight would cost and take; booking it answers the same numbers plus the balance left. `reason` is the error code the booking would be refused with. */
+export type FerryPreview = { distanceNm: number; cost: number; hours: number; arrivesAt: number; ok: boolean; reason?: string };
+export type FerryBooked = FerryPreview & { balanceAfter: number };
 export const FLIGHT_STATUSES = ['active', 'verified', 'unverified', 'rejected', 'cancelled'] as const;
 export const listQuerySchema = z.object({ limit: z.coerce.number().int().min(1).max(200).default(50), before: z.coerce.number().int().positive().optional() });
 export const flightListQuerySchema = listQuerySchema.extend({ status: z.enum(FLIGHT_STATUSES).optional() });

@@ -159,8 +159,8 @@ export function offersFor(db: Db, companyId: number, now: number, icao?: string)
 
 // ---------------------------------------------------------------- leases
 
-function aircraftResult(db: Db, companyId: number, aircraftId: number, firstPayment: number): PurchaseResult {
-  return { aircraft: fleetView(db, companyId).find((a) => a.id === aircraftId)!, firstPayment, balanceAfter: balanceOf(db, companyId) };
+function aircraftResult(db: Db, companyId: number, aircraftId: number, firstPayment: number, now: number): PurchaseResult {
+  return { aircraft: fleetView(db, companyId, now).find((a) => a.id === aircraftId)!, firstPayment, balanceAfter: balanceOf(db, companyId) };
 }
 
 export function signLease(db: Db, companyId: number, o: { offerId: string; months: number; hub: string }, now: number): PurchaseResult {
@@ -184,7 +184,7 @@ export function signLease(db: Db, companyId: number, o: { offerId: string; month
   post(db, companyId, now, 'deposit', -offer.deposit, `${registration} security deposit`);
   post(db, companyId, now, 'ferry', -offer.ferryFee, `convoy and registration ${registration}`);
   snapshot(db, companyId, now);
-  return aircraftResult(db, companyId, aircraftId, first);
+  return aircraftResult(db, companyId, aircraftId, first, now);
 }
 
 function activeContract(db: Db, companyId: number, id: number): ContractRow {
@@ -237,7 +237,7 @@ export function buyoutLease(db: Db, companyId: number, id: number, now: number):
   if (c.deposit > 0) post(db, companyId, now, 'deposit_refund', c.deposit, `${reg} deposit applied`);
   endContract(db, c, now, 'owned');
   snapshot(db, companyId, now);
-  return aircraftResult(db, companyId, c.aircraft_id, t.purchaseOptionPrice);
+  return aircraftResult(db, companyId, c.aircraft_id, t.purchaseOptionPrice, now);
 }
 
 // ---------------------------------------------------------------- club and monthly rental (hardcore start)
@@ -262,7 +262,7 @@ function rentAircraft(db: Db, companyId: number, kind: 'club' | 'rental', hub: s
     post(db, companyId, now, 'lease_rent', -rental.monthly, `${registration} first month`);
   }
   snapshot(db, companyId, now);
-  return aircraftResult(db, companyId, aircraftId, first);
+  return aircraftResult(db, companyId, aircraftId, first, now);
 }
 export const rentFromClub = (db: Db, companyId: number, hub: string, icao: string, now: number): PurchaseResult => rentAircraft(db, companyId, 'club', hub, icao, now);
 export const rentMonthly = (db: Db, companyId: number, hub: string, icao: string, now: number): PurchaseResult => rentAircraft(db, companyId, 'rental', hub, icao, now);

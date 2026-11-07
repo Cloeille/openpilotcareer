@@ -22,6 +22,7 @@ import { registerLines } from './routes-lines.ts';
 import { registerSafety } from './routes-safety.ts';
 import { registerStaff } from './routes-staff.ts';
 import { registerFacilities } from './routes-facilities.ts';
+import { registerFerry } from './routes-ferry.ts';
 import { registerParts } from './routes-parts.ts';
 import { registerService } from './routes-service.ts';
 import { registerCatalogueStats } from './routes-catalogue-stats.ts';
@@ -153,7 +154,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
       return { userId, companyId, token: createSession(db, userId, at) };
     });
     if (companyId === null) return reply.status(201).send({ token, username: b.username, onboarding: onboardingOf(db, userId) });
-    return reply.status(201).send({ token, ...meView(db, userId, companyId) });
+    return reply.status(201).send({ token, ...meView(db, userId, companyId, now()) });
   });
 
   app.post('/api/v1/auth/login', async (req) => {
@@ -165,7 +166,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     run(db, 'DELETE FROM sessions WHERE expires_at <= ?', now()); // expired sessions are only ever dead weight
     const token = createSession(db, u.id, now());
     const companyId = defaultCompany(db, u.id);
-    return companyId === null ? { token, username: b.username, onboarding: onboardingOf(db, u.id) } : { token, ...meView(db, u.id, companyId) };
+    return companyId === null ? { token, username: b.username, onboarding: onboardingOf(db, u.id) } : { token, ...meView(db, u.id, companyId, now()) };
   });
 
   app.post('/api/v1/auth/logout', async (req, reply) => {
@@ -176,7 +177,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
 
   app.get('/api/v1/me', async (req) => {
     const p = user(req);
-    return meView(db, p.userId, p.companyId);
+    return meView(db, p.userId, p.companyId, now());
   });
 
   // ---- companies: a player may own several; the client acts as one via the X-OPC-Company header (see auth.ts)
@@ -245,14 +246,14 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     const p = user(req);
     const b = parse(buyHubSchema, req.body);
     tx(db, () => buyHub(db, p.companyId, b.icao, now()));
-    return reply.status(201).send(meView(db, p.userId, p.companyId));
+    return reply.status(201).send(meView(db, p.userId, p.companyId, now()));
   });
 
   app.post('/api/v1/me/fleet', async (req, reply) => {
     const p = user(req);
     const b = parse(buyAircraftSchema, req.body);
     tx(db, () => buyAircraft(db, p.companyId, b.icao, b.hub, now(), b.financing));
-    return reply.status(201).send(meView(db, p.userId, p.companyId));
+    return reply.status(201).send(meView(db, p.userId, p.companyId, now()));
   });
 
   app.post('/api/v1/me/custom-aircraft', async (req, reply) => {
@@ -342,6 +343,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   registerSimbrief(app, { db, now, doFetch });
   registerSafety(app, { db, now });
   registerParts(app, { db, now });
+  registerFerry(app, { db, now });
 
   return app;
 }

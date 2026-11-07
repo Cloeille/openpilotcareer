@@ -260,7 +260,7 @@ function resolveLeg(db: Db, leg: LegRow, r: Run): void {
   const ac = get<AircraftRow>(db, 'SELECT * FROM aircraft WHERE id = ?', leg.aircraft_id);
   // An aircraft stranded at the far end (its return was cancelled) flies the rotation mirrored, so a line never stays dead on a position mismatch.
   const [origin, dest] = ac && ac.location === leg.dest ? [leg.dest, leg.origin] : [leg.origin, leg.dest];
-  const grounded = !ac || ac.returned_at !== null || ac.status !== 'available' || ac.location !== origin
+  const grounded = !ac || ac.returned_at !== null || ac.status !== 'available' || ac.available_at > leg.dep_at || ac.location !== origin
     || !!get(db, "SELECT 1 AS x FROM flights WHERE aircraft_id = ? AND status = 'active' AND accepted_at <= ?", leg.aircraft_id, leg.dep_at);
   const crew = grounded || !ac ? null : crewLeg(db, { id: leg.id, companyId: leg.company_id, flightNo: leg.flight_no, dep: leg.dep_at, arr: leg.arr_at, origin, dest, icao: ac.icao });
   const cause: CancelCause | null = grounded ? 'aircraft_unavailable' : crew?.cause ?? null;

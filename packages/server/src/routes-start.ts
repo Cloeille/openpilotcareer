@@ -50,7 +50,7 @@ export function registerStart(app: FastifyInstance, { db, now }: StartCtx): void
     const p = account(req);
     const b = parse(createCompanyStartSchema, req.body);
     const id = tx(db, () => foundCompany(db, p.userId, b, now()));
-    return reply.status(201).send(meView(db, p.userId, id));
+    return reply.status(201).send(meView(db, p.userId, id, now()));
   });
 
   app.put('/api/v1/companies/:id/realism', async (req) => {
