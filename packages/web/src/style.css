@@ -8,6 +8,7 @@
 @import './simbrief.css';
 @import './lines.css';
 @import './staff.css';
+@import './facilities.css';
 
 :root {
   color-scheme: dark;
