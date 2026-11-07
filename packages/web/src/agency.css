@@ -1,0 +1,47 @@
+/* ---------------------------------------------------------------- agency (v4 lot AGENCY): the recruiter mission. Widths are those of the mockup frame at 1600x900
+   (docs/design/screens-resolved/staff-cabinet-de-recrutement.md): a main column of three options, a 420 px side column with the mission and the shortlist. */
+
+.ag-screen { display: flex; gap: 20px; width: 100%; min-height: 0; position: relative; z-index: 1; }
+.ag-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 18px; min-height: 0; }
+.ag-side { width: 420px; flex: none; display: flex; flex-direction: column; gap: 20px; min-height: 0; }
+.ag-side-panel .panel-body { gap: 12px; }
+.ag-status { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+.ag-status .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--danger); }
+.ag-status.ok { color: var(--success); }
+
+.ag-options { flex: 1; }
+.ag-opts { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.ag-opt { display: flex; align-items: center; gap: 24px; padding: 20px 18px; border-top: 1px solid var(--border); border-radius: 4px; cursor: pointer; }
+.ag-opt:first-child { border-top: 0; }
+.ag-opt.best { background: #FFFFFF08; outline: 1px solid var(--border-strong); outline-offset: -1px; }
+.ag-opt.off { opacity: .6; }
+.ag-opt:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 2px; }
+.ag-opt-label { width: 250px; flex: none; display: flex; flex-direction: column; gap: 3px; }
+.ag-opt-title { font: 600 18px var(--display); }
+.ag-opt-note { display: flex; align-items: center; gap: 6px; padding-top: 4px; }
+.ag-opt-time { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.ag-bar { display: flex; height: 12px; background: #FFFFFF0A; border-radius: 1px; overflow: hidden; }
+.ag-bar .ph1 { background: #FFFFFF66; }
+.ag-bar .ph2 { background: #FFFFFF33; }
+.ag-opt.best .ag-bar .ph1 { background: var(--text-primary); }
+.ag-opt.best .ag-bar .ph2 { background: #ECEAE599; }
+.ag-opt-end { display: flex; align-items: baseline; gap: 10px; font-size: 14px; }
+.ag-opt-cost { width: 220px; flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; }
+.ag-opt-total { font: 600 26px var(--display); font-variant-numeric: tabular-nums; }
+.ag-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding: 6px 18px 0; margin-top: auto; }
+.ag-saveds { display: flex; gap: 40px; }
+.ag-saved { display: flex; flex-direction: column; gap: 2px; }
+.ag-saved-value { font: 600 32px var(--display); color: var(--success); font-variant-numeric: tabular-nums; }
+
+.ag-count { display: inline-flex; align-items: center; gap: 10px; }
+.ag-count .st-chip { padding: 0 8px; }
+.ag-cands { display: flex; flex-direction: column; }
+.ag-cand { display: flex; align-items: flex-start; gap: 12px; width: 100%; padding: 10px 0; background: none; border: 0; border-top: 1px solid var(--border); color: var(--text-secondary); text-align: left; cursor: pointer; }
+.ag-cand:first-child { border-top: 0; }
+.ag-cand[aria-pressed='true'] { color: var(--text-primary); }
+.ag-cand .icon { margin-top: 2px; flex: none; }
+.ag-cand-who { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.ag-cand-head, .ag-cand-detail { display: flex; justify-content: space-between; gap: 12px; }
+.ag-fee { display: flex; flex-direction: column; gap: 6px; padding-top: 12px; border-top: 1px solid var(--border); }
+.ag-fee .warn { color: var(--warning); }
+.ag-side-panel .btn { width: 100%; }

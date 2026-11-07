@@ -290,8 +290,19 @@ CREATE TABLE sim_aircraft (
   PRIMARY KEY (user_id, title));
 `;
 
+
+// v4 AGENCY: a recruiter mission. The shortlist is not stored: it is a function of the mission (company, start day, base, type, count), like the market's candidates.
+// `commission` is what the signature paid (0 while the mission is open); `premium_pct` is the salary premium the mission was opened at.
+const SCHEMA_AGENCY = `
+CREATE TABLE recruit_missions (
+  id INTEGER PRIMARY KEY, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, base TEXT NOT NULL, qual TEXT NOT NULL,
+  count INTEGER NOT NULL CHECK (count BETWEEN 1 AND 6), started_at INTEGER NOT NULL, ready_at INTEGER NOT NULL, commission INTEGER NOT NULL DEFAULT 0, premium_pct INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'searching' CHECK (status IN ('searching','signed','cancelled')));
+CREATE UNIQUE INDEX recruit_missions_open ON recruit_missions(company_id, base, qual) WHERE status = 'searching';
+`;
+
 /** Append-only; `PRAGMA user_version` records how many ran. */
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT];
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT, SCHEMA_AGENCY];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);

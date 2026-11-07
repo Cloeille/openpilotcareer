@@ -402,3 +402,6 @@ export * from './service.ts';
 
 // ---- lot sim-aircraft
 export * from './simair.ts';
+
+// ---- lot agency (v4)
+export * from './agency.ts';
