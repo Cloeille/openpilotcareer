@@ -6,4 +6,4 @@ Resolved tree (component instances expanded with their overrides; HUD bars refer
   - text «Section Number» fill="$text-tertiary" fontFamily="$font-display" fontSize=44 fontWeight="500"  TEXT: 05
   - frame «Section Text» layout="vertical" gap=4 padding=[0, 0, 6, 0]
     - text «Section Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Flotte
-    - text «Section Description» fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Flotte de la compagnie, catalogue des types ICAO, achat
+    - text «Section Description» fill="$text-secondary" fontFamily="$font-ui" fontSize=15  TEXT: Flotte de la compagnie, catalogue des types ICAO, achat, location et usure des avions loués

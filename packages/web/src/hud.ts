@@ -72,7 +72,9 @@ function build(initial: HudData, lang: Lang) {
     h('button', { type: 'button', class: 'link-btn', title: t('hud.changeHint'), onclick: () => latest.onChangeServer() }, t('hud.change')));
 
   const jobCount = h('span', { class: 'tab-count' });
-  const tabLinks = new Map<Tab, HTMLAnchorElement>(TABS.map((tab) => [tab, h('a', { href: `#${tab}` }, t(`tab.${tab}`), tab === 'jobs' ? jobCount : null)]));
+  const liveDot = h('span', { class: 'dot route', role: 'img', 'aria-label': t('live.hud.active'), hidden: true });
+  const tabExtra = (tab: Tab): Node | null => (tab === 'jobs' ? jobCount : tab === 'live' ? liveDot : null);
+  const tabLinks = new Map<Tab, HTMLAnchorElement>(TABS.map((tab) => [tab, h('a', { href: `#${tab}` }, t(`tab.${tab}`), tabExtra(tab))]));
   const underline = h('span', { class: 'tab-underline', 'aria-hidden': 'true' });
   const nav = h('nav', { class: 'hud-tabs', 'aria-label': t('nav.main') },
     h('span', { title: t('hud.prevTab') }, keycap('Q')), [...tabLinks.values()], h('span', { title: t('hud.nextTab') }, keycap('E')), underline);
@@ -136,6 +138,7 @@ function build(initial: HudData, lang: Lang) {
     for (const [tab, a] of tabLinks) { if (tab === d.tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); }
     if (d.tab === 'settings') settings.setAttribute('aria-current', 'page'); else settings.removeAttribute('aria-current');
     jobCount.textContent = String(d.jobCount);
+    liveDot.hidden = !me.fleet.some((a) => a.busy);
     place(top.isConnected);
 
     balance.set(me.company.balance);

@@ -1,3 +1,2 @@
 Nom d'utilisateur
 ex. lmoreau
-Texte d'aide

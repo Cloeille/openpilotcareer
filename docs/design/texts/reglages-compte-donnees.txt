@@ -3,8 +3,40 @@ Réglages
 Clés API
 Compte et données
 Exporter tes données
-JSON · CSV
+Une copie de tout ce que ce serveur conserve sur toi, à garder ou à réimporter ailleurs.
+JSON
+Export complet
+4,2 Mo
+Profil, compagnie, flotte, vols, transactions et réglages.
+Exporter
+E
+CSV
+Vols
+86 Ko
+312 vols, du 14/03 au 04/11/2026.
+Exporter
+CSV
+Transactions
+212 Ko
+2 847 lignes, du 14/03 au 04/11/2026.
+Exporter
+Dernier export le 21/10/2026
 Supprimer le compte
-IRRÉVERSIBLE
+Efface de ce serveur ton pilote, la compagnie Azur Régional (AZR), sa flotte, tes vols et tes transactions, et révoque tes clés API. Rien ne pourra être restauré : exporte tes données avant.
+Confirme avec ton mot de passe
+••••••••••
+Supprimer mon compte
 Serveur
 Changer
+Serveur global OpenHangar
+https://global.openhangar.org
+Version
+1.4.0, à jour
+Hébergeur
+Association OpenHangar
+Données hébergées à
+Francfort (UE)
+Ton compte
+lmoreau, depuis le 14/03/2026
+L'hébergeur voit tes données.
+Profil, vols, traces de position et transactions sont stockés en clair sur ce serveur et lisibles par son administrateur. Les clés API ne sont conservées que hachées.

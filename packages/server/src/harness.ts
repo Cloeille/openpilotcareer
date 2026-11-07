@@ -13,7 +13,7 @@ export async function harness(opts: Partial<AppOptions> = {}) {
   const app = await buildApp({ db, now: () => clock.t, ai: false, ...opts });
   type Res = { status: number; body: any; headers: Record<string, unknown>; text: string };
   /** `company` acts as that company (X-OPC-Company); `rawCompany` sends the header verbatim. */
-  const call = async (method: 'GET' | 'POST' | 'PATCH' | 'DELETE', url: string, o: { token?: string; body?: unknown; company?: number; rawCompany?: string } = {}): Promise<Res> => {
+  const call = async (method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE', url: string, o: { token?: string; body?: unknown; company?: number; rawCompany?: string } = {}): Promise<Res> => {
     const company = o.rawCompany ?? (o.company === undefined ? undefined : String(o.company));
     const r = await app.inject({ method, url, headers: { ...(company === undefined ? {} : { 'x-opc-company': company }), ...(o.token ? { authorization: `Bearer ${o.token}` } : {}) }, ...(o.body !== undefined ? { payload: o.body as object } : {}) });
     let body: any = null;

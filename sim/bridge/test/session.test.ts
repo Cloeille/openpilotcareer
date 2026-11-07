@@ -22,6 +22,8 @@ const statusContract = z.strictObject({
   flags: z.array(z.string()),
   serverUrl: z.string(),
 });
+// What GET /status really serves: the panel contract above plus the fields the web app reads (v2 contract, lot LIVE).
+const servedContract = statusContract.extend({ sim: z.enum(['connected', 'waiting', 'unavailable']), version: z.string().min(1) }).strict();
 
 const flight: FlightInfo = { id: 7, from: 'LFPN', to: 'LFAQ', aircraftIcao: 'C172' };
 const fixture = (n: string) => readSamples(fileURLToPath(new URL(`../fixtures/${n}.json`, import.meta.url)));
@@ -55,6 +57,53 @@ test('verified flight: status walks pending -> parked/verified and matches the p
   assert.deepEqual([end.phase, end.verification, end.reason, end.flags], ['parked', 'verified', undefined, []]);
   assert.deepEqual(end.flight, flight);
   assert.ok(seen.has('preflight/null') && seen.has('airborne/pending') && seen.has('parked/pending'), [...seen].join(' '));
+});
+
+/** True when `p` has not settled yet (a settled promise wins the race against a macrotask tick). */
+const pending = async (p: Promise<void>): Promise<boolean> => (await Promise.race([p.then(() => false), new Promise<boolean>((r) => setImmediate(() => r(true)))]));
+
+test('done is not resolved by starting: no verdict before the aircraft is parked, then it resolves with the verdict', async (t) => {
+  const base = await stub(t, () => ({ status: 200, body: { verification: 'verified', reason: null, flight: {} } }));
+  const s = make(base, tmp(t));
+  assert.equal(await pending(s.done), true, 'fresh session: nothing has happened yet');
+  const samples = fixture('ga-c172-lfpn-lfaq');
+  const parkedAt = samples.findIndex((_, i) => { s.feed(samples[i]!); return s.status.phase === 'parked'; });
+  assert.ok(parkedAt > 0);
+  await s.done;
+  assert.equal(s.status.verification, 'verified');
+});
+
+test('done stays pending while the flight is being flown (preflight, taxi, airborne)', async (t) => {
+  const base = await stub(t, () => ({ status: 200, body: { verification: 'verified', reason: null, flight: {} } }));
+  const s = make(base, tmp(t));
+  for (const sample of fixture('ga-c172-lfpn-lfaq')) {
+    if (s.status.phase === 'parked') break;
+    s.feed(sample);
+    if (s.status.phase === 'airborne') break;
+  }
+  assert.equal(s.status.phase, 'airborne');
+  assert.equal(await pending(s.done), true);
+});
+
+test('a recording that ends before the aircraft parks: end() says nothing will be reported, and done resolves', async (t) => {
+  let posts = 0;
+  const base = await stub(t, () => { posts++; return { status: 200, body: { verification: 'verified', reason: null } }; });
+  const s = make(base, tmp(t));
+  for (const sample of fixture('ga-c172-lfpn-lfaq').slice(0, 120)) s.feed(sample);
+  assert.equal(await pending(s.done), true);
+  s.end();
+  await s.done;
+  assert.equal(posts, 0);
+  assert.equal(s.status.verification, 'pending');
+});
+
+test('end() does not cut short a report that is being delivered: done resolves with the verdict', async (t) => {
+  const base = await stub(t, () => ({ status: 200, body: { verification: 'verified', reason: null, flight: {} } }));
+  const s = make(base, tmp(t));
+  for (const sample of fixture('ga-c172-lfpn-lfaq')) s.feed(sample);
+  s.end();
+  await s.done;
+  assert.equal(s.status.verification, 'verified');
 });
 
 test('cheat flight: flags show while flying, the server rejection reason reaches the panel', async (t) => {
@@ -103,7 +152,7 @@ test('status endpoint: 127.0.0.1 only, CORS for the panel, GET /status only, rej
   const res = await fetch(`${url}/status`);
   assert.equal(res.status, 200);
   assert.equal(res.headers.get('access-control-allow-origin'), '*');
-  assert.deepEqual(statusContract.parse(await res.json()), { phase: 'preflight', flight, verification: null, flags: [], serverUrl: 'http://127.0.0.1:1' });
+  assert.deepEqual(servedContract.parse(await res.json()), { phase: 'preflight', flight, verification: null, flags: [], serverUrl: 'http://127.0.0.1:1', sim: 'waiting', version: '0.1.0' });
   assert.equal((await fetch(`${url}/status`, { method: 'OPTIONS' })).status, 204);
   assert.equal((await fetch(`${url}/status`, { method: 'POST' })).status, 404);
   assert.equal((await fetch(`${url}/other`)).status, 404);
@@ -112,4 +161,17 @@ test('status endpoint: 127.0.0.1 only, CORS for the panel, GET /status only, rej
   });
   assert.equal(rebinding, 403);
   await assert.rejects(serveStatus(() => s.status, addr.port), /in use/);
+});
+
+test('status endpoint: sim follows the simulator link and version is the bridge package version', async (t) => {
+  const s = make('http://127.0.0.1:1', tmp(t));
+  let link: 'connected' | 'waiting' | 'unavailable' = 'unavailable';
+  const server = await serveStatus(() => s.status, 0, { sim: () => link, version: '9.9.9' });
+  t.after(() => server.close());
+  const url = `http://127.0.0.1:${(server.address() as { port: number }).port}/status`;
+  assert.deepEqual(await fetch(url).then((r) => r.json()).then((b) => [b.sim, b.version]), ['unavailable', '9.9.9']);
+  link = 'connected';
+  assert.equal((await fetch(url).then((r) => r.json())).sim, 'connected');
+  // the panel contract fields are all still there, unchanged
+  assert.deepEqual(statusContract.parse(await fetch(url).then((r) => r.json()).then(({ sim: _s, version: _v, ...rest }) => rest)).phase, 'preflight');
 });

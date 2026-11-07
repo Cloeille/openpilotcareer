@@ -13,6 +13,7 @@ const app = await buildApp({
   registrationOpen: env.OPC_REGISTRATION !== 'closed',
   antiCheat: env.OPC_ANTICHEAT !== 'off',
   trustProxy: env.OPC_TRUST_PROXY === '1',
+  ...(env.OPC_DOWNLOADS ? { downloads: env.OPC_DOWNLOADS } : {}),
   ...(existsSync(webRoot) ? { webRoot } : {}),
 });
 

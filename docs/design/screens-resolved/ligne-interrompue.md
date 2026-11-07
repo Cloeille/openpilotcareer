@@ -1,0 +1,132 @@
+# Ligne · interrompue
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Ligne · interrompue» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-6.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 gap=20 padding=[28, 32, 24, 32] justifyContent="space_between"
+    - frame «Left Column» width=480 height="fill_container" layout="vertical" gap=40
+      - frame «Identity» width="fill_container" layout="vertical" gap=8
+        - frame «Breadcrumb» gap=10 alignItems="center"
+          - instance «Sign · LFLL» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFLL
+          - text «Pair Arrow» fill="$text-secondary" fontFamily="$font-ui" fontSize=16 fontWeight="normal"  TEXT: ⇄
+          - instance «Sign · LFML» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFML
+          - text «Crumb Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Réseau  ›  Lignes autonomes
+        - frame «Status» gap=8 padding=[6, 0, 0, 0] alignItems="center"
+          - ellipse «Status Dot» width=7 height=7 fill="$danger"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Ligne interrompue depuis jeu. 5 novembre 14:00Z
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600" lineHeight=1.05  TEXT: Lyon ⇄ Marseille
+        - text «Subtitle» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Vols AZR 7341 à 7346 · 150 NM · 3 allers-retours par jour en CRJ700
+      - frame «Why» width="fill_container" layout="vertical" gap=14
+        - text «Why Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Pourquoi elle est à l'arrêt
+        - frame «Blocker · Avion» width="fill_container" gap=14 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+          - icon «Icon» width=18 height=18 fill="$danger" icon="wrench"
+          - frame «Blocker Text» width="fill_container" layout="vertical" gap=4
+            - text «Blocker Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: F-HAZC est en inspection
+            - text «Blocker Desc» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Visite C au hangar de Lyon, c'est le seul CRJ700 de la flotte. Sortie prévue mar. 10 novembre 14:00Z.
+            - frame «Inspection Meter» width="fill_container" gap=12 padding=[6, 0, 0, 0] alignItems="center"
+              - frame «Bar» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=2
+                - rectangle «Bar Fill» width=202 height=4 fill="$text-secondary" cornerRadius=2
+              - text «Meter Value» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 62 % · encore 4 jours
+        - frame «Blocker · Équipage» width="fill_container" gap=14 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+          - icon «Icon» width=18 height=18 fill="$danger" icon="user-x"
+          - frame «Blocker Text» width="fill_container" layout="vertical" gap=4
+            - text «Blocker Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Aucun pilote qualifié CRJ700
+            - text «Blocker Desc» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Tes 4 pilotes volent sur ATR 72-600. Le contrat de l'équipage intérimaire CRJ a pris fin le 4 novembre.
+        - text «Why Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Les deux blocages doivent être levés : même sorti d'inspection, F-HAZC resterait au sol sans équipage.
+      - frame «Impact» width="fill_container" layout="vertical" gap=16
+        - text «Impact Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Ce que ça coûte
+        - frame «Impact Stats» width="fill_container" gap=32
+          - instance «Stat · Vols annulés» of «Stat»
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Vols annulés
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 10
+            - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: dont AZR 7345 et 7346 ce soir
+          - instance «Stat · Recette perdue» of «Stat»
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Recette perdue
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 58 000 €
+            - text «Delta» fill="$danger" fontFamily="$font-ui" fontSize=12  TEXT: +34 800 € par jour d'arrêt
+          - instance «Stat · Réputation» of «Stat»
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Réputation
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: −0,1
+            - text «Delta» fill="$danger" fontFamily="$font-ui" fontSize=12  TEXT: −0,05 par jour supplémentaire
+        - frame «Slot Deadline» width="fill_container" gap=10 padding=[12, 14] alignItems="center" fill="$warning-soft" cornerRadius="$radius-md"
+          - icon «Icon» width=16 height=16 fill="$warning" icon="clock-alert"
+          - text «Deadline Text» width="fill_container" fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Créneaux de Marseille rendus le 19 novembre sans reprise.
+    - instance «Panel · Remettre en service» of «Panel»
+      - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+        - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Remettre la ligne en service
+      - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=18 padding=[14, 22, 22, 22]
+        - text «Intro» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Choisis comment débloquer la ligne. L'exploitation automatique applique ton choix et replanifie les vols.
+        - frame «Options» width="fill_container" layout="vertical" gap=10
+          - frame «Option · Réaffecter» width="fill_container" gap=14 padding=16 fill="#FFFFFF0D" stroke="$text-primary" strokeWidth=1.5 cornerRadius=6
+            - frame «Radio» width=16 height=16 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=8
+              - ellipse «Dot» width=8 height=8 fill="$text-primary"
+            - frame «Option Text» width="fill_container" layout="vertical" gap=4
+              - text «Option Label» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Réaffecter F-HAZR, ATR 72-600
+              - text «Option Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" lineHeight=1.35  TEXT: Libre après ton vol AZR 4127 · équipage ATR intérimaire
+              - text «Option Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" lineHeight=1.35  TEXT: 2 allers-retours au lieu de 3, l'ATR est plus lent sur cette ligne
+            - frame «Option Outcome» layout="vertical" gap=2 alignItems="end"
+              - text «Outcome Value» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: sam. 7 nov.
+              - text «Outcome Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: +21 000 € / jour
+          - frame «Option · Recruter» width="fill_container" gap=14 padding=16 stroke="$border" strokeWidth=1 cornerRadius=6
+            - frame «Radio» width=16 height=16 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=8
+            - frame «Option Text» width="fill_container" layout="vertical" gap=4
+              - text «Option Label» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Recruter un équipage CRJ700
+              - text «Option Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" lineHeight=1.35  TEXT: 2 candidats qualifiés à Lyon · 15 600 € / mois pour le binôme
+              - text «Option Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" lineHeight=1.35  TEXT: La ligne reprend quand F-HAZC sort d'inspection
+              - text «Option Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" lineHeight=1.35  TEXT: Ou qualifier un binôme maison : 18 jours · 84 000 €
+            - frame «Option Outcome» layout="vertical" gap=2 alignItems="end"
+              - text «Outcome Value» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: mar. 10 nov.
+              - text «Outcome Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: +34 800 € / jour
+          - frame «Option · Pause» width="fill_container" gap=14 padding=16 stroke="$border" strokeWidth=1 cornerRadius=6
+            - frame «Radio» width=16 height=16 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=8
+            - frame «Option Text» width="fill_container" layout="vertical" gap=4
+              - text «Option Label» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Mettre la ligne en pause
+              - text «Option Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" lineHeight=1.35  TEXT: Plus d'annulations, la réputation cesse de baisser
+              - text «Option Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" lineHeight=1.35  TEXT: Créneaux de Marseille perdus le 19 novembre
+            - frame «Option Outcome» layout="vertical" gap=2 alignItems="end"
+              - text «Outcome Value» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="500"  TEXT: En pause
+              - text «Outcome Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: −3 200 € / jour de frais fixes
+        - frame «Resumption» width="fill_container" height="fill_container" layout="vertical" gap=12 padding=[0, 0, 4, 0] justifyContent="end"
+          - frame «Resumption Head» width="fill_container" alignItems="end" justifyContent="space_between"
+            - text «Resumption Title» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Avec ce choix
+            - text «Resumption Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 20 vols assurés sur 30 d'ici mer. 11
+          - frame «Days» width="fill_container" gap=4
+            - frame «Day · ven. 6» width="fill_container" layout="vertical" gap=6
+              - text «Day» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: ven. 6
+              - rectangle «Day Bar» width="fill_container" height=4 fill="$danger" cornerRadius=1
+              - text «Day Status» fill="$danger" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: Annulés
+            - frame «Day · sam. 7» width="fill_container" layout="vertical" gap=6
+              - text «Day» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: sam. 7
+              - rectangle «Day Bar» width="fill_container" height=4 fill="$text-secondary" cornerRadius=1
+              - text «Day Status» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 2 A/R · ATR
+            - frame «Day · dim. 8» width="fill_container" layout="vertical" gap=6
+              - text «Day» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: dim. 8
+              - rectangle «Day Bar» width="fill_container" height=4 fill="$text-secondary" cornerRadius=1
+              - text «Day Status» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 2 A/R · ATR
+            - frame «Day · lun. 9» width="fill_container" layout="vertical" gap=6
+              - text «Day» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: lun. 9
+              - rectangle «Day Bar» width="fill_container" height=4 fill="$text-secondary" cornerRadius=1
+              - text «Day Status» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 2 A/R · ATR
+            - frame «Day · mar. 10» width="fill_container" layout="vertical" gap=6
+              - text «Day» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: mar. 10
+              - rectangle «Day Bar» width="fill_container" height=4 fill="$text-secondary" cornerRadius=1
+              - text «Day Status» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 2 A/R · ATR
+            - frame «Day · mer. 11» width="fill_container" layout="vertical" gap=6
+              - text «Day» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: mer. 11
+              - rectangle «Day Bar» width="fill_container" height=4 fill="$text-secondary" cornerRadius=1
+              - text «Day Status» fill="$text-tertiary" fontFamily="$font-ui" fontSize=11 fontWeight="normal"  TEXT: 2 A/R · ATR
+        - text «Choice Note» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Tu peux combiner : réaffecter F-HAZR maintenant, puis rendre la ligne au CRJ700 une fois l'équipage recruté.
+        - frame «Actions» width="fill_container" gap=16 alignItems="center"
+          - instance «Apply» of «Button/Primary»
+            - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Réaffecter F-HAZR
+            - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+              - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+          - instance «See Candidates» of «Button/Ghost»
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Voir les candidats
+            - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

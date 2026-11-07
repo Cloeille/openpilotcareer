@@ -50,7 +50,7 @@ let lastSync: number | null = null;
 /** When the server last answered a signed-in request (ms), or null if it has not yet. */
 export const lastSyncAt = (): number | null => lastSync;
 
-type Opts = { method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'; body?: unknown; server?: string; auth?: boolean; timeoutMs?: number };
+type Opts = { method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'; body?: unknown; server?: string; auth?: boolean; timeoutMs?: number };
 
 async function request(path: string, o: Opts): Promise<Response> {
   const headers: Record<string, string> = {};
@@ -95,11 +95,16 @@ export async function downloadExport(format: 'json' | 'flights.csv' | 'transacti
   const res = await request(`/me/export?format=${format}`, {});
   if (!res.ok) return fail(res, true);
   const blob = await res.blob();
+  saveBlob(blob, exportFileName(res.headers.get('content-disposition'), format));
+  return blob.size;
+}
+
+/** Hand a file to the browser as a download. */
+export function saveBlob(blob: Blob, name: string): void {
   const url = URL.createObjectURL(blob);
-  const a = Object.assign(document.createElement('a'), { href: url, download: exportFileName(res.headers.get('content-disposition'), format) });
+  const a = Object.assign(document.createElement('a'), { href: url, download: name });
   document.body.append(a);
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
-  return blob.size;
 }

@@ -1,4 +1,5 @@
 import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
+import { backfillRegistrations } from './registrations.ts';
 
 export type Db = DatabaseSync;
 
@@ -66,13 +67,99 @@ ALTER TABLE companies_new RENAME TO companies;
 CREATE INDEX companies_user ON companies(user_id);
 `;
 
-// Numbers 3 to 5 belong to lots START, FINANCE and LIVE (fixed numbering, see docs/v2-contract.md): empty here until they merge.
-const SCHEMA_V3 = '';
-const SCHEMA_V4 = '';
-const SCHEMA_V5 = '';
+// OpenHangar v2, lot START: company identity, start mode, realism (JSON, NULL = neutral), onboarding state per user,
+// first-job reservations (one per company) and the once-per-season bankruptcy bailouts.
+const SCHEMA_V3 = `
+ALTER TABLE companies ADD COLUMN code TEXT;
+ALTER TABLE companies ADD COLUMN callsign TEXT;
+ALTER TABLE companies ADD COLUMN livery_color TEXT;
+ALTER TABLE companies ADD COLUMN start_mode TEXT;
+ALTER TABLE companies ADD COLUMN realism TEXT;
+CREATE UNIQUE INDEX companies_code ON companies(code) WHERE code IS NOT NULL;
+CREATE TABLE onboarding (
+  user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, completed INTEGER NOT NULL DEFAULT 0, step INTEGER NOT NULL DEFAULT 1,
+  start_mode TEXT, company_id INTEGER REFERENCES companies(id) ON DELETE SET NULL, draft TEXT NOT NULL DEFAULT '{}', updated_at INTEGER NOT NULL);
+CREATE TABLE job_reservations (
+  job_id TEXT PRIMARY KEY, company_id INTEGER NOT NULL UNIQUE REFERENCES companies(id) ON DELETE CASCADE, reserved_until INTEGER NOT NULL);
+CREATE TABLE bailouts (
+  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, season TEXT NOT NULL, at INTEGER NOT NULL, amount INTEGER NOT NULL,
+  PRIMARY KEY (company_id, season));
+`;
 
-// Lot SIMBRIEF-LINK: the saved SimBrief identifier of an account (public, not a secret) and the SimBrief side of a flight.
-const SCHEMA_V6 = `
+// Lot FINANCE: registrations, ownership, wear, maintenance, hub parking; leases/loans/club/rental contracts; monthly billing runs.
+// `returned_at` marks an aircraft handed back (lease ended, rental stopped): the row stays so flight history keeps its foreign key.
+const SCHEMA_V4 = `
+ALTER TABLE aircraft ADD COLUMN registration TEXT;
+ALTER TABLE aircraft ADD COLUMN ownership TEXT NOT NULL DEFAULT 'owned' CHECK (ownership IN ('owned','leased','financed','club','rented'));
+ALTER TABLE aircraft ADD COLUMN wear_pct REAL NOT NULL DEFAULT 0;
+ALTER TABLE aircraft ADD COLUMN status TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available','maintenance'));
+ALTER TABLE aircraft ADD COLUMN maintenance_until INTEGER;
+ALTER TABLE aircraft ADD COLUMN base TEXT;
+ALTER TABLE aircraft ADD COLUMN acquired_at INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE aircraft ADD COLUMN returned_at INTEGER;
+UPDATE aircraft SET base = COALESCE(
+  (SELECT h.icao FROM hubs h WHERE h.company_id = aircraft.company_id AND h.icao = aircraft.location),
+  (SELECT MIN(h.icao) FROM hubs h WHERE h.company_id = aircraft.company_id), aircraft.location),
+  acquired_at = COALESCE((SELECT c.created_at FROM companies c WHERE c.id = aircraft.company_id), 0);
+CREATE UNIQUE INDEX aircraft_registration ON aircraft(registration) WHERE registration IS NOT NULL;
+CREATE TABLE contracts (
+  id INTEGER PRIMARY KEY, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  aircraft_id INTEGER NOT NULL REFERENCES aircraft(id) ON DELETE CASCADE,
+  kind TEXT NOT NULL CHECK (kind IN ('lease','loan','club','rental')),
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','ended')),
+  started_at INTEGER NOT NULL, ends_at INTEGER, months INTEGER, months_paid INTEGER NOT NULL DEFAULT 0,
+  monthly INTEGER NOT NULL DEFAULT 0, hourly INTEGER, deposit INTEGER NOT NULL DEFAULT 0, insurance INTEGER NOT NULL DEFAULT 0,
+  principal INTEGER NOT NULL DEFAULT 0, terms TEXT, ended_at INTEGER);
+CREATE INDEX contracts_company ON contracts(company_id, status);
+CREATE INDEX contracts_aircraft ON contracts(aircraft_id);
+CREATE INDEX aircraft_maintenance ON aircraft(maintenance_until) WHERE status = 'maintenance';
+CREATE TABLE billing_runs (
+  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, month TEXT NOT NULL, at INTEGER NOT NULL,
+  PRIMARY KEY (company_id, month));
+-- Companies that exist now start being billed from the month of the migration (no retroactive parking fees).
+INSERT INTO billing_runs (company_id, month, at) SELECT id, strftime('%Y-%m', 'now'), CAST(strftime('%s', 'now') AS INTEGER) * 1000 FROM companies WHERE user_id IS NOT NULL;
+`;
+
+// Lot LIVE: when the last live sample of a flight arrived (the sample itself lives in memory only).
+const SCHEMA_V5 = `ALTER TABLE flights ADD COLUMN last_live_at INTEGER;`;
+
+// OpenHangar v3, lot LINES: the line engine's clock ticks, each company's network switch and last-seen time (the offline cap),
+// the lines themselves with their aircraft, and the timetable. A scheduled flight keeps its own money columns (the day P&L reads them).
+// lines.live_from: no leg departing before it is ever created (the line did not exist yet, was paused, switched off or its owner was away);
+// lines.laid_through: legs exist up to that instant (the end of tomorrow, B.2 item 1), so ticks re-lay only when the day has turned.
+// Only 'scheduled', 'done' and 'cancelled' are stored: flying and delayed are derived from the clock and delay_min (docs/v3-plan.md B.2, S1 notes).
+const SCHEMA_V7 = `
+CREATE TABLE line_ticks (tick INTEGER PRIMARY KEY);
+CREATE TABLE line_networks (
+  company_id INTEGER PRIMARY KEY REFERENCES companies(id) ON DELETE CASCADE, enabled INTEGER NOT NULL DEFAULT 1, seen_at INTEGER NOT NULL, lapsed_at INTEGER);
+CREATE TABLE lines (
+  id INTEGER PRIMARY KEY, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, a TEXT NOT NULL, b TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','paused','interrupted')), created_at INTEGER NOT NULL,
+  freq_per_day INTEGER NOT NULL, days INTEGER NOT NULL, window_start_min INTEGER NOT NULL, window_end_min INTEGER NOT NULL,
+  turnaround_min INTEGER NOT NULL, flight_base INTEGER NOT NULL, live_from INTEGER NOT NULL DEFAULT 0, laid_through INTEGER NOT NULL DEFAULT 0, paused_at INTEGER, interrupted_since INTEGER, interrupt_cause TEXT, stoppage_charged REAL NOT NULL DEFAULT 0,
+  UNIQUE (company_id, a, b), CHECK (a < b));
+CREATE TABLE line_aircraft (
+  line_id INTEGER NOT NULL REFERENCES lines(id) ON DELETE CASCADE, aircraft_id INTEGER NOT NULL REFERENCES aircraft(id) ON DELETE CASCADE,
+  home TEXT NOT NULL, PRIMARY KEY (line_id, aircraft_id));
+CREATE INDEX line_aircraft_aircraft ON line_aircraft(aircraft_id);
+CREATE TABLE scheduled_flights (
+  id INTEGER PRIMARY KEY, line_id INTEGER NOT NULL REFERENCES lines(id) ON DELETE CASCADE, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  aircraft_id INTEGER NOT NULL REFERENCES aircraft(id) ON DELETE CASCADE, flight_no INTEGER NOT NULL, dep_at INTEGER NOT NULL, arr_at INTEGER NOT NULL,
+  origin TEXT NOT NULL, dest TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled','done','cancelled')),
+  delay_min INTEGER NOT NULL DEFAULT 0, delay_cause TEXT, cancel_cause TEXT, taken_job TEXT,
+  pax INTEGER, revenue INTEGER, fuel_cost INTEGER, landing_fee INTEGER, maintenance INTEGER,
+  UNIQUE (line_id, flight_no, dep_at));
+CREATE INDEX scheduled_due ON scheduled_flights(status, dep_at);
+CREATE INDEX scheduled_company_day ON scheduled_flights(company_id, dep_at);
+CREATE INDEX scheduled_aircraft ON scheduled_flights(aircraft_id, dep_at);
+-- A rotation the player takes over becomes a private job (source 'line') that stays hers until the leg is over; SimBrief imports keep the default.
+ALTER TABLE custom_jobs ADD COLUMN source TEXT NOT NULL DEFAULT 'simbrief';
+ALTER TABLE custom_jobs ADD COLUMN expires_at INTEGER;
+`;
+
+// Lot SIMBRIEF-LINK (runs after V7: V7 was deployed first, so the reserved V6 slot can no longer be used without re-running V7 on live databases): the saved SimBrief identifier of an account (public, not a secret) and the SimBrief side of a flight.
+const SCHEMA_SIMBRIEF = `
 ALTER TABLE users ADD COLUMN simbrief_username TEXT;
 ALTER TABLE users ADD COLUMN simbrief_pilot_id INTEGER;
 ALTER TABLE users ADD COLUMN simbrief_verified_at INTEGER;
@@ -80,12 +167,12 @@ ALTER TABLE flights ADD COLUMN simbrief_static_id TEXT;
 ALTER TABLE flights ADD COLUMN simbrief_ofp_id TEXT;
 `;
 
-/** Append-only; `PRAGMA user_version` records how many ran. */
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V6];
+/** Append-only, in deployment order (the position, not the constant's name, is the version): `PRAGMA user_version` records how many ran. */
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);
-  db.exec('PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000;');
+  db.exec('PRAGMA busy_timeout = 5000; PRAGMA journal_mode = WAL;');
   const row = db.prepare('PRAGMA user_version').get() as { user_version: number };
   // Foreign keys stay off while migrations run: rebuilding a parent table would otherwise cascade-delete its children.
   // (The pragma is a no-op inside a transaction.) Each migration must leave no dangling reference, or it rolls back.
@@ -98,6 +185,8 @@ export function openDb(path: string): Db {
       db.exec(`PRAGMA user_version = ${v + 1}`);
     });
   }
+  // Aircraft that existed before migration 4 (or were inserted without one) get their registration here: it needs the airport data, not SQL.
+  if (db.prepare('SELECT 1 FROM aircraft WHERE registration IS NULL LIMIT 1').get()) tx(db, () => backfillRegistrations(db)); // no write lock when nothing is missing
   db.exec('PRAGMA foreign_keys = ON');
   return db;
 }

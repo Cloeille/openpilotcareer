@@ -2,9 +2,48 @@ Parcours airliner · compagnie et hub
 Fonde ta compagnie
 Donne-lui un nom, un code et une base. C'est de ton hub que partiront tes premiers jobs, et c'est là que tes avions passeront la nuit.
 Compagnie
-Tout voir
+Nom de la compagnie
+Azur Régional
+Modifiable plus tard depuis ta fiche compagnie.
+Code OACI
+AZR
+Disponible sur ce serveur
+Indicatif radio
+AZUR
+À la radio : « AZUR 4127 »
+Le code et l'indicatif ne pourront plus être changés ensuite.
+Couleur de livrée
+facultatif
+Bleu azur
+Appliquée aux livrées compatibles et à ta fiche au classement.
 Hub principal
-Suggestions adaptées au parcours airliner
+Rechercher un aéroport
+Code OACI, ville ou nom d'aéroport
+Suggestions pour un A320neo, un 737-800 ou un E195-E2
+Piste d'au moins 2 000 m
+LFMN
+Nice Côte d'Azur
+Nice · piste de 2 960 m
+Équilibré pour débuter
+LFPG
+Paris-Charles de Gaulle
+Roissy-en-France · piste de 4 215 m
+Le plus de jobs, le plus cher
+LFLL
+Lyon-Saint-Exupéry
+Colombier-Saugnieu · piste de 4 000 m
+Le moins cher des trois
+Basée à Nice
+Ce que ce hub implique pour ta compagnie.
+Parking
+3 900 € par mois
+par avion stationné, prélevé le 1er
+Jobs à proximité
+46 départs
+à moins de 300 NM, renouvelés chaque jour
+Concurrence
+3 compagnies IA
+déjà basées à LFMN
 Tu pourras ouvrir d'autres bases quand ta flotte grandira.
 Choisir mon premier avion
 Entrée

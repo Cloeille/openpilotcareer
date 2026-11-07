@@ -1,11 +1,14 @@
 /** Keyboard and gamepad vocabulary of the mockup (Q / E tabs, Esc back, Enter primary, arrows in lists), as pure functions. */
 export type Action = 'prev' | 'next' | 'back' | 'blur' | 'confirm' | 'up' | 'down';
 
-type KeyLike = { key: string; ctrlKey: boolean; metaKey: boolean; altKey: boolean };
+type KeyLike = { key: string; ctrlKey: boolean; metaKey: boolean; altKey: boolean; repeat?: boolean };
+
+/** A key held down fires again and again; only the arrows (stepping through a list or days) are meant to repeat. Everything else, Space (pause) and Enter included, acts once per press. */
+const held = (e: KeyLike): boolean => e.repeat === true && !e.key.startsWith('Arrow');
 
 /** The action a key press stands for. While the player types in a field letters and arrows reach the field, and Esc only leaves it ('blur'): a second Esc goes back. */
 export function keyAction(e: KeyLike, typing: boolean): Action | null {
-  if (e.ctrlKey || e.metaKey || e.altKey) return null;
+  if (e.ctrlKey || e.metaKey || e.altKey || held(e)) return null;
   if (e.key === 'Escape') return typing ? 'blur' : 'back';
   if (typing) return null;
   switch (e.key) {
@@ -18,12 +21,20 @@ export function keyAction(e: KeyLike, typing: boolean): Action | null {
   }
 }
 
-/** A bare letter, digit, `/` or ← → (as 'left' / 'right') pressed outside a field: the screen-specific shortcut (A = buy, I = import, S = change server...). Lower-cased; Q and E stay with the tab cycle unless a screen claims them. */
-export function shortcutOf(e: KeyLike, typing: boolean): string | null {
-  if (typing || e.ctrlKey || e.metaKey || e.altKey) return null;
-  if (e.key === 'ArrowLeft') return 'left';
-  if (e.key === 'ArrowRight') return 'right';
-  return /^[a-z0-9/]$/i.test(e.key) ? e.key.toLowerCase() : null;
+/**
+ * The screen-specific shortcut a key press stands for, outside a field: a bare letter or digit, `/`, ← → ('left' / 'right'), `F1` ('f1') and Space ('space'). Lower-cased; Q and E stay with the tab cycle unless a screen claims them.
+ * `Tab` is never bound: it stays the browser's focus key, so each `Tab` action of the mockup is a letter instead (B.10 of docs/v3-plan.md).
+ * Space is left alone when `onControl` (focus is on a button, link or switch), because those use it natively.
+ */
+export function shortcutOf(e: KeyLike, typing: boolean, onControl = false): string | null {
+  if (typing || e.ctrlKey || e.metaKey || e.altKey || held(e)) return null;
+  switch (e.key) {
+    case 'ArrowLeft': return 'left';
+    case 'ArrowRight': return 'right';
+    case 'F1': return 'f1';
+    case ' ': return onControl ? null : 'space';
+    default: return /^[a-z0-9/]$/i.test(e.key) ? e.key.toLowerCase() : null;
+  }
 }
 
 /** Standard-mapping gamepad: A = Enter, B = Esc, LB / RB = Q / E, d-pad = arrows. */

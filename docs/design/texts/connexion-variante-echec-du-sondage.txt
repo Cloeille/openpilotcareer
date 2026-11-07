@@ -1,5 +1,11 @@
 Variante : le serveur ne répond pas
 Étape 1 sur 2 · serveur et compte
 Connexion
-Connexion
-Étape 1 sur 2
+Serveur
+Serveur global
+Serveur personnalisé
+https://vol.lesailesdusud.org
+Serveur injoignable
+Aucune réponse après 5 s. Vérifie l'adresse ou réessaie plus tard.
+Réessayer
+Les identifiants s'affichent une fois le serveur joignable.

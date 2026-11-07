@@ -1,0 +1,265 @@
+# Cuisine · production des repas
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Cuisine · production des repas» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-13.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=24 padding=[28, 32, 24, 32]
+    - frame «Kitchen Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Identity» layout="vertical" gap=8
+        - frame «Breadcrumb» gap=10 alignItems="center"
+          - instance «Base Sign» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+          - text «Crumb Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Compagnie  ›  Restauration à bord
+        - frame «Status» gap=8 padding=[6, 0, 0, 0] alignItems="center"
+          - ellipse «Status Dot» width=7 height=7 fill="$warning"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Repas chauds d'AZR 4131 vers Paris en retard de 12 minutes
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600" lineHeight=1.05  TEXT: Cuisine centrale de Nice
+        - text «Role» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Exploitée en propre · zone fret de Nice-Côte d'Azur · production du vendredi 6 novembre
+      - frame «Key Stats» gap=44 padding=[0, 0, 4, 0]
+        - instance «Stat · Repas à produire» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Repas à produire
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 548
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: 312 collations · 236 repas chauds
+        - instance «Stat · Capacité du jour» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Capacité du jour
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 620
+          - text «Delta» fill="$warning" fontFamily="$font-ui" fontSize=12  TEXT: 515 ce soir · un cuisinier absent
+        - instance «Stat · Marge brute» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Marge brute
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 46 %
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: environ 2 300 € sur la journée
+    - frame «Kitchen Body» width="fill_container" height="fill_container" gap=20
+      - instance «Panel · Niveau de qualité» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Niveau de qualité des repas
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Simuler sur 7 jours
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=18 padding=[14, 22, 22, 22] justifyContent="space_between"
+          - frame «Tier Comparison» width="fill_container"
+            - frame «Labels» width=200 layout="vertical"
+              - frame «Head Spacer» width="fill_container" height=84
+              - frame «Label · Temps de préparation» width="fill_container" height=58 layout="vertical" gap=2 justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Temps de préparation
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: par repas chaud
+              - frame «Label · Équipe nécessaire» width="fill_container" height=58 layout="vertical" gap=2 justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Équipe nécessaire
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: cuisiniers par service
+              - frame «Label · Production max» width="fill_container" height=58 layout="vertical" gap=2 justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Production max
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: repas par jour
+              - frame «Label · Coût par repas» width="fill_container" height=58 layout="vertical" gap=2 justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Coût par repas
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: ingrédients et main-d'œuvre
+              - frame «Label · Marge brute» width="fill_container" height=58 layout="vertical" gap=2 justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Marge brute
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: sur la part repas du billet
+              - frame «Label · Satisfaction passagers» width="fill_container" height=58 layout="vertical" gap=2 justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Satisfaction passagers
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: note du service repas
+            - frame «Tier · Économique» width="fill_container" layout="vertical"
+              - frame «Tier Head» width="fill_container" height=84 layout="vertical" gap=4 padding=[14, 18, 0, 18]
+                - frame «Name Row» width="fill_container" gap=10 alignItems="center"
+                  - text «Tier Name» fill="$text-secondary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Économique
+                - text «Tier Desc» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Collation emballée, plat réchauffé
+              - frame «Cell · Temps de préparation» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 4 min
+                  - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: −5 min
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=40 height=3 fill="$text-tertiary"
+              - frame «Cell · Équipe nécessaire» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 4
+                  - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: −2
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=80 height=3 fill="$text-tertiary"
+              - frame «Cell · Production max» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 980
+                  - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: +360
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=180 height=3 fill="$text-tertiary"
+              - frame «Cell · Coût par repas» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 3,10 €
+                  - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: −3,30 €
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=38 height=3 fill="$text-tertiary"
+              - frame «Cell · Marge brute» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 58 %
+                  - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: +12 pts
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=180 height=3 fill="$text-tertiary"
+              - frame «Cell · Satisfaction passagers» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 64 %
+                  - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: −17 pts
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=123 height=3 fill="$text-tertiary"
+            - frame «Tier · Soigné» width="fill_container" layout="vertical" fill="$surface-selected" cornerRadius=4
+              - frame «Tier Head» width="fill_container" height=84 layout="vertical" gap=4 padding=[14, 18, 0, 18]
+                - frame «Name Row» width="fill_container" gap=10 alignItems="center"
+                  - text «Tier Name» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Soigné
+                  - frame «Current» gap=5 alignItems="center"
+                    - icon «Current Icon» width=14 height=14 fill="$text-primary" icon="check"
+                    - text «Current Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Choix actuel
+                - text «Tier Desc» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Produits locaux, plat du jour
+              - frame «Cell · Temps de préparation» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 9 min
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=90 height=3 fill="$text-primary"
+              - frame «Cell · Équipe nécessaire» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 6
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=120 height=3 fill="$text-primary"
+              - frame «Cell · Production max» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 620
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=114 height=3 fill="$text-primary"
+              - frame «Cell · Coût par repas» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 6,40 €
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=78 height=3 fill="$text-primary"
+              - frame «Cell · Marge brute» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 46 %
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=143 height=3 fill="$text-primary"
+              - frame «Cell · Satisfaction passagers» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 81 %
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=155 height=3 fill="$text-primary"
+            - frame «Tier · Gastronomique» width="fill_container" layout="vertical"
+              - frame «Tier Head» width="fill_container" height=84 layout="vertical" gap=4 padding=[14, 18, 0, 18]
+                - frame «Name Row» width="fill_container" gap=10 alignItems="center"
+                  - text «Tier Name» fill="$text-secondary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Gastronomique
+                - text «Tier Desc» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Menu de chef, dressé à la main
+              - frame «Cell · Temps de préparation» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 18 min
+                  - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: +9 min
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=180 height=3 fill="$text-tertiary"
+              - frame «Cell · Équipe nécessaire» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 9
+                  - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 3 à recruter
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=180 height=3 fill="$text-tertiary"
+              - frame «Cell · Production max» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 310
+                  - text «Delta» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: sous la demande de 548
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=57 height=3 fill="$text-tertiary"
+              - frame «Cell · Coût par repas» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 14,80 €
+                  - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: +8,40 €
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=180 height=3 fill="$text-tertiary"
+              - frame «Cell · Marge brute» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 21 %
+                  - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: −25 pts
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=65 height=3 fill="$text-tertiary"
+              - frame «Cell · Satisfaction passagers» width="fill_container" height=58 layout="vertical" gap=7 padding=[0, 18] justifyContent="center" stroke="$border" strokeWidth={"top": 1}
+                - frame «Value Row» gap=8 alignItems="end"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 94 %
+                  - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: +13 pts
+                - frame «Bar Track» width=180 height=3 fill="$border"
+                  - rectangle «Bar» width=180 height=3 fill="$text-tertiary"
+          - frame «Tier Footer» width="fill_container" gap=24 alignItems="center" justifyContent="space_between"
+            - text «Scope Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal" lineHeight=1.4  TEXT: Collations sur les lignes ATR vers Lyon et Calvi, repas chaud vers Paris en A220. Un changement s'applique à la production du lendemain.
+            - frame «Actions» gap=20 alignItems="center"
+              - instance «Change Tier Button» of «Button/Secondary»
+                - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chef-hat"
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Changer de niveau
+      - frame «Side Column» width=520 height="fill_container" layout="vertical" gap=20
+        - instance «Panel · Plan de production» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Départs de ce soir
+            - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Plan de la journée
+          - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=0 padding=[10, 22, 20, 22]
+            - frame «Departure · AZR 1641» width="fill_container" height=56 gap=16 alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+              - text «Time» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 18:10Z
+              - frame «Flight Block» width="fill_container" layout="vertical" gap=3
+                - frame «Flight Line» gap=12
+                  - text «Flight Number» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 1641
+                  - text «Route» fill="$text-tertiary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN → LFKJ
+                - text «Load» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 68 collations · ATR 72-600
+              - frame «Status» gap=6 alignItems="center"
+                - icon «Status Icon» width=14 height=14 fill="$text-tertiary" icon="check-check"
+                - text «Status Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Chargé à bord
+            - frame «Departure · AZR 1137» width="fill_container" height=56 gap=16 alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+              - text «Time» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 18:46Z
+              - frame «Flight Block» width="fill_container" layout="vertical" gap=3
+                - frame «Flight Line» gap=12
+                  - text «Flight Number» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 1137
+                  - text «Route» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN → LFLL
+                - text «Load» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 70 collations · ATR 72-600
+              - frame «Status» gap=6 alignItems="center"
+                - icon «Status Icon» width=14 height=14 fill="$text-secondary" icon="circle-check"
+                - text «Status Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Prêt en chambre froide
+            - frame «Departure · AZR 4131» width="fill_container" height=56 gap=16 alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+              - text «Time» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 19:40Z
+              - frame «Flight Block» width="fill_container" layout="vertical" gap=3
+                - frame «Flight Line» gap=12
+                  - text «Flight Number» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 4131
+                  - text «Route» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN → LFPG
+                - text «Load» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 136 repas chauds · A220-300
+              - frame «Status» gap=6 alignItems="center"
+                - instance «Status Badge» of «Badge/Contesté»
+                  - icon «Icon» width=12 height=12 fill="$warning" icon="clock-alert"
+                  - text «Label» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: Prêt 19:22Z · +12 min
+            - frame «Departure · AZR 4135» width="fill_container" height=56 gap=16 alignItems="center" stroke="$border" strokeWidth={"bottom": 1}
+              - text «Time» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: 21:05Z
+              - frame «Flight Block» width="fill_container" layout="vertical" gap=3
+                - frame «Flight Line» gap=12
+                  - text «Flight Number» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: AZR 4135
+                  - text «Route» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN → LFPG
+                - text «Load» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 100 repas chauds · A220-300
+              - frame «Status» gap=6 alignItems="center"
+                - icon «Status Icon» width=14 height=14 fill="$text-secondary" icon="chef-hat"
+                - text «Status Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: En préparation
+            - frame «Shift» width="fill_container" layout="vertical" gap=8 padding=[14, 0, 0, 0]
+              - frame «Shift Head» width="fill_container" alignItems="end" justifyContent="space_between"
+                - text «Shift Title» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: En cuisine ce soir
+                - text «Shift Hours» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Service 15:00Z – 23:00Z
+              - frame «Crew» width="fill_container" gap=28
+                - frame «Crew · cuisiniers» gap=6 alignItems="end"
+                  - text «Count» fill="$warning" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 5 sur 6
+                  - text «Role» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: cuisiniers
+                - frame «Crew · préparateurs» gap=6 alignItems="end"
+                  - text «Count» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 3
+                  - text «Role» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: préparateurs
+                - frame «Crew · chauffeurs-livreurs» gap=6 alignItems="end"
+                  - text «Count» fill="$text-primary" fontFamily="$font-display" fontSize=20 fontWeight="500" lineHeight=1  TEXT: 2
+                  - text «Role» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: chauffeurs-livreurs
+              - text «Absence Note» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" lineHeight=1.4  TEXT: Hugo Ferrand en arrêt jusqu'à lundi : 515 repas au plus ce soir.
+        - instance «Panel · Cuisine ou sous-traitance» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Cuisine en propre ou sous-traitance
+            - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Demander un devis
+          - frame «Content» width="fill_container" height="fill_container" layout="horizontal" gap=12 padding=[12, 22, 20, 22]
+            - frame «Option · Cuisine en propre» width="fill_container" height="fill_container" layout="vertical" gap=4 padding=[9, 14] fill="$surface-selected" cornerRadius=4
+              - frame «Option Head» width="fill_container" gap=8 alignItems="center"
+                - text «Option Name» fill="$text-primary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: Cuisine en propre
+                - icon «Current Icon» width=14 height=14 fill="$text-primary" icon="check"
+              - text «Economics» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 6,40 € par repas · marge 46 %
+              - text «Trade-off» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" lineHeight=1.35  TEXT: Plafond de 620 repas par jour, 11 personnes à gérer
+            - frame «Option · Riviera Traiteur Aviation» width="fill_container" height="fill_container" layout="vertical" gap=4 padding=[9, 14] stroke="$border" strokeWidth=1 cornerRadius=4
+              - frame «Option Head» width="fill_container" gap=8 alignItems="center"
+                - text «Option Name» fill="$text-secondary" fontFamily="$font-display" fontSize=16 fontWeight="600"  TEXT: Riviera Traiteur Aviation
+              - text «Economics» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 8,10 € par repas · marge 31 %
+              - text «Trade-off» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" lineHeight=1.35  TEXT: Sans plafond de volume, pas de Gastronomique
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

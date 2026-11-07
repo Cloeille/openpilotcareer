@@ -1,6 +1,11 @@
 // Shared contract of OpenPilotCareer: domain types, zod schemas (trust boundary) and economy rules.
 // Everything the server, the AI companies and the web UI must agree on lives here.
 import { z } from 'zod';
+import type { Realism, StartMode } from './career.ts';
+import { financingSchema, type FleetAircraftFinance } from './finance.ts';
+
+export * from './career.ts';
+export * from './finance.ts';
 
 export const API_VERSION = 1;
 export const EXPORT_SCHEMA_VERSION = 2;
@@ -150,17 +155,21 @@ export type SettleInput = {
   status: 'verified' | 'unverified';
   /** Measured values (telemetry); estimated from the aircraft type when absent. */
   fuelUsedKg?: number; blockHours?: number; landingFpm?: number;
+  /** Realism of the company (percent, see career.ts): scales the revenue and the reputation change. */
+  payModifierPct?: number; repModifierPct?: number;
+  /** Multiplies the flat fuel price (the real-fuel-price toggle: per airport and day). */
+  fuelPriceFactor?: number;
 };
 export type Settlement = { revenue: number; fuelCost: number; landingFee: number; maintenance: number; net: number; reputationDelta: number };
 
 /** The one profit formula, used for players, AI companies and AI decision scoring. */
 export function settle(i: SettleInput): Settlement {
   const hard = i.landingFpm !== undefined && Math.abs(i.landingFpm) >= HARD_LANDING_FPM;
-  const revenue = Math.round(i.payout * (i.status === 'verified' ? 1 : MANUAL_PAY_FACTOR));
-  const fuelCost = Math.round((i.fuelUsedKg ?? fuelBurnKg(i.aircraft, i.distanceNm)) * FUEL_PRICE_PER_KG);
+  const revenue = Math.round(i.payout * (i.status === 'verified' ? 1 : MANUAL_PAY_FACTOR) * (1 + (i.payModifierPct ?? 0) / 100));
+  const fuelCost = Math.round((i.fuelUsedKg ?? fuelBurnKg(i.aircraft, i.distanceNm)) * FUEL_PRICE_PER_KG * (i.fuelPriceFactor ?? 1));
   const fee = landingFee(i.aircraft, i.destSize, i.destIsHub);
   const maintenance = Math.round((i.blockHours ?? blockHours(i.aircraft, i.distanceNm)) * maintenancePerHour(i.aircraft) * (hard ? 2 : 1));
-  const reputationDelta = (i.status === 'verified' ? 0.1 : 0.02) - (hard ? 1.5 : 0);
+  const reputationDelta = (i.status === 'verified' ? 0.1 : 0.02) * (1 + (i.repModifierPct ?? 0) / 100) - (hard ? 1.5 : 0); // realism scales the gain, never the hard-landing penalty
   return { revenue, fuelCost, landingFee: fee, maintenance, net: revenue - fuelCost - fee - maintenance, reputationDelta };
 }
 
@@ -189,6 +198,14 @@ export const seasonOf = (ms: number): string => new Date(ms).toISOString().slice
 // ---------------------------------------------------------------- telemetry verification
 
 export const TELEMETRY_SOURCES = ['simconnect', 'manual'] as const;
+/** What the bridge saw break the flight without it being a cheat: flight reloads, sim restarts (game crashes), and the time the sim was away.
+ *  Reported so the pilot can see them; `downtimeMs` is the only part that changes a verdict (see checkTelemetry). */
+export const interruptionsSchema = z.object({
+  reloads: z.number().int().min(0).max(1_000),
+  simRestarts: z.number().int().min(0).max(1_000),
+  downtimeMs: z.number().int().min(0).max(7 * 24 * 3_600_000),
+});
+export type Interruptions = z.infer<typeof interruptionsSchema>;
 export const telemetrySchema = z.object({
   takeoffAt: z.iso.datetime({ offset: true }),
   landedAt: z.iso.datetime({ offset: true }),
@@ -202,6 +219,8 @@ export const telemetrySchema = z.object({
   source: z.enum(TELEMETRY_SOURCES),
   /** Anti-cheat flags raised by the client (slew, time acceleration, teleport...). Any flag fails the check, unless the server has anti-cheat off. */
   flags: z.array(z.string().regex(/^[a-z0-9_]{1,40}$/)).max(16).optional(),
+  /** Absent from bridges that predate it, and from flights that were never interrupted. */
+  interruptions: interruptionsSchema.optional(),
 });
 export type Telemetry = z.infer<typeof telemetrySchema>;
 
@@ -216,9 +235,12 @@ export type TelemetryCheck = { ok: true; blockHours: number } | { ok: false; rea
 export function checkTelemetry(t: Telemetry, f: {
   origin: string; destination: string; distanceNm: number; payloadKg: number;
   aircraftIcao: string; aircraft: AircraftType; acceptedAt: number; now: number; antiCheat: boolean;
+  /** Flags the company's realism setting tolerates (pause tolerance: `long_pause`). */
+  ignoreFlags?: readonly string[];
 }): TelemetryCheck {
   const no = (reason: string): TelemetryCheck => ({ ok: false, reason });
-  if (f.antiCheat && t.flags && t.flags.length > 0) return no(`the simulator client flagged this flight: ${t.flags.join(', ')}`);
+  const flags = (t.flags ?? []).filter((x) => !f.ignoreFlags?.includes(x));
+  if (f.antiCheat && flags.length > 0) return no(`the simulator client flagged this flight: ${flags.join(', ')}`);
   if (t.departureIcao !== f.origin) return no(`departure ${t.departureIcao} does not match job origin ${f.origin}`);
   if (t.arrivalIcao !== f.destination) return no(`arrival ${t.arrivalIcao} does not match job destination ${f.destination}`);
   if (t.aircraftIcao !== f.aircraftIcao) return no(`aircraft ${t.aircraftIcao} does not match the assigned ${f.aircraftIcao}`);
@@ -230,8 +252,10 @@ export function checkTelemetry(t: Telemetry, f: {
   if (!f.antiCheat) return { ok: true, blockHours: hours };
   const minHours = minFlightHours(f.aircraft, f.distanceNm);
   const maxHours = 1 + f.distanceNm / (f.aircraft.cruiseKts * 0.4);
+  // time the sim was closed or loading is not slow flying; it only counts for this check, never for the too-short one or for pay
+  const flownHours = hours - Math.min(t.interruptions?.downtimeMs ?? 0, landed - takeoff) / 3_600_000;
   if (hours < minHours) return no(`flight too short: ${hours.toFixed(2)} h for ${Math.round(f.distanceNm)} nm at ${f.aircraft.cruiseKts} kts`);
-  if (hours > maxHours) return no(`flight too long: ${hours.toFixed(2)} h for ${Math.round(f.distanceNm)} nm`);
+  if (flownHours > maxHours) return no(`flight too long: ${flownHours.toFixed(2)} h for ${Math.round(f.distanceNm)} nm`);
   if (t.distanceNm < f.distanceNm * 0.85 || t.distanceNm > f.distanceNm * 2 + 20) return no(`flown distance ${Math.round(t.distanceNm)} nm is implausible for a ${Math.round(f.distanceNm)} nm job`);
   if (t.payloadKg < f.payloadKg * 0.9) return no(`payload ${Math.round(t.payloadKg)} kg is below the job payload ${f.payloadKg} kg`);
   const expected = fuelBurnKg(f.aircraft, f.distanceNm);
@@ -249,12 +273,14 @@ export const registerSchema = z.object({
   password: z.string().min(8).max(128),
   companyName: companyNameSchema.optional(),
   hub: icaoAirportSchema.optional(),
+  /** true: create the account only; the company is founded by the onboarding (`POST /me/companies` with `startMode`). */
+  onboarding: z.boolean().optional(),
 });
 export const createCompanySchema = z.object({ name: companyNameSchema, hub: icaoAirportSchema });
 export const renameCompanySchema = z.object({ name: companyNameSchema });
 export const loginSchema = z.object({ username: z.string().min(1).max(64), password: z.string().min(1).max(128) });
 export const deleteAccountSchema = z.object({ password: z.string().min(1).max(128) });
-export const buyAircraftSchema = z.object({ icao: icaoTypeSchema, hub: icaoAirportSchema });
+export const buyAircraftSchema = z.object({ icao: icaoTypeSchema, hub: icaoAirportSchema, financing: financingSchema.optional() });
 export const buyHubSchema = z.object({ icao: icaoAirportSchema });
 export const acceptJobSchema = z.object({ aircraftId: z.int().positive() });
 export const FLIGHT_STATUSES = ['active', 'verified', 'unverified', 'rejected', 'cancelled'] as const;
@@ -278,7 +304,7 @@ export type ApiError = { error: string; message: string };
 export type Airport = { icao: string; name: string; lat: number; lon: number; size: AirportSize; country: string; city: string; iata: string };
 
 export type Job = {
-  id: string; source: 'board' | 'simbrief'; kind: JobKind; origin: string; destination: string;
+  id: string; source: 'board' | 'simbrief' | 'line'; kind: JobKind; origin: string; destination: string;
   distanceNm: number; payloadKg: number; pax: number; payout: number;
   requiredAircraft?: string; plannedFuelKg?: number; route?: string;
 };
@@ -286,12 +312,18 @@ export type Job = {
 export type Company = {
   id: number; name: string; balance: number; reputation: number; flights: number; hours: number; revenue: number;
   netWorth: number; isAI: boolean;
+  /** Identity chosen at onboarding: 3-letter code, radio callsign (both immutable once set) and livery colour. Null for companies that predate v2. */
+  code: string | null; callsign: string | null; liveryColor: string | null;
+  startMode: StartMode | null;
+  realism: Realism;
 };
-export type FleetAircraft = { id: number; icao: string; type: AircraftType; location: string; busy: boolean; value: number };
+export type FleetAircraft = { id: number; icao: string; type: AircraftType; location: string; busy: boolean; value: number } & FleetAircraftFinance;
 export type Flight = {
   id: number; companyId: number; job: Job; aircraftId: number; aircraftIcao: string; status: FlightStatus; rejectReason: string | null;
   acceptedAt: number; completedAt: number | null;
   revenue: number; fuelCost: number; landingFee: number; maintenance: number; net: number;
+  /** From the telemetry report, when the bridge saw reloads or sim restarts: allowed, shown, never punished. */
+  interruptions?: Interruptions;
 };
 export type Transaction = { id: number; at: number; kind: string; amount: number; balanceAfter: number; flightId: number | null; memo: string };
 export type ApiKeyInfo = { id: number; label: string; createdAt: number; lastUsedAt: number | null };
@@ -306,3 +338,8 @@ export type CompanyProfile = Company & {
   hubs: string[]; fleet: { icao: string; count: number }[]; personality: Personality | null;
   seasons: { season: string; netWorth: number; flights: number; reputation: number }[];
 };
+
+// ---- lot live
+export * from './live.ts';
+// ---- lot lines (v3)
+export * from './lines.ts';

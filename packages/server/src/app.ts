@@ -2,12 +2,12 @@ import fastifyStatic from '@fastify/static';
 import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import {
-  API_VERSION, acceptJobSchema, apiKeyCreateSchema, buyAircraftSchema, buyHubSchema, checkTelemetry, createCompanySchema, customAircraftSchema, deleteAccountSchema,
+  API_VERSION, acceptJobSchema, apiKeyCreateSchema, buyAircraftSchema, buyHubSchema, checkTelemetry, customAircraftSchema, deleteAccountSchema,
   flightListQuerySchema, icaoAirportSchema, icaoTypeSchema, listQuerySchema, loginSchema, registerSchema, renameCompanySchema, simbriefImportSchema, telemetrySchema,
   type ApiKeyInfo, type ServerInfo,
 } from '@opc/shared';
 import { catchUp, seedAi } from './ai.ts';
-import { apiKeyAuth, COMPANY_HEADER, createSession, defaultCompany, DUMMY_HASH, hashPassword, newToken, ownedCompany, sessionAuth, sha256, verifyPassword, type Principal } from './auth.ts';
+import { apiKeyAuth, COMPANY_HEADER, createSession, defaultCompany, DUMMY_HASH, hashPassword, newToken, ownedCompany, sessionAuth, sessionUser, sha256, verifyPassword, type Principal } from './auth.ts';
 import { airports, catalogType, searchAircraftTypes, searchAirports } from './catalog.ts';
 import { all, get, run, tx, type Db } from './db.ts';
 import { exportDocument, flightsCsv, transactionsCsv } from './export.ts';
@@ -16,7 +16,15 @@ import {
   deleteCustomAircraft, finishFlight, flightView, flightsOf, importJob, leaderboard, meView, openBoard, pendingImports, renameCompany, transactionsOf, typeFor,
 } from './game.ts';
 import { HttpError, Limiter, NUMERIC_ID, parse } from './http.ts';
+import { registerStart } from './routes-start.ts';
+import { registerLive } from './routes-live.ts';
+import { registerLines } from './routes-lines.ts';
+import { registerCatalogueStats } from './routes-catalogue-stats.ts';
 import { fetchLatestOfp, type Fetch } from './simbrief.ts';
+import { maintenanceTick } from './finance.ts';
+import { registerFinance } from './routes-finance.ts';
+import { onboardingOf, toleratedFlags } from './start.ts';
+import { registerDownloads } from './routes-downloads.ts';
 
 const MAX_API_KEYS = 10;
 const AUTH_ATTEMPTS_PER_MINUTE = 20;
@@ -39,6 +47,8 @@ export type AppOptions = {
   ai?: boolean;
   /** Behind a reverse proxy: take the client IP (rate limiting) from X-Forwarded-For. */
   trustProxy?: boolean;
+  /** Directory holding the Windows bridge exe and the panel zip, served at /downloads/:file (omit: 404). */
+  downloads?: string;
 };
 
 const idParam = (req: FastifyRequest): number => {
@@ -57,7 +67,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   if (o.ai !== false) seedAi(db, now());
 
   app.setErrorHandler((err, _req, reply) => {
-    if (err instanceof HttpError) return reply.status(err.status).send({ error: err.code, message: err.message });
+    if (err instanceof HttpError) return reply.status(err.status).send({ ...err.extra, error: err.code, message: err.message });
     const status = (err as { statusCode?: number }).statusCode;
     if (typeof status === 'number' && status >= 400 && status < 500) return reply.status(status).send({ error: 'bad_request', message: (err as Error).message });
     console.error(err);
@@ -67,13 +77,18 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   // AI companies play lazily: any API request first plays the ticks that are due (cheap no-op otherwise).
   if (o.ai !== false) app.addHook('onRequest', async (req) => { if (req.url.startsWith('/api/')) catchUp(db, now()); });
 
+  registerLines(app, { db, now }); // lot LINES: adds its tick hook HERE, before the maintenance hook below, so past ticks replay with the workshop state of their time
+
+  // Lot FINANCE: free aircraft whose workshop visit is over and bill the months that are due (cheap no-op otherwise).
+  app.addHook('onRequest', async (req) => { if (req.url.startsWith('/api/')) maintenanceTick(db, now()); });
+
   // Clients pick their server at runtime, so the API is cross-origin by design. Auth is a Bearer header, never a cookie,
   // so a wildcard origin exposes nothing a script could not already do with a token it was given.
   app.addHook('onRequest', async (req, reply) => {
     if (!req.url.startsWith('/api/')) return;
     reply.header('access-control-allow-origin', '*').header('access-control-expose-headers', 'content-disposition');
     if (req.method === 'OPTIONS') {
-      return reply.header('access-control-allow-methods', 'GET,POST,PATCH,DELETE,OPTIONS').header('access-control-allow-headers', `authorization,content-type,${COMPANY_HEADER}`).header('access-control-max-age', '600').status(204).send();
+      return reply.header('access-control-allow-methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS').header('access-control-allow-headers', `authorization,content-type,${COMPANY_HEADER}`).header('access-control-max-age', '600').status(204).send();
     }
   });
 
@@ -86,7 +101,11 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
       ? reply.sendFile('index.html')
       : reply.status(404).send({ error: 'not_found', message: 'not found' }));
 
+  registerDownloads(app, { downloads: o.downloads });
+
   const user = (req: FastifyRequest): Principal & { token: string } => sessionAuth(db, req, now());
+  // Account-level routes work for a player who has not founded a company yet (v2 onboarding); company-scoped ones answer 409 no_company.
+  const account = (req: FastifyRequest) => sessionUser(db, req, now());
 
   // ---- public
   app.get('/api/v1/info', async () => info);
@@ -96,6 +115,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     if (!a) throw new HttpError(404, 'unknown_airport', 'airport not found');
     return a;
   });
+  registerCatalogueStats(app);
   app.get('/api/v1/aircraft-types', async (req) => searchAircraftTypes(String((req.query as { q?: string }).q ?? '')));
   app.get('/api/v1/aircraft-types/:icao', async (req) => {
     const icao = parse(icaoTypeSchema, String((req.params as { icao: string }).icao).toUpperCase());
@@ -121,9 +141,11 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     const { token, userId, companyId } = tx(db, () => {
       if (get(db, 'SELECT 1 AS x FROM users WHERE username = ?', b.username)) throw new HttpError(409, 'username_taken', 'username is already taken');
       const userId = run(db, 'INSERT INTO users (username, pass_hash, created_at) VALUES (?, ?, ?)', b.username, hash, at).id;
-      const companyId = createCompany(db, { userId, name: b.companyName ?? `${b.username} Aviation`, hub: b.hub ?? DEFAULT_HUB, now: at });
+      // v2 onboarding: the account comes first, the company is founded by the onboarding (POST /me/companies with startMode).
+      const companyId = b.onboarding ? null : createCompany(db, { userId, name: b.companyName ?? `${b.username} Aviation`, hub: b.hub ?? DEFAULT_HUB, now: at });
       return { userId, companyId, token: createSession(db, userId, at) };
     });
+    if (companyId === null) return reply.status(201).send({ token, username: b.username, onboarding: onboardingOf(db, userId) });
     return reply.status(201).send({ token, ...meView(db, userId, companyId) });
   });
 
@@ -135,11 +157,12 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     if (!u || !ok) throw new HttpError(401, 'bad_credentials', 'wrong username or password');
     run(db, 'DELETE FROM sessions WHERE expires_at <= ?', now()); // expired sessions are only ever dead weight
     const token = createSession(db, u.id, now());
-    return { token, ...meView(db, u.id, defaultCompany(db, u.id)) };
+    const companyId = defaultCompany(db, u.id);
+    return companyId === null ? { token, username: b.username, onboarding: onboardingOf(db, u.id) } : { token, ...meView(db, u.id, companyId) };
   });
 
   app.post('/api/v1/auth/logout', async (req, reply) => {
-    const p = user(req);
+    const p = account(req);
     run(db, 'DELETE FROM sessions WHERE token_hash = ?', sha256(p.token));
     return reply.status(204).send();
   });
@@ -150,34 +173,29 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   });
 
   // ---- companies: a player may own several; the client acts as one via the X-OPC-Company header (see auth.ts)
-  app.get('/api/v1/me/companies', async (req) => companiesOf(db, user(req).userId));
-
-  app.post('/api/v1/me/companies', async (req, reply) => {
-    const p = user(req);
-    const b = parse(createCompanySchema, req.body);
-    const id = tx(db, () => createCompany(db, { userId: p.userId, name: b.name, hub: b.hub, now: now() }));
-    return reply.status(201).send(meView(db, p.userId, id));
-  });
+  app.get('/api/v1/me/companies', async (req) => companiesOf(db, account(req).userId));
 
   app.patch('/api/v1/companies/:id', async (req) => {
-    const p = user(req);
+    const p = account(req);
     const id = ownedCompany(db, p.userId, idParam(req));
+    if (req.body && typeof req.body === 'object' && ('code' in req.body || 'callsign' in req.body)) throw new HttpError(409, 'immutable', 'the airline code and callsign cannot be changed once set');
     const b = parse(renameCompanySchema, req.body);
     return tx(db, () => renameCompany(db, id, b.name));
   });
 
   app.get('/api/v1/me/export', async (req, reply) => {
-    const p = user(req);
+    const p = account(req);
     const format = parse(z.object({ format: z.enum(['json', 'flights.csv', 'transactions.csv']).default('json') }), req.query).format;
     const stamp = new Date(now()).toISOString().slice(0, 10);
     const attach = (name: string) => reply.header('content-disposition', `attachment; filename="opc-${name}-${stamp}"`);
-    if (format === 'flights.csv') return attach('flights.csv').headers(CSV_HEADERS).send(flightsCsv(db, p.companyId));
-    if (format === 'transactions.csv') return attach('transactions.csv').headers(CSV_HEADERS).send(transactionsCsv(db, p.companyId));
+    if (format !== 'json' && p.companyId === null) throw new HttpError(409, 'no_company', 'you have no company yet: finish the onboarding');
+    if (format === 'flights.csv') return attach('flights.csv').headers(CSV_HEADERS).send(flightsCsv(db, p.companyId!));
+    if (format === 'transactions.csv') return attach('transactions.csv').headers(CSV_HEADERS).send(transactionsCsv(db, p.companyId!));
     return attach('export.json').send(exportDocument(db, p.userId, info, now()));
   });
 
   app.delete('/api/v1/me', async (req, reply) => {
-    const p = user(req);
+    const p = account(req);
     const b = parse(deleteAccountSchema, req.body);
     const u = get<{ pass_hash: string }>(db, 'SELECT pass_hash FROM users WHERE id = ?', p.userId)!;
     if (!(await verifyPassword(b.password, u.pass_hash))) throw new HttpError(403, 'bad_password', 'wrong password');
@@ -188,11 +206,11 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
 
   // ---- API keys
   app.get('/api/v1/me/api-keys', async (req): Promise<ApiKeyInfo[]> =>
-    all<{ id: number; label: string; created_at: number; last_used_at: number | null }>(db, 'SELECT * FROM api_keys WHERE user_id = ? ORDER BY id', user(req).userId)
+    all<{ id: number; label: string; created_at: number; last_used_at: number | null }>(db, 'SELECT * FROM api_keys WHERE user_id = ? ORDER BY id', account(req).userId)
       .map((k) => ({ id: k.id, label: k.label, createdAt: k.created_at, lastUsedAt: k.last_used_at })));
 
   app.post('/api/v1/me/api-keys', async (req, reply) => {
-    const p = user(req);
+    const p = account(req);
     const b = parse(apiKeyCreateSchema, req.body);
     const key = newToken('opc_');
     const at = now();
@@ -205,7 +223,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   });
 
   app.delete('/api/v1/me/api-keys/:id', async (req, reply) => {
-    const p = user(req);
+    const p = account(req);
     if (run(db, 'DELETE FROM api_keys WHERE id = ? AND user_id = ?', idParam(req), p.userId).changes === 0) throw new HttpError(404, 'not_found', 'API key not found');
     return reply.status(204).send();
   });
@@ -226,7 +244,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   app.post('/api/v1/me/fleet', async (req, reply) => {
     const p = user(req);
     const b = parse(buyAircraftSchema, req.body);
-    tx(db, () => buyAircraft(db, p.companyId, b.icao, b.hub, now()));
+    tx(db, () => buyAircraft(db, p.companyId, b.icao, b.hub, now(), b.financing));
     return reply.status(201).send(meView(db, p.userId, p.companyId));
   });
 
@@ -248,9 +266,9 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   app.get('/api/v1/jobs', async (req) => {
     const p = user(req);
     const q = parse(z.object({ airport: icaoAirportSchema.optional() }), req.query);
-    const airportCodes = q.airport ? [q.airport] : all<{ location: string }>(db, 'SELECT DISTINCT location FROM aircraft WHERE company_id = ? ORDER BY location', p.companyId).map((a) => a.location);
+    const airportCodes = q.airport ? [q.airport] : all<{ location: string }>(db, 'SELECT DISTINCT location FROM aircraft WHERE company_id = ? AND returned_at IS NULL ORDER BY location', p.companyId).map((a) => a.location);
     const at = now();
-    return { jobs: airportCodes.flatMap((icao) => openBoard(db, icao, at)), imported: pendingImports(db, p.companyId, at) };
+    return { jobs: airportCodes.flatMap((icao) => openBoard(db, icao, at, p.companyId)), imported: pendingImports(db, p.companyId, at) };
   });
 
   app.post('/api/v1/jobs/import-simbrief', async (req, reply) => {
@@ -300,7 +318,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
       const f = activeFlight(db, idParam(req), p.userId);
       const check = checkTelemetry(report, {
         origin: f.origin, destination: f.destination, distanceNm: f.distance_nm, payloadKg: f.payload_kg, aircraftIcao: f.aircraft_icao,
-        aircraft: typeFor(db, f.company_id, f.aircraft_icao), acceptedAt: f.accepted_at, now: at, antiCheat: info.antiCheat,
+        aircraft: typeFor(db, f.company_id, f.aircraft_icao), acceptedAt: f.accepted_at, now: at, antiCheat: info.antiCheat, ignoreFlags: toleratedFlags(db, f.company_id),
       });
       if (!check.ok) return { verification: 'rejected', reason: check.reason, flight: flightView(closeUnpaid(db, f, 'rejected', at, check.reason, report)) };
       // manual reports are never trusted as verified: reduced pay, no measured values
@@ -308,6 +326,10 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
       return { verification: 'verified', reason: null, flight: flightView(finishFlight(db, f, 'verified', at, { telemetry: report, blockHours: check.blockHours })) };
     });
   });
+
+  registerStart(app, { db, now });
+  registerFinance(app, { db, now });
+  registerLive(app, { db, now });
 
   return app;
 }

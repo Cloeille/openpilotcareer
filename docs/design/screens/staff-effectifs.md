@@ -1,0 +1,92 @@
+# Staff · effectifs
+
+Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent are design variables (see tokens.css).
+
+- frame «Staff · effectifs» width=1600 height=900 layout="none" fill="$bg" clip=true
+  - frame «Scene 3D» width=1600 height=900 fill={"type": "image", "enabled": true, "url": "images/generated-2.png", "mode": "cover"}
+  - rectangle «Scene Shade» width=1600 height=900 fill={"type": "gradient", "gradientType": "radial", "enabled": true, "rotation": 0, "size": {"width": 1.5, "height": 1.5}, "colors": [{"color"...
+  - frame «Content» width=1600 height=778 gap=24 padding=[28, 32, 24, 32]
+    - frame «Main Column» width="fill_container" height="fill_container" layout="vertical" gap=18
+      - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+        - frame «Title Block» layout="vertical" gap=6
+          - frame «Overline» gap=8 alignItems="center"
+            - ref «Base Sign · LFMN» ref="pirBQ" descendants={"OYKAu": {"content": "LFMN", "fontSize": 12}}  (instance of «Sign/Location»)
+            - ref «Base Sign · LFLL» ref="pirBQ" descendants={"OYKAu": {"content": "LFLL", "fontSize": 12}}  (instance of «Sign/Location»)
+            - text «Overline Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Azur Régional · hub de Nice et base de Lyon
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=34 fontWeight="600"  TEXT: Effectifs
+          - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 70 personnes pour 77 postes prévus par le planning des lignes · masse salariale 345 500 € / mois
+        - ref «View Switcher» ref="a7ZUZ" descendants={"NWATU": {"content": "Effectifs"}, "JvCPs": {"content": "Recrutement"}, "p0di5": {"enabled": false}}  (instance of «View Switcher»)
+      - ref «Panel · Par famille» width="fill_container" height="fill_container" ref="bibzm" descendants={"e0veVE": {"content": "Par famille"}, "A9Tx2K": {"content": "Tout dérouler"}, "q5ftx0": {"gap": 0, "padding": [12, 22, 14, 22], "childre...  (instance of «Panel»)
+      - frame «Footer» width="fill_container" alignItems="center" justifyContent="space_between"
+        - frame «Legend» gap=22 alignItems="center"
+          - frame «Legend · En service» gap=8 alignItems="center"
+            - rectangle «Swatch» width=14 height=8 fill="#ECEAE5" cornerRadius=1
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: En service
+          - frame «Legend · Au repos» gap=8 alignItems="center"
+            - rectangle «Swatch» width=14 height=8 fill="#ECEAE580" cornerRadius=1
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Au repos
+          - frame «Legend · Congé» gap=8 alignItems="center"
+            - rectangle «Swatch» width=14 height=8 fill="#ECEAE533" cornerRadius=1
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Congé
+          - frame «Legend · Formation» gap=8 alignItems="center"
+            - rectangle «Swatch» width=14 height=8 stroke="#ECEAE599" strokeWidth=1 cornerRadius=1
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Formation
+          - frame «Legend · Poste vacant» gap=8 alignItems="center"
+            - rectangle «Swatch» width=14 height=8 fill="$warning-soft" stroke="$warning" strokeWidth=1 cornerRadius=1
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Poste vacant
+          - frame «Legend · Bloque un vol» gap=8 alignItems="center"
+            - rectangle «Swatch» width=14 height=8 fill="$danger-soft" stroke="$danger" strokeWidth=1 cornerRadius=1
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Vacant, bloque un vol
+        - frame «Filters» gap=6 alignItems="center"
+          - frame «Filter · Toutes les bases» padding=[6, 12] fill="#FFFFFF1A" cornerRadius=4
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Toutes les bases
+          - frame «Filter · LFMN Nice» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: LFMN Nice
+          - frame «Filter · LFLL Lyon» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: LFLL Lyon
+    - frame «Shortage Panel» width=380 height="fill_container" layout="vertical" gap=18 padding=[24, 26] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 28}
+      - frame «Shortage Head» width="fill_container" layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - icon «Status Icon» width=14 height=14 fill="$danger" icon="ban"
+          - text «Status Text» fill="$danger" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Bloque une ligne ce soir
+        - text «Shortage Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="600"  TEXT: Aucun pilote CRJ disponible
+        - text «Shortage Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Le seul équipage qualifié est au repos et en congé. La ligne Lyon – Marseille ne peut pas partir.
+      - frame «Facts» width="fill_container" layout="vertical" gap=10 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - frame «Fact · Vols annulés» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Vols annulés
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: AZR 7345 · AZR 7346
+        - frame «Fact · Avion immobilisé» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Avion immobilisé
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: F-HAZC · CRJ700
+        - frame «Fact · Il manque» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Il manque
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 1 Cdt · 1 OPL qualifiés CRJ
+        - frame «Fact · Manque à gagner» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Manque à gagner
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: ≈ 21 400 € / jour
+      - frame «Other Issues» width="fill_container" layout="vertical" gap=12 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - text «Other Title» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: À surveiller
+        - frame «Issue · OPL Lefèvre · 12 h 10 de service sur 13 h» width="fill_container" gap=10
+          - frame «Icon Box» padding=[2, 0, 0, 0]
+            - icon «Issue Icon» width=14 height=14 fill="$warning" icon="triangle-alert"
+          - frame «Issue Text» width="fill_container" layout="vertical" gap=2
+            - text «Issue Title» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: OPL Lefèvre · 12 h 10 de service sur 13 h
+            - text «Issue Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: AZR 1138 de 20:50Z dépasserait sa limite
+        - frame «Issue · Personnel au sol · 2 postes vacants à LFLL» width="fill_container" gap=10
+          - frame «Icon Box» padding=[2, 0, 0, 0]
+            - icon «Issue Icon» width=14 height=14 fill="$warning" icon="triangle-alert"
+          - frame «Issue Text» width="fill_container" layout="vertical" gap=2
+            - text «Issue Title» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Personnel au sol · 2 postes vacants à LFLL
+            - text «Issue Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Escales de Lyon rallongées de 10 min
+        - frame «Issue · Maintenance · 2 techniciens manquants» width="fill_container" gap=10
+          - frame «Icon Box» padding=[2, 0, 0, 0]
+            - icon «Issue Icon» width=14 height=14 fill="$warning" icon="triangle-alert"
+          - frame «Issue Text» width="fill_container" layout="vertical" gap=2
+            - text «Issue Title» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Maintenance · 2 techniciens manquants
+            - text «Issue Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Inspection de F-HAZC prolongée d'un jour
+      - frame «Spacer» width="fill_container" height="fill_container"
+      - frame «Actions» width="fill_container" layout="vertical" gap=10
+        - ref «Recruit» width="fill_container" ref="Im067" descendants={"h8MyJ": {"content": "Recruter un pilote CRJ"}}  (instance of «Button/Primary»)
+        - ref «Train» ref="n9Pulf" descendants={"RUCj0": {"content": "Qualifier un pilote ATR sur CRJ"}}  (instance of «Button/Ghost»)
+  - ref «HUD Top» ref="a93UHQ" descendants={"Uth8f": {"stroke": "#00000000"}, "Ely3m": {"fill": "$text-tertiary"}, "daIvj": {"stroke": "$text-primary"}, "cXwn0": {"fill": "$text-pr...  (instance of «HUD/Top»)
+  - ref «HUD Bottom» ref="t2yhjE" descendants={"XuZbG": {"content": "Retour à la compagnie"}, "msx5l/Mw53t": {"content": "↑ ↓"}, "sA5qV": {"content": "Choisir une famille"}, "EYYNz/Mw...  (instance of «HUD/Bottom»)

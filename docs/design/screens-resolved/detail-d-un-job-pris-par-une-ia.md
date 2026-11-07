@@ -24,7 +24,7 @@ Resolved tree (component instances expanded with their overrides; HUD bars refer
         - frame «Header» width="fill_container" gap=10 padding=[24, 28, 4, 28] alignItems="center"
           - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Jobs similaires
           - text «Action» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Au départ de LFMN · pour ton ATR 42-600
-        - frame «Content» width="fill_container" layout="vertical" gap=2 padding=[12, 12, 20, 12]
+        - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=2 padding=[12, 12, 20, 12]
           - frame «Job · LFMN-LIRQ (sélection)» width="fill_container" height=64 gap=16 padding=[0, 16] alignItems="center" fill="$surface-hover" cornerRadius=4
             - frame «Route» width="fill_container" layout="vertical" gap=4
               - frame «Codes Row» gap=10 alignItems="center"

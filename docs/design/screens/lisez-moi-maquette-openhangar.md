@@ -15,13 +15,13 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
       - text «Column Title» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Lire ce fichier
       - frame «Item · Une rangée par domaine» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
         - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Une rangée par domaine
-        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: De 01 à 07 : les écrans principaux à gauche, les états et cas limites à droite de chaque rangée.
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: De 01 à 09 : les écrans principaux à gauche, les états et cas limites à droite de chaque rangée.
       - frame «Item · Un viewport de jeu fixe» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
         - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Un viewport de jeu fixe
         - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Tous les écrans font 1600 × 900. Ce ne sont pas des pages qui défilent : le contenu tient dans l'écran, le détail passe par des vues secondaires.
       - frame «Item · Les références» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
         - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Les références
-        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: La rangée 08 regroupe la carte des parcours, le schéma d'avion générique et les plans de cabine paramétriques.
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: La rangée 10 regroupe la carte des parcours, le schéma d'avion générique et les plans de cabine paramétriques.
       - frame «Item · Les composants» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
         - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Les composants
         - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Ils sont en haut du canvas, au-dessus de la rangée 01. Toutes les couleurs, polices et rayons sont des variables.
@@ -43,10 +43,10 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
       - text «Column Title» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Pour l'implémentation
       - frame «Item · Clavier et manette d'abord» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
         - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Clavier et manette d'abord
-        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Q / E pour les onglets, Échap pour revenir, Entrée pour l'action principale. Voir la carte des parcours en rangée 08.
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Q / E pour les onglets, Échap pour revenir, Entrée pour l'action principale. Voir la carte des parcours en rangée 10.
       - frame «Item · Deux scripts à reprendre» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
-        - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Deux scripts à reprendre
-        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: scripts/aircraft-schematic.js : avion en nuage de points généré par catégorie. scripts/cabin-layout.js : plan de cabine depuis une configuration JSON (ponts, classes, toilettes, galleys, usure). Du JavaScript simple, réutilisable côté client.
+        - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Trois scripts à reprendre
+        - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: scripts/aircraft-schematic.js : avion en nuage de points généré par catégorie. scripts/cabin-layout.js : plan de cabine depuis une configuration JSON. scripts/airport-chart.js : plan 3D d'un aéroport avec ses bâtiments sélectionnables. Du JavaScript simple, réutilisable côté client.
       - frame «Item · Images et 3D» width="fill_container" layout="vertical" gap=4 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
         - text «Item Title» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Images et 3D
         - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Les fonds sont des rendus d'illustration ; dans l'app, ce sera une scène temps réel. Flotte, catalogue, achat et comparaison afficheront un vrai modèle 3D (glTF) à sourcer.
@@ -55,28 +55,36 @@ Extracted from docs/design/openhangar.pen (Pen schema 2.21). Values like $accent
         - text «Item Body» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14  TEXT: Tout vient du serveur (API REST /api/v1, auto-hébergeable) ou du pont SimConnect (télémétrie). Contrat d'API à écrire à partir de ces écrans. Hors maquette : SayIntentions, contraintes du panneau MSFS.
   - frame «Index» width="fill_container" layout="vertical" gap=14 padding=[8, 0, 0, 0]
     - text «Index Title» fill="$text-primary" fontFamily="$font-display" fontSize=22 fontWeight="600"  TEXT: Sommaire
-    - frame «Index Rows» width="fill_container" gap=12
-      - frame «Index · 01» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
-        - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 01
-        - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Accès & réglages
-      - frame «Index · 02» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
-        - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 02
-        - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Onboarding
-      - frame «Index · 03» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
-        - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 03
-        - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Tableau de bord & vol
-      - frame «Index · 04» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
-        - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 04
-        - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Jobs
-      - frame «Index · 05» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
-        - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 05
-        - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Flotte
-      - frame «Index · 06» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
-        - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 06
-        - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Historique
-      - frame «Index · 07» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
-        - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 07
-        - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Compétition IA
-      - frame «Index · 08» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
-        - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 08
-        - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Références
+    - frame «Index Rows» width="fill_container" layout="vertical" gap=12
+      - frame «Index Row 1» width="fill_container" gap=12
+        - frame «Index · 01» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+          - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 01
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Accès & réglages
+        - frame «Index · 02» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+          - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 02
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Onboarding
+        - frame «Index · 03» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+          - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 03
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Tableau de bord & vol
+        - frame «Index · 04» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+          - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 04
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Jobs
+        - frame «Index · 05» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+          - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 05
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Flotte
+      - frame «Index Row 2» width="fill_container" gap=12
+        - frame «Index · 06» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+          - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 06
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Réseau & lignes
+        - frame «Index · 07» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+          - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 07
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Compagnie
+        - frame «Index · 08» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+          - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 08
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Historique
+        - frame «Index · 09» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+          - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 09
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Compétition IA
+        - frame «Index · 10» width="fill_container" layout="vertical" gap=4 padding=[14, 16] fill="$surface-raised" stroke="$border" strokeWidth=1 cornerRadius=6
+          - text «Num» fill="$text-tertiary" fontFamily="$font-mono" fontSize=12  TEXT: 10
+          - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Références

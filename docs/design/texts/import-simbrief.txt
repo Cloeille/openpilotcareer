@@ -3,7 +3,23 @@ Importer depuis SimBrief
 Ton dernier plan de vol devient un job personnalisé : route, carburant prévu, appareil et charge sont repris tels quels.
 Nom d'utilisateur SimBrief
 lmoreau_azr
-Texte d'aide
 Récupérer le plan
 Aperçu du job
 Plan généré il y a 8 min
+LFMN → LIEO
+Nice → Olbia · 186 NM · FL170 · 1 h 07
+LFMN/22L NERAS6W NERAS UM728 BALEN UL12 MEDAL MEDA1F LIEO/23
+Carburant prévu
+1 840 kg
+Carburant bloc
+Appareil
+ATR 72-600
+F-HAZS
+Charge
+62 passagers
+1 100 kg de fret
+Créer le job
+Entrée
+Gain estimé
+8 120 €
+Le job reste privé : il n'apparaît pas sur le tableau public et ne peut pas être contesté.

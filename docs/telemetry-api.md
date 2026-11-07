@@ -56,7 +56,8 @@ Content-Type: application/json
 | `landingFpm` | number | Vertical speed at touchdown (negative = descending). ±10 000 max in the schema |
 | `distanceNm` | number ≥ 0 | Distance flown |
 | `source` | `"simconnect"` or `"manual"` | Where the data came from |
-| `flags` | optional array of up to 16 names (`a-z`, `0-9`, `_`, max 40 chars) | Anti-cheat flags the client raised during the flight: `slew_detected`, `time_acceleration_above_1x`, `teleport_jump_over_50nm`, `long_pause`. Always send them, never decide yourself: any flag rejects the flight (unless the server has anti-cheat off). Stored with the report |
+| `flags` | optional array of up to 16 names (`a-z`, `0-9`, `_`, max 40 chars) | Anti-cheat flags the client raised during the flight: `slew_detected`, `time_acceleration_above_1x`, `teleport_jump_over_50nm`, `long_pause`, `reload_after_crash`. Always send them, never decide yourself: any flag rejects the flight (unless the server has anti-cheat off). `long_pause` alone is tolerated by companies with pause tolerance; `reload_after_crash` never is. Stored with the report |
+| `interruptions` | optional `{ reloads, simRestarts, downtimeMs }`: integers ≥ 0, counts ≤ 1 000, `downtimeMs` ≤ 7 days | Reloads of an earlier save and simulator restarts (game crashes) the client saw and **allowed**, and how long the simulator was away. Send it whenever one happened; bridges that predate it omit it. Not a flag: nothing is rejected for it, pay is unchanged, the flight detail shows it. The downtime is subtracted from the block time for the "too long" check only |
 
 Unknown fields are ignored; wrong types or missing fields are a `400`.
 
@@ -67,12 +68,20 @@ All must pass, otherwise the flight is **rejected**. Checks 1-3 tie the report t
 1. `departureIcao` / `arrivalIcao` equal the job's origin and destination.
 2. `aircraftIcao` equals the aircraft assigned to the flight.
 3. `landedAt` is after `takeoffAt`, not in the future (5 min clock skew allowed), and `takeoffAt` is not before the job was accepted (5 min skew).
-4. *(anti-cheat)* Duration is plausible for the distance and the aircraft's cruise speed: not faster than 125 % of cruise, not slower than 40 % of cruise plus one hour.
+4. *(anti-cheat)* Duration is plausible for the distance and the aircraft's cruise speed: not faster than 125 % of cruise, not slower than 40 % of cruise plus one hour. For the "slower than" bound only, `interruptions.downtimeMs` is subtracted from the duration, so a game crash and restart is not rejected as a slow flight; the duration used for pay and for the "faster than" bound is the real one.
 5. *(anti-cheat)* `distanceNm` is between 85 % and 2× (+20 nm) of the job distance.
 6. *(anti-cheat)* `payloadKg` is at least 90 % of the job payload.
 7. *(anti-cheat)* `fuelUsedKg` is between 25 % and 300 % of the aircraft type's expected burn.
 8. *(anti-cheat)* `|landingFpm|` ≤ 1500.
 9. *(anti-cheat)* `flags` is empty or absent.
+
+### Reloads and game crashes
+
+The simulator can crash, and an aircraft can bug out, so the client **allows** reloading a flight from an earlier save and restarting the sim mid-flight. The client does the judging (the server cannot see the track); how the bridge decides is in [sim/bridge/README.md](../sim/bridge/README.md#reloads-and-game-crashes). What reaches the server:
+
+- a plain reload or game crash: no flag, `interruptions` filled in;
+- a reload (or a restart) right after the aircraft crashed or was in a violent descent: the flag `reload_after_crash`, which rejects the flight like any other flag;
+- a forward jump (to near the destination), which is still `teleport_jump_over_50nm`.
 
 ### Response `200`
 
@@ -99,6 +108,37 @@ Every non-2xx response is `{ "error": "<code>", "message": "<text>" }`.
 | 404 | `flight_not_found` | No such flight in **any company of this account** (other players' flights look identical) |
 | 409 | `flight_closed` | Flight is no longer `active` |
 | 429 | `rate_limited` | Too many credential attempts from one IP |
+
+## Live position (optional)
+
+While the player flies, the client may also push its position so the web app can show the flight in progress. It is best effort: a client that never sends it still gets its flight verified exactly as above.
+
+```
+POST /api/v1/flights/:id/live        (API key; the flight must be active and yours)
+→ 204 No Content
+```
+
+Body (every field required, validated; units are feet, knots, feet/minute, degrees, kilograms, °C, psi):
+
+```json
+{ "t": 1793782805000, "lat": 48.75, "lon": 2.1, "altFt": 3500, "gsKts": 110, "vsFpm": 0, "headingDeg": 45, "fuelKg": 90,
+  "phase": "airborne", "paused": false, "simRate": 1, "flags": [], "engines": [ { "n1Pct": 88.5, "ittC": 640, "oilPsi": 62 } ] }
+```
+
+`phase` is `preflight | taxiOut | airborne | landed | parked`. An engine gauge the aircraft does not have is left out (`engines: []` when it has none); it is never sent as 0.
+
+- At most **one sample per second per flight**: a faster one gets `429 rate_limited` and is simply dropped. The bridge sends one every 2 s.
+- `404 flight_not_found` (not your flight, or unknown), `409 flight_closed` (verified, cancelled, ...), `400 invalid_request` (the body), `401` (not an API key). Stop sending after a 404 or 409.
+- The server keeps only the **latest** sample per flight, in memory, plus `last_live_at` on the flight. A restart forgets the sample, not the time.
+
+The web app reads it back with the player's session:
+
+```
+GET /api/v1/flights/:id/live
+→ 200 { "sample": LiveSample | null, "receivedAt": 1793782806000 | null, "bridgeLost": false, "remainingNm": 23.4 | null, "etaAt": 1793784210000 | null }
+```
+
+`bridgeLost` is true when the flight is active, has reported before, and nothing arrived for more than 30 s (a flight whose bridge never started is not "lost", it has `sample: null`). `remainingNm` is the great-circle distance to the destination airport; `etaAt` (epoch ms) is that distance at the current ground speed and sim rate, only while airborne, not paused and above 30 kt.
 
 ## Manual completion without a client
 

@@ -1,5 +1,5 @@
 import { parseHash } from './keys.ts';
-import type { ScreenFn } from './screen.ts';
+import type { ScreenFn, Tab } from './screen.ts';
 import { companySheet } from './screens/company-sheet.ts';
 import { dashboard } from './screens/dashboard.ts';
 import { duelScreen } from './screens/duel.ts';
@@ -17,17 +17,30 @@ import { jobDetail } from './screens/job.ts';
 import { newCompany } from './screens/new-company.ts';
 import { jobs } from './screens/jobs.ts';
 import { settings } from './screens/settings.ts';
+import { lease } from './screens/lease.ts';
+import { live } from './screens/live.ts';
 import { simbrief } from './screens/simbrief.ts';
+import { realism } from './screens/ob-realism.ts';
+import { network } from './screens/network.ts';
+import { lineScreen } from './screens/line.ts';
+import { lineNew } from './screens/line-new.ts';
+import { ops } from './screens/ops.ts';
 
-export const routes: Record<string, ScreenFn> = {
+/** Every HUD tab is a route (the HUD links to `#<tab>`), which the type enforces: a tab added to TABS without a screen does not compile. */
+export const routes: Record<Tab, ScreenFn> & Record<string, ScreenFn> = {
   dashboard,
+  live,
   jobs,
   job: jobDetail,
   simbrief,
   fleet, catalogue, buy, hubs, custom, company: newCompany,
+  lease,
   history, flight: flightDetail, manual,
   leaderboard, duel: duelScreen, 'company-sheet': companySheet, recap,
   settings,
+  realism,
+  // ---- lines (v3 F1)
+  network, line: lineScreen, 'line-new': lineNew, ops,
 };
 
 /** Old bookmarks (`#flights`) keep working. */

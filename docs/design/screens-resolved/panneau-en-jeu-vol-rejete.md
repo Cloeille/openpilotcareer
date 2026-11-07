@@ -23,7 +23,7 @@ Resolved tree (component instances expanded with their overrides; HUD bars refer
   - frame «Context Caption» layout="vertical" gap=4
     - text «Caption Title» fill="$text-primary" fontFamily="$font-display" fontSize=24 fontWeight="600"  TEXT: Panneau en jeu
     - text «Caption Meta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: MSFS 2024 · dossier Community · openhangar-panel 0.3
-  - frame «EFB Tablet» width=820 height=590 padding=14 fill="#101215" stroke="#2A2E35" strokeWidth=2 cornerRadius=24 effect={"type": "shadow", "shadowType": "outer", "color": "#000000B3", "offset": {"x": 0, "y":...
+  - frame «EFB Tablet» width=820 height=590 padding=14 fill="#101215" stroke="#2A2E35" strokeWidth=2 cornerRadius=24 effect={"type": "shadow", "shadowType": "outer", "color": "#000000B3", "offset": {"x": 0, "y": 30}, "blur": 60}
     - frame «Screen» width="fill_container" height="fill_container" layout="vertical" fill="#07090C" stroke="#000000" strokeWidth=1 cornerRadius=12
       - frame «Status Bar» width="fill_container" height=32 padding=[0, 16] alignItems="center" justifyContent="space_between"
         - frame «Status Left» gap=8 alignItems="center"

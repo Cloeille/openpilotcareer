@@ -3,7 +3,7 @@
 Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
 
 - frame «HUD/Top» width=1600 height=76 padding=[0, 32] alignItems="center" justifyContent="space_between" fill=gradient
-  - frame «Brand» width=250 gap=12 alignItems="center"
+  - frame «Brand» width=230 gap=12 alignItems="center"
     - frame «Logo Mark» width=36 height=36 alignItems="center" justifyContent="center" fill="$text-primary" cornerRadius=2
       - icon «Logo Icon» width=20 height=20 fill="$on-btn-primary" icon="plane-takeoff"
     - frame «Brand Stack» layout="vertical" gap=3
@@ -16,19 +16,23 @@ Resolved tree (component instances expanded with their overrides; HUD bars refer
   - frame «Tabs» height="fill_container" gap=2 alignItems="center"
     - instance «Key Prev» of «Keycap»
       - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: Q
-    - frame «Tab · TABLEAU DE BORD» height="fill_container" gap=7 padding=[0, 16] alignItems="center" stroke="$text-primary" strokeWidth={"bottom": 2}
-      - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Tableau de bord
-    - frame «Tab · VOL EN COURS» height="fill_container" gap=7 padding=[0, 16] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
+    - frame «Tab · TABLEAU DE BORD» height="fill_container" gap=7 padding=[0, 13] alignItems="center" stroke="$text-primary" strokeWidth={"bottom": 2}
+      - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Accueil
+    - frame «Tab · VOL EN COURS» height="fill_container" gap=7 padding=[0, 13] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
       - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Vol en cours
       - ellipse «Live Dot» width=7 height=7 fill="$route"
-    - frame «Tab · JOBS» height="fill_container" gap=7 padding=[0, 16] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
+    - frame «Tab · JOBS» height="fill_container" gap=7 padding=[0, 13] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
       - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Jobs
       - text «Count» fill="$text-tertiary" fontFamily="$font-mono" fontSize=11  TEXT: 42
-    - frame «Tab · FLOTTE» height="fill_container" gap=7 padding=[0, 16] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
+    - frame «Tab · Réseau» height="fill_container" gap=7 padding=[0, 13] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
+      - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Réseau
+    - frame «Tab · FLOTTE» height="fill_container" gap=7 padding=[0, 13] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
       - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Flotte
-    - frame «Tab · HISTORIQUE» height="fill_container" gap=7 padding=[0, 16] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
+    - frame «Tab · Compagnie» height="fill_container" gap=7 padding=[0, 13] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
+      - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Compagnie
+    - frame «Tab · HISTORIQUE» height="fill_container" gap=7 padding=[0, 13] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
       - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Historique
-    - frame «Tab · CLASSEMENT» height="fill_container" gap=7 padding=[0, 16] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
+    - frame «Tab · CLASSEMENT» height="fill_container" gap=7 padding=[0, 13] alignItems="center" stroke="#00000000" strokeWidth={"bottom": 2}
       - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Classement
     - instance «Key Next» of «Keycap»
       - text «Key» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: E

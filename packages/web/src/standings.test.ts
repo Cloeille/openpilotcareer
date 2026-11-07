@@ -1,11 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import type { CompanyProfile, Leaderboard, LeaderboardRow } from '@opc/shared';
+import { NEUTRAL_REALISM, realismView, type CompanyProfile, type Leaderboard, type LeaderboardRow } from '@opc/shared';
 import { duel, duelScore, isFreshSeason, kindOf, previousSeason, recapOf, seasonDay, sortStandings, withGain } from './standings.ts';
 
 const row = (rank: number, companyId: number, o: Partial<LeaderboardRow> = {}): LeaderboardRow => ({ rank, companyId, name: 'C' + companyId, isAI: false, netWorth: 1000 - rank * 100, flights: 10, reputation: 50, ...o });
 const lb = (season: string, rows: LeaderboardRow[], seasons = ['2026-11', '2026-10', '2026-09']): Leaderboard => ({ season, seasons, rows });
-const profile = (o: Partial<CompanyProfile> = {}): CompanyProfile => ({ id: 1, name: 'x', balance: 0, reputation: 50, flights: 100, hours: 80, revenue: 200000, netWorth: 0, isAI: false, hubs: [], fleet: [], personality: null, seasons: [], ...o });
+const profile = (o: Partial<CompanyProfile> = {}): CompanyProfile => ({ id: 1, name: 'x', balance: 0, reputation: 50, flights: 100, hours: 80, revenue: 200000, netWorth: 0, isAI: false, code: null, callsign: null, liveryColor: null, startMode: null, realism: realismView(NEUTRAL_REALISM), hubs: [], fleet: [], personality: null, seasons: [], ...o });
 
 test('season gain is net worth minus the previous snapshot; null without one', () => {
   const s = withGain([row(1, 1, { netWorth: 900 }), row(2, 2, { netWorth: 500 })], [row(1, 1, { netWorth: 700 })]);

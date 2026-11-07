@@ -1,0 +1,228 @@
+# Service à bord · confort & repas
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Service à bord · confort & repas» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-13.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=24 padding=[28, 32, 24, 32]
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Identity» layout="vertical" gap=8
+        - frame «Breadcrumb» gap=10 alignItems="center"
+          - instance «Base Sign» of «Sign/Location»
+            - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+          - text «Crumb Text» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Compagnie  ›  Service à bord
+        - frame «Status» gap=8 padding=[6, 0, 0, 0] alignItems="center"
+          - ellipse «Status Dot» width=7 height=7 fill="$success"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Appliqué sur tes 4 lignes · 38 vols par jour
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="600" lineHeight=1.05  TEXT: Service à bord
+        - text «Subtitle» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="normal"  TEXT: Ce que tes PNC proposent selon la durée du vol, et ce qui est gratuit ou payant
+      - frame «Key Stats» gap=44 padding=[0, 0, 4, 0]
+        - instance «Stat · Satisfaction cabine» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Satisfaction cabine
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 4,2 / 5
+          - text «Delta» fill="$success" fontFamily="$font-ui" fontSize=12  TEXT: +0,3 ce mois
+        - instance «Stat · Ventes à bord» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Ventes à bord
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 1 920 €
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: par jour
+        - instance «Stat · Coût du service» of «Stat»
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Coût du service
+          - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: 6 480 €
+          - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12  TEXT: par jour · repas et boissons
+    - frame «Body» width="fill_container" height="fill_container" gap=20
+      - instance «Panel · Offre par type de vol» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Offre par type de vol
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Comparer aux compagnies IA
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[10, 22, 18, 22]
+          - frame «Column Heads» width="fill_container" gap=16 padding=[0, 0, 8, 0] alignItems="end"
+            - frame «Label Spacer» width=210 height=1
+            - frame «Head · Court-courrier» width="fill_container" layout="vertical" gap=8 padding=[10, 12] cornerRadius="$radius-md"
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: Court-courrier
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: moins de 1 h 30 · ATR 72-600
+              - frame «Comfort Slider» width="fill_container" layout="vertical" gap=6 padding=[4, 0, 0, 0]
+                - frame «Slider Head» width="fill_container" justifyContent="space_between"
+                  - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Confort
+                  - text «Level» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: Basique
+                - frame «Segments» width="fill_container" gap=3
+                  - rectangle «Step 1» width="fill_container" height=4 fill="$text-primary" cornerRadius=1
+                  - rectangle «Step 2» width="fill_container" height=4 fill="$text-primary" cornerRadius=1
+                  - rectangle «Step 3» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=1
+                  - rectangle «Step 4» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=1
+                  - rectangle «Step 5» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=1
+            - frame «Head · Moyen-courrier» width="fill_container" layout="vertical" gap=8 padding=[10, 12] fill="$surface-hover" cornerRadius="$radius-md"
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: Moyen-courrier
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 1 h 30 à 4 h · A220-300
+              - frame «Comfort Slider» width="fill_container" layout="vertical" gap=6 padding=[4, 0, 0, 0]
+                - frame «Slider Head» width="fill_container" justifyContent="space_between"
+                  - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Confort
+                  - text «Level» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: Confort
+                - frame «Segments» width="fill_container" gap=3
+                  - rectangle «Step 1» width="fill_container" height=4 fill="$text-primary" cornerRadius=1
+                  - rectangle «Step 2» width="fill_container" height=4 fill="$text-primary" cornerRadius=1
+                  - rectangle «Step 3» width="fill_container" height=4 fill="$text-primary" cornerRadius=1
+                  - rectangle «Step 4» width="fill_container" height=4 fill="$text-primary" cornerRadius=1
+                  - rectangle «Step 5» width="fill_container" height=4 fill="$neutral-soft" cornerRadius=1
+            - frame «Head · Long-courrier» width="fill_container" layout="vertical" gap=8 padding=[10, 12] cornerRadius="$radius-md" opacity=0.55
+              - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=16 fontWeight="600"  TEXT: Long-courrier
+              - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: pas encore exploité
+              - frame «Comfort Slider» width="fill_container" layout="vertical" gap=6 padding=[4, 0, 0, 0]
+                - frame «Slider Head» width="fill_container" justifyContent="space_between"
+                  - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Confort
+                  - text «Level» fill="$text-primary" fontFamily="$font-ui" fontSize=12 fontWeight="600"  TEXT: Premium
+                - frame «Segments» width="fill_container" gap=3
+                  - rectangle «Step 1» width="fill_container" height=4 fill="$text-primary" cornerRadius=1
+                  - rectangle «Step 2» width="fill_container" height=4 fill="$text-primary" cornerRadius=1
+                  - rectangle «Step 3» width="fill_container" height=4 fill="$text-primary" cornerRadius=1
+                  - rectangle «Step 4» width="fill_container" height=4 fill="$text-primary" cornerRadius=1
+                  - rectangle «Step 5» width="fill_container" height=4 fill="$text-primary" cornerRadius=1
+          - frame «Group · Boissons & repas» width="fill_container" padding=[12, 0, 6, 0]
+            - text «Group Title» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Boissons & repas
+          - frame «Row · Boissons fraîches» width="fill_container" height=36 gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - text «Row Label» width=210 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Boissons fraîches
+            - frame «Cell 1» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center"
+              - text «State» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Gratuit
+            - frame «Cell 2» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center" fill="$surface-hover"
+              - text «State» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Gratuit
+            - frame «Cell 3» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center" opacity=0.55
+              - text «State» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Gratuit
+          - frame «Row · Snack» width="fill_container" height=36 gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - text «Row Label» width=210 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Snack
+            - frame «Cell 1» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center"
+              - text «State» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Payant
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: · 4 €
+            - frame «Cell 2» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center" fill="$surface-hover"
+              - text «State» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Gratuit
+            - frame «Cell 3» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center" opacity=0.55
+              - text «State» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Gratuit
+          - frame «Row · Repas chaud» width="fill_container" height=36 gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - text «Row Label» width=210 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Repas chaud
+            - frame «Cell 1» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center"
+              - text «State» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Non proposé
+            - frame «Cell 2» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center" fill="$surface-selected" stroke="$text-primary" strokeWidth=1
+              - text «State» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Payant
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: · 14 € · soigné
+            - frame «Cell 3» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center" opacity=0.55
+              - text «State» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Gratuit
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: · gastronomique
+          - frame «Row · Alcool» width="fill_container" height=36 gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - text «Row Label» width=210 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Alcool
+            - frame «Cell 1» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center"
+              - text «State» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Non proposé
+            - frame «Cell 2» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center" fill="$surface-hover"
+              - text «State» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Payant
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: · 7 €
+            - frame «Cell 3» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center" opacity=0.55
+              - text «State» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Gratuit
+          - frame «Group · Infotainment» width="fill_container" padding=[12, 0, 6, 0]
+            - text «Group Title» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Infotainment
+          - frame «Row · Films et séries» width="fill_container" height=36 gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - text «Row Label» width=210 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Films et séries
+            - frame «Cell 1» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center"
+              - text «State» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Indisponible
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: · pas d'écrans sur ATR
+            - frame «Cell 2» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center" fill="$surface-hover"
+              - text «State» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Gratuit
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: · sur ton téléphone via le Wi-Fi
+            - frame «Cell 3» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center" opacity=0.55
+              - text «State» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Gratuit
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: · écran individuel
+          - frame «Row · Wi-Fi» width="fill_container" height=36 gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - text «Row Label» width=210 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Wi-Fi
+            - frame «Cell 1» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center"
+              - text «State» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Indisponible
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: · non équipé
+            - frame «Cell 2» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center" fill="$surface-hover"
+              - text «State» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Payant
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: · 8 € le vol
+            - frame «Cell 3» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center" opacity=0.55
+              - text «State» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Payant
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: · 15 € le vol
+          - frame «Group · Confort» width="fill_container" padding=[12, 0, 6, 0]
+            - text «Group Title» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Confort
+          - frame «Row · Plaid et oreiller» width="fill_container" height=36 gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - text «Row Label» width=210 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Plaid et oreiller
+            - frame «Cell 1» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center"
+              - text «State» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Non proposé
+            - frame «Cell 2» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center" fill="$surface-hover"
+              - text «State» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Payant
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: · 6 €
+            - frame «Cell 3» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center" opacity=0.55
+              - text «State» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Gratuit
+          - frame «Row · Boutique hors taxes» width="fill_container" height=36 gap=16 alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - text «Row Label» width=210 fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Boutique hors taxes
+            - frame «Cell 1» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center"
+              - text «State» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Non proposé
+            - frame «Cell 2» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center" fill="$surface-hover"
+              - text «State» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Payant
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: · catalogue réduit
+            - frame «Cell 3» width="fill_container" height="fill_container" gap=6 padding=[0, 12] alignItems="center" opacity=0.55
+              - text «State» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Payant
+              - text «Detail» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: · catalogue complet
+      - frame «Side Column» width=420 height="fill_container" layout="vertical" gap=20
+        - instance «Panel · Qualité des repas» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Qualité des repas
+            - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Voir la cuisine
+          - frame «Content» width="fill_container" height="fit_content(80)" layout="vertical" gap=14 padding=[14, 22, 22, 22]
+            - frame «Tiers» width="fill_container" gap=4
+              - frame «Tier · Économique» width="fill_container" layout="vertical" gap=6 padding=10 cornerRadius="$radius-md"
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Économique
+                - text «Cost» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 9 € le repas
+                - frame «Sat» gap=4 alignItems="center"
+                  - icon «Star» width=12 height=12 fill="$text-tertiary" icon="smile"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 3,6 / 5
+                - frame «Margin» gap=4 alignItems="center"
+                  - icon «Coin» width=12 height=12 fill="$text-tertiary" icon="percent"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: marge 61 %
+              - frame «Tier · Soigné» width="fill_container" layout="vertical" gap=6 padding=10 fill="$surface-selected" stroke="$text-primary" strokeWidth=1 cornerRadius="$radius-md"
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="600"  TEXT: Soigné
+                - text «Cost» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 14 € le repas
+                - frame «Sat» gap=4 alignItems="center"
+                  - icon «Star» width=12 height=12 fill="$text-tertiary" icon="smile"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 4,2 / 5
+                - frame «Margin» gap=4 alignItems="center"
+                  - icon «Coin» width=12 height=12 fill="$text-tertiary" icon="percent"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: marge 48 %
+              - frame «Tier · Gastronomique» width="fill_container" layout="vertical" gap=6 padding=10 cornerRadius="$radius-md"
+                - text «Name» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Gastronomique
+                - text «Cost» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 23 € le repas
+                - frame «Sat» gap=4 alignItems="center"
+                  - icon «Star» width=12 height=12 fill="$text-tertiary" icon="smile"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: 4,7 / 5
+                - frame «Margin» gap=4 alignItems="center"
+                  - icon «Coin» width=12 height=12 fill="$text-tertiary" icon="percent"
+                  - text «Value» fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: marge 29 %
+            - frame «Trade-off» width="fill_container" layout="vertical" gap=8 padding=[12, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+              - text «Trade Title» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="600"  TEXT: Passer en gastronomique
+              - frame «Effect · Satisfaction» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Satisfaction
+                - text «Value» fill="$success" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: +0,5
+              - frame «Effect · Marge brute du vol» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Marge brute du vol
+                - text «Value» fill="$danger" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: −19 points
+              - frame «Effect · Repas produits par jour» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Repas produits par jour
+                - text «Value» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 420 → 260
+              - frame «Effect · Cuisiniers nécessaires» width="fill_container" justifyContent="space_between"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Cuisiniers nécessaires
+                - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 6 → 11
+        - instance «Panel · Équipage de cabine» of «Panel»
+          - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+            - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Équipage de cabine
+          - frame «Content» width="fill_container" height="fit_content" layout="vertical" gap=10 padding=[14, 22, 22, 22]
+            - frame «Term · PNC par vol · ATR» width="fill_container" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: PNC par vol · ATR
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 2 · minimum légal 1
+            - frame «Term · PNC par vol · A220» width="fill_container" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: PNC par vol · A220
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 4 · minimum légal 3
+            - frame «Term · Primes sur les ventes» width="fill_container" justifyContent="space_between"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Primes sur les ventes
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 5 % pour les PNC
+            - frame «Note» width="fill_container" gap=10 padding=[10, 12] fill="$warning-soft" cornerRadius="$radius-md"
+              - icon «Icon» width=16 height=16 fill="$warning" icon="triangle-alert"
+              - text «Text» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=12 fontWeight="normal" lineHeight=1.35  TEXT: Sur LFMN ⇄ LFPG, le repas chaud tient en 35 min : un retard fait baisser la satisfaction.
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

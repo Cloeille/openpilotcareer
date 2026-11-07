@@ -1,0 +1,325 @@
+# Ligne · création
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Ligne · création» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-3.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=20 padding=[24, 32, 20, 32]
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=6
+        - text «Kicker» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Nouvelle ligne autonome · Azur Régional
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=34 fontWeight="600"  TEXT: Nice → Barcelone
+        - text «Subtitle» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 262 NM · 1 h 20 de vol · première rotation possible lun. 9 novembre
+      - frame «Route Picker» gap=8 alignItems="end"
+        - frame «Field · Départ» layout="vertical" gap=7
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Départ
+          - frame «Box» width=270 height=48 gap=12 padding=[0, 12, 0, 8] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+            - instance «Sign» of «Sign/Location»
+              - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LFMN
+            - text «Airport» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Nice Côte d'Azur
+            - icon «Chevron» width=16 height=16 fill="$text-tertiary" icon="chevron-down"
+        - frame «Swap» width=40 height=48 alignItems="center" justifyContent="center"
+          - icon «Swap Icon» width=18 height=18 fill="$text-secondary" icon="arrow-left-right"
+        - frame «Field · Arrivée» layout="vertical" gap=7
+          - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Arrivée
+          - frame «Box» width=270 height=48 gap=12 padding=[0, 12, 0, 8] alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+            - instance «Sign» of «Sign/Location»
+              - text «Code» fill="$accent" fontFamily="$font-mono" fontSize=15 fontWeight="700" letterSpacing=0.5  TEXT: LEBL
+            - text «Airport» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: Barcelone-El Prat
+            - icon «Chevron» width=16 height=16 fill="$text-tertiary" icon="chevron-down"
+    - frame «Body» width="fill_container" height="fill_container" gap=20
+      - instance «Schedule Builder» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Programme de la ligne
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Reprendre le programme d'une autre ligne
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=30 padding=[14, 22, 22, 22]
+          - frame «Controls» width="fill_container" alignItems="end" justifyContent="space_between"
+            - frame «Control · Avions sur la ligne» layout="vertical" gap=8
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Avions sur la ligne
+              - frame «Row» gap=10 alignItems="center"
+                - frame «Stepper» height=40 alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - frame «Minus» width=40 height="fill_container" alignItems="center" justifyContent="center"
+                    - icon «Minus Icon» width=16 height=16 fill="$text-secondary" icon="minus"
+                  - frame «Value» height="fill_container" padding=[0, 6] alignItems="center"
+                    - text «Value Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 2 avions
+                  - frame «Plus» width=40 height="fill_container" alignItems="center" justifyContent="center"
+                    - icon «Plus Icon» width=16 height=16 fill="$text-secondary" icon="plus"
+            - frame «Control · Fréquence» layout="vertical" gap=8
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Fréquence
+              - frame «Row» gap=10 alignItems="center"
+                - frame «Stepper» height=40 alignItems="center" fill="$surface-sunken" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - frame «Minus» width=40 height="fill_container" alignItems="center" justifyContent="center"
+                    - icon «Minus Icon» width=16 height=16 fill="$text-secondary" icon="minus"
+                  - frame «Value» height="fill_container" padding=[0, 6] alignItems="center"
+                    - text «Value Label» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 7 allers-retours
+                  - frame «Plus» width=40 height="fill_container" alignItems="center" justifyContent="center"
+                    - icon «Plus Icon» width=16 height=16 fill="$text-secondary" icon="plus"
+                - frame «Unit Toggle» height=40 gap=2 padding=3 fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=4
+                  - frame «Unit · par jour» height="fill_container" padding=[0, 12] alignItems="center" fill="$surface-selected" cornerRadius=3
+                    - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: par jour
+                  - frame «Unit · par heure» height="fill_container" padding=[0, 12] alignItems="center" cornerRadius=3
+                    - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: par heure
+            - frame «Control · Jours d'exploitation» layout="vertical" gap=8
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Jours d'exploitation
+              - frame «Row» gap=4 alignItems="center"
+                - frame «Day · L» width=34 height=40 alignItems="center" justifyContent="center" fill="$surface-selected" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: L
+                - frame «Day · M» width=34 height=40 alignItems="center" justifyContent="center" fill="$surface-selected" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: M
+                - frame «Day · M» width=34 height=40 alignItems="center" justifyContent="center" fill="$surface-selected" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: M
+                - frame «Day · J» width=34 height=40 alignItems="center" justifyContent="center" fill="$surface-selected" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: J
+                - frame «Day · V» width=34 height=40 alignItems="center" justifyContent="center" fill="$surface-selected" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: V
+                - frame «Day · S» width=34 height=40 alignItems="center" justifyContent="center" stroke="$border" strokeWidth=1 cornerRadius=3
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: S
+                - frame «Day · D» width=34 height=40 alignItems="center" justifyContent="center" fill="$surface-selected" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: D
+            - frame «Control · Exploitation» layout="vertical" gap=8
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Exploitation
+              - frame «Row» height=40 gap=10 alignItems="center"
+                - instance «Switch 24/7» of «Switch»
+                  - ellipse «Knob» width=16 height=16 fill="$text-secondary"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 24 h sur 24
+          - frame «Timeline» width="fill_container" layout="vertical"
+            - frame «Row · Axe» width="fill_container" height=24 alignItems="center"
+              - frame «Row Label» width=156 height=1 layout="vertical" gap=2
+              - frame «Track» width=936 height="fill_container" layout="none"
+                - text «Hour 0» fill="$text-tertiary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 00Z
+                - text «Hour 3» fill="$text-tertiary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 03Z
+                - text «Hour 6» fill="$text-tertiary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 06Z
+                - text «Hour 9» fill="$text-tertiary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 09Z
+                - text «Hour 12» fill="$text-tertiary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 12Z
+                - text «Hour 15» fill="$text-tertiary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 15Z
+                - text «Hour 18» fill="$text-tertiary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 18Z
+                - text «Hour 21» fill="$text-tertiary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 21Z
+            - frame «Row · Fenêtre» width="fill_container" height=50 alignItems="center"
+              - frame «Row Label» width=156 layout="vertical" gap=2
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Fenêtre d'exploitation
+              - frame «Track» width=936 height="fill_container" layout="none"
+                - rectangle «Grid 0» width=1 height=50 fill="#FFFFFF1A"
+                - rectangle «Grid 3» width=1 height=50 fill="#FFFFFF0D"
+                - rectangle «Grid 6» width=1 height=50 fill="#FFFFFF1A"
+                - rectangle «Grid 9» width=1 height=50 fill="#FFFFFF0D"
+                - rectangle «Grid 12» width=1 height=50 fill="#FFFFFF1A"
+                - rectangle «Grid 15» width=1 height=50 fill="#FFFFFF0D"
+                - rectangle «Grid 18» width=1 height=50 fill="#FFFFFF1A"
+                - rectangle «Grid 21» width=1 height=50 fill="#FFFFFF0D"
+                - rectangle «Grid 24» width=1 height=50 fill="#FFFFFF1A"
+                - frame «Window Band» width=624 height=30 padding=[0, 4] alignItems="center" justifyContent="space_between" fill="#FFFFFF12" stroke="$border-strong" strokeWidth=1 cornerRadius=3
+                  - frame «Handle Start» gap=6 padding=[0, 2] alignItems="center"
+                    - rectangle «Grip» width=4 height=16 fill="$text-primary" cornerRadius=2
+                    - text «Time» fill="$text-primary" fontFamily="$font-mono" fontSize=12 fontWeight="700"  TEXT: 06:00Z
+                  - frame «Handle End» gap=6 padding=[0, 2] alignItems="center"
+                    - text «Time» fill="$text-primary" fontFamily="$font-mono" fontSize=12 fontWeight="700"  TEXT: 22:00Z
+                    - rectangle «Grip» width=4 height=16 fill="$text-primary" cornerRadius=2
+            - frame «Row · Départs Nice» width="fill_container" height=40 alignItems="center"
+              - frame «Row Label» width=156 layout="vertical" gap=2
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Départs de Nice
+              - frame «Track» width=936 height="fill_container" layout="none"
+                - rectangle «Grid 0» width=1 height=40 fill="#FFFFFF1A"
+                - rectangle «Grid 3» width=1 height=40 fill="#FFFFFF0D"
+                - rectangle «Grid 6» width=1 height=40 fill="#FFFFFF1A"
+                - rectangle «Grid 9» width=1 height=40 fill="#FFFFFF0D"
+                - rectangle «Grid 12» width=1 height=40 fill="#FFFFFF1A"
+                - rectangle «Grid 15» width=1 height=40 fill="#FFFFFF0D"
+                - rectangle «Grid 18» width=1 height=40 fill="#FFFFFF1A"
+                - rectangle «Grid 21» width=1 height=40 fill="#FFFFFF0D"
+                - rectangle «Grid 24» width=1 height=40 fill="#FFFFFF1A"
+                - frame «Departure 6» height=20 gap=5 alignItems="center"
+                  - rectangle «Tick» width=3 height=20 fill="$text-primary" cornerRadius=1
+                  - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 06:00
+                - frame «Departure 8» height=20 gap=5 alignItems="center"
+                  - rectangle «Tick» width=3 height=20 fill="$text-primary" cornerRadius=1
+                  - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 08:00
+                - frame «Departure 10» height=20 gap=5 alignItems="center"
+                  - rectangle «Tick» width=3 height=20 fill="$text-primary" cornerRadius=1
+                  - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 10:00
+                - frame «Departure 12» height=20 gap=5 alignItems="center"
+                  - rectangle «Tick» width=3 height=20 fill="$text-primary" cornerRadius=1
+                  - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 12:00
+                - frame «Departure 14» height=20 gap=5 alignItems="center"
+                  - rectangle «Tick» width=3 height=20 fill="$text-primary" cornerRadius=1
+                  - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 14:00
+                - frame «Departure 16» height=20 gap=5 alignItems="center"
+                  - rectangle «Tick» width=3 height=20 fill="$warning" cornerRadius=1
+                  - text «Time» fill="$warning" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 16:00
+                - frame «Departure 18» height=20 gap=5 alignItems="center"
+                  - rectangle «Tick» width=3 height=20 fill="$text-primary" cornerRadius=1
+                  - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 18:00
+            - frame «Row · Départs Barcelone» width="fill_container" height=40 alignItems="center"
+              - frame «Row Label» width=156 layout="vertical" gap=2
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Départs de Barcelone
+              - frame «Track» width=936 height="fill_container" layout="none"
+                - rectangle «Grid 0» width=1 height=40 fill="#FFFFFF1A"
+                - rectangle «Grid 3» width=1 height=40 fill="#FFFFFF0D"
+                - rectangle «Grid 6» width=1 height=40 fill="#FFFFFF1A"
+                - rectangle «Grid 9» width=1 height=40 fill="#FFFFFF0D"
+                - rectangle «Grid 12» width=1 height=40 fill="#FFFFFF1A"
+                - rectangle «Grid 15» width=1 height=40 fill="#FFFFFF0D"
+                - rectangle «Grid 18» width=1 height=40 fill="#FFFFFF1A"
+                - rectangle «Grid 21» width=1 height=40 fill="#FFFFFF0D"
+                - rectangle «Grid 24» width=1 height=40 fill="#FFFFFF1A"
+                - frame «Departure 8» height=20 gap=5 alignItems="center"
+                  - rectangle «Tick» width=3 height=20 fill="$text-primary" cornerRadius=1
+                  - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 08:00
+                - frame «Departure 10» height=20 gap=5 alignItems="center"
+                  - rectangle «Tick» width=3 height=20 fill="$text-primary" cornerRadius=1
+                  - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 10:00
+                - frame «Departure 12» height=20 gap=5 alignItems="center"
+                  - rectangle «Tick» width=3 height=20 fill="$text-primary" cornerRadius=1
+                  - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 12:00
+                - frame «Departure 14» height=20 gap=5 alignItems="center"
+                  - rectangle «Tick» width=3 height=20 fill="$text-primary" cornerRadius=1
+                  - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 14:00
+                - frame «Departure 16» height=20 gap=5 alignItems="center"
+                  - rectangle «Tick» width=3 height=20 fill="$text-primary" cornerRadius=1
+                  - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 16:00
+                - frame «Departure 18» height=20 gap=5 alignItems="center"
+                  - rectangle «Tick» width=3 height=20 fill="$warning" cornerRadius=1
+                  - text «Time» fill="$warning" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 18:00
+                - frame «Departure 20» height=20 gap=5 alignItems="center"
+                  - rectangle «Tick» width=3 height=20 fill="$text-primary" cornerRadius=1
+                  - text «Time» fill="$text-secondary" fontFamily="$font-mono" fontSize=11 fontWeight="normal"  TEXT: 20:00
+            - rectangle «Divider» width="fill_container" height=1 fill="$border"
+            - frame «Spacer» width="fill_container" height=14
+            - frame «Row · F-HAZT» width="fill_container" height=74 alignItems="center"
+              - frame «Row Label» width=156 layout="vertical" gap=2
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: F-HAZT
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: ATR 42-600 · libre à Nice
+              - frame «Track» width=936 height="fill_container" layout="none"
+                - rectangle «Grid 0» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Grid 3» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Grid 6» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Grid 9» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Grid 12» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Grid 15» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Grid 18» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Grid 21» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Grid 24» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Window Tint» width=624 height=66 fill="#FFFFFF06"
+                - frame «Flight LEBL 6» width=52 height=30 padding=[0, 6] alignItems="center" fill="#ECEAE5D9" cornerRadius=2
+                  - text «Dest» fill="$on-btn-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: LEBL
+                - frame «Flight LFMN 8» width=52 height=30 padding=[0, 6] alignItems="center" fill="#FFFFFF24" cornerRadius=2
+                  - text «Dest» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: LFMN
+                - frame «Flight LEBL 10» width=52 height=30 padding=[0, 6] alignItems="center" fill="#ECEAE5D9" cornerRadius=2
+                  - text «Dest» fill="$on-btn-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: LEBL
+                - frame «Flight LFMN 12» width=52 height=30 padding=[0, 6] alignItems="center" fill="#FFFFFF24" cornerRadius=2
+                  - text «Dest» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: LFMN
+                - frame «Flight LEBL 14» width=52 height=30 padding=[0, 6] alignItems="center" fill="#ECEAE5D9" cornerRadius=2
+                  - text «Dest» fill="$on-btn-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: LEBL
+                - frame «Flight LFMN 16» width=52 height=30 padding=[0, 6] alignItems="center" fill="#FFFFFF24" cornerRadius=2
+                  - text «Dest» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: LFMN
+                - frame «Flight LEBL 18» width=52 height=30 padding=[0, 6] alignItems="center" fill="#ECEAE5D9" cornerRadius=2
+                  - text «Dest» fill="$on-btn-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: LEBL
+                - frame «Flight LFMN 20» width=52 height=30 padding=[0, 6] alignItems="center" fill="#FFFFFF24" cornerRadius=2
+                  - text «Dest» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: LFMN
+                - frame «Night Check» width=183 height=30 gap=6 padding=[0, 10] alignItems="center" fill="#FFFFFF08" cornerRadius=2
+                  - icon «Icon» width=12 height=12 fill="$text-tertiary" icon="wrench"
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Visite de nuit à Nice
+            - frame «Row · F-HAZR» width="fill_container" height=74 alignItems="center"
+              - frame «Row Label» width=156 layout="vertical" gap=2
+                - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: F-HAZR
+                - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: ATR 72-600 · déjà sur 2 vols
+              - frame «Track» width=936 height="fill_container" layout="none"
+                - rectangle «Grid 0» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Grid 3» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Grid 6» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Grid 9» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Grid 12» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Grid 15» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Grid 18» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Grid 21» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Grid 24» width=1 height=74 fill="#FFFFFF0D"
+                - rectangle «Window Tint» width=624 height=66 fill="#FFFFFF06"
+                - frame «Flight LEBL 8» width=52 height=30 padding=[0, 6] alignItems="center" fill="#ECEAE5D9" cornerRadius=2
+                  - text «Dest» fill="$on-btn-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: LEBL
+                - frame «Flight LFMN 10» width=52 height=30 padding=[0, 6] alignItems="center" fill="#FFFFFF24" cornerRadius=2
+                  - text «Dest» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: LFMN
+                - frame «Flight LEBL 12» width=52 height=30 padding=[0, 6] alignItems="center" fill="#ECEAE5D9" cornerRadius=2
+                  - text «Dest» fill="$on-btn-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: LEBL
+                - frame «Flight LFMN 14» width=52 height=30 padding=[0, 6] alignItems="center" fill="#FFFFFF24" cornerRadius=2
+                  - text «Dest» fill="$text-primary" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: LFMN
+                - frame «Flight LEBL 16» width=52 height=30 padding=[0, 6] alignItems="center" fill="#E9A04640" stroke="$warning" strokeWidth=2 cornerRadius=2
+                  - text «Dest» fill="$warning" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: LEBL
+                - frame «Flight LFMN 18» width=52 height=30 padding=[0, 6] alignItems="center" fill="$warning-soft" stroke="$warning" strokeWidth=2 cornerRadius=2
+                  - text «Dest» fill="$warning" fontFamily="$font-mono" fontSize=11 fontWeight="700"  TEXT: LFMN
+                - frame «Other AZR 4127» width=63 height=18 padding=[0, 4] alignItems="center" stroke="#FFFFFF40" strokeWidth=1 cornerRadius=2
+                  - text «Label» fill="$text-secondary" fontFamily="$font-mono" fontSize=10 fontWeight="normal"  TEXT: AZR 4127
+                - frame «Other AZR 4128» width=61 height=18 padding=[0, 4] alignItems="center" stroke="#FFFFFF40" strokeWidth=1 cornerRadius=2
+                  - text «Label» fill="$text-secondary" fontFamily="$font-mono" fontSize=10 fontWeight="normal"  TEXT: AZR 4128
+                - frame «Night Check» width=183 height=30 gap=6 padding=[0, 10] alignItems="center" fill="#FFFFFF08" cornerRadius=2
+                  - icon «Icon» width=12 height=12 fill="$text-tertiary" icon="wrench"
+                  - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Visite de nuit à Nice
+            - frame «Row · Ajouter» width="fill_container" height=56 gap=12 alignItems="center"
+              - instance «Add Aircraft» of «Button/Ghost»
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Affecter un avion
+                - icon «Icon» width=16 height=16 fill="$text-secondary" icon="plus"
+              - text «Add Hint» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Aucun autre avion libre à Nice
+          - frame «Spacer» width="fill_container" height="fill_container"
+          - frame «Footer» width="fill_container" alignItems="center" justifyContent="space_between"
+            - frame «Legend» gap=22 alignItems="center"
+              - frame «Legend · Aller vers Barcelone» gap=8 alignItems="center"
+                - frame «Swatch» width=18 height=10 fill="#ECEAE5D9" cornerRadius=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Aller vers Barcelone
+              - frame «Legend · Retour vers Nice» gap=8 alignItems="center"
+                - frame «Swatch» width=18 height=10 fill="#FFFFFF24" cornerRadius=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Retour vers Nice
+              - frame «Legend · Autre vol de l'avion» gap=8 alignItems="center"
+                - frame «Swatch» width=18 height=10 stroke="#FFFFFF40" strokeWidth=1 cornerRadius=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Autre vol de l'avion
+              - frame «Legend · Conflit» gap=8 alignItems="center"
+                - frame «Swatch» width=18 height=10 fill="$warning-soft" stroke="$warning" strokeWidth=2 cornerRadius=2
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Conflit
+            - text «Summary» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 42 allers-retours par semaine · 112 h de vol · escale de 40 min à Barcelone
+      - instance «Requirements & Forecast» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Ce que ça demande
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=14 padding=[14, 22, 22, 22]
+          - frame «Requirements» width="fill_container" layout="vertical" gap=10
+            - frame «Fact · Pilotes ATR» width="fill_container" justifyContent="space_between"
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Pilotes ATR
+              - text «Value» fill="$warning" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 8 requis · 6 disponibles
+            - frame «Fact · PNC» width="fill_container" justifyContent="space_between"
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: PNC
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 8 requis · 8 disponibles
+            - frame «Fact · Escale à Barcelone» width="fill_container" justifyContent="space_between"
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Escale à Barcelone
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 3 agents à recruter
+            - frame «Fact · Maintenance» width="fill_container" justifyContent="space_between"
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Maintenance
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Visite chaque nuit à Nice
+          - frame «Warnings» width="fill_container" layout="vertical" gap=10 padding=[2, 0, 2, 14] stroke="$warning" strokeWidth={"left": 2}
+            - text «Warning · Pilotes» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.35  TEXT: Il manque 2 pilotes ATR : sans recrutement, les vols du dimanche ne partiront pas.
+            - instance «Fix Action» of «Button/Ghost»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Recruter 2 pilotes
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+            - text «Warning · Avion» width="fill_container" fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal" lineHeight=1.35  TEXT: F-HAZR assure déjà AZR 4127 à 17:05Z : ses rotations de 16:00 et 18:00 sont en conflit.
+          - rectangle «Divider» width="fill_container" height=1 fill="$border"
+          - frame «Forecast Head» width="fill_container" alignItems="center" justifyContent="space_between"
+            - text «Forecast Title» fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Prévision sur une semaine
+            - instance «Estimate Badge» of «Badge/Estimé»
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="500"  TEXT: ≈ estimé
+          - instance «Profit» of «Stat»
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13  TEXT: Bénéfice estimé
+            - text «Value» fill="$text-primary" fontFamily="$font-display" fontSize=32 fontWeight="500"  TEXT: +66 500 €
+            - text «Delta» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13  TEXT: 418 900 € de recettes · 352 400 € de coûts
+          - frame «Forecast» width="fill_container" layout="vertical" gap=10
+            - frame «Fact · Demande» width="fill_container" justifyContent="space_between"
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Demande du marché
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 5 200 passagers
+            - frame «Fact · Remplissage» width="fill_container" justifyContent="space_between"
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Remplissage
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 78 % · 3 760 sur 4 824 sièges
+            - frame «Fact · Concurrence» width="fill_container" justifyContent="space_between"
+              - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Concurrence
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Alpes Air Link · 3 vols/jour
+          - frame «Spacer» width="fill_container" height="fill_container"
+          - instance «Open Line» of «Button/Primary»
+            - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Ouvrir la ligne
+            - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+              - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

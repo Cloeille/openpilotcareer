@@ -7,7 +7,48 @@ Calcul du gain
 G
 Atterrissage
 Nice · piste 04R · 21:10Z
+Taux de chute au toucher
+−142
+fpm
+Toucher doux, sous le seuil de 200 fpm
+Doux
+Normal
+Ferme
+Dur
+Facteur de charge
+1,09 G
+Vitesse au toucher
+113 kt
+Rebond
+Aucun
 Contrôles anti-triche
 6 sur 6 réussis
+Mode slew
+Jamais activé pendant le vol
+Accélération du temps
+×1 sur toute la durée du vol
+Pause
+Une pause de 0:38 en croisière, tolérée jusqu'à 2:00
+Sauts de position
+Écart maximal de 0,3 NM entre deux relevés
+Carburant et charge
+Aucune modification en vol
+Intégrité du rapport
+Signature du pont valide
 Phases du vol
 Décollage 20:19Z · toucher 21:10Z
+Roulage
+9 min
+Montée
+18 min
+Croisière FL210
+12 min, dont 0:38 de pause
+Descente
+13 min
+Approche
+7 min
+Roulage
+3 min
+Carburant consommé
+1 180 kg
+30 kg sous le plan de vol

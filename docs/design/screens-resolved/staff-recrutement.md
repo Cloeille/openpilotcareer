@@ -1,0 +1,248 @@
+# Staff · recrutement
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Staff · recrutement» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 gap=24 padding=[28, 32, 24, 32]
+    - frame «Main Column» width="fill_container" height="fill_container" layout="vertical" gap=18
+      - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+        - frame «Title Block» layout="vertical" gap=6
+          - frame «Overline» gap=8 alignItems="center"
+            - ellipse «Live Dot» width=7 height=7 fill="$success"
+            - text «Overline Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Marché de l'emploi · 214 candidats en France ce mois-ci
+          - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=34 fontWeight="600"  TEXT: Recrutement
+          - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 6 pilotes qualifiés CRJ prêts à travailler à Lyon
+        - instance «View Switcher» of «View Switcher»
+          - frame «View · Vue en coupe» padding=[8, 16] fill="#00000000" cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Effectifs
+          - frame «View · Cabine & charge» padding=[8, 16] fill="#FFFFFF1A" cornerRadius=4
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Recrutement
+      - frame «Filters» width="fill_container" gap=28 alignItems="center"
+        - frame «Filter Group · Poste» gap=6 alignItems="center"
+          - text «Group Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Poste
+          - frame «Gap» width=4 height=1
+          - frame «Chip · Pilotes» padding=[6, 12] fill="#FFFFFF1A" stroke="$border-strong" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Pilotes
+          - frame «Chip · PNC» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: PNC
+          - frame «Chip · Sol» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Sol
+          - frame «Chip · Administratif» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Administratif
+          - frame «Chip · Maintenance» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Maintenance
+        - frame «Filter Group · Base» gap=6 alignItems="center"
+          - text «Group Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Base
+          - frame «Gap» width=4 height=1
+          - frame «Chip · LFMN» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-mono" fontSize=12 fontWeight="500"  TEXT: LFMN
+          - frame «Chip · LFLL» padding=[6, 12] fill="#FFFFFF1A" stroke="$border-strong" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-primary" fontFamily="$font-mono" fontSize=12 fontWeight="500"  TEXT: LFLL
+        - frame «Filter Group · Qualification» gap=6 alignItems="center"
+          - text «Group Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Qualification
+          - frame «Gap» width=4 height=1
+          - frame «Chip · ATR 72» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: ATR 72
+          - frame «Chip · A220» padding=[6, 12] stroke="$border" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: A220
+          - frame «Chip · CRJ» padding=[6, 12] fill="#FFFFFF1A" stroke="$border-strong" strokeWidth=1 cornerRadius=4
+            - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: CRJ
+      - instance «Panel · Candidats» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Candidats
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Tri : pertinence
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[10, 22, 16, 22]
+          - frame «Column Head» width="fill_container" gap=20 padding=[0, 12, 10, 12] alignItems="end"
+            - frame «Col · Candidat» width="fill_container"
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Candidat
+            - frame «Col · Poste» width=150
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Poste
+            - frame «Col · Expérience» width=90
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Expérience
+            - frame «Col · Base» width=90
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Base
+            - frame «Col · Fiabilité» width=130
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Fiabilité
+            - frame «Col · Moral» width=70
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Moral
+            - frame «Col · Salaire demandé» width=120 justifyContent="end"
+              - text «Col Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Salaire demandé
+          - frame «Row · Sarah Benali» width="fill_container" height=58 gap=20 padding=[0, 12] alignItems="center" fill="$surface-selected" stroke="$text-primary" strokeWidth={"left": 2} cornerRadius=4
+            - frame «Candidate» width="fill_container" layout="vertical" gap=2
+              - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=15 fontWeight="600"  TEXT: Sarah Benali
+              - text «Background» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: ex-HOP! · 14 ans de ligne
+            - frame «Position» width=150 gap=8 alignItems="center"
+              - text «Role» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Cdt
+              - text «Ratings» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: CRJ · A220
+            - frame «Experience» width=90
+              - text «Hours» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 8 900 h
+            - frame «Base» width=90 layout="vertical" gap=1
+              - text «Base Code» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFLL
+            - frame «Reliability» width=130 gap=10 alignItems="center"
+              - frame «Track» width=80 height=4 fill="#FFFFFF1A" cornerRadius=2
+                - rectangle «Fill» width=70 height=4 fill="#ECEAE5" cornerRadius=2
+              - text «Score» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 88 %
+            - frame «Morale» width=70
+              - text «Morale Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Haut
+            - frame «Salary» width=120 gap=4 alignItems="end" justifyContent="end"
+              - text «Salary Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 13 800 €
+              - text «Per» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: / mois
+          - frame «Row · Hugo Marchand» width="fill_container" height=58 gap=20 padding=[0, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Candidate» width="fill_container" layout="vertical" gap=2
+              - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=15 fontWeight="600"  TEXT: Hugo Marchand
+              - text «Background» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: ex-Air Nostrum
+            - frame «Position» width=150 gap=8 alignItems="center"
+              - text «Role» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Cdt
+              - text «Ratings» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: CRJ
+            - frame «Experience» width=90
+              - text «Hours» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 6 200 h
+            - frame «Base» width=90 layout="vertical" gap=1
+              - text «Base Code» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFLL
+            - frame «Reliability» width=130 gap=10 alignItems="center"
+              - frame «Track» width=80 height=4 fill="#FFFFFF1A" cornerRadius=2
+                - rectangle «Fill» width=74 height=4 fill="#ECEAE5" cornerRadius=2
+              - text «Score» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 92 %
+            - frame «Morale» width=70
+              - text «Morale Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Haut
+            - frame «Salary» width=120 gap=4 alignItems="end" justifyContent="end"
+              - text «Salary Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 11 400 €
+              - text «Per» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: / mois
+          - frame «Row · Marc Dubreuil» width="fill_container" height=58 gap=20 padding=[0, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Candidate» width="fill_container" layout="vertical" gap=2
+              - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=15 fontWeight="600"  TEXT: Marc Dubreuil
+              - text «Background» fill="$warning" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: ex-Brit Air · 2 incidents signalés
+            - frame «Position» width=150 gap=8 alignItems="center"
+              - text «Role» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Cdt
+              - text «Ratings» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: CRJ · ATR 72
+            - frame «Experience» width=90
+              - text «Hours» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 11 300 h
+            - frame «Base» width=90 layout="vertical" gap=1
+              - text «Base Code» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFLL
+            - frame «Reliability» width=130 gap=10 alignItems="center"
+              - frame «Track» width=80 height=4 fill="#FFFFFF1A" cornerRadius=2
+                - rectangle «Fill» width=51 height=4 fill="$warning" cornerRadius=2
+              - text «Score» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 64 %
+            - frame «Morale» width=70
+              - text «Morale Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Moyen
+            - frame «Salary» width=120 gap=4 alignItems="end" justifyContent="end"
+              - text «Salary Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 15 500 €
+              - text «Per» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: / mois
+          - frame «Row · Inès Garnier» width="fill_container" height=58 gap=20 padding=[0, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Candidate» width="fill_container" layout="vertical" gap=2
+              - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=15 fontWeight="600"  TEXT: Inès Garnier
+              - text «Background» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: ex-Chalair
+            - frame «Position» width=150 gap=8 alignItems="center"
+              - text «Role» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: OPL
+              - text «Ratings» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: CRJ
+            - frame «Experience» width=90
+              - text «Hours» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 3 400 h
+            - frame «Base» width=90 layout="vertical" gap=1
+              - text «Base Code» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFLL
+            - frame «Reliability» width=130 gap=10 alignItems="center"
+              - frame «Track» width=80 height=4 fill="#FFFFFF1A" cornerRadius=2
+                - rectangle «Fill» width=76 height=4 fill="#ECEAE5" cornerRadius=2
+              - text «Score» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 95 %
+            - frame «Morale» width=70
+              - text «Morale Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Haut
+            - frame «Salary» width=120 gap=4 alignItems="end" justifyContent="end"
+              - text «Salary Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 6 900 €
+              - text «Per» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: / mois
+          - frame «Row · Julien Masson» width="fill_container" height=58 gap=20 padding=[0, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Candidate» width="fill_container" layout="vertical" gap=2
+              - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=15 fontWeight="600"  TEXT: Julien Masson
+              - text «Background» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: sortie d'école · ENAC
+            - frame «Position» width=150 gap=8 alignItems="center"
+              - text «Role» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: OPL
+              - text «Ratings» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: CRJ
+            - frame «Experience» width=90
+              - text «Hours» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 2 100 h
+            - frame «Base» width=90 layout="vertical" gap=1
+              - text «Base Code» fill="$text-primary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFLL
+            - frame «Reliability» width=130 gap=10 alignItems="center"
+              - frame «Track» width=80 height=4 fill="#FFFFFF1A" cornerRadius=2
+                - rectangle «Fill» width=65 height=4 fill="#ECEAE5" cornerRadius=2
+              - text «Score» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 81 %
+            - frame «Morale» width=70
+              - text «Morale Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Moyen
+            - frame «Salary» width=120 gap=4 alignItems="end" justifyContent="end"
+              - text «Salary Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 6 200 €
+              - text «Per» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: / mois
+          - frame «Row · Thomas Kerboul» width="fill_container" height=58 gap=20 padding=[0, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - frame «Candidate» width="fill_container" layout="vertical" gap=2
+              - text «Name» fill="$text-primary" fontFamily="$font-display" fontSize=15 fontWeight="600"  TEXT: Thomas Kerboul
+              - text «Background» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: ex-Amelia
+            - frame «Position» width=150 gap=8 alignItems="center"
+              - text «Role» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: OPL
+              - text «Ratings» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: CRJ
+            - frame «Experience» width=90
+              - text «Hours» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 1 450 h
+            - frame «Base» width=90 layout="vertical" gap=1
+              - text «Base Code» fill="$text-secondary" fontFamily="$font-mono" fontSize=13 fontWeight="normal"  TEXT: LFMN
+              - text «Base Note» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: préfère Nice
+            - frame «Reliability» width=130 gap=10 alignItems="center"
+              - frame «Track» width=80 height=4 fill="#FFFFFF1A" cornerRadius=2
+                - rectangle «Fill» width=61 height=4 fill="#ECEAE5" cornerRadius=2
+              - text «Score» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: 76 %
+            - frame «Morale» width=70
+              - text «Morale Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Bas
+            - frame «Salary» width=120 gap=4 alignItems="end" justifyContent="end"
+              - text «Salary Value» fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="500"  TEXT: 5 600 €
+              - text «Per» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: / mois
+          - frame «List Spacer» width="fill_container" height="fill_container"
+          - frame «Internal Hint» width="fill_container" gap=10 padding=[14, 12, 0, 12] alignItems="center" stroke="$border" strokeWidth={"top": 1}
+            - icon «Hint Icon» width=16 height=16 fill="$text-secondary" icon="graduation-cap"
+            - text «Hint Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: 3 pilotes ATR 72 de ta compagnie peuvent aussi être qualifiés CRJ
+            - instance «See Training» of «Button/Ghost»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Voir les stages
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+    - frame «Candidate Panel» width=380 height="fill_container" layout="vertical" gap=18 padding=[24, 26] fill="$surface" stroke="$border" strokeWidth=1 cornerRadius=6 effect={"type": "background_blur", "radius": 28}
+      - frame «Candidate Head» width="fill_container" layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - icon «Status Icon» width=14 height=14 fill="$success" icon="circle-check"
+          - text «Status Text» fill="$success" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Débloque la ligne Lyon – Marseille
+        - text «Candidate Name» fill="$text-primary" fontFamily="$font-display" fontSize=26 fontWeight="600"  TEXT: Sarah Benali
+        - text «Candidate Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Commandant de bord · qualifiée CRJ et A220
+      - frame «Facts» width="fill_container" layout="vertical" gap=10 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - frame «Fact · Expérience» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Expérience
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 8 900 h dont 5 200 h sur CRJ
+        - frame «Fact · Dernier poste» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Dernier poste
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: HOP! · base de Lyon
+        - frame «Fact · Disponible» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Disponible
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 13 nov. · préavis de 7 jours
+        - frame «Fact · Fiabilité · moral» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Fiabilité · moral
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 88 % · haut
+        - frame «Fact · Prime d'embauche» width="fill_container" alignItems="center" justifyContent="space_between"
+          - text «Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Prime d'embauche
+          - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: 1 mois de salaire
+      - frame «Options» width="fill_container" layout="vertical" gap=10 padding=[14, 0, 0, 0] stroke="$border" strokeWidth={"top": 1}
+        - text «Options Title» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Pour combler le manque CRJ
+        - frame «Option · Embaucher Sarah Benali» width="fill_container" gap=12 padding=[12, 14] alignItems="center" fill="#FFFFFF0D" stroke="$text-primary" strokeWidth=1.5 cornerRadius=6
+          - frame «Radio» width=16 height=16 alignItems="center" justifyContent="center" stroke="$text-primary" strokeWidth=1.5 cornerRadius=8
+            - ellipse «Dot» width=8 height=8 fill="$text-primary"
+          - frame «Option Text» width="fill_container" layout="vertical" gap=2
+            - text «Option Label» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Embaucher
+            - text «Option Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Sarah Benali · dès le 13 nov.
+          - text «Option Price» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="500"  TEXT: 13 800 € / mois
+        - frame «Option · Qualifier Cdt. Perrin sur CRJ» width="fill_container" gap=12 padding=[12, 14] alignItems="center" stroke="$border" strokeWidth=1 cornerRadius=6
+          - frame «Radio» width=16 height=16 alignItems="center" justifyContent="center" stroke="$border-strong" strokeWidth=1.5 cornerRadius=8
+          - frame «Option Text» width="fill_container" layout="vertical" gap=2
+            - text «Option Label» width="fill_container" fill="$text-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Qualifier Cdt. Perrin sur CRJ
+            - text «Option Sub» width="fill_container" fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Stage de 21 jours · quitte les lignes ATR
+          - text «Option Price» fill="$text-primary" fontFamily="$font-display" fontSize=17 fontWeight="500"  TEXT: 24 000 €
+      - frame «Spacer» width="fill_container" height="fill_container"
+      - frame «Actions» width="fill_container" layout="vertical" gap=10
+        - instance «Hire» of «Button/Primary»
+          - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Embaucher Sarah Benali
+          - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+            - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+        - instance «Negotiate» of «Button/Ghost»
+          - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Négocier le salaire
+          - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

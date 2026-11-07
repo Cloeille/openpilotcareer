@@ -3,10 +3,59 @@ Flotte
 6 appareils · 3 disponibles
 Appareils
 Trier par immatriculation
+Appareil
+Base
+Usure
+État
+F-HAZA
+ATR 72-600 · turbopropulseur
+LFMN
+18 %
+Disponible
+F-HAZB
+ATR 72-600 · turbopropulseur
+LFMN
+41 %
+En vol
+AZR 4127 → LFPG
+F-HAZC
+Bombardier CRJ700 · jet régional
+LFML
+63 %
+En inspection
+Visite A · reste 12 h
+F-HAZD
+Airbus A220-300 · jet
+LFMN
+9 %
+Disponible
+F-HAZE
+Pilatus PC-12 NGX · turbopropulseur
+LFKJ
+27 %
+Disponible
+F-HAZF
+Cessna Grand Caravan EX · turbopropulseur
+LFKB
+82 %
+Immobilisé
+Panne moteur · 3 jours
 Acheter un avion
 A
 Acheter un hub
 Parkings libres
 4 sur 10 · LFKB complet
-Appareil sélectionné
-Fiche technique
+F-HAZC
+Bombardier CRJ700 · jet régional · 22 ans
+En inspection · reste 12 h
+Usure
+63 %
+La visite A en cours ramènera l'usure à 31 %.
+Base
+LFML · Marseille
+Coût horaire
+2 860 €
+Valeur estimée
+7,4 M€
+Transférer
+Vendre

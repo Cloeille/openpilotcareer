@@ -1,4 +1,4 @@
-import { API_VERSION, type Me, type ServerInfo } from '@opc/shared';
+import { API_VERSION, type ServerInfo } from '@opc/shared';
 import { api, GLOBAL_URL, fetchInfo, isOwnOrigin, session } from './api.ts';
 import { PRODUCT_NAME } from './brand.ts';
 import { badge, brandBlock, button, icon, inputField, keycap, panel, titleBlock } from './components.ts';
@@ -104,7 +104,7 @@ export function loginView(root: HTMLElement, done: () => void, draft: Draft = { 
     error.textContent = '';
     try {
       const server = await check();
-      const r = await api<Me & { token: string }>(path, { server, auth: false, body: { username: username.value, password: passwordInput.value } });
+      const r = await api<{ token: string }>(path, { server, auth: false, body: { username: username.value, password: passwordInput.value, ...(path === '/auth/register' ? { onboarding: true } : {}) } });
       session.set(server, r.token);
       passwordInput.value = '';
       done();

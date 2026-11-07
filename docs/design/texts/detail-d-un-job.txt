@@ -4,4 +4,19 @@ LFMN → LIRF · 254 NM · environ 1 h 30 de vol
 Contesté
 Corsica Wings positionne un ATR 72 à Nice : prise estimée dans 6 min environ.
 Briefing
-Carte
+Charge
+46 passagers
+4 764 kg avec bagages et courrier
+Échéance
+Avant 22:30Z
+Décollage au plus tard 21:00Z
+Appareil
+ATR 42-600
+F-HAZT, prêt à Nice
+Gain estimé
+11 380 €
+Ajusté après vérification du vol
+Accepter et verrouiller
+Entrée
+Envoyer à SimBrief
+Le job est réservé à ton nom jusqu'au décollage, 21:00Z au plus tard. Aucune compagnie IA ne pourra plus le prendre.

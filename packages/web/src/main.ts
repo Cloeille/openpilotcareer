@@ -13,6 +13,8 @@ import { preloadScenes } from './scenes.ts';
 import { TABS, type Screen } from './screen.ts';
 import { fitStage, mount, showScreen, withLoading } from './shell.ts';
 import { loadSnapshot, type BootStep, type Snapshot } from './snapshot.ts';
+import { additionalOnboarding, freshOnboarding, onboardingState, runOnboarding, type OnboardingRun } from './onboarding.ts';
+import type { Onboarding } from './onboarding-types.ts';
 import { h, notify } from './ui.ts';
 
 const root = document.getElementById('app')!;
@@ -22,6 +24,8 @@ let nav: NavState = null;
 let shown: { tab: Screen['tab']; offline: boolean } | null = null;
 let showSeq = 0;
 let offline: (OfflineState & { timer: number; tick: (now: number) => void }) | null = null;
+let wizard: OnboardingRun | null = null;
+let obSupported = false;
 
 installInput({ state: () => nav, go: (hash) => { location.hash = hash; } });
 fitStage();
@@ -29,6 +33,7 @@ void preloadScenes();
 window.addEventListener('resize', fitStage);
 
 function signedOut(): void {
+  stopOnboarding();
   stopOffline();
   snap = null;
   nav = null;
@@ -44,12 +49,39 @@ async function boot(): Promise<void> {
   const draw = (partial: Partial<Snapshot>): void => { shown = null; mount(root, bootStage(bootView(partial, seen))); };
   draw({});
   try {
+    const ob = await onboardingState();
+    obSupported = ob.supported;
+    if (ob.pending) return beginOnboarding(ob.pending, false);
     snap = await loadSnapshot((step, partial) => { seen.add(step); draw(partial); });
   } catch (e) {
+    if (e instanceof ApiError && e.code === 'no_company') return beginOnboarding(freshOnboarding(), false);
     if (!(e instanceof ApiError && (e.status === 401 || e.code === 'network'))) notify(errorText(e), 'error');
     return signedOut();
   }
   await show(true);
+}
+
+// ------------------------------------------------------------------ onboarding (lot fe-onboarding): the six-step wizard replaces the HUD screens while it runs
+
+function stopOnboarding(): void {
+  wizard?.stop();
+  wizard = null;
+}
+
+function beginOnboarding(ob: Onboarding, additional: boolean): void {
+  stopOnboarding();
+  const before = session.company;
+  stopOffline();
+  nav = null;
+  wizard = runOnboarding({
+    root,
+    setNav: (n) => { nav = n; },
+    onDone: (dest) => { stopOnboarding(); history.replaceState(null, '', dest); void refresh().catch((e) => { notify(errorText(e), 'error'); signedOut(); }); },
+    onQuit: (add) => {
+      stopOnboarding();
+      if (add && snap) { session.company = before; history.replaceState(null, '', '#dashboard'); void refresh().catch((e) => notify(errorText(e), 'error')); } else { session.set(session.server, null); signedOut(); }
+    },
+  }, ob, additional);
 }
 
 async function refresh(): Promise<void> {
@@ -75,11 +107,13 @@ async function logout(remote: boolean): Promise<void> {
 
 /** Draw the screen of the current hash. `navigate` = the player moved here (enter animation, skeleton while it loads); otherwise it is a redraw of the screen already shown, which keeps the old one up until the new is ready and does not animate. */
 async function show(navigate = false): Promise<void> {
+  if (wizard) return;
   if (!snap) return signedOut();
   if (offline) return showOffline();
   const current = snap;
   const seq = ++showSeq;
   const { name, arg } = resolve(location.hash);
+  if (name === 'company' && obSupported) { void additionalOnboarding().then((ob) => { if (!wizard) beginOnboarding(ob, true); }); return; }
   let screen: Screen;
   try {
     const load = routes[name]!({ snap: current, arg, refresh, go: (hash) => { location.hash = hash; } });
@@ -165,7 +199,7 @@ window.addEventListener('opc:redraw', () => {
 });
 /** The Settings screen's "Change" link does what the HUD's does: sign out to pick another server. */
 window.addEventListener('opc:change-server', () => void logout(true));
-window.addEventListener('opc:lang', () => { if (snap) void show(); else signedOut(); });
+window.addEventListener('opc:lang', () => { if (wizard) wizard.redraw(); else if (snap) void show(); else signedOut(); });
 
 if (session.token) void boot();
 else signedOut();

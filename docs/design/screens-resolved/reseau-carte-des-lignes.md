@@ -1,0 +1,120 @@
+# Réseau · carte des lignes
+
+Resolved tree (component instances expanded with their overrides; HUD bars referenced). Rendered image: renders/<slug>.webp when the frame is a 1600x900 screen.
+
+- frame «Réseau · carte des lignes» width=1600 height=900 layout="none" fill="$bg"
+  - frame «Scene 3D» width=1600 height=900 fill=image(images/generated-3.png)
+  - rectangle «Scene Shade» width=1600 height=900 fill=gradient
+  - frame «Content» width=1600 height=778 layout="vertical" gap=16 padding=[28, 32, 24, 32]
+    - script «Carte réseau · Azur Régional» width=1600 height=778
+    - frame «Header» width="fill_container" alignItems="end" justifyContent="space_between"
+      - frame «Title Block» layout="vertical" gap=6
+        - frame «Status» gap=8 alignItems="center"
+          - ellipse «Live Dot» width=7 height=7 fill="$success"
+          - text «Status Text» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Exploitation automatique · 4 avions sur 6 en service
+        - text «Title» fill="$text-primary" fontFamily="$font-display" fontSize=30 fontWeight="600"  TEXT: Réseau Azur Régional
+        - text «Sub» fill="$text-tertiary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Tes lignes tournent seules, jour et nuit, selon ton planning.
+      - frame «Clock Group» gap=28 alignItems="end"
+        - frame «Auto Ops» gap=10 padding=[0, 0, 9, 0] alignItems="center"
+          - instance «Auto Ops Switch» of «Switch»
+            - ellipse «Knob» width=16 height=16 fill="$on-btn-primary"
+          - text «Auto Ops Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="normal"  TEXT: Exploitation 24/7
+        - rectangle «Clock Divider» width=1 height=48 fill="$border-strong"
+        - frame «Simulated Clock» layout="vertical" alignItems="end"
+          - text «Clock Label» fill="$text-tertiary" fontFamily="$font-ui" fontSize=12 fontWeight="normal"  TEXT: Horloge simulée · ven. 6 novembre
+          - text «Clock Time» fill="$text-primary" fontFamily="$font-display" fontSize=40 fontWeight="500" lineHeight=1.1  TEXT: 17:58Z
+    - frame «Body» width="fill_container" height="fill_container" gap=24
+      - frame «Map Column» width="fill_container" height="fill_container" layout="vertical" justifyContent="end"
+        - frame «Map Footer» width="fill_container" alignItems="center" justifyContent="space_between"
+          - instance «View Switcher · réseaux» of «View Switcher»
+            - frame «View · Vue en coupe» padding=[8, 16] fill="#FFFFFF1A" cornerRadius=4
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Mon réseau
+            - frame «View · Cabine & charge» padding=[8, 16] cornerRadius=4
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Méridia Cargo
+            - frame «View · Systèmes» padding=[8, 16] cornerRadius=4
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Alpes Air Link
+          - frame «Legend» gap=22 alignItems="center"
+            - frame «Legend · En service» gap=8 alignItems="center"
+              - rectangle «Swatch» width=18 height=2 fill="#ECEAE5" opacity=0.7
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: En service
+            - frame «Legend · Ton vol» gap=8 alignItems="center"
+              - rectangle «Swatch» width=18 height=2 fill="$route"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Ton vol
+            - frame «Legend · Interrompue» gap=8 alignItems="center"
+              - frame «Swatch» gap=3 alignItems="center"
+                - rectangle «Dash» width=5 height=2 fill="$danger"
+                - rectangle «Dash» width=5 height=2 fill="$danger"
+                - rectangle «Dash» width=5 height=2 fill="$danger"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Interrompue
+            - frame «Legend · En vol» gap=8 alignItems="center"
+              - icon «Icon» width=16 height=16 fill="$text-primary" icon="flight"
+              - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: En vol maintenant
+      - instance «Panel · Lignes autonomes» of «Panel»
+        - frame «Header» width="fill_container" gap=10 padding=[18, 22, 4, 22] alignItems="center"
+          - text «Title» width="fill_container" fill="$text-primary" fontFamily="$font-display" fontSize=18 fontWeight="600"  TEXT: Lignes autonomes
+          - text «Action» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 4 lignes
+        - frame «Content» width="fill_container" height="fill_container" layout="vertical" gap=0 padding=[10, 14, 18, 14]
+          - frame «Row · LFMN – LFLL» width="fill_container" layout="vertical" gap=6 padding=[14, 10] fill="$surface-selected" cornerRadius=4
+            - frame «Top» width="fill_container" gap=10 alignItems="center"
+              - rectangle «Swatch» width=16 height=2 fill="#ECEAE5" opacity=0.9
+              - text «Code» width="fill_container" fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="700"  TEXT: LFMN – LFLL
+              - frame «Status» gap=5 alignItems="center"
+                - icon «Icon» width=13 height=13 fill="$warning" icon="clock-alert"
+                - text «Label» fill="$warning" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Retard +14 min
+            - frame «Details» width="fill_container" layout="vertical" gap=3 padding=[0, 0, 0, 26]
+              - text «Cities» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Nice – Lyon · toutes les 2 h, 12 vols par jour
+              - text «Aircraft» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZA · ATR 72-600
+          - frame «Row · LFMN – LFPG» width="fill_container" layout="vertical" gap=6 padding=[14, 10] cornerRadius=4
+            - frame «Top» width="fill_container" gap=10 alignItems="center"
+              - rectangle «Swatch» width=16 height=2 fill="#ECEAE5" opacity=0.55
+              - text «Code» width="fill_container" fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="700"  TEXT: LFMN – LFPG
+              - frame «Status» gap=5 alignItems="center"
+                - icon «Icon» width=13 height=13 fill="$text-secondary" icon="circle-check"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: À l'heure
+            - frame «Details» width="fill_container" layout="vertical" gap=3 padding=[0, 0, 0, 26]
+              - text «Cities» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Nice – Paris-CDG · toutes les 3 h, 8 vols par jour
+              - text «Aircraft» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZD · A220-300
+          - frame «Row · LFMN – LFKJ» width="fill_container" layout="vertical" gap=6 padding=[14, 10] stroke="$border" strokeWidth={"top": 1} cornerRadius=4
+            - frame «Top» width="fill_container" gap=10 alignItems="center"
+              - rectangle «Swatch» width=16 height=2 fill="#ECEAE5" opacity=0.55
+              - text «Code» width="fill_container" fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="700"  TEXT: LFMN – LFKJ
+              - frame «Status» gap=5 alignItems="center"
+                - icon «Icon» width=13 height=13 fill="$text-secondary" icon="circle-check"
+                - text «Label» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: À l'heure
+            - frame «Details» width="fill_container" layout="vertical" gap=3 padding=[0, 0, 0, 26]
+              - text «Cities» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Nice – Ajaccio · toutes les 2 h, 10 vols par jour
+              - text «Aircraft» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZB · ATR 72-600
+          - frame «Row · LFLL – LFML» width="fill_container" layout="vertical" gap=6 padding=[14, 10] stroke="$border" strokeWidth={"top": 1} cornerRadius=4
+            - frame «Top» width="fill_container" gap=10 alignItems="center"
+              - frame «Swatch» width=16 gap=2 alignItems="center"
+                - rectangle «Dash» width=4 height=2 fill="$danger"
+                - rectangle «Dash» width=4 height=2 fill="$danger"
+                - rectangle «Dash» width=4 height=2 fill="$danger"
+              - text «Code» width="fill_container" fill="$text-primary" fontFamily="$font-mono" fontSize=14 fontWeight="700"  TEXT: LFLL – LFML
+              - frame «Status» gap=5 alignItems="center"
+                - icon «Icon» width=13 height=13 fill="$danger" icon="circle-x"
+                - text «Label» fill="$danger" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: Interrompue
+            - frame «Details» width="fill_container" layout="vertical" gap=3 padding=[0, 0, 0, 26]
+              - text «Cities» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Lyon – Marseille · suspendue depuis 14:20Z
+              - text «Aircraft» fill="$text-tertiary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: F-HAZC · CRJ700 en inspection
+          - frame «Spacer» width="fill_container" height="fill_container"
+          - frame «Today» width="fill_container" layout="vertical" gap=8 padding=[16, 10] stroke="$border" strokeWidth={"top": 1}
+            - frame «Fact · Vols depuis 00:00Z» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Key» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Vols depuis 00:00Z
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 23 effectués · 2 annulés
+            - frame «Fact · Prochain départ» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Key» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Prochain départ
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 18:10Z · LFMN → LFKJ
+            - frame «Fact · Flotte» width="fill_container" alignItems="center" justifyContent="space_between"
+              - text «Key» fill="$text-secondary" fontFamily="$font-ui" fontSize=13 fontWeight="normal"  TEXT: Ponctualité sur 24 h
+              - text «Value» fill="$text-primary" fontFamily="$font-ui" fontSize=13 fontWeight="500"  TEXT: 91 %
+          - frame «Actions» width="fill_container" layout="vertical" gap=4 padding=[0, 10]
+            - instance «Button · Ouvrir la ligne» of «Button/Primary»
+              - text «Label» fill="$on-btn-primary" fontFamily="$font-ui" fontSize=15 fontWeight="600"  TEXT: Ouvrir LFMN – LFLL
+              - frame «Key» height=22 padding=[0, 7] alignItems="center" fill="#0000000D" stroke="#00000033" strokeWidth={"top": 1, "right": 1, "bottom": 2, "left": 1} cornerRadius=3
+                - text «Key Label» fill="#11121499" fontFamily="$font-ui" fontSize=11 fontWeight="600"  TEXT: Entrée
+            - instance «Button · Créer une ligne» of «Button/Ghost»
+              - text «Label» fill="$text-primary" fontFamily="$font-ui" fontSize=14 fontWeight="500"  TEXT: Créer une ligne
+              - icon «Icon» width=16 height=16 fill="$text-secondary" icon="chevron-right"
+  - [instance «HUD/Top» — see screens-resolved/hud-top.md]
+  - [instance «HUD/Bottom» — see screens-resolved/hud-bottom.md]

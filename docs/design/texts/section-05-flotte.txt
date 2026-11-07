@@ -1,3 +1,3 @@
 05
 Flotte
-Flotte de la compagnie, catalogue des types ICAO, achat
+Flotte de la compagnie, catalogue des types ICAO, achat, location et usure des avions loués

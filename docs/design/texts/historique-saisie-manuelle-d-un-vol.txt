@@ -4,5 +4,54 @@ Non vérifié
 Pour un vol fait sans le pont SimConnect. Rien n'est mesuré : le vol est enregistré comme non vérifié et payé à 60 % de son gain net.
 Vol à déclarer
 Heures en UTC
+Route et appareil
+125 NM entre les deux terrains
+Départ
+LFKJ · Ajaccio
+Arrivée
+LFMN · Nice
+Appareil
+ATR 42-600 · F-HAZD
+Horaires bloc
+Durée calculée : 0 h 58
+Date
+2 nov. 2026
+Départ du bloc
+17:32Z
+Arrivée au bloc
+18:30Z
+Carburant
+Consommé : 640 kg
+Au départ du bloc
+1 900 kg
+À l'arrivée au bloc
+1 260 kg
+Atterrissage
+Optionnel
+Taux de chute au toucher
+ex. −180 fpm
+Indicatif, sans effet sur la paie
+Motif de la saisie
+Pont déconnecté pendant le vol
+Repris dans le carnet de vol
 Aperçu de la paie
 Estimation
+Revenu estimé
+Tarif de la route pour un ATR 42-600
++4 228 €
+Charges
+640 kg de carburant, taxes, 0 h 58 de maintenance
+−2 078 €
+Primes
+Ponctualité et atterrissage non prouvables
+0 €
+Coefficient de vérification
+Non vérifié : saisie manuelle, sans télémétrie
+×0,60
+Gain net
+(4 228 € − 2 078 €) × 0,60
++1 290 €
+Soit 860 € de moins qu'un vol vérifié
+Enregistrer le vol
+Entrée
+Un vol aux horaires incohérents peut encore être rejeté.
