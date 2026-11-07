@@ -72,7 +72,7 @@ export function typeFor(db: Db, companyId: number, icao: string): AircraftType {
 export const balanceOf = (db: Db, companyId: number): number => get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId)?.balance ?? 0;
 
 /** Spending that needs the money in the bank: 402 when the balance does not cover it. `post` (ledger.ts) is the only place a balance changes. */
-function spend(db: Db, companyId: number, at: number, kind: string, price: number, memo: string): void {
+export function spend(db: Db, companyId: number, at: number, kind: string, price: number, memo: string): void {
   const c = get<{ balance: number }>(db, 'SELECT balance FROM companies WHERE id = ?', companyId);
   if (!c || c.balance < price) throw new HttpError(402, 'insufficient_funds', `needs ${price}, balance is ${c?.balance ?? 0}`);
   post(db, companyId, at, kind, -price, memo);

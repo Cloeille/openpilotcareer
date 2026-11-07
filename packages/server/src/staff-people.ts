@@ -1,16 +1,16 @@
 // Lot STAFF (v3): what the player does with her people: recruit, let go, train, transfer, rest, interim, the rest policy and the starter crew (C11).
 // Domain operations: callers wrap them in `tx`. Money goes through game.ts `post`; a payment the balance cannot cover is 409 insufficient_funds (like finance.ts).
 import {
-  CAPTAIN_FROM_HOURS, DAY_MS, DEFAULT_NOTICE_DAYS, FIRING_MONTHS, HIRING_PREMIUM_MONTHS, STAFF_FAMILIES, TRAINING_COURSE, ROLE_OF, dayNo, experienceFactor, interimPrice, salaryFor,
-  type AircraftCategory, type Candidate, type FireResult, type InterimResult, type RestPolicy, type StaffFamily, type StaffRole, type TrainResult,
+  CAPTAIN_FROM_HOURS, DAY_MS, DEFAULT_NOTICE_DAYS, FIRING_MONTHS, HIRING_PREMIUM_MONTHS, MAX_INTERIM_DAYS, START_NOW_FEE, STAFF_FAMILIES, TRAINING_COURSE, ROLE_OF, dayNo, experienceFactor, interimPrice, salaryFor,
+  type AircraftCategory, type Candidate, type FireResult, type InterimResult, type LineBridge, type LineStartNow, type RestPolicy, type StaffFamily, type StaffRole, type TrainResult,
 } from '@opc/shared';
 import { hashSeed, mulberry32 } from './board.ts';
 import { assertSeat } from './facilities.ts';
 import { all, get, run, type Db } from './db.ts';
-import { balanceOf, post, typeFor, snapshot } from './game.ts';
+import { balanceOf, post, snapshot, spend, typeFor } from './game.ts';
 import { HttpError } from './http.ts';
 import { companyDemand, demandOf, type DemandLine, type Slot } from './staff-needs.ts';
-import { crewShortage, rosterOf, rulesOf, stateOf, type Shortage, type StaffRow } from './staff.ts';
+import { crewShortage, pendingHires, rosterOf, rulesOf, stateOf, type Shortage, type StaffRow } from './staff.ts';
 import type { LineRow } from './lines.ts';
 
 // ---------------------------------------------------------------- names
@@ -95,8 +95,9 @@ export function market(db: Db, companyId: number, now: number, f: { family?: Sta
 
 export const memberRow = (db: Db, id: number): StaffRow => get<StaffRow>(db, 'SELECT * FROM staff WHERE id = ?', id)!;
 
-/** Hire a candidate listed today or yesterday: one month's salary now as the hiring premium (C7), on the payroll from the first month after they start. */
-export function hire(db: Db, companyId: number, candidateId: string, now: number): { staffId: number; startsAt: number; premium: number } {
+/** Hire a candidate listed today or yesterday: one month's salary now as the hiring premium (C7), on the payroll from the first month after they start.
+ *  `startAtOnce` also pays START_NOW_FEE: the person starts now instead of after the notice (one transaction, so a refused fee leaves no hire behind). */
+export function hire(db: Db, companyId: number, candidateId: string, now: number, startAtOnce = false): { staffId: number; startsAt: number; premium: number } {
   const m = ID_RE.exec(candidateId);
   const day = m ? Number(m[1]) : NaN, today = dayNo(now);
   if (!m || day > today || day < today - 1 || !basesOf(db, companyId).includes(m[2]!)) throw new HttpError(404, 'candidate_not_found', 'this candidate is no longer on the market');
@@ -111,7 +112,21 @@ export function hire(db: Db, companyId: number, candidateId: string, now: number
   const staffId = insertStaff(db, {
     companyId, family: c.family, name: c.name, base: c.base, experience: c.experience, reliability: c.reliability, morale: c.morale, salary: c.askingSalary, hiredAt: now, startsAt, noticeDays: c.noticeDays, candidateId: c.id, qual: c.qual,
   });
-  return { staffId, startsAt, premium: c.premium };
+  if (startAtOnce) startNow(db, companyId, staffId, now);
+  return { staffId, startsAt: startAtOnce ? now : startsAt, premium: c.premium };
+}
+
+/** Pay START_NOW_FEE and a hire still in notice starts now. His qualifications start with him (`valid_from` follows `starts_at`), so the crew check counts him on the very next leg.
+ *  409 already_started / already_left; 402 insufficient_funds (the spending check of game.ts). */
+export function startNow(db: Db, companyId: number, id: number, now: number): { staffId: number; fee: number; balanceAfter: number } {
+  const s = ownedStaff(db, companyId, id);
+  if (s.ends_at !== null && s.ends_at <= now) throw new HttpError(409, 'already_left', 'this person has already left');
+  if (s.starts_at <= now) throw new HttpError(409, 'already_started', 'this person has already started');
+  spend(db, companyId, now, 'start_now', START_NOW_FEE, `start now ${s.name}`);
+  snapshot(db, companyId, now);
+  run(db, 'UPDATE staff_quals SET valid_from = ? WHERE staff_id = ? AND valid_from = ?', now, id, s.starts_at);
+  run(db, 'UPDATE staff SET starts_at = ? WHERE id = ?', now, id);
+  return { staffId: id, fee: START_NOW_FEE, balanceAfter: balanceOf(db, companyId) };
 }
 
 // ---------------------------------------------------------------- letting go, training, transfer, rest, interim
@@ -169,48 +184,132 @@ export function interim(db: Db, companyId: number, o: { family: StaffFamily; qua
   const bases = basesOf(db, companyId);
   const base = o.base ?? bases[0];
   if (!base || !bases.includes(base)) throw new HttpError(422, 'not_a_base', `${base ?? 'no airport'} is not one of your hubs or bases`);
-  assertSeat(db, companyId, o.family, base, now);
-  const rand = mulberry32(hashSeed(`interim:${companyId}:${now}:${o.family}:${o.qual ?? '-'}`));
-  const experience = o.family === 'pilot' ? 3_500 : 8;
-  const salary = salaryFor(o.family, roleOf(o.family, experience), experienceFactor(o.family, experience), categoryOf(db, companyId, o.qual ?? null));
-  const cost = interimPrice(salary, o.days);
-  const name = `${nameFrom(rand)} (interim)`;
-  pay(db, companyId, now, 'interim', cost, `${o.days} days of interim ${o.family}${o.qual ? ` ${o.qual}` : ''}`);
-  const endsAt = now + o.days * DAY_MS;
-  const staffId = insertStaff(db, { companyId, family: o.family, name, base, experience, reliability: 75, morale: 70, salary, hiredAt: now, startsAt: now, endsAt, contract: 'cdd', noticeDays: 0, qual: o.family === 'pilot' ? o.qual! : null, qualUntil: endsAt });
-  return { staffId, member: null as never, cost, endsAt, balanceAfter: balanceOf(db, companyId) };
+  return bookInterim(db, companyId, { family: o.family, qual: o.qual ?? null, base, until: now + o.days * DAY_MS }, now);
+}
+
+/** What an interim of `family` (rated on `qual` for a pilot) costs until `until`: the days started are paid, at the price of `interimPrice`. */
+function interimQuote(db: Db, companyId: number, family: StaffFamily, qual: string | null, until: number, now: number): { salary: number; experience: number; days: number; cost: number } {
+  const experience = family === 'pilot' ? 3_500 : 8;
+  const salary = salaryFor(family, roleOf(family, experience), experienceFactor(family, experience), categoryOf(db, companyId, qual));
+  const days = Math.ceil((until - now) / DAY_MS);
+  return { salary, experience, days, cost: interimPrice(salary, days) };
+}
+
+/** `index` tells the people of one booking apart (their names come from the same seed). The contract ends at `until` exactly: no gap with whoever replaces him, no day paid twice. */
+function bookInterim(db: Db, companyId: number, o: { family: StaffFamily; qual: string | null; base: string; until: number; index?: number }, now: number): InterimResult & { staffId: number } {
+  assertSeat(db, companyId, o.family, o.base, now);
+  const { salary, experience, days, cost } = interimQuote(db, companyId, o.family, o.qual, o.until, now);
+  const name = `${nameFrom(mulberry32(hashSeed(`interim:${companyId}:${now}:${o.family}:${o.qual ?? '-'}:${o.index ?? 0}`)))} (interim)`;
+  pay(db, companyId, now, 'interim', cost, `${days} days of interim ${o.family}${o.qual ? ` ${o.qual}` : ''}`);
+  const staffId = insertStaff(db, { companyId, family: o.family, name, base: o.base, experience, reliability: 75, morale: 70, salary, hiredAt: now, startsAt: now, endsAt: o.until, contract: 'cdd', noticeDays: 0, qual: o.family === 'pilot' ? o.qual : null, qualUntil: o.until });
+  return { staffId, member: null as never, cost, endsAt: o.until, balanceAfter: balanceOf(db, companyId) };
 }
 
 export function setPolicy(db: Db, companyId: number, policy: RestPolicy): void {
   run(db, 'INSERT INTO staff_company (company_id, policy) VALUES (?, ?) ON CONFLICT (company_id) DO UPDATE SET policy = excluded.policy', companyId, policy);
 }
 
-// ---------------------------------------------------------------- recruiting for a stopped line (B.2 item 6)
+// ---------------------------------------------------------------- a stopped line: recruit, interim bridge, start now (B.2 item 6)
 
-/** The cheapest candidates at the line's base that fill each shortage. The base is the line end that is one of the company's hubs (else the first). */
+const lineIcaos = (db: Db, lineId: number): string[] => all<{ icao: string }>(db, 'SELECT DISTINCT a.icao FROM line_aircraft la JOIN aircraft a ON a.id = la.aircraft_id WHERE la.line_id = ? AND a.returned_at IS NULL', lineId).map((r) => r.icao);
+/** What the line lacks to fly now: the positions the three remedies below fill. Empty when the crew is complete. */
+export const lineShortage = (db: Db, l: Pick<LineRow, 'id' | 'company_id' | 'a' | 'b'>, now: number): Shortage[] => crewShortage(db, l.company_id, lineIcaos(db, l.id), [l.a, l.b], now);
+/** Where a line's people are employed: the line end that is one of the company's hubs or bases (else the first). */
+const lineBase = (db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>): string => [l.a, l.b].find((x) => basesOf(db, l.company_id).includes(x)) ?? l.a;
+
+/** The cheapest candidates at the line's base that fill each shortage. */
 export function recruitPlan(db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>, short: readonly Shortage[], now: number): Candidate[] {
-  const bases = basesOf(db, l.company_id);
-  const base = [l.a, l.b].find((x) => bases.includes(x)) ?? l.a;
+  const base = lineBase(db, l);
   const taken = new Set(all<{ candidate_id: string }>(db, 'SELECT candidate_id FROM staff WHERE company_id = ? AND candidate_id IS NOT NULL', l.company_id).map((r) => r.candidate_id));
   const day = dayNo(now);
   return short.flatMap((x) => candidatesFor(db, l.company_id, day, base, x.family, x.type).filter((c) => !taken.has(c.id)).sort((p, q) => p.askingSalary - q.askingSalary || p.id.localeCompare(q.id)).slice(0, x.need - x.have));
 }
 
-/** What `resolve {option: 'recruit'}` would do, for the problem screen: how many people, what they cost a month, when the first one starts. */
-export function recruitOffer(db: Db, l: LineRow, short: readonly Shortage[], now: number): { candidates: number; monthly: number; readyAt: number | null } {
-  const plan = recruitPlan(db, l, short, now);
-  return { candidates: plan.length, monthly: plan.reduce((t, c) => t + c.askingSalary, 0), readyAt: plan.length === 0 ? null : now + DEFAULT_NOTICE_DAYS * DAY_MS };
+/** A person who will fill positions of `family` (rated on `type`) when he starts. */
+type Arrival = { family: StaffFamily; type: string | null; at: number };
+/** The hires in notice who fill the shortage, from the staff table. */
+const pendingArrivals = (db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>, short: readonly Shortage[], now: number): Arrival[] =>
+  short.flatMap((x) => pendingHires(db, l.company_id, x.family, x.type, [l.a, l.b], now).map((p) => ({ family: x.family, type: x.type, at: p.starts_at })));
+
+type BridgeSlot = LineBridge['perSlot'][number] & { base: string };
+/** One interim per missing position. Each leaves when the earliest hire in notice for his family and type arrives (the arrivals are consumed one slot at a time, soonest first);
+ *  a position nobody is coming for gets DEFAULT_NOTICE_DAYS. No end goes past MAX_INTERIM_DAYS. This one function is both the preview and what gets booked. */
+function bridgePlan(db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>, short: readonly Shortage[], arrivals: readonly Arrival[], now: number): BridgeSlot[] {
+  const base = lineBase(db, l);
+  return short.flatMap((x) => {
+    const coming = arrivals.filter((a) => a.family === x.family && a.type === x.type).map((a) => a.at).sort((p, q) => p - q);
+    return Array.from({ length: x.need - x.have }, (_, i): BridgeSlot => {
+      const at = coming[i];
+      const until = Math.min(at ?? now + DEFAULT_NOTICE_DAYS * DAY_MS, now + MAX_INTERIM_DAYS * DAY_MS);
+      return { family: x.family, type: x.type, base, until, defaulted: at === undefined, cost: interimQuote(db, l.company_id, x.family, x.type, until, now).cost };
+    });
+  });
+}
+const bridgeView = (slots: readonly BridgeSlot[]): LineBridge | null =>
+  slots.length === 0 ? null : { people: slots.length, until: Math.max(...slots.map((s) => s.until)), cost: slots.reduce((t, s) => t + s.cost, 0), perSlot: slots.map(({ base: _base, ...s }) => s) };
+const bookBridge = (db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>, short: readonly Shortage[], arrivals: readonly Arrival[], now: number): void => {
+  bridgePlan(db, l, short, arrivals, now).forEach((s, index) => bookInterim(db, l.company_id, { family: s.family, qual: s.type, base: s.base, until: s.until, index }, now));
+};
+
+/** The hires in notice that, started now, fill every missing position (the soonest ones first); null when some position has nobody coming: a part-way start would not put the line back in service. */
+function startNowPlan(db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>, short: readonly Shortage[], now: number): { ids: number[]; slots: { family: 'pilot' | 'cabin'; type: string | null; people: number }[] } | null {
+  const ids: number[] = [], slots: { family: 'pilot' | 'cabin'; type: string | null; people: number }[] = [];
+  for (const x of short) {
+    const people = pendingHires(db, l.company_id, x.family, x.type, [l.a, l.b], now).slice(0, x.need - x.have);
+    if (people.length < x.need - x.have) return null;
+    ids.push(...people.map((p) => p.id));
+    slots.push({ family: x.family, type: x.type, people: people.length });
+  }
+  return ids.length === 0 ? null : { ids: [...new Set(ids)], slots };
+}
+export function startNowOffer(db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>, short: readonly Shortage[], now: number): LineStartNow | null {
+  const plan = startNowPlan(db, l, short, now);
+  return plan && { people: plan.ids.length, cost: plan.ids.length * START_NOW_FEE, perSlot: plan.slots.map((s) => ({ ...s, cost: s.people * START_NOW_FEE })) };
 }
 
-/** Hire the plan above (the premiums are paid now). The line resumes by itself when they have started: the next tick finds a crew. */
-export function recruitForLine(db: Db, l: LineRow, now: number): number {
-  const short = crewShortage(db, l.company_id, lineIcaos(db, l.id), [l.a, l.b], now);
+/** The interim `resolve {option: 'interim'}` would book, for the problem screen. */
+export const interimOffer = (db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>, short: readonly Shortage[], now: number): LineBridge | null =>
+  bridgeView(bridgePlan(db, l, short, pendingArrivals(db, l, short, now), now));
+
+/** What `resolve {option: 'recruit'}` would do, for the problem screen: how many people, the premiums paid now, what they cost a month, when they start,
+ *  and the interim that `withInterim` adds (it ends when the people hired now arrive, or when the hires already in notice do, whichever is soonest per position). */
+export function recruitOffer(db: Db, l: Pick<LineRow, 'id' | 'company_id' | 'a' | 'b'>, short: readonly Shortage[], now: number): { candidates: number; monthly: number; readyAt: number | null; premium: number; bridge: LineBridge | null } {
+  const plan = recruitPlan(db, l, short, now);
+  const arrivals = [...pendingArrivals(db, l, short, now), ...plan.map((c): Arrival => ({ family: c.family, type: c.qual, at: now + c.noticeDays * DAY_MS }))];
+  return {
+    candidates: plan.length, monthly: plan.reduce((t, c) => t + c.askingSalary, 0), readyAt: plan.length === 0 ? null : now + DEFAULT_NOTICE_DAYS * DAY_MS,
+    premium: plan.reduce((t, c) => t + c.premium, 0), bridge: plan.length === 0 ? null : bridgeView(bridgePlan(db, l, short, arrivals, now)),
+  };
+}
+
+const nothingToCover = (short: readonly Shortage[]): void => { if (short.length === 0) throw new HttpError(409, 'nothing_to_cover', 'the line has all the crew it needs'); };
+
+/** Hire the plan above (the premiums are paid now). The line resumes by itself when they have started: the next tick finds a crew.
+ *  `withInterim` books the bridge in the same transaction: the line flies at once and the interims leave as the hires arrive. */
+export function recruitForLine(db: Db, l: LineRow, now: number, withInterim = false): number {
+  const short = lineShortage(db, l, now);
   const plan = recruitPlan(db, l, short, now);
   if (plan.length === 0) throw new HttpError(409, 'no_candidates', 'nobody is on the market for this position today');
   for (const c of plan) hire(db, l.company_id, c.id, now);
+  if (withInterim) bookBridge(db, l, short, pendingArrivals(db, l, short, now), now);
   return plan.length;
 }
-const lineIcaos = (db: Db, lineId: number): string[] => all<{ icao: string }>(db, 'SELECT DISTINCT a.icao FROM line_aircraft la JOIN aircraft a ON a.id = la.aircraft_id WHERE la.line_id = ? AND a.returned_at IS NULL', lineId).map((r) => r.icao);
+
+/** Book every interim the line needs to fly now. Idempotent: once the crew is complete there is nothing to cover (409). */
+export function interimForLine(db: Db, l: LineRow, now: number): void {
+  const short = lineShortage(db, l, now);
+  nothingToCover(short);
+  bookBridge(db, l, short, pendingArrivals(db, l, short, now), now);
+}
+
+/** Start now the hires in notice who fill the line's positions. */
+export function startNowForLine(db: Db, l: LineRow, now: number): void {
+  const short = lineShortage(db, l, now);
+  nothingToCover(short);
+  const plan = startNowPlan(db, l, short, now);
+  if (!plan) throw new HttpError(409, 'start_now_unavailable', 'not every missing position has a hire in notice');
+  for (const id of plan.ids) startNow(db, l.company_id, id, now);
+}
 
 // ---------------------------------------------------------------- the starter crew (C11)
 

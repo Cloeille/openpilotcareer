@@ -157,6 +157,8 @@ export const DEFAULT_NOTICE_DAYS = 7;
 export const MAX_INTERIM_DAYS = 30;
 /** An interim costs 1.2 x the daily salary x 1.5, for each day, paid up front [NO MODEL for the mockup's 1 450 euros]. */
 export const interimPrice = (monthlySalary: number, days: number): number => Math.round((monthlySalary / 30) * 1.2 * 1.5 * days);
+/** Euros per person to make a hired employee still in notice start at once (starts_at = now). One constant for the hire panel, the member sheet and the line fix panel. */
+export const START_NOW_FEE = 5_000;
 
 /** Type rating course by category: days off the roster and price. CRJ (a jet airliner) is the mockup's 21 days and 24 000 euros. */
 export const TRAINING_COURSE: Record<AircraftCategory, { days: number; cost: number }> = {
@@ -183,7 +185,8 @@ export const candidatesQuerySchema = z.object({
   family: z.enum(STAFF_FAMILIES).optional(), base: airportCode.optional(), qual: typeCode.optional(), sort: z.enum(SORTS).optional(),
 });
 export const staffQuerySchema = z.object({ base: airportCode.optional(), family: z.enum(STAFF_FAMILIES).optional() });
-export const hireSchema = z.object({ candidateId: z.string().min(1).max(60) });
+/** `startNow`: pay START_NOW_FEE too, the hire starts at once. */
+export const hireSchema = z.object({ candidateId: z.string().min(1).max(60), startNow: z.boolean().optional() });
 export const trainSchema = z.object({ type: typeCode });
 export const transferSchema = z.object({ base: airportCode });
 export const interimSchema = z.object({ family: z.enum(STAFF_FAMILIES), qual: typeCode.optional(), base: airportCode.optional(), days: z.int().min(1).max(MAX_INTERIM_DAYS) })
@@ -241,6 +244,7 @@ export type HireResult = { member: StaffMember; startsAt: number; premium: numbe
 export type FireResult = { severance: number; balanceAfter: number };
 export type TrainResult = { member: StaffMember; cost: number; days: number; until: number; balanceAfter: number };
 export type InterimResult = { member: StaffMember; cost: number; endsAt: number; balanceAfter: number };
+export type StartNowResult = { member: StaffMember; fee: number; balanceAfter: number };
 
 export type LeaveRequest = {
   id: number; staffId: number; name: string; family: StaffFamily; from: string; to: string; days: number; status: 'pending' | 'granted' | 'refused'; kind: 'leave' | 'rest' | 'training';

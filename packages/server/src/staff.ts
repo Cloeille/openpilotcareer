@@ -134,11 +134,15 @@ export function crewHeadcount(db: Db, companyId: number, ends: readonly [string,
   return { pilots, cabin: people('cabin'), ground: people('ground'), groundAt: { [ends[0]]: people('ground', ends[0]), [ends[1]]: people('ground', ends[1]) } };
 }
 
-/** When the next hire in notice who would fill a shortage of `family` (rated on `type` for pilots) starts, or null when nobody is coming. */
-export function pendingStart(db: Db, companyId: number, family: 'pilot' | 'cabin', type: string | null, ends: readonly [string, string], now: number): number | null {
-  return get<{ t: number | null }>(db, `SELECT MIN(s.starts_at) AS t FROM staff s WHERE s.company_id = ? AND s.family = ? AND s.base IN (?, ?) AND s.starts_at > ?
-    ${type ? "AND EXISTS (SELECT 1 FROM staff_quals q WHERE q.staff_id = s.id AND q.type_icao = ?)" : ''}`, companyId, family, ends[0], ends[1], now, ...(type ? [type] : []))?.t ?? null;
+/** The hires in notice who would fill a position of `family` (rated on `type` for pilots) at either end of a line, soonest first. A hire cancelled during its notice is not one. */
+export function pendingHires(db: Db, companyId: number, family: 'pilot' | 'cabin', type: string | null, ends: readonly [string, string], now: number): { id: number; starts_at: number }[] {
+  return all<{ id: number; starts_at: number }>(db, `SELECT s.id, s.starts_at FROM staff s WHERE s.company_id = ? AND s.family = ? AND s.base IN (?, ?) AND s.starts_at > ? AND (s.ends_at IS NULL OR s.ends_at > s.starts_at)
+    ${type ? 'AND EXISTS (SELECT 1 FROM staff_quals q WHERE q.staff_id = s.id AND q.type_icao = ?)' : ''} ORDER BY s.starts_at, s.id`, companyId, family, ends[0], ends[1], now, ...(type ? [type] : []));
 }
+
+/** When the next hire in notice who would fill a shortage of `family` (rated on `type` for pilots) starts, or null when nobody is coming. */
+export const pendingStart = (db: Db, companyId: number, family: 'pilot' | 'cabin', type: string | null, ends: readonly [string, string], now: number): number | null =>
+  pendingHires(db, companyId, family, type, ends, now)[0]?.starts_at ?? null;
 
 // ---------------------------------------------------------------- one person's state now
 

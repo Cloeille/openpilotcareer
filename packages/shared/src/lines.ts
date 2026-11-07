@@ -89,7 +89,12 @@ export const lineBodySchema = checked(z.object({ a: airport, b: airport, ...prog
 export type LineBody = z.infer<typeof lineBodySchema>;
 /** Body of `PATCH /lines/:id`: any of the programme fields (the merged programme is validated by the server). */
 export const linePatchSchema = z.object(programmeShape).partial().refine((p) => Object.keys(p).length > 0, 'nothing to change');
-export const lineResolveSchema = z.object({ option: z.enum(['reassign', 'recruit', 'pause']), aircraftId: z.int().positive().optional() });
+/** `interim` and `start_now` put the line back in service at once (the crew starts now); `withInterim` on `recruit` books the interim bridge in the same transaction. */
+export const lineResolveSchema = z.object({
+  option: z.enum(['reassign', 'recruit', 'interim', 'start_now', 'pause']), aircraftId: z.int().positive().optional(), withInterim: z.boolean().optional(),
+});
+export type LineResolve = z.infer<typeof lineResolveSchema>;
+export type ResolveOption = LineResolve['option'];
 export const networkEnabledSchema = z.object({ enabled: z.boolean() });
 export const lineDayQuerySchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() });
 export const networkQuerySchema = z.object({ company: z.coerce.number().int().positive().optional() });
@@ -249,13 +254,22 @@ export type LineForecastView = {
 };
 
 export type FreeAircraft = { id: number; registration: string; icao: string; freeAt: number };
+/** One temporary hire for one missing position: he starts now and leaves at `until`, when the hire that fills the position arrives (`defaulted`: nobody is coming, the default notice is booked). `type` is the aircraft type of a pilot, null for cabin crew. */
+export type LineBridgeSlot = { family: 'pilot' | 'cabin'; type: string | null; until: number; cost: number; defaulted: boolean };
+/** Every interim a line needs to fly now. `until` is the latest end, `cost` the total paid now. */
+export type LineBridge = { people: number; until: number; cost: number; perSlot: LineBridgeSlot[] };
+/** The hired people in notice who fill the missing positions, started now for START_NOW_FEE each (offered only when they fill every position). `perSlot`: one row per family and type. */
+export type LineStartNow = { people: number; cost: number; perSlot: { family: 'pilot' | 'cabin'; type: string | null; people: number; cost: number }[] };
 export type LineProblemView = {
   problem: LineProblem[];
   /** `reputation` is in stored points and negative (a loss); `slotsLostAt` is when 14 days of stoppage forfeit the slots (informational: nothing is deleted). */
   cost: { cancelled: number; lostRevenue: number; perDay: number; reputation: number; slotsLostAt: number | null };
   options: {
     reassign: { aircraft: FreeAircraft[]; flightsPerDay: number; deltaPerDay: number } | null;
-    recruit: { candidates: number; monthly: number; readyAt: number | null } | null;
+    /** `premium`: hiring premiums paid now. `bridge`: the interim that `withInterim` books with the hires (they arrive after the notice, the bridge ends then). */
+    recruit: { candidates: number; monthly: number; readyAt: number | null; premium: number; bridge: LineBridge | null } | null;
+    interim: LineBridge | null;
+    startNow: LineStartNow | null;
     pause: { fixedCostPerDay: number };
   };
   /** `off`: a day the line does not operate. */
