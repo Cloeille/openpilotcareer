@@ -288,7 +288,7 @@ test('a passenger flight the player flies serves its passengers too; cargo and a
   assert.equal(w.ledger().length, 2, 'nothing for cargo or a four-seater');
 });
 
-test('two weeks below 3 costs 0.02 reputation a day from the fifteenth, once a day; a good day lifts the streak for the next fourteen', async () => {
+test('fourteen days of service below 3 cost 0.02 reputation for each further day with service, once a day; a good day breaks the streak', async () => {
   const w = await world({ line: false });
   const leg = (day: number, satisfaction = 2.5): LegPlan => ({ companyId: w.cid, day, hub: 'LFPG', pax: 50, satisfaction, sales: 0, cost: 0, snacks: 0, hot: 0, asked: 0, share: 1, provider: 'caterer' });
   const lost = (rep: number): number => Math.round((rep - w.reputation()) * 100) / 100;
