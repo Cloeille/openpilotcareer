@@ -3,34 +3,35 @@ import { act } from '../actions.ts';
 import { api } from '../api.ts';
 import { airportField } from '../airport-field.ts';
 import { fetchHubsOverview, type FacilityView, type HubOverview, type HubsOverview } from '../api-facilities.ts';
+import { fetchSafety } from '../api-safety.ts';
 import { fetchStaff } from '../api-staff.ts';
 import { airportInfo, cityOf } from '../airports.ts';
 import { button, icon, panel, signDirection, signLocation, stat, titleBlock } from '../components.ts';
-import { holdingText, planFocus } from '../facilities-ui.ts';
+import { facilitiesOff, holdingText, planFocus } from '../facilities-ui.ts';
 import { contractsOf, HOLDING_TONE, holdingOf, KIND_ICON, shown, stepOf, teamRows } from '../facilities-view.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
+import { safetyEntry } from '../safety-ui.ts';
 import { famLabel, staffEntry } from '../staff-ui.ts';
 import { h } from '../ui.ts';
-import { hubs as plainHubs } from './hubs.ts';
 
 /** The base on the big card. Kept across redraws (a language change, an action), not across visits to another tab: it resets to the main hub when the hub list changes. */
 let chosen: string | null = null;
 
-/** `#hubs` (the Compagnie tab): every base with its facilities, team and aircraft, and the way to open another one. A server without facilities keeps the plain "open a hub" screen. */
+/** `#hubs` (the Compagnie tab): every base with its facilities, team and aircraft, and the way to open another one. A server without facilities says so and keeps the way to open a hub and the doors. */
 export async function hubsOverview(ctx: Ctx): Promise<Screen> {
   const { snap, go } = ctx;
   const { me } = snap;
   const fm = fmt();
   const data = await fetchHubsOverview();
-  if (!data) return plainHubs(ctx);
-  const people = await fetchStaff().catch(() => null);
+  const [people, safety] = await Promise.all([fetchStaff().catch(() => null), fetchSafety().catch(() => null)]);
   const infos = new Map(await Promise.all(me.hubs.map(async (icao) => [icao, await airportInfo(icao)] as const)));
-  // The doors to the other Company screens (C8): a card, its key, where it leads, its hint. A door whose server feature is off has no card and no key. Safety (F4) adds its line here.
+  // The doors to the other Company screens (C8): a card, its key, where it leads, its hint. A door whose server feature is off has no card and no key.
   const doors = [
     { card: staffEntry(people, go), key: 's', hash: '#staff', hint: t('st.hint.openStaff') },
+    { card: safetyEntry(safety, go), key: 'f', hash: '#safety', hint: t('sf.hint.open') },
   ].filter((d): d is typeof d & { card: HTMLElement } => d.card !== null);
   const doorKeys: Record<string, () => void> = Object.fromEntries(doors.map((d) => [d.key, () => go(d.hash)]));
   const doorHints = doors.map((d) => ({ key: d.key.toUpperCase(), label: d.hint }));
@@ -49,6 +50,13 @@ export async function hubsOverview(ctx: Ctx): Promise<Screen> {
         void act(t('hub.opened', { icao }), () => api('/me/hubs', { method: 'POST', body: { icao } }), ctx.refresh);
       } }, field.root, h('p', { class: 'dim small' }, t('hub.after', { balance: fm.money(me.company.balance - HUB_PRICE) })), h('div', { class: 'row' }, submit)));
   };
+
+  if (!data) {
+    return {
+      title: t('hub.title'), scene: 'hubs', tab: 'hubs', view: h('div', { class: 'fc-off-screen' }, h('div', { class: 'col', style: 'flex:1' }, facilitiesOff(), openForm()), entries), back: '#dashboard',
+      hints: [{ key: t('key.esc'), label: t('hint.dashboard') }, ...doorHints], keys: doorKeys,
+    };
+  }
 
   // ------------------------------------------------------------ the overview
   const hubs = data.hubs;

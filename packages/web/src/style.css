@@ -9,6 +9,7 @@
 @import './lines.css';
 @import './staff.css';
 @import './facilities.css';
+@import './safety.css';
 
 :root {
   color-scheme: dark;
@@ -360,9 +361,6 @@ table.data tbody td, table.data tbody th { border-bottom: 1px solid var(--border
 .hub-option:has(input:checked) { background: var(--surface-selected); }
 .hub-option:has(input:focus-visible) { outline: 2px solid var(--text-primary); outline-offset: 1px; }
 .hub-option input { accent-color: var(--text-primary); width: 16px; height: 16px; }
-.hub-rows { gap: 0; }
-.hub-row { display: flex; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border); }
-.hub-row .col { flex: 1; }
 .custom-column { width: 760px; display: flex; flex-direction: column; gap: 18px; min-height: 0; overflow: auto; padding-right: 6px; }
 .custom-form { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px 16px; }
 .custom-form .row.end { grid-column: 1 / -1; justify-content: flex-end; }

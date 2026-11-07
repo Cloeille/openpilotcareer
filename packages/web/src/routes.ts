@@ -28,6 +28,7 @@ import { ops } from './screens/ops.ts';
 import { staffRoute } from './screens/staff-route.ts';
 import { hubPlan } from './screens/hub-plan.ts';
 import { facilityScreen } from './screens/facility.ts';
+import { safetyRoute } from './screens/safety.ts';
 
 /** Every HUD tab is a route (the HUD links to `#<tab>`), which the type enforces: a tab added to TABS without a screen does not compile. */
 export const routes: Record<Tab, ScreenFn> & Record<string, ScreenFn> = {
@@ -48,6 +49,8 @@ export const routes: Record<Tab, ScreenFn> & Record<string, ScreenFn> = {
   staff: staffRoute,
   // ---- facilities (v3 F3)
   hub: hubPlan, facility: facilityScreen,
+  // ---- safety (v3 F4)
+  safety: safetyRoute,
 };
 
 /** Old bookmarks (`#flights`) keep working. */

@@ -81,8 +81,14 @@ export async function staff(ctx: Ctx): Promise<Screen> {
   const allOpen = data.families.filter((f) => f.children?.length).every((f) => expanded.has(f.family));
   const expandAll = h('button', { type: 'button', class: 'link-btn st-expand-all', onclick: () => { opened = toggleAll(data.families, expanded); redraw(); } }, allOpen ? t('st.ov.collapseAll') : t('st.ov.expandAll'));
   const head = h('div', { class: 'st-head', 'aria-hidden': 'true' }, [t('st.col.family'), t('st.col.count'), t('st.col.avail'), t('st.col.pay'), ''].map((c, i) => h('span', { class: i === 1 || i === 3 ? 'end' : '' }, c)));
+  // No family at all: nobody is employed and no timetable needs anyone. Headers over a blank panel say nothing, so the panel says so and offers the way out.
+  const empty = data.families.length === 0;
+  const emptyState = h('div', { class: 'st-empty-state' }, icon('users', 20),
+    h('h3', { class: 'st-empty-title' }, base ? t('st.ov.emptyBaseTitle', { base }) : t('st.ov.emptyTitle')),
+    h('p', { class: 'muted' }, base ? t('st.ov.emptyBase') : t('st.ov.empty')),
+    button(t('st.side.recruit'), { variant: 'primary', icon: 'users', key: 'R', onclick: () => goHire(null) }));
   const table = panel({ title: t('st.ov.panel'), action: data.families.some((f) => f.children?.length) ? expandAll : null, id: 'st-table', class: 'st-panel' },
-    head, h('div', { class: 'st-rows', role: 'table', 'aria-label': t('st.ov.panel') }, rows().map(line)));
+    ...(empty ? [emptyState] : [head, h('div', { class: 'st-rows', role: 'table', 'aria-label': t('st.ov.panel') }, rows().map(line))]));
 
   // ------------------------------------------------------------ legend and base filter
   const legendItems: [string, Key][] = [['duty', 'st.leg.duty'], ['rest', 'st.leg.rest'], ['leave', 'st.leg.leave'], ['training', 'st.leg.training'], ['vacant', 'st.leg.vacant'], ['blocks', 'st.leg.blocks']];
