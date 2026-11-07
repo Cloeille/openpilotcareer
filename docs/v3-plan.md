@@ -1,0 +1,424 @@
+# OpenHangar v3: gap analysis, API contract and lot plan
+
+Source: mockup v3 (`docs/design/`, snapshot of 7 Nov 2026, etag 0fc6c194). Renders are in `docs/design/renders/`, resolved trees in `docs/design/screens-resolved/`, plain texts in `docs/design/texts/`. Base: `career-v2-base` at 93fb4dc (v2 onboarding, leasing, finance, live, EFB, settings and motion all merged).
+
+How to read this. Part A says, frame by frame, what the code already has and what is missing. Part B is the contract the lots code against, in the style of `docs/v2-contract.md`. Part C lists the decisions only Chloé can make, each with a default the lots take until she answers. Numbers the mockup shows but no model produces are marked **[NO MODEL]**; section B.8 lists them once more with the formula each lot adopts.
+
+The one fact that shapes everything: the v3 economy is a **second way to earn**. Today money only moves when someone completes a flight (`finishFlight` in `game.ts`, or an AI tick in `ai.ts`). v3 adds lines that fly without the player, which needs a simulated clock, a crew model, and a place to put aircraft, people and buildings. None of that exists. Every v3 server feature is new simulation, not a view over existing data.
+
+## Part A. Gap analysis
+
+### A.0 What v2 already gives v3
+
+| Need | Already there |
+|---|---|
+| Money in and out | `post(db, companyId, at, kind, amount, memo, flightId?)` in `game.ts`; ledger table `transactions` (free-text `kind`); `GET /me/transactions`, `GET /me/finance` |
+| Monthly costs, lazily and idempotently | `runBilling` (`finance.ts`), table `billing_runs`, planner `planMonth` (pure). Rents, loans, parking, insurance |
+| Profit of one leg | `settle()` in `shared/src/index.ts`, used for players, AI, and AI scoring. Revenue, fuel, landing fee, maintenance, reputation |
+| Wear and maintenance | `aircraft.wear_pct`, `status`, `maintenance_until`, `accrueWear`, `maintenanceTick`, `assertFlyable`, constants in `shared/src/finance.ts` |
+| Contracts with a monthly price | table `contracts` (`kind` is a CHECK of lease, loan, club, rental, tied to an `aircraft_id`) |
+| Hubs and parking | table `hubs`, `hubSpots`, `assertHubSpot`, `PARKING_FEE_BY_SIZE`, `GET /me/hubs` |
+| A clock that tests can move | `app.ts` takes `o.now`; every route and hook reads `now()`. `scripts/warp-clock.mjs` speeds `Date.now` for smoke tests |
+| Time-sliced world progress | `ai.ts`: ticks of 6 h, `catchUp(db, now)` on any API request, bounded to 12 ticks, idempotent through `ai_ticks` |
+| Competitors | 8 AI companies seeded from `AI_COMPANIES`, personality `cautious` or `aggressive`, fleet limit 12 |
+| Company identity | `code` (3 letters), `callsign`, `liveryColor`, `startMode`, `realism` toggles |
+| Seasons | `season_stats`, `seasonOf`, `GET /leaderboard`, `recap` screen |
+| Web shell | `routes.ts` (hash routes), `screen.ts` (`TABS`, `Hint`, `Screen`), `keys.ts`, `hud.ts`, `scenes.ts`, `components.ts`, `messages.ts` en/fr |
+| Aircraft drawing | `schematic.ts` (319 lines, port of `aircraft-schematic.js`), `cabin.ts` (197 lines, port of `cabin-layout.js`) |
+
+Three constraints in the web shell that v3 runs into.
+1. The HUD builds each tab link as `#${tab}` (`hud.ts`), so a tab id is also a route name. The Compagnie tab therefore cannot be `company`, which is already the new-company route in `routes.ts`; this plan uses `hubs` (the tab opens Hubs · vue d'ensemble, as the keyboard map says).
+2. `shortcutOf` in `keys.ts` binds only `[a-z0-9/]` and the arrows. The new screens list `Tab`, `Space` and `F1` in their key hints. `Tab` must stay the browser's focus key (binding it would break keyboard focus order, an accessibility regression); v2 already settled this by binding the sub-view to a letter on the leaderboard (`T`). v3 does the same: **each `Tab` action of the mockup gets a letter alias** (B.10), shown in the HUD hint as that letter. `F1` and `Space` can be added to `shortcutOf` (Space only when focus is not on a button, link or switch, which use it natively). Decision C17.
+3. `parseHash` joins everything after the first `/` into one argument, so `#lease/12/wear` would reach the `lease` screen with the argument `12/wear`. v3 routes use one argument only (`#wear/<aircraftId>`).
+
+What v2 does **not** have, and v3 needs: any notion of a crew member, a line or timetable, a scheduled (future) flight, a building, a stock item, a meal, or a simulated clock apart from `Date.now`. There is no `flight_no`: flight numbers like `AZR 1136` only exist in the mockup. `callsign` exists (3 to 12 letters) and `code` is the 3-letter ICAO airline code, so `AZR` is `Company.code`.
+
+### A.1 Shell and shared frames
+
+| Frame | Change vs v2 | Today | Gap | Kind |
+|---|---|---|---|---|
+| HUD/Top | Tabs are now Accueil, Vol en cours, Jobs, **Réseau**, Flotte, **Compagnie**, Historique, Classement. Brand column 250 to 230 px, tab padding 16 to 13 | `TABS = dashboard, live, jobs, fleet, history, leaderboard` (6). Label for `dashboard` is "Tableau de bord" | Add two tabs: `network` (Réseau) and `hubs` (Compagnie; the id cannot be `company`, see A.0). Rename the dashboard label to "Accueil". 8 tabs must fit 1600 px, so tighten padding as the mockup does. Q/E cycle grows to 8. 48 of the 61 full screens embed HUD/Top, so every one of them changes | UI only |
+| Carte des parcours | Rows 06 and 07 added, rows renumbered, new keys (see B.10) | Keys exist for v2 screens only | Implement the keys per screen in B.10 | UI only |
+| Lisez-moi | Intent: 10 rows, keyboard and gamepad first, three scripts to port, real-time 3D scene later, API contract to be written from the screens | n/a | Nothing to build. It confirms `airport-chart.js` is to be ported like the other two | doc |
+| Section 05 Flotte | Description now says "location et usure des avions loués" | n/a | Confirms the new screen "Location · usure & remise à neuf" belongs to Flotte | doc |
+
+### A.2 Changed frames: what actually changed
+
+Of the 16 frames the snapshot flags as changed, **4 changed in content** (HUD/Top, Section 05 Flotte, Carte des parcours, Lisez-moi: A.1) and **12 only moved on the canvas** (y +2200, because rows 06 and 07 were inserted above them): Historique des vols, Détail d'un vol (+ rejeté, + calcul du gain), Historique · saisie manuelle, Classement (+ nouvelle saison), Comparaison IA, Compagnie IA · fiche, Saison · récapitulatif, Schéma générique, Cabines. I compared their trees with positions ignored, and their texts: **no text, size, color or layout differs from v2.** Their HUD Bottom hints are identical too. The ones that carry a HUD (Schéma générique and Cabines do not) differ from v2 renders only by the new 8-tab HUD.
+
+So a "restyle" lot for these screens has nothing to restyle beyond R1. What a v3 worker should still know, because the mockup makes it visible and the code lags it (these are **v2 gaps**, not v3 changes; fold them into R1 as small fixes, they are keyboard hints only):
+- Détail d'un vol: the mockup hints are `R` revoir le toucher, `Z` / `C` vol plus ancien / plus récent, `X` exporter le relevé (calcul du gain) and, on the rejected variant, `T` voir la preuve. `screens/flight.ts` has only `Esc` and `G`.
+- Compagnie IA · fiche: mockup `J` jobs sur ses routes and `A` alerte rival. `screens/company-sheet.ts` has `J` and the arrows only.
+- Classement: the mockup sub-view key is `Tab` (saison / carrière); `screens/leaderboard.ts` binds `T` on purpose (A.0, point 2). Nothing to change.
+
+### A.3 Row 06: Réseau & lignes autonomes (new, 6 screens)
+
+Shared model behind all six: a **Line** is a pair of airports (A⇄B) the company flies on a **programme** (frequency, operating days and window, aircraft assigned). The server flies it **without the player**, on a **simulated clock** that the screens display ("Horloge simulée · ven. 6 novembre 17:58Z"). Revenue, fuel, fees, crew and maintenance are posted to the existing ledger.
+
+| Frame | What it shows | Exists | Missing | Kind |
+|---|---|---|---|---|
+| **Réseau · carte des lignes** (`#network`, tab Réseau) | 3D tilted regional map (`network-map.js`, view player/rival), 4 lines as arcs, aircraft in flight, a clock, the "Exploitation 24/7" switch, per-line status (ok, delayed +14 min, interrupted), counters (23 flights done, 2 cancelled, on-time 91 %), next departure, three network tabs (mine, Méridia Cargo, Alpes Air Link) | Airports with lat/lon (`airports.json`, `GET /airports/:icao`). `distanceNm`. `Switch` component. `schematic.ts` pattern for porting a Pen script | Tables `lines`, `line_aircraft`, `scheduled_flights`; the line engine and clock; live positions from the timetable; `GET /network`; port `network-map.js` to `network-map.ts`; the 24/7 switch persisted | **Simulation** + UI |
+| **Ligne · détail & planning** (`#line/<id>`) | Header (flight numbers 1131 to 1138, 162 NM, 1 h 10, assigned aircraft), 4 KPIs (aircraft, frequency, load factor 78 %, revenue/day 41 500 € with margin 9 400 €), a week strip, a 24 h Gantt per aircraft with rotations, crew duty bars with limits, a day P&L (fuel, fees, crews, maintenance, margin), a "what the line depends on" list | Per-leg settlement formula; aircraft wear and status | Timetable generator, per-day aggregates (load, revenue, cost split), crew assignment per flight, duty-limit check, dependency list built from aircraft and crew state | **Simulation** + UI |
+| **Ligne · création** (`#line-new`) | Pick A and B, programme (frequency per day or per hour, days, operating window), assign aircraft by dragging flights, shows conflicts (aircraft busy), crew/PNC/ground needs vs availability, a 7-day forecast (≈ profit +66 500 €, revenue 418 900 €, costs 352 400 €, demand 5 200 pax, load 78 %, competition) | Airport search field (`airport-field.ts`); fleet list with status and base | Demand model per airport pair, forecast function, conflict detection, crew need computation, validation and creation route | **Simulation** + UI |
+| **Opérations · centre 24/7** (`#ops`, key `O`) | One timetable of every flight today: in flight (progress, delays), next departures with aircraft and crew, causes of cancellation ("avion en inspection, aucun pilote CRJ disponible"), "Ton vol" row for the flight the player flies | `GET /flights/active`, live telemetry for the player's own flight | The unified flight board with statuses (on time, delayed, cancelled) and causes; reuse of the player's active flight as one row | **Simulation** + UI |
+| **Ligne · interrompue** (`#line/<id>`, state) | Why the line is stopped (aircraft in inspection, no qualified crew), what it costs (10 cancelled flights, 58 000 € lost, reputation −0.1), three ways out each with date, cost and effect (reassign another aircraft, recruit a crew, pause), a projection of flights assured | n/a | Interruption causes as data, cost of a stoppage, the three actions and their effects, replanning on action | **Simulation** + UI |
+| **Réseau · compagnie IA** (`#network/<ai>`, Tab on the map) | Same map for an AI company (view rival), "Face à face" on shared lines, lines where the AI is alone | AI companies, hubs, fleet | AI companies need **lines too** (same engine), plus overlap and competition between companies on a pair | **Simulation** + UI |
+
+Needs from the mockup beyond the screens: "Vol pris en main" (key area of the keyboard map): the player flies one rotation of a line instead of the crew. This is the bridge between the two economies and is the **single most valuable link** in v3: a rotation of a line becomes a job the player can accept (see B.2, `POST /lines/:id/rotations/:flightId/take`).
+
+### A.4 Row 07: Compagnie · hubs, facilities & staff (new, 11 screens + 1 in row 05)
+
+| Frame | What it shows | Exists | Missing | Kind |
+|---|---|---|---|---|
+| **Hubs · vue d'ensemble** (`#hubs`, tab Compagnie) | Per hub: facilities list with monthly cost, ownership (loué, acheté, disponible, taken by AI), team (37 people by family), based aircraft with status, contract renewals; a "open a base" suggestion from real traffic | `hubs` table, `GET /me/hubs` (spots), `screens/hubs.ts` is only "open a hub" | Facilities per hub, team counts per hub, aircraft by base (`aircraft.base` exists), suggestion rule | Simulation (facilities, staff) + UI |
+| **Hub · plan de l'aéroport 3D** (`#hub/<icao>`) | `airport-chart.js` for LFMN: runways, taxiways, aprons, stands, 10 buildings with an owner (airport, player, AI, available), filters, a detail panel (area, capacity, level, staff needed, effect on operations, rent vs buy) | `hubs`; airports catalogue has no geometry | **Per-airport layout data**: the script embeds LFMN only. Needs a catalogue of facilities per airport and a rule for airports without a drawn layout. Port `airport-chart.js` | Data + UI |
+| **Facility · contrat & améliorations** (`#facility/<id>`) | Rent (18 500 €/month, 36 months, deposit 37 000 €, 3 months notice) vs buy (2 350 000 €, 127 months of rent, 80 % credit, resale ≈ 75 %), required staff (chief + technicians from the candidates), 3 levels with works, duration and cost, totals due at signing and per month, balance after | Lease and loan logic for aircraft (`finance.ts`, `contracts`) | Facility contracts. **Reuse** `contracts` is not possible as is (`aircraft_id NOT NULL`, CHECK on kind). A facility is a new table `facilities` + `facility_contracts` or a widened `contracts`. Levels and works as timed jobs | **Simulation** + UI |
+| **Staff · effectifs** (`#staff`) | 70 people for 77 positions, payroll 345 500 €/month, by family (pilots by type, cabin, ground, admin, maintenance) with headcount vs need, availability now (in service, resting, leave, training), salaries, blockers ("aucun pilote CRJ disponible, bloque 2 vols"), watch list | n/a | `staff` table, families, qualifications, duty/rest state, payroll, need computed from the timetable | **Simulation** + UI |
+| **Staff · recrutement** (`#staff/hire`, key `R`) | Job market (214 candidates in France), filters (post, base, qualification), candidates with experience, reliability, morale, asking salary, availability and notice; a hire panel, or "qualify one of your own pilots on CRJ" (21 days, 24 000 €) | n/a | Candidate generator (deterministic per day like `board.ts`), hiring with notice, training courses | **Simulation** + UI |
+| **Staff · fiche d'un membre** (`#staff/<id>`) | Hours, reliability, morale, salary, today's duty (9 h 13 of 13 h, end by 21:45Z, rest 12 h after), weekly Gantt, 7-day load, qualifications and training options, medical expiry, contract and assignment, an alert when a flight would exceed the limit | n/a | Per-person duty clock, limits (daily, 28 days, 12 months), rest rule, medical, contract | **Simulation** + UI |
+| **Staff · congés & repos** (`#staff/leave`) | 2 months calendar by family: coverage (ok, tight, short, none), leave balance (312 days), people resting, average fatigue 38 %, pending requests with impact analysis, rest policy (legal minimum, standard, generous) with its cost and effect on fatigue and incident risk | n/a | Leave requests, coverage computation per day and family, rest policies | **Simulation** + UI |
+| **Sécurité · fatigue & incidents** (`#safety`, key `J` journal) | Safety index 72/100 (fatigue 27/40, aircraft state 29/40, training 16/20), incident risk per flight as a curve of duty hours and wear, today's top factors with +points if fixed, season incident log with cost, insurance premium effect | Wear per aircraft; hard-landing penalty in `settle` | Safety index, incident model (probability from duty hours and wear), incident log table, insurance effect | **Simulation** + UI |
+| **Entrepôt · pièces de rechange** (`#warehouse`) | Stock per aircraft type (policy none, critical kit, full kit), tied-up capital, expected ground days per year, an AOG case (engine failure, part ordered, delivery date), per-part inventory with prices, the rule "a part in stock means 6 h repair, otherwise days" | `maintenance_until`, `wear` threshold | Parts catalogue by category, stock table, failure events, delivery delays, policy economics | **Simulation** + UI |
+| **Service à bord · confort & repas** (`#service`) | Offer per flight type (short, medium, long haul): free or paid items, prices, on-board sales, cost of service per day, cabin satisfaction 4.2/5, meal quality levels with cost and margin, crew minimums | Cabin plan `cabin.ts`; nothing about passengers' satisfaction | Service policy per haul class, satisfaction model, on-board revenue and cost per passenger, satisfaction effect on load factor | **Simulation** + UI |
+| **Cuisine · production des repas** (`#kitchen`) | Central kitchen: meals to produce (548), capacity (620), margin 46 %, 3 quality levels (prep time, team, max output, cost per meal, margin, satisfaction), tonight's departures with meal status, kitchen crew on duty, own kitchen vs caterer | n/a | Kitchen as a facility with staff and capacity, meals demand derived from the timetable, caterer contract | **Simulation** + UI (polish) |
+| **Location · usure & remise à neuf** (row 05, `#wear/<aircraftId>`) | A leased DHC-6: five components with wear, effect of wear (performance, reliability, satisfaction), per component choices (leave, overhaul, replace) with cost, payback and net over the lease; total gain, cash curve, a "buy option" variant | `contracts` for leases with `terms` JSON incl. `purchaseOptionPrice` and `earlyExit`; `aircraft.wear_pct` is **one number**, not per component | Per-component wear (engines, landing gear, propellers, avionics, interior, paint), the effect of each on settlement, refurbishment jobs that immobilise the aircraft for days, a payback calculator | **Simulation** + UI |
+
+### A.5 Summary of what is UI only and what is simulation
+
+UI only (no new game rules):
+- 8-tab HUD, new key hints, `network` and `hubs` tabs, backdrops `generated-14` and `generated-15`.
+- Ports of `network-map.js` and `airport-chart.js` to `packages/web/src/` (same pattern as `schematic.ts`).
+- All the changed frames in A.2.
+
+New simulation (each is a model plus tables plus routes plus tests):
+1. Simulated clock and the line engine.
+2. Staff: people, qualifications, duty limits, leave, recruitment, payroll.
+3. Facilities: catalogue per airport, rent or buy, levels, effects.
+4. Spare parts: stock, failures, delivery.
+5. Cabin service and catering: satisfaction, on-board sales, kitchen.
+6. Safety: fatigue and incident model.
+7. Per-component wear on leased aircraft.
+
+## Part B. v3 API contract and lot plan
+
+Conventions are those of `docs/v2-contract.md`: routes under `/api/v1`; session auth and `X-OPC-Company` as today; money is an integer in euros; times are epoch milliseconds; ICAO codes are uppercase. Each lot owns the routes and types in its own section and never edits another lot's. A gap becomes an "Open question" line under the lot's own section with a default. Server code goes in a new `routes-<lot>.ts` and a new domain file, registered from `app.ts` with one line; web code in new files under `screens/`, one line each in `routes.ts`, strings in a block `// ---- <lot>` at the end of `messages.ts`, and a typed client `api-<lot>.ts`. Pure rules and shared types go in `packages/shared/src/<lot>.ts`, re-exported from `index.ts`, runtime-importing nothing from `index.ts` (types only) so there is no module cycle.
+
+Frontends code against this contract with fixtures until the backend merges, as in v2. A route the server does not have yet answers 404, and the client treats 404/405 as "feature off" (the `optional()` helper in `api-finance.ts`).
+
+### B.0 Migrations
+
+`SCHEMA_V5` is taken (live). **`SCHEMA_V6` is reserved for the SimBrief-link lot.** v3 starts at `SCHEMA_V7`. Each lot below owns exactly one number and appends it to `MIGRATIONS` (append-only, `PRAGMA user_version`). Because lots merge in an order that may differ from their numbers, the orchestrator renumbers at merge if needed; a lot never edits another lot's migration.
+
+| Migration | Lot | Tables |
+|---|---|---|
+| `SCHEMA_V6` | simbrief-link (not v3) | reserved |
+| `SCHEMA_V7` | LINES (includes the clock ticks) | `line_ticks`, `lines`, `line_aircraft`, `scheduled_flights` |
+| `SCHEMA_V8` | STAFF | `staff`, `staff_quals`, `staff_leave`, `staff_duty` |
+| `SCHEMA_V9` | FACILITIES | `facilities`, `facility_contracts` |
+| `SCHEMA_V10` | SAFETY | `incidents` (+ `staff.fatigue` read) |
+| `SCHEMA_V11` | PARTS | `parts_stock`, `parts_orders`, `aircraft_components` |
+| `SCHEMA_V12` | SERVICE | `service_policy`, `kitchen` |
+
+### B.1 Lot CLOCK: the simulated clock (owner: be-lines)
+
+Without this nothing else works, so it is the first server unit, shipped inside the LINES lot's first PR.
+
+Decision: **the simulated clock is the real UTC clock.** `now()` already flows through every route and hook, and the mockup's "17:58Z" next to "ven. 6 novembre" is simply the current time. A separate game clock that runs faster or slower than real time would break flights (a player's flight is real time) and the AI tick. So:
+- `simNow(db, now)` returns `now()`. There is no second clock to keep in sync and no speed setting.
+- The line engine advances by **ticks of 15 minutes** (`LINE_TICK_MS = 900_000`), lazily on any API request, idempotent through a table `line_ticks(tick PRIMARY KEY)` exactly like `ai_ticks`, bounded to `MAX_LINE_CATCHUP_TICKS = 192` (2 days). Older ticks are **settled in bulk, not replayed** (see B.2). Lines stop after `MAX_OFFLINE_DAYS = 14` without any request (the cap of decision C1).
+- "Offline" has no special mode: the player is away when no request arrives. The next request catches up.
+- Tests move time through `o.now`, as the AI tests do. The smoke test keeps using `scripts/warp-clock.mjs`.
+
+Types and constants in `packages/shared/src/lines.ts`:
+- `LINE_TICK_MS = 900_000`, `MAX_LINE_CATCHUP_TICKS = 192`.
+- `lineTickOf(ms)`, `isoDay(ms)`.
+
+### B.2 Lot LINES: autonomous lines and operations (owner: be-lines)
+
+**The simplest honest simulation.** A line is a **programme** (a list of departures per day), not a continuous physical model. Each scheduled flight is a **leg** that is created for the day, then resolved when its departure tick passes. Resolution reuses `settle()` unchanged, so a leg flown by the server earns exactly what `settle` gives for the same job, scaled by a **load factor** and an **autonomy factor** (decision C1).
+
+Data model (`SCHEMA_V7`):
+- `line_ticks(tick INTEGER PRIMARY KEY)`.
+- `lines(id, company_id, a TEXT, b TEXT, status 'active'|'paused'|'interrupted', created_at, freq_per_day INTEGER, days INTEGER /* bitmask Mon..Sun */, window_start_min INTEGER, window_end_min INTEGER, turnaround_min INTEGER, flight_base INTEGER /* first flight number */, paused_at INTEGER, interrupted_since INTEGER, interrupt_cause TEXT, UNIQUE(company_id, a, b))`. Airports stored in a fixed order (`a < b`); a line is the pair and flies both ways.
+- `line_aircraft(line_id, aircraft_id, PRIMARY KEY(line_id, aircraft_id))`. An aircraft can serve several lines, each with its own rotation (the mockup shows F-HAZB at mid-time on two lines).
+- `scheduled_flights(id, line_id, company_id, aircraft_id, flight_no INTEGER, dep_at INTEGER, arr_at INTEGER, origin, dest, status 'scheduled'|'flying'|'done'|'delayed'|'cancelled', delay_min INTEGER NOT NULL DEFAULT 0, cancel_cause TEXT, pax INTEGER, revenue INTEGER, cost INTEGER, taken_by_flight_id INTEGER, UNIQUE(line_id, dep_at, origin))`. Generated for **today and tomorrow** only, at the first tick of each UTC day. Past rows are kept for the history counters, pruned after 35 days.
+
+Engine (`packages/server/src/lines.ts`, pure parts in `shared/src/lines.ts`):
+1. **Generate.** At the first tick of the day, for each active line, lay out `freq_per_day` departures from A, evenly in the window, and the matching returns from B after `blockHours + turnaround`. Assign aircraft round-robin from `line_aircraft`. Skip days not in the bitmask.
+2. **Resolve each tick** (for every `scheduled` leg with `dep_at <= tickEnd`):
+   - **Aircraft check**: `status` is `available`, not `maintenance`, and not flown by the player at that moment (`activeFlight`). Else `cancelled` with cause `aircraft_unavailable`.
+   - **Crew check**: needs `crewNeeded(type)` qualified, rested staff at the origin (B.3). Else `cancelled` with cause `no_crew` or `duty_limit`. Until lot STAFF merges, this check is skipped and every leg has a crew (feature flag in code: `crewAvailable` returns true).
+   - **Delay**: `delay_min` is `0` unless the previous leg of the same aircraft arrived late (propagated) or the aircraft's `wear_pct >= 70`, then `+10 min` per 10 points above 70. No weather, no random numbers: delays are deterministic and explainable (the mockup always shows a cause).
+   - **Reputation**: an autonomous leg changes nothing (otherwise 8 legs a day at +0.1 would put her at the 100 cap within two months); a cancelled leg costs 0.02 points, a stoppage and an incident cost what B.2 item 7 and B.5 say. Reputation is stored on 0 to 100 and shown on that scale by the HUD, whereas the mockup shows stars (4,6): C17.
+   - **Money**: `pax = round(seats * loadFactor)`, `payout = jobPayout('pax', distance, pax * PAX_KG)`, then `settle({...})` with `status: 'verified'`, then `revenue *= autonomyFactor`. Posted with kinds `line_revenue`, `line_fuel`, `line_fee`, `line_maintenance` (new ledger kinds; the ledger `kind` is free text so no schema change).
+   - **Wear**: `accrueWear(...)` as for a normal flight, so lines age the fleet.
+   - **Position**: the aircraft `location` becomes `dest`.
+3. **Bulk settlement after a long absence.** If a tick is older than the catch-up bound, its legs are marked `done` with their expected money in **one posting per line per day** (`line_revenue` with memo `LFMN-LFLL 2026-11-04 x8`). Money stays honest, the ledger stays small. No per-leg replay. The absence is capped: after `MAX_OFFLINE_DAYS = 14` days without a request, lines are `paused` with cause `offline` and nothing more is earned or paid until she logs in again (idle-game cap; stops a forgotten account from compounding).
+4. **Load factor** `loadFactor(line, day)`: `demand / capacity` where `demand` comes from the pair demand model (below) shared with the forecast, capped to `[0.35, 0.95]`, plus a **satisfaction term** once lot SERVICE exists (±0.05). Competition (an AI company on the same pair) splits demand by seat share.
+5. **Pair demand model** (`shared/src/lines.ts`, pure): `weeklyDemand(a, b) = K * (sizeA * sizeB) / (1 + distance / 150)`, where `size` is 1, 2 or 4 for small, medium, large airports. `K = 893` makes LFMN-LEBL (large to large, 262 NM as the mockup states) come to 5 200 pax/week, the number the mockup shows [**NO MODEL** in the mockup; this formula is the model]. Demand is then **shared by seats** with any rival flying the pair: `captured = demand × ownSeats / (ownSeats + rivalSeats)`. For the mockup's case (4 824 own seats a week against Alpes Air Link's 3 flights a day of an ATR 72) this gives a load factor of 82 %, within 5 % of the 78 % displayed. Demand is deterministic per pair (no day-to-day noise) so the forecast and the result agree.
+6. **Interruption** is a **derived state**, not stored logic: a line is `interrupted` when it has no aircraft that is `available` or no crew, for the whole next 24 h. `interrupt_cause` records which, `interrupted_since` the first tick it held. The three remedies of "Ligne · interrompue":
+   - `reassign` (assign another free aircraft to this line);
+   - `recruit` (opens STAFF recruiting for the missing qualification; the line resumes when someone is hired and rested);
+   - `pause` (status `paused`, fixed cost only, see below).
+7. **Cost of a stoppage** (shown on the interrupted screen): lost revenue = cancelled legs' expected revenue; reputation −0.1 ★ the first day and −0.05 ★ each day after (the mockup's figures, in stars; **×20 gives stored points: −2 then −1 a day**, C17); slots lost after 14 days of pause or interruption.
+8. **Pause**: no legs generated, `fixed_cost_per_day` posted (decision C2, default: parking and insurance already billed monthly; no extra daily fee unless C2 says otherwise).
+9. **Take a rotation** (the bridge to the player's flying): `POST /lines/:id/rotations/:flightId/take` converts a `scheduled` leg into a normal **job** reserved for the player (reuse `job_reservations`), cancels the autonomous leg without penalty, and when the player's flight is verified it is paid by the normal `finishFlight` path at 100 % of the job rate (no autonomy factor). This is the "Vol pris en main" case of the keyboard map.
+10. **AI companies run lines with the same engine** (A.3, Réseau IA). AI lines are derived from the `preferred` aircraft types and hub, created at seed time, and resolved by the same tick. They replace the AI's current "one best job per aircraft per 6 h tick" behaviour **only for the aircraft assigned to a line**; other AI aircraft keep the old behaviour. This keeps the existing AI tests valid.
+
+Shared types (`packages/shared/src/lines.ts`):
+- `LineStatus = 'active'|'paused'|'interrupted'`.
+- `Line = { id, a, b, status, distanceNm, blockMinutes, freqPerDay, days: boolean[7], windowStart: string /* 'HH:MM' UTC */, windowEnd, turnaroundMin, flightNos: [number, number], aircraft: { id, registration, icao }[], interruptedSince: number|null, interruptCause: 'aircraft'|'crew'|'both'|null }`.
+- `ScheduledFlight = { id, lineId, flightNo: string /* 'AZR 1131' */, dep, arr, origin, dest, aircraftId, status, delayMin, cancelCause: 'aircraft_unavailable'|'no_crew'|'duty_limit'|'line_paused'|null, pax: number|null, takenByPlayer: boolean }`.
+- `LineDay = { date: string, rotations: number, loadFactor: number, planned: boolean }`.
+- `LineForecast = { weeklyDemand, loadFactor, seatsPerWeek, revenue, costs, profit, estimated: true, competition: { company: string, flightsPerDay: number } | null }`.
+- `LineProblem = { kind: 'aircraft'|'crew', detail: string, ready: boolean, until: number|null }`.
+
+Routes:
+- `GET /network?company=` (company optional: AI company id for the rival view; default own) returns `{ now: number, enabled: boolean, lines: Line[], flying: { flightId, flightNo, lineId|null, from, to, progress: number, delayMin, reg, own: boolean }[], today: { done, cancelled, onTimePct: number, nextDeparture: ScheduledFlight|null } }`. `progress` is `(now - dep) / (arr - dep)` and the position is interpolated on the great circle: nothing is stored.
+- `PUT /network/enabled` with `{ enabled: boolean }` sets the "Exploitation 24/7" switch (decision C3: when off, no legs are generated).
+- `GET /lines/:id` returns `{ line: Line, week: LineDay[], day: ScheduledFlight[], kpis: { aircraft: number, freq: string, loadFactor: number, loadTrend7d: number, revenuePerDay: number, marginPerDay: number }, pnl: { fuel, fees, crews, maintenance, margin, flights: number, pax: number }, depends: { label: string, value: string, ok: boolean }[] }`.
+- `POST /lines/forecast` with `{ a, b, freqPerDay, days: boolean[7], windowStart, windowEnd, aircraftIds: number[] }` returns `{ forecast: LineForecast, conflicts: { aircraftId, flightNo, at }[], needs: { pilots: { required, available }, cabin: { required, available }, ground: { required, available, missingAt: string[] }, maintenance: string }, valid: boolean }`. Pure: it creates nothing.
+- `POST /lines` with the same body as the forecast returns `Line`. Errors: `409 hub_missing` (neither airport is a hub or base of the company), `409 aircraft_busy`, `409 duplicate_line`, `422 distance_exceeds_range`.
+- `PATCH /lines/:id` (programme, aircraft); `POST /lines/:id/pause`, `POST /lines/:id/resume`; `DELETE /lines/:id`.
+- `GET /lines/:id/problem` returns `{ problem: LineProblem[], cost: { cancelled: number, lostRevenue: number, perDay: number, reputation: number }, options: { reassign: { aircraft: {id, registration, icao, freeAt: number}[], flightsPerDay: number, deltaPerDay: number } | null, recruit: { candidates: number, monthly: number, readyAt: number|null } | null, pause: { fixedCostPerDay: number } }, projection: { date: string, status: string }[] }`.
+- `POST /lines/:id/resolve` with `{ option: 'reassign'|'recruit'|'pause', aircraftId?: number }` returns `Line`.
+- `POST /lines/:id/rotations/:flightId/take` returns `{ job: Job, reservedUntil: number }`.
+- `GET /ops` returns `{ now, enabled, counts: { flying, upcoming, cancelled, delayed }, flying: OpsRow[], upcoming: OpsRow[] }` where `OpsRow = ScheduledFlight & { reg, typeName, crew: string|null, note: string|null, own: boolean }`. The player's active flight is one row with `own: true` ("Ton vol"). `note` is the cause in plain words, translated by the client from `cancelCause`.
+
+Implementation notes the lot may refine: `flight_no` is the company's `code` plus a number (`AZR 1131`); numbers are allocated from `lines.flight_base` (a line of 4 round trips uses 8 numbers). Departures are stored in UTC.
+
+Frontend (owner: fe-lines): screens `network.ts`, `line.ts`, `line-new.ts`, `ops.ts`; `network-map.ts` (port of `network-map.js`, takes `Line[]`, `flying[]`, camera inputs; airports positions from `airports.ts`); `api-lines.ts`. Hash routes: `#network`, `#network/<companyId>`, `#line/<id>`, `#line-new`, `#ops`. Backdrops: `jobs` (`generated-3`), `job` (`generated-4`), `history` (`generated-7`), `fleet` (`generated-6`), `leaderboard` (`generated-9`).
+
+### B.3 Lot STAFF: people, duty, leave, recruitment (owner: be-staff)
+
+**Simplest model.** Staff are **individually modelled only for pilots**; every other family is a **headcount per base** with a pool, because the screens show named people only for pilots, a chef de hub and a few candidates. This halves the tables and keeps the numbers honest (cabin crew, ground, admin and maintenance are counted, paid and fatigued as pools).
+
+Data model (`SCHEMA_V8`):
+- `staff(id, company_id, family 'pilot'|'cabin'|'ground'|'admin'|'maintenance'|'kitchen', name TEXT, role TEXT /* 'captain'|'fo'|'chief'|'technician'|... */, base TEXT, hired_at, salary INTEGER, reliability REAL, morale REAL, status 'active'|'leaving', medical_until INTEGER, contract 'cdi'|'cdd', notice_days INTEGER)`. Pilots, chefs and the hire candidates are rows. Pools use `staff` rows too but with `pool_count` (so 18 cabin crew at LFMN is one row with count 18). `pool_count INTEGER NOT NULL DEFAULT 1`.
+- `staff_quals(staff_id, type_icao TEXT, valid_until INTEGER, PRIMARY KEY(staff_id, type_icao))`.
+- `staff_leave(id, staff_id, from_day INTEGER, to_day INTEGER, status 'pending'|'granted'|'refused', kind 'leave'|'rest'|'training')`.
+- `staff_duty(staff_id, day INTEGER, duty_min INTEGER, flight_min INTEGER, PRIMARY KEY(staff_id, day))` rolled up from `scheduled_flights` and flown flights; 28-day and 12-month windows are sums over it.
+
+Rules (pure, `shared/src/staff.ts`):
+- **Duty limits** (simplified from EASA FTL, as constants): daily duty ≤ 13 h; flight time ≤ 100 h per 28 days and ≤ 900 h per 12 months; service ≤ 60 h per 7 days; rest after duty ≥ 12 h at base and 10 h away; ≤ 6 duty days in a row; weekly rest 36 h. These are the numbers the mockup displays [the mockup is the source].
+- **Fatigue** `fatigue(staff)` in `[0, 100]`: `clamp(40 × dutyHours7d / 60 + 4 × consecutiveDutyDays + 12 × (lastRestBelowMinimum ? 1 : 0))`, and each full rest day removes 12 points. For the mockup's Camille Lefèvre (46 h in 7 days, 6 duty days in a row) this gives 55; for a pilot at 30 h over 3 days, 32; the fleet mean of 38 % is plausible. [**NO MODEL** in the mockup; these constants are tuning values.]
+- **Crew need per aircraft type**: 2 pilots; cabin crew `ceil(seats / 40)` (ATR 72, 72 seats: 2; A220, about 130 seats: 4, the two values the mockup shows); legal minimum `ceil(seats / 50)`. The mockup's minimums (ATR 1, A220 3) do not follow one seat rule (72 seats would give 2): [**NO MODEL**, mockup inconsistent], the lot takes `ceil(seats / 50)` and the screen shows the server's value.
+- **Positions needed** (the "70 pour 77 postes"): derived from the timetable, default `pilots of a type = 2 × ceil(duty minutes per day of that type / (13 h × 60 × 0.7))`, so adding a line raises the need. The 0.7 is slack for rest and leave and is a tuning constant.
+- **Qualification**: a pilot flies a type only with a valid `staff_quals` row. Training: `POST /staff/:id/train` takes `courseDays` (CRJ: 21 days, 24 000 €; as the mockup) and the pilot is on `training` leave meanwhile.
+- **Recruitment**: `GET /staff/candidates` is **deterministic per company, per day, per base** (same approach as `board.ts`: `mulberry32(hashSeed(...))`), 6 to 10 candidates per family and qualification, with experience, reliability (`60..98`), morale, asking salary (`base[family] * (0.8 + experience factor)`) and notice (7 days). Hiring posts a **hiring premium of 1 month** (`hire_premium` ledger kind) and creates the `staff` row `notice_days` later.
+- **Payroll** is billed **monthly with the existing `runBilling`** (`planMonth` gains a `payroll` charge: sum of `salary * pool_count`), on the 1st like parking.
+- **Leave**: balance `25 days/year/person`; requests with an **impact preview** (`coverage` per day before and after, from the same function as the calendar); granted or refused by the player. Rest policy `legal|standard|generous` changes the rest minimums and an `effect` table (fatigue −x %, payroll +y %) [the "+5 people, +21 600 €/month, fatigue 38→24 %, risk −30 %" in the mockup are **[NO MODEL]**; B.8 gives the formulas].
+
+Shared types: `StaffFamily`, `StaffMember`, `Qualification`, `DutyState = { dutyMin, limitMin, endsAt|null, restHours, flight28d, flight12m, fatigue, medicalDays }`, `Coverage = 'ok'|'tight'|'short'|'none'`, `Candidate`, `LeaveRequest`.
+
+Routes:
+- `GET /staff?base=` returns `{ people: number, positions: number, payroll: number, families: FamilyRow[], blockers: Blocker[], watch: WatchItem[] }`. `FamilyRow = { family, label, headcount, need, availability: { onDuty, resting, leave, training, vacant }, salaries: number, note: string|null, children?: FamilyRow[] }` (pilots have children per type).
+- `GET /staff/:id` returns `{ member: StaffMember, duty: DutyState, week: DutyBlock[], last7d: { day: string, hours: number|null, kind: 'duty'|'rest'|'planned' }[], quals: Qualification[], contract: {...}, nextLeave: {from, to}|null, alert: { flightNo: string, overBy: number, detail: string }|null }`.
+- `GET /staff/candidates?family=&base=&qual=&sort=` returns `{ market: number, candidates: Candidate[], suggestion: { count: number, label: string } | null }`.
+- `POST /staff/hire` with `{ candidateId }` returns `{ member, startsAt: number, premium: number, balanceAfter: number }`. `409 insufficient_funds`, `409 candidate_taken`.
+- `POST /staff/:id/train` with `{ type }`; `POST /staff/:id/rest` (grant a rest now, effect: removes them from today's remaining legs); `POST /staff/:id/transfer` with `{ base }`.
+- `GET /staff/leave?from=&days=` returns `{ balance: number, resting: number, restingPilots: number, avgFatigue: number, coverage: { family, label, headcount, perDay: number, days: Coverage[] }[], alerts: [...], requests: LeaveRequest[], policy: RestPolicy, policies: PolicyOption[] }`.
+- `POST /staff/leave/:id` with `{ decision: 'grant'|'refuse' }`; `PUT /staff/rest-policy` with `{ policy }`.
+- `POST /staff/interim` with `{ family, qual, days }` hires a temporary pilot (1 450 € in the mockup) [**NO MODEL** for the price: default `1.2 * daily salary * 1.5`].
+
+Effects the server enforces: the line engine's crew check (B.2) reads `staff_duty` and `staff_leave` and refuses legs with `no_crew` or `duty_limit`; the player's own flights add to **their own** `staff_duty` only (the player is a captain; decision C4 says whether the player's hours count against the pool).
+
+Frontend (owner: fe-staff): `staff.ts`, `staff-hire.ts`, `staff-member.ts`, `staff-leave.ts`; `api-staff.ts`. Hash routes `#staff`, `#staff/hire`, `#staff/<id>`, `#staff/leave`. Hints from the mockup (`R` recruiter, `E` dérouler, `Tab` familles).
+
+### B.4 Lot FACILITIES: buildings at hubs (owner: be-facilities)
+
+**Simplest model.** A facility is a **building slot** on a hub with a **kind**, a **level**, a **monthly cost** and one **effect** from a short fixed list. No geometry on the server beyond a catalogue of slots per airport.
+
+Data model (`SCHEMA_V9`):
+- `facilities(id, hub_icao TEXT, slot TEXT /* 'MX2' */, kind 'maintenance'|'terminal'|'cargo'|'office'|'parking'|'airport', name TEXT, area_m2 INTEGER, owner 'airport'|'company'|'ai'|'available', company_id INTEGER, level INTEGER NOT NULL DEFAULT 1, UNIQUE(hub_icao, slot))`. Rows are **materialised on first use** of an airport from a catalogue in `shared/src/facilities.ts` (the 10 LFMN buildings of `airport-chart.js` are the first catalogue entry).
+- `facility_contracts(id, facility_id, company_id, kind 'lease'|'purchase', status 'active'|'ended', started_at, months INTEGER, monthly INTEGER, deposit INTEGER, principal INTEGER, notice_months INTEGER, level_works_until INTEGER, works_to_level INTEGER, ended_at INTEGER)`. A new table rather than widening `contracts`: `contracts.aircraft_id` is `NOT NULL` with a CHECK on `kind`, and SQLite cannot relax a CHECK without rebuilding the table (the v2 migration already does that dance once for `companies`). Billing reuses `planMonth` through a new charge kind.
+
+Catalogue (`shared/src/facilities.ts`): per airport size, a list of slots with `kind`, `area`, base rent, base price. The mockup's numbers anchor LFMN (large): maintenance hangar 18 500 €/month or 2 350 000 € (127 months of rent, so price = 127 * rent), bureaux, terminals (revenue share per passenger rather than rent), parking stands (the existing `PARKING_FEE_BY_SIZE`, so **stands are not a new facility**: `hubSpots` stays the source and the 3D plan shows it).
+
+Rules (pure):
+- **Effects** (one per kind, constants): maintenance hangar level 1 = maintenance cost −35 % and downtime ×0.5 for aircraft based at that hub; level 2 = heavy checks without ferry, 3 aircraft at once, AOG fixed in 4 h; level 3 = wide-bodies, sells maintenance to AI companies (≈ 30 000 €/month [**NO MODEL**: default `0.4 * (rent + payroll)`]); office = enables a hub manager and more staff slots; terminal = passenger fee revenue; cargo = enables a cargo kitchen/warehouse; operations centre = needed for the 24/7 network beyond N lines (decision C5).
+- **Levels**: cost, works duration (3 and 8 weeks in the mockup), staff required (technicians 6/10/16, chiefs 1/1/2). During works the facility works at the lower level.
+- **Rent vs buy**: same effects; rent has deposit (2 months), notice (3 months), no resale; purchase has resale at 75 % of price (`RESALE_FACTOR` is 0.8 for aircraft; buildings use 0.75 as the mockup says), upkeep 2 400 €/month, optional 80 % credit (reuses `loanOption` from `shared/src/finance.ts` with `LOAN_RATE`).
+- **Staff required** per level is checked at signing and monthly: facility stays at level but `understaffed: true` and its effect is halved when the roster is short (so STAFF is a dependency, not a blocker: until STAFF merges the check is skipped).
+- **Occupied by an AI company**: the AI companies take slots with a deterministic rule at seed (`MX1` yes, `CG1` cargo for Méridia), and may take free slots on a slow tick; this is flavour, keep it minimal (decision C6).
+
+Routes:
+- `GET /hubs/overview` returns `{ company: {...}, monthlyCost: number, hubs: HubOverview[], suggestion: { icao, flightsPerWeek, fromMonthly, text } | null }`. `HubOverview = { icao, name, role: 'main'|'secondary', facilities: FacilityRow[], monthlyCost, team: { total: number, byFamily: {...}, chief: {name, since}|null }, aircraft: { id, reg, typeName, status, note }[], renewals: { text, before: number }[] }`.
+- `GET /hubs/:icao/plan` returns `{ airport: string, layout: LayoutKey, buildings: Building[], filters: string[], summary: { yours, available, ai } }`. `Building = { slot, name, kind, owner: 'airport'|'player'|'ai'|'available', ownerName?: string, box: {x, y, w, d, h}, selected?: boolean }`. **The geometry (`box`, runways, taxiways) is client data** from the ported `airport-chart.js` (same as `AIRCRAFT` in `schematic.ts`); the server only returns slots, owners and prices. An airport without a drawn layout answers `layout: null` and the client falls back to the list view.
+- `GET /facilities/:id` returns `{ facility, offer: { lease: LeaseTerms, purchase: PurchaseTerms }, levels: LevelInfo[], required: { family, role, need, have, candidates }[], due: { today: number, monthly: number, balanceAfter: number } }`.
+- `POST /facilities/:id/lease` and `POST /facilities/:id/buy` with `{ level?: number, financing?: { downPct, months } }` return `{ contract, due, balanceAfter }`. Errors: `409 occupied`, `409 insufficient_funds`, `409 not_a_hub`.
+- `POST /facilities/:id/upgrade` with `{ toLevel }` starts works. `POST /facilities/:id/terminate`.
+
+Frontend (owner: fe-facilities): `hubs-overview.ts` (replaces the current `hubs.ts` "open a hub" screen; the buy-a-hub form stays as a panel), `hub-plan.ts`, `facility.ts`; `airport-chart.ts` (port of `airport-chart.js`); `api-facilities.ts`. Hash routes `#hubs` (kept, now the overview), `#hub/<icao>`, `#facility/<id>`. Backdrops `generated-14` (Facility) and `generated-15` (Hubs): copy `assets/generated-14.webp` and `-15.webp` into `packages/web/src/design/scenes/` and add them to `scenes.ts`.
+
+### B.5 Lot SAFETY: fatigue and incidents (owner: be-safety)
+
+**Simplest model.** An incident is rolled **once per resolved flight** (autonomous or player-flown) from a probability that is a pure function of the two inputs the mockup charts: crew duty hours and aircraft wear. The roll uses the flight id as the seed, so it is reproducible and testable. Players never see a random number they cannot explain.
+
+Rules (`shared/src/safety.ts`, pure):
+- `incidentRisk(dutyHours, wearPct) = base * dutyFactor(dutyHours) * wearFactor(wearPct)`, `base = 0.45 %` per flight (the average of the mockup's curve), `dutyFactor = 1` up to 8 h, then `1 + 3 × ((h − 8) / 5.25) ** 2`, which gives exactly ×4 at 13 h 15, as the mockup states (4 × 0.45 % = 1.8 %, the figure it shows, for an aircraft at about 40 % wear where the wear factor is 1.0), `wearFactor = 0.76 + 1.5 × (wear / 100) ** 2` (about 1.0 at 40 %, 1.4 at 63 %, 1.8 at 84 %). The check value is 1.8 % at 13 h 15 and 40 % wear.
+- **Severity** by a second seeded roll: minor (70 %), serious (25 %), grave (5 %), with cost ranges (minor 5 000 to 20 000 €, serious 40 000 to 120 000 €, grave 100 000 to 250 000 €), downtime (2 days, 14 days, aircraft grounded until a decision), reputation (0, −0.1 ★, −0.3 ★ in the mockup's stars; ×20 in stored points: 0, −2, −6, C17). Out-of-control causes (bird strike) are 15 % of minor ones and are insured.
+- **Safety index** `0..100` is the sum of three scores of the mockup, fatigue (max 40), aircraft state (max 40) and training (max 20): 27 + 29 + 16 = 72, the figure it shows. Each score starts at its maximum and loses points from the penalties below. Computed from STAFF fatigue, fleet wear and deferred repairs, and expiring qualifications.
+- **Insurance**: monthly premium `+x %` when incidents accumulate (the mockup: +12 % from December, 2 740 €/month). Posted by the existing monthly billing through `insuranceMonthly` with a multiplier.
+- **Levers** ("ce qui pèse aujourd'hui", +3/+4/+3 points): each is a computed action with a deep link (replace crew, schedule a service, open the leave planner).
+
+Data model (`SCHEMA_V10`): `incidents(id, company_id, at, flight_id, aircraft_id, severity, kind, title, detail, cost, covered, downtime_until, reputation_delta)`.
+
+Routes:
+- `GET /safety` returns `{ index: number, delta7d: number, parts: { fatigue: {points, max}, aircraft: {points, max}, training: {points, max} }, riskCurve: { dutyHours: number, risk: number }[], today: { flightNo, crew, risk, factor }[], levers: { label, detail, points, action: 'crew'|'maintenance'|'leave', ref: string }[], season: { total: number, covered: number, borne: number, insuranceFrom: string|null, insuranceDelta: number } }`.
+- `GET /safety/incidents?season=` returns the journal.
+
+Hooks: `finishFlight` (game.ts) and the line engine call `rollIncident(db, flight, crew, aircraft)` after settlement. **No new random source**: the roll is `mulberry32(hashSeed('incident:' + flightId))` (from `board.ts`).
+
+Frontend (owner: fe-safety): `safety.ts`; `api-safety.ts`; hash route `#safety`, key `J` for the journal.
+
+### B.6 Lot PARTS: spare parts and per-component wear (owner: be-parts)
+
+**Simplest model.** Wear stays **one number per aircraft** (`wear_pct`, already live) for the whole of v3 **except** on leased aircraft, where the five components of the "usure & remise à neuf" screen are derived from it by fixed weights; a refurbishment resets a component. Spare parts are a **policy per aircraft type** that changes one thing: how long a breakdown immobilises the aircraft.
+
+Rules (`shared/src/parts.ts`, pure):
+- **Components** with weights of wear: engines 0.35, landing gear 0.2, propellers/rotors 0.1 (turboprops and helicopters only), avionics 0.1, interior 0.15, paint 0.1. A component's wear is `clamp(wear_pct * w_scale + offset_by_age)`; an aircraft's `acquired` age (`year` of a lease offer) sets the offset. The mockup's per-component numbers (81, 76, 64, 70, 68, 58 %) are **[NO MODEL]** for a given aircraft: they come from `aircraft_components` seeded at acquisition from the offer's `year` and `airframeHours`.
+- **Effect of wear** (constants): engines → performance −3 % and fuel +3 % at 80 %; gear → reliability −2 pts; avionics → reliability −3 pts; interior → satisfaction −0.5 and load −4 %; paint → satisfaction −0.2. Performance and fuel feed `settle` (a new `perfFactor` input); reliability feeds the incident roll; satisfaction feeds SERVICE.
+- **Refurbish / replace**: cost per component by aircraft value, payback computed from the effect × the aircraft's hours per month (the mockup assumes 80 h) [formula in B.8], downtime days, and for a **leased** aircraft the net over the remaining months with and without the purchase option (the mockup's two totals).
+- **Spare-part policies** `none | critical | full` per type: `capital = Σ price(part) * qty`; **breakdown downtime** with the part in stock is 6 h, without it `deliveryDays` (2 to 5, deterministic from `hashSeed(aircraft + failureId)`) plus transport cost. Failure events are generated by the **wear threshold**, not by chance: at `wear_pct >= 80` the existing maintenance fires (`accrueWear`), and a **breakdown** (new) fires when an incident roll of severity serious or a deferred repair is hit. Policy changes only the immobilisation time. Expected ground days per year `≈ failuresPerYear(category, wear) * downtime(policy)`.
+- **Parts catalogue** per category in `shared/src/parts.ts`: ATR-class, jet-class, piston, with the parts of the mockup (engine module, propeller blade, avionics units, starter-generator, carbon brake, wheel and tyre) as a short table of `{ part, category, price, qtyCritical, qtyFull }`.
+
+Data model (`SCHEMA_V11`): `aircraft_components(aircraft_id, component, wear_pct, refurb_until, PRIMARY KEY(aircraft_id, component))`, `parts_stock(company_id, hub, part, qty, PRIMARY KEY(company_id, hub, part))`, `parts_orders(id, company_id, part, qty, hub, ordered_at, eta, cost, express)`.
+
+Routes:
+- `GET /warehouse/:hub` returns `{ facility: {...}|null, capital, capitalShare: number, expectedGroundDays: number, covered: { count, of }, aog: AogCase|null, policies: TypePolicy[], inventory: StockLine[] }`.
+- `PUT /warehouse/:hub/policy` with `{ icao, policy: 'none'|'critical'|'full' }` returns `{ capital, deltaGroundDays, annualSaving }`.
+- `POST /warehouse/:hub/order` with `{ partId, qty, express?: boolean }`.
+- `GET /me/fleet/:id/wear` returns `{ components: ComponentWear[], effects: {...}, choices: ChoiceTable, totals: { give: number, buy: number, cashCurve: number[] }, balanceAfter: number }`.
+- `POST /me/fleet/:id/refurbish` with `{ items: { component, action: 'overhaul'|'replace' }[] }` returns `{ cost, downUntil, balanceAfter }`; the aircraft is `maintenance` until then (reuses `status` and `maintenance_until`).
+
+Frontend (owner: fe-parts): `warehouse.ts`, `lease-wear.ts`; `api-parts.ts`. Hash routes `#warehouse/<hub>`, `#wear/<aircraftId>`.
+
+### B.7 Lot SERVICE: cabin service and catering (owner: be-service)
+
+**Simplest model.** Service is a **policy table** that sets a **per-passenger revenue**, a **per-passenger cost** and a **satisfaction** per haul class. Satisfaction feeds the load factor by a small term. The kitchen is a **capacity-limited cost line** on the meals the timetable consumes. Polish: ship last.
+
+Rules (`shared/src/service.ts`, pure):
+- **Haul class**: short (< 1 h 30), medium (1 h 30 to 4 h), long (> 4 h) from block time.
+- **Policy** per haul class and item (drinks, snack, hot meal, alcohol, films, Wi-Fi, comfort, duty-free): `'none'|'free'|'paid'`, with prices from the mockup as constants (snack 4 €, hot meal 14 €, alcohol 7 €, Wi-Fi 8 or 15 €, plaid 6 €). An item the aircraft cannot offer (ATR has no screens or Wi-Fi) is `unavailable`, derived from `category`.
+- **Per passenger**: `revenue = Σ paid item price * attachRate(item)`, `cost = Σ free item cost + paid item cost`, `satisfaction = base + Σ itemBonus(item, mode)`. The mockup's totals (on-board sales 1 920 €/day, service cost 6 480 €/day, satisfaction 4.2/5, +0.3 per month) are **[NO MODEL]**; B.8 says how they are computed.
+- **Meal quality levels** `economy | soigné | gastronomique`: cost per meal (the Service screen shows 9 €, 14 € and 23 € per meal with margins 61 %, 48 % and 29 %; the Cuisine screen shows costs of 3.10 €, 6.40 € and 14.80 € with margins 58 %, 46 % and 21 %. These two screens disagree: with 9 € against 3.10 € the margin would be 66 %. The lot takes the **price** from Service and the **cost** from Cuisine, and computes margin as `1 − cost / price`, giving 66 %, 54 % and 36 %, so neither screen's percentages are reproduced: C14), prep time, team needed, max output, satisfaction (3.6, 4.2, 4.7).
+- **Satisfaction → load factor**: `loadFactor *= 1 + 0.04 * (satisfaction - 3.5)`, clamped to ±6 %. Satisfaction below 3 for 14 days costs reputation (−0.02/day).
+- **Kitchen**: a facility (`kind: 'kitchen'`, needs FACILITIES) with capacity = `maxOutput(level)`; meals demanded per day = hot-meal passengers + snack passengers over the day's legs; over capacity means **meals not served** (satisfaction −1 on those legs, a caterer can be hired: `8.10 €/meal`, no cap, no gastronomique). Staff: cooks, prepared by STAFF as the `kitchen` family.
+- Changes **apply the next day** (as the mockup says).
+
+Data model (`SCHEMA_V12`): `service_policy(company_id, haul TEXT, item TEXT, mode TEXT, PRIMARY KEY(company_id, haul, item))`, `kitchen(company_id, hub, quality, provider 'own'|'caterer', since)`.
+
+Routes: `GET /service` and `PUT /service/policy` (`{ haul, item, mode }`), `PUT /service/meal-quality` (`{ quality }`) with a **preview** (`GET /service/preview?quality=` returns the deltas of the mockup's "Passer en gastronomique": satisfaction, gross margin, meals per day, cooks needed); `GET /kitchen/:hub`, `PUT /kitchen/:hub` (`{ quality?, provider? }`), `POST /kitchen/:hub/quote` (caterer quote, deterministic).
+
+Frontend (owner: fe-service): `service.ts`, `kitchen.ts`; `api-service.ts`. Hash routes `#service`, `#kitchen/<hub>`.
+
+### B.8 Numbers the mockup shows that no model produces
+
+Each row says what the lot adopts. "Calibrated" means the formula is tuned so the mockup's sample value comes out (so the screen can reproduce the picture with real data).
+
+| Number in the mockup (screen) | Status today | Lot adopts |
+|---|---|---|
+| Load factor 78 %, revenue/day 41 500 € (Ligne · détail) | No load factor exists. A real run of `settle` for the mockup's own line (ATR 72, 162 NM, 78 % load, 8 legs) gives **33 456 €/day revenue** at full autonomy. The mockup says 41 500 € | `loadFactor` from the demand model (B.2). The mockup is **~24 % above** what v2's economy pays. Decision C1 sets the autonomy factor; the plan does **not** inflate payouts to match the picture |
+| Margin 9 400 € on 41 500 € (23 %) | Margin is revenue − fuel − fees − maintenance − crew, which is a different split (fuel 12 800, fees 7 300, crews 6 900, maintenance 5 100) | In the model: fuel 2 936, fees 4 052, maintenance 2 816 and crew about 1 430 a day (4 ATR pilots at the 7 323 €/month that 95 200 € for 13 pilots implies, and 4 cabin crew at 3 400 €, which is 61 200 € for 18) for the same line. The mockup's costs are 4.4× the model's for fuel, 4.8× for crews and 1.8× for fees and for maintenance. A line's margin on v2 numbers is **66 %** at full autonomy, 58 % at 80 %, **33 % at 50 %**; the mockup's 23 % sits between 40 % (16 %) and 50 %. Decision C1 |
+| Demand 5 200 pax, forecast +66 500 €/week (Ligne · création) | None | `weeklyDemand` calibrated to 5 200 for LFMN-LEBL; forecast = Σ legs of one week through the same `settle`, so forecast and result agree by construction. The mockup's revenue per passenger (111 €) vs the model's 120 € is within 8 % |
+| On-time 91 %, 23 flights done, 2 cancelled | None | Counters over `scheduled_flights` of the day (B.2) |
+| Crew duty 9 h 13 of 13 h, limit 21:45Z | None | `staff_duty` and the limits in B.3 |
+| 70 people for 77 positions, payroll 345 500 €/month | None | `staff` counts and `salary * pool_count`; positions from the timetable (B.3). Salary levels set from the mockup: ATR captain 6 200 € (the Staff member card) to 13 800 € (a CRJ captain with 8 900 h) |
+| Fatigue 38 %, safety index 72/100, incident 1.8 % | None | B.3 fatigue formula and B.5 `incidentRisk` (13 h 15 gives ×4, 1.8 % check value) |
+| "+5 people, +21 600 €/month, fatigue 38→24 %, risk −30 %" (rest policy generous) | None | Table of three policies in `shared/src/staff.ts`: extra headcount = `ceil(0.07 * pilots + 0.07 * cabin)`; payroll delta = extra headcount × mean salary; fatigue and risk deltas are constants per policy. The figures are the **mockup's for the demo company**; other companies get the same percentages applied to their own base |
+| Hangar rent 18 500 €/month, price 2 350 000 € (127 months), levels 420 000 € and 1 150 000 €, deposit 37 000 € | None | Facility catalogue constants (B.4); price = 127 × rent, deposit = 2 × rent, level costs per kind |
+| Maintenance −35 % and downtime ×0.5 (hangar level 1), AOG 4 h (level 2), 30 000 €/month revenue (level 3) | None | B.4 constants; level 3 revenue is `0.4 × (rent + payroll)` [no source in the mockup] |
+| Spare parts: kit 382.5 k€ (ATR), 65 k€, 33.9 k€; expected ground days 4, 5, 4, 11; one ground day worth 9 800 €, 14 200 €, 8 600 €, 3 400 € | None | `parts` catalogue prices from the mockup; **one ground day = one day of expected line revenue of that type**, so the 9 800 € for the ATR is a real function of the lines. Expected ground days from `failuresPerYear(category, wear) × downtime(policy)` [calibrate on the four values] |
+| Part delivery date and AOG story (F-HAZF) | None | Deterministic delivery from `hashSeed`; the F-HAZF case is a **fixture**, not a rule |
+| Component wear 81 / 76 / 64 / 70 / 68 / 58 %, payback "8 mois", "37 mois", net over 24 months (Location · usure) | One `wear_pct`, no component | B.6 components; payback = `cost / (monthly gain)` with `monthly gain = effectSize × hoursPerMonth × revenuePerHour` (the mockup assumes 80 h/month, and so does the default) |
+| On-board sales 1 920 €/day, service cost 6 480 €/day, satisfaction 4.2/5 (+0.3/month) | None | B.7: Σ over the day's legs of per-passenger policy revenue and cost; satisfaction is the passenger-weighted mean, a **monthly trend** is the difference of two month-ends |
+| Meals 548 (312 snacks + 236 hot), capacity 620, margin 46 % | None | Derived from the day's timetable and the quality level (B.7); the mockup's 515 with one cook absent is `capacity × onDutyCooks/needed` |
+| Interrupted line: −58 000 € lost, +34 800 €/day, −0.1 reputation | None | B.2 stoppage cost; lost revenue = cancelled legs' expected revenue |
+| "Dépôt 37 000 €, 12 mois minimum" (hangar offer) vs "Caution 37 000 €, 36 mois" (contract screen) | Two screens, two terms for the **same** building (18 500 €/month) | Not a model gap: a mockup inconsistency. Lot FACILITIES uses 36 months (the contract screen) and flags it as Open question (decision C9) |
+| Stand fees: 4 stands for 8 400 €/month, so 2 100 € each (Hubs · vue d'ensemble) | `PARKING_FEE_BY_SIZE.large = 3 900` per aircraft per month, already live | Server value (3 900). Another case of C10 |
+| Hub plan: LFMN "4 sur 6" stands and "4 sur 10" parkings | Parking spots per hub are 10 (`PARKING_SPOTS_PER_HUB`) | Real: 10. The 6 on the plan is a drawing choice (`airport-chart.js` draws 6 stands). Keep 10 |
+| Distances 162 / 150 / 262 NM in the mockup | `distanceNm` great-circle gives LFMN-LFLL **153**, LFLL-LFML **137**, LFMN-LEBL **268** | The mockup uses rounder, longer numbers (routing). The server uses `distanceNm`; screens show the server's value. Flagged in C10 |
+
+### B.9 Lot order, owners and independence
+
+Ordered by **playable value** (Chloé's rule: lines, operations and staff are the core loop; catering and kitchen are polish). Each lot has an owner, its migration, and the files it owns, and is shippable alone behind the feature check (a 404 means "off").
+
+| # | Lot | Owner | Needs | Migration | Playable value | Owner files |
+|---|---|---|---|---|---|---|
+| R1 | **HUD and keys**: 8 tabs (`network`, `hubs` added, Accueil rename, tight padding), `F1` and `Space` in `shortcutOf`, one-argument routes, the v2 hint gaps of A.2, the 2 new backdrops copied into `scenes/` | fe-hud | nothing | none | Unblocks every other screen's entry point | `screen.ts` (`TABS`), `hud.ts`, `keys.ts`, `scenes.ts`, `messages.ts` (block `// ---- v3 hud`), `style.css`, `screens/{flight,company-sheet}.ts` (hints only) |
+| S1 | **LINES backend**: clock note, line engine, ticks, forecast, rotations, ops board | be-lines | nothing (crew check stubbed) | `SCHEMA_V7` | The core loop starts: lines earn while she is away | `server/src/lines.ts`, `routes-lines.ts`, `shared/src/lines.ts`, `db.ts` (V7), `app.ts` (1 line), `ai.ts` (assigned aircraft only) |
+| F1 | **LINES frontend**: network, line, creation, ops, `network-map.ts` | fe-lines | S1 contract | none | She can see and create lines | `screens/{network,line,line-new,ops}.ts`, `network-map.ts`, `api-lines.ts` |
+| S2 | **STAFF backend** | be-staff | S1 | `SCHEMA_V8` | Lines now fail for real reasons (no crew, duty limit, leave) | `server/src/staff.ts`, `routes-staff.ts`, `shared/src/staff.ts`, `finance.ts` (payroll charge) |
+| F2 | **STAFF frontend** | fe-staff | S2 | none | She can hire, rest and plan leave | `screens/staff*.ts`, `api-staff.ts` |
+| S3 | **FACILITIES backend** | be-facilities | S1 | `SCHEMA_V9` | Money sinks with a real effect (hangar, offices) | `server/src/facilities.ts`, `routes-facilities.ts`, `shared/src/facilities.ts` |
+| F3 | **FACILITIES frontend**: hubs overview, 3D plan, facility contract, `airport-chart.ts` | fe-facilities | S3 | none | Buildings she can rent and see | `screens/{hubs-overview,hub-plan,facility}.ts`, `airport-chart.ts`, `api-facilities.ts`, `scenes.ts` (2 backdrops) |
+| S4 | **SAFETY backend** | be-safety | S2 | `SCHEMA_V10` | Overworking staff has a price | `server/src/safety.ts`, `routes-safety.ts`, `shared/src/safety.ts`, `game.ts` (hook in `finishFlight`) |
+| F4 | **SAFETY frontend** | fe-safety | S4 | none | | `screens/safety.ts`, `api-safety.ts` |
+| S5 | **PARTS backend** (parts, components, refurbish) | be-parts | S3 | `SCHEMA_V11` | Maintenance becomes a decision | `server/src/parts.ts`, `routes-parts.ts`, `shared/src/parts.ts` |
+| F5 | **PARTS frontend** (warehouse, lease wear) | fe-parts | S5 | none | | `screens/{warehouse,lease-wear}.ts`, `api-parts.ts` |
+| S6 | **SERVICE backend** (service, kitchen) | be-service | S2, S3 | `SCHEMA_V12` | Polish | `server/src/service.ts`, `routes-service.ts`, `shared/src/service.ts` |
+| F6 | **SERVICE frontend** | fe-service | S6 | none | Polish | `screens/{service,kitchen}.ts`, `api-service.ts` |
+| P | **Restyle** of the changed frames | none | R1 | none | None. A.2 shows the 12 moved frames have no visual change beyond the HUD, and the 4 content changes are in R1 or are docs. **There is no restyle lot**: R1 covers it | none |
+
+Independence: S1 and R1 start at once. F1 needs only the S1 contract (fixtures). S2 and S3 both depend on S1's tick but touch different files and different tables, so they run in parallel. The only shared server files are `app.ts` (one `register*` line per lot), `db.ts` (one migration per lot) and `finance.ts` (S2 adds a payroll charge, S3 a facility charge, each as a separate function in `planMonth`'s charge list; S3 merges after S2 or rebases the 5-line hunk). Shared web files are `routes.ts`, `messages.ts`, `scenes.ts` and `screen.ts`; every lot appends its own block. Merge order: R1, S1, F1, S2, F2, S3, F3, S4, F4, S5, F5, S6, F6.
+
+Each lot's definition of done: new tests next to the code (`*.test.ts`) for the pure rules in `shared/` and for the routes through `harness.ts`; `npm run typecheck`, `npm test` green; the new route answers its contract shape with fixtures in a web view-model test (as `finance-view.test.ts`); no change to another lot's section of this file.
+
+### B.10 Routes and keys (from "Carte des parcours & navigation clavier" and each frame's HUD Bottom)
+
+Global: tabs Q/E cycle **Accueil, Vol en cours, Jobs, Réseau, Flotte, Compagnie, Historique, Classement**; Réglages by the gear. `Échap` back (from a tab, opens the menu), `Entrée` main action, `↑ ↓` list, `V` view in Vol en cours, `F1` help, gamepad A/B/LB/RB.
+
+Reading the table. The *Hint keys* are what the frame's HUD Bottom shows, read from the pen file. **`Tab` in a hint is bound to a letter** (A.0, point 2; C17): the letter in brackets is the proposed alias, chosen to avoid the letters the same screen already uses. *Map keys* are the extra single keys that only the keyboard map names. Back targets are inferred from the hint labels ("Retour aux hubs", "Retour à la compagnie").
+
+| Screen | Hash | Back | Hint keys (HUD Bottom) | Map keys |
+|---|---|---|---|---|
+| Réseau · carte des lignes | `#network` | `#dashboard` | `↑↓` ligne suivante, `Tab` [`T`] autre réseau, `Entrée` ouvrir la ligne | `N` nouvelle ligne, `O` opérations |
+| Ligne · détail & planning | `#line/<id>` | `#network` | `←→` jour précédent / suivant, `Souris` choisir une rotation, `Entrée` ouvrir le vol | `Espace` mettre en pause |
+| Ligne · création | `#line-new` | `#network` | `Souris` glisser un vol, `Entrée` ouvrir la ligne, `F1` aide | n/a |
+| Opérations · centre 24/7 | `#ops` | `#network` | `Tab` [`T`] filtres, `Entrée` sélectionner, `F1` aide | `Entrée` traiter l'alerte |
+| Ligne · interrompue | `#line/<id>` (state) | `#network` | `↑↓` choisir une solution, `Entrée` appliquer, `F1` aide | n/a |
+| Réseau · compagnie IA | `#network/<companyId>` | `#network` | `↑↓` ligne suivante, `Tab` [`T`] autre réseau, `F` fiche de la compagnie | n/a |
+| Hubs · vue d'ensemble | `#hubs` | `#dashboard` | `←→` changer de base, `Entrée` plan 3D, `F1` aide | n/a |
+| Hub · plan de l'aéroport 3D | `#hub/<icao>` | `#hubs` | `Souris` choisir un bâtiment, `←→` bâtiment suivant, `Entrée` louer | n/a |
+| Facility · contrat & améliorations | `#facility/<id>` | `#hub/<icao>` | `Tab` [`T`] louer / acheter, `←→` niveau, `Entrée` confirmer | n/a |
+| Staff · effectifs | `#staff` | `#hubs` | `↑↓` choisir une famille, `Entrée` dérouler, `E` recrutement (see C16) | `R` recruter |
+| Staff · recrutement | `#staff/hire` | `#staff` | `Tab` [`T`] filtres, `↑↓` choisir un candidat, `Entrée` embaucher | n/a |
+| Staff · fiche d'un membre | `#staff/<id>` | `#staff` | `←→` membre précédent / suivant, `Entrée` trouver un remplaçant, `F1` aide | n/a |
+| Staff · congés & repos | `#staff/leave` | `#staff` | `←→` changer de jour, `Tab` [`T`] par famille ou par personne, `Entrée` voir le jour | n/a |
+| Sécurité · fatigue & incidents | `#safety` | `#hubs` | `↑↓` parcourir les facteurs, `Entrée` agir sur ce facteur, `J` journal des incidents | n/a |
+| Entrepôt · pièces de rechange | `#warehouse/<hub>` | `#hub/<icao>` | `←→` changer de politique, `Entrée` commander le kit critique, `F1` aide | n/a |
+| Service à bord · confort & repas | `#service` | `#hubs` | `←→` niveau de confort, `Entrée` changer gratuit ou payant, `F1` aide | n/a |
+| Cuisine · production des repas | `#kitchen/<hub>` | `#hub/<icao>` | `←→` niveau de qualité, `Tab` [`T`] cuisine ou traiteur, `Entrée` appliquer | n/a |
+| Location · usure & remise à neuf | `#wear/<aircraftId>` | `#fleet` | `↑↓` composant, `←→` laisser / remettre à neuf / remplacer, `Entrée` lancer les travaux | n/a |
+
+Entry points not drawn in the mockup, so they are my inference (decision C8): Staff, Sécurité and Service à bord have no tab; their "Retour à la compagnie" hint sends back to the Compagnie tab, so they are reached by buttons on Hubs · vue d'ensemble. Entrepôt and Cuisine are reached from the facility list of a hub ("Retour aux installations", "Retour au hub").
+
+## Part C. Product decisions only Chloé can make
+
+Each has the **default the lots take** until she answers. They are ordered by how early they are needed.
+
+| # | Question | Why it matters | Recommended default |
+|---|---|---|---|
+| C1 | **Do autonomous lines earn while she is offline, and at what rate vs a flown job?** | It decides whether the game rewards playing or waiting. v2 pays one flown ATR leg (162 NM, 56 pax) 2 788 € net. The mockup's line flies 8 such legs a day: **22 222 €/day at full rate, 15 534 at 80 %, 5 494 at 50 %** (computed with `settle`, crew included), per line, with no effort. One line at 80 % nets as much as 5.6 flown legs a day and at full rate as 8, with no effort, so the player's own flights stop mattering; at 50 % it is about 2 flown legs | **Yes, earn offline, at 50 % of a flown job's revenue** (`AUTONOMY_FACTOR = 0.5`, one constant in `shared/src/lines.ts`, to be tuned by play). At 50 % the line margin (33 %) is nearest the mockup's 23 %. Crews, fuel, fees and wear are paid in full. Lines stop after 14 days without a login (B.2 item 3). Flying a rotation yourself (B.2 take) pays 100 % |
+| C2 | **Does a paused or interrupted line cost money?** | The mockup shows −3 200 €/day of fixed costs | **No extra daily fee**; the aircraft keeps its monthly parking and rent, the slot is lost after 14 days (the mockup's "créneaux perdus") |
+| C3 | **Can she switch the whole network off?** ("Exploitation 24/7" switch) | If yes, it needs a reason to ever switch it off | **Yes.** Off means no legs generated, nothing paid, no revenue. A grey badge on every HUD tab reminds her |
+| C4 | **Does the player count as crew?** (her own flying hours count against the pool, her rank) | Without this the player is a free extra captain | **No.** The player's flying is separate from line crews. The staff pool is the airline's employees |
+| C5 | **Is the Opérations 24/7 centre a building to buy, or always free?** (a building "Centre d'opérations" appears on the airport plan, available to rent) | It could gate the number of lines | **Free up to 6 lines, then it requires the building.** Cheap to reverse |
+| C6 | **Do AI companies compete for buildings in real time?** | Flavour, but it makes "occupé par Méridia" true | **Seed only**: AI companies hold a fixed set of slots, no take-over at runtime |
+| C7 | **Is hiring and firing real money, in euros per month, forever?** (payroll is the biggest cost in the mockup, 345 500 €/month for 70 people) | A company can go bankrupt from payroll alone | **Yes**, with the existing `bankruptcyBailout` realism toggle behaving as for rents. Firing costs 3 months of salary |
+| C8 | **Where do Staff, Sécurité and Service live in the HUD?** (no frame has a tab for them) | Entry points | **Under Compagnie**: the Hubs overview carries buttons to Staff, Sécurité, Service; each returns there |
+| C9 | **Hangar lease terms** (12 months minimum with 37 000 € deposit on the plan; 36 months with 37 000 € on the contract screen) | The mockup contradicts itself | **36 months, 3 months notice**, as the contract screen (the later, more detailed frame) |
+| C10 | **Mockup distances and money are rounder and higher than the server's** (LFMN-LFLL 162 vs 153 NM; line revenue 41 500 € vs 33 456 €) | Screens will show different numbers from the pictures | **Server numbers win.** Do not tune the model to match the mockup values; change the mockup |
+| C11 | **Does the player have to hire staff at all** for lines to run? | Without it lines work out of the box | **Yes from lot STAFF on.** Existing companies get a **starter crew** worth the current need at no cost on migration, so nobody's lines stop at the upgrade |
+| C12 | **How much of the cabin and kitchen economy should change the headline profit?** | Polish systems can drown the core loop | **Small**: satisfaction moves load factor by at most ±6 %; on-board sales are under 6 % of line revenue at default settings |
+| C13 | **3D model sourcing** (Lisez-moi says Flotte, catalogue, purchase and comparison will show a real glTF model) | Not part of v3 lots | **Out of scope**; keep the point-cloud schematic and the backdrop images |
+| C14 | **Meal margins disagree between the Service and Cuisine screens** (61/48/29 % vs 58/46/21 %, and neither matches price against cost) | The picture and the model cannot both be right | **Compute from price and cost** (B.7); fix the mockup labels later |
+| C15 | **The mockup's rivals (Méridia Cargo, Alpes Air Link) are not the AI companies the server seeds** (Aurora Airways, Redwood Regional, Skyline Express, Pacific Wings, Sahara Cargo, Alpine Charter, Outback Bush Air, Nordic Link, hubs EGLL, KSEA, KJFK, RJTT, OMDB, LSZH, YSSY, ENGM) | The AI network screens and "face à face" need rivals on the player's own pairs | **Add 2 AI seeds based in France** (a regional passenger airline at LFML and a cargo airline at LFLL region), keep the 8 existing ones, and name them as she likes. Names in the mockup are placeholders |
+| C16 | **Staff shortcut conflict**: the keyboard map says `R` recruter, the Staff screen hint says `E` recrutement (E is also next-tab) | One key must win | **`R`** as the map says; `E` stays next-tab |
+
+| C17 | **Two UX calls the code already made differently from the mockup.** (a) `Tab` stays the focus key and each `Tab` action gets a letter (leaderboard uses `T`). (b) Reputation: the HUD shows 0 to 100 (start 50, +0.1 per verified flight) while the mockup shows 4,6 stars and prices v3 penalties in stars | (a) is an accessibility choice; (b) changes what every penalty means | (a) **Keep it and show the letter in the hint.** (b) **Keep 0 to 100 in the code and the HUD; convert the mockup's stars at ×20** (−0.1 ★ = −2 points), so a stoppage day hurts about as much as a hard landing (−1.5) |
+
+## Appendix: what v3 does not touch
+
+`packages/` bridge code, `sim/`, SayIntentions, the MSFS panel constraints, and the existing flows (accept job, fly, complete, verify, anti-cheat) are unchanged. v2's AI tick keeps running as is for AI aircraft that are not assigned to a line. Nothing in v3 changes `settle` except two optional inputs added by PARTS (`perfFactor`) and SERVICE (via the load factor, not `settle`).
