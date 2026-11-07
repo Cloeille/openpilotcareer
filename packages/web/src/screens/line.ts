@@ -1,4 +1,4 @@
-import type { FleetAircraft } from '@opc/shared';
+import { DEFAULT_NOTICE_DAYS, type FleetAircraft } from '@opc/shared';
 import { act } from '../actions.ts';
 import { fetchLine, fetchProblem, pauseLine, resolveLine, resumeLine, takeRotation, type LineDetail, type LineProblemView, type ResolveOption, type ScheduledFlight } from '../api-lines.ts';
 import { button, icon, panel, signLocation, stat, unknownValue } from '../components.ts';
@@ -6,7 +6,7 @@ import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import { dayMedium, dayShort, dayTime, fill, typeNames } from '../lines-ui.ts';
 import {
-  CAUSE_KEYS, causesOf, dayKind, meterFraction, daysBetween, ganttLanes, isoDay, minuteOfDay, MINUTES_PER_DAY, NETWORK_TAB, pnlParts, progressPct, assuredDays, RULER_HOURS, stepDay, type Lane, type Segment,
+  APPLIED_KEYS, CAUSE_KEYS, causesOf, cheaperRemedy, dayKind, defaultRemedy, meterFraction, daysBetween, ganttLanes, groupSlots, isoDay, minuteOfDay, MINUTES_PER_DAY, NETWORK_TAB, pnlParts, progressPct, assuredDays, RULER_HOURS, stepDay, type Lane, type Segment, type SlotGroup,
 } from '../lines-view.ts';
 import type { Key } from '../messages.ts';
 import { pollWhileShown } from '../live-poll.ts';
@@ -16,7 +16,9 @@ import { h } from '../ui.ts';
 const POLL_LINE_MS = 10_000;
 /** The day of the strip the player looks at, kept while the screen redraws. */
 let day: { line: number; date: string } | null = null;
-let option: ResolveOption = 'reassign';
+/** The remedy picked in the panel (null until the player picks: the cheapest way to fly now is then offered) and whether recruiting also books the interim bridge (on by default). */
+let option: ResolveOption | null = null;
+let withBridge = true;
 
 /** `#line/<id>`: the line's planning, or, when the line is interrupted, what is blocking it and how to get it going again. */
 export async function lineScreen(ctx: Ctx): Promise<Screen> {
@@ -192,31 +194,68 @@ function interrupted(ctx: Ctx, d: LineDetail, p: LineProblemView): Screen {
     fact(t('ln.cost.lost'), fm.money(cost.lostRevenue), t('ln.cost.perDay', { amount: fm.money(cost.perDay) })),
     fact(t('ln.cost.rep'), fm.num(cost.reputation, 1).replace('-', '−'), cost.slotsLostAt === null ? t('ln.cost.repSub') : t('ln.cost.slots', { at: dayMedium(cost.slotsLostAt) })));
 
-  // ------------------------------------------------------------ the three ways out
-  const reassign = p.options.reassign;
+  // ------------------------------------------------------------ the ways out
+  const opts = p.options;
+  const reassign = opts.reassign;
   const candidate = reassign?.aircraft[0] ?? null;
-  const choices: { id: ResolveOption; title: string; sub: string; date: string; impact: string; note?: string; disabled: boolean }[] = [
+  const balance = ctx.snap.me.company.balance;
+  const cheaper = cheaperRemedy(opts);
+  const who = (g: Pick<SlotGroup, 'family' | 'type'>): string => (g.family === 'pilot' ? t('ln.slot.pilot', { type: g.type ?? '' }) : t('ln.slot.cabin'));
+  const bridgeLines = (slots: SlotGroup[]): string[] => slots.map((g) => t('ln.slot', {
+    n: g.people, who: g.defaulted ? `${who(g)} (${t('ln.slot.default', { days: DEFAULT_NOTICE_DAYS })})` : who(g), date: dayMedium(g.until), amount: fm.money(g.cost),
+  }));
+  const recruit = opts.recruit && opts.recruit.candidates > 0 ? opts.recruit : null;
+  type Choice = { id: ResolveOption; title: string; sub: string; lines?: string[]; badge?: string; date: string; impact: string; note?: string; disabled: boolean };
+  const choices: Choice[] = [
+    ...(opts.interim ? [{ id: 'interim' as const, title: t('ln.opt.interim'), sub: t('ln.opt.interimSub', { n: opts.interim.people, date: dayMedium(opts.interim.until) }), lines: bridgeLines(groupSlots(opts.interim.perSlot)),
+      ...(cheaper === 'interim' ? { badge: t('ln.opt.cheapest') } : {}), date: t('ln.opt.now'), impact: t('ln.opt.cost', { amount: fm.money(opts.interim.cost) }), disabled: false }] : []),
+    ...(opts.startNow ? [{ id: 'start_now' as const, title: t('ln.opt.startNow', { n: opts.startNow.people, fee: fm.money(opts.startNow.cost / opts.startNow.people) }), sub: t('ln.opt.startNowSub'),
+      lines: opts.startNow.perSlot.map((x) => t('ln.slot.start', { n: x.people, who: who(x), amount: fm.money(x.cost) })), ...(cheaper === 'start_now' ? { badge: t('ln.opt.cheapest') } : {}),
+      date: t('ln.opt.now'), impact: t('ln.opt.cost', { amount: fm.money(opts.startNow.cost) }), disabled: false }] : []),
     { id: 'reassign', title: candidate ? t('ln.opt.reassign', { reg: candidate.registration, type: candidate.icao }) : t('ln.opt.reassignNone'), sub: candidate ? t('ln.opt.reassignSub', { at: dayMedium(candidate.freeAt) }) : t('ln.opt.reassignNoneSub'),
       date: candidate ? dayMedium(candidate.freeAt) : '–', impact: reassign ? t('ln.opt.perDay', { amount: fm.signedMoney(reassign.deltaPerDay) }) : '–', note: reassign ? t('ln.opt.reassignNote', { n: reassign.flightsPerDay / 2 }) : undefined, disabled: !candidate },
-    { id: 'recruit', title: t('ln.opt.recruit'), sub: p.options.recruit ? t('ln.opt.recruitSub', { n: p.options.recruit.candidates, amount: fm.money(p.options.recruit.monthly) }) : t('ln.opt.recruitNone'),
-      date: p.options.recruit?.readyAt ? dayMedium(p.options.recruit.readyAt) : '–', impact: p.options.recruit ? t('ln.opt.recruitImpact') : '–', disabled: !p.options.recruit },
-    { id: 'pause', title: t('ln.opt.pause'), sub: t('ln.opt.pauseSub'), date: t('ln.opt.pauseDate'), impact: p.options.pause.fixedCostPerDay > 0 ? t('ln.opt.pauseFixed', { amount: fm.money(p.options.pause.fixedCostPerDay) }) : t('ln.opt.pauseFree'), note: t('ln.opt.pauseNote'), disabled: false },
+    { id: 'recruit', title: t('ln.opt.recruit'), sub: recruit ? t('ln.opt.recruitSub', { n: recruit.candidates, amount: fm.money(recruit.monthly) }) : opts.recruit ? t('ln.opt.recruitCovered') : t('ln.opt.recruitNone'),
+      date: recruit?.readyAt ? dayMedium(recruit.readyAt) : '–', impact: recruit ? t('ln.opt.recruitImpact') : '–', disabled: !recruit },
+    { id: 'pause', title: t('ln.opt.pause'), sub: t('ln.opt.pauseSub'), date: t('ln.opt.pauseDate'), impact: opts.pause.fixedCostPerDay > 0 ? t('ln.opt.pauseFixed', { amount: fm.money(opts.pause.fixedCostPerDay) }) : t('ln.opt.pauseFree'), note: t('ln.opt.pauseNote'), disabled: false },
   ];
-  if (choices.find((c) => c.id === option)?.disabled) option = choices.find((c) => !c.disabled)?.id ?? 'pause';
-  const chosen = (): (typeof choices)[number] => choices.find((c) => c.id === option)!;
+  if (!option || !choices.some((c) => c.id === option && !c.disabled)) option = defaultRemedy(opts);
+  const chosen = (): Choice => choices.find((c) => c.id === option)!;
+  /** Euros the chosen remedy takes now, as the server priced it. */
+  const bridged = (): boolean => withBridge && !!recruit?.bridge;
+  const price = (id: ResolveOption): number => (id === 'interim' ? opts.interim?.cost ?? 0 : id === 'start_now' ? opts.startNow?.cost ?? 0 : id === 'recruit' && recruit ? recruit.premium + (bridged() ? recruit.bridge!.cost : 0) : 0);
 
   const primary = h('div', { class: 'ln-apply' });
+  const applyLabel = (id: ResolveOption, reg?: string): string => {
+    const amount = fm.money(price(id));
+    return id === 'reassign' ? t('ln.apply.reassign', { reg: reg ?? '' }) : id === 'interim' ? t('ln.apply.interim', { amount }) : id === 'start_now' ? t('ln.apply.startNow', { amount })
+      : id === 'recruit' ? (bridged() ? t('ln.apply.recruitBridge', { amount }) : t('ln.apply.recruit')) : t('ln.apply.pause');
+  };
+  const bridgeBox = (): HTMLElement | null => (option === 'recruit' && recruit?.bridge
+    ? h('label', { class: 'ln-bridge' }, h('input', { type: 'checkbox', id: 'ln-bridge', checked: withBridge, onchange: (e: Event) => { withBridge = (e.target as HTMLInputElement).checked; paintApply(); } }),
+      h('span', { class: 'col tight' }, h('span', { class: 'strong' }, t('ln.bridge.check')), h('span', { class: 'muted small' }, t('ln.bridge.sub', { amount: fm.money(recruit.bridge.cost), date: dayMedium(recruit.bridge.until) })),
+        ...bridgeLines(groupSlots(recruit.bridge.perSlot)).map((l) => h('span', { class: 'dim small' }, l))))
+    : null);
+  const costNote = (c: Choice): HTMLElement | null => {
+    const total = price(c.id);
+    if (total === 0) return null;
+    const sum = c.id === 'recruit' && bridged() ? t('ln.pay.sum', { premium: fm.money(recruit!.premium), bridge: fm.money(recruit!.bridge!.cost), total: fm.money(total) }) : null;
+    return h('div', { class: 'col tight' }, sum ? h('span', { class: 'muted small' }, sum) : null,
+      h('span', { class: balance < total ? 'ln-down small' : 'dim small' }, balance < total ? t('ln.pay.short') : t('ln.pay.after', { amount: fm.money(balance - total) })));
+  };
   const paintApply = (): void => {
     const c = chosen();
-    fill(primary, button(applyLabel(c.id, candidate?.registration), { variant: 'primary', key: t('key.enter'), disabled: c.disabled, onclick: () => void apply() }),
-      option === 'recruit' ? null : p.options.recruit ? button(t('ln.opt.candidates'), { variant: 'ghost', onclick: () => go('#staff/hire') }) : null);
+    fill(primary, bridgeBox(), costNote(c), button(applyLabel(c.id, candidate?.registration), { variant: 'primary', key: t('key.enter'), disabled: c.disabled || balance < price(c.id), onclick: () => void apply() }),
+      option === 'recruit' || !recruit ? null : button(t('ln.opt.candidates'), { variant: 'ghost', onclick: () => go('#staff/hire') }));
   };
-  const applyLabel = (id: ResolveOption, reg?: string): string => (id === 'reassign' ? t('ln.apply.reassign', { reg: reg ?? '' }) : id === 'recruit' ? t('ln.apply.recruit') : t('ln.apply.pause'));
   async function apply(): Promise<void> {
     const c = chosen();
     if (c.disabled) return;
-    const ok = await act(t(`ln.applied.${c.id}`), () => resolveLine(line.id, c.id, c.id === 'reassign' ? candidate?.id : undefined), async () => { redraw(); });
-    if (ok && c.id === 'recruit') go('#staff/hire');
+    const bridge = c.id === 'recruit' && bridged();
+    const extra = c.id === 'reassign' ? (candidate ? { aircraftId: candidate.id } : {}) : c.id === 'recruit' ? { withInterim: bridge } : {};
+    const done = bridge ? t('ln.applied.recruitBridge') : t(APPLIED_KEYS[c.id]);
+    // the money options change the balance on screen: reload the shell, not just this screen
+    const ok = await act(done, () => resolveLine(line.id, c.id, extra), ctx.refresh);
+    if (ok && c.id === 'recruit' && !bridge) go('#staff/hire');
   }
   const select = (id: ResolveOption): void => {
     option = id;
@@ -228,8 +267,8 @@ function interrupted(ctx: Ctx, d: LineDetail, p: LineProblemView): Screen {
     const inputId = `ln-opt-${c.id}`;
     return h('label', { class: `ln-choice${c.disabled ? ' disabled' : ''}`, for: inputId },
       h('input', { type: 'radio', name: 'ln-option', id: inputId, value: c.id, checked: c.id === option, disabled: c.disabled, 'data-row': c.disabled ? null : '', onfocus: () => select(c.id), onchange: () => select(c.id) }),
-      h('span', { class: 'ln-choice-text' }, h('span', { class: 'strong' }, c.title), h('span', { class: 'muted small' }, c.sub), c.note ? h('span', { class: 'dim small' }, c.note) : null),
-      h('span', { class: 'ln-choice-effect' }, h('span', { class: 'strong' }, c.date), h('span', { class: c.impact.startsWith('−') ? 'ln-down small' : 'ln-ok small' }, c.impact)));
+      h('span', { class: 'ln-choice-text' }, h('span', { class: 'strong' }, c.title), h('span', { class: 'muted small' }, c.sub), c.lines?.map((l) => h('span', { class: 'dim small' }, l)), c.note ? h('span', { class: 'dim small' }, c.note) : null),
+      h('span', { class: 'ln-choice-effect' }, c.badge ? h('span', { class: 'ln-ok small' }, c.badge) : null, h('span', { class: 'strong' }, c.date), h('span', { class: c.impact.startsWith('−') ? 'ln-down small' : 'ln-ok small' }, c.impact)));
   });
 
   const projectionHost = h('div', { class: 'ln-projection' });

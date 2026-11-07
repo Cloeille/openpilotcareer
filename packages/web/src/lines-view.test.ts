@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import type { FlyingRow, Line, NetworkView, OpsRow, ScheduledFlight } from './api-lines.ts';
 import {
   asProgramme, causesOf, clockNow, dayKind, draftProblem, everyHours, faceToFace, filterOps, firstAlert, ganttLanes, hhmm, isoDay, lineDelay, lineVisual, mapAirportCodes, mapFlights, mapLines,
-  minuteOfDay, minutesOf, nextFilter, opsBadge, pairId, meterFraction, rivalOrder, sinceToday, phaseOf, perHour, freqFromPerHour, windowHours, isRoundTheClock, ROUND_THE_CLOCK, previewProgramme, pnlParts, progressPct, assuredDays, reopenTarget, stepDay, DEFAULT_DRAFT, forecastShare, candidateAircraft,
+  minuteOfDay, minutesOf, nextFilter, opsBadge, pairId, meterFraction, rivalOrder, sinceToday, phaseOf, perHour, freqFromPerHour, windowHours, isRoundTheClock, ROUND_THE_CLOCK, previewProgramme, pnlParts, progressPct, assuredDays, reopenTarget, stepDay, DEFAULT_DRAFT, forecastShare, candidateAircraft, groupSlots, cheaperRemedy, defaultRemedy,
 } from './lines-view.ts';
 
 const line = (o: Partial<Line> = {}): Line => ({
@@ -251,4 +251,27 @@ test('frequency per hour: round trips per hour of the window, converted both way
 
 test('flight phase follows the progress', () => {
   assert.deepEqual([0, 0.1, 0.4, 0.8, 0.82, 1].map(phaseOf), ['climb', 'climb', 'cruise', 'cruise', 'descent', 'descent']);
+});
+
+test('bridge slots that leave together are one row; cost and people add up', () => {
+  const slot = (family: 'pilot' | 'cabin', type: string | null, until: number, cost: number, defaulted = false) => ({ family, type, until, cost, defaulted });
+  assert.deepEqual(groupSlots([slot('pilot', 'AT76', 10, 100), slot('pilot', 'AT76', 10, 100), slot('pilot', 'AT76', 20, 300), slot('cabin', null, 10, 50, true)]), [
+    { family: 'pilot', type: 'AT76', until: 10, defaulted: false, people: 2, cost: 200 },
+    { family: 'pilot', type: 'AT76', until: 20, defaulted: false, people: 1, cost: 300 },
+    { family: 'cabin', type: null, until: 10, defaulted: true, people: 1, cost: 50 },
+  ]);
+});
+
+test('the panel opens on the cheapest way to fly now, and says so only when both are offered and differ', () => {
+  const bridge = (cost: number) => ({ people: 4, until: 1, cost, perSlot: [] });
+  const startNow = (cost: number) => ({ people: 4, cost, perSlot: [] });
+  const opts = (o: Partial<Parameters<typeof cheaperRemedy>[0]> & { reassign?: unknown; recruit?: unknown }) => ({ reassign: null, recruit: null, interim: null, startNow: null, pause: { fixedCostPerDay: 0 }, ...o }) as never;
+  assert.equal(cheaperRemedy(opts({ interim: bridge(3_000), startNow: startNow(20_000) })), 'interim');
+  assert.equal(cheaperRemedy(opts({ interim: bridge(30_000), startNow: startNow(20_000) })), 'start_now');
+  assert.equal(cheaperRemedy(opts({ interim: bridge(20_000), startNow: startNow(20_000) })), null);
+  assert.equal(cheaperRemedy(opts({ interim: bridge(3_000) })), null);
+  assert.equal(defaultRemedy(opts({ interim: bridge(30_000), startNow: startNow(20_000) })), 'start_now');
+  assert.equal(defaultRemedy(opts({ interim: bridge(3_000) })), 'interim');
+  assert.equal(defaultRemedy(opts({ reassign: {}, recruit: {} })), 'reassign');
+  assert.equal(defaultRemedy(opts({})), 'pause');
 });

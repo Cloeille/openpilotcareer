@@ -1,8 +1,9 @@
+import { START_NOW_FEE } from '@opc/shared';
 import { act } from '../actions.ts';
-import { fetchMember, fetchStaff, hireInterim, restMember, trainMember, transferMember, type StaffDetail } from '../api-staff.ts';
+import { fetchMember, fetchStaff, hireInterim, restMember, startNowMember, trainMember, transferMember, type StaffDetail } from '../api-staff.ts';
 import { typesOf } from '../competition-data.ts';
 import { button, icon, panel, signLocation, stat, titleBlock } from '../components.ts';
-import { locale } from '../finance-ui.ts';
+import { locale, perform } from '../finance-ui.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import { hashFor } from '../keys.ts';
@@ -152,6 +153,11 @@ async function sheet(ctx: Ctx, d: StaffDetail, overview: Awaited<ReturnType<type
     if (!confirm(t('st.c.restConfirm', { name: m.name }))) return;
     void act(t('st.c.rested', { name: m.name }), () => restMember(m.id), async () => { redraw(); });
   };
+  const startNow = (): void => {
+    if (!confirm(t('st.m.startNowConfirm', { amount: fm.money(START_NOW_FEE), name: m.name, date: fm.date(m.startsAt) }))) return;
+    void perform(() => startNowMember(m.id), (r) => t('st.m.startedNow', { name: m.name, balance: fm.money(r.balanceAfter) }), async () => { await ctx.refresh(); });
+  };
+  const pending = m.state === 'pending' && m.endsAt === null;
   const contract = panel({ title: t('st.c.title'), id: 'st-contract', class: 'st-panel' },
     h('div', { class: 'col tight st-facts-list' },
       line(t('st.c.base'), `${base}`),
@@ -159,6 +165,7 @@ async function sheet(ctx: Ctx, d: StaffDetail, overview: Awaited<ReturnType<type
       line(t('st.c.salary'), t('st.d.hirePay', { amount: fm.money(d.contract.salary) })),
       line(t('st.c.firing'), fm.money(d.contract.firingCost)),
       line(t('st.c.nextLeave'), d.nextLeave ? t('st.c.nextLeaveVal', { from: shortDate(d.nextLeave.from, loc), to: shortDate(d.nextLeave.to, loc) }) : t('st.c.none'))),
+    pending ? h('div', { class: 'row' }, button(t('st.m.startNow', { amount: fm.money(START_NOW_FEE) }), { variant: 'primary', icon: 'clock', disabled: me.company.balance < START_NOW_FEE, onclick: startNow })) : null,
     h('div', { class: 'row' }, isPilot ? button(t('st.c.rest'), { variant: 'secondary', icon: 'clock', onclick: rest }) : null,
       otherBases.length > 0 ? button(t('st.c.transfer'), { variant: 'secondary', onclick: (e: MouseEvent) => { transfer.hidden = !transfer.hidden; if (!transfer.hidden) (e.currentTarget as HTMLElement).blur(); } }) : null), transfer);
 

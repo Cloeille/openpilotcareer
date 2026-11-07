@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import {
   DAY_MS, DEFAULT_TURNAROUND_MIN, FIRST_FLIGHT_NO, FLIGHT_NO_BLOCK, MAX_LINES_PER_COMPANY, PAX_KG, PAUSED_LINE_COST_PER_DAY, daysToMask, dayStart, hhmmToMin, jobPayout,
   SIZE_WEIGHT, layoutDay, minToHhmm, overlappingLegs, programmeProblem, weeklyDemand, weeklySeats,
-  type Job, type LineBody, type LineForecastView, type LineProblemView, type PlannedLeg,
+  type Job, type LineBody, type LineForecastView, type LineProblemView, type LineResolve, type PlannedLeg,
 } from '@opc/shared';
 import { airportList, airports } from './catalog.ts';
 import { all, get, run, type Db } from './db.ts';
@@ -12,8 +12,8 @@ import { LINE_JOB_PREFIX, hasHub, jobView, typeFor, type AircraftRow } from './g
 import { lineLimit } from './facilities.ts';
 import { HttpError } from './http.ts';
 import { countOf, demandOf } from './staff-needs.ts';
-import { recruitForLine, recruitOffer } from './staff-people.ts';
-import { crewHeadcount, crewShortage, pendingStart, rulesOf } from './staff.ts';
+import { interimForLine, interimOffer, lineShortage, recruitForLine, recruitOffer, startNowForLine, startNowOffer } from './staff-people.ts';
+import { crewHeadcount, pendingStart, rulesOf } from './staff.ts';
 import {
   blockMinutes, companyCode, ensureNetwork, layLine, legMoney, lineAircraft, lineDistance, loadFactorOf, networkOf, planned, programmeOf, refreshLine, relayLine, rivalSeats, seatsOf, sizeOf,
   type LegRow, type LineAircraftRow, type LineRow,
@@ -265,7 +265,7 @@ export function problemView(db: Db, l: LineRow, now: number): LineProblemView {
     kind: 'aircraft' as const, ready: false, until: x.status === 'maintenance' ? x.maintenance_until : null,
     detail: x.status === 'maintenance' ? `${x.registration} maintenance` : `${x.registration} at ${x.location}`,
   }));
-  const short = crewShortage(db, l.company_id, [...new Set(fleet.map((x) => x.icao))], [l.a, l.b], now);
+  const short = lineShortage(db, l, now);
   const crewProblems = short.map((x) => ({
     kind: 'crew' as const, ready: false, until: pendingStart(db, l.company_id, x.family, x.type, [l.a, l.b], now),
     detail: `${x.family === 'pilot' ? `${x.type} pilots` : 'cabin crew'} ${x.have}/${x.need}`,
@@ -292,18 +292,25 @@ export function problemView(db: Db, l: LineRow, now: number): LineProblemView {
     options: {
       reassign: free.length > 0 ? { aircraft: free, flightsPerDay: l.freq_per_day * 2, deltaPerDay: perDay } : null,
       recruit: short.length === 0 ? null : recruitOffer(db, l, short, now),
+      interim: short.length === 0 ? null : interimOffer(db, l, short, now),
+      startNow: short.length === 0 ? null : startNowOffer(db, l, short, now),
       pause: { fixedCostPerDay: PAUSED_LINE_COST_PER_DAY },
     },
     projection,
   };
 }
 
-export function resolveLine(db: Db, companyId: number, id: number, o: { option: 'reassign' | 'recruit' | 'pause'; aircraftId?: number }, now: number): LineRow {
+/** The remedies that need crew (`recruit`, `interim`, `start_now`) end by deriving the line's status again, like every change to a line: nothing writes `active` by hand. */
+export function resolveLine(db: Db, companyId: number, id: number, o: LineResolve, now: number): LineRow {
   const l = ownedLine(db, companyId, id);
   if (o.option === 'pause') return setPaused(db, companyId, id, true, now);
-  if (o.option === 'recruit') {
-    if (crewShortage(db, l.company_id, [...new Set(lineAircraft(db, id).filter((x) => x.returned_at === null).map((x) => x.icao))], [l.a, l.b], now).length === 0) throw new HttpError(409, 'nothing_to_recruit', 'the line has all the crew it needs');
-    recruitForLine(db, l, now);
+  if (o.option === 'recruit' || o.option === 'interim' || o.option === 'start_now') {
+    if (o.option === 'recruit') {
+      if (lineShortage(db, l, now).length === 0) throw new HttpError(409, 'nothing_to_recruit', 'the line has all the crew it needs');
+      recruitForLine(db, l, now, o.withInterim ?? false);
+    } else if (o.option === 'interim') interimForLine(db, l, now);
+    else startNowForLine(db, l, now);
+    refreshLine(db, id, now);
     return ownedLine(db, companyId, id);
   }
   if (o.aircraftId === undefined) throw new HttpError(400, 'invalid_request', 'aircraftId: required to reassign');
