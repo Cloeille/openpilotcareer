@@ -365,6 +365,19 @@ Independence: S1 and R1 start at once. F1 needs only the S1 contract (fixtures).
 
 Each lot's definition of done: new tests next to the code (`*.test.ts`) for the pure rules in `shared/` and for the routes through `harness.ts`; `npm run typecheck`, `npm test` green; the new route answers its contract shape with fixtures in a web view-model test (as `finance-view.test.ts`); no change to another lot's section of this file.
 
+#### Implementation notes (R1)
+
+Done as specified, with these choices where the plan was silent. Each is one constant, one line or one message.
+
+- **Tabs.** `TABS` is `dashboard, live, jobs, network, fleet, hubs, history, leaderboard`; the HUD links `#<tab>`, so `routes` is typed `Record<Tab, ScreenFn> & Record<string, ScreenFn>`: a tab added without a screen no longer compiles. Labels: `tab.dashboard` is now "Accueil" / "Home" (and the `hint.dashboard` back label with it), `tab.network` and `tab.hubs` ("Compagnie" / "Company") are in the `// ---- v3 hud` block.
+- **`#network` is a placeholder until lot F1.** `screens/network-soon.ts` says plainly that lines are not available on this server yet, so the tab and the Q / E cycle never dead-end. **F1 replaces the `network: networkSoon` line in `routes.ts` and deletes that file and the `soon.*` messages.**
+- **`#hubs` is the Compagnie tab now.** The existing "open a hub" screen keeps working under it (scene `hubs`, Esc to the dashboard). F3 replaces `screens/hubs.ts` with the overview. The backdrops `generated-14` (`facility`) and `generated-15` (`hubs`) are in `SCENES`; `facility` is unused until F3.
+- **HUD width.** At 1600 px the 8 tabs, brand (230 px) and resources fit in French and English, also with a 12-digit balance and a long company or pilot name: the company switch is capped at 126 px and the pilot name at 130 px (ellipsis, full text in the DOM). The old `live.css` override of the six-tab bar is gone; the values live in `style.css`.
+- **Keys.** `shortcutOf(e, typing, onControl)` also returns `'f1'` and `'space'`. Space is not a shortcut in a field, with a modifier, or when focus is on a button, link, summary or input (`onControl`), which use it natively. `Tab` is never bound (tested). **A held key acts once** (`e.repeat` is ignored for everything except the arrows), so a held Space cannot toggle a pause back and forth. Screens bind `f1` and `space` in `Screen.keys`; no R1 screen uses them yet.
+- **One-argument routes.** `parseHash` is unchanged: it already returns the rest of the hash as one argument, which a screen validates (`#wear/12`, `#staff/hire`, `#network/7`; `#lease/12/wear` reaches `lease` with `12/wear`). Tested in `keys.test.ts`.
+- **v2 hint gaps (A.2).** Flight detail: `Z` / `C` open the older / newer closed flight of the log (from the last 200 flights; the key and its hint are absent at the ends), `X` exports the statement as a CSV built in the browser from the amounts the server stored (gain view only), `R` and `T` (rejected only) show a notice that this server does not record the touchdown or keep the proof, because no data exists to show (the hints stay so the keys are discoverable and honest). Company sheet: `J` reads "Jobs on its routes"; `A` (AIs only) says rival alerts are not available. `saveBlob` in `api.ts` is the download helper `downloadExport` already used.
+- **Not done on purpose.** "Échap from a tab opens the menu": there is no menu in the app, Esc from a tab still goes to the dashboard. `F1` help has no screen to open. Both wait for a decision.
+
 ### B.10 Routes and keys (from "Carte des parcours & navigation clavier" and each frame's HUD Bottom)
 
 Global: tabs Q/E cycle **Accueil, Vol en cours, Jobs, Réseau, Flotte, Compagnie, Historique, Classement**; Réglages by the gear. `Échap` back (from a tab, opens the menu), `Entrée` main action, `↑ ↓` list, `V` view in Vol en cours, `F1` help, gamepad A/B/LB/RB.

@@ -58,6 +58,15 @@ test('hash routes round-trip their argument', () => {
   assert.equal(parseHash('#job/%E0%A4%A').arg, null);
 });
 
+test('v3 routes carry one argument: #wear/12 and #staff/hire are a name and one argument, and extra segments stay inside it for the screen to refuse', () => {
+  assert.deepEqual(parseHash('#wear/12'), { name: 'wear', arg: '12' });
+  assert.deepEqual(parseHash('#staff/hire'), { name: 'staff', arg: 'hire' });
+  assert.deepEqual(parseHash('#network/7'), { name: 'network', arg: '7' });
+  assert.deepEqual(parseHash('#lease/12/wear'), { name: 'lease', arg: '12/wear' });
+  assert.equal(hashFor('wear', 12), '#wear/12');
+  assert.equal(hashFor('hub', 'LFMN'), '#hub/LFMN');
+});
+
 test('shortcuts are single letters or digits outside fields, lower-cased, never with modifiers', () => {
   assert.equal(shortcutOf(press('A'), false), 'a');
   assert.equal(shortcutOf(press('1'), false), '1');
