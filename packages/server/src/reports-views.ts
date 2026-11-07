@@ -44,7 +44,7 @@ const moneyOf = (cells: readonly Cell[]): ProfitMoney => {
 };
 
 /** The month the report opens on: the last full month once the company has one, else the current month. */
-export function defaultProfitMonth(db: Db, companyId: number, now: number): string {
+function defaultProfitMonth(db: Db, companyId: number, now: number): string {
   return get(db, 'SELECT 1 AS x FROM transactions WHERE company_id = ? AND at < ? LIMIT 1', companyId, monthStart(monthKey(now))) ? monthKey(addMonths(now, -1)) : monthKey(now);
 }
 

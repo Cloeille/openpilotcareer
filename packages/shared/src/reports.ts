@@ -28,9 +28,6 @@ export function categoryOf(kind: string, flightKind?: string | null): Category {
   if (kind === 'payout' && flightKind === 'cargo') return 'freight';
   return CATEGORY_OF_KIND[kind] ?? 'other';
 }
-/** The ledger kinds filed under a category (`other`: none, it is every kind not listed). */
-export const kindsOf = (category: Category): string[] => KNOWN_KINDS.filter((k) => CATEGORY_OF_KIND[k] === category);
-
 /** What the company earns by flying: the categories that make up a month's revenue (credit ceilings and debt ratios read this, never a grant or a refund). */
 export const OPERATING_INCOME: readonly Category[] = ['tickets', 'jobs', 'freight', 'service'];
 
