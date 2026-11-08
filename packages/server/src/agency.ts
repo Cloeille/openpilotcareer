@@ -13,7 +13,8 @@ import { HttpError } from './http.ts';
 import { stoppageCostPerDay } from './lines-manage.ts';
 import type { LineRow } from './lines.ts';
 import { FLIES_SQL } from './staff.ts';
-import { basesOf, categoryOf, engage, fleetTypes, lineBase, lineShortage, market, memberRow, nameFrom, openOf, roleOf } from './staff-people.ts';
+import { nameFrom } from './names.ts';
+import { basesOf, categoryOf, engage, fleetTypes, lineBase, lineShortage, market, baseCountry, memberRow, openOf, roleOf } from './staff-people.ts';
 import { memberView } from './staff-views.ts';
 
 type MissionRow = { id: number; company_id: number; base: string; qual: string; count: number; started_at: number; ready_at: number; commission: number; premium_pct: number; status: 'searching' | 'signed' | 'cancelled' };
@@ -35,7 +36,7 @@ function shortlistOf(db: Db, companyId: number, p: Position, day: number, premiu
     const role = roleOf('pilot', experience);
     const grid = salaryFor('pilot', role, experienceFactor('pilot', experience), category);
     const askingSalary = agencySalary(grid, premiumPct);
-    out.push({ id, family: 'pilot', role, name: nameFrom(rand), base: p.base, qual: p.qual, experience, reliability: 75 + Math.floor(rand() * 20), morale: 60 + Math.floor(rand() * 30), grid, askingSalary, noticeDays: AGENCY_NOTICE_DAYS, premium: agencyCommission(askingSalary) });
+    out.push({ id, family: 'pilot', role, name: nameFrom(rand, baseCountry(p.base)), base: p.base, qual: p.qual, experience, reliability: 75 + Math.floor(rand() * 20), morale: 60 + Math.floor(rand() * 30), grid, askingSalary, noticeDays: AGENCY_NOTICE_DAYS, premium: agencyCommission(askingSalary) });
   }
   return out;
 }

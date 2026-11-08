@@ -226,7 +226,8 @@ test('candidates are the same people all day, differ between days, and hiring pa
   assert.equal((await w.call('POST', '/api/v1/staff/hire', { candidateId: '1.LFPG.pilot.AT76.0' })).status, 404, 'a candidate of another day');
   assert.equal((await w.call('POST', '/api/v1/staff/hire', { candidateId: 'nonsense' })).status, 404);
   const after = (await w.call('GET', '/api/v1/staff/candidates?family=pilot&base=LFPG&qual=AT76')).body as CandidatesView;
-  assert.equal(after.market, a.market - 1, 'the hired candidate is gone from the market');
+  assert.ok(after.candidates.every((x) => x.id !== c.id), 'the hired candidate is gone from the market');
+  assert.equal(after.market, a.market, 'and the market stays as full as it was');
   const noticed = (await w.call('GET', '/api/v1/staff')).body as StaffOverview;
   assert.equal(noticed.people, 0, 'not working until they start');
   assert.equal(noticed.pending, 1, 'but counted as arriving');
