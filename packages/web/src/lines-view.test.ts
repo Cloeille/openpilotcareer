@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import type { FlyingRow, Line, NetworkView, OpsRow, ScheduledFlight } from './api-lines.ts';
 import {
   asProgramme, causesOf, clockNow, dayKind, draftProblem, everyHours, faceToFace, filterOps, firstAlert, ganttLanes, hhmm, isoDay, lineDelay, lineVisual, mapAirportCodes, mapFlights, mapLines,
-  minuteOfDay, minutesOf, nextFilter, opsBadge, pairId, meterFraction, rivalOrder, sinceToday, phaseOf, perHour, freqFromPerHour, windowHours, isRoundTheClock, ROUND_THE_CLOCK, previewProgramme, pnlParts, progressPct, assuredDays, reopenTarget, stepDay, DEFAULT_DRAFT, forecastShare, candidateAircraft, groupSlots, cheaperRemedy, defaultRemedy,
+  minuteOfDay, minutesOf, nextFilter, opsBadge, pairId, meterFraction, rivalOrder, sinceToday, phaseOf, perHour, freqFromPerHour, windowHours, isRoundTheClock, ROUND_THE_CLOCK, previewProgramme, pnlParts, progressPct, assuredDays, reopenTarget, stepDay, DEFAULT_DRAFT, forecastShare, candidateAircraft, aircraftTags, defaultAircraft, linesByAircraft, groupSlots, cheaperRemedy, defaultRemedy,
 } from './lines-view.ts';
 
 const line = (o: Partial<Line> = {}): Line => ({
@@ -191,12 +191,36 @@ test('programme preview: one round trip leaves at the start; no aircraft means n
   assert.deepEqual(clash.lanes[0]!.blocks.map((b) => b.conflict), [true, false]);
 });
 
-test('aircraft for a new line: the workshop ones are left out, those standing at A come first, then idle before busy', () => {
+test('aircraft for a new line: the workshop ones are left out, ready ones at A come first, then those at A that are taken, then the rest', () => {
   const fleet = [
-    { id: 1, location: 'LFLL', busy: false, status: 'available' }, { id: 2, location: 'LFMN', busy: true, status: 'flying' },
-    { id: 3, location: 'LFMN', busy: false, status: 'available' }, { id: 4, location: 'LFMN', busy: false, status: 'maintenance' },
+    { id: 1, location: 'LFLL', busy: false, lines: [], status: 'available' }, { id: 2, location: 'LFMN', busy: true, lines: [], status: 'flying' },
+    { id: 3, location: 'LFMN', busy: false, lines: [], status: 'available' }, { id: 4, location: 'LFMN', busy: false, lines: [], status: 'maintenance' },
+    { id: 5, location: 'LFMN', busy: false, lines: ['LFMN-LFPG'], status: 'available' },
   ];
-  assert.deepEqual(candidateAircraft(fleet, 'LFMN').map((a) => a.id), [3, 2, 1]);
+  assert.deepEqual(candidateAircraft(fleet, 'LFMN').map((a) => a.id), [3, 5, 2, 1]);
+});
+
+test('the default aircraft of a new line is a ready one: the free aircraft at A, never one already on another line', () => {
+  const n100ad = { id: 1, location: 'KSFO', busy: false, lines: ['KLAX-KSFO'], status: 'available' };
+  const n100ae = { id: 2, location: 'KSFO', busy: false, lines: [], status: 'available' };
+  assert.equal(defaultAircraft([n100ad, n100ae], 'KSFO')?.id, 2);
+  assert.equal(candidateAircraft([n100ad, n100ae], 'KSFO')[0]!.id, 2);
+  assert.equal(defaultAircraft([n100ad], 'KSFO'), null, 'nothing is picked for the player when no aircraft is ready');
+  assert.equal(defaultAircraft([{ ...n100ae, busy: true }], 'KSFO'), null);
+  assert.equal(defaultAircraft([{ ...n100ae, location: 'KLAX' }], 'KSFO'), null);
+});
+
+test('the lines of each aircraft come from the network, as pair ids', () => {
+  const lines = [line({ id: 1, a: 'KSFO', b: 'KLAX', aircraft: [{ id: 1, registration: 'N100AD', icao: 'E295' }] }), line({ id: 2, a: 'KLAX', b: 'KSEA', aircraft: [{ id: 1, registration: 'N100AD', icao: 'E295' }] })];
+  assert.deepEqual([...linesByAircraft(lines)], [[1, ['KLAX-KSFO', 'KLAX-KSEA']]]);
+});
+
+test('picker tags: free when nothing is to be said, else the line, the flight and the place of the aircraft', () => {
+  const ac = { id: 1, location: 'KSFO', busy: false, lines: [] as string[] };
+  assert.deepEqual(aircraftTags(ac, 'KSFO', 'CYVR'), [{ kind: 'free' }]);
+  assert.deepEqual(aircraftTags({ ...ac, location: 'CYVR' }, 'KSFO', 'CYVR'), [{ kind: 'free' }]);
+  assert.deepEqual(aircraftTags({ ...ac, lines: ['KLAX-KSFO'] }, 'KSFO', 'CYVR'), [{ kind: 'line', lines: ['KLAX-KSFO'] }]);
+  assert.deepEqual(aircraftTags({ ...ac, busy: true, location: 'KLAX' }, 'KSFO', 'CYVR'), [{ kind: 'flying' }, { kind: 'elsewhere', at: 'KLAX' }]);
 });
 
 test('forecast bar: costs and margin as shares of the larger of revenue and costs', () => {

@@ -1,4 +1,4 @@
-import { createLine, forecastLine, type LineForecastView } from '../api-lines.ts';
+import { createLine, fetchNetwork, forecastLine, type LineForecastView } from '../api-lines.ts';
 import { act } from '../actions.ts';
 import { airportInfo, cityOf } from '../airports.ts';
 import { airportField } from '../airport-field.ts';
@@ -7,10 +7,11 @@ import { ApiError } from '../errors.ts';
 import { errorText } from '../error-text.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
+import { toggleId } from '../group-view.ts';
 import { hashFor } from '../keys.ts';
 import {
-  asProgramme, blockMinutesFor, candidateAircraft, DEFAULT_DRAFT, DEFAULT_TURNAROUND_MIN, draftProblem, forecastShare, freqFromPerHour, hhmm, isRoundTheClock, MAX_FREQ, minutesOf, NETWORK_TAB, perHour,
-  previewProgramme, ROUND_THE_CLOCK, WEEKDAYS, type Draft, type DraftProblem, type Preview,
+  aircraftTags, asProgramme, blockMinutesFor, candidateAircraft, DEFAULT_DRAFT, DEFAULT_TURNAROUND_MIN, defaultAircraft, draftProblem, forecastShare, freqFromPerHour, hhmm, isRoundTheClock, linesByAircraft, MAX_FREQ, minutesOf, NETWORK_TAB,
+  perHour, previewProgramme, ROUND_THE_CLOCK, WEEKDAYS, type AircraftTag, type Draft, type DraftProblem, type Preview,
 } from '../lines-view.ts';
 import { fill } from '../lines-ui.ts';
 import { debounce, h, notify } from '../ui.ts';
@@ -21,9 +22,11 @@ import { distanceNm } from '@opc/shared';
 /** The draft survives a redraw (language change, refresh) so a half-made line is not lost. */
 let draft: Draft = { ...DEFAULT_DRAFT };
 let unit: 'day' | 'hour' = 'day';
+/** Until the player touches the aircraft picker, the draft carries the best ready aircraft for its origin. */
+let picked = false;
 
 /** Why the server would refuse the programme (codes of `POST /lines` errors), in the player's words; an unknown code is shown as it is. */
-const REFUSAL_KEY: Record<string, Key> = { hub_missing: 'ln.err.hub_missing', aircraft_busy: 'ln.err.aircraft_busy', duplicate_line: 'ln.err.duplicate_line', distance_exceeds_range: 'ln.err.distance_exceeds_range' };
+const REFUSAL_KEY: Record<string, Key> = { hub_missing: 'ln.err.hub_missing', aircraft_busy: 'ln.err.aircraft_busy', aircraft_elsewhere: 'ln.err.aircraft_elsewhere', duplicate_line: 'ln.err.duplicate_line', distance_exceeds_range: 'ln.err.distance_exceeds_range' };
 const refusalText = (code: string): string => (REFUSAL_KEY[code] ? t(REFUSAL_KEY[code]!) : code);
 const PROBLEM_KEY: Record<DraftProblem, Key> = { airports: 'ln.new.p.airports', same: 'ln.new.p.same', aircraft: 'ln.new.p.aircraft', days: 'ln.new.p.days', window: 'ln.new.p.window', freq: 'ln.new.p.freq' };
 
@@ -32,13 +35,16 @@ export async function lineNew(ctx: Ctx): Promise<Screen> {
   const { snap, go } = ctx;
   const { me } = snap;
   const fm = fmt();
-  const aircraft = me.fleet;
   if (!draft.a) draft = { ...draft, a: me.hubs[0] ?? '' };
   const redraw = (): void => { window.dispatchEvent(new Event('opc:redraw')); };
 
   const known = { a: false, b: false };
   const info = { a: null as Awaited<ReturnType<typeof airportInfo>>, b: null as Awaited<ReturnType<typeof airportInfo>> };
-  [info.a, info.b] = await Promise.all([draft.a ? airportInfo(draft.a) : null, draft.b ? airportInfo(draft.b) : null]);
+  let network: Awaited<ReturnType<typeof fetchNetwork>>;
+  [info.a, info.b, network] = await Promise.all([draft.a ? airportInfo(draft.a) : null, draft.b ? airportInfo(draft.b) : null, fetchNetwork()]);
+  const onLines = linesByAircraft(network?.lines ?? []);
+  const aircraft = me.fleet.map((x) => ({ ...x, lines: onLines.get(x.id) ?? [] }));
+  if (!picked) draft = { ...draft, aircraftIds: [defaultAircraft(aircraft, draft.a)?.id ?? []].flat() };
   known.a = info.a !== null; known.b = info.b !== null;
   const types = new Map(me.fleet.map((a) => [a.id, a.type]));
   const distance = info.a && info.b ? distanceNm(info.a.lat, info.a.lon, info.b.lat, info.b.lon) : null;
@@ -82,11 +88,31 @@ export async function lineNew(ctx: Ctx): Promise<Screen> {
       stepper(t('ln.new.freq'), perH ? tp('ln.new.perHourN', freqNow) : tp('ln.new.roundTrips', freqNow), () => setFreq(freqNow - 1), () => setFreq(freqNow + 1), freqNow > 1, freqNow < freqMax, 'ln-freq'),
       h('div', { class: 'ln-unit segments', role: 'group', 'aria-label': t('ln.new.unit') }, (['day', 'hour'] as const).map((u) =>
         h('button', { type: 'button', class: 'seg', 'aria-pressed': String(unit === u), onclick: () => { unit = u; redraw(); } }, t(u === 'day' ? 'ln.new.perDay' : 'ln.new.perHour'))))));
-  const chosen = draft.aircraftIds.length;
-  const planes = h('div', { class: 'ln-control' }, h('span', { class: 'ln-control-label' }, t('ln.new.aircraft')),
-    stepper(t('ln.new.aircraft'), tp('ln.new.planes', chosen), () => set({ aircraftIds: draft.aircraftIds.slice(0, -1) }),
-      () => { const next = candidateAircraft(aircraft, draft.a).find((x) => !draft.aircraftIds.includes(x.id)); if (next) set({ aircraftIds: [...draft.aircraftIds, next.id] }); },
-      chosen > 0, aircraft.some((x) => !draft.aircraftIds.includes(x.id) && x.status !== 'maintenance'), 'ln-planes'));
+  // the aircraft: every one outside the workshop, with what keeps it from this line
+  const tagText = (g: AircraftTag): string => {
+    switch (g.kind) {
+      case 'free': return t('ln.new.tag.free');
+      case 'line': return tp('ln.new.tag.line', g.lines.length, { lines: g.lines.join(', ') });
+      case 'flying': return t('ln.new.tag.flying');
+      case 'elsewhere': return t('ln.new.tag.elsewhere', { at: g.at });
+    }
+  };
+  const pickRows = new Map<number, HTMLElement>();
+  const pickRow = (a: (typeof aircraft)[number]): HTMLElement => {
+    const on = draft.aircraftIds.includes(a.id);
+    const el = h('button', {
+      type: 'button', id: `ln-ac-${a.id}`, class: `ln-pick${on ? ' on' : ''}`, role: 'checkbox', 'aria-checked': String(on), 'data-row': '',
+      onclick: () => { picked = true; set({ aircraftIds: toggleId(draft.aircraftIds, a.id) }); },
+    }, icon(on ? 'circle-check' : 'circle-dashed', 16), h('span', { class: 'mono strong' }, a.registration), h('span', { class: 'dim small' }, `${a.type.name} · ${a.location}`),
+    h('span', { class: 'ln-pick-tags' }, aircraftTags(a, draft.a, draft.b).map((g) => h('span', { class: `ln-pick-tag ${g.kind}` }, tagText(g))),
+      h('span', { class: 'ln-pick-tag clash', hidden: true }, icon('triangle-alert', 13), t('ln.new.tag.clash'))));
+    pickRows.set(a.id, el);
+    return el;
+  };
+  const eligible = candidateAircraft(aircraft, draft.a);
+  const planes = h('div', { class: 'ln-control ln-planes' },
+    h('div', { class: 'row' }, h('span', { class: 'ln-control-label', id: 'ln-planes-label' }, t('ln.new.aircraft')), h('output', { class: 'dim small', 'aria-live': 'polite' }, tp('ln.new.planes', draft.aircraftIds.length))),
+    eligible.length === 0 ? h('p', { class: 'dim small' }, t('ln.new.noAircraft')) : h('div', { class: 'ln-picklist', role: 'group', 'aria-labelledby': 'ln-planes-label' }, eligible.map(pickRow)));
   const days = h('div', { class: 'ln-control' }, h('span', { class: 'ln-control-label' }, t('ln.new.days')),
     h('div', { class: 'ln-days', role: 'group', 'aria-label': t('ln.new.days') }, WEEKDAYS.map((d, i) =>
       h('button', { type: 'button', class: 'ln-daybtn', 'aria-pressed': String(draft.days[i]), 'aria-label': t(`ln.wd.${d}`), onclick: () => set({ days: draft.days.map((v, j) => (j === i ? !v : v)) }) }, t(`ln.wd.${d}`).slice(0, 1).toUpperCase()))));
@@ -96,15 +122,21 @@ export async function lineNew(ctx: Ctx): Promise<Screen> {
   const timeInput = (label: string, key: 'windowStart' | 'windowEnd'): HTMLElement =>
     h('label', { class: 'ln-time' }, h('span', { class: 'dim small' }, label),
       h('input', { type: 'time', value: draft[key], disabled: around, step: 1800, onchange: (e: Event) => { const v = (e.target as HTMLInputElement).value; if (/^\d\d:\d\d$/.test(v)) set({ [key]: v }); } }));
-  const controls = h('div', { class: 'ln-controls' }, planes, freq, days, hours);
+  const controls = h('div', { class: 'ln-controls' }, freq, days, hours);
 
   // ------------------------------------------------------------ the timetable the programme makes
   const turnaround = DEFAULT_TURNAROUND_MIN;
   let forecast: LineForecastView | null = null;
   const preview = (): Preview | null => (block ? previewProgramme(draft, block, turnaround, forecast?.conflicts ?? []) : null);
+  /** The rows of the aircraft whose rotations would clash with another line's are marked as soon as the forecast says so; they are edited in place so the focus stays. */
+  const paintClashes = (): void => {
+    const bad = new Set((forecast?.conflicts ?? []).map((c) => c.aircraftId));
+    for (const [id, el] of pickRows) { el.classList.toggle('clash', bad.has(id)); el.querySelector<HTMLElement>('.ln-pick-tag.clash')!.hidden = !bad.has(id); }
+  };
   const tableHost = h('div', { class: 'ln-schedule' });
   const sideHost = h('div', { class: 'ln-need-col' });
   const paintTable = (): void => {
+    paintClashes();
     const pv = preview();
     const axis = h('div', { class: 'ln-axis', 'aria-hidden': 'true' }, [0, 3, 6, 9, 12, 15, 18, 21].map((hr) => h('span', { style: `left:${(hr / 24) * 100}%` }, `${String(hr).padStart(2, '0')}Z`)));
     const track = (cls: string, content: Node[]): HTMLElement => h('div', { class: `ln-track ${cls}` }, content);
@@ -129,7 +161,7 @@ export async function lineNew(ctx: Ctx): Promise<Screen> {
       pv ? h('p', { class: 'dim small ln-totals' }, t('ln.new.totals', { trips: pv.roundTripsPerWeek, hours: fm.num(pv.weekHours, 0), turn: turnaround, city: cities(info.b) || draft.b })) : null);
   };
 
-  const left = panel({ title: t('ln.new.programme'), id: 'ln-programme', class: 'ln-programme', action: undefined }, controls, h('div', { class: 'ln-times' }, timeInput(t('ln.new.opens'), 'windowStart'), timeInput(t('ln.new.closes'), 'windowEnd')), tableHost);
+  const left = panel({ title: t('ln.new.programme'), id: 'ln-programme', class: 'ln-programme', action: undefined }, controls, planes, h('div', { class: 'ln-times' }, timeInput(t('ln.new.opens'), 'windowStart'), timeInput(t('ln.new.closes'), 'windowEnd')), tableHost);
 
   // ------------------------------------------------------------ what it needs, the forecast, and the button
   const problem = draftProblem(draft, known);
@@ -180,7 +212,7 @@ export async function lineNew(ctx: Ctx): Promise<Screen> {
     if (problem !== null) { notify(t(PROBLEM_KEY[problem]), 'error'); return; }
     let line: { id: number } | null = null;
     const ok = await act(t('ln.new.created'), async () => { line = await createLine(asProgramme(draft)); }, ctx.refresh);
-    if (ok && line) { draft = { ...DEFAULT_DRAFT }; unit = 'day'; go(hashFor('line', (line as { id: number }).id)); }
+    if (ok && line) { draft = { ...DEFAULT_DRAFT }; unit = 'day'; picked = false; go(hashFor('line', (line as { id: number }).id)); }
   }
 
   paintTable(); paintSide();
@@ -188,7 +220,7 @@ export async function lineNew(ctx: Ctx): Promise<Screen> {
   const view = h('div', { class: 'ln-new' }, header, h('div', { class: 'ln-new-body' }, left, sideHost));
   return {
     title: t('ln.new.title'), scene: 'jobs', tab: NETWORK_TAB, view, back: '#network',
-    hints: [{ key: t('key.esc'), label: t('ln.hint.cancel') }, { key: t('key.enter'), label: t('ln.hint.openLine') }],
+    hints: [{ key: t('key.esc'), label: t('ln.hint.cancel') }, { key: '↑ ↓', label: t('ln.hint.aircraft') }, { key: t('key.space'), label: t('ln.hint.toggle') }, { key: t('key.enter'), label: t('ln.hint.openLine') }],
   };
 }
 

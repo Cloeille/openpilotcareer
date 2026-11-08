@@ -247,9 +247,40 @@ export function previewProgramme(d: Pick<Draft, 'freqPerDay' | 'days' | 'windowS
   return { fromA, fromB, lanes, roundTripsPerWeek: n * dayCount, weekHours: Math.round(((n * dayCount * 2 * blockMin) / 60) * 10) / 10 };
 }
 
-/** The aircraft that can be put on a line starting at `a`: free ones, listed first when they stand at `a`. */
-export function candidateAircraft<T extends { id: number; location: string; busy: boolean; status?: string }>(fleet: readonly T[], a: string): T[] {
-  return fleet.filter((x) => x.status !== 'maintenance').sort((x, y) => Number(y.location === a) - Number(x.location === a) || Number(x.busy) - Number(y.busy));
+/** What the picker knows of an aircraft: where it stands, whether it is flying, and the lines of the network it already flies (`pairId`s). */
+export type Pickable = { id: number; location: string; busy: boolean; lines: readonly string[]; status?: string };
+
+/** The lines each aircraft flies, from the network (`/network`): the fleet itself does not say. */
+export function linesByAircraft(lines: readonly Pick<Line, 'a' | 'b' | 'aircraft'>[]): Map<number, string[]> {
+  const out = new Map<number, string[]>();
+  for (const l of lines) for (const x of l.aircraft) out.set(x.id, [...(out.get(x.id) ?? []), pairId(l)]);
+  return out;
+}
+
+/** Ready to take a line from `a` as it is: standing at `a`, on no other line, not flying. */
+const readyAt = (x: Pickable, a: string): boolean => x.location === a && !x.busy && x.lines.length === 0;
+
+/** The aircraft that can be put on a line starting at `a`, best first: those at `a` (ready, then on another line, then flying), then the rest. The workshop ones are left out. */
+export function candidateAircraft<T extends Pickable>(fleet: readonly T[], a: string): T[] {
+  const rank = (x: T): number => (x.location === a ? 0 : 10) + (x.busy ? 2 : x.lines.length > 0 ? 1 : 0);
+  return fleet.filter((x) => x.status !== 'maintenance').sort((x, y) => rank(x) - rank(y));
+}
+
+/** What a new line starts with: the best aircraft when it is ready, nothing otherwise (the player picks). */
+export const defaultAircraft = <T extends Pickable>(fleet: readonly T[], a: string): T | null => {
+  const best = candidateAircraft(fleet, a)[0];
+  return best && readyAt(best, a) ? best : null;
+};
+
+export type AircraftTag = { kind: 'free' } | { kind: 'line'; lines: readonly string[] } | { kind: 'flying' } | { kind: 'elsewhere'; at: string };
+
+/** The status tags of a picker row for a line `a`-`b` (`b` may still be empty): `free` only when nothing else is to be said. */
+export function aircraftTags(x: Pickable, a: string, b: string): AircraftTag[] {
+  const tags: AircraftTag[] = [];
+  if (x.lines.length > 0) tags.push({ kind: 'line', lines: x.lines });
+  if (x.busy) tags.push({ kind: 'flying' });
+  if (x.location !== a && x.location !== b) tags.push({ kind: 'elsewhere', at: x.location });
+  return tags.length > 0 ? tags : [{ kind: 'free' }];
 }
 
 /** The weekly bar of the forecast (income against costs), as widths. */
