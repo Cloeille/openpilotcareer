@@ -2,7 +2,7 @@
 // give notice. The pay level is a history like `service_policy`: a change is a row whose `since` is the next UTC midnight and the level at instant `t` is the row with the latest `since <= t`,
 // so a replayed billing month always sees the level of its own time. The payroll itself is the existing one (finance.ts `planMonth`, fed the staff inputs through shared `paidStaff`).
 // The morale step runs inside `runBilling`, behind its billing_runs guard, so each company and month is stepped once whatever the number of requests or replays.
-import { DAY_MS, driftMorale, moraleTarget, onPayroll, quits, type PayLevel } from '@opc/shared';
+import { DAY_MS, PAY_PCT_DEFAULT, driftMorale, moraleTarget, onPayroll, quits, type PayLevel } from '@opc/shared';
 import { hashSeed, mulberry32 } from './board.ts';
 import { get, run, type Db } from './db.ts';
 import { applyFrom } from './service.ts';
@@ -13,7 +13,7 @@ const LATEST = Number.MAX_SAFE_INTEGER;
 
 /** The company's pay level at instant `at` (default: as it will be once a pending change is in force). No row: market pay. */
 export const payAt = (db: Db, companyId: number, at: number = LATEST): PayLevel =>
-  (get<{ pay_pct: PayLevel }>(db, 'SELECT pay_pct FROM hr_policy WHERE company_id = ? AND since <= ? ORDER BY since DESC LIMIT 1', companyId, at)?.pay_pct ?? 0) as PayLevel;
+  get<{ pay_pct: PayLevel }>(db, 'SELECT pay_pct FROM hr_policy WHERE company_id = ? AND since <= ? ORDER BY since DESC LIMIT 1', companyId, at)?.pay_pct ?? PAY_PCT_DEFAULT;
 
 /** Set the pay level; it applies from the next UTC midnight (a second change the same day replaces the first). */
 export function setPay(db: Db, companyId: number, payPct: PayLevel, now: number): void {

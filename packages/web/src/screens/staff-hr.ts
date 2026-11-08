@@ -36,7 +36,7 @@ export async function staffHr(ctx: Ctx): Promise<Screen> {
     stat(t('hr.stat.risk'), fm.num(data.rule.atRisk), t('hr.stat.risk.sub', { below: data.rule.below })));
 
   // ------------------------------------------------------------ the pay level
-  const preview = h('div', { class: 'col' });
+  const preview = h('div', { class: 'col', 'aria-live': 'polite' });
   const seg = h('div', { class: 'segments st-policy', role: 'group', 'aria-label': t('hr.pay.title') });
   const draft = (): PayLevel => memo.draft ?? data.pay.next;
   const choose = (level: PayLevel): void => { memo.draft = level === data.pay.next ? null : level; paint(); };
