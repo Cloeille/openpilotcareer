@@ -4,10 +4,11 @@ import { mkdtempSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { AGENCY_NOTICE_DAYS, AGENCY_SEARCH_DAYS, DAY_MS, OVERDRAFT_LIMIT, START_NOW_FEE, type AgencyView, type LineProblemView, type MissionView, type SignResult } from '@opc/shared';
+import { AGENCY_MAX_COUNT, AGENCY_NOTICE_DAYS, AGENCY_SEARCH_DAYS, DAY_MS, OVERDRAFT_LIMIT, START_NOW_FEE, type AgencyView, type LineProblemView, type MissionView, type SignResult, type StaffOverview } from '@opc/shared';
 import { all, get, MIGRATIONS, openDb, run } from './db.ts';
 import { insertAircraft } from './fleet-extras.ts';
 import { harness } from './harness.ts';
+import { grantStarterCrew } from './staff-people.ts';
 import { crewShortage } from './staff.ts';
 
 const HOUR = 3_600_000;
@@ -31,18 +32,23 @@ async function world() {
   const staff = () => all<{ id: number; family: string; candidate_id: string | null; starts_at: number; hired_at: number; notice_days: number; salary: number; contract: string }>(h.db, 'SELECT * FROM staff WHERE company_id = ? ORDER BY id', cid);
   const view = async (q = '') => (await call('GET', `/agency/options${q}`)).body as AgencyView;
   const open = (b: Record<string, unknown> = { base: 'LFPG', qual: 'AT76', count: 2 }) => call('POST', '/agency/missions', b);
+  const overview = async () => (await call('GET', '/staff')).body as StaffOverview;
   await advance(2 * HOUR);
-  return { h, u, cid, call, advance, balance, tx, staff, view, open, lineId, ac };
+  return { h, u, cid, call, advance, balance, tx, staff, view, open, overview, lineId, ac };
 }
+
+const pilotRow = (o: StaffOverview, type: string) => o.families.find((f) => f.family === 'pilot')!.children!.find((c) => c.type === type)!;
 
 test('the options price the position that lacks pilots, against the stopped line\'s revenue a day (the figure of the problem screen)', async () => {
   const w = await world();
   const v = await w.view();
-  assert.deepEqual(v.gaps.map((g) => [g.base, g.qual, g.open, g.lines.length]), [['LFPG', 'AT76', 2, 1]]);
+  const need = pilotRow(await w.overview(), 'AT76').need;
+  assert.ok(need > 2, 'the timetable needs crews for the rotation, not the two seats of one flight');
+  assert.deepEqual(v.gaps.map((g) => [g.base, g.qual, g.have, g.need, g.open, g.lines.length]), [['LFPG', 'AT76', 0, need, need, 1]], 'the need is the staffing screen\'s');
   const problem = (await w.call('GET', `/lines/${w.lineId}/problem`)).body as LineProblemView;
   assert.ok(problem.cost.perDay > 0);
   assert.equal(v.perDay, problem.cost.perDay, 'one daily figure: the stoppage cost of the line');
-  assert.deepEqual(v.request, { base: 'LFPG', qual: 'AT76', count: 2 }, 'no query: the position that costs the most');
+  assert.deepEqual(v.request, { base: 'LFPG', qual: 'AT76', count: Math.min(need, AGENCY_MAX_COUNT) }, 'no query: the position that costs the most, as many as one mission can ask');
   assert.deepEqual(v.options.map((o) => o.id), ['agency', 'train', 'classic']);
   for (const o of v.options) assert.equal(o.total, o.fees + o.stopped, o.id);
   const [agency, train, classic] = v.options;
@@ -96,6 +102,7 @@ test('a mission costs nothing until the signature, hides its shortlist until it 
 
 test('signing hires the shortlist as normal staff: commission through the ledger, the usual notice and starts_at, pilots rated from the day they start, and the gap closes', async () => {
   const w = await world();
+  const need = pilotRow(await w.overview(), 'AT76').need;
   const m = (await w.open()).body as MissionView;
   const t0 = w.h.clock.t;
   await w.advance(AGENCY_SEARCH_DAYS * DAY_MS);
@@ -129,7 +136,9 @@ test('signing hires the shortlist as normal staff: commission through the ledger
   assert.ok(s.members.every((x) => x.state === 'pending' && x.quals.includes('AT76')));
 
   const after = await w.view();
-  assert.deepEqual(after.gaps, [], 'hires in notice fill the positions: the gap is closed, nobody is paid for twice');
+  assert.deepEqual(after.gaps.map((g) => [g.have, g.open]), [[0, need - 2]], 'the two hires in notice fill two posts: nobody is paid for twice, the rest is still open');
+  const o = await w.overview();
+  assert.deepEqual([o.people, o.pending, o.vacant, o.positions], [0, 2, o.positions - 2, o.positions], 'the header adds up: working + in notice + vacant = posts');
   assert.equal(after.mission, null, 'the mission is over');
   assert.equal(get<{ status: string; commission: number }>(w.h.db, 'SELECT status, commission FROM recruit_missions WHERE id = ?', m.id)!.status, 'signed');
   assert.equal(get<{ commission: number }>(w.h.db, 'SELECT commission FROM recruit_missions WHERE id = ?', m.id)!.commission, commission);
@@ -259,4 +268,60 @@ test('migration V15 adds recruit_missions on a database at the previous version,
   assert.throws(() => run(db, "INSERT INTO recruit_missions (company_id, base, qual, count, started_at, ready_at, premium_pct, status) VALUES (1, 'LFPG', 'B738', 9, 1, 2, 11, 'signed')"), /CHECK/, 'at most 6 people');
   run(db, 'DELETE FROM companies WHERE id = 1');
   assert.equal(get<{ n: number }>(db, 'SELECT COUNT(*) AS n FROM recruit_missions')!.n, 0);
+});
+
+// ---------------------------------------------------------------- what is short: the staffing screen's need, not a flight deck
+
+/** An AMERICA-like company: two lines from one hub (an AT76 and an A319), a starter crew, then the pilots cut to one deck per type: every leg has a crew on paper, the rotation does not. */
+async function america() {
+  const w = await world(); // its first line was interrupted for want of crew: forget the cancellations, the crew is about to come
+  run(w.h.db, 'DELETE FROM scheduled_flights');
+  run(w.h.db, "UPDATE lines SET status = 'active', interrupted_since = NULL, interrupt_cause = NULL, stoppage_charged = 0");
+  const second = insertAircraft(w.h.db, { companyId: w.cid, icao: 'A319', hub: 'LFPG', value: 3_000_000, ownership: 'owned', at: w.h.clock.t });
+  const made = await w.call('POST', '/lines', body({ b: 'LFMN', freqPerDay: 2, aircraftIds: [second] }));
+  assert.equal(made.status, 201, made.text);
+  grantStarterCrew(w.h.db, w.cid, w.h.clock.t);
+  for (const type of ['AT76', 'A319']) {
+    const keep = all<{ id: number }>(w.h.db, "SELECT s.id FROM staff s JOIN staff_quals q ON q.staff_id = s.id WHERE s.company_id = ? AND s.family = 'pilot' AND q.type_icao = ? ORDER BY s.id LIMIT 2", w.cid, type).map((r) => r.id);
+    run(w.h.db, `DELETE FROM staff WHERE company_id = ? AND family = 'pilot' AND id IN (SELECT s.id FROM staff s JOIN staff_quals q ON q.staff_id = s.id WHERE q.type_icao = ?) AND id NOT IN (${keep.join(',')})`, w.cid, type);
+  }
+  await w.advance(3 * DAY_MS);
+  return w;
+}
+
+test('a base with a flight deck for every leg but too few crews for the rotation is short of pilots: legs are cancelled for duty limits and the agency says so', async () => {
+  const w = await america();
+  const cancelled = all<{ cancel_cause: string; crew_family: string }>(w.h.db, "SELECT cancel_cause, crew_family FROM scheduled_flights WHERE status = 'cancelled'");
+  assert.ok(cancelled.some((l) => l.cancel_cause === 'duty_limit' && l.crew_family === 'pilot'), `legs cancelled for the pilots' duty limits (${JSON.stringify(cancelled)})`);
+  for (const l of all<{ id: number; a: string; b: string }>(w.h.db, 'SELECT id, a, b FROM lines')) {
+    const icaos = all<{ icao: string }>(w.h.db, 'SELECT DISTINCT a.icao FROM line_aircraft la JOIN aircraft a ON a.id = la.aircraft_id WHERE la.line_id = ?', l.id).map((r) => r.icao);
+    assert.deepEqual(crewShortage(w.h.db, w.cid, icaos, [l.a, l.b], w.h.clock.t), [], 'each line has a deck: the headcount check sees no missing person, which is why it cannot be the agency\'s measure');
+  }
+
+  const o = await w.overview();
+  const v = await w.view();
+  assert.deepEqual(v.gaps.map((g) => g.qual).sort(), ['A319', 'AT76'], 'both types lack crews');
+  for (const g of v.gaps) {
+    const row = pilotRow(o, g.qual);
+    assert.deepEqual([g.base, g.have, g.need, g.open], ['LFPG', 2, row.need, row.availability.vacant], `${g.qual}: the agency's gap is the staffing screen's vacancy`);
+    assert.ok(g.need > g.have && g.perDay > 0 && g.lines.length === 1, g.qual);
+  }
+  assert.ok(v.request && v.request.count > 0, 'there is a position to fill');
+  assert.equal(o.people + o.pending + o.vacant, o.positions, 'the header adds up: working + in notice + vacant = posts');
+  assert.equal(o.vacant, o.families.reduce((n, f) => n + f.availability.vacant, 0));
+
+});
+
+test('when only cabin crew is missing the agency has no pilot gap, and says how many cabin crew to recruit', async () => {
+  const w = await world();
+  grantStarterCrew(w.h.db, w.cid, w.h.clock.t);
+  const need = (await w.overview()).families.find((f) => f.family === 'cabin')!.need;
+  assert.ok(need > 0);
+  assert.deepEqual([(await w.view()).gaps.length, (await w.view()).cabinOpen], [0, 0], 'a full crew: nothing to recruit');
+  run(w.h.db, "DELETE FROM staff WHERE company_id = ? AND family = 'cabin'", w.cid);
+  const v = await w.view();
+  assert.deepEqual([v.gaps, v.request, v.options, v.cabinOpen], [[], null, [], need], 'no pilot gap, every cabin post open');
+  const o = await w.overview();
+  assert.equal(o.people + o.pending + o.vacant, o.positions);
+  assert.equal(o.vacant, need, 'the vacancies of the header are those cabin posts');
 });

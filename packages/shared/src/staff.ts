@@ -234,8 +234,9 @@ export type FamilyRow = {
 /** Today's flights cancelled for want of crew: `family` is what ran short (null when unknown), `type` the aircraft type. */
 export type Blocker = { kind: 'no_crew' | 'duty_limit'; family: 'pilot' | 'cabin' | null; type: string; flights: number };
 export type WatchItem = { staffId: number; name: string; family: StaffFamily; reason: 'fatigue' | 'duty'; value: number; detail: string };
-/** `people` and `payroll` are the people working now; `pending` counts the hires still in notice (listed per row in `arriving`). */
-export type StaffOverview = { people: number; pending: number; positions: number; payroll: number; policy: RestPolicy; families: FamilyRow[]; blockers: Blocker[]; watch: WatchItem[] };
+/** `positions` is what the timetable needs, `people` and `payroll` are the people working now, `pending` the hires still in notice (listed per row in `arriving`) and `vacant` the posts neither fills:
+ *  people + pending + vacant = positions, unless a family has more people than posts or instructors are on the payroll (they fill no post). */
+export type StaffOverview = { people: number; pending: number; positions: number; vacant: number; payroll: number; policy: RestPolicy; families: FamilyRow[]; blockers: Blocker[]; watch: WatchItem[] };
 
 export type StaffDetail = {
   member: StaffMember; duty: DutyState; week: DutyBlock[];

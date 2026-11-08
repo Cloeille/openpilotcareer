@@ -90,7 +90,8 @@ export const signBodySchema = z.object({ candidateIds: z.array(z.string().min(1)
 
 // ---------------------------------------------------------------- wire types
 
-/** Pilots a base lacks for a type: `have` and `need` are those of the first line that is short, `open` the positions no hire in notice fills, `perDay` the revenue the short lines lose each day. */
+/** Pilots a base lacks for a type: `have` the pilots rated and working there now, `need` the posts its timetable keeps busy (duty limits and rest included), `open` the posts no hire in notice fills,
+ *  `perDay` the revenue its lines lose each day: what they earn, in proportion to the share of `need` that nobody works. */
 export type AgencyGap = { base: string; qual: string; have: number; need: number; open: number; perDay: number; lines: { id: number; a: string; b: string }[] };
 /** An open mission. The shortlist and the quote are hidden (`null`) until `readyAt`; the quote prices `quote.picked`: the first `count` candidates unless the caller asked for others. */
 export type MissionView = {
@@ -104,6 +105,8 @@ export type AgencyView = {
   request: { base: string; qual: string; count: number } | null;
   /** Revenue lost per day while the requested position stays empty. */
   perDay: number;
+  /** Cabin crew posts nobody works or is coming for. The agency only searches pilots: this is what the screen sends to the market when no pilot is missing. */
+  cabinOpen: number;
   commissionPct: number; premiumPct: number;
   options: AgencyOption[];
   savings: ReturnType<typeof agencySavings>;

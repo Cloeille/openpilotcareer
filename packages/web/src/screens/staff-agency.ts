@@ -43,16 +43,16 @@ export async function staffAgency(ctx: Ctx): Promise<Screen> {
   const [view, overview] = await Promise.all([load(), fetchStaff().catch(() => null)]);
   if (!view) return { title: t('ag.title'), scene: 'login', tab: 'hubs', back, hints: hints.slice(0, 1), view: off() };
 
-  const { request, mission } = view;
+  const { request, mission, cabinOpen } = view;
   const gap: AgencyGap | undefined = request ? view.gaps.find((g) => same(g, request)) : undefined;
   const agency = view.options.find((o) => o.id === 'agency');
-  const vacant = overview ? overview.families.reduce((n, f) => n + f.availability.vacant, 0) : null;
   const widths = barWidths(view.options);
 
   // ------------------------------------------------------------ header
   const status = gap
     ? h('p', { class: 'ag-status' }, h('span', { class: 'dot' }), t('ag.status.short', { lines: gap.lines.map((l) => `${l.a} ⇄ ${l.b}`).join(', '), have: gap.have, need: gap.need, qual: gap.qual }))
-    : h('p', { class: 'ag-status ok' }, icon('circle-check', 14), t('ag.status.none'));
+    : cabinOpen > 0 ? h('p', { class: 'ag-status' }, h('span', { class: 'dot' }), tp('ag.status.cabin', cabinOpen))
+      : h('p', { class: 'ag-status ok' }, icon('circle-check', 14), t('ag.status.none'));
   const header = h('div', { class: 'ln-header' },
     titleBlock(h('span', { class: 'row tight' }, request ? signLocation(request.base) : null, h('span', { class: 'dim' }, t('ag.crumb'))), t('ag.title'),
       h('div', { class: 'col tight' }, status, h('p', { class: 'muted', style: 'font-size:14px' }, t('ag.sub')))),
@@ -60,10 +60,13 @@ export async function staffAgency(ctx: Ctx): Promise<Screen> {
   const kpis = h('div', { class: 'ln-kpis st-kpis' },
     gap ? stat(t('ag.stat.pilots', { qual: gap.qual }), `${gap.have} / ${gap.need}`, t('ag.stat.pilots.sub')) : null,
     request ? stat(t('ag.stat.perDay'), fm.money(view.perDay), t('ag.stat.perDay.sub')) : null,
-    overview && vacant !== null ? stat(t('ag.stat.staff'), `${fm.num(overview.people)} / ${fm.num(overview.positions)}`, tp('ag.stat.staff.sub', vacant)) : null);
+    overview ? stat(t('ag.stat.staff'), `${fm.num(overview.people)} / ${fm.num(overview.positions)}`, [overview.pending > 0 ? t('ag.stat.staff.notice', { n: fm.num(overview.pending) }) : null, tp('ag.stat.staff.sub', overview.vacant)].filter(Boolean).join(' · ')) : null);
 
   if (!request) {
-    const empty = panel({ title: t('ag.empty.title'), id: 'ag-empty', class: 'st-panel' }, h('p', { class: 'dim st-empty' }, t('ag.empty.body')));
+    const toMarket = (): void => { Object.assign(hireFilter, { family: 'cabin', base: null, qual: null }); go('#staff/hire'); };
+    const empty = cabinOpen > 0
+      ? panel({ title: t('ag.empty.cabin.title'), id: 'ag-empty', class: 'st-panel' }, h('p', { class: 'dim st-empty' }, tp('ag.empty.cabin.body', cabinOpen)), button(t('st.view.hire'), { variant: 'primary', icon: 'users', onclick: toMarket }))
+      : panel({ title: t('ag.empty.title'), id: 'ag-empty', class: 'st-panel' }, h('p', { class: 'dim st-empty' }, t('ag.empty.body')));
     return { title: t('ag.title'), scene: 'login', tab: 'hubs', back, hints: hints.slice(0, 1), view: h('div', { class: 'ag-screen' }, h('div', { class: 'ag-main' }, header, kpis, empty)) };
   }
 
