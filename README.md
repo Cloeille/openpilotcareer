@@ -90,7 +90,7 @@ Errors are `{ "error": "<code>", "message": "<text>" }`. Session routes take `Au
 | Reference data | `GET /airports?q=`, `/airports/:icao`, `/aircraft-types?q=`, `/aircraft-types/:icao` |
 | Accounts | `POST /auth/register`, `/auth/login`, `/auth/logout`; `GET /me`; `DELETE /me` (needs password) |
 | Companies | `GET`/`POST /me/companies` (`{name, hub}`, up to 5 per player), `PATCH /companies/:id` (`{name}`, rename) |
-| Your data | `GET /me/export?format=json\|flights.csv\|transactions.csv`, `/me/flights`, `/me/transactions` |
+| Your data | `GET /me/export?format=json\|flights.csv\|transactions.csv`, `/me/flights`, `/me/history` (flights and line legs), `/me/transactions` |
 | API keys | `GET`/`POST /me/api-keys`, `DELETE /me/api-keys/:id` |
 | Active company | `POST /me/hubs`, `/me/fleet`, `/me/custom-aircraft`; `DELETE /me/custom-aircraft/:icao` |
 | Jobs | `GET /jobs[?airport=]`, `POST /jobs/:id/accept`, `POST /jobs/import-simbrief` |

@@ -327,6 +327,11 @@ export type FerryBooked = FerryPreview & { balanceAfter: number };
 export const FLIGHT_STATUSES = ['active', 'verified', 'unverified', 'rejected', 'cancelled'] as const;
 export const listQuerySchema = z.object({ limit: z.coerce.number().int().min(1).max(200).default(50), before: z.coerce.number().int().positive().optional() });
 export const flightListQuerySchema = listQuerySchema.extend({ status: z.enum(FLIGHT_STATUSES).optional() });
+/** The flight log merges the flights the player flew with the legs her lines flew. `before` is the `cursor` of the last entry of the previous page (the log is date-ordered, its ids come from two tables). */
+export const HISTORY_SOURCES = ['all', 'flown', 'lines'] as const;
+export type HistorySource = (typeof HISTORY_SOURCES)[number];
+export const HISTORY_CURSOR = /^\d{1,15}-[01]-\d{1,15}$/;
+export const historyQuerySchema = listQuerySchema.omit({ before: true }).extend({ before: z.string().regex(HISTORY_CURSOR).optional(), source: z.enum(HISTORY_SOURCES).default('all') });
 export const apiKeyCreateSchema = z.object({ label: z.string().trim().min(1).max(40) });
 
 export const infoSchema = z.object({

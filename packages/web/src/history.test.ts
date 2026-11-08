@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { MANUAL_PAY_FACTOR, REJECT_REPUTATION_PENALTY, type AircraftType, type Flight } from '@opc/shared';
-import { NO_FILTER, filterFlights, flightNeighbours, manualEstimate, manualWaitMs, payFactor, seasonTotals, seasonsOf, statement, statementCsv, statusCounts } from './history.ts';
+import { MANUAL_PAY_FACTOR, REJECT_REPUTATION_PENALTY, type AircraftType, type Flight, type HistoryEntry, type LineLeg } from '@opc/shared';
+import { NO_FILTER, filterEntries, flightNeighbours, manualEstimate, manualWaitMs, payFactor, rowOf, seasonTotals, seasonsOf, statement, statementCsv, statusCounts, tabsOf } from './history.ts';
 
 const D = (m: number, d: number, h = 12): number => Date.UTC(2026, m - 1, d, h);
 const flight = (id: number, status: Flight['status'], at: number, o: Partial<Flight> = {}): Flight => ({
@@ -14,30 +14,67 @@ const flights = [
   flight(1, 'verified', D(11, 4), { net: 1000, revenue: 2000 }), flight(2, 'unverified', D(11, 5), { net: 400, aircraftId: 2 }), flight(3, 'rejected', D(11, 6)),
   flight(4, 'verified', D(10, 30), { net: 700 }), flight(5, 'active', D(11, 7)), flight(6, 'cancelled', D(11, 3)),
 ];
+const leg = (id: number, at: number, o: Partial<LineLeg> = {}): LineLeg => ({
+  id, lineId: 9, flightNo: `AZR ${1100 + id}`, dep: at, arr: at + 3_600_000, origin: 'LFPG', dest: 'LFLL', aircraftId: 7, status: 'done', delayMin: 0, delayCause: null, cancelCause: null, pax: 40, takenByPlayer: false,
+  reg: 'F-HAZA', icao: 'AT76', revenue: 5000, fuelCost: 1200, landingFee: 300, maintenance: 100, net: 3400, ...o,
+});
+const flownEntry = (f: Flight): HistoryEntry => ({ at: f.completedAt ?? f.acceptedAt, cursor: `${f.completedAt ?? f.acceptedAt}-0-${f.id}`, source: 'flown', flight: f });
+const lineEntry = (l: LineLeg): HistoryEntry => ({ at: l.dep, cursor: `${l.dep}-1-${l.id}`, source: 'line', leg: l });
+// the server's log: closed flights and legs that left, newest first
+const log: HistoryEntry[] = [
+  lineEntry(leg(21, D(11, 6, 15))), flownEntry(flights[2]!), lineEntry(leg(20, D(11, 6, 9), { delayMin: 12 })), flownEntry(flights[1]!), lineEntry(leg(19, D(11, 4, 18), { status: 'cancelled', cancelCause: 'no_crew', net: 0, revenue: 0, fuelCost: 0, landingFee: 0, maintenance: 0, pax: null })),
+  flownEntry(flights[0]!), flownEntry(flights[5]!), flownEntry(flights[3]!), lineEntry(leg(18, D(10, 29), { status: 'flying', aircraftId: 8 })),
+];
+const ids = (es: HistoryEntry[]): string[] => es.map((e) => (e.source === 'flown' ? `f${e.flight.id}` : `l${e.leg.id}`));
 
-test('the log lists closed flights only, newest first', () => {
-  assert.deepEqual(filterFlights(flights, NO_FILTER).map((f) => f.id), [3, 2, 1, 6, 4]);
+test('the log keeps the server order, and the source, status, aircraft and season filters combine over both sources', () => {
+  assert.deepEqual(ids(filterEntries(log, NO_FILTER)), ['l21', 'f3', 'l20', 'f2', 'l19', 'f1', 'f6', 'f4', 'l18']);
+  assert.deepEqual(ids(filterEntries(log, { ...NO_FILTER, source: 'lines' })), ['l21', 'l20', 'l19', 'l18']);
+  assert.deepEqual(ids(filterEntries(log, { ...NO_FILTER, source: 'flown' })), ['f3', 'f2', 'f1', 'f6', 'f4']);
+  assert.deepEqual(ids(filterEntries(log, { ...NO_FILTER, status: 'verified' })), ['f1', 'f4']);
+  assert.deepEqual(ids(filterEntries(log, { ...NO_FILTER, status: 'done' })), ['l21', 'l20', 'l18']);
+  assert.deepEqual(ids(filterEntries(log, { ...NO_FILTER, status: 'cancelled' })), ['l19', 'f6']);
+  assert.deepEqual(ids(filterEntries(log, { ...NO_FILTER, season: '2026-11' })), ['l21', 'f3', 'l20', 'f2', 'l19', 'f1', 'f6']);
+  assert.deepEqual(ids(filterEntries(log, { source: 'all', status: 'all', aircraftId: 7, season: '2026-11' })), ['l21', 'l20', 'l19']);
+  assert.deepEqual(ids(filterEntries(log, { ...NO_FILTER, aircraftId: 2 })), ['f2']);
+  assert.deepEqual(filterEntries(log, { ...NO_FILTER, aircraftId: 99 }), []);
 });
 
-test('status, aircraft and season filters combine', () => {
-  assert.deepEqual(filterFlights(flights, { ...NO_FILTER, status: 'verified' }).map((f) => f.id), [1, 4]);
-  assert.deepEqual(filterFlights(flights, { ...NO_FILTER, season: '2026-11' }).map((f) => f.id), [3, 2, 1, 6]);
-  assert.deepEqual(filterFlights(flights, { status: 'unverified', aircraftId: 2, season: '2026-11' }).map((f) => f.id), [2]);
-  assert.deepEqual(filterFlights(flights, { ...NO_FILTER, aircraftId: 99 }), []);
+test('status tab counts follow the other filters, and a tab that cannot match the source is not offered', () => {
+  assert.deepEqual(statusCounts(log, NO_FILTER), { all: 9, verified: 2, unverified: 1, rejected: 1, done: 3, cancelled: 2 });
+  assert.deepEqual(statusCounts(log, { ...NO_FILTER, source: 'lines' }), { all: 4, verified: 0, unverified: 0, rejected: 0, done: 3, cancelled: 1 });
+  assert.deepEqual(statusCounts(log, { ...NO_FILTER, season: '2026-11' }), { all: 7, verified: 1, unverified: 1, rejected: 1, done: 2, cancelled: 2 });
+  assert.deepEqual(tabsOf('all'), ['all', 'verified', 'unverified', 'rejected', 'done', 'cancelled']);
+  assert.deepEqual(tabsOf('lines'), ['all', 'done', 'cancelled']);
+  assert.deepEqual(tabsOf('flown'), ['all', 'verified', 'unverified', 'rejected', 'cancelled']);
 });
 
-test('status tab counts follow the other filters', () => {
-  assert.deepEqual(statusCounts(flights, NO_FILTER), { all: 5, verified: 2, unverified: 1, rejected: 1, cancelled: 1 });
-  assert.deepEqual(statusCounts(flights, { ...NO_FILTER, season: '2026-11' }), { all: 4, verified: 1, unverified: 1, rejected: 1, cancelled: 1 });
+test('seasons are the months with an entry of either source, newest first', () => {
+  assert.deepEqual(seasonsOf(log), ['2026-11', '2026-10']);
+  assert.deepEqual(seasonsOf(log.filter((e) => e.source === 'line' && e.leg.id === 18)), ['2026-10']);
 });
 
-test('seasons are the months with closed flights, newest first', () => {
-  assert.deepEqual(seasonsOf(flights), ['2026-11', '2026-10']);
+test('season totals: the net counts both sources and says which is which; legs and verified flights are counted apart', () => {
+  assert.deepEqual(seasonTotals(log, '2026-11'), { net: 1400 + 3400 + 3400, flownNet: 1400, linesNet: 6800, flown: 3, verified: 1, legs: 2, cancelledLegs: 1 });
+  assert.deepEqual(seasonTotals(log, '2026-10'), { net: 700 + 3400, flownNet: 700, linesNet: 3400, flown: 1, verified: 1, legs: 1, cancelledLegs: 0 });
+  assert.deepEqual(seasonTotals(log, '2026-09'), { net: 0, flownNet: 0, linesNet: 0, flown: 0, verified: 0, legs: 0, cancelledLegs: 0 });
 });
 
-test('season totals: net of paid flights; verified out of every flight that went through verification', () => {
-  assert.deepEqual(seasonTotals(flights, '2026-11'), { net: 1400, flown: 3, verified: 1 });
-  assert.deepEqual(seasonTotals(flights, '2026-09'), { net: 0, flown: 0, verified: 0 });
+test('a line leg row carries its flight number, money and state, and leads to its line; a flown flight leads to its page', () => {
+  const regOf = (id: number): string | null => (id === 1 ? 'F-GXYZ' : null);
+  const done = rowOf(log[0]!, regOf);
+  assert.equal(done.source, 'line');
+  assert.equal(done.net, 3400);
+  assert.equal(done.href, '#line/9');
+  assert.deepEqual(done.source === 'line' && [done.flightNo, done.pax, done.revenue, done.costs, done.state, done.reg, done.icao], ['AZR 1121', 40, 5000, 1600, { kind: 'done' }, 'F-HAZA', 'AT76']);
+  assert.deepEqual(rowOf(log[2]!, regOf).source === 'line' && (rowOf(log[2]!, regOf) as { state: unknown }).state, { kind: 'late', delayMin: 12 });
+  const cancelled = rowOf(log[4]!, regOf);
+  assert.equal(cancelled.net, null, 'a cancelled leg earned nothing');
+  assert.deepEqual(cancelled.source === 'line' && cancelled.state, { kind: 'cancelled', cause: 'no_crew' });
+  assert.deepEqual(rowOf(log[8]!, regOf).source === 'line' && (rowOf(log[8]!, regOf) as { state: unknown }).state, { kind: 'flying' });
+  const flown = rowOf(log[5]!, regOf);
+  assert.deepEqual([flown.source, flown.net, flown.href, flown.reg, flown.origin, flown.dest], ['flown', 1000, '#flight/1', 'F-GXYZ', 'LFMN', 'LFLL']);
+  assert.equal(rowOf(log[1]!, regOf).net, null, 'a rejected flight earned nothing');
 });
 
 test('pay factor: full, reduced, none', () => {

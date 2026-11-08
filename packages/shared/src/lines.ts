@@ -1,7 +1,7 @@
 // Lot LINES (v3): autonomous lines on the simulated clock. Pure rules, constants and wire types (docs/v3-plan.md B.1, B.2).
 // Imports only types from index.ts, so there is no runtime cycle.
 import { z } from 'zod';
-import type { AirportSize } from './index.ts';
+import type { AirportSize, Flight } from './index.ts';
 
 // ---------------------------------------------------------------- clock (B.1: the simulated clock IS the real UTC clock)
 
@@ -283,3 +283,14 @@ export type OpsView = {
   counts: { flying: number; upcoming: number; cancelled: number; delayed: number };
   flying: OpsRow[]; upcoming: OpsRow[];
 };
+
+// ---------------------------------------------------------------- history and fleet feedback (read models of `scheduled_flights`; nothing is stored for them)
+
+/** A leg a line flew, or failed to fly, with its money: `net = revenue - fuelCost - landingFee - maintenance` (crews and cabin service are posted apart). `status` is the derived one: `done` or `cancelled`, `delayMin` says how late it left. */
+export type LineLeg = ScheduledFlight & { reg: string; icao: string; revenue: number; fuelCost: number; landingFee: number; maintenance: number; net: number };
+/** One row of the flight log: a flight the player flew or a leg a line flew. The log is ordered by `at` (a flight's close time, a leg's departure: the date of its postings), `cursor` is the key of the row for the next page. */
+export type HistoryEntry = { at: number; cursor: string } & ({ source: 'flown'; flight: Flight } | { source: 'line'; leg: LineLeg });
+
+/** What an aircraft of a line is doing. `flying`: the leg it is in the air on (its real times are `dep` and `arr` plus `delayMin`). `location`: where it stands (the origin of a leg that is late to leave, else where the fleet says it is).
+ * `next`: its next departure. `last`: the last leg it landed, with its net. */
+export type AircraftLine = { aircraftId: number; location: string; flying: ScheduledFlight | null; next: ScheduledFlight | null; last: (ScheduledFlight & { net: number }) | null };

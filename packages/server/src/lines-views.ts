@@ -1,11 +1,11 @@
 // Lot LINES (v3): read models for the network map, the line page and the operations board. Nothing here writes.
 import {
   DAY_MS, ON_TIME_LIMIT_MIN, blockHours, dayStart, maskToDays, weekdayOf,
-  type CancelCause, type FlyingRow, type LineDay, type LineDetail, type NetworkView, type OpsRow, type OpsView, type ScheduledFlight,
+  type AircraftLine, type CancelCause, type FlyingRow, type HistoryEntry, type HistorySource, type LineDay, type LineDetail, type LineLeg, type NetworkView, type OpsRow, type OpsView, type ScheduledFlight,
 } from '@opc/shared';
 import { all, get, type Db } from './db.ts';
 import type { AircraftRow, FlightRow } from './game.ts';
-import { typeFor } from './game.ts';
+import { flightView, typeFor } from './game.ts';
 import { expectedPerDay } from './lines-manage.ts';
 import { crewCost, crewShortage, pilotNames, type Shortage } from './staff.ts';
 import { companyCode, legStatus, legView, lineAircraft, lineView, loadFactorOf, networkOf, type LegRow, type LineRow } from './lines.ts';
@@ -15,6 +15,8 @@ const NOTE: Record<CancelCause, string> = {
 };
 const shiftOf = (l: LegRow): number => l.delay_min * 60_000;
 const registrationOf = (db: Db, id: number): string => get<{ registration: string | null }>(db, 'SELECT registration FROM aircraft WHERE id = ?', id)?.registration ?? `#${id}`;
+/** What a leg earned: its revenue less fuel, landing fees and maintenance (crews and cabin service are posted apart, so the ledger's `line_*` rows of the leg sum to this). */
+export const legNet = (l: LegRow): number => (l.revenue ?? 0) - (l.fuel_cost ?? 0) - (l.landing_fee ?? 0) - (l.maintenance ?? 0);
 const isFlying = (l: LegRow, now: number): boolean => l.status === 'done' && l.dep_at + shiftOf(l) <= now && now < l.arr_at + shiftOf(l);
 const legProgress = (l: LegRow, now: number): number => Math.min(1, Math.max(0, (now - (l.dep_at + shiftOf(l))) / (l.arr_at - l.dep_at)));
 
@@ -99,7 +101,7 @@ export function lineDetail(db: Db, l: LineRow, now: number, date?: string): Line
   const measured = last7.length > 0;
   const exp = measured ? null : expectedPerDay(db, l, fleet, now);
   const revenue7 = last7.reduce((s, x) => s + (x.revenue ?? 0), 0);
-  const margin7 = last7.reduce((s, x) => s + (x.revenue ?? 0) - (x.fuel_cost ?? 0) - (x.landing_fee ?? 0) - (x.maintenance ?? 0), 0) - crewCost(db, last7.map((x) => x.id));
+  const margin7 = last7.reduce((s, x) => s + legNet(x), 0) - crewCost(db, last7.map((x) => x.id));
 
   const usable = fleet.filter((x) => x.returned_at === null);
   const worst = usable.reduce((m, x) => Math.max(m, x.wear_pct), 0);
@@ -154,6 +156,51 @@ export function opsView(db: Db, companyId: number, now: number): OpsView {
     },
     flying, upcoming,
   };
+}
+
+// ---------------------------------------------------------------- history and fleet feedback
+
+type HistoryKey = { at: number; src: 0 | 1; id: number };
+const FLOWN = 0, LINE = 1;
+const START: HistoryKey = { at: Number.MAX_SAFE_INTEGER, src: LINE, id: Number.MAX_SAFE_INTEGER };
+
+/** The flight log of a company, newest first: the flights it flew (closed ones, dated by their close) and the legs its lines flew or failed to fly (dated by their departure, the date of their ledger postings).
+ * A cancelled leg the player took over is not a leg of the line: it became one of her flights. `before` is the `cursor` of the last entry of the previous page. */
+export function historyView(db: Db, companyId: number, limit: number, before: string | undefined, source: HistorySource, now: number): HistoryEntry[] {
+  const [at, src, id] = before ? before.split('-').map(Number) as [number, 0 | 1, number] : [START.at, START.src, START.id];
+  const keys = all<HistoryKey>(db, `SELECT at, src, id FROM (
+      SELECT COALESCE(completed_at, accepted_at) AS at, ${FLOWN} AS src, id FROM flights WHERE company_id = ?1 AND status <> 'active' AND ?2 <> 'lines'
+      UNION ALL
+      SELECT dep_at, ${LINE}, id FROM scheduled_flights WHERE company_id = ?1 AND ?2 <> 'flown' AND (status = 'done' OR (status = 'cancelled' AND taken_job IS NULL)))
+    WHERE (at, src, id) < (?3, ?4, ?5) ORDER BY at DESC, src DESC, id DESC LIMIT ?6`, companyId, source, at, src, id, limit);
+  const ids = (k: 0 | 1): number[] => keys.filter((x) => x.src === k).map((x) => x.id);
+  const marks = (n: number[]): string => n.map(() => '?').join(',');
+  const flights = new Map(ids(FLOWN).length === 0 ? [] : all<FlightRow>(db, `SELECT * FROM flights WHERE id IN (${marks(ids(FLOWN))})`, ...ids(FLOWN)).map((f) => [f.id, f]));
+  const legs = new Map(ids(LINE).length === 0 ? [] : all<LegRow & { reg: string | null; icao: string }>(db, `SELECT l.*, a.registration AS reg, a.icao FROM scheduled_flights l JOIN aircraft a ON a.id = l.aircraft_id WHERE l.id IN (${marks(ids(LINE))})`, ...ids(LINE)).map((l) => [l.id, l]));
+  const code = companyCode(db, companyId);
+  return keys.map((k): HistoryEntry => {
+    const cursor = `${k.at}-${k.src}-${k.id}`;
+    if (k.src === FLOWN) return { at: k.at, cursor, source: 'flown', flight: flightView(flights.get(k.id)!) };
+    const l = legs.get(k.id)!;
+    const leg: LineLeg = { ...legView(l, code, now), reg: l.reg ?? `#${l.aircraft_id}`, icao: l.icao, revenue: l.revenue ?? 0, fuelCost: l.fuel_cost ?? 0, landingFee: l.landing_fee ?? 0, maintenance: l.maintenance ?? 0, net: legNet(l) };
+    return { at: k.at, cursor, source: 'line', leg };
+  });
+}
+
+/** What each aircraft of a line is doing now: in the air (the leg, whose real times are `dep`/`arr` plus `delayMin`), else standing where its last leg landed with its next departure; and the last leg it landed. */
+export function aircraftLines(db: Db, companyId: number, now: number): AircraftLine[] {
+  const code = companyCode(db, companyId);
+  const one = (aircraftId: number, where: string, order: string): LegRow | undefined =>
+    get<LegRow>(db, `SELECT * FROM scheduled_flights WHERE aircraft_id = ?1 AND ${where} ORDER BY ${order} LIMIT 1`, aircraftId, now);
+  const planes = all<{ id: number; location: string }>(db, 'SELECT DISTINCT a.id, a.location FROM line_aircraft la JOIN lines l ON l.id = la.line_id JOIN aircraft a ON a.id = la.aircraft_id WHERE l.company_id = ? AND a.returned_at IS NULL ORDER BY a.id', companyId);
+  return planes.map(({ id, location }): AircraftLine => {
+    const flying = one(id, "status = 'done' AND dep_at + delay_min * 60000 <= ?2 AND arr_at + delay_min * 60000 > ?2", 'dep_at DESC');
+    const next = one(id, "status IN ('scheduled', 'done') AND dep_at + delay_min * 60000 > ?2", 'dep_at, id');
+    const last = one(id, "status = 'done' AND arr_at + delay_min * 60000 <= ?2", 'dep_at DESC, id DESC');
+    const nextView = next ? legView(next, code, now) : null;
+    // a leg resolves at its nominal departure and moves the aircraft then: one that is late to leave still stands at its origin
+    return { aircraftId: id, location: nextView?.status === 'delayed' ? nextView.origin : location, flying: flying ? legView(flying, code, now) : null, next: nextView, last: last ? { ...legView(last, code, now), net: legNet(last) } : null };
+  });
 }
 
 export { legStatus };
