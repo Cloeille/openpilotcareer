@@ -9,12 +9,14 @@ import { loanPayment, loanStep } from './finance.ts';
 /** C19: how far below zero a purchase or a bill may take the balance, and what that costs a year, on the lowest negative balance of the month. */
 export const OVERDRAFT_LIMIT = 250_000;
 export const OVERDRAFT_RATE = 0.115;
-/** C18: at most this many consumer credits at once; the ceiling is this share of the last full month's revenue, floored to a step. Tuned: the step is 50 000 (the slider of the frame). */
+/** C18: at most this many consumer credits at once; the ceiling is this share of the last full month's revenue, floored to a step, and never below the guaranteed floor. Tuned: amounts go by 10 000 (the frame's slider went by 50 000). */
 export const CREDIT_MAX_ACTIVE = 2;
 export const CREDIT_CEILING_PCT = 30;
-export const CREDIT_STEP = 50_000;
+export const CREDIT_STEP = 10_000;
 export const CREDIT_MIN = CREDIT_STEP;
-export const CREDIT_AMOUNT_MAX = 10_000_000;
+export const CREDIT_AMOUNT_MAX = 100_000_000;
+/** What any company may borrow in all, whatever its revenue (a new company has none): within it the debt-ratio rule is waived, above it the rule applies. */
+export const CREDIT_FLOOR = 10_000_000;
 export const CREDIT_MONTHS = [12, 24, 36, 48, 60] as const;
 /** C20: an instalment the bank takes with the account already past the overdraft limit costs this share of it and this much reputation (a stoppage day). Nothing is seized. */
 export const UNPAID_FEE_PCT = 5;
@@ -31,7 +33,7 @@ export const CREDIT_BANKS: Readonly<Record<CreditBankId, { rate: number; fee: nu
   aerofinance: { rate: 0.096, fee: 0, insurance: 0, earlyPenaltyPct: 0 },
 };
 
-/** The rating is read from the debt ratio (instalments over last month's revenue); `[rating, highest ratio it covers]`. B+ goes up to 9 % and covers the 6.1 to 7.1 % of the frame; the list frame's A- at 6.1 % is the inconsistency B.8 names, the credit-new frame wins. Above the last row the rating is E and no credit is granted. */
+/** The rating is read from the debt ratio (instalments over last month's revenue); `[rating, highest ratio it covers]`. B+ goes up to 9 % and covers the 6.1 to 7.1 % of the frame; the list frame's A- at 6.1 % is the inconsistency B.8 names, the credit-new frame wins. Above the last row the rating is E and no credit above the guaranteed floor is granted. With no revenue to measure against (a new company) the rating is B. */
 export const CREDIT_MAX_RATIO = 0.35;
 export const CREDIT_RATINGS = [['A', 0.02], ['A-', 0.05], ['B+', 0.09], ['B', 0.15], ['C', 0.25], ['D', CREDIT_MAX_RATIO]] as const;
 export type CreditRating = (typeof CREDIT_RATINGS)[number][0] | 'E';
@@ -40,9 +42,10 @@ export type CreditRating = (typeof CREDIT_RATINGS)[number][0] | 'E';
 
 /** Instalments over revenue; null when there is no revenue to measure against and something is owed (0 when nothing is owed). */
 export const debtRatio = (monthly: number, revenue: number): number | null => (monthly <= 0 ? 0 : revenue > 0 ? monthly / revenue : null);
-export const ratingOf = (ratio: number | null): CreditRating => (ratio === null ? 'E' : CREDIT_RATINGS.find(([, upTo]) => ratio <= upTo)?.[0] ?? 'E');
-/** What the bank lends at most in all, on last month's revenue: 30 % of it, floored to the step (614 880 -> 600 000). */
-export const creditCeiling = (revenue: number): number => Math.floor((Math.max(0, revenue) * CREDIT_CEILING_PCT) / 100 / CREDIT_STEP) * CREDIT_STEP;
+export const ratingOf = (ratio: number | null): CreditRating => (ratio === null ? 'B' : CREDIT_RATINGS.find(([, upTo]) => ratio <= upTo)?.[0] ?? 'E');
+/** What the bank lends at most in all: 30 % of last month's revenue, floored to the step (12 345 678 -> 3 700 000), at least the guaranteed floor and at most the amount cap. */
+export const creditCeiling = (revenue: number): number =>
+  Math.min(CREDIT_AMOUNT_MAX, Math.max(CREDIT_FLOOR, Math.floor((Math.max(0, revenue) * CREDIT_CEILING_PCT) / 100 / CREDIT_STEP) * CREDIT_STEP));
 /** The interest of a month on the lowest negative balance `low` (0 when the balance never went below zero). */
 export const overdraftInterest = (low: number): number => (low < 0 ? Math.round((-low * OVERDRAFT_RATE) / 12) : 0);
 export const lateFee = (instalment: number): number => Math.round((instalment * UNPAID_FEE_PCT) / 100);
@@ -113,7 +116,7 @@ export function planCreditMonth(start: number, input: CreditInputs): { charges: 
 
 const bankSchema = z.enum(CREDIT_BANK_IDS);
 const monthsSchema = z.number().int().refine((m) => (CREDIT_MONTHS as readonly number[]).includes(m), `months must be one of ${CREDIT_MONTHS.join(', ')}`);
-export const creditRequestSchema = z.object({ amount: z.number().int().min(CREDIT_MIN).max(CREDIT_AMOUNT_MAX), months: monthsSchema, bank: bankSchema });
+export const creditRequestSchema = z.object({ amount: z.number().int().min(CREDIT_MIN).max(CREDIT_AMOUNT_MAX).multipleOf(CREDIT_STEP), months: monthsSchema, bank: bankSchema });
 export type CreditRequest = z.infer<typeof creditRequestSchema>;
 export const prepayRequestSchema = z.union([z.object({ full: z.literal(true) }).strict(), z.object({ amount: z.number().int().min(1).max(CREDIT_AMOUNT_MAX) }).strict()]);
 export type PrepayRequest = z.infer<typeof prepayRequestSchema>;

@@ -12,6 +12,8 @@ import { monthName } from '../reports-view.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { h, notify } from '../ui.ts';
 
+/** The arrows a focused slider answers to: the same steps as the screen's ← →. */
+const ARROW_DIR: Record<string, 1 | -1 | undefined> = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 };
 /** The choice survives a redraw (a language change), not a new visit. */
 let draft: Draft | null = null;
 
@@ -43,11 +45,12 @@ export async function financeCreditNew(ctx: Ctx): Promise<Screen> {
       figure(t('cr.c.rating'), q?.rating.before ?? data.rating, data.ratio === null ? t('cr.c.ratio.none') : t('cr.c.ratio.sub', { amount: fm.money(data.revenue), month: monthName(data.revenueMonth, loc, false) }))));
 
   // ------------------------------------------------------------ amount, duration, bank
-  const slider = h('input', { type: 'range', id: 'cr-amount', min: CREDIT_MIN, max: Math.max(CREDIT_MIN, data.room), step: CREDIT_STEP, value: String(d.amount), disabled: data.room < CREDIT_MIN,
-    'aria-label': t('cr.n.amount'), 'aria-valuetext': fm.money(d.amount), onchange: (e: Event) => change({ amount: Number((e.target as HTMLInputElement).value) }) });
+  const slider = h('input', { type: 'range', id: 'cr-amount', min: CREDIT_MIN, max: clampAmount(data.room, data.room), step: CREDIT_STEP, value: String(d.amount), disabled: data.room < CREDIT_MIN,
+    'aria-label': t('cr.n.amount'), 'aria-valuetext': fm.money(d.amount), onchange: (e: Event) => change({ amount: Number((e.target as HTMLInputElement).value) }),
+    onkeydown: (e: KeyboardEvent) => { const dir = ARROW_DIR[e.key]; if (dir) { e.preventDefault(); change({ amount: stepAmount(d.amount, dir, data.room) }); } } });
   const amountBlock = h('div', { class: 'cr-amount-block' },
     h('label', { class: 'cr-amount-label', for: 'cr-amount' }, h('span', { class: 'dim small' }, t('cr.n.amount')), h('strong', { class: 'cr-amount-value' }, fm.money(d.amount))),
-    slider, h('div', { class: 'cr-range dim small' }, h('span', null, fm.money(CREDIT_MIN)), h('span', null, data.room < CREDIT_MIN ? t('cr.n.noroom') : t('cr.n.ceiling', { ceiling: fm.money(data.room) })), h('span', null, fm.money(Math.max(CREDIT_MIN, data.room)))));
+    slider, h('div', { class: 'cr-range dim small' }, h('span', null, fm.money(CREDIT_MIN)), h('span', null, data.room < CREDIT_MIN ? t('cr.n.noroom') : t('cr.n.ceiling', { ceiling: fm.money(data.room) })), h('span', null, fm.money(clampAmount(data.room, data.room)))));
   const duration = h('div', { class: 'cr-durations', role: 'radiogroup', 'aria-label': t('cr.n.duration') }, (sheet?.durations ?? CREDIT_MONTHS.map((months) => ({ months, monthly: 0, cost: 0 }))).map((o) =>
     h('button', { type: 'button', id: `cr-dur-${o.months}`, class: `cr-duration${o.months === d.months ? ' on' : ''}`, role: 'radio', 'aria-checked': String(o.months === d.months), 'data-row': '', onfocus: () => change({ months: o.months }), onclick: () => change({ months: o.months }) },
       h('strong', null, t('cr.n.months', { n: o.months })), h('span', { class: 'mono' }, t('cr.n.perMonth', { amount: fm.money(o.monthly) })), h('span', { class: 'dim small' }, t('cr.n.cost', { amount: fm.money(o.cost) })))));

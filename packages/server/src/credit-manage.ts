@@ -1,7 +1,7 @@
 // Lot CREDIT (v4): sign a consumer credit, repay it early, and the views of the credits screens. Callers wrap the writes in `tx` and settle the month first (routes-credit.ts).
 // The ceiling reads `lastMonthRevenue` (reports.ts), the debt ratio and the schedule read `debtLines` (reports.ts), the money moves through `post` and the spending guard of game.ts.
 import {
-  CREDIT_BANKS, CREDIT_BANK_IDS, CREDIT_MAX_ACTIVE, CREDIT_MAX_RATIO, CREDIT_MONTHS, LOAN_RATE, OVERDRAFT_LIMIT, OVERDRAFT_RATE, creditCeiling, creditSchedule, creditTerms, debtRatio, overdraftInterest, prepayPlan, ratingOf,
+  CREDIT_BANKS, CREDIT_BANK_IDS, CREDIT_FLOOR, CREDIT_MAX_ACTIVE, CREDIT_MAX_RATIO, CREDIT_MONTHS, LOAN_RATE, OVERDRAFT_LIMIT, OVERDRAFT_RATE, creditCeiling, creditSchedule, creditTerms, debtRatio, overdraftInterest, prepayPlan, ratingOf,
   type CreditQuote, type CreditRefusal, type CreditRequest, type CreditSheet, type CreditSigned, type CreditView, type CreditsView, type LoanLine, type PrepayDone, type PrepayQuote, type PrepayRequest,
 } from '@opc/shared';
 import { overdraftLow, type CreditRow } from './credit.ts';
@@ -14,7 +14,7 @@ import { debtLines, debtOf } from './reports.ts';
 
 const REFUSAL_TEXT: Record<CreditRefusal, string> = {
   too_many: `at most ${CREDIT_MAX_ACTIVE} credits at once`,
-  over_ceiling: 'the credits would exceed what your last month of revenue allows',
+  over_ceiling: 'the credits would exceed your borrowing ceiling',
   debt_ratio: `the instalments would exceed ${Math.round(CREDIT_MAX_RATIO * 100)} % of your last month of revenue`,
 };
 const short = (needed: number, db: Db, companyId: number): HttpError => new HttpError(409, 'insufficient_funds', `needs ${needed - spendable(db, companyId)} more`, { needed, balance: balanceOf(db, companyId), missing: needed - spendable(db, companyId) });
@@ -32,7 +32,8 @@ function standing(db: Db, companyId: number, now: number) {
   const debt = debtOf(db, companyId);
   const held = rows(db, companyId);
   const ceiling = creditCeiling(revenue);
-  return { revenue, debt, held, ceiling, room: Math.max(0, ceiling - held.reduce((t, c) => t + c.principal, 0)), ratio: debtRatio(debt.monthly, revenue) };
+  const borrowed = held.reduce((t, c) => t + c.principal, 0);
+  return { revenue, debt, held, borrowed, ceiling, room: Math.max(0, ceiling - borrowed), ratio: debtRatio(debt.monthly, revenue) };
 }
 
 // ---------------------------------------------------------------- quote and sign
@@ -41,7 +42,8 @@ function quoteOf(db: Db, companyId: number, r: CreditRequest, now: number): Cred
   const s = standing(db, companyId, now);
   const terms = creditTerms(r.amount, r.months, r.bank);
   const after = debtRatio(s.debt.monthly + terms.monthly, s.revenue);
-  const refusal: CreditRefusal | null = s.held.length >= CREDIT_MAX_ACTIVE ? 'too_many' : r.amount > s.room ? 'over_ceiling' : after === null || after > CREDIT_MAX_RATIO ? 'debt_ratio' : null;
+  const guaranteed = s.borrowed + r.amount <= CREDIT_FLOOR;
+  const refusal: CreditRefusal | null = s.held.length >= CREDIT_MAX_ACTIVE ? 'too_many' : r.amount > s.room ? 'over_ceiling' : !guaranteed && (after === null || after > CREDIT_MAX_RATIO) ? 'debt_ratio' : null;
   return {
     ...terms, amount: r.amount, earlyPenaltyPct: CREDIT_BANKS[r.bank].earlyPenaltyPct, net: r.amount - terms.fee, firstDebit: addMonths(now, 1),
     ratio: { before: s.ratio, after }, rating: { before: ratingOf(s.ratio), after: ratingOf(after) }, balanceAfter: balanceOf(db, companyId) + r.amount - terms.fee, refusal,

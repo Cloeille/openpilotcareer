@@ -1,21 +1,31 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CREDIT_BANK_IDS, CREDIT_MIN, CREDIT_MONTHS, CREDIT_STEP, type CreditsView } from '@opc/shared';
+import { CREDIT_AMOUNT_MAX, CREDIT_BANK_IDS, CREDIT_MIN, CREDIT_MONTHS, CREDIT_STEP, type CreditsView } from '@opc/shared';
 import { BANK_KEY, REFUSAL_KEY, barShares, clampAmount, clampPrepay, cycle, firstDraft, percent1, repaidShare, stepAmount, stepScheduleMonth } from './credit-view.ts';
 import { en, fr } from './messages.ts';
 
 const schedule = (...rows: [string, number, number, number][]): CreditsView['schedule'] => rows.map(([month, capital, interest, insurance]) => ({ month, capital, interest, insurance }));
 
-test('the slider moves by the step and stays between the smallest credit and what the ceiling leaves; with no room it stays on the smallest', () => {
-  assert.equal(clampAmount(123_456, 600_000), 100_000);
+test('the slider stays between the smallest credit and what the ceiling leaves, in whole steps; with no room it stays on the smallest', () => {
+  assert.equal(clampAmount(123_456, 600_000), 120_000);
   assert.equal(clampAmount(1, 600_000), CREDIT_MIN);
   assert.equal(clampAmount(9_000_000, 600_000), 600_000);
+  assert.equal(clampAmount(9_000_000, 605_000), 600_000, 'a room that is not a whole step ends on the step below');
   assert.equal(clampAmount(300_000, 0), CREDIT_MIN, 'nothing to borrow: the screen asks the server, which says why');
-  assert.equal(stepAmount(300_000, 1, 600_000), 300_000 + CREDIT_STEP);
-  assert.equal(stepAmount(600_000, 1, 600_000), 600_000);
-  assert.equal(stepAmount(CREDIT_MIN, -1, 600_000), CREDIT_MIN);
   assert.deepEqual(firstDraft(600_000), { amount: 300_000, months: 24, bank: 'alpes' });
   assert.ok(CREDIT_MONTHS.includes(firstDraft(0).months as 24));
+});
+
+test('an arrow moves by a tenth of the order of the amount (at least one step), crosses 10 000 to 100 M in under 300 presses (an arrow repeats when held), and goes back the way it came', () => {
+  const room = CREDIT_AMOUNT_MAX;
+  assert.equal(stepAmount(CREDIT_MIN, 1, room), CREDIT_MIN + CREDIT_STEP);
+  assert.equal(stepAmount(CREDIT_MIN, -1, room), CREDIT_MIN);
+  assert.deepEqual([50_000, 100_000, 1_000_000, 10_000_000].map((a) => stepAmount(a, 1, room)), [60_000, 110_000, 1_100_000, 11_000_000]);
+  assert.deepEqual([60_000, 110_000, 1_100_000, 11_000_000, 10_000_000].map((a) => stepAmount(a, -1, room)), [50_000, 100_000, 1_000_000, 10_000_000, 9_900_000]);
+  assert.equal(stepAmount(600_000, 1, 600_000), 600_000);
+  let a = CREDIT_MIN, presses = 0;
+  while (a < room) { a = stepAmount(a, 1, room); presses++; }
+  assert.ok(presses < 300, `${presses} presses from 10 000 to 100 M`);
 });
 
 test('cycling the banks wraps around both ways', () => {

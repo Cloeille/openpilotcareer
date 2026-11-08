@@ -69,7 +69,7 @@ const CATEGORY_DEFAULTS: Record<AircraftCategory, {
   'jet-airliner':       { engines: 2, seats: 150, cargoKg: 3_000,  cruiseKts: 450, rangeNm: 2800, burnKgNmPerTonne: 0.3,  maintPerHourPerTonne: 55 },
   'jet-widebody':       { engines: 2, seats: 280, cargoKg: 15_000, cruiseKts: 490, rangeNm: 6500, burnKgNmPerTonne: 0.43, maintPerHourPerTonne: 75 },
   // Flying Fries Quasar (Mach 7 add-on). 6 kg/nm: 1.8 t for a 300 nm hop (climb and acceleration burn most of it), 48 t for 8 000 nm (its real tank is 18 t), so checkTelemetry's
-  // 0.25x-3x fuel window accepts both. Maintenance is 12 000 per block hour (a 777 costs 1 650): with the 40 M price and the landing fee, what the express premiums pay for.
+  // 0.25x-3x fuel window accepts both. Maintenance is 12 000 per block hour (a 777 costs 1 650): with the 10 M price and the landing fee, what the express premiums pay for.
   'spaceplane':         { engines: 4, seats: 0,   cargoKg: 2_000,  cruiseKts: 5000, rangeNm: 9999, burnKgNmPerTonne: 3,    maintPerHourPerTonne: 6_000 },
   'helicopter':         { engines: 1, seats: 4,   cargoKg: 300,    cruiseKts: 120, rangeNm: 300,  burnKgNmPerTonne: 1.5,  maintPerHourPerTonne: 300 },
   'other':              { engines: 1, seats: 4,   cargoKg: 400,    cruiseKts: 150, rangeNm: 600,  burnKgNmPerTonne: 1.0,  maintPerHourPerTonne: 150 },
@@ -117,11 +117,8 @@ export type AirportSize = 'large' | 'medium' | 'small';
 export type FlightStatus = 'active' | 'verified' | 'unverified' | 'rejected' | 'cancelled';
 
 export const capacityKg = (a: AircraftType): number => Math.max(a.seats * PAX_KG, a.cargoKg);
-/** Price follows earning power (capacity x speed), so every type pays back in a comparable number of flight hours. */
-/** A spaceplane earns from premiums, not from its load: capacity x speed would price the Quasar (2 t, Mach 7) at 10 M, under a 777. Four times that makes it 40 M, above an A380. */
-const SPACEPLANE_PRICE_FACTOR = 4;
-export const aircraftPrice = (a: AircraftType): number =>
-  Math.round(PRICE_PER_KG_KT * (a.category === 'spaceplane' ? SPACEPLANE_PRICE_FACTOR : 1) * capacityKg(a) * a.cruiseKts);
+/** Price follows earning power (capacity x speed), so every type pays back in a comparable number of flight hours. The Quasar (2 t, Mach 7) comes out at 10 M by the same rule. */
+export const aircraftPrice = (a: AircraftType): number => Math.round(PRICE_PER_KG_KT * capacityKg(a) * a.cruiseKts);
 export const aircraftValue = (a: AircraftType): number => Math.round(aircraftPrice(a) * RESALE_FACTOR);
 
 export function distanceNm(lat1: number, lon1: number, lat2: number, lon2: number): number {
