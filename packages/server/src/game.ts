@@ -226,6 +226,8 @@ export function fleetView(db: Db, companyId: number, now: number): FleetAircraft
     .map((a) => ({ id: a.id, icao: a.icao, type: typeFor(db, companyId, a.icao), location: a.location, busy: !!a.busy, value: a.value, ...financeFields(a, !!a.busy, contracts.get(a.id), now) }));
 }
 
+/** A company's main hub: the first of `hubsOf` (ICAO order), as a subquery on `companies c`. */
+const MAIN_HUB_SQL = '(SELECT MIN(icao) FROM hubs WHERE company_id = c.id)';
 export const hubsOf = (db: Db, companyId: number): string[] => all<{ icao: string }>(db, 'SELECT icao FROM hubs WHERE company_id = ? ORDER BY icao', companyId).map((h) => h.icao);
 
 export const customAircraftOf = (db: Db, companyId: number): AircraftType[] =>
@@ -444,10 +446,10 @@ export const currentSeason = (now: number): string => seasonOf(now);
 export function leaderboard(db: Db, season: string, now: number): Leaderboard {
   const seasons = [...new Set([currentSeason(now), ...all<{ season: string }>(db, 'SELECT DISTINCT season FROM season_stats ORDER BY season DESC').map((s) => s.season)])];
   const rows = season === currentSeason(now)
-    ? all<Omit<LeaderboardRow, 'rank'>>(db, `SELECT c.id AS companyId, c.name, c.user_id IS NULL AS isAI, ${NET_WORTH_SQL} AS netWorth, c.reputation AS reputation,
+    ? all<Omit<LeaderboardRow, 'rank'>>(db, `SELECT c.id AS companyId, c.name, c.user_id IS NULL AS isAI, ${MAIN_HUB_SQL} AS hub, ${NET_WORTH_SQL} AS netWorth, c.reputation AS reputation,
         (SELECT COUNT(*) FROM flights f WHERE f.company_id = c.id AND f.season = ?1 AND f.status IN ('verified','unverified')) AS flights
         FROM companies c WHERE c.parent_id IS NULL ORDER BY netWorth DESC, c.id LIMIT 100`, season)
-    : all<Omit<LeaderboardRow, 'rank'>>(db, `SELECT c.id AS companyId, c.name, c.user_id IS NULL AS isAI, s.net_worth AS netWorth, s.reputation AS reputation, s.flights AS flights
+    : all<Omit<LeaderboardRow, 'rank'>>(db, `SELECT c.id AS companyId, c.name, c.user_id IS NULL AS isAI, ${MAIN_HUB_SQL} AS hub, s.net_worth AS netWorth, s.reputation AS reputation, s.flights AS flights
         FROM season_stats s JOIN companies c ON c.id = s.company_id WHERE s.season = ? AND c.parent_id IS NULL ORDER BY s.net_worth DESC, c.id LIMIT 100`, season);
   return { season, seasons, rows: rows.map((r, i) => ({ ...r, isAI: !!r.isAI, reputation: round1(r.reputation), rank: i + 1 })) };
 }

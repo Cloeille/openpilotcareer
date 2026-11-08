@@ -184,6 +184,24 @@ test('leaderboard keeps the past: a finished season is served from its snapshot'
   void frozen;
 });
 
+test('every leaderboard row carries its company\'s main hub, a player\'s and an AI\'s, in the current season and a past one; null without a hub', async () => {
+  const h = await harness({ ai: true });
+  const jal = await h.register('jal', 'RJTT');
+  const bare = await h.register('bare', 'LFPG');
+  run(h.db, 'DELETE FROM hubs WHERE company_id = ?', bare.me.company.id);
+  run(h.db, 'INSERT INTO hubs (company_id, icao) VALUES (?, ?)', jal.me.company.id, 'EGLL');
+  const hubs = async (season?: string) => new Map(((await h.call('GET', `/api/v1/leaderboard${season ? `?season=${season}` : ''}`)).body.rows as { companyId: number; isAI: boolean; hub: string | null }[]).map((r) => [r.companyId, r]));
+  const now = await hubs();
+  assert.equal(now.get(jal.me.company.id)!.hub, 'EGLL', 'the first of its hubs by ICAO, as me.hubs[0]');
+  assert.equal(now.get(bare.me.company.id)!.hub, null);
+  const ai = [...now.values()].find((r) => r.isAI)!;
+  assert.equal(ai.hub, (await h.call('GET', `/api/v1/companies/${ai.companyId}`)).body.hubs[0]);
+  assert.ok([...now.values()].filter((r) => r.isAI).every((r) => r.hub));
+  for (const c of [jal.me.company.id, bare.me.company.id, ai.companyId]) run(h.db, "INSERT INTO season_stats (season, company_id, net_worth, flights, reputation) VALUES ('2026-10', ?, 1, 0, 50)", c);
+  const past = await hubs('2026-10');
+  assert.deepEqual([...past.values()].map((r) => [r.companyId, r.hub]).sort(), [[jal.me.company.id, 'EGLL'], [bare.me.company.id, null], [ai.companyId, ai.hub]].sort());
+});
+
 test('player and AI share one profit formula: a manually driven flight equals settle()', () => {
   const db = world();
   const ai = get<AircraftRow>(db, 'SELECT * FROM aircraft ORDER BY id LIMIT 1')!;

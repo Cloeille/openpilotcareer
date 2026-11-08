@@ -373,7 +373,8 @@ export type ApiKeyInfo = { id: number; label: string; createdAt: number; lastUse
 export type Pilot = { rank: string; hours: number; flights: number };
 /** The signed-in account seen through one company: `company` and everything below it is the ACTIVE company (X-OPC-Company); `companies` lists all of them. */
 export type Me = { username: string; pilot: Pilot; company: Company; companies: Company[]; hubs: string[]; fleet: FleetAircraft[]; customAircraft: AircraftType[] };
-export type LeaderboardRow = { rank: number; companyId: number; name: string; isAI: boolean; netWorth: number; flights: number; reputation: number };
+/** `hub` is the company's main hub (first of its hubs by ICAO, as `Me.hubs[0]` and `CompanyProfile.hubs[0]`), null while it has none. */
+export type LeaderboardRow = { rank: number; companyId: number; name: string; isAI: boolean; hub: string | null; netWorth: number; flights: number; reputation: number };
 export type Leaderboard = { season: string; seasons: string[]; rows: LeaderboardRow[] };
 export type Personality = { style: 'aggressive' | 'cautious'; preferred: string[] };
 export type CompanyProfile = Company & {

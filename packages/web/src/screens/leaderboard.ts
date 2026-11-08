@@ -6,7 +6,7 @@ import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import { hashFor } from '../keys.ts';
 import type { Ctx, Screen } from '../screen.ts';
-import { SORT_KEYS, isFreshSeason, kindOf, seasonDay, sortStandings, type Kind, type SortKey, type Standing } from '../standings.ts';
+import { SORT_KEYS, hubOf, isFreshSeason, kindOf, seasonDay, sortStandings, type Kind, type SortKey, type Standing } from '../standings.ts';
 import { h } from '../ui.ts';
 
 type Scope = 'season' | 'career';
@@ -23,7 +23,7 @@ export async function leaderboard(ctx: Ctx): Promise<Screen> {
   const fm = fmt();
   const [data, rivals] = await Promise.all([loadSeason(season), aiRivals()]);
   season = data.season;
-  const profiles = new Map<number, Pick<CompanyProfile, 'personality' | 'hubs'>>(rivals.profiles.map((p) => [p.id, p]));
+  const profiles = new Map<number, Pick<CompanyProfile, 'personality'>>(rivals.profiles.map((p) => [p.id, p]));
   const redraw = (): void => { window.dispatchEvent(new Event('opc:redraw')); };
 
   const current = data.raw.seasons[0] === data.season;
@@ -32,7 +32,6 @@ export async function leaderboard(ctx: Ctx): Promise<Screen> {
   const rows = sortStandings(data.standings, career ? 'worth' : sort);
   if (selected === null || !rows.some((r) => r.companyId === selected)) selected = rows.find((r) => r.companyId !== me.company.id)?.companyId ?? me.company.id;
 
-  const hubOf = (id: number): string => (id === me.company.id ? me.hubs[0] : profiles.get(id)?.hubs[0]) ?? '–';
   const pick = rows.find((r) => r.companyId === selected);
   const panelHost = h('div', { class: 'selection' });
   const showSelection = (s: Standing | undefined): void => {
@@ -46,7 +45,7 @@ export async function leaderboard(ctx: Ctx): Promise<Screen> {
     const canSheet = !isMe && s.isAI;
     panelHost.replaceChildren(panel({ title: s.name, action: fm.ordinal(s.rank), tick: isMe, class: 'selected-company' },
       h('div', { class: 'col' },
-        h('span', { class: 'muted' }, t('lb.sel.kindHub', { kind: kindLabel(kind), hub: hubOf(s.companyId) })),
+        h('span', { class: 'muted' }, t('lb.sel.kindHub', { kind: kindLabel(kind), hub: hubOf(s) })),
         h('div', { class: 'fact big' }, h('span', { class: 'fact-label' }, t('lb.col.worth')), h('span', { class: 'fact-value' }, fm.moneyShort(s.netWorth)),
           h('span', { class: 'fact-sub' }, delta === null ? t('lb.sel.you') : t(delta >= 0 ? 'lb.sel.ahead' : 'lb.sel.behind', { amount: fm.moneyShort(Math.abs(delta)) }))),
         h('div', { class: 'facts' },
@@ -71,7 +70,7 @@ export async function leaderboard(ctx: Ctx): Promise<Screen> {
       cells: [
         h('span', { class: `rank ${r.companyId === me.company.id ? 'me' : ''}`.trim() }, String(r.rank)),
         h('div', { class: 'col tight' }, h('span', { class: 'strong' }, r.name), h('span', { class: 'dim small' }, kindLabel(kind))),
-        h('span', { class: 'mono' }, hubOf(r.companyId)),
+        h('span', { class: 'mono' }, hubOf(r)),
         fm.num(r.flights), fm.num(r.reputation, 1),
         h('span', { class: 'strong' }, !career && sort === 'gain' ? (r.gain === null ? '–' : fm.signedMoney(r.gain)) : fm.moneyShort(r.netWorth)),
       ],

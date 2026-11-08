@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { NEUTRAL_REALISM, realismView, type CompanyProfile, type Leaderboard, type LeaderboardRow } from '@opc/shared';
-import { duel, duelScore, isFreshSeason, kindOf, previousSeason, recapOf, seasonDay, sortStandings, withGain } from './standings.ts';
+import { duel, duelScore, hubOf, isFreshSeason, kindOf, previousSeason, recapOf, seasonDay, sortStandings, withGain } from './standings.ts';
 
-const row = (rank: number, companyId: number, o: Partial<LeaderboardRow> = {}): LeaderboardRow => ({ rank, companyId, name: 'C' + companyId, isAI: false, netWorth: 1000 - rank * 100, flights: 10, reputation: 50, ...o });
+const row = (rank: number, companyId: number, o: Partial<LeaderboardRow> = {}): LeaderboardRow => ({ rank, companyId, name: 'C' + companyId, isAI: false, hub: null, netWorth: 1000 - rank * 100, flights: 10, reputation: 50, ...o });
 const lb = (season: string, rows: LeaderboardRow[], seasons = ['2026-11', '2026-10', '2026-09']): Leaderboard => ({ season, seasons, rows });
 const profile = (o: Partial<CompanyProfile> = {}): CompanyProfile => ({ id: 1, name: 'x', balance: 0, reputation: 50, flights: 100, hours: 80, revenue: 200000, netWorth: 0, isAI: false, code: null, callsign: null, liveryColor: null, startMode: null, realism: realismView(NEUTRAL_REALISM), hubs: [], fleet: [], personality: null, seasons: [], ...o });
 
@@ -18,6 +18,11 @@ test('sorting keeps the server rank and orders ties by it; missing gains go last
   assert.deepEqual(sortStandings(s, 'flights').map((x) => x.companyId), [2, 3, 1]);
   assert.deepEqual(sortStandings(s, 'gain').map((x) => x.companyId), [1, 2, 3]);
   assert.deepEqual(sortStandings(s, 'flights').map((x) => x.rank), [2, 3, 1]);
+});
+
+test('the hub column reads the row hub for a player and an AI alike; a dash when the company has none', () => {
+  const rows = withGain([row(1, 1, { hub: 'RJTT' }), row(2, 2, { isAI: true, hub: 'LFPG' }), row(3, 3)], null);
+  assert.deepEqual(rows.map(hubOf), ['RJTT', 'LFPG', '–']);
 });
 
 test('a fresh season is one where nobody has flown', () => {

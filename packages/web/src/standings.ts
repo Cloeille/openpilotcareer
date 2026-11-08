@@ -18,6 +18,9 @@ const SORT_VALUE: Record<SortKey, (s: Standing) => number> = { worth: (s) => s.n
 /** Best first; ties keep the official rank order. The `rank` field itself is never rewritten: it is the net-worth rank the server gives. */
 export const sortStandings = (rows: Standing[], key: SortKey): Standing[] => [...rows].sort((a, b) => SORT_VALUE[key](b) - SORT_VALUE[key](a) || a.rank - b.rank);
 
+/** The main hub the server puts on every row (a company with none shows a dash). */
+export const hubOf = (row: Pick<LeaderboardRow, 'hub'>): string => row.hub ?? '–';
+
 /** A new season: nobody has flown yet. */
 export const isFreshSeason = (rows: LeaderboardRow[]): boolean => rows.length > 0 && rows.every((r) => r.flights === 0);
 
