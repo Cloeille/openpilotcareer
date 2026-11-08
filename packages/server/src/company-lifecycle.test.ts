@@ -67,6 +67,11 @@ async function fill(h: H, token: string, cid: number): Promise<void> {
   run(h.db, "INSERT INTO service_policy (company_id, haul, item, mode, since) VALUES (?, 'short', 'snack', 'sold', ?)", cid, at);
   run(h.db, "INSERT INTO kitchen (company_id, hub, provider, since) VALUES (?, 'LFMN', 'caterer', ?)", cid, at);
   run(h.db, "INSERT INTO service_days (company_id, day, hub) VALUES (?, 1, 'LFMN')", cid);
+  // v4 ALLIANCE: a club of which she is the only member, with a pending vote on her other company (a ballot of hers on it): the last member leaving takes the alliance, its vote and its ballot away
+  const club = run(h.db, "INSERT INTO alliances (name, founded_at) VALUES ('Fixture Club', ?)", at).id;
+  run(h.db, 'INSERT INTO alliance_members (alliance_id, company_id, since) VALUES (?, ?, ?)', club, cid, at);
+  const vote = run(h.db, 'INSERT INTO alliance_votes (alliance_id, candidate_id, created_at) VALUES (?, (SELECT id FROM companies WHERE user_id = (SELECT user_id FROM companies WHERE id = ?) AND id != ?), ?)', club, cid, cid, at).id;
+  run(h.db, "INSERT INTO alliance_ballots (vote_id, company_id, choice) VALUES (?, ?, 'yes')", vote, cid);
   snapshot(h.db, cid, at);
 }
 

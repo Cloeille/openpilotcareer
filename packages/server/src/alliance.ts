@@ -114,10 +114,9 @@ export function castBallot(db: Db, companyId: number, voteId: number, choice: Ba
   const m = stayingMemberOf(db, companyId, now);
   const v = get<VoteRow>(db, 'SELECT * FROM alliance_votes WHERE id = ? AND alliance_id = ?', voteId, m.alliance_id);
   if (!v) throw new HttpError(404, 'vote_not_found', 'no such vote');
+  if (get(db, 'SELECT 1 AS x FROM alliance_ballots WHERE vote_id = ? AND company_id = ?', voteId, companyId)) throw new HttpError(409, 'already_voted', 'you have already voted');
   if (v.closed_at !== null || tally(db, v, now).status !== 'open') throw new HttpError(409, 'vote_closed', 'that vote is over');
-  if (run(db, 'INSERT INTO alliance_ballots (vote_id, company_id, choice) VALUES (?, ?, ?) ON CONFLICT DO NOTHING', voteId, companyId, choice).changes === 0) {
-    throw new HttpError(409, 'already_voted', 'you have already voted');
-  }
+  run(db, 'INSERT INTO alliance_ballots (vote_id, company_id, choice) VALUES (?, ?, ?)', voteId, companyId, choice); // the primary key (vote, company) is the guard: one ballot, final
   return allianceView(db, companyId, now);
 }
 
