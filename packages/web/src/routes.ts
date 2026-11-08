@@ -36,6 +36,7 @@ import { kitchen } from './screens/kitchen.ts';
 import { financeRoute } from './screens/finance-route.ts';
 import { retrain } from './screens/retrain.ts';
 import { groupRoute } from './screens/group-route.ts';
+import { alliance } from './screens/alliance.ts';
 
 /** Every HUD tab is a route (the HUD links to `#<tab>`), which the type enforces: a tab added to TABS without a screen does not compile. */
 export const routes: Record<Tab, ScreenFn> & Record<string, ScreenFn> = {
@@ -68,6 +69,8 @@ export const routes: Record<Tab, ScreenFn> & Record<string, ScreenFn> = {
   retrain,
   // ---- group (v4)
   group: groupRoute,
+  // ---- alliance (v4)
+  alliance,
 };
 
 /** Old bookmarks (`#flights`) keep working. */

@@ -1,0 +1,11 @@
+/* ---------------------------------------------------------------- alliance (v4 ALLIANCE): members and admission votes.
+   Same panels, figures and tokens as the reports (reports.css); only what they do not have is here. */
+
+.al-list { display: flex; flex-direction: column; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.al-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 3px; background: transparent; }
+.al-row:hover { background: var(--surface-hover); }
+.al-row.on { background: var(--surface-selected); border-color: var(--border-strong); }
+.al-row:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.al-who { min-width: 0; flex: 1; }
+.al-figs { display: flex; gap: 32px; }
+.al-figs .mono { font-size: 15px; }

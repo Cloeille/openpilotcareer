@@ -4,6 +4,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { CREDIT_BANK_IDS, CREDIT_REFUSALS, SIM_AIRCRAFT_SOURCES, CATEGORIES, COST_PARTS, DECISIONS, FINANCE_SCREENS, PROFIT_BY, SCENARIOS, AIRCRAFT_CATEGORIES, COMPONENTS, FACILITY_KINDS, HAULS, MECHANICAL, MEAL_QUALITIES, PARTS_POLICIES, PART_CLASSES, REALISM_TOGGLES, RANKS, REST_POLICY_NAMES, SERVICE_ITEMS, SERVICE_MODES, STAFF_FAMILIES, WTCS, type AirportSize, type Ownership } from '@opc/shared';
 import { CESSION_REFUSALS, GROUP_ACTIVITIES, GROUP_CREATE_REFUSALS, GROUP_ROLES } from '@opc/shared';
+import { BALLOT_CHOICES, VOTE_STATUSES } from '@opc/shared';
 import type { Coverage, DutyRule, StaffRole, StaffState } from './api-staff.ts';
 import type { Meter, Level } from './staff-view.ts';
 import type { DuelKey, Kind } from './standings.ts';
@@ -15,6 +16,7 @@ import type { EffectLines } from './parts-view.ts';
 import type { Comfort, Effect } from './service-view.ts';
 import { OWN_WHY, RETRAIN_WHY } from './training-view.ts';
 import { ACTIVITY_KEY, CESSION_KEY, CREATE_REFUSAL_KEY, ROLE_KEY } from './group-view.ts';
+import { BALLOT_KEY, CHOICE_KEY, PROPOSE_KEY, STATUS_KEY } from './alliance-view.ts';
 import { OPTION_HASH, OPTION_NOTE, OPTION_PHASES, OPTION_SUB, OPTION_TITLE, OPTION_UNAVAILABLE, SAVED_AGAINST } from './agency-view.ts';
 import type { KitchenDeparture } from './api-service.ts';
 import type { AgencyOptionId } from './api-agency.ts';
@@ -99,6 +101,8 @@ const LOOKUPS: readonly (readonly [string, readonly (string | number)[], string?
   ['cr.bank.', CREDIT_BANK_IDS], ['cr.refusal.', CREDIT_REFUSALS], ['err.', CREDIT_REFUSALS],
   ['gr.activity.', GROUP_ACTIVITIES], ['gr.role.', GROUP_ROLES], ['gr.cession.', CESSION_REFUSALS], ['gr.refusal.', GROUP_CREATE_REFUSALS], ['err.', ['has_subsidiaries', 'has_debt', 'is_subsidiary', 'not_in_group', 'leased_aircraft', 'aircraft_not_found', 'code_taken']],
   ['tx.kind.', ['credit', 'credit_fee', 'credit_installment', 'credit_prepay', 'credit_late_fee', 'overdraft_interest']], ['fin.kind.', ['credit_installment', 'overdraft_interest']],
+  ['err.', ['not_in_alliance', 'alliance_full', 'alliance_name_taken', 'already_member', 'already_invited', 'already_voted', 'vote_closed', 'vote_not_found', 'not_invitable', 'leaving', 'already_leaving', 'company_not_found', 'invitation_not_found']],
+  ['tx.kind.', ['alliance_dues']], ['fin.kind.', ['alliance_dues']],
 ];
 
 test('every value of every closed set a message is looked up by has a message in both languages', () => {
@@ -132,6 +136,12 @@ test('every agency option has its title, sub, note, phases, unavailable reason, 
 test('every group union has its message, through the typed Record the screens look it up by', () => {
   const keys = [...GROUP_ACTIVITIES.map((a) => ACTIVITY_KEY[a]), ...GROUP_ROLES.map((r) => ROLE_KEY[r]), ...CESSION_REFUSALS.map((c) => CESSION_KEY[c]), ...GROUP_CREATE_REFUSALS.map((c) => CREATE_REFUSAL_KEY[c])];
   assert.equal(keys.length, GROUP_ACTIVITIES.length + GROUP_ROLES.length + CESSION_REFUSALS.length + GROUP_CREATE_REFUSALS.length);
+  for (const key of keys) for (const lang of ['en', 'fr'] as const) assert.notEqual((lang === 'en' ? en : fr)[key].trim(), '', `${key} (${lang})`);
+});
+
+test('every alliance union has its message, through the typed Record the screens look it up by', () => {
+  const keys = [...VOTE_STATUSES.map((v) => STATUS_KEY[v]), ...BALLOT_CHOICES.flatMap((c) => [CHOICE_KEY[c], BALLOT_KEY[c]]), ...Object.values(PROPOSE_KEY)];
+  assert.equal(keys.length, VOTE_STATUSES.length + BALLOT_CHOICES.length * 2 + 2);
   for (const key of keys) for (const lang of ['en', 'fr'] as const) assert.notEqual((lang === 'en' ? en : fr)[key].trim(), '', `${key} (${lang})`);
 });
 

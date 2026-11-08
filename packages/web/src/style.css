@@ -465,3 +465,4 @@ input.upper { text-transform: uppercase; }
 .ferry-title { font-size: 14px; font-weight: 500; margin: 0; }
 .ferry-form { align-items: flex-end; }
 @import './group.css';
+@import './alliance.css';

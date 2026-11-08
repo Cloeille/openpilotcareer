@@ -8,6 +8,8 @@ import { fetchSafety } from '../api-safety.ts';
 import { fetchService } from '../api-service.ts';
 import { fetchCash } from '../api-reports.ts';
 import { fetchGroup } from '../api-group.ts';
+import { fetchAlliance } from '../api-alliance.ts';
+import { allianceEntry } from '../alliance-ui.ts';
 import { fetchStaff } from '../api-staff.ts';
 import { airportInfo, cityOf } from '../airports.ts';
 import { button, icon, panel, signDirection, signLocation, stat, titleBlock } from '../components.ts';
@@ -33,7 +35,7 @@ export async function hubsOverview(ctx: Ctx): Promise<Screen> {
   const { me } = snap;
   const fm = fmt();
   const data = await fetchHubsOverview();
-  const [people, safety, parts, onboard, cash, grp] = await Promise.all([fetchStaff().catch(() => null), fetchSafety().catch(() => null), me.hubs[0] ? fetchWarehouse(me.hubs[0]).catch(() => null) : null, fetchService().catch(() => null), fetchCash(1).catch(() => null), fetchGroup().catch(() => null)]);
+  const [people, safety, parts, onboard, cash, grp, ally] = await Promise.all([fetchStaff().catch(() => null), fetchSafety().catch(() => null), me.hubs[0] ? fetchWarehouse(me.hubs[0]).catch(() => null) : null, fetchService().catch(() => null), fetchCash(1).catch(() => null), fetchGroup().catch(() => null), fetchAlliance().catch(() => null)]);
   const infos = new Map(await Promise.all(me.hubs.map(async (icao) => [icao, await airportInfo(icao)] as const)));
   // The doors to the other Company screens (C8): a card, its key, where it leads, its hint. A door whose server feature is off has no card and no key.
   const doors = [
@@ -43,6 +45,7 @@ export async function hubsOverview(ctx: Ctx): Promise<Screen> {
     { card: serviceEntry(onboard, go), key: 'b', hash: '#service', hint: t('sv.hint.open') },
     { card: financeEntry(cash, go), key: 'c', hash: '#finance', hint: t('rp.hint.openFinance') },
     { card: groupEntry(grp, go), key: 'g', hash: '#group', hint: t('gr.hint.openGroup') },
+    { card: allianceEntry(ally, go), key: 'l', hash: '#alliance', hint: t('al.hint.openAlliance') },
   ].filter((d): d is typeof d & { card: HTMLElement } => d.card !== null);
   const doorKeys: Record<string, () => void> = Object.fromEntries(doors.map((d) => [d.key, () => go(d.hash)]));
   const doorHints = doors.map((d) => ({ key: d.key.toUpperCase(), label: d.hint }));
