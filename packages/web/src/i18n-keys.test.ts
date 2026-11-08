@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { CREDIT_BANK_IDS, CREDIT_REFUSALS, SIM_AIRCRAFT_SOURCES, CATEGORIES, COST_PARTS, DECISIONS, FINANCE_SCREENS, PROFIT_BY, SCENARIOS, AIRCRAFT_CATEGORIES, COMPONENTS, FACILITY_KINDS, HAULS, MECHANICAL, MEAL_QUALITIES, PARTS_POLICIES, PART_CLASSES, REALISM_TOGGLES, RANKS, REST_POLICY_NAMES, SERVICE_ITEMS, SERVICE_MODES, STAFF_FAMILIES, WTCS, type AirportSize, type Ownership } from '@opc/shared';
-import { CESSION_REFUSALS, GROUP_ACTIVITIES, GROUP_CREATE_REFUSALS, GROUP_ROLES } from '@opc/shared';
+import { CESSION_REFUSALS, GROUP_ACTIVITIES, GROUP_CREATE_REFUSALS, GROUP_ROLES, PAY_LEVELS, type PayLevel } from '@opc/shared';
 import type { Coverage, DutyRule, StaffRole, StaffState } from './api-staff.ts';
 import type { Meter, Level } from './staff-view.ts';
 import type { DuelKey, Kind } from './standings.ts';
@@ -21,6 +21,7 @@ import type { AgencyOptionId } from './api-agency.ts';
 import type { OwnWhy, RetrainWhy, TrainPlace } from './api-training.ts';
 import type { TrainMode } from './training-view.ts';
 import { METRICS } from './kitchen-view.ts';
+import { LEVEL_KEY } from './hr-view.ts';
 import type { NoAircraftReason } from './board.ts';
 import { GROUPS } from './catalogue.ts';
 import { GROUPS as SERVICE_GROUPS } from './service-view.ts';
@@ -70,12 +71,13 @@ const OWN_WHYS = every<OwnWhy>({ no_training_centre: 0, no_instructor: 0, centre
 const RETRAIN_WHYS = every<RetrainWhy>({ not_a_pilot: 0, not_employed: 0, temporary_contract: 0, already_instructor: 0, not_a_captain: 0, no_rating: 0 });
 const TRAIN_MODES = every<TrainMode>({ trainees: 0, instructors: 0 });
 const TRAIN_PLACES = every<TrainPlace>({ own: 0, outside: 0 });
+const PAY_LEVEL_UNION: Record<PayLevel, 0> = { '-10': 0, '-5': 0, 0: 0, 5: 0, 10: 0 };
 
 /** [message prefix, the values it is followed by, an optional suffix]. */
 const LOOKUPS: readonly (readonly [string, readonly (string | number)[], string?])[] = [
   ['st.fam.', STAFF_FAMILIES], ['st.fam.sub.', STAFF_FAMILIES], ['st.fam.short.', STAFF_FAMILIES],
   ['st.role.', ROLES], ['st.role.', ROLES, 'Full'],
-  ['st.view.', ['staff', 'hire', 'agency', 'training']], ['st.level.', LEVELS], ['st.m.state.', STAFF_STATES], ['st.contract.', ['cdi', 'cdd']],
+  ['st.view.', ['staff', 'hire', 'agency', 'training', 'hr']], ['st.level.', LEVELS], ['st.m.state.', STAFF_STATES], ['st.contract.', ['cdi', 'cdd']],
   ['st.al.rule.', DUTY_RULES], ['st.lim.', METERS], ['st.l.c.', COVERAGES], ['st.l.d.', COVERAGES], ['st.du.l.', ['done', 'flying', 'planned', 'over']],
   ['st.p.', REST_POLICY_NAMES], ['st.p.btn.', REST_POLICY_NAMES],
   ['ln.wd.', WEEKDAYS], ['ln.fs.', FLIGHT_STATUSES], ['ln.part.', PARTS], ['ln.why.', ['aircraft', 'crew']], ['ln.applied.', OPTIONS], ['ln.proj.day.', PROJECTIONS],
@@ -133,6 +135,12 @@ test('every group union has its message, through the typed Record the screens lo
   const keys = [...GROUP_ACTIVITIES.map((a) => ACTIVITY_KEY[a]), ...GROUP_ROLES.map((r) => ROLE_KEY[r]), ...CESSION_REFUSALS.map((c) => CESSION_KEY[c]), ...GROUP_CREATE_REFUSALS.map((c) => CREATE_REFUSAL_KEY[c])];
   assert.equal(keys.length, GROUP_ACTIVITIES.length + GROUP_ROLES.length + CESSION_REFUSALS.length + GROUP_CREATE_REFUSALS.length);
   for (const key of keys) for (const lang of ['en', 'fr'] as const) assert.notEqual((lang === 'en' ? en : fr)[key].trim(), '', `${key} (${lang})`);
+});
+
+test('every pay level has its message, through the typed Record the HR screen looks it up by', () => {
+  assert.deepEqual(Object.keys(LEVEL_KEY).sort(), Object.keys(PAY_LEVEL_UNION).sort(), 'the Record lists exactly the levels of the union');
+  assert.deepEqual(Object.keys(PAY_LEVEL_UNION).map(Number).sort((a, b) => a - b), [...PAY_LEVELS], 'and the union is the shared list');
+  for (const key of PAY_LEVELS.map((l) => LEVEL_KEY[l])) for (const lang of ['en', 'fr'] as const) assert.notEqual((lang === 'en' ? en : fr)[key].trim(), '', `${key} (${lang})`);
 });
 
 test('a cancellation cause maps to a message in both languages', () => {

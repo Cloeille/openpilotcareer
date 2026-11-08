@@ -294,6 +294,15 @@ if (trainee) {
 expect((await call('POST', '/training/courses', { token: lineTok, body: { staffId: 999999, type: 'C172', place: 'outside' } })).status === 404, "another company's pilot (or none) is a 404");
 expect((await call('GET', '/staff/999999/retrain', { token: lineTok })).status === 404, 'no retraining view for a pilot that is not hers');
 expect((await call('GET', '/training', { token: (await call('POST', '/me/api-keys', { token: lineTok, body: { label: 'training' } })).body.key })).status === 401, 'an API key cannot read the training centre');
+// v4 hr: the pay level is one lever (no compliance axis, C27) that applies from the next UTC day; the payroll preview is the staff overview's payroll plus the level, an API key cannot read or set it
+const hrView = await call('GET', '/hr', { token: lineTok });
+expect(hrView.status === 200 && hrView.body.pay.current === 0 && hrView.body.options.length === 5 && hrView.body.rule.below === 50 && hrView.body.morale.target === 60, `hr: market pay, morale heading to ${hrView.body.morale?.target}, ${hrView.body.people} on the payroll`, hrView);
+const hrSet = await call('PUT', '/hr/policy', { token: lineTok, body: { payPct: 5 } });
+expect(hrSet.status === 200 && hrSet.body.pay.current === 0 && hrSet.body.pay.next === 5 && hrSet.body.payroll === hrView.body.options.find((o) => o.payPct === 5).payroll, 'hr: +5 % is set for tomorrow (still 0 today), and the payroll shown is the one the preview priced', hrSet.body);
+expect((await call('PUT', '/hr/policy', { token: lineTok, body: { payPct: 5, law: 'illegal' } })).status === 400 && (await call('PUT', '/hr/policy', { token: lineTok, body: { payPct: 3 } })).status === 400, 'hr: no compliance axis, no free number');
+const hrKey = (await call('POST', '/me/api-keys', { token: lineTok, body: { label: 'hr' } })).body.key;
+expect((await call('GET', '/hr', { token: hrKey })).status === 401 && (await call('PUT', '/hr/policy', { token: hrKey, body: { payPct: 0 } })).status === 401, 'an API key cannot read or set the HR policy');
+await call('PUT', '/hr/policy', { token: lineTok, body: { payPct: 0 } });
 // v4 reports: the cash flow, statement, profitability and forecast read the same ledger the balance comes from
 const cashView = await call('GET', '/finance/cash?months=12', { token: lineTok });
 const meNow = (await call('GET', '/me', { token: lineTok })).body.company.balance;
