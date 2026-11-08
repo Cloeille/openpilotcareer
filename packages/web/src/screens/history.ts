@@ -23,7 +23,7 @@ const LEG_ICON = { done: 'circle-check', late: 'clock', flying: 'plane', cancell
 function legBadge(state: LegState): HTMLElement {
   const label = state.kind === 'late' ? t('ln.ops.b.delayed', { n: state.delayMin }) : state.kind === 'cancelled' ? t('ln.fs.cancelled') : state.kind === 'flying' ? t('ln.fs.flying') : t('ln.fs.done');
   const cls = state.kind === 'late' ? 'delayed' : state.kind === 'cancelled' ? 'cancelled' : 'ontime';
-  return h('div', { class: 'col tight' }, h('span', { class: `ln-badge ${cls}` }, icon(LEG_ICON[state.kind], 12), label),
+  return h('div', { class: 'col tight start' }, h('span', { class: `ln-badge ${cls}` }, icon(LEG_ICON[state.kind], 12), label),
     state.kind === 'cancelled' && state.cause ? h('span', { class: 'dim small' }, t(CAUSE_KEYS[state.cause])) : null);
 }
 

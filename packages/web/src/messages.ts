@@ -442,7 +442,7 @@ const table = {
   'hist.empty': ['No flight yet. Your first one is waiting on the job board.', 'Aucun vol pour le moment. Le premier t’attend sur le tableau de jobs.'],
   'hist.emptyLines': ['No line flight yet. They appear here once your lines have flown.', 'Aucun vol de ligne pour le moment. Ils apparaissent ici dès que tes lignes ont volé.'],
   'hist.legMoney': ['{revenue} revenue · {costs} costs', '{revenue} de recettes · {costs} de frais'],
-  'hist.legNote': ['Line flights show revenue less fuel, landing fees and maintenance. Crew pay and cabin service are posted separately.', 'Les vols de lignes montrent le chiffre d’affaires moins carburant, taxes d’atterrissage et maintenance. La paie des équipages et le service en cabine sont comptabilisés à part.'],
+  'hist.legNote': ['Line flights: revenue less fuel, fees and maintenance (crews and cabin service are posted apart).', 'Vols de lignes : recettes moins carburant, taxes et maintenance (équipages et service en cabine à part).'],
   'hist.more': ['Load older flights', 'Charger les vols plus anciens'],
   'hist.emptyFiltered': ['No flight matches these filters.', 'Aucun vol ne correspond à ces filtres.'],
   'hist.count.one': ['{n} flight', '{n} vol'],
