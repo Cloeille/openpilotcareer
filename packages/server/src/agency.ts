@@ -11,10 +11,10 @@ import { all, get, run, type Db } from './db.ts';
 import { balanceOf } from './game.ts';
 import { HttpError } from './http.ts';
 import { stoppageCostPerDay } from './lines-manage.ts';
-import type { LineRow } from './lines.ts';
+import { lineAircraft, type LineRow } from './lines.ts';
 import { FLIES_SQL } from './staff.ts';
-import { basesOf, categoryOf, engage, fleetTypes, lineBase, lineShortage, market, memberRow, nameFrom, openOf, roleOf } from './staff-people.ts';
-import { memberView } from './staff-views.ts';
+import { basesOf, categoryOf, engage, fleetTypes, market, memberRow, nameFrom, roleOf } from './staff-people.ts';
+import { coverOf, memberView, type Cover } from './staff-views.ts';
 
 type MissionRow = { id: number; company_id: number; base: string; qual: string; count: number; started_at: number; ready_at: number; commission: number; premium_pct: number; status: 'searching' | 'signed' | 'cancelled' };
 type Position = { base: string; qual: string; count: number };
@@ -43,24 +43,19 @@ const shortlistOfMission = (db: Db, m: MissionRow): AgencyCandidate[] => shortli
 
 // ---------------------------------------------------------------- what is short
 
-/** The pilot positions the company's running lines lack, per base and type: only those no hire in notice fills. The most costly first. `perDay` is the sum over the short lines of what they lose a day (lot LINES). */
-export function gapsOf(db: Db, companyId: number, now: number): AgencyGap[] {
-  const gaps = new Map<string, AgencyGap>(), bases = basesOf(db, companyId);
-  for (const l of all<LineRow>(db, "SELECT * FROM lines WHERE company_id = ? AND status IN ('active','interrupted') ORDER BY id", companyId)) {
-    const base = lineBase(db, l);
-    if (!bases.includes(base)) continue; // nobody can be employed at an airport that is neither a hub nor a base
-    for (const x of lineShortage(db, l, now)) {
-      if (x.family !== 'pilot' || x.type === null) continue;
-      const open = openOf(db, l, x, now);
-      if (open === 0) continue;
-      const g = gaps.get(`${base}.${x.type}`) ?? { base, qual: x.type, have: x.have, need: x.need, open: 0, perDay: 0, lines: [] };
-      g.open = Math.max(g.open, open);
-      g.perDay += stoppageCostPerDay(db, l, now);
-      g.lines.push({ id: l.id, a: l.a, b: l.b });
-      gaps.set(`${base}.${x.type}`, g);
-    }
-  }
-  return [...gaps.values()].sort((p, q) => q.perDay - p.perDay || p.base.localeCompare(q.base) || p.qual.localeCompare(q.qual));
+/** The pilot posts the company's timetable lacks, per base and type: the open posts of `coverOf`, the staffing screen's own need (crews for the rotation, duty limits and rest included) less the people
+ *  working or in notice. A deck that exists is not enough: a line cancelled for duty limits has pilots, just too few crews. The most costly first.
+ *  `perDay` is what the lines flying the type from the base earn a day, in proportion to the share of the posts nobody works yet (all of it for a line that cannot fly at all; lot LINES). */
+export function gapsOf(db: Db, companyId: number, cover: readonly Cover[], now: number): AgencyGap[] {
+  const bases = basesOf(db, companyId);
+  const lines = all<LineRow>(db, "SELECT * FROM lines WHERE company_id = ? AND status != 'paused' ORDER BY id", companyId);
+  return cover.filter((c) => c.family === 'pilot' && c.open > 0 && bases.includes(c.base)) // nobody can be employed at an airport that is neither a hub nor a base
+    .map((c): AgencyGap => {
+      const flown = lines.filter((l) => lineAircraft(db, l.id).some((x) => x.returned_at === null && x.home === c.base && x.icao === c.type));
+      const unstaffed = 1 - c.working / c.count;
+      return { base: c.base, qual: c.type!, have: c.working, need: c.count, open: c.open, perDay: flown.reduce((t, l) => t + stoppageCostPerDay(db, l, now), 0) * unstaffed, lines: flown.map((l) => ({ id: l.id, a: l.a, b: l.b })) };
+    })
+    .sort((p, q) => q.perDay - p.perDay || p.base.localeCompare(q.base) || p.qual.localeCompare(q.qual));
 }
 
 /** Only positions the market itself lists: a hub or base of the company, a type it flies. */
@@ -130,12 +125,13 @@ export type AgencyQuery = { base?: string | undefined; qual?: string | undefined
 /** The comparison for one position: the agency, training the company's own pilots on the type (`train` of staff-people.ts, price and days of TRAINING_COURSE), or the market (`hire`, one month's salary
  *  and the market's notice), each priced with the revenue the short lines lose a day. The position asked for, else the open mission's, else the line gap that costs the most. */
 export function agencyView(db: Db, companyId: number, q: AgencyQuery, now: number): AgencyView {
-  const gaps = gapsOf(db, companyId, now);
+  const cover = coverOf(db, companyId, now);
+  const gaps = gapsOf(db, companyId, cover, now);
   const mission0 = q.base === undefined ? openMissions(db, companyId)[0] : undefined;
   const asked: Position | null = q.base !== undefined ? { base: q.base, qual: q.qual!, count: q.count! }
     : mission0 ? { base: mission0.base, qual: mission0.qual, count: mission0.count }
       : gaps[0] ? { base: gaps[0].base, qual: gaps[0].qual, count: Math.min(gaps[0].open, AGENCY_MAX_COUNT) } : null;
-  const view = { gaps, commissionPct: AGENCY_COMMISSION_PCT, premiumPct: AGENCY_PREMIUM_PCT };
+  const view = { gaps, cabinOpen: cover.filter((c) => c.family === 'cabin').reduce((n, c) => n + c.open, 0), commissionPct: AGENCY_COMMISSION_PCT, premiumPct: AGENCY_PREMIUM_PCT };
   if (!asked) return { ...view, request: null, perDay: 0, options: [], savings: null, mission: null };
   if (q.base !== undefined) assertPosition(db, companyId, asked.base, asked.qual);
 

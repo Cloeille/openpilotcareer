@@ -49,3 +49,10 @@ test('plural messages of the agency read in the singular for one, in both langua
   assert.equal(translatePlural('en', 'ag.saved.days', 1), '1 day');
   assert.equal(translate('fr', 'ag.fee.surchargeVal', { amount: '1 400 €' }), '+1 400 € / mois');
 });
+
+test('no pilot missing but cabin crew is: the status and the empty card say how many to recruit, in both languages', () => {
+  assert.equal(translatePlural('fr', 'ag.status.cabin', 4), 'Aucune ligne ne manque de pilote, mais 4 PNC manquent : recrute-les dans Recrutement');
+  assert.equal(translatePlural('fr', 'ag.status.cabin', 1), 'Aucune ligne ne manque de pilote, mais 1 PNC manque : recrute-le dans Recrutement');
+  assert.match(translatePlural('en', 'ag.empty.cabin.body', 41), /41 cabin crew posts are open/);
+  assert.equal(translate('fr', 'ag.stat.staff.notice', { n: 8 }), '8 en préavis');
+});

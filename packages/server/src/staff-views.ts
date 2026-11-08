@@ -15,7 +15,7 @@ import { typeFor } from './game.ts';
 import { HttpError } from './http.ts';
 import { payAt } from './hr.ts';
 import { companyCode } from './lines.ts';
-import { companyDemand, countOf } from './staff-needs.ts';
+import { companyDemand, countOf, type Slot } from './staff-needs.ts';
 import { market } from './staff-people.ts';
 import { dutyFacts, dutyInput, policyOf, positionOf, rosterOf, rulesOf, stateOf, type StaffRow } from './staff.ts';
 
@@ -39,7 +39,7 @@ const emptyAvailability = () => ({ onDuty: 0, resting: 0, leave: 0, training: 0,
 /** The roster is everyone employed or in notice. `headcount` is who works now (what the crew check can use); a hire in notice already fills a post, so it leaves `vacant` and is listed in `arriving`. */
 export function overview(db: Db, companyId: number, now: number, base?: string, family?: StaffFamily): StaffOverview {
   const rules = rulesOf(db, companyId);
-  const demand = companyDemand(db, companyId, rules).filter((d) => !base || d.base === base);
+  const demand = companyDemand(db, companyId, rules).filter((d) => (!base || d.base === base) && (!family || d.family === family));
   const roster = rosterOf(db, companyId, now).filter((s) => !base || s.base === base).filter((s) => !family || s.family === family);
   const states = new Map(roster.map((s) => [s.id, stateOf(db, s, now, rules)]));
   const hereNow = roster.filter((s) => states.get(s.id) !== 'pending');
@@ -68,7 +68,7 @@ export function overview(db: Db, companyId: number, now: number, base?: string, 
     families.push(r);
   }
   return {
-    people: hereNow.length, pending: roster.length - hereNow.length, positions: demand.reduce((n, d) => n + d.count, 0), payroll: hereNow.filter((s) => s.contract === 'cdi').reduce((t, s) => t + paidSalary(s.salary, payAt(db, companyId, now)), 0), policy: policyOf(db, companyId),
+    people: hereNow.length, pending: roster.length - hereNow.length, positions: demand.reduce((n, d) => n + d.count, 0), vacant: families.reduce((n, f) => n + f.availability.vacant, 0), payroll: hereNow.filter((s) => s.contract === 'cdi').reduce((t, s) => t + paidSalary(s.salary, payAt(db, companyId, now)), 0), policy: policyOf(db, companyId),
     families, blockers: blockersToday(db, companyId, now), watch: watchList(db, hereNow, now),
   };
 }
@@ -161,14 +161,23 @@ export function candidates(db: Db, companyId: number, now: number, f: { family?:
   return { market: all_.length, candidates: list.slice(0, MAX_LISTED), suggestion: vacancy(db, companyId, now) };
 }
 
+/** A post of the timetable against the roster: `working` people at its base (rated on its type, for pilots) who have started, `pending` hires in notice, and the `open` posts that neither fills.
+ *  Duty limits are already in `count` (staff-needs.ts), so a base with a deck for every leg but too few crews for the rotation shows its open posts here. */
+export type Cover = Slot & { working: number; pending: number; open: number };
+
+export function coverOf(db: Db, companyId: number, now: number): Cover[] {
+  const roster = rosterOf(db, companyId, now).filter((r) => r.role !== ROLE_INSTRUCTOR);
+  return companyDemand(db, companyId, rulesOf(db, companyId)).map((sl) => {
+    const held = roster.filter((r) => r.family === sl.family && r.base === sl.base && (sl.type === null || qualsOf(db, r.id).some((q) => q.type_icao === sl.type)));
+    const pending = held.filter((r) => r.starts_at > now).length;
+    return { ...sl, working: held.length - pending, pending, open: Math.max(0, sl.count - held.length) };
+  });
+}
+
 /** The biggest vacancy of the company, as "N x label" for the recruitment panel; null when everything is staffed. */
 export function vacancy(db: Db, companyId: number, now: number): { count: number; label: string } | null {
-  const roster = rosterOf(db, companyId, now);
   let best: { count: number; label: string } | null = null;
-  for (const sl of companyDemand(db, companyId, rulesOf(db, companyId))) {
-    const have = roster.filter((r) => r.family === sl.family && r.role !== ROLE_INSTRUCTOR && r.base === sl.base && (sl.type === null || qualsOf(db, r.id).some((q) => q.type_icao === sl.type))).length;
-    if (sl.count - have > (best?.count ?? 0)) best = { count: sl.count - have, label: `${sl.family}${sl.type ? ` ${sl.type}` : ''} ${sl.base}` };
-  }
+  for (const c of coverOf(db, companyId, now)) if (c.open > (best?.count ?? 0)) best = { count: c.open, label: `${c.family}${c.type ? ` ${c.type}` : ''} ${c.base}` };
   return best;
 }
 
