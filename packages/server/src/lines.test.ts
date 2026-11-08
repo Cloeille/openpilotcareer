@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import {
   AUTONOMY_FACTOR, DAY_MS, LINE_TICK_MS, MAX_OFFLINE_DAYS, PAX_KG, jobPayout, lineTickOf, settle, blockHours, fuelPriceFactor, type Job, type NetworkView, type ScheduledFlight,
 } from '@opc/shared';
-import { catchUpLines } from './lines.ts';
+import { catchUpLines, nextBoundary } from './lines.ts';
 import { createLine } from './lines-manage.ts';
 import { seedAi } from './ai.ts';
 import { airports, catalogType } from './catalog.ts';
@@ -353,6 +353,56 @@ test('the forecast agrees with the result: one week of the programme valued by t
   assert.equal(day7.length, 7 * 6);
   const revenue = day7.reduce((s, l) => s + l.revenue!, 0);
   assert.equal(revenue, f.revenue, 'the forecast IS the engine\'s maths over a week');
+});
+
+test('changing a line\'s programme lays the legs that have not departed again, and only those: flown legs and the leg in the air stay', async () => {
+  const w = await world();
+  const second = insertAircraft(w.h.db, { companyId: w.cid, icao: 'AT76', hub: 'LFPG', value: 1_000_000, ownership: 'owned', at: w.h.clock.t });
+  const more = { freqPerDay: 6, aircraftIds: [w.ac, second] }; // more flights need a second aircraft
+  const url = `/api/v1/lines/${w.lineId}`;
+  w.h.clock.t = Date.UTC(2026, 10, 5, 10, 30); // Thursday 10:30: the 06:00 and 07:45 legs are done, the 10:00 one is in the air, 11:45 and 14:00 are ahead
+  await w.get('/api/v1/network');
+  const air = get<{ id: number; dep_at: number; arr_at: number }>(w.h.db, "SELECT * FROM scheduled_flights WHERE status = 'done' AND dep_at <= ? AND arr_at > ?", w.h.clock.t, w.h.clock.t);
+  assert.ok(air, 'a leg is in the air at this instant');
+  const departed = () => JSON.stringify(all(w.h.db, 'SELECT * FROM scheduled_flights WHERE dep_at <= ? ORDER BY id', w.h.clock.t));
+  const frozen = departed();
+  assert.ok(w.legs().filter((l) => l.status === 'done').length >= 3);
+  const before = w.legs().filter((l) => l.dep_at > w.h.clock.t);
+  assert.ok(before.length > 0 && before.every((l) => l.status === 'scheduled'));
+
+  const total = w.legs().length;
+  const f = await w.h.call('POST', `${url}/forecast`, { token: w.tok, body: more });
+  assert.equal(f.status, 200, f.text);
+  assert.deepEqual({ valid: f.body.valid, conflicts: f.body.conflicts.length }, { valid: true, conflicts: 0 }, 'the line does not conflict with itself');
+  assert.equal(w.legs().length, total, 'the forecast changes nothing');
+
+  const patched = await w.h.call('PATCH', url, { token: w.tok, body: more });
+  assert.equal(patched.status, 200, patched.text);
+  assert.equal(departed(), frozen, 'the legs flown and the one in the air are untouched');
+  const after = w.legs().filter((l) => l.dep_at > w.h.clock.t);
+  assert.ok(after.every((l) => l.status === 'scheduled' && l.dep_at >= nextBoundary(w.h.clock.t)), 'laid again from the next tick');
+  const laid = (legs: { dep_at: number }[], day: number) => legs.filter((l) => l.dep_at >= day && l.dep_at < day + DAY_MS).length;
+  assert.equal(laid(after, Date.UTC(2026, 10, 6)), 12, 'tomorrow is the new programme: six round trips');
+  assert.equal(laid(before, Date.UTC(2026, 10, 6)), 6, 'it was three');
+});
+
+test('a programme that clashes with another line on a shared aircraft is reported by the forecast and refused by the patch', async () => {
+  const w = await world();
+  const url = `/api/v1/lines/${w.lineId}`;
+  const widen = { freqPerDay: 3, windowEnd: '22:00' };
+  assert.equal((await w.h.call('POST', `${url}/forecast`, { token: w.tok, body: widen })).body.valid, true, 'alone, the wider programme is fine');
+  const evening = await w.h.call('POST', '/api/v1/lines', { token: w.tok, body: body({ a: 'LFPG', b: 'LFMN', freqPerDay: 1, windowStart: '19:00', windowEnd: '23:50', aircraftIds: [w.ac] }) });
+  assert.equal(evening.status, 201, evening.text);
+  const f = await w.h.call('POST', `${url}/forecast`, { token: w.tok, body: widen });
+  assert.deepEqual({ valid: f.body.valid, problems: f.body.problems }, { valid: false, problems: ['aircraft_busy'] });
+  assert.ok(f.body.conflicts.length > 0 && f.body.conflicts.every((c: { aircraftId: number }) => c.aircraftId === w.ac));
+  const legs = JSON.stringify(w.legs());
+  const refused = await w.h.call('PATCH', url, { token: w.tok, body: widen });
+  assert.deepEqual({ status: refused.status, error: refused.body.error }, { status: 409, error: 'aircraft_busy' });
+  assert.equal(JSON.stringify(w.legs()), legs, 'a refused change leaves the timetable as it was');
+  assert.equal((await w.h.call('POST', `${url}/forecast`, { token: w.tok, body: {} })).status, 400, 'a forecast of nothing is a bad request');
+  const bob = await w.h.register('bob', 'LFPG');
+  assert.equal((await w.h.call('POST', `${url}/forecast`, { token: bob.token, body: { freqPerDay: 2 } })).status, 404, 'another company cannot probe your line');
 });
 
 test('a line is edited, paused, resumed and deleted; pausing keeps no unflown leg and costs nothing extra', async () => {

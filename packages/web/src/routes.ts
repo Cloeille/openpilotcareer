@@ -23,7 +23,7 @@ import { simbrief } from './screens/simbrief.ts';
 import { realism } from './screens/ob-realism.ts';
 import { network } from './screens/network.ts';
 import { lineScreen } from './screens/line.ts';
-import { lineNew } from './screens/line-new.ts';
+import { lineEdit, lineNew } from './screens/line-editor.ts';
 import { ops } from './screens/ops.ts';
 import { staffRoute } from './screens/staff-route.ts';
 import { hubPlan } from './screens/hub-plan.ts';
@@ -52,7 +52,7 @@ export const routes: Record<Tab, ScreenFn> & Record<string, ScreenFn> = {
   settings,
   realism,
   // ---- lines (v3 F1)
-  network, line: lineScreen, 'line-new': lineNew, ops,
+  network, line: lineScreen, 'line-new': lineNew, 'line-edit': lineEdit, ops,
   // ---- staff (v3 F2)
   staff: staffRoute,
   // ---- facilities (v3 F3)

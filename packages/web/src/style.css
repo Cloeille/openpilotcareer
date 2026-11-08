@@ -415,6 +415,7 @@ input.upper { text-transform: uppercase; }
 .manual-card { display: flex; flex-direction: column; gap: 14px; padding: 6px 0 18px; border-bottom: 1px solid var(--border); }
 .manual-card:last-of-type { border-bottom: 0; }
 .history-view .filter select { max-width: none; }
+.history-view .panel-fill > .scroll { padding-bottom: 20px; }
 
 /* ---------------------------------------------------------------- leaderboard, duel, company sheet, recap */
 .lb-layout { display: flex; gap: 56px; width: 100%; min-height: 0; justify-content: space-between; }

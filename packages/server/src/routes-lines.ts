@@ -5,7 +5,7 @@ import { historyQuerySchema, lineBodySchema, lineDayQuerySchema, linePatchSchema
 import { bearer, sessionAuth, type Principal } from './auth.ts';
 import { get, tx, type Db } from './db.ts';
 import { HttpError, NUMERIC_ID, parse } from './http.ts';
-import { createLine, deleteLine, forecast, ownedLine, patchLine, problemView, resolveLine, setEnabled, setPaused, takeRotation } from './lines-manage.ts';
+import { createLine, deleteLine, forecast, forecastPatch, ownedLine, patchLine, problemView, resolveLine, setEnabled, setPaused, takeRotation } from './lines-manage.ts';
 import { aircraftLines, historyView, lineDetail, networkView, opsView } from './lines-views.ts';
 import { lineView, linesRequest, networkOf } from './lines.ts';
 
@@ -53,6 +53,12 @@ export function registerLines(app: FastifyInstance, ctx: LinesCtx): void {
   app.post('/api/v1/lines/forecast', async (req) => {
     const p = user(req);
     return forecast(db, p.companyId, parse(lineBodySchema, req.body), now());
+  });
+
+  // The same forecast for a line that exists, under the programme a PATCH would give it (fields left out keep the line's own): the line does not conflict with itself.
+  app.post('/api/v1/lines/:id/forecast', async (req) => {
+    const p = user(req);
+    return forecastPatch(db, p.companyId, id(req), parse(linePatchSchema, req.body), now());
   });
 
   app.post('/api/v1/lines', async (req, reply) => {

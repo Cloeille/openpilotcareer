@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import type { FlyingRow, Line, NetworkView, OpsRow, ScheduledFlight } from './api-lines.ts';
 import {
   asProgramme, causesOf, clockNow, dayKind, draftProblem, everyHours, faceToFace, filterOps, firstAlert, ganttLanes, hhmm, isoDay, lineDelay, lineVisual, mapAirportCodes, mapFlights, mapLines,
-  minuteOfDay, minutesOf, nextFilter, opsBadge, pairId, meterFraction, rivalOrder, sinceToday, phaseOf, perHour, freqFromPerHour, windowHours, isRoundTheClock, ROUND_THE_CLOCK, previewProgramme, pnlParts, progressPct, assuredDays, reopenTarget, stepDay, DEFAULT_DRAFT, forecastShare, candidateAircraft, aircraftTags, defaultAircraft, linesByAircraft, groupSlots, cheaperRemedy, defaultRemedy,
+  minuteOfDay, minutesOf, nextFilter, opsBadge, pairId, meterFraction, rivalOrder, sinceToday, phaseOf, perHour, freqFromPerHour, windowHours, isRoundTheClock, ROUND_THE_CLOCK, previewProgramme, pnlParts, progressPct, assuredDays, reopenTarget, stepDay, DEFAULT_DRAFT, forecastShare, candidateAircraft, aircraftTags, defaultAircraft, linesByAircraft, groupSlots, cheaperRemedy, defaultRemedy, fromLine, asPatch, isChanged,
 } from './lines-view.ts';
 
 const line = (o: Partial<Line> = {}): Line => ({
@@ -298,4 +298,24 @@ test('the panel opens on the cheapest way to fly now, and says so only when both
   assert.equal(defaultRemedy(opts({ interim: bridge(3_000) })), 'interim');
   assert.equal(defaultRemedy(opts({ reassign: {}, recruit: {} })), 'reassign');
   assert.equal(defaultRemedy(opts({})), 'pause');
+});
+
+test('the editor opens on the line\'s own programme: prefilled, the route kept, saved without it', () => {
+  const l = line({ days: [true, true, true, true, true, false, false], aircraft: [{ id: 9, registration: 'F-HAZB', icao: 'AT76' }, { id: 7, registration: 'F-HAZA', icao: 'AT76' }] });
+  const draft = fromLine(l);
+  assert.deepEqual(draft, { a: 'LFLL', b: 'LFMN', freqPerDay: 4, days: l.days, windowStart: '06:00', windowEnd: '22:00', aircraftIds: [9, 7] });
+  assert.equal(draftProblem(draft, { a: true, b: true }), null, 'an existing line is a valid draft as it stands');
+  assert.equal(isChanged(draft, l), false, 'nothing to save until something moves');
+  assert.deepEqual(asPatch(draft), { freqPerDay: 4, days: l.days, windowStart: '06:00', windowEnd: '22:00', aircraftIds: [9, 7] }, 'the patch carries no route');
+  assert.equal(isChanged({ ...draft, freqPerDay: 6 }, l), true);
+  assert.equal(isChanged({ ...draft, days: [true, true, true, true, true, true, false] }, l), true);
+  assert.equal(isChanged({ ...draft, windowEnd: '23:00' }, l), true);
+  assert.equal(isChanged({ ...draft, aircraftIds: [7, 9] }, l), false, 'the same aircraft in another order is the same programme');
+  assert.equal(isChanged({ ...draft, aircraftIds: [7] }, l), true);
+});
+
+test('the aircraft of the edited line stay in the picker even when the workshop has them', () => {
+  const fleet = [{ id: 1, location: 'LFLL', busy: false, lines: [], status: 'maintenance' }, { id: 2, location: 'LFLL', busy: false, lines: [], status: 'available' }];
+  assert.deepEqual(candidateAircraft(fleet, 'LFLL').map((x) => x.id), [2]);
+  assert.deepEqual(candidateAircraft(fleet, 'LFLL', new Set([1])).map((x) => x.id), [1, 2]);
 });

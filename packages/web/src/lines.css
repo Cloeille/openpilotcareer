@@ -199,6 +199,9 @@ li:first-child > .ln-row { border-top-color: transparent; }
 .ln-new-title { font-size: 34px; }
 .ln-route { display: flex; align-items: flex-end; gap: 8px; }
 .ln-route .input { width: 270px; }
+.ln-route-locked { align-items: center; gap: 12px; flex-wrap: wrap; }
+.ln-locked { display: inline-flex; align-items: center; gap: 6px; }
+.ln-edit-note { margin: 0; }
 .ln-route .airport-found { position: absolute; }
 .ln-swap { width: 40px; height: 44px; display: flex; align-items: center; justify-content: center; background: transparent; border: 0; color: var(--text-secondary); cursor: pointer; border-radius: 3px; }
 .ln-swap:hover { background: var(--surface-hover); color: var(--text-primary); }
@@ -236,7 +239,7 @@ li:first-child > .ln-row { border-top-color: transparent; }
 .ln-time input { height: 36px; background: var(--surface-sunken); border: 1px solid var(--border-strong); border-radius: 3px; padding: 0 10px; color-scheme: dark; }
 .ln-time input:disabled { opacity: .45; }
 .ln-schedule { display: flex; flex-direction: column; gap: 10px; }
-.ln-row-grid { display: flex; gap: 16px; align-items: center; min-height: 28px; }
+.ln-row-grid { display: flex; gap: 16px; align-items: center; min-height: 28px; flex: none; }
 .ln-row-grid > :last-child { flex: 1; min-width: 0; position: relative; }
 .ln-row-label { width: 170px; flex: none; font-size: 12px; color: var(--text-tertiary); }
 .ln-axis { position: relative; height: 16px; }

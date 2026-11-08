@@ -12,6 +12,7 @@ import type { Key } from '../messages.ts';
 import { pollWhileShown } from '../live-poll.ts';
 import type { Ctx, Hint, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
+import { hashFor } from '../keys.ts';
 
 const POLL_LINE_MS = 10_000;
 /** The day of the strip the player looks at, kept while the screen redraws. */
@@ -34,13 +35,14 @@ export async function lineScreen(ctx: Ctx): Promise<Screen> {
     const problem = await fetchProblem(id);
     if (problem) return interrupted(ctx, detail, problem);
   }
-  return planning(detail, snap.me.fleet, snap.me.company.code ?? '');
+  return planning(ctx, detail, snap.me.fleet);
 }
 
 // ====================================================================== detail & planning
 
-function planning(d: LineDetail, fleet: FleetAircraft[], code: string): Screen {
+function planning(ctx: Ctx, d: LineDetail, fleet: FleetAircraft[]): Screen {
   const { line } = d;
+  const code = ctx.snap.me.company.code ?? '';
   const fm = fmt();
   const today = isoDay(Date.now());
   const selectedDate = day?.line === line.id ? day.date : (d.week.find((x) => dayKind(x.date, today) === 'today')?.date ?? d.week[0]?.date ?? today);
@@ -146,8 +148,10 @@ function planning(d: LineDetail, fleet: FleetAircraft[], code: string): Screen {
   const pauseBtn = paused
     ? button(t('ln.resume'), { variant: 'primary', key: t('key.space'), onclick: () => void act(t('ln.resumed'), () => resumeLine(line.id), async () => { redraw(); }) })
     : button(t('ln.pause'), { variant: 'secondary', key: t('key.space'), onclick: () => void act(t('ln.paused'), () => pauseLine(line.id), async () => { redraw(); }) });
+  const edit = (): void => ctx.go(hashFor('line-edit', line.id));
+  const editBtn = button(t('ln.edit.open'), { variant: 'secondary', key: 'M', icon: 'settings', onclick: edit });
   const view = h('div', { class: 'ln-line' }, header,
-    panel({ title: t('ln.plan.title'), action: pauseBtn, class: 'ln-plan', id: 'ln-plan' }, weekRow, timeline, detailPanel, h('div', { class: 'ln-footer' }, econ, deps)));
+    panel({ title: t('ln.plan.title'), action: h('div', { class: 'row' }, editBtn, pauseBtn), class: 'ln-plan', id: 'ln-plan' }, weekRow, timeline, detailPanel, h('div', { class: 'ln-footer' }, econ, deps)));
   paintRotation();
 
   pollWhileShown('ln-line', view, async () => {
@@ -156,11 +160,11 @@ function planning(d: LineDetail, fleet: FleetAircraft[], code: string): Screen {
     if (fresh.line.status !== line.status || fresh.day.map((f) => `${f.id}${f.status}${f.delayMin}`).join() !== d.day.map((f) => `${f.id}${f.status}${f.delayMin}`).join()) redraw();
   }, POLL_LINE_MS);
 
-  const hints: Hint[] = [{ key: t('key.esc'), label: t('ln.hint.network') }, { key: '← →', label: t('ln.hint.day') }, { key: t('key.enter'), label: t('ln.hint.take') }, { key: t('key.space'), label: paused ? t('ln.hint.resume') : t('ln.hint.pause') }];
+  const hints: Hint[] = [{ key: t('key.esc'), label: t('ln.hint.network') }, { key: '← →', label: t('ln.hint.day') }, { key: t('key.enter'), label: t('ln.hint.take') }, { key: t('key.space'), label: paused ? t('ln.hint.resume') : t('ln.hint.pause') }, { key: 'M', label: t('ln.hint.edit') }];
   const toggle = (): void => { void act(paused ? t('ln.resumed') : t('ln.paused'), () => (paused ? resumeLine(line.id) : pauseLine(line.id)), async () => { redraw(); }); };
   return {
     title: `${line.a} ⇄ ${line.b}`, scene: 'job', tab: NETWORK_TAB, view, back: '#network', hints,
-    keys: { left: () => setDay(stepDay(d.week, selectedDate, -1)), right: () => setDay(stepDay(d.week, selectedDate, 1)), space: toggle },
+    keys: { left: () => setDay(stepDay(d.week, selectedDate, -1)), right: () => setDay(stepDay(d.week, selectedDate, 1)), space: toggle, m: edit },
   };
 }
 
@@ -177,6 +181,7 @@ function interrupted(ctx: Ctx, d: LineDetail, p: LineProblemView): Screen {
   const { line } = d;
   const fm = fmt();
   const now = Date.now();
+  const edit = (): void => go(hashFor('line-edit', line.id));
   const redraw = (): void => { window.dispatchEvent(new Event('opc:redraw')); };
   const causes = causesOf(line);
   const since = line.interruptedSince;
@@ -297,7 +302,8 @@ function interrupted(ctx: Ctx, d: LineDetail, p: LineProblemView): Screen {
   const right = panel({ title: t('ln.fix.title'), class: 'ln-fix', id: 'ln-fix' },
     h('p', { class: 'muted small' }, t('ln.fix.sub')),
     h('div', { class: 'ln-choices', role: 'radiogroup', 'aria-label': t('ln.fix.title') }, choiceEls), projectionHost,
-    h('p', { class: 'dim small' }, t('ln.fix.combine')), primary);
+    h('p', { class: 'dim small' }, t('ln.fix.combine')), primary,
+    button(t('ln.edit.open'), { variant: 'ghost', key: 'M', onclick: edit }));
   const view = h('div', { class: 'ln-int' }, left, right);
   view.addEventListener('keydown', (e) => {
     const target = e.target as Element | null;
@@ -310,7 +316,8 @@ function interrupted(ctx: Ctx, d: LineDetail, p: LineProblemView): Screen {
 
   return {
     title: `${line.a} ⇄ ${line.b}`, scene: 'fleet', tab: NETWORK_TAB, view, back: '#network',
-    hints: [{ key: t('key.esc'), label: t('ln.hint.network') }, { key: '↑ ↓', label: t('ln.hint.solution') }, { key: t('key.enter'), label: t('ln.hint.apply') }],
+    hints: [{ key: t('key.esc'), label: t('ln.hint.network') }, { key: '↑ ↓', label: t('ln.hint.solution') }, { key: t('key.enter'), label: t('ln.hint.apply') }, { key: 'M', label: t('ln.hint.edit') }],
+    keys: { m: edit },
   };
 }
 

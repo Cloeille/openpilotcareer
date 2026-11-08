@@ -100,9 +100,9 @@ const throwFirst = (problems: Problem[]): void => {
 // ---------------------------------------------------------------- forecast
 
 /** One week of the programme from `now`, valued leg by leg with the same maths the engine uses. Creates nothing. */
-export function forecast(db: Db, companyId: number, b: LineBody, now: number): LineForecastView {
+export function forecast(db: Db, companyId: number, b: LineBody, now: number, excludeLineId = 0): LineForecastView {
   const [a, z] = [b.a, b.b].sort() as [string, string];
-  const { problems, conflicts } = programmeProblems(db, companyId, { a, b: z, programme: b, excludeLineId: 0 });
+  const { problems, conflicts } = programmeProblems(db, companyId, { a, b: z, programme: b, excludeLineId });
   const fleet = liveAircraft(db, companyId, b.aircraftIds).sort((x, y) => x.id - y.id);
   const days = daysToMask(b.days);
   const dist = airports.has(a) && airports.has(z) && a !== z ? lineDistance(a, z) : 0;
@@ -180,14 +180,25 @@ export function createLine(db: Db, companyId: number, b: LineBody, now: number):
   return get<LineRow>(db, 'SELECT * FROM lines WHERE id = ?', id)!;
 }
 
-export function patchLine(db: Db, companyId: number, id: number, patch: Partial<Omit<LineBody, 'a' | 'b'>>, now: number): LineRow {
+type ProgrammePatch = Partial<Omit<LineBody, 'a' | 'b'>>;
+
+/** The programme the line would have once `patch` is applied: every field the patch leaves out keeps the line's own. */
+const mergedProgramme = (db: Db, l: LineRow, patch: ProgrammePatch): LineBody => ({
+  a: l.a, b: l.b, freqPerDay: patch.freqPerDay ?? l.freq_per_day, days: patch.days ?? maskDays(l.days),
+  windowStart: patch.windowStart ?? minToHhmm(l.window_start_min), windowEnd: patch.windowEnd ?? minToHhmm(l.window_end_min),
+  turnaroundMin: patch.turnaroundMin ?? l.turnaround_min, aircraftIds: patch.aircraftIds ?? lineAircraft(db, l.id).map((x) => x.id),
+});
+
+/** The forecast of an existing line under `patch`: what `patchLine` would be judged by, the line itself left out of its own conflicts. Creates nothing. */
+export function forecastPatch(db: Db, companyId: number, id: number, patch: ProgrammePatch, now: number): LineForecastView {
+  return forecast(db, companyId, mergedProgramme(db, ownedLine(db, companyId, id), patch), now, id);
+}
+
+/** Change a line's programme. The legs that have not departed are dropped and laid again from the new programme at the next tick (`relayLine`); legs already flown, cancelled or taken
+ *  by the player, and the one in the air (resolved at its departure), are history and stay as they are. */
+export function patchLine(db: Db, companyId: number, id: number, patch: ProgrammePatch, now: number): LineRow {
   const l = ownedLine(db, companyId, id);
-  const cur = lineAircraft(db, id);
-  const merged: LineBody = {
-    a: l.a, b: l.b, freqPerDay: patch.freqPerDay ?? l.freq_per_day, days: patch.days ?? maskDays(l.days),
-    windowStart: patch.windowStart ?? minToHhmm(l.window_start_min), windowEnd: patch.windowEnd ?? minToHhmm(l.window_end_min),
-    turnaroundMin: patch.turnaroundMin ?? l.turnaround_min, aircraftIds: patch.aircraftIds ?? cur.map((x) => x.id),
-  };
+  const merged = mergedProgramme(db, l, patch);
   throwFirst(programmeProblems(db, companyId, { a: l.a, b: l.b, programme: merged, excludeLineId: id }).problems);
   run(db, 'UPDATE lines SET freq_per_day = ?, days = ?, window_start_min = ?, window_end_min = ?, turnaround_min = ? WHERE id = ?',
     merged.freqPerDay, daysToMask(merged.days), hhmmToMin(merged.windowStart), hhmmToMin(merged.windowEnd), merged.turnaroundMin ?? DEFAULT_TURNAROUND_MIN, id);

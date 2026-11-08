@@ -1,5 +1,5 @@
 import { blockHours, type AircraftType, type LineBridgeSlot } from '@opc/shared';
-import type { CancelCause, LineProblemView, ProjectionStatus, ResolveOption, ScheduledFlightStatus, FlyingRow, Line, NetworkView, OpsRow, LineBody, ScheduledFlight } from './api-lines.ts';
+import type { CancelCause, LineProblemView, ProjectionStatus, ResolveOption, ScheduledFlightStatus, FlyingRow, Line, NetworkView, OpsRow, LineBody, LinePatch, ScheduledFlight } from './api-lines.ts';
 import type { MapAirport, MapFlight, MapLine } from './network-map.ts';
 import type { Key } from './messages.ts';
 import type { Screen } from './screen.ts';
@@ -192,7 +192,17 @@ export type Draft = { a: string; b: string; freqPerDay: number; days: boolean[];
 export const DEFAULT_DRAFT: Draft = { a: '', b: '', freqPerDay: 4, days: ALL_DAYS, windowStart: '06:00', windowEnd: '22:00', aircraftIds: [] };
 
 export const asProgramme = (d: Draft): LineBody => ({ a: d.a, b: d.b, freqPerDay: d.freqPerDay, days: d.days, windowStart: d.windowStart, windowEnd: d.windowEnd, aircraftIds: d.aircraftIds });
+/** The programme of an existing line as the editor opens it: prefilled with the line's own, the route locked (it is the line's identity). */
 export const fromLine = (l: Line): Draft => ({ a: l.a, b: l.b, freqPerDay: l.freqPerDay, days: l.days, windowStart: l.windowStart, windowEnd: l.windowEnd, aircraftIds: l.aircraft.map((a) => a.id) });
+/** What `PATCH /lines/:id` takes: the programme without its route; the line keeps the turnaround it has. */
+export const asPatch = (d: Draft): LinePatch => ({ freqPerDay: d.freqPerDay, days: d.days, windowStart: d.windowStart, windowEnd: d.windowEnd, aircraftIds: d.aircraftIds });
+/** The draft differs from what the line flies (the aircraft compared as a set): nothing to save otherwise. */
+export const isChanged = (d: Draft, l: Line): boolean => {
+  const own = fromLine(l);
+  const sameDays = d.days.length === own.days.length && d.days.every((v, i) => v === own.days[i]);
+  const ids = (x: Draft): string => [...x.aircraftIds].sort((p, q) => p - q).join();
+  return d.freqPerDay !== own.freqPerDay || !sameDays || d.windowStart !== own.windowStart || d.windowEnd !== own.windowEnd || ids(d) !== ids(own);
+};
 
 /** Why the draft cannot be created yet; null when it can. The server stays the judge (hub, range, duplicates). */
 export type DraftProblem = 'airports' | 'same' | 'aircraft' | 'days' | 'window' | 'freq';
@@ -260,10 +270,10 @@ export function linesByAircraft(lines: readonly Pick<Line, 'a' | 'b' | 'aircraft
 /** Ready to take a line from `a` as it is: standing at `a`, on no other line, not flying. */
 const readyAt = (x: Pickable, a: string): boolean => x.location === a && !x.busy && x.lines.length === 0;
 
-/** The aircraft that can be put on a line starting at `a`, best first: those at `a` (ready, then on another line, then flying), then the rest. The workshop ones are left out. */
-export function candidateAircraft<T extends Pickable>(fleet: readonly T[], a: string): T[] {
+/** The aircraft that can be put on a line starting at `a`, best first: those at `a` (ready, then on another line, then flying), then the rest. The workshop ones are left out, except the `keep` ones (the aircraft the edited line already flies stay on the list so she can take them off). */
+export function candidateAircraft<T extends Pickable>(fleet: readonly T[], a: string, keep: ReadonlySet<number> = new Set()): T[] {
   const rank = (x: T): number => (x.location === a ? 0 : 10) + (x.busy ? 2 : x.lines.length > 0 ? 1 : 0);
-  return fleet.filter((x) => x.status !== 'maintenance').sort((x, y) => rank(x) - rank(y));
+  return fleet.filter((x) => x.status !== 'maintenance' || keep.has(x.id)).sort((x, y) => rank(x) - rank(y));
 }
 
 /** What a new line starts with: the best aircraft when it is ready, nothing otherwise (the player picks). */

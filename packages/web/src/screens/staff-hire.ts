@@ -1,4 +1,4 @@
-import { START_NOW_FEE } from '@opc/shared';
+import { START_NOW_FEE, STAFF_FAMILIES } from '@opc/shared';
 import { act } from '../actions.ts';
 import { fetchCandidates, fetchStaff, hireCandidate, type Candidate, type CandidatesView, type StaffFamily, type StaffOverview } from '../api-staff.ts';
 import { button, icon, panel, titleBlock } from '../components.ts';
@@ -9,7 +9,8 @@ import { famLabel, hireFilter, meterBar, roleFull, roleShort, shortDate, staffOf
 import { keepSelection, moraleLevel, reliabilityTone, startsAt, unblocks } from '../staff-view.ts';
 import { h } from '../ui.ts';
 
-const FAMILIES: StaffFamily[] = ['pilot', 'cabin', 'ground', 'admin', 'maintenance'];
+/** Every family the market lists: the server's own list, so a family added there is hireable here (the kitchen's cooks were missing from a hand-kept copy). */
+const FAMILIES: readonly StaffFamily[] = STAFF_FAMILIES;
 let selected: string | null = null;
 
 /** Pilot types the player can filter on: the type rows of the staffing overview. */

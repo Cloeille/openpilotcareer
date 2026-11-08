@@ -227,6 +227,18 @@ for (let i = 0; i < 90 && flown === 0; i++) {
 }
 const lineTx = (await call('GET', '/me/transactions', { token: lp.body.token })).body.filter((x) => x.kind.startsWith('line_'));
 expect(flown > 0 && lineTx.some((x) => x.kind === 'line_revenue' && x.amount > 0), `the line flew on its own: ${lineTx.length} ledger lines (line_revenue ${lineTx.find((x) => x.kind === 'line_revenue')?.amount})`, lineTx);
+// the programme of a line that flies is edited: the forecast leaves the line out of its own conflicts, the PATCH takes it, the flights to come follow it
+const edit = { freqPerDay: 3 };
+const editFc = await call('POST', `/lines/${made.body.id}/forecast`, { token: lineTok, body: edit });
+expect(editFc.status === 200 && editFc.body.valid === true && editFc.body.conflicts.length === 0, 'editing a line: its forecast does not conflict with the line itself', editFc);
+const edited = await call('PATCH', `/lines/${made.body.id}`, { token: lineTok, body: edit });
+expect(edited.status === 200 && edited.body.freqPerDay === 3 && edited.body.flightNos[1] === edited.body.flightNos[0] + 5, `line frequency edited: ${edited.body.freqPerDay} round trips a day`, edited);
+const editedDetail = await call('GET', `/lines/${made.body.id}`, { token: lineTok });
+expect(editedDetail.status === 200 && editedDetail.body.line.freqPerDay === 3, 'the line detail shows the new frequency', editedDetail);
+// the kitchen's cooks are on the market and hireable like any other family
+const cook = (await call('GET', '/staff/candidates?family=kitchen&base=LFPG', { token: lineTok })).body.candidates[0];
+const hiredCook = cook ? await call('POST', '/staff/hire', { token: lineTok, body: { candidateId: cook.id } }) : null;
+expect(cook?.role === 'cook' && hiredCook?.status === 201 && hiredCook.body.member.family === 'kitchen', `hired a cook ${cook?.name}: ${cook?.askingSalary} a month`, hiredCook);
 const staffNow = await call('GET', `/staff/${interim.body.member.id}`, { token: lineTok });
 expect(staffNow.status === 200 && staffNow.body.week.length > 0 && staffNow.body.duty.flight28d > 0, `the interim pilot's card shows the legs flown: ${staffNow.body.duty.flight28d} h in 28 days`, staffNow.body.duty);
 // v3 safety: the index, tonight's crews and the journal answer the B.5 shapes (a new company with wear off has no incident to show)

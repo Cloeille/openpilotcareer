@@ -5,8 +5,8 @@ import { DatabaseSync } from 'node:sqlite';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  DAY_MS, DEFAULT_POLICY, LINE_TICK_MS, SATISFACTION_STREAK_DAYS, kitchenCapacity, offerFor, pairLoadFactor, weeklyDemand, weeklySeats, withSatisfaction, dayNo,
-  type CatererQuote, type KitchenView, type ServicePreview, type ServiceView,
+  DAY_MS, DEFAULT_POLICY, LINE_TICK_MS, MEALS, SATISFACTION_STREAK_DAYS, kitchenCapacity, offerFor, pairLoadFactor, weeklyDemand, weeklySeats, withSatisfaction, dayNo,
+  type CandidatesView, type CatererQuote, type KitchenView, type ServicePreview, type ServiceView,
 } from '@opc/shared';
 import { seedAi } from './ai.ts';
 import { catalogType } from './catalog.ts';
@@ -212,6 +212,32 @@ test('the cooks set the output: too few and meals are not made, nor sold nor pai
   assert.equal(c.unserved, 0, 'a caterer has no cap');
   assert.ok(f.sat / f.pax > s.sat / s.pax && s.sat / s.pax > n.sat / n.pax, 'satisfaction falls with the meals not made');
   assert.ok(full.w.sum('service_sales') > none.w.sum('service_sales') && full.w.sum('service_cost') < none.w.sum('service_cost'), 'a meal not made is neither sold nor paid for (the cost is booked negative)');
+});
+
+test('a cook is hired from the market like anyone else, and the cooks hired are the cooks of the kitchen: capacity = cooks x maxOutput / team', async () => {
+  const w = await world();
+  assert.equal((await w.call('POST', `/facilities/${await w.hall()}/lease`, {})).status, 201);
+  assert.equal((await w.call('PUT', '/kitchen/LFPG', { provider: 'own', quality: 'economy' })).status, 200);
+  w.h.clock.t += DAY_MS; // the own kitchen is in force from this midnight
+  const listed = (await w.call('GET', '/staff/candidates?family=kitchen&base=LFPG')).body as CandidatesView;
+  assert.ok(listed.candidates.length >= 6, 'the market has cooks');
+  assert.ok(listed.candidates.every((c) => c.family === 'kitchen' && c.role === 'cook' && c.qual === null && c.base === 'LFPG' && c.askingSalary > 0), 'cooks, at the hub, with no qualification');
+  const cooksOf = async () => ((await w.call('GET', '/kitchen/LFPG')).body as KitchenView);
+  assert.deepEqual({ employed: (await cooksOf()).cooks.employed, cap: (await cooksOf()).day.capacity }, { employed: 0, cap: 0 });
+
+  const before = get<{ balance: number }>(w.h.db, 'SELECT balance FROM companies WHERE id = ?', w.cid)!.balance;
+  const [first, second] = listed.candidates;
+  const hired = await w.call('POST', '/staff/hire', { candidateId: first!.id });
+  assert.equal(hired.status, 201, hired.text);
+  assert.deepEqual({ family: hired.body.member.family, role: hired.body.member.role, premium: hired.body.premium }, { family: 'kitchen', role: 'cook', premium: first!.askingSalary });
+  assert.equal(get<{ balance: number }>(w.h.db, 'SELECT balance FROM companies WHERE id = ?', w.cid)!.balance, before - first!.askingSalary);
+  assert.equal((await cooksOf()).cooks.employed, 0, 'a cook in notice makes no meal yet');
+  assert.equal((await w.call('POST', '/staff/hire', { candidateId: second!.id, startNow: true })).status, 201);
+  w.h.clock.t += 8 * DAY_MS;
+  const k = await cooksOf();
+  assert.deepEqual({ employed: k.cooks.employed, onDuty: k.cooks.onDuty, cap: k.day.capacity }, { employed: 2, onDuty: 2, cap: kitchenCapacity('economy', 2) });
+  assert.equal(k.day.capacity, Math.floor((2 * MEALS.economy.maxOutput) / MEALS.economy.team), 'cooks available x maxOutput / team');
+  assert.ok(k.day.capacity! > 0);
 });
 
 test('a caterer quote is deterministic, has no chef\'s menu, and compares with an own kitchen\'s ingredients, cooks and hall', async () => {

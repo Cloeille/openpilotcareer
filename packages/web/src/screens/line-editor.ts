@@ -1,8 +1,8 @@
-import { createLine, fetchNetwork, forecastLine, type LineForecastView } from '../api-lines.ts';
+import { createLine, fetchLine, fetchNetwork, forecastLine, forecastLinePatch, patchLine, type Line, type LineForecastView } from '../api-lines.ts';
 import { act } from '../actions.ts';
 import { airportInfo, cityOf } from '../airports.ts';
 import { airportField } from '../airport-field.ts';
-import { button, icon, panel, switchControl, unknownValue } from '../components.ts';
+import { button, icon, panel, signLocation, switchControl, unknownValue } from '../components.ts';
 import { ApiError } from '../errors.ts';
 import { errorText } from '../error-text.ts';
 import { fmt } from '../format.ts';
@@ -10,7 +10,7 @@ import { t, tp } from '../i18n.ts';
 import { toggleId } from '../group-view.ts';
 import { hashFor } from '../keys.ts';
 import {
-  aircraftTags, asProgramme, blockMinutesFor, candidateAircraft, DEFAULT_DRAFT, DEFAULT_TURNAROUND_MIN, defaultAircraft, draftProblem, forecastShare, freqFromPerHour, hhmm, isRoundTheClock, linesByAircraft, MAX_FREQ, minutesOf, NETWORK_TAB,
+  aircraftTags, asPatch, asProgramme, blockMinutesFor, candidateAircraft, DEFAULT_DRAFT, DEFAULT_TURNAROUND_MIN, defaultAircraft, draftProblem, forecastShare, freqFromPerHour, fromLine, hhmm, isChanged, isRoundTheClock, linesByAircraft, MAX_FREQ, minutesOf, NETWORK_TAB,
   perHour, previewProgramme, ROUND_THE_CLOCK, WEEKDAYS, type AircraftTag, type Draft, type DraftProblem, type Preview,
 } from '../lines-view.ts';
 import { fill } from '../lines-ui.ts';
@@ -19,32 +19,67 @@ import type { Key } from '../messages.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { distanceNm } from '@opc/shared';
 
-/** The draft survives a redraw (language change, refresh) so a half-made line is not lost. */
-let draft: Draft = { ...DEFAULT_DRAFT };
+/** A programme being worked on: it survives a redraw (language change, refresh) so a half-made one is not lost. Until the player touches the aircraft picker, a new line's draft carries the best ready aircraft for its origin. */
+type Session = { draft: Draft; picked: boolean };
+const freshSession = (): Session => ({ draft: { ...DEFAULT_DRAFT }, picked: false });
+/** The new line's draft also survives leaving the screen. */
+let creation: Session = freshSession();
+/** The programme change of one line: prefilled from the line, kept while the player stays on `#line-edit/<id>`, dropped as soon as she goes anywhere else. */
+let revision: (Session & { lineId: number }) | null = null;
 let unit: 'day' | 'hour' = 'day';
-/** Until the player touches the aircraft picker, the draft carries the best ready aircraft for its origin. */
-let picked = false;
+
+function revisionOf(line: Line): Session {
+  if (revision?.lineId === line.id) return revision;
+  revision = { lineId: line.id, draft: fromLine(line), picked: true };
+  const leave = (): void => {
+    if (location.hash === hashFor('line-edit', line.id)) return;
+    revision = null;
+    window.removeEventListener('hashchange', leave);
+  };
+  window.addEventListener('hashchange', leave);
+  return revision;
+}
+
+/** Which programme the editor works on: a line to open, or an existing line whose programme is changed (its route is the line's identity and stays locked). */
+type Mode = { kind: 'new' } | { kind: 'edit'; line: Line };
 
 /** Why the server would refuse the programme (codes of `POST /lines` errors), in the player's words; an unknown code is shown as it is. */
 const REFUSAL_KEY: Record<string, Key> = { hub_missing: 'ln.err.hub_missing', aircraft_busy: 'ln.err.aircraft_busy', aircraft_elsewhere: 'ln.err.aircraft_elsewhere', duplicate_line: 'ln.err.duplicate_line', distance_exceeds_range: 'ln.err.distance_exceeds_range' };
 const refusalText = (code: string): string => (REFUSAL_KEY[code] ? t(REFUSAL_KEY[code]!) : code);
 const PROBLEM_KEY: Record<DraftProblem, Key> = { airports: 'ln.new.p.airports', same: 'ln.new.p.same', aircraft: 'ln.new.p.aircraft', days: 'ln.new.p.days', window: 'ln.new.p.window', freq: 'ln.new.p.freq' };
 
-/** `#line-new`: pick two airports, a programme and aircraft; see the timetable it makes, what it needs and a week's forecast; open the line. */
-export async function lineNew(ctx: Ctx): Promise<Screen> {
+/** The line editor: one screen for opening a line and for changing the programme of one that flies. `#line-new`: pick two airports, a programme and aircraft; see the timetable it makes, what it needs and a week's forecast; open the line. */
+export const lineNew = (ctx: Ctx): Promise<Screen> => editor(ctx, { kind: 'new' });
+
+/** `#line-edit/<id>`: the same editor on an existing line, prefilled with its programme and aircraft, the route locked; the forecast leaves the line out of its own conflicts. Saving lays the flights that have not departed again. */
+export async function lineEdit(ctx: Ctx): Promise<Screen> {
+  const id = ctx.arg === null ? NaN : Number(ctx.arg);
+  const detail = Number.isInteger(id) ? await fetchLine(id) : null;
+  if (!detail) {
+    const back = '#network';
+    return { title: t('ln.line.notFound'), scene: 'job', tab: NETWORK_TAB, back, hints: [{ key: t('key.esc'), label: t('hint.back') }], view: h('p', { class: 'error-text', role: 'alert' }, t('ln.line.notFound')) };
+  }
+  return editor(ctx, { kind: 'edit', line: detail.line });
+}
+
+async function editor(ctx: Ctx, mode: Mode): Promise<Screen> {
   const { snap, go } = ctx;
   const { me } = snap;
   const fm = fmt();
-  if (!draft.a) draft = { ...draft, a: me.hubs[0] ?? '' };
+  const edited = mode.kind === 'edit' ? mode.line : null;
+  const state = edited ? revisionOf(edited) : creation;
+  let draft = state.draft;
+  const update = (patch: Partial<Draft>): void => { draft = state.draft = { ...draft, ...patch }; };
+  if (!edited && !draft.a) update({ a: me.hubs[0] ?? '' });
   const redraw = (): void => { window.dispatchEvent(new Event('opc:redraw')); };
 
   const known = { a: false, b: false };
   const info = { a: null as Awaited<ReturnType<typeof airportInfo>>, b: null as Awaited<ReturnType<typeof airportInfo>> };
   let network: Awaited<ReturnType<typeof fetchNetwork>>;
   [info.a, info.b, network] = await Promise.all([draft.a ? airportInfo(draft.a) : null, draft.b ? airportInfo(draft.b) : null, fetchNetwork()]);
-  const onLines = linesByAircraft(network?.lines ?? []);
+  const onLines = linesByAircraft((network?.lines ?? []).filter((l) => l.id !== edited?.id));
   const aircraft = me.fleet.map((x) => ({ ...x, lines: onLines.get(x.id) ?? [] }));
-  if (!picked) draft = { ...draft, aircraftIds: [defaultAircraft(aircraft, draft.a)?.id ?? []].flat() };
+  if (!state.picked) update({ aircraftIds: [defaultAircraft(aircraft, draft.a)?.id ?? []].flat() });
   known.a = info.a !== null; known.b = info.b !== null;
   const types = new Map(me.fleet.map((a) => [a.id, a.type]));
   const distance = info.a && info.b ? distanceNm(info.a.lat, info.a.lon, info.b.lat, info.b.lon) : null;
@@ -56,24 +91,29 @@ export async function lineNew(ctx: Ctx): Promise<Screen> {
     const f = airportField(label, { value: draft[which], name: `ln-${which}`, id: `ln-${which}-input` });
     f.input.addEventListener('input', debounce(() => {
       const code = f.input.value.trim().toUpperCase();
-      if (/^[A-Z]{4}$/.test(code) && code !== draft[which]) { draft = { ...draft, [which]: code }; redraw(); }
+      if (/^[A-Z]{4}$/.test(code) && code !== draft[which]) { update({ [which]: code }); redraw(); }
     }, 350));
     return f;
   };
-  const depart = field(t('ln.new.from'), 'a');
-  const arrive = field(t('ln.new.to'), 'b');
-  const swap = h('button', { type: 'button', class: 'ln-swap', 'aria-label': t('ln.new.swap'), onclick: () => { draft = { ...draft, a: draft.b, b: draft.a }; redraw(); } }, icon('refresh-cw', 18));
+  const fields = (): HTMLElement => {
+    const depart = field(t('ln.new.from'), 'a'), arrive = field(t('ln.new.to'), 'b');
+    const swap = h('button', { type: 'button', class: 'ln-swap', 'aria-label': t('ln.new.swap'), onclick: () => { update({ a: draft.b, b: draft.a }); redraw(); } }, icon('refresh-cw', 18));
+    return h('div', { class: 'ln-route' }, depart.root, swap, arrive.root);
+  };
   const cities = (a: typeof info.a): string => (a ? cityOf(a).replace(/\s*\(.*$/, '') : '');
   const title = known.a && known.b ? `${cities(info.a)} → ${cities(info.b)}` : t('ln.new.titleEmpty');
   const sub = distance !== null
     ? t('ln.new.sub', { nm: fm.nm(Math.round(distance)), time: block ? fm.duration(block / 60) : '–' })
     : t('ln.new.subEmpty');
+  const route = edited
+    ? h('div', { class: 'ln-route ln-route-locked', role: 'group', 'aria-label': t('ln.edit.route') }, signLocation(edited.a), h('span', { class: 'ln-pair', 'aria-hidden': 'true' }, '⇄'), signLocation(edited.b),
+      h('span', { class: 'dim small ln-locked' }, icon('lock', 14), t('ln.edit.locked')))
+    : fields();
   const header = h('div', { class: 'ln-new-header' },
-    h('div', { class: 'col tight' }, h('p', { class: 'muted' }, t('ln.new.kicker', { company: me.company.name })), h('h1', { class: 'title ln-new-title' }, title), h('p', { class: 'dim' }, sub)),
-    h('div', { class: 'ln-route' }, depart.root, swap, arrive.root));
+    h('div', { class: 'col tight' }, h('p', { class: 'muted' }, t(edited ? 'ln.edit.kicker' : 'ln.new.kicker', { company: me.company.name })), h('h1', { class: 'title ln-new-title' }, title), h('p', { class: 'dim' }, sub)), route);
 
   // ------------------------------------------------------------ the programme controls
-  const set = (patch: Partial<Draft>): void => { draft = { ...draft, ...patch }; redraw(); };
+  const set = (patch: Partial<Draft>): void => { update(patch); redraw(); };
   const stepper = (label: string, text: string, onMinus: () => void, onPlus: () => void, canMinus: boolean, canPlus: boolean, id: string): HTMLElement =>
     h('div', { class: 'ln-stepper', role: 'group', 'aria-label': label },
       h('button', { type: 'button', id: `${id}-minus`, 'aria-label': t('ln.new.less', { what: label }), disabled: !canMinus, onclick: onMinus }, icon('minus', 16)),
@@ -102,14 +142,14 @@ export async function lineNew(ctx: Ctx): Promise<Screen> {
     const on = draft.aircraftIds.includes(a.id);
     const el = h('button', {
       type: 'button', id: `ln-ac-${a.id}`, class: `ln-pick${on ? ' on' : ''}`, role: 'checkbox', 'aria-checked': String(on), 'data-row': '',
-      onclick: () => { picked = true; set({ aircraftIds: toggleId(draft.aircraftIds, a.id) }); },
+      onclick: () => { state.picked = true; set({ aircraftIds: toggleId(draft.aircraftIds, a.id) }); },
     }, icon(on ? 'circle-check' : 'circle-dashed', 16), h('span', { class: 'mono strong' }, a.registration), h('span', { class: 'dim small' }, `${a.type.name} · ${a.location}`),
     h('span', { class: 'ln-pick-tags' }, aircraftTags(a, draft.a, draft.b).map((g) => h('span', { class: `ln-pick-tag ${g.kind}` }, tagText(g))),
       h('span', { class: 'ln-pick-tag clash', hidden: true }, icon('triangle-alert', 13), t('ln.new.tag.clash'))));
     pickRows.set(a.id, el);
     return el;
   };
-  const eligible = candidateAircraft(aircraft, draft.a);
+  const eligible = candidateAircraft(aircraft, draft.a, new Set(edited?.aircraft.map((x) => x.id)));
   const planes = h('div', { class: 'ln-control ln-planes' },
     h('div', { class: 'row' }, h('span', { class: 'ln-control-label', id: 'ln-planes-label' }, t('ln.new.aircraft')), h('output', { class: 'dim small', 'aria-live': 'polite' }, tp('ln.new.planes', draft.aircraftIds.length))),
     eligible.length === 0 ? h('p', { class: 'dim small' }, t('ln.new.noAircraft')) : h('div', { class: 'ln-picklist', role: 'group', 'aria-labelledby': 'ln-planes-label' }, eligible.map(pickRow)));
@@ -125,7 +165,7 @@ export async function lineNew(ctx: Ctx): Promise<Screen> {
   const controls = h('div', { class: 'ln-controls' }, freq, days, hours);
 
   // ------------------------------------------------------------ the timetable the programme makes
-  const turnaround = DEFAULT_TURNAROUND_MIN;
+  const turnaround = edited?.turnaroundMin ?? DEFAULT_TURNAROUND_MIN;
   let forecast: LineForecastView | null = null;
   const preview = (): Preview | null => (block ? previewProgramme(draft, block, turnaround, forecast?.conflicts ?? []) : null);
   /** The rows of the aircraft whose rotations would clash with another line's are marked as soon as the forecast says so; they are edited in place so the focus stays. */
@@ -176,12 +216,13 @@ export async function lineNew(ctx: Ctx): Promise<Screen> {
     const crewShort = f !== null && f.crewModelled && f.needs.pilots.available < f.needs.pilots.required;
     const crewNeed = (n: { required: number; available: number }): { text?: string } => (f!.crewModelled ? {} : { text: t('ln.need.requiredOnly', { required: n.required }) });
     const refusal = f && !f.valid ? f.problems[0] ?? null : null;
-    const primary = button(t('ln.new.open'), { variant: 'primary', key: t('key.enter'), disabled: problem !== null || (f !== null && !f.valid), onclick: () => void create() });
+    const primary = button(t(edited ? 'ln.edit.save' : 'ln.new.open'), { variant: 'primary', key: t('key.enter'), disabled: problem !== null || (f !== null && !f.valid) || (edited !== null && !isChanged(draft, edited)), onclick: () => void submit() });
     sideHost.replaceChildren(
       panel({ title: t('ln.need.title'), class: 'ln-needs', id: 'ln-needs' },
         f ? [need(t('ln.need.pilots'), f.needs.pilots, crewNeed(f.needs.pilots).text), need(t('ln.need.cabin'), f.needs.cabin, crewNeed(f.needs.cabin).text), need(t('ln.need.ground', { city: cities(info.b) || draft.b }), f.needs.ground, f.needs.ground.missingAt.length ? t('ln.need.groundMissing', { n: f.needs.ground.required - f.needs.ground.available }) : t('ln.need.groundOk')), need(t('ln.need.maintenance'), null, f.needs.maintenance)] : h('p', { class: 'dim small' }, problem ? t(PROBLEM_KEY[problem]) : t('ln.need.loading')),
         crewShort ? h('div', { class: 'ln-warn' }, icon('triangle-alert', 16), h('div', { class: 'col tight' }, h('span', null, t('ln.warn.crew', { n: f!.needs.pilots.required - f!.needs.pilots.available })), h('button', { type: 'button', class: 'link-btn', onclick: () => go('#staff/hire') }, t('ln.warn.recruit', { n: f!.needs.pilots.required - f!.needs.pilots.available })))) : null,
         refusal ? h('div', { class: 'ln-warn', role: 'alert' }, icon('circle-x', 16), h('span', null, refusalText(refusal))) : null,
+        edited ? h('p', { class: 'dim small ln-edit-note' }, t('ln.edit.note')) : null,
         conflicts.length ? h('div', { class: 'ln-warn' }, icon('triangle-alert', 16), h('span', null, t('ln.warn.conflict', { reg: aircraft.find((x) => x.id === conflicts[0]!.aircraftId)?.registration ?? '', no: `${me.company.code ?? ''} ${conflicts[0]!.flightNo}`.trim(), at: fm.zulu(conflicts[0]!.at) }))) : null),
       panel({ title: t('ln.fc.title'), action: h('span', { class: 'badge estimated' }, t('ln.fc.estimated')), class: 'ln-forecast', id: 'ln-forecast' },
         f ? [h('div', { class: 'col tight' }, h('span', { class: 'muted small' }, t('ln.fc.profit')), h('span', { class: `ln-profit${f.forecast.profit < 0 ? ' loss' : ''}` }, fm.signedMoney(f.forecast.profit)), h('span', { class: 'dim small' }, t('ln.fc.split', { revenue: fm.money(f.forecast.revenue), costs: fm.money(f.forecast.costs) }))),
@@ -197,7 +238,7 @@ export async function lineNew(ctx: Ctx): Promise<Screen> {
     const mine = ++seq;
     if (problem !== null) { forecast = null; paintSide(); paintTable(); return; }
     try {
-      const f = await forecastLine(asProgramme(draft));
+      const f = edited ? await forecastLinePatch(edited.id, asPatch(draft)) : await forecastLine(asProgramme(draft));
       if (mine !== seq) return;
       forecast = f;
     } catch (e) {
@@ -208,19 +249,25 @@ export async function lineNew(ctx: Ctx): Promise<Screen> {
     paintSide(); paintTable();
   }, 250);
 
-  async function create(): Promise<void> {
+  /** Open the new line, or save the new programme of the edited one; the server's refusals are told the same way (`act`). */
+  async function submit(): Promise<void> {
     if (problem !== null) { notify(t(PROBLEM_KEY[problem]), 'error'); return; }
     let line: { id: number } | null = null;
-    const ok = await act(t('ln.new.created'), async () => { line = await createLine(asProgramme(draft)); }, ctx.refresh);
-    if (ok && line) { draft = { ...DEFAULT_DRAFT }; unit = 'day'; picked = false; go(hashFor('line', (line as { id: number }).id)); }
+    const ok = edited
+      ? await act(t('ln.edit.saved'), async () => { line = await patchLine(edited.id, asPatch(draft)); }, ctx.refresh)
+      : await act(t('ln.new.created'), async () => { line = await createLine(asProgramme(draft)); }, ctx.refresh);
+    if (!ok || !line) return;
+    if (edited) revision = null; else creation = freshSession();
+    unit = 'day';
+    go(hashFor('line', (line as { id: number }).id));
   }
 
   paintTable(); paintSide();
   if (problem === null) refreshForecast();
   const view = h('div', { class: 'ln-new' }, header, h('div', { class: 'ln-new-body' }, left, sideHost));
   return {
-    title: t('ln.new.title'), scene: 'jobs', tab: NETWORK_TAB, view, back: '#network',
-    hints: [{ key: t('key.esc'), label: t('ln.hint.cancel') }, { key: '↑ ↓', label: t('ln.hint.aircraft') }, { key: t('key.space'), label: t('ln.hint.toggle') }, { key: t('key.enter'), label: t('ln.hint.openLine') }],
+    title: edited ? t('ln.edit.title') : t('ln.new.title'), scene: 'jobs', tab: NETWORK_TAB, view, back: edited ? hashFor('line', edited.id) : '#network',
+    hints: [{ key: t('key.esc'), label: t('ln.hint.cancel') }, { key: '↑ ↓', label: t('ln.hint.aircraft') }, { key: t('key.space'), label: t('ln.hint.toggle') }, { key: t('key.enter'), label: t(edited ? 'ln.edit.hintSave' : 'ln.hint.openLine') }],
   };
 }
 

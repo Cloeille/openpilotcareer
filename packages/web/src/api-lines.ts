@@ -52,6 +52,8 @@ export type LineDetail = {
   depends: { key: DependencyKey; label: string; value: string; ok: boolean }[];
 };
 export type LineBody = { a: string; b: string; freqPerDay: number; days: boolean[]; windowStart: string; windowEnd: string; turnaroundMin?: number; aircraftIds: number[] };
+/** Body of `PATCH /lines/:id` and `POST /lines/:id/forecast`: the programme without its route (any field left out keeps the line's own). */
+export type LinePatch = Omit<LineBody, 'a' | 'b'>;
 export type Need = { required: number; available: number };
 export type LineForecastView = {
   forecast: LineForecast; conflicts: { aircraftId: number; flightNo: number; at: number }[];
@@ -100,7 +102,9 @@ export const fetchOps = (): Promise<OpsView | null> => optional<OpsView>('/ops')
 
 export const setNetworkEnabled = (enabled: boolean): Promise<unknown> => api('/network/enabled', { method: 'PUT', body: { enabled } });
 export const forecastLine = (p: LineBody): Promise<LineForecastView> => api<LineForecastView>('/lines/forecast', { method: 'POST', body: p });
+export const forecastLinePatch = (id: number, p: LinePatch): Promise<LineForecastView> => api<LineForecastView>(`/lines/${id}/forecast`, { method: 'POST', body: p });
 export const createLine = (p: LineBody): Promise<Line> => api<Line>('/lines', { method: 'POST', body: p });
+export const patchLine = (id: number, p: LinePatch): Promise<Line> => api<Line>(`/lines/${id}`, { method: 'PATCH', body: p });
 export const pauseLine = (id: number): Promise<unknown> => api(`/lines/${id}/pause`, { method: 'POST', body: {} });
 export const resumeLine = (id: number): Promise<unknown> => api(`/lines/${id}/resume`, { method: 'POST', body: {} });
 export const deleteLine = (id: number): Promise<unknown> => api(`/lines/${id}`, { method: 'DELETE' });
