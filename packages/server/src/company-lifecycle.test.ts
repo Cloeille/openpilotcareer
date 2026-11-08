@@ -67,6 +67,7 @@ async function fill(h: H, token: string, cid: number): Promise<void> {
   run(h.db, "INSERT INTO service_policy (company_id, haul, item, mode, since) VALUES (?, 'short', 'snack', 'sold', ?)", cid, at);
   run(h.db, "INSERT INTO kitchen (company_id, hub, provider, since) VALUES (?, 'LFMN', 'caterer', ?)", cid, at);
   run(h.db, "INSERT INTO service_days (company_id, day, hub) VALUES (?, 1, 'LFMN')", cid);
+  run(h.db, 'INSERT INTO hr_policy (company_id, pay_pct, since) VALUES (?, 5, ?)', cid, at);
   snapshot(h.db, cid, at);
 }
 

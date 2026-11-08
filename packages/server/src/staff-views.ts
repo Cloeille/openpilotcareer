@@ -68,7 +68,7 @@ export function overview(db: Db, companyId: number, now: number, base?: string, 
     families.push(r);
   }
   return {
-    people: hereNow.length, pending: roster.length - hereNow.length, positions: demand.reduce((n, d) => n + d.count, 0), payroll: hereNow.filter((s) => s.contract === 'cdi').reduce((t, s) => t + paidSalary(s.salary, payAt(db, companyId)), 0), policy: policyOf(db, companyId),
+    people: hereNow.length, pending: roster.length - hereNow.length, positions: demand.reduce((n, d) => n + d.count, 0), payroll: hereNow.filter((s) => s.contract === 'cdi').reduce((t, s) => t + paidSalary(s.salary, payAt(db, companyId, now)), 0), policy: policyOf(db, companyId),
     families, blockers: blockersToday(db, companyId, now), watch: watchList(db, hereNow, now),
   };
 }

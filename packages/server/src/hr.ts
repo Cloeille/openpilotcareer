@@ -21,9 +21,9 @@ export function setPay(db: Db, companyId: number, payPct: PayLevel, now: number)
 }
 
 /** The step billing makes for `month` (`YYYY-MM`, `at` its 1st): everybody the payroll pays that month and who has not given notice moves a share of the way to the morale the pay level and the rest policy
- *  set (C30); then, on the morale they now have, a person under QUIT_BELOW gives notice on a roll seeded by their id and the month. Both are functions of the stored state and of `month` alone, so the same
- *  history always gives the same morale and the same leavers, whenever the request that runs the billing arrives. Notice is dated the 1st, so they leave `notice_days` later, paid until then (the month
- *  just posted already paid them), no severance. The rest policy is not a history (the staff lot keeps one setting), so a catch-up of several months steps them all with the one in force. */
+ *  set (C30); then, on the morale they now have, a person under QUIT_BELOW gives notice on a roll seeded by their id and the month. The morale, the roll and the date are functions of the stored state and of
+ *  `month` alone, never of when the request that ran the billing arrived: the same history gives the same morale and the same leavers, to the day (the notice runs from the 1st; they are paid until they go,
+ *  no severance). The rest policy is not a history (the staff lot keeps one setting), so a catch-up of several months steps them all with the one in force. */
 export function stepMorale(db: Db, companyId: number, month: string, at: number): void {
   const target = moraleTarget(payAt(db, companyId, at), policyOf(db, companyId));
   for (const p of payrollRows(db, companyId)) {
