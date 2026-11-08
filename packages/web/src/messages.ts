@@ -3234,7 +3234,7 @@ const table = {
   'cr.hint.open': ['Credits', 'Crédits'],
   'cr.bank.alpes': ['Banque des Alpes', 'Banque des Alpes'], 'cr.bank.meridional': ['Crédit Méridional', 'Crédit Méridional'], 'cr.bank.aerofinance': ['AéroFinance Direct', 'AéroFinance Direct'],
   'cr.refusal.too_many': ['You already have the maximum number of credits at once. Repay one first.', 'Tu as déjà le nombre maximal de crédits en même temps. Rembourses-en un d’abord.'],
-  'cr.refusal.over_ceiling': ['This amount is above what your last month of revenue lets you borrow. Ask for less.', 'Ce montant dépasse ce que ton dernier mois de recettes te permet d’emprunter. Demande moins.'],
+  'cr.refusal.over_ceiling': ['This amount is above your borrowing ceiling. Ask for less.', 'Ce montant dépasse ton plafond d’emprunt. Demande moins.'],
   'cr.refusal.debt_ratio': ['The instalments would weigh too much against your last month of revenue.', 'Les mensualités pèseraient trop sur tes recettes du dernier mois.'],
   'err.too_many': ['You already have the maximum number of credits at once.', 'Tu as déjà le nombre maximal de crédits en même temps.'],
   'err.over_ceiling': ['This amount is above what your last month of revenue lets you borrow.', 'Ce montant dépasse ce que ton dernier mois de recettes te permet d’emprunter.'],

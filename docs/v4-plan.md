@@ -177,7 +177,7 @@ Definition of done per lot as in v3: tests next to the code (`shared/` rules, ro
 | Runway 21 days (cash) | ok | `balance / (monthly spend / 30)` |
 | Debt ratio 6.1 % to 7.1 % (credits) | ok | instalments / last full month's revenue |
 | Consumer credit 40 700 for 24 months (credit-new, all 5 durations) | ok | annuity at the bank's rate + monthly insurance × n + fee; banks 7.2 % (fee 3 500, insurance 112), 7.9 % (1 200, ≈135, 1 % early penalty), 9.6 % (none) |
-| Credit ceiling 600 000, rating B+ | [NO MODEL] and inconsistent (A- and 940 000 on the list frame) | ceiling = 30 % of last full month revenue, floor to 50 000; rating from debt ratio (B+ up to 9 % as the frame states) |
+| Credit ceiling 600 000, rating B+ | [NO MODEL] and inconsistent (A- and 940 000 on the list frame) | ceiling = 30 % of last full month revenue, floor to 10 000, at least 10 M and at most 100 M (amounts go by 10 000; the debt ratio is waived inside the 10 M); rating from debt ratio, B when there is no revenue (B+ up to 9 % as the frame states) |
 | Interest saved by prepaying 224 000 = 30 000 | does not reproduce (≈18 900) | show the computed value |
 | Aircraft loan 4.6 %, market 4.1 % | server has 6.9 % fixed | keep `LOAN_RATE` for aircraft; rate stored per credit; renegotiation not modelled (C22) |
 | Payroll 486 000 / 492 000 on the 28th vs 345 500 elsewhere | inconsistent | payroll as staff computes it, on the 1st |

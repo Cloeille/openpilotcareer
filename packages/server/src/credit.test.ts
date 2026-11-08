@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  CREDIT_BANKS, CREDIT_LATE_REPUTATION, CREDIT_MAX_ACTIVE, OVERDRAFT_LIMIT, UNPAID_FEE_PCT, categoryOf, creditCeiling, creditSchedule, creditTerms, lateFee, loanPayment, overdraftInterest, planCreditMonth, prepayPlan, ratingOf,
+  CREDIT_AMOUNT_MAX, CREDIT_BANKS, CREDIT_FLOOR, CREDIT_LATE_REPUTATION, CREDIT_STEP, CREDIT_MAX_ACTIVE, OVERDRAFT_LIMIT, UNPAID_FEE_PCT, categoryOf, creditCeiling, creditRequestSchema, creditSchedule, creditTerms, lateFee, loanPayment, overdraftInterest, planCreditMonth, prepayPlan, ratingOf,
   type CreditQuote, type CreditSheet, type CreditsView, type CreditState,
 } from '@opc/shared';
 import { all, get, MIGRATIONS, run } from './db.ts';
@@ -37,7 +37,7 @@ async function world(o: { revenue?: number; balance?: number } = {}) {
 
 // ---------------------------------------------------------------- pure rules
 
-test('the offers: Alpes 24 months reproduces the frame (20 300 a month, 3 500 fee, about 40 700 of cost), the ceiling is 30 % of a month floored to 50 000, the rating follows the debt ratio', () => {
+test('the offers: Alpes 24 months reproduces the frame (20 300 a month, 3 500 fee, about 40 700 of cost), the ceiling is 30 % of a month floored to 10 000 and never under 10 M, the rating follows the debt ratio', () => {
   const alpes = creditTerms(450_000, 24, 'alpes');
   assert.equal(alpes.monthly, 20_300);
   assert.equal(alpes.fee, 3_500);
@@ -45,10 +45,11 @@ test('the offers: Alpes 24 months reproduces the frame (20 300 a month, 3 500 fe
   assert.ok(Math.abs(alpes.cost - 40_700) < 50, `cost ${alpes.cost}`);
   assert.deepEqual([creditTerms(450_000, 24, 'meridional').monthly, creditTerms(450_000, 24, 'aerofinance').monthly], [20_467, 20_682]);
   assert.equal(creditTerms(450_000, 24, 'aerofinance').fee, 0);
-  assert.equal(creditCeiling(2_049_600), 600_000);
-  assert.equal(creditCeiling(100_000), 0);
-  assert.equal(creditCeiling(-5), 0);
-  assert.deepEqual([0, 0.02, 0.0201, 0.05, 0.061, 0.071, 0.09, 0.0901, 0.35, 0.36, null].map(ratingOf), ['A', 'A', 'A-', 'A-', 'B+', 'B+', 'B+', 'B', 'D', 'E', 'E']);
+  assert.equal(creditCeiling(100_000_000), 30_000_000, '30 % of a big month, above the floor');
+  assert.equal(creditCeiling(41_234_567), 12_370_000, 'floored to 10 000');
+  assert.equal(creditCeiling(1_000_000_000), CREDIT_AMOUNT_MAX, '30 % would be 300 M: capped at 100 M');
+  assert.deepEqual([0, 100_000, 33_000_000, -5].map(creditCeiling), [CREDIT_FLOOR, CREDIT_FLOOR, CREDIT_FLOOR, CREDIT_FLOOR], 'no revenue, a small one or none: the guaranteed floor');
+  assert.deepEqual([0, 0.02, 0.0201, 0.05, 0.061, 0.071, 0.09, 0.0901, 0.35, 0.36, null].map(ratingOf), ['A', 'A', 'A-', 'A-', 'B+', 'B+', 'B+', 'B', 'D', 'E', 'B'], 'no revenue to measure against: B, a new company');
 });
 
 test('early repayment maths: the term stays, the instalment falls, and what is saved is exactly the interest and insurance no longer paid; the penalty is on the amount repaid', () => {
@@ -108,41 +109,65 @@ test('overdraftLow reads the ledger in date order: the opening balance, then eve
 
 // ---------------------------------------------------------------- the ceiling and the cap
 
-test('the ceiling is 30 % of last month revenue across all the credits, the cap is two at once, and a refusal books nothing', async () => {
-  const w = await world({ revenue: 1_000_000 });
+test('the ceiling is 30 % of last month revenue (10 M at least) across all the credits, the cap is two at once, and a refusal books nothing', async () => {
+  const w = await world({ revenue: 100_000_000 });
   const view = (await w.call<CreditsView>('GET', '/credits')).body;
-  assert.deepEqual([view.ceiling, view.room, view.active, view.maxActive, view.revenue, view.revenueMonth], [300_000, 300_000, 0, CREDIT_MAX_ACTIVE, 1_000_000, '2026-10']);
+  assert.deepEqual([view.ceiling, view.room, view.active, view.maxActive, view.revenue, view.revenueMonth], [30_000_000, 30_000_000, 0, CREDIT_MAX_ACTIVE, 100_000_000, '2026-10']);
   const before = w.balance();
-  const over = await w.sign(350_000);
+  const over = await w.sign(30_010_000);
   assert.deepEqual([over.status, over.body.error], [409, 'over_ceiling']);
   assert.equal(w.balance(), before);
-  const first = await w.sign(200_000, 24, 'alpes');
+  const first = await w.sign(20_000_000, 24, 'alpes');
   assert.equal(first.status, 201, first.text);
-  assert.equal(first.body.net, 200_000 - 3_500);
-  assert.equal(w.balance(), before + 200_000 - 3_500, 'the amount less the fee reaches the account');
+  assert.equal(first.body.net, 20_000_000 - 3_500);
+  assert.equal(w.balance(), before + 20_000_000 - 3_500, 'the amount less the fee reaches the account');
   assert.deepEqual([w.txs('credit').length, w.txs('credit_fee')[0]!.amount], [1, -3_500]);
-  assert.equal((await w.call<CreditsView>('GET', '/credits')).body.room, 100_000);
-  const second = await w.sign(150_000, 12, 'aerofinance');
+  assert.equal((await w.call<CreditsView>('GET', '/credits')).body.room, 10_000_000);
+  const second = await w.sign(15_000_000, 12, 'aerofinance');
   assert.deepEqual([second.status, second.body.error], [409, 'over_ceiling'], 'the second credit counts the first against the same ceiling');
-  assert.equal((await w.sign(100_000, 12, 'aerofinance')).status, 201);
-  const third = await w.sign(50_000);
+  assert.equal((await w.sign(10_000_000, 12, 'aerofinance')).status, 201);
+  const third = await w.sign(10_000);
   assert.deepEqual([third.status, third.body.error], [409, 'too_many'], 'at most two active');
   assert.equal(all(w.h.db, 'SELECT 1 FROM credits').length, 2);
 });
 
-test('no revenue last month means no credit; a heavy existing debt refuses on the debt ratio; the quote says why, and signing needs a valid body', async () => {
-  const none = await world();
-  assert.equal((await none.sign(50_000)).body.error, 'over_ceiling');
-  const w = await world({ revenue: 1_000_000 });
+test('with no revenue last month a company can still borrow the guaranteed 10 M, or 10 k, but not a step more; the rating is B and signing books the credit', async () => {
+  const w = await world();
+  const view = (await w.call<CreditsView>('GET', '/credits')).body;
+  assert.deepEqual([view.revenue, view.ratio, view.rating, view.ceiling, view.room], [0, 0, 'A', CREDIT_FLOOR, CREDIT_FLOOR]);
+  const over = await w.sign(CREDIT_FLOOR + 10_000);
+  assert.deepEqual([over.status, over.body.error], [409, 'over_ceiling']);
+  const before = w.balance();
+  const all10m = await w.sign(CREDIT_FLOOR);
+  assert.equal(all10m.status, 201, all10m.text);
+  assert.equal(w.balance(), before + CREDIT_FLOOR - 3_500);
+  const after = (await w.call<CreditsView>('GET', '/credits')).body;
+  assert.deepEqual([after.room, after.ratio, after.rating], [0, null, 'B'], 'instalments owed against no revenue: no ratio, rated B');
+  assert.equal((await w.sign(10_000)).body.error, 'over_ceiling', 'the floor is for all the credits together');
+  const small = await world();
+  assert.equal((await small.sign(10_000)).status, 201, 'the smallest credit is 10 k');
+});
+
+test('a heavy existing debt refuses on the debt ratio above the guaranteed floor, not inside it; the quote says why, and signing needs a valid body', async () => {
+  const w = await world({ revenue: 100_000_000 });
   const ac = insertAircraft(w.h.db, { companyId: w.cid, icao: 'AT76', hub: 'LFPG', value: 1_000_000, ownership: 'financed', at: w.h.clock.t });
-  run(w.h.db, "INSERT INTO contracts (company_id, aircraft_id, kind, started_at, months, monthly, principal) VALUES (?, ?, 'loan', ?, 36, 400000, 5000000)", w.cid, ac, w.h.clock.t - 40 * DAY);
-  const quote = (await w.call<CreditSheet>('POST', '/credits/quote', { amount: 100_000, months: 24, bank: 'alpes' })).body;
-  assert.equal(quote.quote.refusal, 'debt_ratio');
-  assert.deepEqual([quote.quote.ratio.before, quote.quote.rating.before], [0.4, 'E']);
-  assert.equal((await w.sign(100_000)).body.error, 'debt_ratio');
-  for (const bad of [{ amount: 100_000, months: 25, bank: 'alpes' }, { amount: 100_000, months: 24, bank: 'nope' }, { amount: 10, months: 24, bank: 'alpes' }, { amount: 100_000.5, months: 24, bank: 'alpes' }, {}]) {
+  run(w.h.db, "INSERT INTO contracts (company_id, aircraft_id, kind, started_at, months, monthly, principal) VALUES (?, ?, 'loan', ?, 36, 40000000, 900000000)", w.cid, ac, w.h.clock.t - 40 * DAY);
+  const ask = (amount: number) => ({ amount, months: 24, bank: 'alpes' });
+  const above = (await w.call<CreditSheet>('POST', '/credits/quote', ask(CREDIT_FLOOR + CREDIT_STEP))).body;
+  assert.equal(above.quote.refusal, 'debt_ratio');
+  assert.deepEqual([above.quote.ratio.before, above.quote.rating.before], [0.4, 'E']);
+  assert.equal((await w.sign(CREDIT_FLOOR + CREDIT_STEP)).body.error, 'debt_ratio');
+  assert.equal((await w.call<CreditSheet>('POST', '/credits/quote', ask(CREDIT_FLOOR))).body.quote.refusal, null, 'inside the floor the ratio is not read');
+  assert.equal((await w.sign(CREDIT_FLOOR)).status, 201);
+  for (const bad of [{ amount: 100_000, months: 25, bank: 'alpes' }, { amount: 100_000, months: 24, bank: 'nope' }, { amount: 10, months: 24, bank: 'alpes' }, { amount: 100_000.5, months: 24, bank: 'alpes' }, { amount: 15_000, months: 24, bank: 'alpes' }, {}]) {
     assert.equal((await w.call('POST', '/credits', bad)).status, 400, JSON.stringify(bad));
   }
+});
+
+test('the request schema takes 10 000 up to 100 M in steps of 10 000: 100 M passes, 100 M plus a step and anything off the step fail', () => {
+  const ok = (amount: number) => creditRequestSchema.safeParse({ amount, months: 24, bank: 'alpes' }).success;
+  assert.deepEqual([10_000, 20_000, CREDIT_FLOOR, CREDIT_AMOUNT_MAX].map(ok), [true, true, true, true]);
+  assert.deepEqual([CREDIT_AMOUNT_MAX + CREDIT_STEP, 9_999, 0, 15_000, 10_000.5].map(ok), [false, false, false, false, false]);
 });
 
 test('the quote prices the credit, the three banks and the five durations, and shows the ratio and the balance after; it books nothing', async () => {

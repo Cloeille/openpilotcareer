@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { EXPRESS_AIRCRAFT, EXPRESS_MIN_NM, aircraftPrice, blockHours, cannotFly, cannotFlyCause, expressPayout, fuelBurnKg, jobPayout, settle, type Job } from '@opc/shared';
+import { EXPRESS_AIRCRAFT, EXPRESS_MIN_NM, aircraftPrice, aircraftValue, blockHours, cannotFly, cannotFlyCause, expressPayout, fuelBurnKg, jobPayout, settle, type Job } from '@opc/shared';
 import { boardFor } from './board.ts';
 import { insertAircraft } from './fleet-extras.ts';
 import { airportList, aircraftTypes, catalogType, searchAircraftTypes } from './catalog.ts';
@@ -21,7 +21,7 @@ test('the catalogue has the curated Quasar, not a derived one', () => {
 });
 
 test('the Quasar costs a fortune to buy and to fly, but a flight cannot lose money', () => {
-  assert.ok(aircraftPrice(QASR) > aircraftPrice(catalogType('A388')), 'dearer than an A380');
+  assert.deepEqual([aircraftPrice(QASR), aircraftValue(QASR)], [10_000_000, 8_000_000], '2 t x 5000 kts, like every type; resale is 80 %');
   const hours = blockHours(QASR, 8000);
   assert.ok(hours > 1.5 && hours < 2.5, `block hours ${hours}`);
   const s = settle({ payout: 0, distanceNm: 8000, aircraft: QASR, status: 'verified', destSize: 'large', destIsHub: false });
