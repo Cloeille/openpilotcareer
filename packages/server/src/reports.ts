@@ -7,40 +7,13 @@ import {
 import { all, get, type Db } from './db.ts';
 import { monthKey, projectCharges } from './finance.ts';
 import { addMonths, balanceOf } from './game.ts';
+import { CATEGORY_SQL, LEDGER, SIGNED, monthStart, monthlyTotals, totalOf, type Totals } from './ledger-totals.ts';
 
 const UPCOMING_MAX = 6;
 /** One-off purchases and capital movements are not what a company burns: they stay out of the runway (an aircraft bought last month must not read as "two days of cash", nor a transfer to a subsidiary). */
 const NOT_BURN: readonly Category[] = ['investment', 'capital'];
 
-const monthStart = (key: string): number => Date.parse(`${key}-01T00:00:00Z`);
 const sumOf = <T>(rows: readonly T[], pick: (r: T) => number): number => rows.reduce((t, r) => t + pick(r), 0);
-
-/** The category of a posting as SQL, built from `categoryOf` so the filter, the grouping and the code can not drift. Needs `transactions t` and `flights f` (LEFT JOIN on flight_id) in scope. */
-const CATEGORY_SQL = `(CASE WHEN t.kind = 'payout' AND f.kind = 'cargo' THEN 'freight' ${KNOWN_KINDS.map((k) => `WHEN t.kind = '${k}' THEN '${categoryOf(k)}'`).join(' ')} ELSE 'other' END)`;
-const LEDGER = 'FROM transactions t LEFT JOIN flights f ON f.id = t.flight_id';
-const SIGNED = 'SUM(CASE WHEN t.amount > 0 THEN t.amount ELSE 0 END) AS inflow, SUM(CASE WHEN t.amount < 0 THEN -t.amount ELSE 0 END) AS outflow';
-
-type Totals = { category: string; inflow: number; outflow: number; month?: string };
-const totalOf = (r: Totals): CategoryTotal => ({ category: r.category as Category, in: r.inflow, out: r.outflow });
-
-/** Per UTC month (`YYYY-MM`) and category: what came in and what went out, for postings dated in [from, to). */
-function monthlyTotals(db: Db, companyId: number, from: number, to: number): Map<string, CategoryTotal[]> {
-  const rows = all<Totals>(db, `SELECT strftime('%Y-%m', t.at / 1000, 'unixepoch') AS month, ${CATEGORY_SQL} AS category, ${SIGNED} ${LEDGER}
-    WHERE t.company_id = ? AND t.at >= ? AND t.at < ? GROUP BY month, category`, companyId, from, to);
-  const out = new Map<string, CategoryTotal[]>();
-  for (const r of rows) out.set(r.month!, [...(out.get(r.month!) ?? []), totalOf(r)]);
-  return out;
-}
-
-// ---------------------------------------------------------------- revenue (read by lot CREDIT)
-
-/** What the company earned by flying in the UTC month `YYYY-MM`: tickets, jobs, freight and on-board sales (never a grant, a refund or a resale). */
-export function monthRevenue(db: Db, companyId: number, month: string): number {
-  const from = monthStart(month);
-  return revenueOf(monthlyTotals(db, companyId, from, addMonths(from, 1)).get(month) ?? []);
-}
-/** Revenue of the last full UTC month before `now`: what the credit ceiling and the debt ratio are read against. 0 for a company that did not exist yet. */
-export const lastMonthRevenue = (db: Db, companyId: number, now: number): number => monthRevenue(db, companyId, monthKey(addMonths(now, -1)));
 
 // ---------------------------------------------------------------- debt
 

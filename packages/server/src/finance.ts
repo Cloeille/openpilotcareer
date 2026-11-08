@@ -4,6 +4,7 @@ import {
   CLUB, CREDIT_INSTALMENT, LOAN_QUOTE_DOWN_PCTS, LOAN_QUOTE_MONTHS, MONTHLY_RENTAL, PARKING_FEE_BY_SIZE, aircraftPrice, aircraftValue, loanOption, loanStep, NO_CREDIT, planCreditMonth, planFacilityMonth,
   type AircraftCategory, type CreditInputs, type CreditState, type FinanceCharge, type FinanceContract, type FinanceOverview, type FleetQuote, type LeaseOffer, type Ownership, type PlanFacility, type PurchaseResult,
 } from '@opc/shared';
+import { allianceDues } from './alliance.ts';
 import { airports } from './catalog.ts';
 import { activeCredits, overdraftLow, saveCredits, settleLate } from './credit.ts';
 import { planRows, savePlanRows } from './facilities.ts';
@@ -38,7 +39,7 @@ export type MonthPlan = { charges: Charge[]; contracts: PlanContract[]; faciliti
 
 /** What the month starting at `start` (UTC, the 1st) costs. Everything signed or bought before `start` is billed; things signed this month were paid at signing.
  *  Returns the new contract states without touching the input, so `GET /me/finance` can project several months with the same rules billing uses. */
-export function planMonth(start: number, contracts: PlanContract[], fleet: PlanAircraft[], staff: PlanStaff[] = [], facilities: PlanFacility[] = [], rise = 0, credit: CreditInputs = NO_CREDIT): MonthPlan {
+export function planMonth(start: number, contracts: PlanContract[], fleet: PlanAircraft[], staff: PlanStaff[] = [], facilities: PlanFacility[] = [], rise = 0, credit: CreditInputs = NO_CREDIT, dues: readonly Charge[] = []): MonthPlan {
   const charges: Charge[] = [];
   const ended: number[] = [], returned: number[] = [], owned: number[] = [];
   const reg = (id: number): string => fleet.find((a) => a.id === id)?.registration ?? `#${id}`;
@@ -83,6 +84,8 @@ export function planMonth(start: number, contracts: PlanContract[], fleet: PlanA
   // v3 facilities: rent, upkeep, instalments and the sale of maintenance of the buildings she holds (shared/facilities.ts), billed like everything else
   const built = planFacilityMonth(start, facilities);
   charges.push(...built.charges);
+  // v4 ALLIANCE: the dues, computed by alliance.ts from last month's revenue (a precomputed charge: the plan stays pure), before the credit block so the late rule reads the account after them
+  charges.push(...dues);
   // v4 CREDIT: the overdraft interest of the month just over and the consumer-credit instalments come last, so the late rule reads the account after every other bill
   const lent = planCreditMonth(start, credit);
   charges.push(...lent.charges);
@@ -119,7 +122,7 @@ export function runBilling(db: Db, companyId: number, now: number): number {
     if (run(db, 'INSERT INTO billing_runs (company_id, month, at) VALUES (?, ?, ?) ON CONFLICT DO NOTHING', companyId, m, now).changes === 0) continue;
     const at = monthStart(m);
     const { contracts, fleet, staff, facilities, credit } = planInputs(db, companyId, at, overdraftLow(db, companyId, addMonths(at, -1), at));
-    const plan = planMonth(at, contracts, fleet, staff, facilities, insuranceRise(db, companyId, m), credit);
+    const plan = planMonth(at, contracts, fleet, staff, facilities, insuranceRise(db, companyId, m), credit, allianceDues(db, companyId, at));
     for (const c of plan.charges) {
       post(db, companyId, at, c.kind, c.amount, c.memo, null, c.aircraftId === undefined ? {} : { aircraftId: c.aircraftId });
       if (c.kind === CREDIT_INSTALMENT) settleLate(db, companyId, at, -c.amount, c.memo);
@@ -290,7 +293,7 @@ export function projectCharges(db: Db, companyId: number, now: number, months: n
   let state = contracts, buildings = facilities, lent = inputs.credit;
   for (let i = 1; i <= months; i++) {
     const at = addMonths(now, i);
-    const plan = planMonth(at, state, fleet, staff, buildings, insuranceRise(db, companyId, monthKey(at)), lent);
+    const plan = planMonth(at, state, fleet, staff, buildings, insuranceRise(db, companyId, monthKey(at)), lent, allianceDues(db, companyId, at));
     for (const c of plan.charges) upcoming.push({ at, kind: c.kind, amount: c.amount, memo: c.memo });
     state = plan.contracts.filter((c) => !plan.ended.includes(c.id));
     buildings = plan.facilities;

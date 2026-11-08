@@ -10,7 +10,7 @@ import {
 } from '@opc/shared';
 import { all, get, MIGRATIONS, openDb, run } from './db.ts';
 import { insertAircraft } from './fleet-extras.ts';
-import { lastMonthRevenue, monthRevenue } from './reports.ts';
+import { lastMonthRevenue, monthRevenue } from './ledger-totals.ts';
 import { grantStarterCrew } from './staff-people.ts';
 import { refreshLine } from './lines.ts';
 import { harness } from './harness.ts';

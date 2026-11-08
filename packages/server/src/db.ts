@@ -366,7 +366,31 @@ ALTER TABLE companies ADD COLUMN activity TEXT CHECK (activity IN ('passengers',
 CREATE INDEX companies_parent ON companies(parent_id) WHERE parent_id IS NOT NULL;
 `;
 
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT, SCHEMA_AGENCY, SCHEMA_REPORTS, SCHEMA_CREDIT, SCHEMA_SIM_AIRCRAFT_OVERRIDE, SCHEMA_TRAINING, SCHEMA_GROUP];
+// v4 ALLIANCE (C23 to C25): a club of players. `alliance_members` keeps the history: a company is IN while `left_at` is NULL or still ahead (leaving takes 30 days from the notice, which sets `left_at`), so billing can ask whether it was a member
+// on the 1st of any month it catches up. One current membership per company is held by alliance.ts (every write is in a `tx`). An alliance with no row left is dropped by the trigger, which also fires on the cascade of a deleted company:
+// deleting or resetting a member leaves the alliance cleanly (company-lifecycle.ts lists no table). The name is not UNIQUE: an alliance whose members have all left keeps its rows (the dues of months not billed yet need them), so only a living
+// alliance holds its name (alliance.ts). A vote is an admission vote of `candidate_id`; it is live until `closed_at` (the candidate joined, or the members proposed it again after a refusal), and its status (open, accepted, refused) is derived from
+// the ballots of the members of the day. `alliance_ballots` has one ballot per company and vote (primary key). Shared buildings are not in this migration: they reuse the S3 facility contracts and need a holder that is not a company.
+const SCHEMA_ALLIANCE = `
+CREATE TABLE alliances (id INTEGER PRIMARY KEY, name TEXT NOT NULL COLLATE NOCASE, founded_at INTEGER NOT NULL);
+CREATE TABLE alliance_members (
+  id INTEGER PRIMARY KEY, alliance_id INTEGER NOT NULL REFERENCES alliances(id) ON DELETE CASCADE, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  since INTEGER NOT NULL, left_at INTEGER);
+CREATE INDEX alliance_members_company ON alliance_members(company_id);
+CREATE INDEX alliance_members_alliance ON alliance_members(alliance_id);
+CREATE TRIGGER alliance_members_gone AFTER DELETE ON alliance_members
+  BEGIN DELETE FROM alliances WHERE id = OLD.alliance_id AND NOT EXISTS (SELECT 1 FROM alliance_members WHERE alliance_id = OLD.alliance_id); END;
+CREATE TABLE alliance_votes (
+  id INTEGER PRIMARY KEY, alliance_id INTEGER NOT NULL REFERENCES alliances(id) ON DELETE CASCADE, candidate_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  created_at INTEGER NOT NULL, closed_at INTEGER);
+CREATE UNIQUE INDEX alliance_votes_live ON alliance_votes(alliance_id, candidate_id) WHERE closed_at IS NULL;
+CREATE INDEX alliance_votes_candidate ON alliance_votes(candidate_id);
+CREATE TABLE alliance_ballots (
+  vote_id INTEGER NOT NULL REFERENCES alliance_votes(id) ON DELETE CASCADE, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  choice TEXT NOT NULL CHECK (choice IN ('yes','no')), PRIMARY KEY (vote_id, company_id));
+`;
+
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT, SCHEMA_AGENCY, SCHEMA_REPORTS, SCHEMA_CREDIT, SCHEMA_SIM_AIRCRAFT_OVERRIDE, SCHEMA_TRAINING, SCHEMA_GROUP, SCHEMA_ALLIANCE];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);

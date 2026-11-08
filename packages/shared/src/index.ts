@@ -413,3 +413,5 @@ export * from './credit.ts';
 export * from './training.ts';
 // ---- lot group (v4)
 export * from './group.ts';
+// ---- lot alliance (v4)
+export * from './alliance.ts';

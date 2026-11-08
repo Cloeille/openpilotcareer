@@ -22,6 +22,8 @@ const CATEGORY_OF_KIND: Readonly<Record<string, Category>> = {
   grant: 'capital', bailout: 'capital',
   // v4 GROUP: cash between a parent and its subsidiary is a capital movement (an aircraft cession moves no money and posts nothing)
   group_transfer: 'capital',
+  // v4 ALLIANCE: the monthly dues are a running cost that belongs to no other category
+  alliance_dues: 'other',
 };
 export const KNOWN_KINDS: readonly string[] = Object.keys(CATEGORY_OF_KIND);
 

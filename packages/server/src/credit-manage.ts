@@ -9,7 +9,8 @@ import { all, get, run, type Db } from './db.ts';
 import { addMonths, balanceOf, post, snapshot, spendable } from './game.ts';
 import { HttpError } from './http.ts';
 import { monthKey } from './finance.ts';
-import { debtLines, debtOf, lastMonthRevenue } from './reports.ts';
+import { lastMonthRevenue } from './ledger-totals.ts';
+import { debtLines, debtOf } from './reports.ts';
 
 const REFUSAL_TEXT: Record<CreditRefusal, string> = {
   too_many: `at most ${CREDIT_MAX_ACTIVE} credits at once`,
