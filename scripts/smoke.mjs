@@ -363,6 +363,24 @@ expect((await call('POST', `/flights/${take.body.id}/cancel`, { token })).status
 const txs = (await call('GET', '/me/transactions?limit=200', { token })).body;
 expect(txs.filter((x) => x.kind === 'ferry_flight').length === 1 && txs.reduce((sum, x) => sum + x.amount, 0) === (await call('GET', '/me', { token })).body.company.balance, 'one ferry_flight ledger line, and the ledger still sums to the balance');
 
+// v4 alliance: a player founds a club, a stranger gets a 404 on everything inside it, a member is voted in unanimously and joins, members see five fields of each other and nothing else, and an API key is a 401
+const al = await call('POST', '/auth/register', { body: { username: `${username}a`, password, hub: 'LFPG' } });
+const alTok = al.body.token, ally = rival.body.token;
+expect((await call('GET', '/alliance', { token: ally })).status === 404, 'alliance: a player in none gets a 404, not a 403');
+const clubMade = await call('POST', '/alliance', { token: alTok, body: { name: `${username} Club` } });
+expect(clubMade.status === 201 && clubMade.body.members.length === 1, 'alliance: founded, its founder is the first member', clubMade);
+expect((await call('GET', '/alliance', { token: ally })).status === 404 && (await call('POST', '/alliance/invite', { token: ally, body: { name: al.body.company.name } })).status === 404, 'alliance: a stranger sees nothing inside it, whatever it asks');
+const proposed = await call('POST', '/alliance/invite', { token: alTok, body: { name: rival.body.company.name } });
+const voteId = proposed.body.votes?.[0]?.id;
+expect(proposed.status === 200 && proposed.body.votes[0].status === 'accepted' && (await call('GET', '/alliance/invitations', { token: ally })).body[0]?.id === voteId, 'alliance: the founder is the only member, so her yes is unanimous and the candidate is invited', proposed);
+const joined = await call('POST', `/alliance/invitations/${voteId}/join`, { token: ally });
+const seen = joined.body.members ?? [];
+expect(joined.status === 200 && seen.length === 2 && seen.every((m) => Object.keys(m).sort().join() === 'fleet,name,online,reputation,username'), 'alliance: the invited company joined; each member shows five fields and nothing else', joined);
+expect(!JSON.stringify(joined.body).includes('balance') && !JSON.stringify(joined.body).includes('email'), 'alliance: no balance and no email in what a member sees');
+expect((await call('GET', '/alliance', { token: apiKey })).status === 401, 'alliance: an API key cannot read it');
+expect((await call('POST', '/alliance/leave', { token: ally })).body.leavesAt > Date.now() + 29 * 86_400_000, 'alliance: leaving is a 30-day notice');
+await call('DELETE', '/me', { token: alTok, body: { password } });
+
 // --- company reset and delete (password, session only, owner only)
 const companiesBefore = (await call('GET', '/me', { token })).body.companies.length;
 const spare = await call('POST', '/me/companies', { token, body: { name: `${username} Spare`, hub: 'LFPG' } });
