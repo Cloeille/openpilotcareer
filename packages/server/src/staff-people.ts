@@ -5,19 +5,15 @@ import {
   type AircraftCategory, type Candidate, type FireResult, type InterimResult, type LineBridge, type LineStartNow, type RestPolicy, type StaffFamily, type StaffRole, type TrainPlace, type TrainResult,
 } from '@opc/shared';
 import { hashSeed, mulberry32 } from './board.ts';
+import { airports } from './catalog.ts';
 import { assertSeat, trainingSeats } from './facilities.ts';
 import { all, get, run, type Db } from './db.ts';
 import { balanceOf, post, snapshot, spend, spendable, typeFor } from './game.ts';
 import { HttpError } from './http.ts';
+import { nameFrom } from './names.ts';
 import { companyDemand, demandOf, type DemandLine, type Slot } from './staff-needs.ts';
 import { crewShortage, pendingHires, rosterOf, rulesOf, stateOf, type Shortage, type StaffRow } from './staff.ts';
 import type { LineRow } from './lines.ts';
-
-// ---------------------------------------------------------------- names
-
-const FIRST = ['Camille', 'Lucas', 'Léa', 'Hugo', 'Manon', 'Louis', 'Chloé', 'Jules', 'Inès', 'Arthur', 'Sarah', 'Nathan', 'Emma', 'Théo', 'Julie', 'Antoine', 'Clara', 'Paul', 'Zoé', 'Maxime', 'Alice', 'Romain', 'Lina', 'Victor', 'Yasmine', 'Mathis', 'Éloïse', 'Samuel'];
-const LAST = ['Lefèvre', 'Martin', 'Bernard', 'Dubois', 'Moreau', 'Laurent', 'Simon', 'Michel', 'Garcia', 'Roux', 'Fournier', 'Girard', 'Bonnet', 'Mercier', 'Blanc', 'Guérin', 'Faure', 'Rousseau', 'Perrin', 'Morel', 'Giraud', 'Andre', 'Lemoine', 'Chevalier', 'Marchand', 'Colin', 'Benoit', 'Renard'];
-export const nameFrom = (rand: () => number): string => `${FIRST[Math.floor(rand() * FIRST.length)]} ${LAST[Math.floor(rand() * LAST.length)]}`;
 
 // ---------------------------------------------------------------- shared helpers
 
@@ -44,6 +40,9 @@ export function ownedStaff(db: Db, companyId: number, id: number): StaffRow {
   return s;
 }
 
+/** The ISO country of an airport: the pool its people's names come from. */
+export const baseCountry = (base: string): string | undefined => airports.get(base)?.country;
+
 export const categoryOf = (db: Db, companyId: number, qual: string | null): AircraftCategory | null => (qual ? typeFor(db, companyId, qual).category : null);
 export const roleOf = (family: StaffFamily, experience: number): StaffRole => (family === 'pilot' ? (experience >= CAPTAIN_FROM_HOURS ? 'captain' : 'fo') : ROLE_OF[family]);
 
@@ -60,38 +59,48 @@ function insertStaff(db: Db, o: { companyId: number; family: StaffFamily; name: 
 // ---------------------------------------------------------------- the market: deterministic per company, per day, per base
 
 const ID_RE = /^(\d+)\.([A-Z]{4})\.([a-z]+)\.([A-Z0-9]{2,4}|-)\.(\d+)$/;
+/** One (day, base, family, qualification) has this many people at most (indexes 0 to CANDIDATE_CAP - 1): the market scans that far for people not hired yet, and `hire` refuses an id past it. */
+export const CANDIDATE_CAP = 5000;
 
-/** 6 to 10 candidates for one (base, family, qualification) on one day. The same call always returns the same people (the `board.ts` approach). */
-export function candidatesFor(db: Db, companyId: number, day: number, base: string, family: StaffFamily, qual: string | null): Candidate[] {
-  const rand = mulberry32(hashSeed(`cand:${companyId}:${day}:${base}:${family}:${qual ?? '-'}`));
-  const n = 6 + Math.floor(rand() * 5);
-  const category = categoryOf(db, companyId, qual);
+/** The person of index `i` for one (day, base, family, qualification), from a stream of their own: any id is rebuilt from itself, whoever else was hired before, and the name follows the country of the base. */
+function candidateAt(db: Db, companyId: number, day: number, base: string, family: StaffFamily, qual: string | null, i: number): Candidate {
+  const rand = mulberry32(hashSeed(`cand:${companyId}:${day}:${base}:${family}:${qual ?? '-'}:${i}`));
+  const experience = family === 'pilot' ? Math.round(500 + rand() ** 2 * 11_500) : Math.round(rand() * 20);
+  const role = roleOf(family, experience);
+  const salary = salaryFor(family, role, experienceFactor(family, experience), categoryOf(db, companyId, qual));
+  return {
+    id: `${day}.${base}.${family}.${qual ?? '-'}.${i}`, family, role, name: nameFrom(rand, baseCountry(base)), base, qual, experience, reliability: 60 + Math.floor(rand() * 39), morale: 50 + Math.floor(rand() * 46),
+    askingSalary: salary, noticeDays: DEFAULT_NOTICE_DAYS, premium: salary * HIRING_PREMIUM_MONTHS,
+  };
+}
+
+/** The candidate ids the company has already hired (market and agency alike). */
+const hiredIds = (db: Db, companyId: number): Set<string> =>
+  new Set(all<{ candidate_id: string }>(db, 'SELECT candidate_id FROM staff WHERE company_id = ? AND candidate_id IS NOT NULL', companyId).map((r) => r.candidate_id));
+
+/** 6 to 10 candidates for one (base, family, qualification) on one day, never anybody in `hired`: the first ones by index, so the market does not run dry however many people the company has hired.
+ *  The same call always returns the same people (the `board.ts` approach). */
+export function candidatesFor(db: Db, companyId: number, day: number, base: string, family: StaffFamily, qual: string | null, hired: ReadonlySet<string>): Candidate[] {
+  const n = 6 + Math.floor(mulberry32(hashSeed(`cand:${companyId}:${day}:${base}:${family}:${qual ?? '-'}`))() * 5);
   const out: Candidate[] = [];
-  for (let i = 0; i < n; i++) {
-    const experience = family === 'pilot' ? Math.round(500 + rand() ** 2 * 11_500) : Math.round(rand() * 20);
-    const role = roleOf(family, experience);
-    const salary = salaryFor(family, role, experienceFactor(family, experience), category);
-    out.push({
-      id: `${day}.${base}.${family}.${qual ?? '-'}.${i}`, family, role, name: nameFrom(rand), base, qual, experience, reliability: 60 + Math.floor(rand() * 39), morale: 50 + Math.floor(rand() * 46),
-      askingSalary: salary, noticeDays: DEFAULT_NOTICE_DAYS, premium: salary * HIRING_PREMIUM_MONTHS,
-    });
+  for (let i = 0; i < CANDIDATE_CAP && out.length < n; i++) {
+    if (!hired.has(`${day}.${base}.${family}.${qual ?? '-'}.${i}`)) out.push(candidateAt(db, companyId, day, base, family, qual, i));
   }
   return out;
 }
 
 /** Everyone on the market today at the company's bases (or `base`), for the filters given, minus those already hired. */
 export function market(db: Db, companyId: number, now: number, f: { family?: StaffFamily | undefined; base?: string | undefined; qual?: string | undefined }): Candidate[] {
-  const day = dayNo(now);
-  const hired = new Set(all<{ candidate_id: string }>(db, 'SELECT candidate_id FROM staff WHERE company_id = ? AND candidate_id IS NOT NULL', companyId).map((r) => r.candidate_id));
+  const day = dayNo(now), hired = hiredIds(db, companyId);
   const bases = f.base ? [f.base] : basesOf(db, companyId);
   const types = f.qual ? [f.qual] : fleetTypes(db, companyId);
   const out: Candidate[] = [];
   for (const base of bases) {
     for (const family of f.family ? [f.family] : STAFF_FAMILIES) {
-      for (const qual of family === 'pilot' ? types : [null]) out.push(...candidatesFor(db, companyId, day, base, family, qual));
+      for (const qual of family === 'pilot' ? types : [null]) out.push(...candidatesFor(db, companyId, day, base, family, qual, hired));
     }
   }
-  return out.filter((c) => !hired.has(c.id));
+  return out;
 }
 
 export const memberRow = (db: Db, id: number): StaffRow => get<StaffRow>(db, 'SELECT * FROM staff WHERE id = ?', id)!;
@@ -112,11 +121,12 @@ export function engage(db: Db, companyId: number, c: Candidate, now: number, fee
 export function hire(db: Db, companyId: number, candidateId: string, now: number, startAtOnce = false): { staffId: number; startsAt: number; premium: number } {
   const m = ID_RE.exec(candidateId);
   const day = m ? Number(m[1]) : NaN, today = dayNo(now);
-  if (!m || day > today || day < today - 1 || !basesOf(db, companyId).includes(m[2]!)) throw new HttpError(404, 'candidate_not_found', 'this candidate is no longer on the market');
-  const c = candidatesFor(db, companyId, day, m[2]!, m[3] as StaffFamily, m[4] === '-' ? null : m[4]!).find((x) => x.id === candidateId);
-  // only what the market lists: a pilot for a type the company flies, nobody else with a type rating
-  const listed = c && (STAFF_FAMILIES as readonly string[]).includes(c.family) && (c.family === 'pilot' ? c.qual !== null && fleetTypes(db, companyId).includes(c.qual) : c.qual === null);
-  if (!c || !listed) throw new HttpError(404, 'candidate_not_found', 'this candidate is no longer on the market');
+  if (!m || day > today || day < today - 1 || Number(m[5]) >= CANDIDATE_CAP || !(STAFF_FAMILIES as readonly string[]).includes(m[3]!) || !basesOf(db, companyId).includes(m[2]!)) throw new HttpError(404, 'candidate_not_found', 'this candidate is no longer on the market');
+  const family = m[3] as StaffFamily, qual = m[4] === '-' ? null : m[4]!;
+  const c = candidateAt(db, companyId, day, m[2]!, family, qual, Number(m[5]));
+  // only what the market lists: a pilot for a type the company flies, nobody else with a type rating; and the canonical id (`007` is not `7`)
+  const listed = c.id === candidateId && (family === 'pilot' ? qual !== null && fleetTypes(db, companyId).includes(qual) : qual === null);
+  if (!listed) throw new HttpError(404, 'candidate_not_found', 'this candidate is no longer on the market');
   if (get(db, 'SELECT 1 AS x FROM staff WHERE company_id = ? AND candidate_id = ?', companyId, c.id)) throw new HttpError(409, 'candidate_taken', 'you already hired this candidate');
   const staffId = engage(db, companyId, c, now, { kind: 'hire_premium', amount: c.premium, memo: `hiring premium ${c.name}` });
   if (startAtOnce) startNow(db, companyId, staffId, now);
@@ -214,7 +224,7 @@ function interimQuote(db: Db, companyId: number, family: StaffFamily, qual: stri
 function bookInterim(db: Db, companyId: number, o: { family: StaffFamily; qual: string | null; base: string; until: number; index?: number }, now: number): InterimResult & { staffId: number } {
   assertSeat(db, companyId, o.family, o.base, now);
   const { salary, experience, days, cost } = interimQuote(db, companyId, o.family, o.qual, o.until, now);
-  const name = `${nameFrom(mulberry32(hashSeed(`interim:${companyId}:${now}:${o.family}:${o.qual ?? '-'}:${o.index ?? 0}`)))} (interim)`;
+  const name = `${nameFrom(mulberry32(hashSeed(`interim:${companyId}:${now}:${o.family}:${o.qual ?? '-'}:${o.index ?? 0}`)), baseCountry(o.base))} (interim)`;
   pay(db, companyId, now, 'interim', cost, `${days} days of interim ${o.family}${o.qual ? ` ${o.qual}` : ''}`);
   const staffId = insertStaff(db, { companyId, family: o.family, name, base: o.base, experience, reliability: 75, morale: 70, salary, hiredAt: now, startsAt: now, endsAt: o.until, contract: 'cdd', noticeDays: 0, qual: o.family === 'pilot' ? o.qual : null, qualUntil: o.until });
   return { staffId, member: null as never, cost, endsAt: o.until, balanceAfter: balanceOf(db, companyId) };
@@ -253,9 +263,8 @@ export const openOf = (db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>, x: Sh
 /** The cheapest candidates at the line's base that fill the open positions of each shortage. */
 export function recruitPlan(db: Db, l: Pick<LineRow, 'company_id' | 'a' | 'b'>, short: readonly Shortage[], now: number): Candidate[] {
   const base = lineBase(db, l);
-  const taken = new Set(all<{ candidate_id: string }>(db, 'SELECT candidate_id FROM staff WHERE company_id = ? AND candidate_id IS NOT NULL', l.company_id).map((r) => r.candidate_id));
-  const day = dayNo(now);
-  return short.flatMap((x) => candidatesFor(db, l.company_id, day, base, x.family, x.type).filter((c) => !taken.has(c.id)).sort((p, q) => p.askingSalary - q.askingSalary || p.id.localeCompare(q.id)).slice(0, openOf(db, l, x, now)));
+  const taken = hiredIds(db, l.company_id), day = dayNo(now);
+  return short.flatMap((x) => candidatesFor(db, l.company_id, day, base, x.family, x.type, taken).sort((p, q) => p.askingSalary - q.askingSalary || p.id.localeCompare(q.id)).slice(0, openOf(db, l, x, now)));
 }
 
 /** A person who will fill positions of `family` (rated on `type`) when he starts. */
@@ -363,7 +372,7 @@ export function grantStarterCrew(db: Db, companyId: number, now: number, lines?:
       const experience = sl.family === 'pilot' ? Math.round(1_500 + rand() * 6_000) : Math.round(2 + rand() * 12);
       const role = roleOf(sl.family, experience);
       insertStaff(db, {
-        companyId, family: sl.family, name: nameFrom(rand), base: sl.base, experience, reliability: 70 + Math.floor(rand() * 25), morale: 65 + Math.floor(rand() * 25),
+        companyId, family: sl.family, name: nameFrom(rand, baseCountry(sl.base)), base: sl.base, experience, reliability: 70 + Math.floor(rand() * 25), morale: 65 + Math.floor(rand() * 25),
         salary: salaryFor(sl.family, role, experienceFactor(sl.family, experience), categoryOf(db, companyId, sl.type)), hiredAt: now, startsAt: 0, qual: sl.type,
       });
       made++;
