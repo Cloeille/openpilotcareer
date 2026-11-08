@@ -289,6 +289,11 @@ table.data tbody td, table.data tbody th { border-bottom: 1px solid var(--border
 .fact { display: flex; flex-direction: column; gap: 4px; }
 .fact-label { font-size: 13px; color: var(--text-tertiary); }
 .fact-value { font: 500 24px var(--display); }
+.panel.legs-card { width: 380px; padding: 0 0 8px; align-self: flex-end; flex: none; backdrop-filter: blur(28px); }
+.legs { padding: 4px 8px; }
+.col.end { align-items: flex-end; }
+.leg { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 4px; text-decoration: none; color: inherit; }
+.leg:hover, .leg:focus-visible { background: var(--surface-hover); }
 .others { display: flex; flex-direction: column; gap: 8px; padding-top: 4px; border-top: 1px solid var(--border); }
 .plain { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .other { display: flex; align-items: center; gap: 14px; }

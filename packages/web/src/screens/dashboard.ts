@@ -1,20 +1,24 @@
-import { blockHours, type Flight, type Job, type SimbriefLink } from '@opc/shared';
+import { blockHours, type Flight, type HistoryEntry, type Job, type SimbriefLink } from '@opc/shared';
 import { act } from '../actions.ts';
 import { api } from '../api.ts';
 import { fetchLive } from '../api-live.ts';
 import { getLink } from '../api-simbrief.ts';
-import { button, icon, signDirection, signLocation, unknownValue } from '../components.ts';
+import { button, icon, panel, signDirection, signLocation, unknownValue } from '../components.ts';
+import { loadLineLegs } from '../flights-data.ts';
 import { companyTitle, keyFigures } from '../figures.ts';
 import { fmt } from '../format.ts';
 import { jobsAtIdleAirports, flyable } from '../board.ts';
+import { landedLegs } from '../history.ts';
 import { t, tp } from '../i18n.ts';
 import { loadLabel } from '../job-view.ts';
 import { pollWhileShown } from '../live-poll.ts';
+import { whenLabel } from '../line-feedback.ts';
 import { liveFacts, progressOf, type LiveFacts } from '../live-view.ts';
 import { simbriefBlock } from '../simbrief-card.ts';
 import { hashFor } from '../keys.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
+import { showLineLegs } from './history.ts';
 
 function flightActions(f: Flight, refresh: () => Promise<void>): HTMLElement {
   return h('div', { class: 'row' },
@@ -98,15 +102,33 @@ function nextDeparture(ctx: Ctx): HTMLElement {
       button(t('dash.importSimbrief'), { variant: 'secondary', icon: 'file-down', key: 'I', onclick: () => go('#simbrief') })));
 }
 
+const LEGS_SHOWN = 4;
+/** Entries fetched for the card: a stopped line leaves a run of cancelled legs before the last one that flew. */
+const LEGS_FETCHED = 40;
+/** The last legs of the company's lines that left, each with its net: what the lines earned while the player was elsewhere. Null while no leg has flown. */
+function lineLegsCard(entries: HistoryEntry[], go: Ctx['go']): HTMLElement | null {
+  const legs = landedLegs(entries, LEGS_SHOWN);
+  if (legs.length === 0) return null;
+  const fm = fmt();
+  const now = Date.now();
+  const open = (e: Event): void => { e.preventDefault(); showLineLegs(); go('#history'); };
+  return panel({ title: t('dash.legs.title'), class: 'legs-card', id: 'dash-legs' },
+    h('ul', { class: 'plain legs' }, legs.map((leg) => h('li', null,
+      h('a', { class: 'leg', href: '#history', 'data-row': '', onclick: open },
+        h('span', { class: 'col tight' }, h('span', { class: 'mono strong' }, `${leg.origin} → ${leg.dest}`), h('span', { class: 'dim small' }, t('dash.legs.sub', { flight: leg.flightNo, time: whenLabel(leg.dep + leg.delayMin * 60_000, now) }))),
+        h('span', { class: 'strong' }, fm.signedMoney(leg.net)))))),
+    h('a', { class: 'btn ghost', href: '#history', onclick: open }, h('span', null, t('dash.legs.all')), icon('chevron-right')));
+}
+
 export async function dashboard(ctx: Ctx): Promise<Screen> {
   const { snap } = ctx;
-  const [active, link] = await Promise.all([api<Flight[]>('/me/flights?status=active&limit=50'), getLink().catch((): SimbriefLink | null => null)]);
+  const [active, link, legs] = await Promise.all([api<Flight[]>('/me/flights?status=active&limit=50'), getLink().catch((): SimbriefLink | null => null), loadLineLegs(LEGS_FETCHED).catch((): HistoryEntry[] => [])]);
   const oldestFirst = [...active].sort((a, b) => a.acceptedAt - b.acceptedAt);
   const main = oldestFirst[0];
   const first = main ? liveFacts(await fetchLive(main.id).catch(() => null), Date.now()) : null;
   const sb = main && link ? simbriefBlock(main, link, ctx, snap.me.fleet.find((a) => a.id === main.aircraftId)?.registration) : null;
   const view = h('div', { class: 'wide-layout' }, companyTitle(snap),
-    h('div', { class: 'offline-row' }, main && first ? currentFlight(main, ctx, oldestFirst.slice(1), first, sb?.node ?? null) : nextDeparture(ctx), keyFigures(snap.me, snap.lastFlight)));
+    h('div', { class: 'offline-row' }, main && first ? currentFlight(main, ctx, oldestFirst.slice(1), first, sb?.node ?? null) : nextDeparture(ctx), lineLegsCard(legs, ctx.go), keyFigures(snap.me, snap.lastFlight)));
   return {
     title: t('tab.dashboard'), scene: 'dashboard', tab: 'dashboard', wide: true, view, back: null,
     hints: main ? [{ key: t('key.enter'), label: t('hint.follow') }, { key: 'C', label: t('hint.cutaway') }, ...(sb ? [{ key: 'B', label: t('sb.hint.generate') }] : [])] : [{ key: t('key.enter'), label: t('hint.openJobs') }, { key: 'I', label: t('hint.simbrief') }],

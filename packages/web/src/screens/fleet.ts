@@ -8,8 +8,10 @@ import { ferryPanel } from '../ferry-ui.ts';
 import { badge, button, dataTable, line, panel, unknownValue } from '../components.ts';
 import { aircraftName, byRegistration, monthLabel, nextCharges, parkingSummary, statusOf, wearOf, type ActiveFlightInfo } from '../finance-view.ts';
 import { locale, perform, tidyCity } from '../finance-ui.ts';
+import { loadAircraftLines } from '../flights-data.ts';
 import { fmt } from '../format.ts';
 import { codeLabel, t, tp } from '../i18n.ts';
+import { aircraftLive, liveLast, liveState, type AircraftLive } from '../line-feedback.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
 import { starter } from './starter.ts';
@@ -19,14 +21,19 @@ let selected: number | null = null;
 export const categoryName = (c: AircraftCategory): string => t(`cat.${c}`);
 const companyCode = (c: object): string | null => (c as { code?: string | null }).code || null;
 
-const statusCell = (a: FleetAircraft, flights: Map<number, ActiveFlightInfo>, code: string | null, now: number): HTMLElement => {
+/** Where the aircraft is: the leg while it is in the air on a line (the fleet lists its destination from the departure on), the airport it stands at otherwise (a late leg has not left: the fleet already lists its destination). */
+const whereCell = (a: FleetAircraft, live: AircraftLive | undefined): string => (live ? (live.state.kind === 'flying' ? `${live.state.from} → ${live.state.to}` : live.state.at) : a.location);
+
+const statusCell = (a: FleetAircraft, flights: Map<number, ActiveFlightInfo>, live: AircraftLive | undefined, code: string | null, now: number): HTMLElement => {
   const v = statusOf(a, now, flights.get(a.id) ?? null);
+  const last = live ? liveLast(live) : null;
   const dot = v.kind === 'flying' ? 'dot route' : v.kind === 'maintenance' ? 'dot maint' : 'dot';
   const label = v.kind === 'flying' ? t('fleet.inFlight') : v.kind === 'maintenance' ? t('fin.status.maintenance') : t('fleet.available');
   const sub = v.flight ? t('fin.fleet.flight', { flight: `${code ? `${code} ` : ''}${v.flight.flightId}`, dest: v.flight.destination })
     : v.hoursLeft !== null ? t('fin.status.hoursLeft', { n: v.hoursLeft })
       : a.ferryUntil !== null ? t('ferry.until', { time: fmt().zulu(a.ferryUntil) }) : null;
-  return h('div', { class: 'status-cell' }, h('span', { class: 'status-line' }, h('span', { class: dot }), label), sub ? h('span', { class: 'status-sub' }, sub) : null);
+  return h('div', { class: 'status-cell' }, h('span', { class: 'status-line' }, h('span', { class: dot }), label), sub ? h('span', { class: 'status-sub' }, sub) : null,
+    live ? h('span', { class: 'status-sub' }, liveState(live, now)) : null, last ? h('span', { class: 'status-sub' }, last) : null);
 };
 
 const wearBar = (pct: number): HTMLElement =>
@@ -39,11 +46,15 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
   const fm = fmt();
   const now = Date.now();
   const code = companyCode(me.company);
-  const [usage, finance, active] = await Promise.all([
+  const [usage, finance, active, lineStates] = await Promise.all([
     hubUsage().catch((): HubSpots[] | null => null),
     financeOverview().catch((): FinanceOverview | null => null),
     api<Flight[]>('/me/flights?status=active&limit=50').catch((): Flight[] => []),
+    loadAircraftLines().catch(() => []),
   ]);
+  const lines = new Map(lineStates.flatMap((l) => { const live = aircraftLive(l); return live ? [[l.aircraftId, live] as const] : []; }));
+  /** The line state of an aircraft, unless a flight of the player, a ferry or the workshop has it. */
+  const liveOf = (a: FleetAircraft): AircraftLive | undefined => (a.status === 'maintenance' || a.ferryUntil !== null || flights.has(a.id) ? undefined : lines.get(a.id));
   const flights = new Map<number, ActiveFlightInfo>(active.map((f) => [f.aircraftId, { destination: f.job.destination, flightId: f.id }]));
   const planes = me.fleet;
   const { total, available } = fleetSummary(planes.map((a) => ({ busy: statusOf(a, now).kind !== 'available' })));
@@ -71,8 +82,9 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
     const contractText = c === null ? (a.ownership === 'owned' ? t('fin.fleet.noContract') : null)
       : [c.monthly > 0 ? t('fin.contract.monthly', { amount: fm.money(c.monthly) }) : null, c.hourly ? t('fin.contract.hourly', { amount: fm.money(c.hourly) }) : null,
         c.endsAt ? t('fin.contract.until', { date: monthLabel(locale(), c.endsAt, true) }) : null].filter(Boolean).join(' · ');
-    const baseLine = h('span', { class: 'mono' }, a.location);
-    void airportInfo(a.location).then((ap) => { if (ap) baseLine.textContent = `${a.location} · ${tidyCity(ap)}`; });
+    const where = whereCell(a, liveOf(a));
+    const baseLine = h('span', { class: 'mono' }, where);
+    if (!where.includes('→')) void airportInfo(where).then((ap) => { if (ap) baseLine.textContent = `${where} · ${tidyCity(ap)}`; });
     const actions = h('div', { class: 'fin-actions-row' });
     if (ferrying === a.id) {
       actions.style.flexDirection = 'column';
@@ -97,7 +109,7 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
       h('div', { class: 'identity' },
         h('h2', { class: 'reg' }, aircraftName(a)),
         h('span', { class: 'muted' }, `${a.type.name} · ${categoryName(a.type.category)}`),
-        h('div', { class: 'row tight' }, statusCell(a, flights, code, now), a.type.derived ? badge('estimated', t('badge.estimated'), null) : null)),
+        h('div', { class: 'row tight' }, statusCell(a, flights, liveOf(a), code, now), a.type.derived ? badge('estimated', t('badge.estimated'), null) : null)),
       wear === null ? null : h('div', { class: 'cond' },
         h('div', { class: 'top' }, h('span', { class: 'muted' }, t('fin.fleet.wear')), h('span', { class: 'pct' }, fm.percent(wear / 100))),
         wearBar(wear)),
@@ -120,9 +132,9 @@ export async function fleet(ctx: Ctx): Promise<Screen> {
       onOpen: () => { showDetail(a); },
       cells: [
         h('div', { class: 'col tight' }, h('span', { class: 'reg-sm' }, aircraftName(a)), h('span', { class: 'dim small' }, `${a.type.name} · ${categoryName(a.type.category)}`)),
-        h('span', { class: 'mono dim' }, a.location),
+        h('span', { class: 'mono dim' }, whereCell(a, liveOf(a))),
         wear === null ? unknownValue() : h('span', { class: 'wear-pct' }, fm.percent(wear / 100)),
-        statusCell(a, flights, code, now),
+        statusCell(a, flights, liveOf(a), code, now),
       ],
     };
   });
