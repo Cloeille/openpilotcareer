@@ -45,6 +45,10 @@ test('every type finds light jobs where it stands: a C172 still gets light jobs,
     assert.ok(perWindow >= 4, `${t} at ${icao}: ${perWindow} fitting jobs per window`);
   }
   assert.ok(fitting('A20N', boards(LARGE)).length / (WINDOWS.length * LARGE.length) >= 3, 'a narrowbody has jobs at large airports too');
+  for (const t of ['A20N', 'B738']) for (const icao of mediums) {
+    const perWindow = fitting(t, boards([icao])).length / WINDOWS.length;
+    assert.ok(perWindow >= 3, `${t} at medium ${icao}: ${perWindow} fitting jobs per window`);
+  }
 });
 
 test('the board stays deterministic and keeps its ids', () => {
@@ -53,7 +57,7 @@ test('the board stays deterministic and keeps its ids', () => {
   assert.deepEqual(a, b);
   assert.deepEqual(a.map((j) => j.id), a.map((_, i) => `LFPG-123456-${i}`));
   const within = (icao: string, pax: number, cargoKg: number): boolean => WINDOWS.every((w) => boardFor(airports.get(icao)!, w).every((j) => (j.kind === 'pax' ? j.pax <= pax : j.payloadKg <= cargoKg)));
-  assert.ok(within(mediums[0]!, 70, 3_000), 'medium airports keep the light and regional mix');
+  assert.ok(within(mediums[0]!, 200, 9_000), 'medium airports stop at narrowbody loads');
   assert.ok(within(smalls[0]!, 4, 200), 'small airports keep the light mix');
 });
 
