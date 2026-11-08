@@ -34,6 +34,10 @@ const ownNetWorth = (c: string): string => `${c}.balance + COALESCE((SELECT SUM(
   + COALESCE((SELECT SUM(value + deposit - principal) FROM facility_contracts WHERE company_id = ${c}.id AND status = 'active'), 0)`;
 // v4 GROUP (C21): a parent owns its subsidiaries 100 %, so its net worth is its own plus theirs (a subsidiary has none of its own below it: one level). Subsidiaries are not ranked (leaderboard below).
 const NET_WORTH_SQL = `${ownNetWorth('c')} + COALESCE((SELECT SUM(${ownNetWorth('s')}) FROM companies s WHERE s.parent_id = c.id), 0)`;
+/** A company's flights in the season `?1` ('YYYY-MM'), as a subquery on `companies c`: the flights it flew itself (verified or not) plus its line legs ('done') that landed in that UTC month.
+ *  scheduled_flights has no season column, so the month bounds are those of `seasonOf`. Shared by `snapshot` and `leaderboard`, so the live season and the closed ones count the same. */
+const FLIGHTS_SQL = `((SELECT COUNT(*) FROM flights f WHERE f.company_id = c.id AND f.season = ?1 AND f.status IN ('verified','unverified'))
+  + (SELECT COUNT(*) FROM scheduled_flights l WHERE l.company_id = c.id AND l.status = 'done' AND l.arr_at >= strftime('%s', ?1 || '-01') * 1000 AND l.arr_at < strftime('%s', ?1 || '-01', '+1 month') * 1000))`;
 export const SB_PREFIX = 'sb-';
 /** Id prefix of the private job made when the player takes over a line rotation (lines.ts). */
 export const LINE_JOB_PREFIX = 'ln-';
@@ -95,7 +99,7 @@ export function spend(db: Db, companyId: number, at: number, kind: string, price
 export function snapshot(db: Db, companyId: number, at: number): void {
   const season = seasonOf(at);
   run(db, `INSERT INTO season_stats (season, company_id, net_worth, flights, reputation)
-    SELECT ?1, c.id, ${NET_WORTH_SQL}, (SELECT COUNT(*) FROM flights f WHERE f.company_id = c.id AND f.season = ?1 AND f.status IN ('verified','unverified')), c.reputation
+    SELECT ?1, c.id, ${NET_WORTH_SQL}, ${FLIGHTS_SQL}, c.reputation
     FROM companies c WHERE c.id = ?2
     ON CONFLICT (season, company_id) DO UPDATE SET net_worth = excluded.net_worth, flights = excluded.flights, reputation = excluded.reputation`, season, companyId);
   // The parent's net worth holds its subsidiaries' (NET_WORTH_SQL): when one moves, the parent's season line moves with it, or a closed season would rank a stale group.
@@ -447,7 +451,7 @@ export function leaderboard(db: Db, season: string, now: number): Leaderboard {
   const seasons = [...new Set([currentSeason(now), ...all<{ season: string }>(db, 'SELECT DISTINCT season FROM season_stats ORDER BY season DESC').map((s) => s.season)])];
   const rows = season === currentSeason(now)
     ? all<Omit<LeaderboardRow, 'rank'>>(db, `SELECT c.id AS companyId, c.name, c.user_id IS NULL AS isAI, ${MAIN_HUB_SQL} AS hub, ${NET_WORTH_SQL} AS netWorth, c.reputation AS reputation,
-        (SELECT COUNT(*) FROM flights f WHERE f.company_id = c.id AND f.season = ?1 AND f.status IN ('verified','unverified')) AS flights
+        ${FLIGHTS_SQL} AS flights
         FROM companies c WHERE c.parent_id IS NULL ORDER BY netWorth DESC, c.id LIMIT 100`, season)
     : all<Omit<LeaderboardRow, 'rank'>>(db, `SELECT c.id AS companyId, c.name, c.user_id IS NULL AS isAI, ${MAIN_HUB_SQL} AS hub, s.net_worth AS netWorth, s.reputation AS reputation, s.flights AS flights
         FROM season_stats s JOIN companies c ON c.id = s.company_id WHERE s.season = ? AND c.parent_id IS NULL ORDER BY s.net_worth DESC, c.id LIMIT 100`, season);
