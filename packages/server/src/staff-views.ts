@@ -2,7 +2,7 @@
 // people file (deterministically per person and month) so the player has something to decide.
 import {
   DAY_MS, DUTY_MAX_MIN, FIRING_MONTHS, FLIGHT_MAX_28D_MIN, LEAVE_ASK_RATE, LEAVE_DAYS_PER_YEAR, REST_POLICIES, REST_POLICY_NAMES, STAFF_FAMILIES, coverageOf, dayIso, dayNo,
-  ROLE_INSTRUCTOR, ageAt, dutyViolation, flies, isoDayNo, retirementAt, yearOfDay,
+  ROLE_INSTRUCTOR, ageAt, dutyViolation, flies, isoDayNo, paidSalary, retirementAt, yearOfDay,
   type Arrival, type Blocker, type Candidate, type CandidatesView, type Coverage, type DutyBlock, type FamilyRow, type LeaveRequest, type LeaveView, type PolicyOption, type Qualification,
   type StaffDetail, type StaffFamily, type StaffMember, type StaffOverview, type WatchItem,
   type SORTS,
@@ -13,6 +13,7 @@ import { hashSeed, mulberry32 } from './board.ts';
 import { all, get, run, type Db } from './db.ts';
 import { typeFor } from './game.ts';
 import { HttpError } from './http.ts';
+import { payAt } from './hr.ts';
 import { companyCode } from './lines.ts';
 import { companyDemand, countOf } from './staff-needs.ts';
 import { market } from './staff-people.ts';
@@ -67,7 +68,7 @@ export function overview(db: Db, companyId: number, now: number, base?: string, 
     families.push(r);
   }
   return {
-    people: hereNow.length, pending: roster.length - hereNow.length, positions: demand.reduce((n, d) => n + d.count, 0), payroll: hereNow.filter((s) => s.contract === 'cdi').reduce((t, s) => t + s.salary, 0), policy: policyOf(db, companyId),
+    people: hereNow.length, pending: roster.length - hereNow.length, positions: demand.reduce((n, d) => n + d.count, 0), payroll: hereNow.filter((s) => s.contract === 'cdi').reduce((t, s) => t + paidSalary(s.salary, payAt(db, companyId, now)), 0), policy: policyOf(db, companyId),
     families, blockers: blockersToday(db, companyId, now), watch: watchList(db, hereNow, now),
   };
 }

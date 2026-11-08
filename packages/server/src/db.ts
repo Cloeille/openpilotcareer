@@ -390,7 +390,16 @@ CREATE TABLE alliance_ballots (
   choice TEXT NOT NULL CHECK (choice IN ('yes','no')), PRIMARY KEY (vote_id, company_id));
 `;
 
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT, SCHEMA_AGENCY, SCHEMA_REPORTS, SCHEMA_CREDIT, SCHEMA_SIM_AIRCRAFT_OVERRIDE, SCHEMA_TRAINING, SCHEMA_GROUP, SCHEMA_ALLIANCE];
+// v4 HR (C27, C30, C31): the company's pay level against the grid, as a history like `service_policy`: one row per change, `since` the first instant it is in force (the next UTC midnight), so the
+// level at any instant is a read and a replayed billing month sees the level of its own time. No row means market pay (0). It is the only HR state: the grid salary on a contract is never rewritten,
+// the payroll applies the level (shared `paidStaff`), and morale is the `staff.morale` column that already existed, moved once a month by the billing run.
+const SCHEMA_HR = `
+CREATE TABLE hr_policy (
+  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE, pay_pct INTEGER NOT NULL CHECK (pay_pct BETWEEN -10 AND 10), since INTEGER NOT NULL,
+  PRIMARY KEY (company_id, since));
+`;
+
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT, SCHEMA_AGENCY, SCHEMA_REPORTS, SCHEMA_CREDIT, SCHEMA_SIM_AIRCRAFT_OVERRIDE, SCHEMA_TRAINING, SCHEMA_GROUP, SCHEMA_ALLIANCE, SCHEMA_HR];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);

@@ -1,13 +1,15 @@
 // Lot FINANCE domain: monthly billing (pure planner + lazy idempotent runner), leases, rentals, loans. Like game.ts, nothing
 // here opens a transaction (callers use `tx`) and rule violations throw HttpError. The money still moves through game.ts `post`.
 import {
-  CLUB, CREDIT_INSTALMENT, LOAN_QUOTE_DOWN_PCTS, LOAN_QUOTE_MONTHS, MONTHLY_RENTAL, PARKING_FEE_BY_SIZE, aircraftPrice, aircraftValue, loanOption, loanStep, NO_CREDIT, planCreditMonth, planFacilityMonth,
+  CLUB, CREDIT_INSTALMENT, LOAN_QUOTE_DOWN_PCTS, LOAN_QUOTE_MONTHS, MONTHLY_RENTAL, PARKING_FEE_BY_SIZE, aircraftPrice, aircraftValue, loanOption, loanStep, NO_CREDIT, onPayroll, paidStaff, planCreditMonth, planFacilityMonth,
   type AircraftCategory, type CreditInputs, type CreditState, type FinanceCharge, type FinanceContract, type FinanceOverview, type FleetQuote, type LeaseOffer, type Ownership, type PlanFacility, type PurchaseResult,
 } from '@opc/shared';
 import { allianceDues } from './alliance.ts';
 import { airports } from './catalog.ts';
 import { activeCredits, overdraftLow, saveCredits, settleLate } from './credit.ts';
 import { planRows, savePlanRows } from './facilities.ts';
+import { payAt, stepMorale } from './hr.ts';
+import { payrollRows } from './staff.ts';
 import { all, get, run, type Db } from './db.ts';
 import { applyBailout, startModeOf } from './start.ts';
 import {
@@ -79,7 +81,7 @@ export function planMonth(start: number, contracts: PlanContract[], fleet: PlanA
     }
   }
   // C7: payroll is its own charge. Whoever started before the 1st and has not left by it is paid for the month (the hiring premium covered the month they joined).
-  const paid = staff.filter((p) => p.since < start && (p.ends_at === null || p.ends_at > start));
+  const paid = staff.filter((p) => onPayroll(p, start));
   if (paid.length > 0) charges.push({ kind: 'payroll', amount: -paid.reduce((t, p) => t + p.salary, 0), memo: `payroll ${paid.length} people` });
   // v3 facilities: rent, upkeep, instalments and the sale of maintenance of the buildings she holds (shared/facilities.ts), billed like everything else
   const built = planFacilityMonth(start, facilities);
@@ -94,14 +96,14 @@ export function planMonth(start: number, contracts: PlanContract[], fleet: PlanA
 
 export type PlanInputs = { contracts: PlanContract[]; fleet: PlanAircraft[]; staff: PlanStaff[]; facilities: PlanFacility[]; credit: CreditInputs };
 
-/** What the next billing charges, seen from `at`. `low`: the lowest balance of the month whose overdraft interest it bills; by default the month in progress (a projection), billing passes the month that just ended. */
-export function planInputs(db: Db, companyId: number, at: number, low: number = overdraftLow(db, companyId, addMonths(at, 0), at + 1)): PlanInputs {
+/** What the next billing charges, seen from `at`. `low`: the lowest balance of the month whose overdraft interest it bills; by default the month in progress (a projection), billing passes the month that just ended.
+ *  `pay`: the company's pay level the payroll applies (v4 HR): by default the one as it will be (a projection of the next 1st), billing passes the level in force on the 1st it bills. */
+export function planInputs(db: Db, companyId: number, at: number, low: number = overdraftLow(db, companyId, addMonths(at, 0), at + 1), pay: number = payAt(db, companyId)): PlanInputs {
   const contracts = all<ContractRow>(db, "SELECT * FROM contracts WHERE company_id = ? AND status = 'active' ORDER BY id", companyId);
   const fleet = all<{ id: number; icao: string; registration: string | null; base: string | null; ownership: Ownership; value: number; acquired_at: number; busy: number }>(db,
     `SELECT a.*, EXISTS (SELECT 1 FROM flights f WHERE f.aircraft_id = a.id AND f.status = 'active') AS busy FROM aircraft a WHERE a.company_id = ? AND a.returned_at IS NULL ORDER BY a.id`, companyId)
     .map((a) => ({ id: a.id, registration: a.registration ?? `#${a.id}`, base: a.base, ownership: a.ownership, value: a.value, category: typeFor(db, companyId, a.icao).category, acquired_at: a.acquired_at, busy: !!a.busy }));
-  const staff = all<PlanStaff>(db, "SELECT salary, MAX(starts_at, hired_at) AS since, ends_at FROM staff WHERE company_id = ? AND contract = 'cdi'", companyId);
-  return { contracts, fleet, staff, facilities: planRows(db, companyId, at), credit: { credits: activeCredits(db, companyId), overdraftLow: low } };
+  return { contracts, fleet, staff: paidStaff(payrollRows(db, companyId), pay), facilities: planRows(db, companyId, at), credit: { credits: activeCredits(db, companyId), overdraftLow: low } };
 }
 
 // ---------------------------------------------------------------- monthly billing (lazy, idempotent per company and UTC month)
@@ -121,7 +123,7 @@ export function runBilling(db: Db, companyId: number, now: number): number {
   for (const m of months.slice(-MAX_CATCHUP_MONTHS)) {
     if (run(db, 'INSERT INTO billing_runs (company_id, month, at) VALUES (?, ?, ?) ON CONFLICT DO NOTHING', companyId, m, now).changes === 0) continue;
     const at = monthStart(m);
-    const { contracts, fleet, staff, facilities, credit } = planInputs(db, companyId, at, overdraftLow(db, companyId, addMonths(at, -1), at));
+    const { contracts, fleet, staff, facilities, credit } = planInputs(db, companyId, at, overdraftLow(db, companyId, addMonths(at, -1), at), payAt(db, companyId, at));
     const plan = planMonth(at, contracts, fleet, staff, facilities, insuranceRise(db, companyId, m), credit, allianceDues(db, companyId, at));
     for (const c of plan.charges) {
       post(db, companyId, at, c.kind, c.amount, c.memo, null, c.aircraftId === undefined ? {} : { aircraftId: c.aircraftId });
@@ -129,6 +131,7 @@ export function runBilling(db: Db, companyId: number, now: number): number {
     }
     savePlanRows(db, facilities, plan.facilities);
     saveCredits(db, credit.credits, plan.credits);
+    stepMorale(db, companyId, m, at);
     for (const c of plan.contracts) {
       const before = contracts.find((x) => x.id === c.id)!;
       if (c.months_paid !== before.months_paid || c.principal !== before.principal) run(db, 'UPDATE contracts SET months_paid = ?, principal = ? WHERE id = ?', c.months_paid, c.principal, c.id);

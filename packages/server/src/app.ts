@@ -38,6 +38,7 @@ import { registerCredit } from './routes-credit.ts';
 import { registerTraining } from './routes-training.ts';
 import { registerGroup } from './routes-group.ts';
 import { registerAlliance } from './routes-alliance.ts';
+import { registerHr } from './routes-hr.ts';
 import { onboardingOf, toleratedFlags } from './start.ts';
 import { registerDownloads } from './routes-downloads.ts';
 
@@ -387,6 +388,7 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   registerCredit(app, { db, now });
   registerGroup(app, { db, now });
   registerAlliance(app, { db, now });
+  registerHr(app, { db, now });
 
   return app;
 }

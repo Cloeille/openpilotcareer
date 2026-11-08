@@ -72,6 +72,7 @@ async function fill(h: H, token: string, cid: number): Promise<void> {
   run(h.db, 'INSERT INTO alliance_members (alliance_id, company_id, since) VALUES (?, ?, ?)', club, cid, at);
   const vote = run(h.db, 'INSERT INTO alliance_votes (alliance_id, candidate_id, created_at) VALUES (?, (SELECT id FROM companies WHERE user_id = (SELECT user_id FROM companies WHERE id = ?) AND id != ?), ?)', club, cid, cid, at).id;
   run(h.db, "INSERT INTO alliance_ballots (vote_id, company_id, choice) VALUES (?, ?, 'yes')", vote, cid);
+  run(h.db, 'INSERT INTO hr_policy (company_id, pay_pct, since) VALUES (?, 5, ?)', cid, at);
   snapshot(h.db, cid, at);
 }
 

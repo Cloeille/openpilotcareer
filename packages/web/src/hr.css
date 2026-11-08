@@ -1,0 +1,7 @@
+/* ---------------------------------------------------------------- HR (v4 lot HR): the pay level and the morale by family. The screen reuses the agency's two-column frame (.ag-screen, .ag-main, .ag-side),
+   the rest policy's segments (.st-policy) and the staff meters (.st-meter); these are its own parts. */
+
+.hr-families, .hr-rules { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.hr-family { display: grid; grid-template-columns: minmax(120px, 180px) minmax(0, 1fr) 64px; align-items: center; gap: 14px; }
+.hr-family .st-meter { width: 100%; height: 4px; }
+.hr-family .end { text-align: right; }
