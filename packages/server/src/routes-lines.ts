@@ -1,12 +1,12 @@
 // Lot LINES routes (docs/v3-plan.md B.2). Registered from app.ts with one line. The line engine itself runs from an onRequest hook added here,
 // BEFORE the maintenance hook of app.ts: ticks must replay the past with the workshop state of the past.
 import type { FastifyInstance, FastifyRequest } from 'fastify';
-import { lineBodySchema, lineDayQuerySchema, linePatchSchema, lineResolveSchema, networkEnabledSchema, networkQuerySchema, type Programme } from '@opc/shared';
+import { historyQuerySchema, lineBodySchema, lineDayQuerySchema, linePatchSchema, lineResolveSchema, networkEnabledSchema, networkQuerySchema, type Programme } from '@opc/shared';
 import { bearer, sessionAuth, type Principal } from './auth.ts';
 import { get, tx, type Db } from './db.ts';
 import { HttpError, NUMERIC_ID, parse } from './http.ts';
 import { createLine, deleteLine, forecast, ownedLine, patchLine, problemView, resolveLine, setEnabled, setPaused, takeRotation } from './lines-manage.ts';
-import { lineDetail, networkView, opsView } from './lines-views.ts';
+import { aircraftLines, historyView, lineDetail, networkView, opsView } from './lines-views.ts';
 import { lineView, linesRequest, networkOf } from './lines.ts';
 
 export type LinesCtx = { db: Db; now: () => number };
@@ -41,6 +41,14 @@ export function registerLines(app: FastifyInstance, ctx: LinesCtx): void {
   });
 
   app.get('/api/v1/ops', async (req) => opsView(db, user(req).companyId, now()));
+
+  // The flight log: flights flown by hand and legs flown by the lines in one date-ordered, paginated list (`/me/flights` stays the flown flights only).
+  app.get('/api/v1/me/history', async (req) => {
+    const q = parse(historyQuerySchema, req.query);
+    return historyView(db, user(req).companyId, q.limit, q.before, q.source, now());
+  });
+
+  app.get('/api/v1/network/aircraft', async (req) => aircraftLines(db, user(req).companyId, now()));
 
   app.post('/api/v1/lines/forecast', async (req) => {
     const p = user(req);

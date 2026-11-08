@@ -219,10 +219,10 @@ export function companyView(db: Db, id: number): Company {
   };
 }
 
-/** `busy`: on an active flight, or on a ferry flight that has not landed at `now`. */
+/** `busy`: on an active flight, on a ferry flight that has not landed at `now`, or in the air on a line leg (`assertFlyable` refuses such an aircraft too; it already stands at the leg's destination). */
 export function fleetView(db: Db, companyId: number, now: number): FleetAircraft[] {
   const contracts = activeContractsOf(db, companyId);
-  return all<AircraftRow & { busy: number }>(db, `SELECT a.*, (EXISTS (SELECT 1 FROM flights f WHERE f.aircraft_id = a.id AND f.status = 'active') OR a.available_at > ?2) AS busy FROM aircraft a WHERE a.company_id = ?1 AND a.returned_at IS NULL ORDER BY a.id`, companyId, now)
+  return all<AircraftRow & { busy: number }>(db, `SELECT a.*, (EXISTS (SELECT 1 FROM flights f WHERE f.aircraft_id = a.id AND f.status = 'active') OR a.available_at > ?2 OR EXISTS (SELECT 1 FROM scheduled_flights s WHERE s.aircraft_id = a.id AND s.status = 'done' AND s.dep_at + s.delay_min * 60000 <= ?2 AND s.arr_at + s.delay_min * 60000 > ?2)) AS busy FROM aircraft a WHERE a.company_id = ?1 AND a.returned_at IS NULL ORDER BY a.id`, companyId, now)
     .map((a) => ({ id: a.id, icao: a.icao, type: typeFor(db, companyId, a.icao), location: a.location, busy: !!a.busy, value: a.value, ...financeFields(a, !!a.busy, contracts.get(a.id), now) }));
 }
 
