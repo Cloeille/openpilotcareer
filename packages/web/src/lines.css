@@ -201,7 +201,8 @@ li:first-child > .ln-row { border-top-color: transparent; }
 .ln-route .input { width: 270px; }
 .ln-route-locked { align-items: center; gap: 12px; flex-wrap: wrap; }
 .ln-locked { display: inline-flex; align-items: center; gap: 6px; }
-.ln-edit-note { margin: 0; }
+.ln-edit-aside { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; max-width: 520px; }
+.ln-edit-note { text-align: right; }
 .ln-route .airport-found { position: absolute; }
 .ln-swap { width: 40px; height: 44px; display: flex; align-items: center; justify-content: center; background: transparent; border: 0; color: var(--text-secondary); cursor: pointer; border-radius: 3px; }
 .ln-swap:hover { background: var(--surface-hover); color: var(--text-primary); }
@@ -239,7 +240,7 @@ li:first-child > .ln-row { border-top-color: transparent; }
 .ln-time input { height: 36px; background: var(--surface-sunken); border: 1px solid var(--border-strong); border-radius: 3px; padding: 0 10px; color-scheme: dark; }
 .ln-time input:disabled { opacity: .45; }
 .ln-schedule { display: flex; flex-direction: column; gap: 10px; }
-.ln-row-grid { display: flex; gap: 16px; align-items: center; min-height: 28px; flex: none; }
+.ln-row-grid { display: flex; gap: 16px; align-items: center; min-height: 28px; }
 .ln-row-grid > :last-child { flex: 1; min-width: 0; position: relative; }
 .ln-row-label { width: 170px; flex: none; font-size: 12px; color: var(--text-tertiary); }
 .ln-axis { position: relative; height: 16px; }
@@ -248,7 +249,7 @@ li:first-child > .ln-row { border-top-color: transparent; }
 .ln-window { position: absolute; top: 4px; height: 20px; display: flex; align-items: center; padding: 0 8px; background: var(--surface-selected); border-radius: 2px; font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; }
 .ln-dep { position: absolute; top: 6px; font-size: 11px; font-family: var(--mono); color: var(--text-secondary); border-left: 1px solid var(--border-strong); padding-left: 4px; }
 .ln-lane-new { display: flex; flex-direction: column; gap: 4px; width: 100%; }
-.ln-lane-new .ln-track { height: 34px; }
+.ln-lane-new .ln-track { flex: none; height: 34px; }
 .ln-lane-id { display: flex; gap: 10px; align-items: baseline; }
 .ln-block-new { position: absolute; top: 3px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 2px; font: 700 11px var(--mono); overflow: hidden; }
 .ln-block-new.out { background: #ECEAE5D9; color: #111214; }

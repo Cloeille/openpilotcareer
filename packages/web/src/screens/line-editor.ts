@@ -106,8 +106,10 @@ async function editor(ctx: Ctx, mode: Mode): Promise<Screen> {
     ? t('ln.new.sub', { nm: fm.nm(Math.round(distance)), time: block ? fm.duration(block / 60) : '–' })
     : t('ln.new.subEmpty');
   const route = edited
-    ? h('div', { class: 'ln-route ln-route-locked', role: 'group', 'aria-label': t('ln.edit.route') }, signLocation(edited.a), h('span', { class: 'ln-pair', 'aria-hidden': 'true' }, '⇄'), signLocation(edited.b),
-      h('span', { class: 'dim small ln-locked' }, icon('lock', 14), t('ln.edit.locked')))
+    ? h('div', { class: 'ln-edit-aside' },
+      h('div', { class: 'ln-route ln-route-locked', role: 'group', 'aria-label': t('ln.edit.route') }, signLocation(edited.a), h('span', { class: 'ln-pair', 'aria-hidden': 'true' }, '⇄'), signLocation(edited.b),
+        h('span', { class: 'dim small ln-locked' }, icon('lock', 14), t('ln.edit.locked'))),
+      h('p', { class: 'dim small ln-edit-note' }, t('ln.edit.note')))
     : fields();
   const header = h('div', { class: 'ln-new-header' },
     h('div', { class: 'col tight' }, h('p', { class: 'muted' }, t(edited ? 'ln.edit.kicker' : 'ln.new.kicker', { company: me.company.name })), h('h1', { class: 'title ln-new-title' }, title), h('p', { class: 'dim' }, sub)), route);
@@ -222,7 +224,6 @@ async function editor(ctx: Ctx, mode: Mode): Promise<Screen> {
         f ? [need(t('ln.need.pilots'), f.needs.pilots, crewNeed(f.needs.pilots).text), need(t('ln.need.cabin'), f.needs.cabin, crewNeed(f.needs.cabin).text), need(t('ln.need.ground', { city: cities(info.b) || draft.b }), f.needs.ground, f.needs.ground.missingAt.length ? t('ln.need.groundMissing', { n: f.needs.ground.required - f.needs.ground.available }) : t('ln.need.groundOk')), need(t('ln.need.maintenance'), null, f.needs.maintenance)] : h('p', { class: 'dim small' }, problem ? t(PROBLEM_KEY[problem]) : t('ln.need.loading')),
         crewShort ? h('div', { class: 'ln-warn' }, icon('triangle-alert', 16), h('div', { class: 'col tight' }, h('span', null, t('ln.warn.crew', { n: f!.needs.pilots.required - f!.needs.pilots.available })), h('button', { type: 'button', class: 'link-btn', onclick: () => go('#staff/hire') }, t('ln.warn.recruit', { n: f!.needs.pilots.required - f!.needs.pilots.available })))) : null,
         refusal ? h('div', { class: 'ln-warn', role: 'alert' }, icon('circle-x', 16), h('span', null, refusalText(refusal))) : null,
-        edited ? h('p', { class: 'dim small ln-edit-note' }, t('ln.edit.note')) : null,
         conflicts.length ? h('div', { class: 'ln-warn' }, icon('triangle-alert', 16), h('span', null, t('ln.warn.conflict', { reg: aircraft.find((x) => x.id === conflicts[0]!.aircraftId)?.registration ?? '', no: `${me.company.code ?? ''} ${conflicts[0]!.flightNo}`.trim(), at: fm.zulu(conflicts[0]!.at) }))) : null),
       panel({ title: t('ln.fc.title'), action: h('span', { class: 'badge estimated' }, t('ln.fc.estimated')), class: 'ln-forecast', id: 'ln-forecast' },
         f ? [h('div', { class: 'col tight' }, h('span', { class: 'muted small' }, t('ln.fc.profit')), h('span', { class: `ln-profit${f.forecast.profit < 0 ? ' loss' : ''}` }, fm.signedMoney(f.forecast.profit)), h('span', { class: 'dim small' }, t('ln.fc.split', { revenue: fm.money(f.forecast.revenue), costs: fm.money(f.forecast.costs) }))),

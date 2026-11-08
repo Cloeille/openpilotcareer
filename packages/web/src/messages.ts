@@ -1703,7 +1703,7 @@ const table = {
   'ln.edit.save': ['Save the programme', 'Enregistrer le programme'],
   'ln.edit.saved': ['Programme saved. The flights to come are laid again.', 'Programme enregistré. Les vols à venir sont replanifiés.'],
   'ln.edit.hintSave': ['Save the programme', 'Enregistrer le programme'],
-  'ln.edit.note': ['Flights already flown and the one in the air stay as they are; the flights to come follow the new programme from the next quarter hour.', 'Les vols déjà faits et celui en l’air restent tels quels ; les vols à venir suivent le nouveau programme dès le prochain quart d’heure.'],
+  'ln.edit.note': ['Flights flown and the one in the air stay as they are; the flights to come follow the new programme.', 'Les vols faits et celui en l’air restent tels quels ; les vols à venir suivent le nouveau programme.'],
   'ln.edit.open': ['Change the programme', 'Modifier le programme'],
   'ln.hint.edit': ['Change the programme', 'Modifier le programme'],
   'ln.new.p.airports': ['Enter two known airport codes.', 'Saisis deux codes d’aéroport connus.'],
