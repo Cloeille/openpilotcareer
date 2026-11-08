@@ -17,6 +17,12 @@ export type StaffRow = {
 export const policyOf = (db: Db, companyId: number): RestPolicy => get<{ policy: RestPolicy }>(db, 'SELECT policy FROM staff_company WHERE company_id = ?', companyId)?.policy ?? 'standard';
 export const rulesOf = (db: Db, companyId: number): RestPolicyRules => REST_POLICIES[policyOf(db, companyId)];
 
+/** Who a monthly payroll can pay: the people on a permanent contract (a temporary one is paid up front when it is booked), with what the payroll and the HR morale step read.
+ *  `since` is the later of the start and the day of the hire, so a starter crew granted at an upgrade is paid from the next month, never retroactively. */
+export type PayrollRow = { id: number; family: StaffFamily; salary: number; morale: number; notice_days: number; since: number; ends_at: number | null };
+export const payrollRows = (db: Db, companyId: number): PayrollRow[] =>
+  all<PayrollRow>(db, "SELECT id, family, salary, morale, notice_days, MAX(starts_at, hired_at) AS since, ends_at FROM staff WHERE company_id = ? AND contract = 'cdi' ORDER BY id", companyId);
+
 /** On the payroll at instant `at` (hired people who have not started yet are not). */
 export const isEmployed = (s: Pick<StaffRow, 'starts_at' | 'ends_at'>, at: number): boolean => s.starts_at <= at && (s.ends_at === null || s.ends_at > at);
 /** Everyone who is employed or will be (a hire in notice), not yet let go. */
