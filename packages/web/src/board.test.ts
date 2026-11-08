@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { AircraftType, Job, Me } from '@opc/shared';
-import { DEFAULT_FILTERS, boardRows, candidates, flyable, jobsAtIdleAirports, lookupJob, matchesFilters, nextBoardWave, remember } from './board.ts';
+import { DEFAULT_FILTERS, boardRows, candidates, flyable, jobsAtIdleAirports, lookupJob, matchesFilters, nextBoardWave, noAircraftReason, remember, suits } from './board.ts';
 
 const type = (o: Partial<AircraftType> = {}): AircraftType => ({ icao: 'C208', name: 'Caravan', category: 'turboprop-single', engines: 1, wtc: 'L', seats: 9, cargoKg: 1000, cruiseKts: 180, rangeNm: 900, derived: false, ...o });
 const plane = (id: number, location: string, busy = false, t = type()): Me['fleet'][number] => ({ id, icao: t.icao, type: t, location, busy, value: 1, registration: `F-HT${id}`, ownership: 'owned', wearPct: 0, status: busy ? 'flying' : 'available', maintenanceUntil: null, contract: null, ferryUntil: null });
@@ -70,4 +70,14 @@ test('board rows: SimBrief imports first, then flyable, then payout', () => {
   const m = me([plane(1, 'LFMN')]);
   const rows = boardRows(m, { jobs: [job('low', 'LFMN', 1), job('high', 'LFMN', 9), job('far', 'LFMN', 99, { distanceNm: 5000 })], imported: [job('sb', 'LFMN', 0, { source: 'simbrief' })] });
   assert.deepEqual(rows.map((j) => j.id), ['sb', 'high', 'low', 'far']);
+});
+
+test('a board job lists the aircraft it suits: the UI follows the server, not just the size check', () => {
+  const m = me([plane(1, 'LFMN'), plane(2, 'LFMN', false, type({ icao: 'B789', seats: 290, cargoKg: 17000 }))]);
+  const light = job('a', 'LFMN', 100, { pax: 1, payloadKg: 100, fits: [1] });
+  assert.deepEqual(candidates(m, light).map((a) => a.id), [1], 'the widebody could fly it but it does not suit');
+  assert.equal(suits(m.fleet[1]!, light), false);
+  assert.equal(flyable(me([plane(2, 'LFMN', false, type({ icao: 'B789', seats: 290 }))]), light), false);
+  assert.deepEqual(noAircraftReason(me([plane(2, 'LFMN', false, type({ icao: 'B789', seats: 290 }))]), light)?.kind, 'unsuited');
+  assert.equal(suits(m.fleet[1]!, { ...light, source: 'simbrief', fits: undefined }), true, 'a job the player made only has to be flyable');
 });

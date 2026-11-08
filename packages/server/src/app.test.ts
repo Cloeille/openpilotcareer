@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { cannotFly, fuelBurnKg, type Job } from '@opc/shared';
-import { catalogType } from './catalog.ts';
-import { JOB_WINDOW_MS } from './board.ts';
+import { airports, catalogType } from './catalog.ts';
+import { JOB_WINDOW_MS, boardFor, windowOf } from './board.ts';
 import { harness } from './harness.ts';
 
 test('GET /info describes the server; unknown routes are 404 JSON', async () => {
@@ -67,8 +67,10 @@ test('job board is deterministic per airport and window, and changes between win
   const { token } = await h.register();
   const a = (await h.call('GET', '/api/v1/jobs?airport=LFPG', { token })).body.jobs as Job[];
   const b = (await h.call('GET', '/api/v1/jobs?airport=LFPG', { token })).body.jobs as Job[];
-  assert.ok(a.length > 5);
+  assert.ok(a.length > 0);
   assert.deepEqual(a, b);
+  const shared = boardFor(airports.get('LFPG')!, windowOf(h.clock.t));
+  assert.ok(a.every((j) => shared.some((s) => s.id === j.id)), 'the ids are the shared board\'s');
   for (const j of a) {
     assert.equal(j.origin, 'LFPG');
     assert.notEqual(j.destination, 'LFPG');
@@ -105,14 +107,14 @@ test('accept validates aircraft ownership, capability, location and job id', asy
   const h = await harness();
   const a = await h.register('own');
   const b = await h.register('other');
-  const jobs = (await h.call('GET', '/api/v1/jobs', { token: a.token })).body.jobs as Job[];
-  const tooBig = jobs.find((j) => cannotFly(catalogType('C172'), j));
+  const tooBig = boardFor(airports.get('LFPG')!, windowOf(h.clock.t)).find((j) => cannotFly(catalogType('C172'), j));
   assert.ok(tooBig);
   assert.equal((await h.call('POST', `/api/v1/jobs/${tooBig.id}/accept`, { token: a.token, body: { aircraftId: a.me.fleet[0].id } })).body.error, 'cannot_fly');
   assert.equal((await h.call('POST', `/api/v1/jobs/${tooBig.id}/accept`, { token: a.token, body: { aircraftId: b.me.fleet[0].id } })).status, 404, "someone else's aircraft");
   assert.equal((await h.call('POST', '/api/v1/jobs/bogus/accept', { token: a.token, body: { aircraftId: a.me.fleet[0].id } })).status, 404);
   assert.equal((await h.call('POST', '/api/v1/jobs/LFPG-1-0/accept', { token: a.token, body: { aircraftId: a.me.fleet[0].id } })).status, 404, 'other window');
   assert.equal((await h.call('POST', `/api/v1/jobs/${tooBig.id}/accept`, { token: a.token, body: {} })).status, 400);
+  const jobs = (await h.call('GET', '/api/v1/jobs', { token: a.token })).body.jobs as Job[];
   const far = jobs.find((j) => j.origin !== 'LFPG');
   assert.equal(far, undefined, 'jobs list only covers airports where aircraft stand');
 });

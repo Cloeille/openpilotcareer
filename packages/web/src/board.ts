@@ -9,11 +9,14 @@ export const planeLabel = (a: Pick<Plane, 'icao' | 'registration' | 'id'>): stri
 /** Not on a flight (a ferry flight included) and not in the workshop. */
 const free = (a: Plane): boolean => !a.busy && a.status !== 'maintenance';
 
+/** Does `a` suit `j`? A board job comes from the server with `fits`, the aircraft the shared rule (`jobFits`: enough load, a positive net) accepts; the jobs the player made (SimBrief, a line) only have to be flyable. */
+export const suits = (a: Plane, j: Job): boolean => (j.fits ? j.fits.includes(a.id) : !cannotFly(a.type, j));
+
 /** Can one of the company's idle aircraft, standing at the job's origin, fly it? */
-export const flyable = (me: Me, j: Job): boolean => me.fleet.some((a) => free(a) && a.location === j.origin && !cannotFly(a.type, j));
+export const flyable = (me: Me, j: Job): boolean => me.fleet.some((a) => free(a) && a.location === j.origin && suits(a, j));
 
 /** Idle aircraft that can take `j` right now. */
-export const candidates = (me: Me, j: Job): Me['fleet'] => me.fleet.filter((a) => free(a) && a.location === j.origin && !cannotFly(a.type, j));
+export const candidates = (me: Me, j: Job): Me['fleet'] => me.fleet.filter((a) => free(a) && a.location === j.origin && suits(a, j));
 
 /** Distance in nm between two airports, null when either is unknown. */
 export type Distance = (from: string, to: string) => number | null;
@@ -24,6 +27,8 @@ export type NoAircraftReason =
   | { kind: 'type'; icao: string }
   /** No aircraft is big enough or has the range: `aircraft` is the closest, `have` of the `need` (seats, kg or nm). */
   | { kind: 'seats' | 'cargo' | 'range'; aircraft: Plane; need: number; have: number }
+  /** An aircraft could fly it, but not worth it: the load is too small for it or the pay does not cover its costs. */
+  | { kind: 'unsuited'; aircraft: Plane }
   /** An idle aircraft that could fly it stands somewhere else: ferry it to the job's origin. */
   | { kind: 'elsewhere'; aircraft: Plane; distanceNm: number | null }
   /** The same, but the origin is beyond the aircraft's range: no single ferry flight gets it there. */
@@ -41,8 +46,10 @@ const nearness = (a: Plane, j: Job, cause: CannotFlyCause): number =>
 export function noAircraftReason(me: Me, j: Job, dist: Distance = () => null): NoAircraftReason | null {
   if (flyable(me, j)) return null;
   if (me.fleet.length === 0) return { kind: 'none' };
-  const fits = me.fleet.filter((a) => cannotFlyCause(a.type, j) === null);
+  const fits = me.fleet.filter((a) => suits(a, j));
   if (fits.length === 0) {
+    const able = me.fleet.find((a) => cannotFlyCause(a.type, j) === null);
+    if (able) return { kind: 'unsuited', aircraft: able };
     const tries = me.fleet.map((a) => ({ a, cause: cannotFlyCause(a.type, j)! }));
     const best = tries.reduce((b, x) => (nearness(x.a, j, x.cause) > nearness(b.a, j, b.cause) ? x : b));
     if (best.cause === 'type') return { kind: 'type', icao: j.requiredAircraft ?? best.a.icao };

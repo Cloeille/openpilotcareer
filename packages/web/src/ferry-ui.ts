@@ -21,7 +21,7 @@ export async function distanceLookup(codes: Iterable<string>): Promise<Distance>
 }
 
 const WHY: Record<NoAircraftReason['kind'], Key> = {
-  none: 'ferry.why.none', type: 'ferry.why.type', seats: 'ferry.why.seats', cargo: 'ferry.why.cargo', range: 'ferry.why.range',
+  none: 'ferry.why.none', type: 'ferry.why.type', seats: 'ferry.why.seats', cargo: 'ferry.why.cargo', range: 'ferry.why.range', unsuited: 'ferry.why.unsuited',
   elsewhere: 'ferry.why.elsewhere', far: 'ferry.why.far', arriving: 'ferry.why.arriving', busy: 'ferry.why.busy',
 };
 
@@ -34,6 +34,7 @@ export function reasonLine(r: NoAircraftReason, origin: string): string {
     case 'seats': return t(WHY.seats, { plane: planeLabel(r.aircraft), have: r.have, need: r.need });
     case 'cargo': return t(WHY.cargo, { plane: planeLabel(r.aircraft), have: fm.kg(r.have), need: fm.kg(r.need) });
     case 'range': return t(WHY.range, { plane: planeLabel(r.aircraft), have: fm.nm(r.have), need: fm.nm(r.need) });
+    case 'unsuited': return t(WHY.unsuited, { plane: planeLabel(r.aircraft) });
     case 'elsewhere': return t(WHY.elsewhere, { plane: planeLabel(r.aircraft), at: r.aircraft.location, to: origin });
     case 'far': return t(WHY.far, { plane: planeLabel(r.aircraft), at: r.aircraft.location, to: origin, dist: fm.nm(r.distanceNm), range: fm.nm(r.aircraft.type.rangeNm) });
     case 'arriving': return t(WHY.arriving, { plane: planeLabel(r.aircraft), to: origin, time: fm.zulu(r.at) });

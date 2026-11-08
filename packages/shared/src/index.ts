@@ -173,6 +173,32 @@ export function cannotFly(a: AircraftType, j: JobShape): string | null {
   }
 }
 
+/** A board job must fill at least this percentage of the seats (passengers) or of the hold (cargo) of the aircraft that flies it: a 290-seat airliner does not fly one passenger. */
+export const MIN_LOAD_PCT = 35;
+
+export type JobMisfitCode = 'cannot_fly' | 'load_too_small' | 'job_not_profitable';
+export type JobMisfit = { code: JobMisfitCode; message: string };
+
+/** The net of flying `j` with `a` at the type's standard costs: `settle` on a verified flight, with no realism modifier and no hub discount on the landing fee. */
+export const standardNet = (a: AircraftType, j: JobShape & { payout: number }, destSize: AirportSize): number =>
+  settle({ payout: j.payout, distanceNm: j.distanceNm, aircraft: a, destSize, destIsHub: false, status: 'verified' }).net;
+
+/** null when `a` suits the board job `j`; otherwise why not, with the error code the API refuses it with. It suits when it can fly it (`cannotFly`),
+ *  the load fills at least MIN_LOAD_PCT of what it carries, and the expected net (`standardNet`) is above zero.
+ *  A job that names its aircraft (the Quasar's express jobs, a SimBrief plan) keeps its own rule: it only has to be flyable. */
+export function jobMisfit(a: AircraftType, j: JobShape & { payout: number }, destSize: AirportSize): JobMisfit | null {
+  const why = cannotFly(a, j);
+  if (why) return { code: 'cannot_fly', message: why };
+  if (j.requiredAircraft) return null;
+  const [load, capacity, unit] = j.kind === 'pax' ? [j.pax, a.seats, 'seats'] as const : [j.payloadKg, a.cargoKg, 'kg of cargo'] as const;
+  if (load * 100 < capacity * MIN_LOAD_PCT) return { code: 'load_too_small', message: `${load} of the ${capacity} ${unit} of ${a.icao} is too small a load: a job must fill at least ${Math.ceil((capacity * MIN_LOAD_PCT) / 100)}` };
+  const net = standardNet(a, j, destSize);
+  if (net <= 0) return { code: 'job_not_profitable', message: `${a.icao} would lose ${-net} on this job: it pays ${j.payout}, before fuel, landing fee and maintenance` };
+  return null;
+}
+
+export const jobFits = (a: AircraftType, j: JobShape & { payout: number }, destSize: AirportSize): boolean => jobMisfit(a, j, destSize) === null;
+
 export const blockHours = (a: AircraftType, dist: number): number => dist / a.cruiseKts + TAXI_HOURS;
 /** Fastest believable flight time: 25% above cruise speed (tailwind). Telemetry and manual completion both honour it. */
 export const minFlightHours = (a: AircraftType, dist: number): number => dist / (a.cruiseKts * 1.25);
@@ -352,6 +378,8 @@ export type Job = {
   id: string; source: 'board' | 'simbrief' | 'line'; kind: JobKind; origin: string; destination: string;
   distanceNm: number; payloadKg: number; pax: number; payout: number;
   requiredAircraft?: string; plannedFuelKg?: number; route?: string;
+  /** Ids of the company's aircraft (wherever they stand) that suit this board job (`jobFits`). Set by `GET /jobs` and the first job; absent on SimBrief and line jobs, which any aircraft able to fly them takes. */
+  fits?: number[];
 };
 
 export type Company = {

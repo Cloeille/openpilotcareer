@@ -14,7 +14,7 @@ import { all, get, run, tx, type Db } from './db.ts';
 import { exportDocument, flightsCsv, transactionsCsv } from './export.ts';
 import {
   acceptJob, activeFlight, activeFlightsOfUser, addCustomAircraft, buyAircraft, buyHub, closeUnpaid, companiesOf, companyProfile, completeManually, createCompany, currentSeason,
-  deleteCustomAircraft, finishFlight, flightView, flightsOf, importJob, leaderboard, meView, openBoard, pendingImports, renameCompany, transactionsOf, typeFor,
+  deleteCustomAircraft, finishFlight, fleetTypes, flightView, flightsOf, importJob, leaderboard, meView, openBoard, pendingImports, renameCompany, suitedJobs, transactionsOf, typeFor,
 } from './game.ts';
 import { HttpError, Limiter, NUMERIC_ID, parse } from './http.ts';
 import { registerStart } from './routes-start.ts';
@@ -311,9 +311,10 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
   app.get('/api/v1/jobs', async (req) => {
     const p = user(req);
     const q = parse(z.object({ airport: icaoAirportSchema.optional() }), req.query);
-    const airportCodes = q.airport ? [q.airport] : all<{ location: string }>(db, 'SELECT DISTINCT location FROM aircraft WHERE company_id = ? AND returned_at IS NULL ORDER BY location', p.companyId).map((a) => a.location);
+    const fleet = fleetTypes(db, p.companyId);
+    const airportCodes = q.airport ? [q.airport] : [...new Set(fleet.map((a) => a.location))].sort();
     const at = now();
-    return { jobs: airportCodes.flatMap((icao) => openBoard(db, icao, at, p.companyId)), imported: pendingImports(db, p.companyId, at) };
+    return { jobs: airportCodes.flatMap((icao) => suitedJobs(fleet, openBoard(db, icao, at, p.companyId))), imported: pendingImports(db, p.companyId, at) };
   });
 
   app.post('/api/v1/jobs/import-simbrief', async (req, reply) => {

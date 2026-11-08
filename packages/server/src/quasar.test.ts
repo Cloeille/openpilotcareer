@@ -73,15 +73,17 @@ test('an express job is refused to a C172, flown and paid with a Quasar, and the
   const h = await harness();
   const p = await h.register('quasarpilot');
   const cid = p.me.company.id as number;
-  const jobs = (await h.call('GET', '/api/v1/jobs', { token: p.token })).body.jobs as Job[];
-  const job = express(jobs).sort((a, b) => a.distanceNm - b.distanceNm)[0]!;
+  const listed = async (): Promise<Job[]> => express((await h.call('GET', '/api/v1/jobs', { token: p.token })).body.jobs as Job[]);
+  assert.equal((await listed()).length, 0, 'a company with no Quasar is not offered express jobs');
+  const aircraftId = insertAircraft(h.db, { companyId: cid, icao: 'QASR', hub: 'LFPG', value: aircraftPrice(QASR), ownership: 'owned', at: h.clock.t });
+  const job = (await listed()).sort((a, b) => a.distanceNm - b.distanceNm)[0]!;
   assert.ok(job, 'LFPG is a large airport: its board offers express jobs');
+  assert.deepEqual(job.fits, [aircraftId], 'only the Quasar suits it');
   const fleet = p.me.fleet as { id: number }[];
   const refused = await h.call('POST', `/api/v1/jobs/${job.id}/accept`, { token: p.token, body: { aircraftId: fleet[0]!.id } });
   assert.deepEqual([refused.status, refused.body.error], [422, 'cannot_fly']);
   assert.match(refused.body.message, /requires a QASR/);
 
-  const aircraftId = insertAircraft(h.db, { companyId: cid, icao: 'QASR', hub: 'LFPG', value: aircraftPrice(QASR), ownership: 'owned', at: h.clock.t });
   const accepted = await h.call('POST', `/api/v1/jobs/${job.id}/accept`, { token: p.token, body: { aircraftId } });
   assert.equal(accepted.status, 201, accepted.text);
 

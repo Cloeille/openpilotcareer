@@ -1,4 +1,4 @@
-import { cannotFly, type Job } from '@opc/shared';
+import type { Job } from '@opc/shared';
 import { button, icon, signDirection, signLocation } from '../components.ts';
 import { fmt } from '../format.ts';
 import { t } from '../i18n.ts';
@@ -6,6 +6,7 @@ import { UNVERIFIED_PAY_PCT } from '../onboarding-model.ts';
 import { acceptJob, completeOnboarding, firstJob } from '../api-onboarding.ts';
 import type { FirstJob, Me } from '../onboarding-types.ts';
 import { airportInfo, cityOf } from '../airports.ts';
+import { suits } from '../board.ts';
 import { guarded, hintsOf, obError, titleArea, type StepResult, type Wizard } from '../onboarding-shell.ts';
 import { notify, h } from '../ui.ts';
 import type { Key } from '../messages.ts';
@@ -33,7 +34,7 @@ export async function step6(w: Wizard): Promise<StepResult> {
   let fj: FirstJob | null = null;
   if (aircraft) { try { fj = await firstJob(company.id); } catch { fj = null; } }
   const job: Job | null = fj?.job ?? null;
-  const flier = job ? me.fleet.find((a) => !a.busy && a.location === job.origin && !cannotFly(a.type, job)) ?? null : null;
+  const flier = job ? me.fleet.find((a) => !a.busy && a.location === job.origin && suits(a, job)) ?? null : null;
   const [origin, dest] = job ? await Promise.all([airportInfo(job.origin), airportInfo(job.destination)]) : [null, null];
 
   const cityName = hub ? cityOf(hub) : hubCode;

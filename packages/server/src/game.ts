@@ -4,8 +4,8 @@
 import { randomUUID } from 'node:crypto';
 import {
   HUB_PRICE, MAX_COMPANIES_PER_USER, OVERDRAFT_LIMIT, loanOption, loanPayment, PAX_KG, REJECT_REPUTATION_PENALTY, START_MODES, START_REPUTATION, STARTER_AIRCRAFT, STARTING_BALANCE,
-  EXPRESS_AIRCRAFT, EXPRESS_MAX_NM, EXPRESS_MIN_NM, EXPRESS_PAYLOAD_KG, aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, expressPayout, flightDutyMin, fuelPriceFactor, interruptionsSchema, jobPayout, minFlightHours, presetSetting, rankFor, realismModifiers, realismView, seasonOf, settle,
-  type AircraftType, type Company, type CompanyProfile, type CustomAircraftInput, type FleetAircraft, type Flight,
+  EXPRESS_AIRCRAFT, EXPRESS_MAX_NM, EXPRESS_MIN_NM, EXPRESS_PAYLOAD_KG, aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, expressPayout, flightDutyMin, fuelPriceFactor, interruptionsSchema, jobFits, jobMisfit, jobPayout, minFlightHours, presetSetting, rankFor, realismModifiers, realismView, seasonOf, settle,
+  type AircraftType, type AirportSize, type Company, type CompanyProfile, type CustomAircraftInput, type FleetAircraft, type Flight,
   type Financing, type FlightStatus, type GroupActivity, type Job, type Leaderboard, type LeaderboardRow, type Me, type Ownership, type Personality, type Pilot, type StartMode, type Telemetry, type Transaction,
 } from '@opc/shared';
 import { airports, catalogType } from './catalog.ts';
@@ -300,6 +300,25 @@ export function openBoard(db: Db, icao: string, now: number, companyId?: number)
   return boardFor(origin, window).filter((j) => !taken.has(j.id) && !held.has(j.id));
 }
 
+const destSizeOf = (j: Job): AirportSize => airports.get(j.destination)?.size ?? 'small';
+
+/** The aircraft of a company with the facts a job fits are decided on. */
+export type FleetTypes = { id: number; location: string; type: AircraftType }[];
+export const fleetTypes = (db: Db, companyId: number): FleetTypes =>
+  all<AircraftRow>(db, 'SELECT * FROM aircraft WHERE company_id = ? AND returned_at IS NULL ORDER BY id', companyId).map((a) => ({ id: a.id, location: a.location, type: typeFor(db, companyId, a.icao) }));
+
+/** `job` with `fits`: the ids of the aircraft of the company (wherever they stand) that suit it (`jobFits`). */
+export const withFits = (fleet: FleetTypes, job: Job): Job => ({ ...job, fits: fleet.filter((a) => jobFits(a.type, job, destSizeOf(job))).map((a) => a.id) });
+
+/** What a company is offered: the board `jobs` that suit at least one of its aircraft standing at their origin (a widebody is not offered one passenger), each with its `fits`.
+ *  A board the company has no aircraft at (`GET /jobs?airport=` to plan a ferry) is judged against its whole fleet. */
+export function suitedJobs(fleet: FleetTypes, jobs: Job[]): Job[] {
+  return jobs.map((j) => withFits(fleet, j)).filter((j) => {
+    const here = fleet.filter((a) => a.location === j.origin);
+    return (here.length > 0 ? here : fleet).some((a) => j.fits!.includes(a.id));
+  });
+}
+
 export function pendingImports(db: Db, companyId: number, now: number): Job[] {
   return all<CustomJobRow>(db, `SELECT j.* FROM custom_jobs j WHERE j.company_id = ? AND COALESCE(j.expires_at, j.created_at + ?) > ? AND NOT EXISTS (SELECT 1 FROM job_claims c WHERE c.job_id = j.id) ORDER BY j.created_at DESC`, companyId, IMPORT_TTL_MS, now).map(jobView);
 }
@@ -363,10 +382,14 @@ export function startFlight(db: Db, companyId: number, job: Job, aircraft: Aircr
   return get<FlightRow>(db, 'SELECT * FROM flights WHERE id = ?', id)!;
 }
 
+/** A player takes a job: a board job must also suit the aircraft (`jobMisfit`), as the list `GET /jobs` only offers those. AI companies go through `startFlight` directly: they may fly any job to reposition. */
 export function acceptJob(db: Db, companyId: number, jobId: string, aircraftId: number, now: number): FlightRow {
   const aircraft = get<AircraftRow>(db, 'SELECT * FROM aircraft WHERE id = ? AND company_id = ? AND returned_at IS NULL', aircraftId, companyId);
   if (!aircraft) throw new HttpError(404, 'aircraft_not_found', 'aircraft not found');
-  return startFlight(db, companyId, resolveJob(db, companyId, jobId, now), aircraft, now);
+  const job = resolveJob(db, companyId, jobId, now);
+  const misfit = job.source === 'board' ? jobMisfit(typeFor(db, companyId, aircraft.icao), job, destSizeOf(job)) : null;
+  if (misfit) throw new HttpError(422, misfit.code, misfit.message);
+  return startFlight(db, companyId, job, aircraft, now);
 }
 
 /** An active flight of one of the player's companies; with `companyId`, of that company only (what a session acting as it may touch). */

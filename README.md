@@ -93,7 +93,7 @@ Errors are `{ "error": "<code>", "message": "<text>" }`. Session routes take `Au
 | Your data | `GET /me/export?format=json\|flights.csv\|transactions.csv`, `/me/flights`, `/me/history` (flights and line legs), `/me/transactions` |
 | API keys | `GET`/`POST /me/api-keys`, `DELETE /me/api-keys/:id` |
 | Active company | `POST /me/hubs`, `/me/fleet`, `/me/custom-aircraft`; `DELETE /me/custom-aircraft/:icao` |
-| Jobs | `GET /jobs[?airport=]`, `POST /jobs/:id/accept`, `POST /jobs/import-simbrief` |
+| Jobs | `GET /jobs[?airport=]` (board jobs that suit an aircraft of yours standing at their origin, each with `fits`: your aircraft ids it suits; an airport where none of your aircraft stands is judged against your whole fleet; SimBrief imports are never filtered), `POST /jobs/:id/accept` (a board job the aircraft does not suit is `422 load_too_small` or `job_not_profitable`), `POST /jobs/import-simbrief` |
 | Flights | `POST /flights/:id/complete` (manual, unverified), `/flights/:id/cancel` |
 | Verification | `GET /flights/active`, `POST /flights/:id/telemetry-verify` (API key): see [docs/telemetry-api.md](docs/telemetry-api.md) |
 | Competition | `GET /leaderboard[?season=YYYY-MM]`, `GET /companies/:id` |

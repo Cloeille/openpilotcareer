@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
-import { cannotFly, fuelBurnKg, type Telemetry, type Job } from '@opc/shared';
+import { fuelBurnKg, type Telemetry, type Job } from '@opc/shared';
 import { buildApp, type AppOptions } from './app.ts';
 import { catalogType } from './catalog.ts';
-import { openDb } from './db.ts';
+import { get, openDb } from './db.ts';
 import { JOB_WINDOW_MS } from './board.ts';
 
 const T0 = Date.UTC(2026, 10, 4, 12, 0, 0);
@@ -26,15 +26,16 @@ export async function harness(opts: Partial<AppOptions> = {}) {
     assert.equal(r.status, 201, r.text);
     return { token: r.body.token as string, me: r.body, name };
   };
-  /** Advance windows until a starter C172 of the (active) company has a job it can fly; returns it. */
+  /** Advance windows until the board offers a job that suits the aircraft where it stands (the C172 the goodReport flies); returns it. */
   const flyableJob = async (token: string, aircraftId: number, company?: number): Promise<Job> => {
+    const where = get<{ location: string }>(db, 'SELECT location FROM aircraft WHERE id = ?', aircraftId)?.location;
     for (let i = 0; i < 40; i++) {
       const jobs = (await call('GET', '/api/v1/jobs', { token, ...(company === undefined ? {} : { company }) })).body.jobs as Job[];
-      const j = jobs.find((x) => !cannotFly(catalogType('C172'), x));
+      const j = jobs.find((x) => x.origin === where && x.fits?.includes(aircraftId));
       if (j) return j;
       clock.t += JOB_WINDOW_MS;
     }
-    throw new Error(`no C172 job found for aircraft ${aircraftId}`);
+    throw new Error(`no job suits aircraft ${aircraftId}`);
   };
   const apiKey = async (token: string) => (await call('POST', '/api/v1/me/api-keys', { token, body: { label: 'sim' } })).body.key as string;
   /** Telemetry that passes every plausibility check for `job` flown in a C172. */

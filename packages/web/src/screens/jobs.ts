@@ -76,11 +76,13 @@ export async function jobs(ctx: Ctx): Promise<Screen> {
   const empty = (): HTMLElement => {
     const noAircraft = idle.length === 0;
     const card = (title: string, sub: string, action: HTMLElement): HTMLElement => h('div', { class: 'next-action' }, h('div', { class: 'col tight' }, h('span', { class: 'strong' }, title), h('span', { class: 'dim small' }, sub)), action);
+    const noneFit = !noAircraft && fleetBoard.length === 0;
     return h('div', { class: 'empty-state' },
-      h('div', { class: 'col tight' }, h('h2', { class: 'empty-title' }, noAircraft ? t('jobs.empty.noAircraft.title') : t('jobs.empty.title')),
-        h('p', { class: 'muted' }, noAircraft ? t('jobs.empty.noAircraft.reason') : t('jobs.empty.reason', { total: fleetBoard.length, hidden: fleetBoard.length - shown.length }))),
+      h('div', { class: 'col tight' }, h('h2', { class: 'empty-title' }, noAircraft ? t('jobs.empty.noAircraft.title') : noneFit ? t('jobs.empty.noFit.title', { airports: idleAirports.join(', ') }) : t('jobs.empty.title')),
+        h('p', { class: 'muted' }, noAircraft ? t('jobs.empty.noAircraft.reason') : noneFit ? t('jobs.empty.noFit.reason') : t('jobs.empty.reason', { total: fleetBoard.length, hidden: fleetBoard.length - shown.length }))),
       h('div', { class: 'col tight' },
-        noAircraft ? null : card(t('jobs.empty.reset'), t('jobs.empty.resetSub'), button(t('jobs.empty.reset'), { variant: 'secondary', onclick: () => set({ ...DEFAULT_FILTERS, fleetOnly: false }) })),
+        noneFit ? card(t('jobs.empty.move'), t('jobs.empty.moveSub'), button(t('jobs.empty.move'), { variant: 'secondary', icon: 'route', onclick: () => go('#fleet') })) : null,
+        noAircraft || noneFit ? null : card(t('jobs.empty.reset'), t('jobs.empty.resetSub'), button(t('jobs.empty.reset'), { variant: 'secondary', onclick: () => set({ ...DEFAULT_FILTERS, fleetOnly: false }) })),
         card(t('jobs.empty.buy'), t('jobs.empty.buySub'), button(t('jobs.empty.buy'), { variant: 'secondary', icon: 'plus', onclick: () => go('#catalogue') })),
         card(t('jobs.empty.simbrief'), t('jobs.empty.simbriefSub'), button(t('jobs.simbrief'), { variant: 'secondary', icon: 'file-down', onclick: () => go('#simbrief') }))),
       h('p', { class: 'dim small' }, t('jobs.empty.wave', { time: fm.zulu(nextBoardWave(Date.now())), left: fm.elapsed(nextBoardWave(Date.now()) - Date.now()) })));

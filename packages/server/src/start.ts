@@ -1,14 +1,14 @@
 // OpenHangar v2, lot START: the operations behind onboarding, hub suggestions, first-job reservation and the realism hooks.
 // Routes live in routes-start.ts; money goes through game.ts `post`, like everything else.
 import {
-  FIRST_JOB_RESERVATION_MS, HUB_PARKING_MONTHLY, START_MODES, START_MODE_HUB_SIZES, cannotFly, presetSetting, realismModifiers, seasonOf, settle, withToggles,
+  FIRST_JOB_RESERVATION_MS, HUB_PARKING_MONTHLY, START_MODES, START_MODE_HUB_SIZES, jobFits, presetSetting, realismModifiers, seasonOf, settle, withToggles,
   type Airport, type CreateCompanyStart, type HubNoteKey, type HubSuggestion, type FirstJob, type Job, type Onboarding, type OnboardingStep, type OnboardingUpdate,
   type Realism, type RealismToggles, type StartMode,
 } from '@opc/shared';
 import { boardFor } from './board.ts';
 import { airports, searchAirports } from './catalog.ts';
 import { all, get, run, type Db } from './db.ts';
-import { createCompany, hasSubsidiaries, openBoard, post, typeFor, type AircraftRow } from './game.ts';
+import { createCompany, fleetTypes, hasSubsidiaries, openBoard, post, typeFor, withFits, type AircraftRow } from './game.ts';
 import { HttpError } from './http.ts';
 import { realismOf, realismSettingOf, saveRealism } from './realism.ts';
 import { release, reservationOf, reserve } from './reservations.ts';
@@ -175,7 +175,7 @@ export function firstJob(db: Db, companyId: number, now: number): FirstJob {
   const held = reservationOf(db, companyId, now);
   if (held) {
     const job = boardJobById(held.jobId);
-    if (job) return { job, reservedUntil: held.reservedUntil };
+    if (job) return { job: withFits(fleetTypes(db, companyId), job), reservedUntil: held.reservedUntil };
     release(db, companyId, held.jobId);
   }
   const fleet = all<AircraftRow & { busy: number }>(db, `SELECT a.*, EXISTS (SELECT 1 FROM flights f WHERE f.aircraft_id = a.id AND f.status = 'active') AS busy FROM aircraft a WHERE a.company_id = ? ORDER BY a.id`, companyId);
@@ -186,16 +186,17 @@ export function firstJob(db: Db, companyId: number, now: number): FirstJob {
     const ready = fleet.filter((a) => a.location === hub && !a.busy).map((a) => typeFor(db, companyId, a.icao));
     if (ready.length === 0) continue;
     for (const job of openBoard(db, hub, now, companyId)) {
-      const type = ready.find((t) => !cannotFly(t, job));
+      const destSize = airports.get(job.destination)?.size ?? 'small';
+      const type = ready.find((t) => jobFits(t, job, destSize));
       if (!type) continue;
-      const net = settle({ payout: job.payout, distanceNm: job.distanceNm, aircraft: type, status: 'verified', destSize: airports.get(job.destination)?.size ?? 'small', destIsHub: hubs.includes(job.destination), ...realismModifiers(realismSettingOf(db, companyId).toggles) }).net;
+      const net = settle({ payout: job.payout, distanceNm: job.distanceNm, aircraft: type, status: 'verified', destSize, destIsHub: hubs.includes(job.destination), ...realismModifiers(realismSettingOf(db, companyId).toggles) }).net;
       if (net > 0 && (!best || net > best.net || (net === best.net && job.id < best.job.id))) best = { job, net };
     }
   }
   if (!best) throw new HttpError(409, 'no_flyable_job', 'no job at your hub fits your fleet right now; try again after the next board refresh');
   const reservedUntil = now + FIRST_JOB_RESERVATION_MS;
   reserve(db, companyId, best.job.id, reservedUntil);
-  return { job: best.job, reservedUntil };
+  return { job: withFits(fleetTypes(db, companyId), best.job), reservedUntil };
 }
 
 function boardJobById(id: string): Job | null {

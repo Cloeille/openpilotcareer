@@ -5,17 +5,20 @@ import { airportList, airports } from './catalog.ts';
 export const JOB_WINDOW_MS = 6 * 3_600_000;
 export const windowOf = (ms: number): number => Math.floor(ms / JOB_WINDOW_MS);
 
-const JOBS_PER_BOARD: Record<AirportSize, number> = { large: 18, medium: 12, small: 8 };
+const JOBS_PER_BOARD: Record<AirportSize, number> = { large: 24, medium: 12, small: 8 };
 const MAX_RANGE_NM: Record<AirportSize, number> = { large: 3000, medium: 1500, small: 600 };
 
-/** Every board mixes load classes so any aircraft finds work: light (C172), regional (turboprop/regional jet), heavy (airliner). */
+/** Every board mixes load classes so any aircraft finds work: light (C172), regional (turboprop/regional jet), narrowbody, widebody. Only a job that fills enough of an aircraft is offered to it
+ *  (`jobMisfit`), so each class serves the aircraft of its own size; the load ranges overlap so that no size falls between two classes. */
 const TIERS = [
   { pax: [1, 4], cargoKg: [30, 200], nm: [30, 450] },
   { pax: [5, 70], cargoKg: [200, 3_000], nm: [100, 1_500] },
-  { pax: [70, 320], cargoKg: [3_000, 20_000], nm: [300, 3_000] },
+  { pax: [70, 200], cargoKg: [3_000, 9_000], nm: [300, 3_000] },
+  { pax: [150, 400], cargoKg: [8_000, 25_000], nm: [500, 3_000] },
 ] as const;
-/** Smaller airports only offer the lighter classes. */
-const TIERS_AT: Record<AirportSize, number> = { large: 3, medium: 2, small: 1 };
+/** The tiers a board cycles through, by airport size: small airports only offer light jobs, medium ones light and regional. Large airports are where airliners stand:
+ *  half of their jobs are for narrowbodies and widebodies, so a 290-seat aircraft finds at least about 4 jobs that fit it per window. */
+const TIER_PATTERN: Record<AirportSize, readonly number[]> = { large: [0, 1, 2, 3], medium: [0, 1], small: [0] };
 const DEST_WEIGHT: Record<AirportSize, number> = { large: 4, medium: 2, small: 1 };
 /** Spaceplane express jobs (a Quasar only) are offered at large airports, the only runways it uses, between large airports; a few per board keeps them rare. */
 const EXPRESS_PER_BOARD = 2;
@@ -85,7 +88,8 @@ export function boardFor(origin: Airport, window: number): Job[] {
   const cands = candidatesFor(origin);
   const jobs: Job[] = [];
   for (let i = 0; cands.length > 0 && i < JOBS_PER_BOARD[origin.size]; i++) {
-    const tier = TIERS[i % TIERS_AT[origin.size]]!;
+    const pattern = TIER_PATTERN[origin.size];
+    const tier = TIERS[pattern[i % pattern.length]!]!;
     // Target distance is log-uniform within the class, so short hops are as common as long hauls.
     const reach = cands[cands.length - 1]!.d;
     const lo = Math.min(tier.nm[0], reach), hi = Math.max(lo + 1, Math.min(tier.nm[1], reach));
