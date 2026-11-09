@@ -1,5 +1,6 @@
 import type { Me } from '@opc/shared';
-import { brandBlock, icon, keycap } from './components.ts';
+import { brandBlock, icon } from './components.ts';
+import { hintItem, keyButton } from './hint-bar.ts';
 import { fmt } from './format.ts';
 import { getLang, t, tp, type Lang } from './i18n.ts';
 import { COUNT_MS, countValue, motionOK } from './motion.ts';
@@ -77,7 +78,7 @@ function build(initial: HudData, lang: Lang) {
   const tabLinks = new Map<Tab, HTMLAnchorElement>(TABS.map((tab) => [tab, h('a', { href: `#${tab}` }, t(`tab.${tab}`), tabExtra(tab))]));
   const underline = h('span', { class: 'tab-underline', 'aria-hidden': 'true' });
   const nav = h('nav', { class: 'hud-tabs', 'aria-label': t('nav.main') },
-    h('span', { title: t('hud.prevTab') }, keycap('Q')), [...tabLinks.values()], h('span', { title: t('hud.nextTab') }, keycap('E')), underline);
+    keyButton('Q', t('hud.prevTab')), [...tabLinks.values()], keyButton('E', t('hud.nextTab')), underline);
 
   const ringProgress = svgCircle('progress', { 'stroke-dasharray': ringDash(0), 'stroke-linecap': 'round' });
   const ringSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -160,7 +161,7 @@ function build(initial: HudData, lang: Lang) {
     const hintsKey = hintList.map((x) => `${x.key}=${x.label}`).join('|');
     if (hintsKey !== keys.hints) {
       keys.hints = hintsKey;
-      hintsEl.replaceChildren(...hintList.map((x) => h('span', { class: 'hint' }, keycap(x.key), x.label)));
+      hintsEl.replaceChildren(...hintList.map(hintItem));
     }
   };
   update(initial, []);

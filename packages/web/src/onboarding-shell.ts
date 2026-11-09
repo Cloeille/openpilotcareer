@@ -1,5 +1,6 @@
 import { PRODUCT_NAME } from './brand.ts';
-import { brandBlock, icon, keycap } from './components.ts';
+import { brandBlock, icon } from './components.ts';
+import { hintItem } from './hint-bar.ts';
 import { ApiError } from './errors.ts';
 import { errorText } from './error-text.ts';
 import { fmt } from './format.ts';
@@ -110,7 +111,7 @@ export function obBottom(hints: Hint[], probe: BridgeStatus | null, now = Date.n
     h('div', { class: 'hud-status' },
       h('span', { role: 'status' }, dot, t('ob.bridge.label'), h('span', { class: 'dim', 'aria-hidden': 'true' }, '·'), value),
       h('span', null, icon('calendar-clock', 14), t('hud.season', { month }), h('span', { class: 'dim' }, daysLeft === 0 ? t('hud.lastDay') : tp('hud.daysLeft', daysLeft)))),
-    h('div', { class: 'hints' }, hints.map((x) => h('span', { class: 'hint' }, keycap(x.key), x.label))));
+    h('div', { class: 'hints' }, hints.map(hintItem)));
   return { el, setBridge: paint };
 }
 

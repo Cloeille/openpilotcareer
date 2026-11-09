@@ -99,9 +99,15 @@ a { color: inherit; }
 .hud-status .dim { color: var(--text-tertiary); }
 .hints { display: flex; align-items: center; gap: 22px; }
 .hint { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .02em; }
+.hint-btn { background: none; border: 0; padding: 0; font: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; }
+.hint-btn:hover { color: var(--text-primary); }
+.hint-keys { display: inline-flex; gap: 3px; }
 
 /* ---------------------------------------------------------------- Keycap, Button */
 .keycap { display: inline-flex; align-items: center; height: 22px; padding: 0 7px; background: #FFFFFF0F; border: 1px solid #FFFFFF4D; border-bottom-width: 2px; border-radius: 3px; font: 700 11px var(--mono); color: var(--text-primary); white-space: nowrap; }
+.hint-key { cursor: pointer; text-transform: inherit; }
+.hint-key:hover, .hint-btn:hover .keycap { background: var(--surface-hover); }
+.hint-key:active, .hint-btn:active .keycap { border-bottom-width: 1px; transform: translateY(1px); }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 42px; padding: 0 18px; border-radius: 3px; font-size: 15px; font-weight: 500; cursor: pointer; white-space: nowrap; border: 1px solid transparent; background: transparent; color: var(--text-primary); }
 .btn .icon { flex: none; }
 .btn.primary { background: var(--btn-primary); color: var(--on-btn-primary); font-weight: 600; padding: 0 20px; }
