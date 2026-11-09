@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { EXPRESS_AIRCRAFT, EXPRESS_MIN_NM, aircraftPrice, aircraftValue, blockHours, cannotFly, cannotFlyCause, expressPayout, fuelBurnKg, jobPayout, settle, type Job } from '@opc/shared';
+import { EXPRESS_AIRCRAFT, EXPRESS_MAX_NM, EXPRESS_MIN_NM, aircraftPrice, aircraftValue, blockHours, cannotFly, cannotFlyCause, expressPayout, fuelBurnKg, jobMisfit, jobPayout, settle, standardNet, type Job } from '@opc/shared';
 import { boardFor } from './board.ts';
 import { insertAircraft } from './fleet-extras.ts';
 import { airportList, aircraftTypes, catalogType, searchAircraftTypes } from './catalog.ts';
@@ -20,18 +20,38 @@ test('the catalogue has the curated Quasar, not a derived one', () => {
   assert.equal(searchAircraftTypes('quasar')[0]?.icao, 'QASR');
 });
 
-test('the Quasar costs a fortune to buy and to fly, but a flight cannot lose money', () => {
+test('the Quasar costs a fortune to buy, burns no fuel, and its flight hour costs what a large widebody flight hour does', () => {
   assert.deepEqual([aircraftPrice(QASR), aircraftValue(QASR)], [10_000_000, 8_000_000], '2 t x 5000 kts, like every type; resale is 80 %');
   const hours = blockHours(QASR, 8000);
   assert.ok(hours > 1.5 && hours < 2.5, `block hours ${hours}`);
   const s = settle({ payout: 0, distanceNm: 8000, aircraft: QASR, status: 'verified', destSize: 'large', destIsHub: false });
-  assert.ok(s.fuelCost > 20_000 && s.maintenance > 10_000 && Number.isFinite(s.net), JSON.stringify(s));
+  assert.equal(s.fuelCost, 0, 'fuel regeneration');
+  const perHour = (icao: string): number => settle({ payout: 0, distanceNm: 1000, aircraft: catalogType(icao), status: 'verified', destSize: 'large', destIsHub: false, blockHours: 1 }).maintenance;
+  assert.ok(perHour('QASR') > 0.8 * perHour('A35K') && perHour('QASR') < 1.2 * perHour('B77W'), `Quasar ${perHour('QASR')} / h, A35K ${perHour('A35K')}, B77W ${perHour('B77W')}`);
   for (const j of express(sampleBoards())) assert.ok(netOf(j) > 0, `${j.distanceNm} nm nets ${netOf(j)}`);
+});
+
+test('an express job never loses money: standard net, and the net at the 660 kt players really fly, grow with the distance', () => {
+  const job = (distanceNm: number): Job => ({ id: 'x', source: 'board', kind: 'cargo', origin: 'LFPG', destination: 'KJFK', distanceNm, payloadKg: 2000, pax: 0, payout: expressPayout(distanceNm), requiredAircraft: EXPRESS_AIRCRAFT });
+  const real = (d: number, landingFpm = -300): number => settle({ payout: expressPayout(d), distanceNm: d, aircraft: QASR, status: 'verified', destSize: 'large', destIsHub: false, blockHours: d / 660 + 0.3, landingFpm }).net;
+  let last = 0;
+  for (const d of [EXPRESS_MIN_NM, 300, 1010, 3000, 8000]) {
+    const std = standardNet(QASR, job(d), 'large');
+    assert.ok(std > 0 && real(d) > 0 && real(d, -950) > 0, `${d} nm: standard ${std}, real ${real(d)}, with a hard landing ${real(d, -950)}`);
+    assert.ok(std > last, 'the net grows with the distance');
+    assert.equal(jobMisfit(QASR, job(d), 'large'), null, 'express jobs obey the same net > 0 rule as any board job');
+    last = std;
+  }
+  assert.ok(standardNet(QASR, job(300), 'large') >= 10_000, `300 nm nets ${standardNet(QASR, job(300), 'large')}`);
+  assert.ok(real(300) >= 10_000, `a 300 nm hop nets ${real(300)} at 660 kt`);
+  assert.ok(real(300, -950) >= 7_000, 'and still pays well after a hard landing, which doubles the upkeep');
+  assert.equal(jobMisfit(QASR, { ...job(300), payout: 1_000 }, 'large')?.code, 'job_not_profitable', 'the exemption is gone: a losing express job is a misfit');
+  for (const j of express(sampleBoards())) assert.ok(standardNet(QASR, j, 'large') >= 9_000 && j.distanceNm <= EXPRESS_MAX_NM, `${j.distanceNm} nm`);
 });
 
 test('express payout: a short hop pays about 10 000, a long one the premium of a widebody long-haul flight', () => {
   const short = expressPayout(300), long = expressPayout(5000);
-  assert.ok(short >= 8_000 && short <= 12_000, `300 nm pays ${short}`);
+  assert.ok(short >= 12_000 && short <= 17_000, `300 nm pays ${short}: 10 k net after the 2 250 landing fee and the upkeep`);
   const b77w = settle({ payout: jobPayout('pax', 3000, 320 * 100), distanceNm: 3000, aircraft: catalogType('B77W'), status: 'verified', destSize: 'large', destIsHub: false }).net;
   const longNet = settle({ payout: long, distanceNm: 5000, aircraft: QASR, status: 'verified', destSize: 'large', destIsHub: false }).net;
   assert.ok(longNet > 0.8 * b77w && longNet < 1.2 * b77w, `a 5 000 nm express nets ${longNet}, a 777 long-haul ${b77w}`);
@@ -69,6 +89,30 @@ test('no other type can take an express job', () => {
   assert.equal(cannotFly(QASR, { ...job, distanceNm: 8000 }), null);
 });
 
+test('a Quasar flight 5x slower than expected, with a fuel burn of 5005 kg and a -700 fpm landing, is verified: no fuel, no hard landing, no reputation lost', async () => {
+  const h = await harness();
+  const p = await h.register('slowquasar');
+  const cid = p.me.company.id as number;
+  const aircraftId = insertAircraft(h.db, { companyId: cid, icao: 'QASR', hub: 'LFPG', value: aircraftPrice(QASR), ownership: 'owned', at: h.clock.t });
+  const job = (express((await h.call('GET', '/api/v1/jobs', { token: p.token })).body.jobs as Job[])).sort((a, b) => a.distanceNm - b.distanceNm)[0]!;
+  const accepted = await h.call('POST', `/api/v1/jobs/${job.id}/accept`, { token: p.token, body: { aircraftId } });
+  assert.equal(accepted.status, 201, accepted.text);
+  const reputation = (): number => (h.db.prepare('SELECT reputation FROM companies WHERE id = ?').get(cid) as { reputation: number }).reputation;
+  const before = reputation();
+  const key = await h.apiKey(p.token);
+  const takeoff = h.clock.t + 60_000, landed = takeoff + 5 * (job.distanceNm / 5000 + 0.1) * 3_600_000;
+  h.clock.t = landed + 60_000;
+  const r = await h.call('POST', `/api/v1/flights/${accepted.body.id}/telemetry-verify`, { token: key, body: {
+    takeoffAt: new Date(takeoff).toISOString(), landedAt: new Date(landed).toISOString(), departureIcao: job.origin, arrivalIcao: job.destination, aircraftIcao: 'QASR',
+    payloadKg: 2000, fuelUsedKg: 5005, landingFpm: -700, distanceNm: job.distanceNm + 2, source: 'simconnect',
+  } });
+  assert.equal(r.body.verification, 'verified', r.text);
+  assert.equal(r.body.flight.fuelCost, 0);
+  assert.equal(r.body.flight.landing.hard, false, '-700 fpm is not hard for a spaceplane');
+  assert.ok(reputation() >= before, 'a completed flight never lowers reputation');
+  assert.ok(r.body.flight.net > 0);
+});
+
 test('an express job is refused to a C172, flown and paid with a Quasar, and the designator QASR cannot be redefined', async () => {
   const h = await harness();
   const p = await h.register('quasarpilot');
@@ -96,7 +140,9 @@ test('an express job is refused to a C172, flown and paid with a Quasar, and the
   } });
   assert.equal(r.body.verification, 'verified', r.text);
   assert.equal(r.body.flight.revenue, job.payout);
+  assert.equal(r.body.flight.fuelCost, 0);
   assert.ok(r.body.flight.net > 0);
+  assert.deepEqual([r.body.flight.hardLandingFpm, r.body.flight.fuelRegenerated, r.body.flight.landing], [900, true, { fpm: -200, hard: false }]);
 
   const def = { icao: 'QASR', name: 'Fake', category: 'piston-single', engines: 1, wtc: 'L', seats: 2, cargoKg: 20, cruiseKts: 90, rangeNm: 300 };
   assert.equal((await h.call('POST', '/api/v1/me/custom-aircraft', { token: p.token, body: def })).status, 409);

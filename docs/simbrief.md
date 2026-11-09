@@ -140,7 +140,7 @@ What the server computes itself, not from the OFP:
 - **`kind`**: `pax` when `pax_count_actual > 0`, otherwise `cargo`.
 - **`payloadKg`** for a `pax` job is `pax × 100 kg` (`PAX_KG`), **not** SimBrief's payload. SimBrief's `weights.payload` is the *total* load. In the one plan I inspected it equalled pax weight + bag weight + freight (176 × 185 + 176 × 35 + 5 271 = 43 991 lb). So on a mixed passenger + freight plan the freight is dropped. This is intentional (`importJob` comment: "pax jobs pay for pax × PAX_KG only").
 - **`payout`**: `round(distance × payloadKg × rate)` with the same `jobRate` as board jobs.
-- **Quasar with no load**: a `QASR` plan with 0 passengers and 0 payload is an express job: `payloadKg` is `EXPRESS_PAYLOAD_KG` (2 000 kg) and the payout is `expressPayout(distance)` when the distance is within the board's express range (200–8 000 nm), else the regular cargo payout of 2 000 kg. A `QASR` plan that carries a load keeps it.
+- **Quasar with no load**: a `QASR` plan with 0 passengers and 0 payload is an express job: `payloadKg` is `EXPRESS_PAYLOAD_KG` (2 000 kg) and the payout is `expressPayout(distance)` when the distance is within the board's express range (200–8 000 nm), else the regular cargo payout of 2 000 kg. A `QASR` plan that carries a load keeps it. The Quasar regenerates its fuel, so its flights cost none; the express payout is set so a flight is never a loss (`standardNet > 0` at every distance of the range).
 - **`id`**: `sb-` + random UUID. Importing the same plan twice creates two jobs (no de-duplication).
 
 ## Lifecycle and limits

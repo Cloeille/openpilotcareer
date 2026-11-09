@@ -57,7 +57,7 @@ Content-Type: application/json
 | `distanceNm` | number ≥ 0 | Distance flown |
 | `source` | `"simconnect"` or `"manual"` | Where the data came from |
 | `flags` | optional array of up to 16 names (`a-z`, `0-9`, `_`, max 40 chars) | Anti-cheat flags the client raised during the flight: `slew_detected`, `time_acceleration_above_1x`, `teleport_jump_over_50nm`, `long_pause`, `reload_after_crash`. Always send them, never decide yourself: any flag rejects the flight (unless the server has anti-cheat off). `long_pause` alone is tolerated by companies with pause tolerance; `reload_after_crash` never is. Stored with the report |
-| `interruptions` | optional `{ reloads, simRestarts, downtimeMs }`: integers ≥ 0, counts ≤ 1 000, `downtimeMs` ≤ 7 days | Reloads of an earlier save and simulator restarts (game crashes) the client saw and **allowed**, and how long the simulator was away. Send it whenever one happened; bridges that predate it omit it. Not a flag: nothing is rejected for it, pay is unchanged, the flight detail shows it. The downtime is subtracted from the block time for the "too long" check only |
+| `interruptions` | optional `{ reloads, simRestarts, downtimeMs }`: integers ≥ 0, counts ≤ 1 000, `downtimeMs` ≤ 7 days | Reloads of an earlier save and simulator restarts (game crashes) the client saw and **allowed**, and how long the simulator was away. Send it whenever one happened; bridges that predate it omit it. Not a flag: nothing is rejected for it, pay is unchanged, the flight detail shows it. |
 
 Unknown fields are ignored; wrong types or missing fields are a `400`.
 
@@ -68,10 +68,10 @@ All must pass, otherwise the flight is **rejected**. Checks 1-3 tie the report t
 1. `departureIcao` / `arrivalIcao` equal the job's origin and destination.
 2. `aircraftIcao` equals the aircraft assigned to the flight.
 3. `landedAt` is after `takeoffAt`, not in the future (5 min clock skew allowed), and `takeoffAt` is not before the job was accepted (5 min skew).
-4. *(anti-cheat)* Duration is plausible for the distance and the aircraft's cruise speed: not faster than 125 % of cruise, not slower than 40 % of cruise plus one hour. For the "slower than" bound only, `interruptions.downtimeMs` is subtracted from the duration, so a game crash and restart is not rejected as a slow flight; the duration used for pay and for the "faster than" bound is the real one.
+4. *(anti-cheat)* Duration is plausible for the distance and the aircraft's cruise speed: not faster than 125 % of cruise. **There is no upper bound: a flight is never rejected for being too long or too slow** (a pause, a crash and a restart, a detour); pay uses the real block time.
 5. *(anti-cheat)* `distanceNm` is between 85 % and 2× (+20 nm) of the job distance.
 6. *(anti-cheat)* `payloadKg` is at least 90 % of the job payload.
-7. *(anti-cheat)* `fuelUsedKg` is between 25 % and 300 % of the aircraft type's expected burn.
+7. *(anti-cheat)* `fuelUsedKg` is between 25 % and 300 % of the aircraft type's expected burn. Skipped for an aircraft that regenerates its own fuel (the Quasar): whatever it reports, no fuel check can reject the flight, and the flight costs no fuel.
 8. *(anti-cheat)* `|landingFpm|` ≤ 1500.
 9. *(anti-cheat)* `flags` is empty or absent.
 
@@ -91,7 +91,7 @@ The simulator can crash, and an aircraft can bug out, so the client **allows** r
 
 | `verification` | `flight.status` | Effect |
 |---|---|---|
-| `verified` | `verified` | Paid in full. Measured fuel, block time and landing rate replace the estimates. Reputation up (down on a hard landing, ≥ 600 fpm, which also doubles maintenance). |
+| `verified` | `verified` | Paid in full. Measured fuel, block time and landing rate replace the estimates. Reputation up, never down: a hard landing (≥ 600 fpm; ≥ 900 fpm for a spaceplane such as the Quasar, `hardLandingFpm` in `packages/shared`) doubles the upkeep and cancels the flight's reputation gain (delta 0). |
 | `unverified` | `unverified` | `source: "manual"` passes the same checks but is never trusted: paid at **60 %** (`MANUAL_PAY_FACTOR` in `packages/shared`), costs use the type's estimates, small reputation gain. |
 | `rejected` | `rejected` | Unpaid. `reason` says which check failed. Reputation −2. The job stays claimed, so a failed flight cannot be retried. |
 

@@ -65,7 +65,7 @@ test('settle: pay and reputation modifiers scale revenue and the reputation gain
   assert.equal(settle({ ...base, payModifierPct: -5 }).revenue, 9_500);
   assert.equal(settle({ ...base, status: 'unverified', payModifierPct: 10 }).revenue, Math.round(10_000 * 0.6 * 1.1));
   const landing = settle({ ...base, landingFpm: -900, repModifierPct: 30 });
-  assert.ok(Math.abs(landing.reputationDelta - (0.13 - 1.5)) < 1e-9, 'the hard-landing penalty is not scaled');
+  assert.equal(landing.reputationDelta, 0, 'a hard landing cancels the gain; it never goes below zero');
 });
 
 test('settle: fuelPriceFactor multiplies the fuel cost', () => {

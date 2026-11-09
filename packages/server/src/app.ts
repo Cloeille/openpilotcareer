@@ -330,30 +330,30 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
     const b = parse(acceptJobSchema, req.body);
     const jobId = String((req.params as { id: string }).id);
     const f = tx(db, () => acceptJob(db, p.companyId, jobId, b.aircraftId, now()));
-    return reply.status(201).send(flightView(f));
+    return reply.status(201).send(flightView(db, f));
   });
 
   app.get('/api/v1/me/flights', async (req) => {
     const q = parse(flightListQuerySchema, req.query);
-    return flightsOf(db, user(req).companyId, q.limit, q.before, q.status).map(flightView);
+    return flightsOf(db, user(req).companyId, q.limit, q.before, q.status).map((r) => flightView(db, r));
   });
 
   app.post('/api/v1/flights/:id/cancel', async (req) => {
     const p = user(req);
-    return flightView(tx(db, () => closeUnpaid(db, activeFlight(db, idParam(req), p.userId, p.companyId), 'cancelled', now())));
+    return flightView(db, tx(db, () => closeUnpaid(db, activeFlight(db, idParam(req), p.userId, p.companyId), 'cancelled', now())));
   });
 
   // Manual completion: no telemetry, so the flight is unverified (reduced pay) and, with anti-cheat on, only allowed once the fastest believable flight time has passed.
   app.post('/api/v1/flights/:id/complete', async (req) => {
     const p = user(req);
-    return flightView(tx(db, () => completeManually(db, activeFlight(db, idParam(req), p.userId, p.companyId), now(), info.antiCheat)));
+    return flightView(db, tx(db, () => completeManually(db, activeFlight(db, idParam(req), p.userId, p.companyId), now(), info.antiCheat)));
   });
 
   // ---- verification ingest (per-player API key). Keys can do exactly two things: list active flights and submit telemetry.
   // A key spans all of the player's companies: each flight names its company, and ownership is checked against the flight.
   app.get('/api/v1/flights/active', async (req) => {
     const p = apiKeyAuth(db, req, now());
-    return activeFlightsOfUser(db, p.userId, 50).map(flightView);
+    return activeFlightsOfUser(db, p.userId, 50).map((r) => flightView(db, r));
   });
 
   app.post('/api/v1/flights/:id/telemetry-verify', async (req) => {
@@ -366,10 +366,10 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
         origin: f.origin, destination: f.destination, distanceNm: f.distance_nm, payloadKg: f.payload_kg, aircraftIcao: f.aircraft_icao,
         aircraft: typeFor(db, f.company_id, f.aircraft_icao), acceptedAt: f.accepted_at, now: at, antiCheat: info.antiCheat, ignoreFlags: toleratedFlags(db, f.company_id),
       });
-      if (!check.ok) return { verification: 'rejected', reason: check.reason, flight: flightView(closeUnpaid(db, f, 'rejected', at, check.reason, report)) };
+      if (!check.ok) return { verification: 'rejected', reason: check.reason, flight: flightView(db, closeUnpaid(db, f, 'rejected', at, check.reason, report)) };
       // manual reports are never trusted as verified: reduced pay, no measured values
-      if (report.source === 'manual') return { verification: 'unverified', reason: null, flight: flightView(finishFlight(db, f, 'unverified', at, { telemetry: report, blockHours: check.blockHours })) };
-      return { verification: 'verified', reason: null, flight: flightView(finishFlight(db, f, 'verified', at, { telemetry: report, blockHours: check.blockHours })) };
+      if (report.source === 'manual') return { verification: 'unverified', reason: null, flight: flightView(db, finishFlight(db, f, 'unverified', at, { telemetry: report, blockHours: check.blockHours })) };
+      return { verification: 'verified', reason: null, flight: flightView(db, finishFlight(db, f, 'verified', at, { telemetry: report, blockHours: check.blockHours })) };
     });
   });
 

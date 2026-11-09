@@ -42,7 +42,7 @@ export function exportDocument(db: Db, userId: number, server: ServerInfo, now: 
       hubs: hubsOf(db, company.id),
       fleet: fleetView(db, company.id, now),
       customAircraft: customAircraftOf(db, company.id),
-      flights: allFlights(db, company.id).map((f) => ({ ...flightView(f), telemetry: f.telemetry ? (JSON.parse(f.telemetry) as unknown) : null })),
+      flights: allFlights(db, company.id).map((f) => ({ ...flightView(db, f), telemetry: f.telemetry ? (JSON.parse(f.telemetry) as unknown) : null })),
       transactions: allTransactions(db, company.id),
     })),
     apiKeys: all<{ id: number; label: string; created_at: number; last_used_at: number | null }>(db, 'SELECT id, label, created_at, last_used_at FROM api_keys WHERE user_id = ? ORDER BY id', userId)

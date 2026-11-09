@@ -53,7 +53,7 @@ export function registerSimbrief(app: FastifyInstance, { db, now, doFetch }: Sim
       if (run(db, "UPDATE flights SET planned_fuel_kg = ?, route = ?, simbrief_ofp_id = ? WHERE id = ? AND status = 'active'", ofp.plannedFuelKg, ofp.route, ofp.ofpId, f.id).changes === 0) {
         throw new HttpError(409, 'flight_closed', 'flight is already closed');
       }
-      return flightView(get<FlightRow>(db, 'SELECT * FROM flights WHERE id = ?', f.id)!);
+      return flightView(db, get<FlightRow>(db, 'SELECT * FROM flights WHERE id = ?', f.id)!);
     });
   });
 }

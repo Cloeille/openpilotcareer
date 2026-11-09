@@ -180,7 +180,7 @@ export function historyView(db: Db, companyId: number, limit: number, before: st
   const code = companyCode(db, companyId);
   return keys.map((k): HistoryEntry => {
     const cursor = `${k.at}-${k.src}-${k.id}`;
-    if (k.src === FLOWN) return { at: k.at, cursor, source: 'flown', flight: flightView(flights.get(k.id)!) };
+    if (k.src === FLOWN) return { at: k.at, cursor, source: 'flown', flight: flightView(db, flights.get(k.id)!) };
     const l = legs.get(k.id)!;
     const leg: LineLeg = { ...legView(l, code, now), reg: l.reg ?? `#${l.aircraft_id}`, icao: l.icao, revenue: l.revenue ?? 0, fuelCost: l.fuel_cost ?? 0, landingFee: l.landing_fee ?? 0, maintenance: l.maintenance ?? 0, net: legNet(l) };
     return { at: k.at, cursor, source: 'line', leg };

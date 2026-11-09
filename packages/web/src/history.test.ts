@@ -92,6 +92,15 @@ test('statement adds up and only a rejection has a known reputation change', () 
   assert.equal(statement(flight(3, 'rejected', D(11, 6))).reputation, -REJECT_REPUTATION_PENALTY);
 });
 
+test('the statement knows the aircraft: regenerated fuel, its own hard-landing threshold, and a hard landing that cancels the reputation gain', () => {
+  const plain = statement(flight(1, 'verified', D(11, 4)));
+  assert.deepEqual([plain.fuelRegenerated, plain.hardFromFpm, plain.hardLandingFpm], [false, null, null], 'a server that does not say: nothing shown');
+  const quasar = statement(flight(2, 'verified', D(11, 4), { hardLandingFpm: 900, fuelRegenerated: true, landing: { fpm: -631, hard: false } }));
+  assert.deepEqual([quasar.fuelRegenerated, quasar.hardFromFpm, quasar.hardLandingFpm], [true, 900, null], '-631 fpm is not hard on a spaceplane');
+  const hard = statement(flight(3, 'verified', D(11, 4), { hardLandingFpm: 600, landing: { fpm: -631, hard: true } }));
+  assert.deepEqual([hard.hardFromFpm, hard.hardLandingFpm, hard.reputation], [600, 631, null], 'no negative reputation is shown for a completed flight');
+});
+
 test('manual estimate pays 60 % of the payout and charges the same costs as the server formula', () => {
   const e = manualEstimate(flight(1, 'active', D(11, 4)), type, 'large', false);
   assert.equal(e.revenue, 3000);

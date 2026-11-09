@@ -207,7 +207,7 @@ export class FlightTracker {
       source: 'simconnect',
       // flagged flights are still reported: the server, not the client, rejects them (and tells the pilot why)
       ...(this.#flags.size > 0 ? { flags: [...this.#flags] } : {}),
-      // allowed, but kept visible: the server shows them and excuses the downtime from the flight duration
+      // allowed, but kept visible: the server shows them; they never change a verdict or the pay
       ...(this.#reloads + this.#restarts > 0 ? { interruptions: { reloads: this.#reloads, simRestarts: this.#restarts, downtimeMs: this.#downtimeMs } } : {}),
     });
     return parsed.success ? { ok: true, report: parsed.data } : no(`report is not valid: ${parsed.error.issues.map((i) => `${i.path.join('.')} ${i.message}`).join(', ')}`);

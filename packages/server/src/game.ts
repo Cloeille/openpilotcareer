@@ -4,7 +4,7 @@
 import { randomUUID } from 'node:crypto';
 import {
   HUB_PRICE, MAX_COMPANIES_PER_USER, OVERDRAFT_LIMIT, loanOption, loanPayment, PAX_KG, REJECT_REPUTATION_PENALTY, START_MODES, START_REPUTATION, STARTER_AIRCRAFT, STARTING_BALANCE,
-  EXPRESS_AIRCRAFT, EXPRESS_MAX_NM, EXPRESS_MIN_NM, EXPRESS_PAYLOAD_KG, aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, expressPayout, flightDutyMin, fuelPriceFactor, interruptionsSchema, jobFits, jobMisfit, jobPayout, minFlightHours, presetSetting, rankFor, realismModifiers, realismView, seasonOf, settle,
+  EXPRESS_AIRCRAFT, EXPRESS_MAX_NM, EXPRESS_MIN_NM, EXPRESS_PAYLOAD_KG, aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, expressPayout, flightDutyMin, fuelPriceFactor, hardLandingFpm, interruptionsSchema, isHardLanding, jobFits, jobMisfit, jobPayout, minFlightHours, presetSetting, rankFor, realismModifiers, realismView, regeneratesFuel, seasonOf, settle,
   type AircraftType, type AirportSize, type Company, type CompanyProfile, type CustomAircraftInput, type FleetAircraft, type Flight,
   type Financing, type FlightStatus, type GroupActivity, type Job, type Leaderboard, type LeaderboardRow, type Me, type Ownership, type Personality, type Pilot, type StartMode, type Telemetry, type Transaction,
 } from '@opc/shared';
@@ -261,14 +261,19 @@ export function jobView(r: JobColumns & { id: string }): Job {
   return j;
 }
 
-export function flightView(r: FlightRow): Flight {
+export function flightView(db: Db, r: FlightRow): Flight {
   const f: Flight = {
     id: r.id, companyId: r.company_id, job: jobView({ ...r, id: r.job_id }), aircraftId: r.aircraft_id, aircraftIcao: r.aircraft_icao, status: r.status, rejectReason: r.reject_reason,
     acceptedAt: r.accepted_at, completedAt: r.completed_at, revenue: r.revenue, fuelCost: r.fuel_cost, landingFee: r.landing_fee, maintenance: r.maintenance, net: r.net,
   };
-  const stored = r.telemetry ? (JSON.parse(r.telemetry) as { interruptions?: unknown }).interruptions : undefined; // validated when it was ingested
-  const interruptions = interruptionsSchema.safeParse(stored);
+  const stored = r.telemetry ? (JSON.parse(r.telemetry) as { interruptions?: unknown; landingFpm?: unknown }) : undefined; // validated when it was ingested
+  const interruptions = interruptionsSchema.safeParse(stored?.interruptions);
   if (interruptions.success && interruptions.data.reloads + interruptions.data.simRestarts > 0) f.interruptions = interruptions.data;
+  const type = typeFor(db, r.company_id, r.aircraft_icao);
+  f.hardLandingFpm = hardLandingFpm(type);
+  if (regeneratesFuel(type)) f.fuelRegenerated = true;
+  // only a verified flight is settled on its measured landing
+  if (r.status === 'verified' && typeof stored?.landingFpm === 'number') f.landing = { fpm: stored.landingFpm, hard: isHardLanding(type, stored.landingFpm) };
   if (r.simbrief_static_id) f.simbrief = { staticId: r.simbrief_static_id, ofpId: r.simbrief_ofp_id };
   return f;
 }
@@ -427,7 +432,7 @@ export function finishFlight(db: Db, f: FlightRow, status: 'verified' | 'unverif
   const memo = `${f.origin}-${f.destination} ${f.aircraft_icao}`;
   const on = { aircraftId: f.aircraft_id };
   post(db, f.company_id, at, 'payout', s.revenue, memo, f.id, { ...on, legs: 1 });
-  post(db, f.company_id, at, fuelKind, -s.fuelCost, memo, f.id, on);
+  if (s.fuelCost !== 0) post(db, f.company_id, at, fuelKind, -s.fuelCost, memo, f.id, on);
   post(db, f.company_id, at, 'landing_fee', -s.landingFee, memo, f.id, on);
   post(db, f.company_id, at, 'maintenance', -s.maintenance, memo, f.id, on);
   // lot SERVICE: a passenger flight with a cabin crew serves its passengers like a line leg does (separate ledger kinds: the flight's own settlement above is the job's)

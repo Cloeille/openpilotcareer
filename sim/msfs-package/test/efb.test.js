@@ -238,6 +238,9 @@ test('landing categories follow the server\u2019s hard-landing threshold (600 ft
   assert.equal(sub(-599), 'Firm landing');
   assert.equal(sub(-600), 'Hard landing');
   assert.equal(sub(-1200), 'Hard landing');
+  const spaceplane = (fpm) => VM.fromStatus(bare({ phase: 'parked', verification: 'verified', result: { landingFpm: fpm, hardLandingFpm: 900 } }), EN).view.results[0].sub;
+  assert.equal(spaceplane(-631), 'Firm landing', 'the status carries the aircraft\u2019s own threshold');
+  assert.equal(spaceplane(-950), 'Hard landing');
 });
 
 test('Job, SimBrief and Cabin tabs: rows with real values, a note when the bridge sent nothing', () => {

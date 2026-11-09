@@ -59,20 +59,25 @@ export type CatalogEntry = {
 const CATEGORY_DEFAULTS: Record<AircraftCategory, {
   engines: number; seats: number; cargoKg: number; cruiseKts: number; rangeNm: number;
   burnKgNmPerTonne: number; maintPerHourPerTonne: number;
+  /** Touchdown rate (fpm) from which a landing is hard: upkeep doubled, the flight's reputation gain cancelled. */
+  hardLandingFpm: number;
+  /** The aircraft regenerates its own fuel: a flight costs none and no fuel figure is checked. */
+  regenFuel: boolean;
 }> = {
-  'piston-single':      { engines: 1, seats: 4,   cargoKg: 150,    cruiseKts: 115, rangeNm: 550,  burnKgNmPerTonne: 0.6,  maintPerHourPerTonne: 90 },
-  'piston-multi':       { engines: 2, seats: 6,   cargoKg: 250,    cruiseKts: 170, rangeNm: 900,  burnKgNmPerTonne: 0.9,  maintPerHourPerTonne: 130 },
-  'turboprop-single':   { engines: 1, seats: 8,   cargoKg: 800,    cruiseKts: 260, rangeNm: 1000, burnKgNmPerTonne: 1.0,  maintPerHourPerTonne: 150 },
-  'turboprop-multi':    { engines: 2, seats: 10,  cargoKg: 900,    cruiseKts: 280, rangeNm: 1200, burnKgNmPerTonne: 1.1,  maintPerHourPerTonne: 180 },
-  'turboprop-airliner': { engines: 2, seats: 60,  cargoKg: 1_500,  cruiseKts: 270, rangeNm: 800,  burnKgNmPerTonne: 0.35, maintPerHourPerTonne: 55 },
-  'jet-business':       { engines: 2, seats: 8,   cargoKg: 700,    cruiseKts: 440, rangeNm: 2800, burnKgNmPerTonne: 1.8,  maintPerHourPerTonne: 330 },
-  'jet-airliner':       { engines: 2, seats: 150, cargoKg: 3_000,  cruiseKts: 450, rangeNm: 2800, burnKgNmPerTonne: 0.3,  maintPerHourPerTonne: 55 },
-  'jet-widebody':       { engines: 2, seats: 280, cargoKg: 15_000, cruiseKts: 490, rangeNm: 6500, burnKgNmPerTonne: 0.43, maintPerHourPerTonne: 75 },
-  // Flying Fries Quasar (Mach 7 add-on). 6 kg/nm: 1.8 t for a 300 nm hop (climb and acceleration burn most of it), 48 t for 8 000 nm (its real tank is 18 t), so checkTelemetry's
-  // 0.25x-3x fuel window accepts both. Maintenance is 12 000 per block hour (a 777 costs 1 650): with the 10 M price and the landing fee, what the express premiums pay for.
-  'spaceplane':         { engines: 4, seats: 0,   cargoKg: 2_000,  cruiseKts: 5000, rangeNm: 9999, burnKgNmPerTonne: 3,    maintPerHourPerTonne: 6_000 },
-  'helicopter':         { engines: 1, seats: 4,   cargoKg: 300,    cruiseKts: 120, rangeNm: 300,  burnKgNmPerTonne: 1.5,  maintPerHourPerTonne: 300 },
-  'other':              { engines: 1, seats: 4,   cargoKg: 400,    cruiseKts: 150, rangeNm: 600,  burnKgNmPerTonne: 1.0,  maintPerHourPerTonne: 150 },
+  'piston-single':      { engines: 1, seats: 4,   cargoKg: 150,    cruiseKts: 115, rangeNm: 550,  burnKgNmPerTonne: 0.6,  maintPerHourPerTonne: 90, hardLandingFpm: 600, regenFuel: false },
+  'piston-multi':       { engines: 2, seats: 6,   cargoKg: 250,    cruiseKts: 170, rangeNm: 900,  burnKgNmPerTonne: 0.9,  maintPerHourPerTonne: 130, hardLandingFpm: 600, regenFuel: false },
+  'turboprop-single':   { engines: 1, seats: 8,   cargoKg: 800,    cruiseKts: 260, rangeNm: 1000, burnKgNmPerTonne: 1.0,  maintPerHourPerTonne: 150, hardLandingFpm: 600, regenFuel: false },
+  'turboprop-multi':    { engines: 2, seats: 10,  cargoKg: 900,    cruiseKts: 280, rangeNm: 1200, burnKgNmPerTonne: 1.1,  maintPerHourPerTonne: 180, hardLandingFpm: 600, regenFuel: false },
+  'turboprop-airliner': { engines: 2, seats: 60,  cargoKg: 1_500,  cruiseKts: 270, rangeNm: 800,  burnKgNmPerTonne: 0.35, maintPerHourPerTonne: 55, hardLandingFpm: 600, regenFuel: false },
+  'jet-business':       { engines: 2, seats: 8,   cargoKg: 700,    cruiseKts: 440, rangeNm: 2800, burnKgNmPerTonne: 1.8,  maintPerHourPerTonne: 330, hardLandingFpm: 600, regenFuel: false },
+  'jet-airliner':       { engines: 2, seats: 150, cargoKg: 3_000,  cruiseKts: 450, rangeNm: 2800, burnKgNmPerTonne: 0.3,  maintPerHourPerTonne: 55, hardLandingFpm: 600, regenFuel: false },
+  'jet-widebody':       { engines: 2, seats: 280, cargoKg: 15_000, cruiseKts: 490, rangeNm: 6500, burnKgNmPerTonne: 0.43, maintPerHourPerTonne: 75, hardLandingFpm: 600, regenFuel: false },
+  // Flying Fries Quasar (Mach 7 add-on): a fuel regeneration system, so no fuel cost and no fuel check (burnKgNmPerTonne only scales the live fuel gauge).
+  // Upkeep is 2 800 per flight hour, what a large widebody costs (B77W 2 970, A35K 2 625): players fly it at about 660 kt (1 010 nm in 1.5 h), not at its nominal 5 000 kt.
+  // A spaceplane lands harder than an airliner: 900 fpm.
+  'spaceplane':         { engines: 4, seats: 0,   cargoKg: 2_000,  cruiseKts: 5000, rangeNm: 9999, burnKgNmPerTonne: 3,    maintPerHourPerTonne: 1_400, hardLandingFpm: 900, regenFuel: true },
+  'helicopter':         { engines: 1, seats: 4,   cargoKg: 300,    cruiseKts: 120, rangeNm: 300,  burnKgNmPerTonne: 1.5,  maintPerHourPerTonne: 300, hardLandingFpm: 600, regenFuel: false },
+  'other':              { engines: 1, seats: 4,   cargoKg: 400,    cruiseKts: 150, rangeNm: 600,  burnKgNmPerTonne: 1.0,  maintPerHourPerTonne: 150, hardLandingFpm: 600, regenFuel: false },
 };
 
 /** Category/engine/WTC defaults for a type without curated performance (derived=true). */
@@ -105,7 +110,6 @@ export const STARTING_BALANCE = 400_000;
 export const STARTER_AIRCRAFT = 'C172';
 export const HUB_PRICE = 50_000;
 export const RESALE_FACTOR = 0.8;
-export const HARD_LANDING_FPM = 600;
 export const START_REPUTATION = 50;
 export const REJECT_REPUTATION_PENALTY = 2;
 const PRICE_PER_KG_KT = 1.0;
@@ -116,6 +120,11 @@ export type AirportSize = 'large' | 'medium' | 'small';
 /** `verified`/`unverified` flights are completed and paid; `rejected` and `cancelled` are closed unpaid. */
 export type FlightStatus = 'active' | 'verified' | 'unverified' | 'rejected' | 'cancelled';
 
+/** Touchdown rate (fpm, absolute) from which this aircraft's landing is hard. */
+export const hardLandingFpm = (a: AircraftType): number => CATEGORY_DEFAULTS[a.category].hardLandingFpm;
+export const isHardLanding = (a: AircraftType, fpm: number): boolean => Math.abs(fpm) >= hardLandingFpm(a);
+/** True when the aircraft makes its own fuel: it costs nothing to fly and no fuel figure is checked. */
+export const regeneratesFuel = (a: AircraftType): boolean => CATEGORY_DEFAULTS[a.category].regenFuel;
 export const capacityKg = (a: AircraftType): number => Math.max(a.seats * PAX_KG, a.cargoKg);
 /** Price follows earning power (capacity x speed), so every type pays back in a comparable number of flight hours. The Quasar (2 t, Mach 7) comes out at 10 M by the same rule. */
 export const aircraftPrice = (a: AircraftType): number => Math.round(PRICE_PER_KG_KT * capacityKg(a) * a.cruiseKts);
@@ -136,12 +145,13 @@ export const jobPayout = (kind: JobKind, dist: number, payloadKg: number): numbe
 
 // Spaceplane express: 2 t of cargo that only a Quasar can carry, between large airports (the runway it needs).
 // payout = EXPRESS_BASE + regular 2 t cargo payout x EXPRESS_PREMIUM x (1 + dist / EXPRESS_PREMIUM_DOUBLES_NM): a flat fee plus the regular cargo rate under a premium that grows with the distance.
-// 200 nm pays 8 900, 300 nm 10 700, 1 000 nm 29 000, 5 000 nm 330 000 (what a long-haul widebody flight nets), 8 000 nm 770 000.
+// The Quasar burns no fuel (regeneration) and its upkeep is 2 800 per flight hour, so a flight costs the 2 250 landing fee plus about 4.2 k per 1 000 nm flown at the 660 kt players really fly:
+// a short hop is less profitable but never a loss. 200 nm pays 12 900 (nets 9.5 k), 300 nm 14 700 (nets 11.4 k, 10.3 k at 660 kt), 1 000 nm 33 300, 5 000 nm 333 000 (what a long-haul widebody flight nets), 8 000 nm 778 000.
 export const EXPRESS_AIRCRAFT = 'QASR';
 export const EXPRESS_PAYLOAD_KG = 2_000;
 export const EXPRESS_MIN_NM = 200;
 export const EXPRESS_MAX_NM = 8_000;
-const EXPRESS_BASE = 6_000;
+const EXPRESS_BASE = 10_000;
 const EXPRESS_PREMIUM = 1.5;
 const EXPRESS_PREMIUM_DOUBLES_NM = 1_200;
 export const expressPayout = (dist: number): number =>
@@ -182,11 +192,10 @@ export const standardNet = (a: AircraftType, j: JobShape & { payout: number }, d
 
 /** null when `a` suits the board job `j`; otherwise why not, with the error code the API refuses it with. It suits when it can fly it (`cannotFly`),
  *  the load fills at least MIN_LOAD_PCT of what it carries, and the expected net (`standardNet`) is above zero.
- *  A job that names its aircraft (the Quasar's express jobs, a SimBrief plan) keeps its own rule: it only has to be flyable. */
+ *  Express jobs obey it like any other board job: their payout is set to always cover the Quasar's costs. SimBrief plans are not board jobs and are never filtered. */
 export function jobMisfit(a: AircraftType, j: JobShape & { payout: number }, destSize: AirportSize): JobMisfit | null {
   const why = cannotFly(a, j);
   if (why) return { code: 'cannot_fly', message: why };
-  if (j.requiredAircraft) return null;
   const [load, capacity, unit] = j.kind === 'pax' ? [j.pax, a.seats, 'seats'] as const : [j.payloadKg, a.cargoKg, 'kg of cargo'] as const;
   if (load * 100 < capacity * MIN_LOAD_PCT) return { code: 'load_too_small', message: `${load} of the ${capacity} ${unit} of ${a.icao} is too small a load: a job must fill at least ${Math.ceil((capacity * MIN_LOAD_PCT) / 100)}` };
   const net = standardNet(a, j, destSize);
@@ -219,12 +228,13 @@ export type Settlement = { revenue: number; fuelCost: number; landingFee: number
 
 /** The one profit formula, used for players, AI companies and AI decision scoring. */
 export function settle(i: SettleInput): Settlement {
-  const hard = i.landingFpm !== undefined && Math.abs(i.landingFpm) >= HARD_LANDING_FPM;
+  const hard = i.landingFpm !== undefined && isHardLanding(i.aircraft, i.landingFpm);
   const revenue = Math.round(i.payout * (i.status === 'verified' ? 1 : MANUAL_PAY_FACTOR) * (1 + (i.payModifierPct ?? 0) / 100));
-  const fuelCost = Math.round((i.fuelUsedKg ?? fuelBurnKg(i.aircraft, i.distanceNm)) * FUEL_PRICE_PER_KG * (i.fuelPriceFactor ?? 1));
+  const fuelCost = regeneratesFuel(i.aircraft) ? 0 : Math.round((i.fuelUsedKg ?? fuelBurnKg(i.aircraft, i.distanceNm)) * FUEL_PRICE_PER_KG * (i.fuelPriceFactor ?? 1));
   const fee = landingFee(i.aircraft, i.destSize, i.destIsHub);
   const maintenance = Math.round((i.blockHours ?? blockHours(i.aircraft, i.distanceNm)) * maintenancePerHour(i.aircraft) * (hard ? 2 : 1));
-  const reputationDelta = (i.status === 'verified' ? 0.1 : 0.02) * (1 + (i.repModifierPct ?? 0) / 100) - (hard ? 1.5 : 0); // realism scales the gain, never the hard-landing penalty
+  // a completed flight never lowers reputation: a hard landing cancels the gain instead (only a rejected flight is penalised, see closeUnpaid)
+  const reputationDelta = hard ? 0 : Math.max(0, (i.status === 'verified' ? 0.1 : 0.02) * (1 + (i.repModifierPct ?? 0) / 100));
   return { revenue, fuelCost, landingFee: fee, maintenance, net: revenue - fuelCost - fee - maintenance, reputationDelta };
 }
 
@@ -254,7 +264,7 @@ export const seasonOf = (ms: number): string => new Date(ms).toISOString().slice
 
 export const TELEMETRY_SOURCES = ['simconnect', 'manual'] as const;
 /** What the bridge saw break the flight without it being a cheat: flight reloads, sim restarts (game crashes), and the time the sim was away.
- *  Reported so the pilot can see them; `downtimeMs` is the only part that changes a verdict (see checkTelemetry). */
+ *  Reported so the pilot can see them; they never change a verdict or the pay. */
 export const interruptionsSchema = z.object({
   reloads: z.number().int().min(0).max(1_000),
   simRestarts: z.number().int().min(0).max(1_000),
@@ -306,15 +316,11 @@ export function checkTelemetry(t: Telemetry, f: {
   const hours = (landed - takeoff) / 3_600_000;
   if (!f.antiCheat) return { ok: true, blockHours: hours };
   const minHours = minFlightHours(f.aircraft, f.distanceNm);
-  const maxHours = 1 + f.distanceNm / (f.aircraft.cruiseKts * 0.4);
-  // time the sim was closed or loading is not slow flying; it only counts for this check, never for the too-short one or for pay
-  const flownHours = hours - Math.min(t.interruptions?.downtimeMs ?? 0, landed - takeoff) / 3_600_000;
   if (hours < minHours) return no(`flight too short: ${hours.toFixed(2)} h for ${Math.round(f.distanceNm)} nm at ${f.aircraft.cruiseKts} kts`);
-  if (flownHours > maxHours) return no(`flight too long: ${flownHours.toFixed(2)} h for ${Math.round(f.distanceNm)} nm`);
   if (t.distanceNm < f.distanceNm * 0.85 || t.distanceNm > f.distanceNm * 2 + 20) return no(`flown distance ${Math.round(t.distanceNm)} nm is implausible for a ${Math.round(f.distanceNm)} nm job`);
   if (t.payloadKg < f.payloadKg * 0.9) return no(`payload ${Math.round(t.payloadKg)} kg is below the job payload ${f.payloadKg} kg`);
   const expected = fuelBurnKg(f.aircraft, f.distanceNm);
-  if (t.fuelUsedKg < expected * 0.25 || t.fuelUsedKg > expected * 3) return no(`fuel used ${Math.round(t.fuelUsedKg)} kg is implausible for this aircraft (expected about ${Math.round(expected)} kg)`);
+  if (!regeneratesFuel(f.aircraft) && (t.fuelUsedKg < expected * 0.25 || t.fuelUsedKg > expected * 3)) return no(`fuel used ${Math.round(t.fuelUsedKg)} kg is implausible for this aircraft (expected about ${Math.round(expected)} kg)`);
   if (Math.abs(t.landingFpm) > MAX_LANDING_FPM) return no(`landing rate ${Math.round(t.landingFpm)} fpm exceeds structural limits`);
   return { ok: true, blockHours: hours };
 }
@@ -392,6 +398,12 @@ export type Flight = {
   id: number; companyId: number; job: Job; aircraftId: number; aircraftIcao: string; status: FlightStatus; rejectReason: string | null;
   acceptedAt: number; completedAt: number | null;
   revenue: number; fuelCost: number; landingFee: number; maintenance: number; net: number;
+  /** The touchdown rate from which this aircraft's landing is hard (`hardLandingFpm`: a category rule, a spaceplane's is higher than an airliner's). */
+  hardLandingFpm?: number;
+  /** The aircraft makes its own fuel (`regeneratesFuel`): the flight's fuel cost is zero, not missing. */
+  fuelRegenerated?: boolean;
+  /** The measured landing of a verified flight; `hard` doubled the upkeep and cancelled the reputation gain. */
+  landing?: { fpm: number; hard: boolean };
   /** From the telemetry report, when the bridge saw reloads or sim restarts: allowed, shown, never punished. */
   interruptions?: Interruptions;
   /** Lot SIMBRIEF-LINK: the id the SimBrief dispatch is made under, and the OFP fetched for the flight. Only flights of players have it. */

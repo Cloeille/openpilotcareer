@@ -7,7 +7,7 @@
  * a missing or wrongly typed one is shown as a dash, never guessed and never an error.
  *   flight.fromName, flight.toName, flight.callsign, flight.registration, flight.aircraftName, flight.payloadKg
  *   live      { altFt, progress (0..1), etaAt (epoch ms), fuelArrivalKg }       estimatedPay (EUR)
- *   result    { landingFpm, gForce, fuelRemainingKg, fuelVsSimbriefKg, netPay (EUR), blockMinutes, stand, parkedAt (epoch ms) }
+ *   result    { landingFpm, hardLandingFpm, gForce, fuelRemainingKg, fuelVsSimbriefKg, netPay (EUR), blockMinutes, stand, parkedAt (epoch ms) }
  *   plan      { blockFuelKg, tripFuelKg, reserveFuelKg, cruiseAltFt }           cabin { passengers, cargoKg }
  *   simTime (epoch ms, sim UTC)    sim ('connected' | 'waiting' | 'unavailable')
  * flight.id is a number from the real bridge; a string is accepted too. */
@@ -22,8 +22,8 @@
   var MINUS = '\u2212';
   var ARROW = '\u2192';
   var DOT = ' \u00B7 ';
-  /* Same threshold as HARD_LANDING_FPM in packages/shared (the server's hard-landing penalty). */
-  var HARD_LANDING_FPM = 600;
+  /* Default when the status does not carry result.hardLandingFpm: hardLandingFpm() of packages/shared for an ordinary aircraft (a spaceplane's is higher). */
+  var DEFAULT_HARD_LANDING_FPM = 600;
   var FIRM_LANDING_FPM = 250;
 
   var PHASES = [
@@ -528,9 +528,9 @@
     return parts.map(function (t) { return t.replace(/[.\s]+$/, ''); }).join('. ') + '.';
   }
 
-  function landingCategory(fpm) {
+  function landingCategory(fpm, hardFpm) {
     var a = Math.abs(fpm);
-    return a >= HARD_LANDING_FPM ? 'hard' : a > FIRM_LANDING_FPM ? 'firm' : 'smooth';
+    return a >= (hardFpm === null ? DEFAULT_HARD_LANDING_FPM : hardFpm) ? 'hard' : a > FIRM_LANDING_FPM ? 'firm' : 'smooth';
   }
 
   /* Position along the route, 0..1, or null when the bridge does not say and the phase does not imply it. */
@@ -661,7 +661,7 @@
     return {
       live: { altFt: optNum(live.altFt), progress: optNum(live.progress), etaAt: optNum(live.etaAt), fuelArrivalKg: optNum(live.fuelArrivalKg) },
       result: {
-        landingFpm: optNum(result.landingFpm), gForce: optNum(result.gForce), fuelRemainingKg: optNum(result.fuelRemainingKg),
+        landingFpm: optNum(result.landingFpm), hardLandingFpm: optNum(result.hardLandingFpm), gForce: optNum(result.gForce), fuelRemainingKg: optNum(result.fuelRemainingKg),
         fuelVsSimbriefKg: optNum(result.fuelVsSimbriefKg), netPay: optNum(result.netPay), blockMinutes: optNum(result.blockMinutes),
         stand: optText(result.stand), parkedAt: optNum(result.parkedAt)
       },
@@ -736,7 +736,7 @@
       fuelSub = tr(lang, 'fuel.vsSimbrief', { delta: (d < 0 ? MINUS : d > 0 ? '+' : '') + group(d, lang) + NBSP + tr(lang, 'unit.kg') });
     }
     return [
-      { key: 'landing', label: tr(lang, 'result.landing'), value: fmtFpm(r.landingFpm, lang), sub: r.landingFpm === null ? null : tr(lang, 'landing.' + landingCategory(r.landingFpm)) },
+      { key: 'landing', label: tr(lang, 'result.landing'), value: fmtFpm(r.landingFpm, lang), sub: r.landingFpm === null ? null : tr(lang, 'landing.' + landingCategory(r.landingFpm, r.hardLandingFpm)) },
       { key: 'gForce', label: tr(lang, 'result.gForce'), value: fmtG(r.gForce, lang), sub: null },
       { key: 'fuel', label: tr(lang, 'result.fuel'), value: fmtKg(r.fuelRemainingKg, lang), sub: fuelSub }
     ];

@@ -23,7 +23,7 @@ what `sim/bridge` sends today. Everything else the EFB can show is an OPTIONAL e
 | --- | --- |
 | `flight.fromName`, `toName`, `callsign`, `registration`, `aircraftName`, `payloadKg` | route title ("Nice → Paris-CDG"), meta line, Job tab |
 | `live { altFt, progress, etaAt, fuelArrivalKg }`, `estimatedPay` | status line level, route progress, arrival / fuel / estimated pay |
-| `result { landingFpm, gForce, fuelRemainingKg, fuelVsSimbriefKg, netPay, blockMinutes, stand, parkedAt }` | finished / rejected figures and net pay |
+| `result { landingFpm, hardLandingFpm, gForce, fuelRemainingKg, fuelVsSimbriefKg, netPay, blockMinutes, stand, parkedAt }` | finished / rejected figures and net pay |
 | `plan { blockFuelKg, tripFuelKg, reserveFuelKg, cruiseAltFt }`, `cabin { passengers, cargoKg }` | SimBrief and Cabine tabs |
 | `simTime`, `sim` (`connected` / `waiting` / `unavailable`) | status-bar clock, "Waiting for MSFS" |
 

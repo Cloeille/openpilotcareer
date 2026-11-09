@@ -87,12 +87,21 @@ const logOrder = (flights: Flight[]): Flight[] => flights.filter((f) => f.status
 /** Share of the job's payout the flight earned: full when verified, MANUAL_PAY_FACTOR when entered by hand, nothing otherwise. */
 export const payFactor = (status: FlightStatus): number => (status === 'verified' ? 1 : status === 'unverified' ? MANUAL_PAY_FACTOR : 0);
 
-export type Statement = { payout: number; factor: number; revenue: number; fuel: number; landing: number; maintenance: number; charges: number; net: number; reputation: number | null };
+export type Statement = {
+  payout: number; factor: number; revenue: number; fuel: number; landing: number; maintenance: number; charges: number; net: number; reputation: number | null;
+  /** The aircraft makes its own fuel: the fuel line says so instead of showing a cost. */
+  fuelRegenerated: boolean;
+  /** The touchdown rate from which this aircraft's landing is hard (null: the server did not say). */
+  hardFromFpm: number | null;
+  /** The measured landing rate (absolute), when it was hard: it doubled the upkeep and cancelled the reputation gain. */
+  hardLandingFpm: number | null;
+};
 /** The earnings statement of a closed flight, from the amounts the server recorded. Reputation: only the rejection penalty is known exactly (landing quality, which adjusts the rest, is not exposed). */
 export function statement(f: Flight): Statement {
   return {
     payout: f.job.payout, factor: payFactor(f.status), revenue: f.revenue, fuel: f.fuelCost, landing: f.landingFee, maintenance: f.maintenance,
     charges: f.fuelCost + f.landingFee + f.maintenance, net: f.net, reputation: f.status === 'rejected' ? -REJECT_REPUTATION_PENALTY : null,
+    fuelRegenerated: f.fuelRegenerated === true, hardFromFpm: f.hardLandingFpm ?? null, hardLandingFpm: f.landing?.hard ? Math.abs(f.landing.fpm) : null,
   };
 }
 

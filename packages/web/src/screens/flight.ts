@@ -103,9 +103,11 @@ function gainBody(f: Flight, onExport: () => void): HTMLElement {
     row(t('fl.gain.jobPay'), t('fl.gain.jobPayBasis', { load: loadLabel(f.job), dist: fm.nm(f.job.distanceNm) }), fm.money(s.payout)),
     row(t('fl.gain.coef'), coef, `×${fm.num(s.factor, 2)}`),
     h('div', { class: 'stmt-section' }, h('span', null, t('fl.gain.charges')), h('span', { class: 'strong' }, fm.signedMoney(-s.charges))),
-    row(t('fl.gain.fuel'), f.aircraftIcao, fm.signedMoney(-s.fuel)),
+    s.fuelRegenerated ? row(t('fl.gain.fuelRegen'), f.aircraftIcao, fm.money(0)) : row(t('fl.gain.fuel'), f.aircraftIcao, fm.signedMoney(-s.fuel)),
     row(t('fl.gain.landing'), f.job.destination, fm.signedMoney(-s.landing)),
-    row(t('fl.gain.maintenance'), f.aircraftIcao, fm.signedMoney(-s.maintenance)),
+    row(t('fl.gain.maintenance'), s.hardLandingFpm === null ? f.aircraftIcao : t('fl.gain.maintenanceHard', { fpm: fm.num(s.hardLandingFpm) }), fm.signedMoney(-s.maintenance)),
+    s.hardFromFpm === null ? null : h('p', { class: 'dim small' }, t('fl.gain.maintenanceHint', { fpm: fm.num(s.hardFromFpm) })),
+    s.hardLandingFpm === null ? null : h('div', { class: 'stmt-line' }, h('span', { class: 'stmt-name' }, t('fl.gain.repHard', { fpm: fm.num(s.hardLandingFpm) }))),
     h('div', { class: 'stmt-net' }, h('span', null, t('fl.gain.net')), h('span', { class: 'big-money' }, fm.signedMoney(s.net))),
     h('div', { class: 'row' }, button(t('fl.export'), { variant: 'secondary', icon: 'download', key: 'X', onclick: onExport }))));
 }
