@@ -1,4 +1,4 @@
-import type { AgencyCandidate, AgencyGap, AgencyOption, AgencyOptionId, AgencyQuote, AgencyView, MissionView, SignResult } from '@opc/shared';
+import type { AgencyGap, AgencyOption, AgencyOptionId, AgencyPost, AgencyQuote, AgencyRequest, AgencyView, Candidate, MissionView, SignResult } from '@opc/shared';
 import { api } from './api.ts';
 import { ApiError } from './errors.ts';
 
@@ -7,10 +7,7 @@ import { ApiError } from './errors.ts';
  * A route the server does not have answers 404/405: `null` means "feature off", any other failure still throws.
  * Money is euros and computed by the server (a quote carries the balance after it); instants are epoch milliseconds.
  */
-export type { AgencyCandidate, AgencyGap, AgencyOption, AgencyOptionId, AgencyQuote, AgencyView, MissionView, SignResult };
-
-/** The position a comparison is for. */
-export type AgencyRequest = { base: string; qual: string; count: number };
+export type { AgencyGap, AgencyOption, AgencyOptionId, AgencyPost, AgencyQuote, AgencyRequest, AgencyView, Candidate, MissionView, SignResult };
 
 async function optional<T>(path: string): Promise<T | null> {
   try {
@@ -21,10 +18,10 @@ async function optional<T>(path: string): Promise<T | null> {
   }
 }
 
-/** `request` absent: the server takes the open mission, else the position that costs the most. `pick`: the candidates to price (the first ones when absent). */
+/** `request` absent: the server takes the open mission, else the post that costs the most. `pick`: the candidates to price (the first ones when absent). */
 export function fetchAgency(request?: AgencyRequest | null, pick?: readonly string[]): Promise<AgencyView | null> {
   const q = new URLSearchParams();
-  if (request) { q.set('base', request.base); q.set('qual', request.qual); q.set('count', String(request.count)); }
+  if (request) { for (const k of ['family', 'role', 'base'] as const) q.set(k, request[k]); if (request.qual) q.set('qual', request.qual); q.set('count', String(request.count)); }
   if (pick) q.set('pick', pick.join(','));
   return optional<AgencyView>(`/agency/options${q.size ? `?${q}` : ''}`);
 }

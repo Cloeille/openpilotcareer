@@ -117,7 +117,7 @@ The live DB is at position 10 (`…V8, V9, V10`). v3 wave 3 takes `SCHEMA_V11` (
 |---|---|---|
 | `SCHEMA_V13` | REPORTS | `transactions` gains nullable `line_id`, `aircraft_id`, `counterparty_id`, index `(company_id, at)`. `post()` takes an optional link argument; old rows keep NULL and show category from `kind` |
 | `SCHEMA_V14` | CREDIT | `credits(id, company_id, bank, principal0, principal, rate, months, months_paid, monthly, fee, insurance, early_penalty_pct, started_at, status)`; `credit_ratings` is derived, not stored |
-| `SCHEMA_V15` | AGENCY | `recruit_missions(id, company_id, base, qual, count, started_at, ready_at, commission, premium_pct, status)` |
+| `SCHEMA_V15` | AGENCY | `recruit_missions(id, company_id, base, qual, count, started_at, ready_at, commission, premium_pct, status)` (rebuilt by the last migration: `family`, `role`, `qual` NULL for non-pilots, no `premium_pct`; count 1 to 20) |
 | `SCHEMA_V16` | SIMAC | `sim_aircraft(user_id, sim_key, title, source, icao, state, seen_at, PRIMARY KEY(user_id, sim_key))` |
 | `SCHEMA_V17` | GROUP | `companies.parent_id`, `companies.iata`; `group_loans(id, lender_id, borrower_id, principal, rate, months, months_paid, …)`; `group_audit(id, at, user_id, from_id, to_id, kind, amount, ref)` |
 | `SCHEMA_V18` | TRAINING | `staff.birth_year`; `training_courses(id, company_id, staff_id, kind, type_icao, start_day, end_day, place 'own'|'outside', cost)`; building kind `training` is catalogue code (S3 pattern, no table) |

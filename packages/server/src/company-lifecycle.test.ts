@@ -60,7 +60,7 @@ async function fill(h: H, token: string, cid: number): Promise<void> {
   run(h.db, "INSERT INTO parts_stock (company_id, hub, part, qty) VALUES (?, 'LFMN', 'filter', 2)", cid);
   run(h.db, "INSERT INTO credits (company_id, bank, principal0, principal, rate, months, monthly, fee, insurance, early_penalty_pct, started_at) VALUES (?, 'alpes', 100, 100, 0.072, 12, 9, 0, 0, 0, ?)", cid, at);
   run(h.db, "INSERT INTO training_courses (company_id, staff_id, type_icao, base, place, start_at, end_at, cost, saved) VALUES (?, ?, 'AT76', 'LFMN', 'own', ?, ?, 100, 50)", cid, staff, at, at + 1);
-  run(h.db, "INSERT INTO recruit_missions (company_id, base, qual, count, started_at, ready_at, premium_pct) VALUES (?, 'LFMN', 'AT76', 2, ?, ?, 11)", cid, at, at + 1);
+  run(h.db, "INSERT INTO recruit_missions (company_id, family, role, base, qual, count, started_at, ready_at) VALUES (?, 'pilot', 'captain', 'LFMN', 'AT76', 2, ?, ?)", cid, at, at + 1);
   run(h.db, "INSERT INTO parts_orders (company_id, hub, part, qty, ordered_at, eta, cost) VALUES (?, 'LFMN', 'filter', 1, ?, ?, 100)", cid, at, at + 1);
   run(h.db, "INSERT INTO parts_policy (company_id, hub, icao, cls, policy) VALUES (?, 'LFMN', 'AT76', 'turboprop', 'critical')", cid);
   run(h.db, "INSERT INTO breakdowns (company_id, aircraft_id, hub, component, part, failed_at, eta, ready_at, paid, from_stock) VALUES (?, ?, 'LFMN', 'engines', 'filter', ?, ?, ?, 100, 1)", cid, ac, at, at + 1, at + 2);

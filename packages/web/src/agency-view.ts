@@ -1,5 +1,5 @@
-import { AGENCY_MAX_COUNT } from '@opc/shared';
-import type { AgencyGap, AgencyOption, AgencyOptionId, AgencyRequest, MissionView } from './api-agency.ts';
+import { AGENCY_MAX_COUNT, HIRED_ROLES } from '@opc/shared';
+import type { AgencyOption, AgencyOptionId, AgencyPost, AgencyRequest, MissionView } from './api-agency.ts';
 import type { Key } from './messages.ts';
 
 /** What the recruiter agency screen decides without asking the server: how the options line up, which candidates are held, what may be pressed. The money is always the server's (`quote`, `options`). */
@@ -23,8 +23,11 @@ export function barWidths(options: readonly Pick<AgencyOption, 'id' | 'phases'>[
   return widths;
 }
 
-/** The mission to propose for a gap: every post that no hire in notice fills, up to what one mission can ask. */
-export const requestFor = (g: Pick<AgencyGap, 'base' | 'qual' | 'open'>): AgencyRequest => ({ base: g.base, qual: g.qual, count: Math.min(g.open, AGENCY_MAX_COUNT) });
+/** Change one field of the post the player is choosing. A new family starts over from its first role and, for pilots, the first type she flies (`types`), so the post is always one that exists. */
+export function retarget(r: AgencyRequest, to: Partial<Pick<AgencyPost, 'family' | 'role' | 'base' | 'qual'>>, types: readonly string[]): AgencyRequest {
+  if (to.family === undefined || to.family === r.family) return { ...r, ...to };
+  return { ...r, ...to, family: to.family, role: HIRED_ROLES[to.family][0]!, qual: to.family === 'pilot' ? (to.qual ?? types[0] ?? null) : null };
+}
 
 /** One more or one fewer person, kept between 1 and what one mission can ask. */
 export const stepCount = (count: number, dir: 1 | -1): number => Math.min(AGENCY_MAX_COUNT, Math.max(1, count + dir));

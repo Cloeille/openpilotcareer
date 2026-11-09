@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { CREDIT_BANK_IDS, CREDIT_REFUSALS, SIM_AIRCRAFT_SOURCES, CATEGORIES, COST_PARTS, DECISIONS, FINANCE_SCREENS, PROFIT_BY, SCENARIOS, AIRCRAFT_CATEGORIES, COMPONENTS, FACILITY_KINDS, HAULS, MECHANICAL, MEAL_QUALITIES, PARTS_POLICIES, PART_CLASSES, REALISM_TOGGLES, RANKS, REST_POLICY_NAMES, SERVICE_ITEMS, SERVICE_MODES, STAFF_FAMILIES, WTCS, type AirportSize, type Ownership } from '@opc/shared';
+import { CREDIT_BANK_IDS, CREDIT_REFUSALS, SIM_AIRCRAFT_SOURCES, CATEGORIES, COST_PARTS, DECISIONS, FINANCE_SCREENS, PROFIT_BY, SCENARIOS, AIRCRAFT_CATEGORIES, COMPONENTS, FACILITY_KINDS, HAULS, MECHANICAL, MEAL_QUALITIES, PARTS_POLICIES, PART_CLASSES, REALISM_TOGGLES, RANKS, REST_POLICY_NAMES, SERVICE_ITEMS, SERVICE_MODES, STAFF_FAMILIES, STAFF_ROLES, WTCS, type AirportSize, type Ownership } from '@opc/shared';
 import { CESSION_REFUSALS, GROUP_ACTIVITIES, GROUP_CREATE_REFUSALS, GROUP_ROLES } from '@opc/shared';
 import { BALLOT_CHOICES, VOTE_STATUSES } from '@opc/shared';
 import { PAY_LEVELS, type PayLevel } from '@opc/shared';
@@ -127,6 +127,10 @@ test('the training reasons map to a message in both languages, every one of them
   for (const key of [...Object.values(OWN_WHY), ...Object.values(RETRAIN_WHY)]) for (const lang of ['en', 'fr'] as const) assert.notEqual((lang === 'en' ? en : fr)[key].trim(), '', `${key} (${lang})`);
   assert.deepEqual(Object.keys(OWN_WHY).sort(), OWN_WHYS.slice().sort());
   assert.deepEqual(Object.keys(RETRAIN_WHY).sort(), RETRAIN_WHYS.slice().sort());
+});
+
+test('the roles a mission can ask for are the typed ones: the schema\'s list and the labelled Record agree', () => {
+  assert.deepEqual([...STAFF_ROLES].sort(), ROLES.slice().sort());
 });
 
 test('every agency option has its title, sub, note, phases, unavailable reason, and a place to go; the keys are typed, so a new option breaks the Record before it reaches here', () => {
