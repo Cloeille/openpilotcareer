@@ -1,6 +1,7 @@
 // Lot LINES (v3): autonomous lines on the simulated clock. Pure rules, constants and wire types (docs/v3-plan.md B.1, B.2).
 // Imports only types from index.ts, so there is no runtime cycle.
 import { z } from 'zod';
+import { scopeSchema } from './group.ts';
 import type { AirportSize, Flight } from './index.ts';
 
 // ---------------------------------------------------------------- clock (B.1: the simulated clock IS the real UTC clock)
@@ -97,7 +98,8 @@ export type LineResolve = z.infer<typeof lineResolveSchema>;
 export type ResolveOption = LineResolve['option'];
 export const networkEnabledSchema = z.object({ enabled: z.boolean() });
 export const lineDayQuerySchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() });
-export const networkQuerySchema = z.object({ company: z.coerce.number().int().positive().optional() });
+/** `company`: an AI company's public network. `scope=group`: the player's own company and its subsidiaries (ignored for anything else). */
+export const networkQuerySchema = z.object({ company: z.coerce.number().int().positive().optional(), scope: scopeSchema });
 
 /** A line as stored: a pair of airports flown both ways on a daily programme. */
 export type Programme = {
@@ -220,12 +222,21 @@ export type LineForecast = {
 
 export type LineProblem = { kind: 'aircraft' | 'crew'; detail: string; ready: boolean; until: number | null };
 
-export type FlyingRow = { flightId: number; flightNo: string; lineId: number | null; from: string; to: string; progress: number; delayMin: number; reg: string; own: boolean };
+/** `companyId`: the company that flies it (see `NetworkView.companies`). */
+export type FlyingRow = { flightId: number; flightNo: string; lineId: number | null; from: string; to: string; progress: number; delayMin: number; reg: string; own: boolean; companyId: number };
+/** A line of the network and the company it belongs to. */
+export type NetworkLine = Line & { companyId: number };
 export type NetworkView = {
-  now: number; enabled: boolean;
+  now: number;
+  /** The network switch and the 14-day offline cap are the asked company's (each subsidiary has its own). */
+  enabled: boolean;
   /** When the 14-day offline cap (C1) last stopped this network; null if it never did. */
   lapsedAt: number | null;
-  lines: Line[]; flying: FlyingRow[];
+  /** The companies read, with their hubs: the asked one first, then (`scope=group`) its subsidiaries. */
+  companies: { id: number; name: string; hubs: string[] }[];
+  /** How many subsidiaries the asked company has, whichever scope was read: the toggle is shown for it. */
+  subsidiaries: number;
+  lines: NetworkLine[]; flying: FlyingRow[];
   /** `onTimePct` is null until a leg of the day has flown. */
   today: { done: number; cancelled: number; onTimePct: number | null; nextDeparture: ScheduledFlight | null };
 };

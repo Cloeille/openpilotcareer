@@ -15,6 +15,11 @@ export type CessionRefusal = (typeof CESSION_REFUSALS)[number];
 export const GROUP_CREATE_REFUSALS = ['is_subsidiary', 'limit_reached'] as const;
 export type GroupCreateRefusal = (typeof GROUP_CREATE_REFUSALS)[number];
 
+/** What a read covers: the company on its own (the default) or, for the owner of a parent, the company and all its subsidiaries. A subsidiary has none, so it always reads itself. */
+export const SCOPES = ['company', 'group'] as const;
+export type Scope = (typeof SCOPES)[number];
+export const scopeSchema = z.enum(SCOPES).default('company');
+
 const TRANSFER_MAX = 1_000_000_000;
 const euros = z.int().min(0).max(TRANSFER_MAX);
 const aircraftIds = z.array(z.int().positive()).max(50).refine((ids) => new Set(ids).size === ids.length, { message: 'aircraft ids must be unique' });

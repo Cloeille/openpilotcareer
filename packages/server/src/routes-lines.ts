@@ -30,7 +30,7 @@ export function registerLines(app: FastifyInstance, ctx: LinesCtx): void {
     const target = q.company ?? p.companyId;
     // A rival network is public, but only an AI company's: another player's lines stay theirs.
     if (target !== p.companyId && !get(db, 'SELECT 1 AS x FROM companies WHERE id = ? AND user_id IS NULL', target)) throw new HttpError(404, 'company_not_found', 'company not found');
-    return networkView(db, p.companyId, target, now());
+    return networkView(db, p.companyId, target, now(), q.scope);
   });
 
   app.put('/api/v1/network/enabled', async (req) => {

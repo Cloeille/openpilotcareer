@@ -6,7 +6,7 @@ import {
   HUB_PRICE, MAX_COMPANIES_PER_USER, OVERDRAFT_LIMIT, loanOption, loanPayment, PAX_KG, REJECT_REPUTATION_PENALTY, START_MODES, START_REPUTATION, STARTER_AIRCRAFT, STARTING_BALANCE,
   EXPRESS_AIRCRAFT, EXPRESS_MAX_NM, EXPRESS_MIN_NM, EXPRESS_PAYLOAD_KG, aircraftPrice, aircraftValue, blockHours, cannotFly, distanceNm, expressPayout, flightDutyMin, fuelPriceFactor, hardLandingFpm, interruptionsSchema, isHardLanding, jobFits, jobMisfit, jobPayout, minFlightHours, presetSetting, rankFor, realismModifiers, realismView, regeneratesFuel, seasonOf, settle,
   type AircraftType, type AirportSize, type Company, type CompanyProfile, type CustomAircraftInput, type FleetAircraft, type Flight,
-  type Financing, type FlightStatus, type GroupActivity, type Job, type Leaderboard, type LeaderboardRow, type Me, type Ownership, type Personality, type Pilot, type StartMode, type Telemetry, type Transaction,
+  type Financing, type FlightStatus, type GroupActivity, type Job, type Leaderboard, type LeaderboardRow, type LeaderboardSubsidiary, type Me, type Ownership, type Personality, type Pilot, type Scope, type StartMode, type Telemetry, type Transaction,
 } from '@opc/shared';
 import { airports, catalogType } from './catalog.ts';
 import { boardFor, boardJob, windowOf } from './board.ts';
@@ -17,6 +17,7 @@ import { post } from './ledger.ts';
 import { parseRealism, realismSettingOf, saveRealism } from './realism.ts';
 import { release, reservedAgainst, reservedIds, reservationOf, windowOfJobId } from './reservations.ts';
 import { rollIncident } from './safety.ts';
+import { booksOf, idsOf, internalSql } from './scope.ts';
 import { bookLeg, planLeg } from './service.ts';
 import type { Ofp } from './simbrief.ts';
 
@@ -286,10 +287,17 @@ export function flightsOf(db: Db, companyId: number, limit: number, before?: num
 export const activeFlightsOfUser = (db: Db, userId: number, limit: number): FlightRow[] =>
   all<FlightRow>(db, `SELECT f.* FROM flights f JOIN companies c ON c.id = f.company_id WHERE c.user_id = ? AND f.status = 'active' ORDER BY f.id DESC LIMIT ?`, userId, limit);
 
-export function transactionsOf(db: Db, companyId: number, limit: number, before?: number): Transaction[] {
-  return all<{ id: number; at: number; kind: string; amount: number; balance_after: number; flight_id: number | null; memo: string }>(
-    db, 'SELECT * FROM transactions WHERE company_id = ? AND id < ? ORDER BY id DESC LIMIT ?', companyId, before ?? Number.MAX_SAFE_INTEGER, limit,
-  ).map((t) => ({ id: t.id, at: t.at, kind: t.kind, amount: t.amount, balanceAfter: t.balance_after, flightId: t.flight_id, memo: t.memo }));
+/** A page of the ledger, newest first (`at`, then id: a backdated line leg sits where it happened), `before` being the id of the last row of the previous page. Under `scope=group` the books of the subsidiaries are merged in:
+ *  each row says whose it is, and a transfer inside the group is on both books and flagged `internal`, so a total can leave it out. */
+export function transactionsOf(db: Db, companyId: number, limit: number, before?: number, scope: Scope = 'company'): Transaction[] {
+  const books = booksOf(db, companyId, scope), ids = idsOf(books);
+  return all<{ id: number; company_id: number; company_name: string; internal: number; at: number; kind: string; amount: number; balance_after: number; flight_id: number | null; memo: string }>(
+    db, `SELECT t.*, c.name AS company_name, ${internalSql(books)} AS internal FROM transactions t JOIN companies c ON c.id = t.company_id WHERE t.company_id IN (${ids})${before === undefined ? '' : ` AND (t.at, t.id) < (SELECT at, id FROM transactions WHERE id = ? AND company_id IN (${ids}))`}
+     ORDER BY t.at DESC, t.id DESC LIMIT ?`, ...(before === undefined ? [] : [before]), limit,
+  ).map((t) => ({
+    id: t.id, at: t.at, kind: t.kind, amount: t.amount, balanceAfter: t.balance_after, flightId: t.flight_id, memo: t.memo, companyId: t.company_id, companyName: t.company_name,
+    ...(t.internal ? { internal: true as const } : {}),
+  }));
 }
 
 // ---------------------------------------------------------------- job board
@@ -475,6 +483,14 @@ export function closeUnpaid(db: Db, f: FlightRow, status: 'rejected' | 'cancelle
 
 export const currentSeason = (now: number): string => seasonOf(now);
 
+/** The live season's subsidiaries by parent, as the leaderboard nests them under the parent's row: unranked (C21), with their own figures (the parent's `netWorth` already holds theirs, so nothing is added to its row). Closed seasons keep none. */
+function subsidiariesByParent(db: Db, season: string): Map<number, LeaderboardSubsidiary[]> {
+  const by = new Map<number, LeaderboardSubsidiary[]>();
+  for (const s of all<LeaderboardSubsidiary & { parentId: number }>(db, `SELECT c.parent_id AS parentId, c.name, ${MAIN_HUB_SQL} AS hub, ${FLIGHTS_SQL} AS flights, ${NET_WORTH_SQL} AS netWorth
+    FROM companies c WHERE c.parent_id IS NOT NULL ORDER BY c.parent_id, c.id`, season)) by.set(s.parentId, [...(by.get(s.parentId) ?? []), { name: s.name, hub: s.hub, flights: s.flights, netWorth: s.netWorth }]);
+  return by;
+}
+
 export function leaderboard(db: Db, season: string, now: number): Leaderboard {
   const seasons = [...new Set([currentSeason(now), ...all<{ season: string }>(db, 'SELECT DISTINCT season FROM season_stats ORDER BY season DESC').map((s) => s.season)])];
   const rows = season === currentSeason(now)
@@ -483,7 +499,8 @@ export function leaderboard(db: Db, season: string, now: number): Leaderboard {
         FROM companies c WHERE c.parent_id IS NULL ORDER BY netWorth DESC, c.id LIMIT 100`, season)
     : all<Omit<LeaderboardRow, 'rank'>>(db, `SELECT c.id AS companyId, c.name, c.user_id IS NULL AS isAI, ${MAIN_HUB_SQL} AS hub, s.net_worth AS netWorth, s.reputation AS reputation, s.flights AS flights
         FROM season_stats s JOIN companies c ON c.id = s.company_id WHERE s.season = ? AND c.parent_id IS NULL ORDER BY s.net_worth DESC, c.id LIMIT 100`, season);
-  return { season, seasons, rows: rows.map((r, i) => ({ ...r, isAI: !!r.isAI, reputation: round1(r.reputation), rank: i + 1 })) };
+  const subs = season === currentSeason(now) ? subsidiariesByParent(db, season) : new Map<number, LeaderboardSubsidiary[]>();
+  return { season, seasons, rows: rows.map((r, i) => ({ ...r, isAI: !!r.isAI, reputation: round1(r.reputation), rank: i + 1, ...(subs.has(r.companyId) ? { subsidiaries: subs.get(r.companyId)! } : {}) })) };
 }
 
 export function companyProfile(db: Db, id: number): CompanyProfile {

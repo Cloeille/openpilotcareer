@@ -1,6 +1,7 @@
 // Lot REPORTS (v4): cash flow, statement, profitability and forecast. Pure rules and wire types; the server reads the ledger (server/src/reports*.ts), the web only shows what it returns.
 // Runtime-imports nothing from ./index.ts (index re-exports this file).
 import { z } from 'zod';
+import { scopeSchema } from './group.ts';
 
 // ---------------------------------------------------------------- categories
 
@@ -91,11 +92,17 @@ export const cashQuerySchema = z.object({ months: z.coerce.number().int().min(1)
 /** `balanceAfter` is the balance after this posting in date order (the order the statement is read in), so a backdated line leg sits where it happened. */
 export type StatementRow = {
   id: number; at: number; kind: string; category: Category; memo: string; amount: number; balanceAfter: number; flightId: number | null;
+  /** The book the posting is on. `internal`: under `scope=group`, a transfer between two companies of the group (listed on both books, left out of the totals). */
+  companyId: number; companyName: string; internal?: true;
   line: { id: number; a: string; b: string } | null; aircraft: { id: number; registration: string } | null;
 };
 export type StatementDay = { day: string; net: number; rows: StatementRow[] };
 export type StatementView = {
   days: StatementDay[];
+  /** The cash of the companies read (all the group's under `scope=group`). */
+  balance: number;
+  /** How many subsidiaries the company has, whichever scope was read: the toggle is shown for it. */
+  subsidiaries: number;
   summary: { net: number; in: number; out: number; count: number; byCategory: CategoryTotal[] };
   /** Cursor for the next (older) page: pass it as `before`; null at the end. */
   next: number | null;
@@ -105,7 +112,7 @@ export type StatementView = {
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((s) => !Number.isNaN(Date.parse(`${s}T00:00:00Z`)) && new Date(`${s}T00:00:00Z`).toISOString().slice(0, 10) === s, 'not a calendar date');
 export const statementQuerySchema = z.object({
   from: isoDate.optional(), to: isoDate.optional(), category: z.enum(CATEGORIES).optional(), line: z.coerce.number().int().positive().optional(),
-  before: z.coerce.number().int().positive().optional(), limit: z.coerce.number().int().min(1).max(200).default(50),
+  before: z.coerce.number().int().positive().optional(), limit: z.coerce.number().int().min(1).max(200).default(50), scope: scopeSchema,
 });
 export type StatementQuery = z.infer<typeof statementQuerySchema>;
 

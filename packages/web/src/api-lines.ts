@@ -1,4 +1,4 @@
-import type { LineBridge, LineStartNow, ResolveOption } from '@opc/shared';
+import type { LineBridge, LineStartNow, NetworkView, ResolveOption, Scope } from '@opc/shared';
 import { api } from './api.ts';
 import { ApiError } from './errors.ts';
 
@@ -34,15 +34,7 @@ export type LineForecast = {
 };
 export type LineProblem = { kind: 'aircraft' | 'crew'; detail: string; ready: boolean; until: number | null };
 
-export type FlyingRow = { flightId: number; flightNo: string; lineId: number | null; from: string; to: string; progress: number; delayMin: number; reg: string; own: boolean };
-export type NetworkView = {
-  now: number; enabled: boolean;
-  /** When the 14-day offline cap last stopped this network; null if it never did. */
-  lapsedAt: number | null;
-  lines: Line[]; flying: FlyingRow[];
-  /** `onTimePct` is null until a leg of the day has flown. */
-  today: { done: number; cancelled: number; onTimePct: number | null; nextDeparture: ScheduledFlight | null };
-};
+export type { FlyingRow, NetworkLine, NetworkView } from '@opc/shared';
 export type DependencyKey = 'aircraft' | 'crew' | 'maintenance' | 'network';
 export type LineDetail = {
   line: Line; week: LineDay[]; day: ScheduledFlight[];
@@ -95,7 +87,8 @@ async function optional<T>(path: string): Promise<T | null> {
   }
 }
 
-export const fetchNetwork = (company?: number): Promise<NetworkView | null> => optional<NetworkView>(`/network${company === undefined ? '' : `?company=${company}`}`);
+export const fetchNetwork = (o: { company?: number; scope?: Scope } = {}): Promise<NetworkView | null> =>
+  optional<NetworkView>(`/network${o.company !== undefined ? `?company=${o.company}` : o.scope === 'group' ? '?scope=group' : ''}`);
 export const fetchLine = (id: number, date?: string): Promise<LineDetail | null> => optional<LineDetail>(`/lines/${id}${date ? `?date=${date}` : ''}`);
 export const fetchProblem = (id: number): Promise<LineProblemView | null> => optional<LineProblemView>(`/lines/${id}/problem`);
 export const fetchOps = (): Promise<OpsView | null> => optional<OpsView>('/ops');

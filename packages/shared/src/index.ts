@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { START_MODE_IDS, type Realism, type StartMode } from './career.ts';
 import { financingSchema, type FleetAircraftFinance } from './finance.ts';
+import { scopeSchema } from './group.ts';
 import type { FlightSimbrief } from './simbrief.ts';
 
 export * from './career.ts';
@@ -355,6 +356,8 @@ export type FerryPreview = { distanceNm: number; cost: number; hours: number; ar
 export type FerryBooked = FerryPreview & { balanceAfter: number };
 export const FLIGHT_STATUSES = ['active', 'verified', 'unverified', 'rejected', 'cancelled'] as const;
 export const listQuerySchema = z.object({ limit: z.coerce.number().int().min(1).max(200).default(50), before: z.coerce.number().int().positive().optional() });
+/** `GET /me/transactions`: a page of the ledger, of the company alone or (`scope=group`) of the group. */
+export const transactionsQuerySchema = listQuerySchema.extend({ scope: scopeSchema });
 export const flightListQuerySchema = listQuerySchema.extend({ status: z.enum(FLIGHT_STATUSES).optional() });
 /** The flight log merges the flights the player flew with the legs her lines flew. `before` is the `cursor` of the last entry of the previous page (the log is date-ordered, its ids come from two tables). */
 export const HISTORY_SOURCES = ['all', 'flown', 'lines'] as const;
@@ -409,14 +412,17 @@ export type Flight = {
   /** Lot SIMBRIEF-LINK: the id the SimBrief dispatch is made under, and the OFP fetched for the flight. Only flights of players have it. */
   simbrief?: FlightSimbrief;
 };
-export type Transaction = { id: number; at: number; kind: string; amount: number; balanceAfter: number; flightId: number | null; memo: string };
+/** `companyId` / `companyName`: the book the posting is on (always the asked company unless `scope=group`). `internal`: under `scope=group`, a transfer between two companies of the group; both legs are listed, the totals leave them out. */
+export type Transaction = { id: number; at: number; kind: string; amount: number; balanceAfter: number; flightId: number | null; memo: string; companyId: number; companyName: string; internal?: true };
 export type ApiKeyInfo = { id: number; label: string; createdAt: number; lastUsedAt: number | null };
 /** The pilot (the account), whose rank counts hours and flights over all their companies. */
 export type Pilot = { rank: string; hours: number; flights: number };
 /** The signed-in account seen through one company: `company` and everything below it is the ACTIVE company (X-OPC-Company); `companies` lists all of them. */
 export type Me = { username: string; pilot: Pilot; company: Company; companies: Company[]; hubs: string[]; fleet: FleetAircraft[]; customAircraft: AircraftType[] };
 /** `hub` is the company's main hub (first of its hubs by ICAO, as `Me.hubs[0]` and `CompanyProfile.hubs[0]`), null while it has none. */
-export type LeaderboardRow = { rank: number; companyId: number; name: string; isAI: boolean; hub: string | null; netWorth: number; flights: number; reputation: number };
+/** A subsidiary under its parent's row: never ranked (C21), and its net worth is already inside the parent's. */
+export type LeaderboardSubsidiary = { name: string; hub: string | null; flights: number; netWorth: number };
+export type LeaderboardRow = { rank: number; companyId: number; name: string; isAI: boolean; hub: string | null; netWorth: number; flights: number; reputation: number; subsidiaries?: LeaderboardSubsidiary[] };
 export type Leaderboard = { season: string; seasons: string[]; rows: LeaderboardRow[] };
 export type Personality = { style: 'aggressive' | 'cautious'; preferred: string[] };
 export type CompanyProfile = Company & {

@@ -1,4 +1,4 @@
-import { OPC_GLOBAL_URL, infoSchema, type ServerInfo } from '@opc/shared';
+import { OPC_GLOBAL_URL, infoSchema, type Scope, type ServerInfo } from '@opc/shared';
 import { ApiError } from './errors.ts';
 import { exportFileName } from './settings-model.ts';
 import { createSession } from './session-store.ts';
@@ -62,8 +62,8 @@ export async function fetchInfo(server: string): Promise<ServerInfo> {
 }
 
 /** Download an authenticated export (the browser cannot send the Bearer header from a plain link). Resolves with the file size in bytes. */
-export async function downloadExport(format: 'json' | 'flights.csv' | 'transactions.csv'): Promise<number> {
-  const res = await request(`/me/export?format=${format}`, {});
+export async function downloadExport(format: 'json' | 'flights.csv' | 'transactions.csv', scope?: Scope): Promise<number> {
+  const res = await request(`/me/export?format=${format}${scope === 'group' ? '&scope=group' : ''}`, {});
   if (!res.ok) return fail(res, true);
   const blob = await res.blob();
   saveBlob(blob, exportFileName(res.headers.get('content-disposition'), format));

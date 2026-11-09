@@ -112,11 +112,11 @@ async function show(navigate = false): Promise<void> {
   if (offline) return showOffline();
   const current = snap;
   const seq = ++showSeq;
-  const { name, arg } = resolve(location.hash);
+  const { name, arg, query } = resolve(location.hash);
   if (name === 'company' && obSupported) { void additionalOnboarding().then((ob) => { if (!wizard) beginOnboarding(ob, true); }); return; }
   let screen: Screen;
   try {
-    const load = routes[name]!({ snap: current, arg, refresh, go: (hash) => { location.hash = hash; } });
+    const load = routes[name]!({ snap: current, arg, query, refresh, go: (hash) => { location.hash = hash; } });
     screen = navigate ? await withLoading(load, () => seq === showSeq) : await load;
   } catch (e) {
     if (offline) return; // the connection dropped under us: the offline screen is already up
