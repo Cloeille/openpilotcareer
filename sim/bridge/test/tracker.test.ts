@@ -5,6 +5,7 @@ import { checkTelemetry, deriveAircraft, distanceNm, resolveCatalogEntry, teleme
 import { CRAFT, simulate } from '../scripts/make-fixtures.ts';
 import { readSamples } from '../src/fixture.ts';
 import { designatorOf, FlightTracker } from '../src/tracker.ts';
+import { JOB, LIFTOFF, TOUCHDOWN, recorded, serverSays as verdict175, silentGap } from './flight175.ts';
 import type { Phase, SimSample, TrackerOptions } from '../src/types.ts';
 
 const load = (name: string): SimSample[] => readSamples(fileURLToPath(new URL(`../fixtures/${name}.json`, import.meta.url)));
@@ -239,4 +240,90 @@ test('the same 5000 kts in an A20N is a teleport, and a QASR is still caught by 
   const at = quasarFlight.findIndex((s) => !s.onGround && s.lat < 47) + 1; // airborne over France, 60 s per sample
   const jumped = [...quasarFlight.slice(0, at), ...quasarFlight.slice(at).map((s) => ({ ...s, lat: s.lat + 4 }))]; // 240 nm sideways in one sample: over 14 000 kts
   assert.ok(run(jumped).tr.flags.includes('teleport_jump_over_50nm'));
+});
+
+// ---- the flight ends where the aircraft stops with the parking brake set within 5 nm of the destination; flight 175 (VCCJ -> ZBAD, a Quasar) must not be refused
+const feedAll = (stream: SimSample[], opts: TrackerOptions = JOB) => { const tr = new FlightTracker(opts); for (const s of stream) tr.feed(s); return tr; };
+const reportOf = (tr: FlightTracker) => { assert.ok(tr.outcome?.ok, JSON.stringify(tr.outcome)); return tr.outcome.report; };
+
+test('(a) a normal flight parks with the brake: verified report, brake off at touchdown does not end it', () => {
+  const tr = feedAll(recorded({ brake: true }));
+  const r = reportOf(tr);
+  assert.deepEqual([tr.phase, r.departureIcao, r.arrivalIcao, r.aircraftIcao, tr.flags], ['parked', 'VCCJ', 'ZBAD', 'QASR', []]);
+  assert.equal(verdict175(r).ok, true);
+  const early = feedAll(recorded({ brake: true, stoppedFor: 1 }));
+  assert.equal(early.phase, 'parked', 'the brake ends the flight at once, not after 30 s');
+});
+
+test('(b) flight 175: a long pause mid-flight, then landing and brake at ZBAD: it used to be refused, now reported with the right departure', () => {
+  const stream = recorded({ brake: true, standNm: 1.6 });
+  for (const [name, gapped] of [
+    ['roll to cruise', silentGap(stream, LIFTOFF - 5, LIFTOFF + 25, 20 * MIN)],
+    ['taxi to cruise', silentGap(stream, 30, LIFTOFF + 25, 20 * MIN)],
+  ] as const) {
+    const before = feedAll(gapped, { aircraftIcao: 'QASR' }); // the departure is the first airborne reading, over open sea: the refusal of flight 175
+    assert.ok(before.outcome && !before.outcome.ok && before.outcome.reason === 'takeoff was not at a known airport', `${name}: ${JSON.stringify(before.outcome)}`);
+    const tr = feedAll(gapped);
+    const r = reportOf(tr);
+    assert.deepEqual([r.departureIcao, r.arrivalIcao, tr.flags], ['VCCJ', 'ZBAD', ['long_pause']], name);
+    assert.ok(Math.abs(r.distanceNm - 2_635) < 40, `${name}: the unseen leg counts as flown, ${r.distanceNm} nm`);
+    assert.equal(verdict175(r).ok, false, 'the server still rejects the flag...');
+    assert.equal(verdict175(r, ['long_pause']).ok, true, '...unless the company tolerates pauses: then the flight is verified');
+  }
+  const climbed = feedAll(silentGap(stream, LIFTOFF + 1, LIFTOFF + 25, 20 * MIN));
+  assert.deepEqual([reportOf(climbed).departureIcao, climbed.flags], ['VCCJ', ['long_pause']], 'a gap after the takeoff was seen never needed the fallback');
+  const reconnect = feedAll(silentGap(stream, LIFTOFF - 5, LIFTOFF + 25, 20 * MIN, { resumed: 'reconnect' }));
+  assert.deepEqual([reportOf(reconnect).departureIcao, reconnect.flags], ['VCCJ', ['teleport_jump_over_50nm']], 'a reconnect before the climb is a jump off the track: flagged as ever, but the departure is right');
+});
+
+test('(b) the departure fallback needs the job: an aircraft that was never on the ground at the origin has no departure', () => {
+  const stream = recorded({ brake: true });
+  const gapped = silentGap(stream, LIFTOFF - 5, LIFTOFF + 25, 20 * MIN);
+  for (const opts of [{ ...JOB, originIcao: 'ZBAD' }, { aircraftIcao: 'QASR', destinationIcao: 'ZBAD' }]) {
+    const o = feedAll(gapped, opts).outcome;
+    assert.ok(o && !o.ok && /known airport/.test(o.reason), JSON.stringify(o));
+  }
+  const slow = feedAll(silentGap(stream, LIFTOFF - 5, LIFTOFF + 25, 5 * MIN), { aircraftIcao: 'C172', originIcao: 'VCCJ', destinationIcao: 'ZBAD' }).outcome;
+  assert.ok(slow && !slow.ok, 'a Cessna cannot have flown 800 nm in 5 minutes: nothing to fall back on');
+});
+
+test('a bridge started in the air has seen no departure: refused, as before', () => {
+  const tr = feedAll(recorded({ brake: true }).slice(LIFTOFF + 30));
+  assert.deepEqual([tr.phase, tr.outcome && !tr.outcome.ok && /started with the aircraft in the air/.test(tr.outcome.reason)], ['parked', true]);
+  assert.deepEqual(tr.flags, []);
+});
+
+test('(c) stopped at the destination without the parking brake: no finish yet; the brake ends it', () => {
+  const free = feedAll(recorded({ brake: false, standNm: 1.6 }));
+  assert.deepEqual([free.phase, free.outcome], ['landed', null], 'five minutes later it is still not over');
+  const braked = new FlightTracker(JOB);
+  const stream = recorded({ brake: false, standNm: 1.6 });
+  for (const s of stream) braked.feed(s);
+  braked.feed({ ...stream.at(-1)!, t: stream.at(-1)!.t + 1_000, parkingBrake: true });
+  assert.equal(braked.phase, 'parked');
+  assert.equal(reportOf(braked).arrivalIcao, 'ZBAD', 'a stand 1.6 nm from the reference point is Daxing');
+});
+
+test('(d) the brake set 8 nm from the destination: no finish', () => {
+  const tr = feedAll(recorded({ brake: true, standNm: 8 }));
+  assert.deepEqual([tr.phase, tr.outcome], ['landed', null]);
+  assert.equal(feedAll(recorded({ brake: true, standNm: 4.5 })).phase, 'parked', 'within 5 nm it is');
+});
+
+test('(e) a recording without the parkingBrake field still finishes through the 30 s hold timer', () => {
+  const old = recorded({ brake: true }).map(({ parkingBrake: _, ...s }) => s as SimSample);
+  const stopped = old.findIndex((s, i) => i > TOUCHDOWN && s.groundSpeedKts < 1);
+  assert.equal(feedAll(old.filter((s, i) => i < stopped || s.t - old[stopped]!.t < 30_000)).phase, 'landed', 'less than 30 s stopped');
+  const tr = feedAll(old);
+  assert.deepEqual([tr.phase, reportOf(tr).arrivalIcao], ['parked', 'ZBAD']);
+  assert.equal(feedAll(old, { aircraftIcao: 'QASR' }).phase, 'parked', 'without a job too (replay of an old fixture)');
+});
+
+test('recovery: stopped with the brake set at the destination after a reload left the tracker airborne, or a rewind; and never at the wrong airport', () => {
+  const stream = recorded({ brake: true, standNm: 1.6 });
+  const rewound = silentGap(stream, LIFTOFF + 40, LIFTOFF + 10, 30_000, { resumed: 'reload' }); // a reload back along the track, then the rest of the flight
+  const tr = feedAll(rewound);
+  assert.deepEqual([tr.phase, reportOf(tr).departureIcao, reportOf(tr).arrivalIcao, tr.flags], ['parked', 'VCCJ', 'ZBAD', []]);
+  const wrong = feedAll(recorded({ brake: true }), { ...JOB, destinationIcao: 'VCBI' }); // the job was for another airport
+  assert.deepEqual([wrong.phase, wrong.outcome], ['landed', null]);
 });

@@ -3,7 +3,7 @@
 // No I/O and no SimConnect: everything here is testable from recorded sample streams.
 import { distanceNm, icaoTypeSchema, telemetrySchema } from '@opc/shared';
 import { cruiseKtsOf } from './aircraft-types.ts';
-import { nearestAirport } from './airports.ts';
+import { isNearAirport, nearestAirport } from './airports.ts';
 import type { Flag, Outcome, Phase, SimSample, TrackerOptions } from './types.ts';
 
 const MOVING_KTS = 5;               // ground speed that ends `preflight`
@@ -11,8 +11,9 @@ const LIFTOFF_CONFIRM_MS = 3_000;   // off the ground this long = airborne (igno
 const LANDED_KTS = 30;              // a ground contact slower than this is a landing; faster is a touch-and-go or bounce
 const LANDED_KTS_HELICOPTER = 5;    // helicopters stop on touchdown instead of rolling out
 const PARKED_KTS = 1;
-const PARK_HOLD_MS = 30_000;
+const PARK_HOLD_MS = 30_000;        // standing still this long ends the flight when the sim does not report the parking brake (older recordings)
 const AIRPORT_MATCH_NM = 10;        // takeoff/landing farther than this from every known airport is off-airport
+const DEST_PARK_NM = 5;             // the flight ends where the aircraft stops with the brake set within this of the job's destination (a large airport's reference point is 2-3 nm from the stands)
 const TELEPORT_NM = 50;
 const TELEPORT_MIN_KTS = 1_500;     // a position jump must be faster than this to be a teleport, so a long sample gap is not one...
 const TELEPORT_MARGIN = 1.5;        // ...and faster than this times the cruise speed of the type: a Quasar cruises at 5 000 kts, an A320 at 447
@@ -50,6 +51,7 @@ export class FlightTracker {
   #prev: SimSample | null = null;
   #firstOff: Snapshot | null = null;     // first off-ground sample of the current liftoff attempt
   #takeoff: Snapshot | null = null;
+  #grounded: Snapshot | null = null;     // the latest reading on the ground before the aircraft left it. Unlike #takeoff and the breadcrumbs, a rewind or a reconnect never resets it
   #flownNm = 0;
   #contact: Contact | null = null;
   #stoppedSince: number | null = null;
@@ -108,8 +110,7 @@ export class FlightTracker {
     const nm = distanceNm(prev.lat, prev.lon, s.lat, s.lon);
     if (!s.resumed && gapMs > LONG_PAUSE_MS) this.#flag('long_pause'); // the sim (or the bridge) was away for a long time, and the host did not say why
     const moved = nm > RELOAD_NM;
-    const flyableKts = Math.max(TELEPORT_MIN_KTS, TELEPORT_MARGIN * (cruiseKtsOf(designatorOf(s.atcModel) ?? this.#opts.aircraftIcao) ?? 0));
-    if (!s.resumed && !(moved && nm / (gapMs / 3_600_000) > flyableKts)) return false;
+    if (!s.resumed && !(moved && nm / (gapMs / 3_600_000) > this.#flyableKts(s.atcModel))) return false;
     // back on the track? A break that left the aircraft where it was has nothing to rewind, except that a reload before takeoff starts over
     const back = moved ? this.#nearestCrumb(s) : this.#takeoff ? -1 : 0;
     if (moved && back < 0 && nm > TELEPORT_NM) this.#flag('teleport_jump_over_50nm'); // forward, off the track: the sim jumped too fast to have flown it
@@ -122,6 +123,11 @@ export class FlightTracker {
     if (back < 0) return false;
     this.#rewind(back);
     return true;
+  }
+
+  /** The fastest the aircraft can be flown, for the teleport rule: the cruise speed of its type with a margin (a Quasar cruises at 5 000 kts), never under TELEPORT_MIN_KTS. */
+  #flyableKts(atcModel: string): number {
+    return Math.max(TELEPORT_MIN_KTS, TELEPORT_MARGIN * (cruiseKtsOf(designatorOf(atcModel) ?? this.#opts.aircraftIcao) ?? 0));
   }
 
   /** Index of the recorded point closest to `s` and within RELOAD_NM of it, else -1. */
@@ -147,6 +153,7 @@ export class FlightTracker {
     if (s.onGround) {
       this.#firstOff = null;
       if (this.#phase === 'preflight' && s.groundSpeedKts >= MOVING_KTS) this.#phase = 'taxiOut';
+      this.#grounded = snap(s);
       return;
     }
     this.#firstOff ??= snap(s);
@@ -163,7 +170,9 @@ export class FlightTracker {
     if (!s.onGround) { this.#contact = null; return; } // airborne again: touch-and-go or bounce, not a landing
     this.#contact ??= { ...snap(s), distanceNm: this.#flownNm, approachFpm: prev?.verticalSpeedFpm ?? 0, touchdownFpm: undefined };
     this.#contact.touchdownFpm ??= s.touchdownFpm;
-    if (s.groundSpeedKts < (s.engineKind === 'helicopter' ? LANDED_KTS_HELICOPTER : LANDED_KTS)) this.#phase = 'landed';
+    if (s.groundSpeedKts >= (s.engineKind === 'helicopter' ? LANDED_KTS_HELICOPTER : LANDED_KTS)) return;
+    this.#phase = 'landed';
+    this.#landed(s); // already stopped, brake set (a reload to the stand): the flight ends on this reading
   }
 
   #landed(s: SimSample): void {
@@ -174,21 +183,53 @@ export class FlightTracker {
     }
     // the touchdown rate can be latched by the sim a reading after the wheels touch
     if (this.#contact) this.#contact.touchdownFpm ??= s.touchdownFpm;
-    if (s.groundSpeedKts >= PARKED_KTS) { this.#stoppedSince = null; return; }
-    this.#stoppedSince ??= s.t;
-    if (s.t - this.#stoppedSince >= PARK_HOLD_MS) {
+    if (this.#parked(s)) {
       this.#phase = 'parked';
-      this.#outcome = this.#finish();
+      this.#outcome = this.#finish(s);
     }
   }
 
-  #finish(): Outcome {
+  /** The flight ends when the aircraft stands still on the ground with its parking brake set, within DEST_PARK_NM of the job's destination
+   *  (anywhere, when the tracker was not told the destination). A sample without the brake reading falls back to standing still for PARK_HOLD_MS, anywhere. */
+  #parked(s: SimSample): boolean {
+    if (!s.onGround || s.groundSpeedKts >= PARKED_KTS) { this.#stoppedSince = null; return false; }
+    this.#stoppedSince ??= s.t;
+    if (s.parkingBrake === undefined) return s.t - this.#stoppedSince >= PARK_HOLD_MS;
+    return s.parkingBrake && (this.#opts.destinationIcao === undefined || this.#destinationAt(s) !== null);
+  }
+
+  /** The job's destination when `p` is within DEST_PARK_NM of it. */
+  #destinationAt(p: Pick<SimSample, 'lat' | 'lon'>): string | null {
+    const { destinationIcao } = this.#opts;
+    return destinationIcao && isNearAirport(p.lat, p.lon, destinationIcao, DEST_PARK_NM) ? destinationIcao : null;
+  }
+
+  /** Where the flight left from, and the snapshot that counts as the takeoff. Normally the takeoff itself. A gap in the samples (a long pause, a stalled bridge) can hide
+   *  the roll and the climb, so that the first airborne reading is far from the airport. If the aircraft was last seen on the ground at the job's origin and the type could
+   *  have flown to that reading in the time that passed (the teleport rule's limit), the flight left from the origin: that ground reading is the takeoff and the unseen
+   *  leg counts as flown. The gap keeps the flags it raised (long_pause, teleport) and the server checks the departure against the job either way.
+   *  A bridge started in the air has no ground reading: no departure was seen. */
+  #departure(takeoff: Snapshot): { icao: string; at: Snapshot; unseenNm: number } | null {
+    const { originIcao } = this.#opts, left = this.#grounded;
+    if (!left) return null;
+    const icao = nearestAirport(takeoff.lat, takeoff.lon, AIRPORT_MATCH_NM);
+    const unseenNm = distanceNm(left.lat, left.lon, takeoff.lat, takeoff.lon);
+    const hours = (takeoff.t - left.t) / 3_600_000;
+    if (originIcao && icao !== originIcao && isNearAirport(left.lat, left.lon, originIcao, AIRPORT_MATCH_NM) && unseenNm <= this.#flyableKts(takeoff.atcModel) * hours) {
+      return { icao: originIcao, at: left, unseenNm };
+    }
+    return icao ? { icao, at: takeoff, unseenNm: 0 } : null;
+  }
+
+  #finish(stop: SimSample): Outcome {
     const no = (reason: string): Outcome => ({ ok: false, reason });
-    const takeoff = this.#takeoff, landing = this.#contact;
-    if (!takeoff || !landing) return no('no complete flight was recorded');
-    const departureIcao = nearestAirport(takeoff.lat, takeoff.lon, AIRPORT_MATCH_NM);
-    if (!departureIcao) return no('takeoff was not at a known airport');
-    const arrivalIcao = nearestAirport(landing.lat, landing.lon, AIRPORT_MATCH_NM);
+    const landing = this.#contact;
+    if (!this.#takeoff || !landing) return no('no complete flight was recorded');
+    const departure = this.#departure(this.#takeoff);
+    if (!departure) return no(this.#grounded ? 'takeoff was not at a known airport' : 'no departure seen: the bridge started with the aircraft in the air');
+    const { icao: departureIcao, at: takeoff } = departure;
+    // the job's airport wins where a neighbour is nearer to the touchdown or the stands are far from the reference point
+    const arrivalIcao = this.#destinationAt(landing) ?? this.#destinationAt(stop) ?? nearestAirport(landing.lat, landing.lon, AIRPORT_MATCH_NM);
     if (!arrivalIcao) return no('landing was not at a known airport');
     const aircraftIcao = designatorOf(takeoff.atcModel) ?? this.#opts.aircraftIcao?.toUpperCase();
     if (!aircraftIcao) return no(`aircraft type unknown (ATC MODEL "${takeoff.atcModel}"): pass --aircraft with its ICAO designator`);
@@ -203,7 +244,7 @@ export class FlightTracker {
       fuelUsedKg: Math.round(Math.max(0, takeoff.fuelKg - landing.fuelKg)),
       // the sim's latched touchdown rate; else the last vertical speed before the wheels touched. Always reported as a descent.
       landingFpm: -Math.round(Math.abs(landing.touchdownFpm ?? landing.approachFpm)),
-      distanceNm: Math.round(landing.distanceNm * 10) / 10,
+      distanceNm: Math.round((landing.distanceNm + departure.unseenNm) * 10) / 10,
       source: 'simconnect',
       // flagged flights are still reported: the server, not the client, rejects them (and tells the pilot why)
       ...(this.#flags.size > 0 ? { flags: [...this.#flags] } : {}),

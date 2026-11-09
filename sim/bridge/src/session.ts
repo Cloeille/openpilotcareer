@@ -44,8 +44,8 @@ export class Session {
 
   constructor(o: SessionOptions) {
     this.#o = o;
-    // the job's assigned aircraft is the fallback when ATC MODEL is not a designator (add-on aircraft)
-    const opts: TrackerOptions = { aircraftIcao: o.flight.aircraftIcao };
+    // the job's assigned aircraft is the fallback when ATC MODEL is not a designator (add-on aircraft); its airports say where the flight leaves from and ends
+    const opts: TrackerOptions = { aircraftIcao: o.flight.aircraftIcao, originIcao: o.flight.from, destinationIcao: o.flight.to };
     this.#tracker = new FlightTracker(opts);
   }
 

@@ -5,20 +5,20 @@ import { FlightTracker } from '../src/tracker.ts';
 
 // A reading as decode() returns it: SimConnect units already converted by the data definition (knots, fpm, kg, degrees).
 const reading = (over: Partial<Parameters<SampleMapper['map']>[0]> = {}): Parameters<SampleMapper['map']>[0] => ({
-  atcModel: 'C172', title: 'Cessna 172 Skyhawk', category: 'Airplane', engineType: 0, onGround: 1, slew: 0,
+  atcModel: 'C172', title: 'Cessna 172 Skyhawk', category: 'Airplane', engineType: 0, onGround: 1, slew: 0, parkingBrake: 0,
   lat: 49.0097, lon: 2.5479, groundSpeedKts: 0, verticalSpeedFpm: 0, touchdownFpm: 0,
   fuelKg: 100, totalWeightKg: 1000, emptyWeightKg: 770, simRate: 1, ...over,
 });
 
 test('decode reads the values in the order of the data definition', () => {
   const doubles = [1, 2, 3, 4, 5, 6, 7, 8, 9];   // lat lon groundSpeed verticalSpeed touchdown fuel total empty simRate
-  const ints = [5, 1, 0];                         // engineType onGround slew
+  const ints = [5, 1, 0, 1];                      // engineType onGround slew parkingBrake
   const r = decode({
     readString64: () => 'TT:ATCCOM.AC_MODEL_A20N.0.text', readString256: () => 'Airbus A320neo', readString32: () => 'Airplane',
     readInt32: () => ints.shift()!, readFloat64: () => doubles.shift()!,
   });
   assert.deepEqual(r, {
-    atcModel: 'TT:ATCCOM.AC_MODEL_A20N.0.text', title: 'Airbus A320neo', category: 'Airplane', engineType: 5, onGround: 1, slew: 0,
+    atcModel: 'TT:ATCCOM.AC_MODEL_A20N.0.text', title: 'Airbus A320neo', category: 'Airplane', engineType: 5, onGround: 1, slew: 0, parkingBrake: 1,
     lat: 1, lon: 2, groundSpeedKts: 3, verticalSpeedFpm: 4, touchdownFpm: 5, fuelKg: 6, totalWeightKg: 7, emptyWeightKg: 8, simRate: 9,
   });
   assert.equal(doubles.length + ints.length, 0, 'every field consumed exactly once');
@@ -35,6 +35,8 @@ test('mapper: engine kinds, unknown empty weight, flags and the pause state', ()
   assert.equal(kind({ engineType: 6 }), 'other');
   const noEmpty = m.map(reading({ emptyWeightKg: 0 }), 2_000, true);
   assert.ok('sample' in noEmpty && noEmpty.sample.emptyWeightKg === undefined && noEmpty.sample.paused);
+  const braked = m.map(reading({ parkingBrake: 1 }), 2_500, false), free = m.map(reading({ parkingBrake: 0 }), 2_600, false);
+  assert.ok('sample' in braked && braked.sample.parkingBrake === true && 'sample' in free && free.sample.parkingBrake === false);
   const cheat = m.map(reading({ slew: 1, simRate: 4 }), 3_000, false);
   assert.ok('sample' in cheat && cheat.sample.slew && cheat.sample.simRate === 4);
 });
@@ -69,7 +71,9 @@ test('mapped readings walk the tracker through a whole flight', () => {
   assert.equal(tr.phase, 'airborne');
   feed({ ...LFAQ, onGround: 0, groundSpeedKts: 65, verticalSpeedFpm: -500 });
   feed({ ...LFAQ, onGround: 1, groundSpeedKts: 60, touchdownFpm: -200 });
-  feed({ ...LFAQ, onGround: 1, groundSpeedKts: 0, touchdownFpm: -200 }, 40);
+  feed({ ...LFAQ, onGround: 1, groundSpeedKts: 0, touchdownFpm: -200 }, 5);
+  assert.equal(tr.phase, 'landed', 'stopped, but the parking brake is off: the flight goes on');
+  feed({ ...LFAQ, onGround: 1, groundSpeedKts: 0, touchdownFpm: -200, parkingBrake: 1 }, 2);
   assert.equal(tr.phase, 'parked');
   assert.ok(tr.outcome?.ok && tr.outcome.report.landingFpm === -200 && tr.outcome.report.departureIcao === 'LFPN' && tr.outcome.report.arrivalIcao === 'LFAQ', JSON.stringify(tr.outcome));
 });

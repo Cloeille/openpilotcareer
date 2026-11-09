@@ -26,7 +26,7 @@ import type { Listing } from './aircraft-cfg.ts';
 import { simSampleSchema, type EngineKind, type Resume, type SimSample } from './types.ts';
 
 type Kind = 'f64' | 'i32' | 's32' | 's64' | 's256';
-type Reading = Record<'atcModel' | 'title' | 'category', string> & Record<'engineType' | 'onGround' | 'slew' | 'lat' | 'lon' | 'groundSpeedKts' |
+type Reading = Record<'atcModel' | 'title' | 'category', string> & Record<'engineType' | 'onGround' | 'slew' | 'parkingBrake' | 'lat' | 'lon' | 'groundSpeedKts' |
   'verticalSpeedFpm' | 'touchdownFpm' | 'fuelKg' | 'totalWeightKg' | 'emptyWeightKg' | 'simRate', number>;
 
 /** One row per SimVar, in the order the values arrive in the data buffer. Names and units are the MSFS SDK's. */
@@ -37,6 +37,7 @@ const FIELDS: readonly (readonly [key: keyof Reading, simVar: string, units: str
   ['engineType', 'ENGINE TYPE', 'enum', 'i32'],
   ['onGround', 'SIM ON GROUND', 'bool', 'i32'],
   ['slew', 'IS SLEW ACTIVE', 'bool', 'i32'],
+  ['parkingBrake', 'BRAKE PARKING POSITION', 'bool', 'i32'],
   ['lat', 'PLANE LATITUDE', 'degrees', 'f64'],
   ['lon', 'PLANE LONGITUDE', 'degrees', 'f64'],
   ['groundSpeedKts', 'GROUND VELOCITY', 'knots', 'f64'],
@@ -163,7 +164,7 @@ export class SampleMapper {
     const touchdownFpm = onGround ? this.#unreported : undefined;
     if (onGround) this.#unreported = undefined;
     const parsed = simSampleSchema.safeParse({
-      t, onGround, lat: r.lat, lon: r.lon, groundSpeedKts: r.groundSpeedKts, verticalSpeedFpm: r.verticalSpeedFpm,
+      t, onGround, parkingBrake: r.parkingBrake !== 0, lat: r.lat, lon: r.lon, groundSpeedKts: r.groundSpeedKts, verticalSpeedFpm: r.verticalSpeedFpm,
       ...(touchdownFpm !== undefined ? { touchdownFpm } : {}),
       fuelKg: r.fuelKg, totalWeightKg: r.totalWeightKg,
       // MSFS reports 0 for an aircraft without a usable empty weight: unknown, not "weightless"

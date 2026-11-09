@@ -21,3 +21,9 @@ export function nearestAirport(lat: number, lon: number, maxNm: number): string 
   }
   return best;
 }
+
+/** Is the point within `maxNm` of the reference point of this airport? False for an ICAO the data does not list. */
+export const isNearAirport = (lat: number, lon: number, icao: string, maxNm: number): boolean => {
+  const at = airportPosition(icao);
+  return at !== null && distanceNm(lat, lon, at.lat, at.lon) <= maxNm;
+};

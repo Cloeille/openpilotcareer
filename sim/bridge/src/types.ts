@@ -32,6 +32,8 @@ export const simSampleSchema = z.object({
   simRate: finite.pipe(z.number().positive()),
   slew: z.boolean(),
   paused: z.boolean(),
+  /** BRAKE PARKING POSITION. Absent in recordings that predate it: the tracker then falls back to a stopped-for-PARK_HOLD_MS rule. */
+  parkingBrake: z.boolean().optional(),
   /** SimVar ATC MODEL: either a bare ICAO designator or MSFS's `TT:ATCCOM.AC_MODEL_<ICAO>.0.text` token. */
   atcModel: z.string().max(200),
   title: z.string().max(200),
@@ -61,4 +63,8 @@ export type Outcome = { ok: true; report: Telemetry } | { ok: false; reason: str
 export type TrackerOptions = {
   /** ICAO type designator to report when ATC MODEL is not a valid designator (e.g. add-on aircraft). */
   aircraftIcao?: string;
+  /** The accepted job's origin and destination. The origin names the departure when the takeoff snapshot is off-airport but the flight began on the ground there;
+   *  the destination is where a stopped aircraft with its parking brake set ends the flight (DEST_PARK_NM), and the arrival the report names. */
+  originIcao?: string;
+  destinationIcao?: string;
 };

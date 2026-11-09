@@ -27,6 +27,7 @@ const USAGE = `usage: opc-bridge [command]
   scan-aircraft [--dry-run] [--out F] list the aircraft installed in MSFS (it must be running; official and Community) and send them to the server
                                       as the aircraft you can buy. --dry-run only prints them (--out F writes them to the file F as JSON). Auto mode does it once per sim session.
   fly <flightId>                      follow MSFS (Windows, SimConnect) and report that flight when you park; leave it running.
+                                      The flight ends when you are on the ground, stopped, parking brake set, within 5 nm of the destination.
                                       The in-sim panel reads http://127.0.0.1:${STATUS_PORT}/status. Ctrl+C quits.
   replay <fixture.json> [--flight ID] [--speed N]
                                       feed a recorded sample stream through the bridge and report it to the server, without a simulator.

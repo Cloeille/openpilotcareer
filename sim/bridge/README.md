@@ -20,9 +20,14 @@ fixture file ───────▶ fixture.ts ───┴▶ SimSample ▶ t
 ```
 
 - `tracker.ts` is pure (no I/O, no SimConnect): `preflight → taxiOut → airborne → landed → parked`. Touch-and-go and go-around are
-  not landings. At `parked` it builds the report: nearest airport from `data/airports.json` for departure and arrival, aircraft from
+  not landings. **The flight ends when you are on the ground, stopped, parking brake set, within 5 nm of the destination** (`BRAKE PARKING POSITION`; the job's airport is
+  the arrival even where a neighbour is nearer). Stopped without the brake, or with it set farther away, the flight goes on. A recording without the brake reading (older
+  fixtures) ends after 30 s stopped, anywhere. At `parked` it builds the report: nearest airport from `data/airports.json` for departure and arrival, aircraft from
   ATC MODEL (the accepted flight's aircraft when ATC MODEL is not a valid designator), payload = total − empty − fuel at takeoff,
-  fuel used, touchdown rate, great-circle distance, `source: "simconnect"`.
+  fuel used, touchdown rate, great-circle distance, `source: "simconnect"`. If a gap in the samples (a long pause, a stalled bridge) hid the roll and the
+  climb, so that the first airborne reading is far from any airport, the departure is the job's origin when the aircraft was last seen on the ground there and the type
+  could have flown the distance in the time that passed; the unseen leg counts as flown and the gap keeps its flags. A bridge started with the aircraft already in the air
+  saw no departure and still reports nothing ("takeoff was not at a known airport"); start it before takeoff.
 - Anti-cheat flags, always sent with the report: `slew_detected`, `time_acceleration_above_1x`, `teleport_jump_over_50nm`,
   `long_pause`, `reload_after_crash` (see [Reloads and game crashes](#reloads-and-game-crashes)). The server rejects any flagged flight and tells the pilot why, unless its owner turned anti-cheat off (`antiCheat: false` in `/api/v1/info`; `flights` and `fly` print a note then). The client never decides; it only reports.
 - <a id="reloads-and-game-crashes"></a>**Reloads and game crashes are allowed**, because an aircraft can bug out and the game can crash. A *break of the track* is a position jump over 5 nm faster than 1 500 kt between two samples, a `FlightLoaded` event, or a reconnect after the sim quit or the link closed. The tracker keeps a breadcrumb of the flight (the departure plus one point per nm flown):
@@ -90,7 +95,7 @@ one-file change: it only has to produce `SimSample`s.
 
 ### SimVars read (once per second, user aircraft)
 
-`ATC MODEL`, `TITLE`, `CATEGORY`, `ENGINE TYPE`, `SIM ON GROUND`, `IS SLEW ACTIVE`, `PLANE LATITUDE`, `PLANE LONGITUDE`,
+`ATC MODEL`, `TITLE`, `CATEGORY`, `ENGINE TYPE`, `SIM ON GROUND`, `IS SLEW ACTIVE`, `BRAKE PARKING POSITION`, `PLANE LATITUDE`, `PLANE LONGITUDE`,
 `GROUND VELOCITY`, `VERTICAL SPEED`, `PLANE TOUCHDOWN NORMAL VELOCITY`, `FUEL TOTAL QUANTITY WEIGHT`, `TOTAL WEIGHT`, `EMPTY WEIGHT`,
 `SIMULATION RATE`, plus the `Pause` system event. Units are requested in the SimVar definition (knots, feet/minute, kilograms,
 degrees), so the core never converts. Every reading is validated against the `SimSample` schema before it reaches the core; an
@@ -110,7 +115,7 @@ invalid reading is dropped and mentioned once in the log.
   A non-designator ATC MODEL falls back to the aircraft of the accepted flight.
 - Windows specifics: the config path under `%APPDATA%` and the missing file-permission check there; the hidden key prompt of
   `setup` on an interactive terminal (tested with piped input only; `--key` and `OPC_API_KEY` avoid the prompt).
-- The thresholds in `tracker.ts` (3 s off the ground = airborne, 30 s stopped = parked, 15 min = long pause) are reasoned, not
+- The thresholds in `tracker.ts` (3 s off the ground = airborne, 5 nm and the parking brake = parked, 30 s stopped = parked when there is no brake reading, 15 min = long pause) are reasoned, not
   tuned on recorded flights.
 
 ## Tests

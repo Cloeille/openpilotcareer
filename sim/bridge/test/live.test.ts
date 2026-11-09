@@ -136,7 +136,7 @@ test('simconnect extras: gauges follow the engine kind and the engine count; una
 });
 
 test('mapper: extras ride on the sample; garbage extras never invalidate the sample the tracker depends on', () => {
-  const reading = { atcModel: 'C172', title: 'C172', category: 'Airplane', engineType: 0, onGround: 0, slew: 0, lat: 48.75, lon: 2.1, groundSpeedKts: 100, verticalSpeedFpm: 0, touchdownFpm: 0, fuelKg: 50, totalWeightKg: 900, emptyWeightKg: 770, simRate: 1 };
+  const reading = { atcModel: 'C172', title: 'C172', category: 'Airplane', engineType: 0, onGround: 0, slew: 0, parkingBrake: 0, lat: 48.75, lon: 2.1, groundSpeedKts: 100, verticalSpeedFpm: 0, touchdownFpm: 0, fuelKg: 50, totalWeightKg: 900, emptyWeightKg: 770, simRate: 1 };
   const m = new SampleMapper();
   const withExtras = m.map(reading, 1_000, false, { altFt: 4_500, headingDeg: 123, engineCount: 1, engines: [{ torquePct: 0, n1Pct: 0, ittC: 0, oilPsi: 55 }] });
   assert.ok('sample' in withExtras);
