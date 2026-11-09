@@ -7,9 +7,11 @@ import { svg } from './svg.ts';
  * What changed from the script: airports, lines and flights come from the API instead of constants; the map centre, the arc heights, the label sides and the aircraft tags are derived instead of written by hand.
  */
 
-export type MapAirport = { icao: string; city: string; lat: number; lon: number; hub?: 'player' | 'rival' };
+/** `sub`: a hub of one of the player's subsidiaries (a group view). */
+export type MapAirport = { icao: string; city: string; lat: number; lon: number; hub?: 'player' | 'rival' | 'sub' };
 export type MapLine = {
-  id: string; a: string; b: string; owner: 'player' | 'rival'; state: 'ok' | 'delayed' | 'interrupted';
+  /** `sub`: a line of one of the player's subsidiaries (a group view): drawn like the player's, dimmer. */
+  id: string; a: string; b: string; owner: 'player' | 'sub' | 'rival'; state: 'ok' | 'delayed' | 'interrupted';
   /** A rival line on a pair the player flies too. */
   contested?: boolean;
   /** The player's lines while the rival network is shown. */
@@ -18,7 +20,7 @@ export type MapLine = {
 export type MapFlight = {
   reg: string; info: string; late?: string; from: string; to: string; t: number;
   /** `me` is the player's own flight; `player` and `rival` are autonomous. */
-  owner: 'player' | 'me' | 'rival';
+  owner: 'player' | 'sub' | 'me' | 'rival';
   /** Id of the line it flies; null for a flight that follows no line (the player's own job). */
   line: string | null;
 };
@@ -92,7 +94,7 @@ export type Prim =
 
 export type MapScene = { w: number; h: number; prims: Prim[]; /** Screen position of each airport, for tests and hit areas. */ airports: Map<string, Pt>; focus: Pt };
 
-const COL = { line: '#ECEAE5', rival: '#9A9DA2', danger: 'var(--danger)', warning: 'var(--warning)', route: 'var(--route)' } as const;
+const COL = { line: '#ECEAE5', sub: 'var(--text-secondary)', rival: '#9A9DA2', danger: 'var(--danger)', warning: 'var(--warning)', route: 'var(--route)' } as const;
 
 export function buildNetworkMap(input: MapInput): MapScene {
   const { airports, lines, flights, fit, size } = input;
@@ -225,12 +227,13 @@ export function buildNetworkMap(input: MapInput): MapScene {
   const labels: Prim[] = [];
   for (const l of drawn) {
     const pts = arcPts(l.a, l.b, l.k, 0, 1);
-    const sel = l.owner === 'player' && l.id === input.selected && !l.dim;
-    const name = `${l.owner === 'rival' ? 'rival' : 'line'} ${l.a}-${l.b}`;
-    if (l.owner === 'player' && l.state === 'interrupted') prims.push({ kind: 'path', name, d: dashed(pts, 7, 6), stroke: COL.danger, width: 2, round: true, opacity: l.dim ? 0.55 : 0.9 });
-    else if (l.owner === 'player') prims.push({ kind: 'path', name, d: pathOf(pts), stroke: COL.line, width: sel ? 2.5 : 2, round: true, opacity: l.dim ? 0.3 : sel ? 0.75 : 0.42, ...(sel ? { glow: '#ECEAE5' } : {}) });
+    const mine = l.owner !== 'rival';
+    const sel = mine && l.id === input.selected && !l.dim;
+    const name = `${l.owner === 'rival' ? 'rival' : l.owner === 'sub' ? 'subsidiary line' : 'line'} ${l.a}-${l.b}`;
+    if (mine && l.state === 'interrupted') prims.push({ kind: 'path', name, d: dashed(pts, 7, 6), stroke: COL.danger, width: 2, round: true, opacity: l.dim ? 0.55 : l.owner === 'sub' ? 0.6 : 0.9 });
+    else if (mine) prims.push({ kind: 'path', name, d: pathOf(pts), stroke: l.owner === 'sub' ? COL.sub : COL.line, width: sel ? 2.5 : 2, round: true, opacity: l.dim ? 0.3 : sel ? 0.75 : l.owner === 'sub' ? 0.3 : 0.42, ...(sel ? { glow: '#ECEAE5' } : {}) });
     else prims.push({ kind: 'path', name, d: pathOf(pts), stroke: l.contested ? COL.warning : COL.rival, width: 2, round: true, opacity: l.contested ? 0.95 : 0.8 });
-    if (!l.dim && l.owner === 'player' && l.state === 'interrupted') {
+    if (!l.dim && mine && l.state === 'interrupted') {
       const q = arcPoint(l.a, l.b, l.k, 0.62), p = SR(q[0], q[1], q[2]);
       labels.push({ kind: 'label', name: `flag ${l.id}`, x: p.x - 12, y: p.y, side: 'left', lines: [{ text: input.text.interrupted, cls: 'flag-danger' }], flagIcon: 'circle-x' });
     }
@@ -250,7 +253,7 @@ export function buildNetworkMap(input: MapInput): MapScene {
     const mine = f.owner === 'me';
     const k = mine ? 0.24 : l?.k ?? 0.16;
     const reversed = !!l && l.a !== f.from;
-    const col = mine ? COL.route : f.owner === 'rival' ? (l?.contested ? COL.warning : '#C4C6C9') : COL.line;
+    const col = mine ? COL.route : f.owner === 'rival' ? (l?.contested ? COL.warning : '#C4C6C9') : f.owner === 'sub' ? COL.sub : COL.line;
     const at = (t: number): Pt => { const p = reversed ? arcPoint(l!.a, l!.b, k, 1 - t) : arcPoint(f.from, f.to, k, t); return SR(p[0], p[1], p[2]); };
     if (mine) prims.push({ kind: 'path', name: 'own trajectory', d: pathOf(arcPts(f.from, f.to, k, 0, 1)), stroke: COL.route, width: 2, round: true, opacity: 0.4 });
     const t = Math.min(1, Math.max(0, f.t));
@@ -275,11 +278,11 @@ export function buildNetworkMap(input: MapInput): MapScene {
   for (const c of shown) {
     const p = where.get(c)!, a = ap.get(c)!;
     prims.push({ kind: 'ellipse', name: `halo ${c}`, cx: p.x, cy: p.y, rx: 9, ry: 5, stroke: a.hub ? '#FFFFFF4D' : '#FFFFFF26' });
-    prims.push({ kind: 'ellipse', name: `airport ${c}`, cx: p.x, cy: p.y, rx: 3.5, ry: 3.5, fill: a.hub === 'player' ? 'var(--accent)' : 'var(--text-primary)' });
+    prims.push({ kind: 'ellipse', name: `airport ${c}`, cx: p.x, cy: p.y, rx: 3.5, ry: 3.5, fill: a.hub === 'player' ? 'var(--accent)' : a.hub === 'sub' ? 'var(--text-secondary)' : 'var(--text-primary)' });
     const others = [...where].filter(([k]) => k !== c).map(([, q]) => q);
     const mx = others.length ? others.reduce((s, q) => s + q.x, 0) / others.length - p.x : 0, my = others.length ? others.reduce((s, q) => s + q.y, 0) / others.length - p.y : 0;
     const side: Side = Math.abs(my) * 1.4 > Math.abs(mx) ? (my > 0 ? 'above' : 'below') : mx > 0 ? 'left' : 'right';
-    labels.push({ kind: 'label', name: `label ${c}`, x: p.x, y: p.y, side, lines: [{ text: c, cls: a.hub ? 'code-hub' : 'code' }, { text: a.city, cls: 'city' }] });
+    labels.push({ kind: 'label', name: `label ${c}`, x: p.x, y: p.y, side, lines: [{ text: c, cls: a.hub && a.hub !== 'sub' ? 'code-hub' : 'code' }, { text: a.city, cls: 'city' }] });
   }
 
   // Tags: the player's own flight first, then the others; each takes the first side that does not cover a tag already placed.

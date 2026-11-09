@@ -1,17 +1,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import type { FlyingRow, Line, NetworkView, OpsRow, ScheduledFlight } from './api-lines.ts';
+import type { FlyingRow, NetworkLine, NetworkView, OpsRow, ScheduledFlight } from './api-lines.ts';
 import {
-  asProgramme, causesOf, clockNow, dayKind, draftProblem, everyHours, faceToFace, filterOps, firstAlert, ganttLanes, hhmm, isoDay, lineDelay, lineVisual, mapAirportCodes, mapFlights, mapLines,
+  asProgramme, causesOf, clockNow, dayKind, draftProblem, everyHours, faceToFace, filterOps, firstAlert, ganttLanes, hhmm, isoDay, lineDelay, lineVisual, mapAirportCodes, mapAirports, mapFlights, mapLines, subsidiariesOfNetwork, companyName,
   minuteOfDay, minutesOf, nextFilter, opsBadge, pairId, meterFraction, rivalOrder, sinceToday, phaseOf, perHour, freqFromPerHour, windowHours, isRoundTheClock, ROUND_THE_CLOCK, previewProgramme, pnlParts, progressPct, assuredDays, reopenTarget, stepDay, DEFAULT_DRAFT, forecastShare, candidateAircraft, aircraftTags, defaultAircraft, linesByAircraft, groupSlots, cheaperRemedy, defaultRemedy, fromLine, asPatch, isChanged,
 } from './lines-view.ts';
 
-const line = (o: Partial<Line> = {}): Line => ({
+const line = (o: Partial<NetworkLine> = {}): NetworkLine => ({
   id: 1, a: 'LFLL', b: 'LFMN', status: 'active', distanceNm: 153, blockMinutes: 75, freqPerDay: 4, days: [true, true, true, true, true, false, false], windowStart: '06:00', windowEnd: '22:00', turnaroundMin: 40,
-  flightNos: [1131, 1138], aircraft: [{ id: 7, registration: 'F-HAZA', icao: 'AT76' }], interruptedSince: null, interruptCause: null, ...o,
+  flightNos: [1131, 1138], aircraft: [{ id: 7, registration: 'F-HAZA', icao: 'AT76' }], interruptedSince: null, interruptCause: null, companyId: 1, ...o,
 });
-const flying = (o: Partial<FlyingRow> = {}): FlyingRow => ({ flightId: 1, flightNo: 'AZR 1136', lineId: 1, from: 'LFLL', to: 'LFMN', progress: 0.82, delayMin: 0, reg: 'F-HAZA', own: false, ...o });
-const net = (o: Partial<NetworkView> = {}): NetworkView => ({ now: 0, enabled: true, lapsedAt: null, lines: [line()], flying: [], today: { done: 0, cancelled: 0, onTimePct: 100, nextDeparture: null }, ...o });
+const flying = (o: Partial<FlyingRow> = {}): FlyingRow => ({ flightId: 1, flightNo: 'AZR 1136', lineId: 1, from: 'LFLL', to: 'LFMN', progress: 0.82, delayMin: 0, reg: 'F-HAZA', own: false, companyId: 1, ...o });
+const net = (o: Partial<NetworkView> = {}): NetworkView => ({ now: 0, enabled: true, lapsedAt: null, companies: [{ id: 1, name: 'Azur', hubs: ['LFMN'] }], subsidiaries: 0, lines: [line()], flying: [], today: { done: 0, cancelled: 0, onTimePct: 100, nextDeparture: null }, ...o });
 const T0 = Date.parse('2026-11-06T00:00:00Z');
 const leg = (o: Partial<ScheduledFlight> = {}): ScheduledFlight => ({
   id: 1, lineId: 1, flightNo: 'AZR 1131', dep: T0 + 6 * 3_600_000, arr: T0 + 7.25 * 3_600_000, origin: 'LFMN', dest: 'LFLL', aircraftId: 7, status: 'scheduled', delayMin: 0, delayCause: null, cancelCause: null, pax: null, takenByPlayer: false, ...o,
@@ -318,4 +318,15 @@ test('the aircraft of the edited line stay in the picker even when the workshop 
   const fleet = [{ id: 1, location: 'LFLL', busy: false, lines: [], status: 'maintenance' }, { id: 2, location: 'LFLL', busy: false, lines: [], status: 'available' }];
   assert.deepEqual(candidateAircraft(fleet, 'LFLL').map((x) => x.id), [2]);
   assert.deepEqual(candidateAircraft(fleet, 'LFLL', new Set([1])).map((x) => x.id), [1, 2]);
+});
+
+test('group view: a subsidiary\'s lines and aircraft are `sub` on the map, the asked company\'s stay `player`; its hubs are `sub` hubs', () => {
+  const own = net({ companies: [{ id: 1, name: 'AMERICA', hubs: ['LFMN'] }, { id: 2, name: 'America Cargo', hubs: ['LFPG'] }], subsidiaries: 1,
+    lines: [line(), line({ id: 2, a: 'LFLL', b: 'LFPG', companyId: 2 })], flying: [flying(), flying({ flightId: 2, lineId: 2, companyId: 2, reg: 'N1AC' })] });
+  assert.deepEqual(mapLines(own, null).map((l) => [l.id, l.owner]), [['LFLL-LFMN', 'player'], ['LFLL-LFPG', 'sub']]);
+  assert.deepEqual(mapFlights(own, null, () => '').map((f) => [f.reg, f.owner]), [['F-HAZA', 'player'], ['N1AC', 'sub']]);
+  const airports = mapAirports([{ icao: 'LFMN', city: 'Nice', lat: 0, lon: 0 }, { icao: 'LFPG', city: 'Paris', lat: 0, lon: 0 }, { icao: 'LFLL', city: 'Lyon', lat: 0, lon: 0 }], ['LFMN'], [], ['LFPG']);
+  assert.deepEqual(airports.map((a) => a.hub), ['player', 'sub', undefined]);
+  assert.deepEqual(subsidiariesOfNetwork(own).map((c) => c.name), ['America Cargo']);
+  assert.equal(companyName(own, 2), 'America Cargo');
 });

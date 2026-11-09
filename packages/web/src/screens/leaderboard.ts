@@ -1,5 +1,5 @@
-import type { CompanyProfile } from '@opc/shared';
-import { button, dataTable, keycap, panel, segments, titleBlock } from '../components.ts';
+import type { CompanyProfile, LeaderboardSubsidiary } from '@opc/shared';
+import { button, dataTable, icon, keycap, panel, segments, titleBlock, type Row } from '../components.ts';
 import { loadProfile, loadSeason } from '../competition-data.ts';
 import { aiRivals } from '../competition.ts';
 import { fmt } from '../format.ts';
@@ -14,6 +14,8 @@ let sort: SortKey = 'worth';
 let scope: Scope = 'season';
 let season: string | undefined;
 let selected: number | null = null;
+/** The parents whose subsidiaries are open under their row; kept across redraws like the other choices of the screen. */
+const open = new Set<number>();
 
 const kindLabel = (kind: Kind | null): string => (kind === null ? t('lb.kind.ai') : t(`lb.kind.${kind}`));
 
@@ -57,25 +59,44 @@ export async function leaderboard(ctx: Ctx): Promise<Screen> {
   };
   showSelection(pick);
 
+  const worthOf = (netWorth: number, gain: number | null): string | HTMLElement => (!career && sort === 'gain' ? (gain === null ? '–' : fm.signedMoney(gain)) : fm.moneyShort(netWorth));
+  /** A subsidiary under its parent's row: no rank (C21), its own figures, and its worth is already inside the parent's. */
+  const subRow = (s: LeaderboardSubsidiary, parent: string): Row => ({
+    nested: true, label: t('lb.sub.row', { name: s.name, parent }),
+    cells: [h('span', { class: 'dim' }, '–'), h('div', { class: 'col tight lb-sub-name' }, h('span', null, s.name), h('span', { class: 'dim small' }, t('lb.sub.of', { parent }))), h('span', { class: 'mono' }, s.hub ?? '–'), fm.num(s.flights), '', !career && sort === 'gain' ? '–' : fm.moneyShort(s.netWorth)],
+  });
+  const owners: { id: number; nested: boolean }[] = [];
+  const tableRows: Row[] = rows.flatMap((r) => {
+    const kind = kindOf(r, me.company.id, profiles.get(r.companyId));
+    const subs = r.subsidiaries ?? [];
+    owners.push({ id: r.companyId, nested: false }, ...subs.map(() => ({ id: r.companyId, nested: true })));
+    const parent: Row = {
+      label: subs.length > 0 ? t('lb.sub.parent', { name: r.name, n: subs.length }) : r.name,
+      selected: r.companyId === selected,
+      ...(subs.length > 0 ? { expanded: open.has(r.companyId) } : {}),
+      onFocus: () => showSelection(r),
+      onOpen: () => { showSelection(r); if (subs.length > 0) setOpen(r.companyId, !open.has(r.companyId)); else if (r.isAI) go(hashFor('company-sheet', r.companyId)); },
+      cells: [
+        h('span', { class: `rank ${r.companyId === me.company.id ? 'me' : ''}`.trim() }, String(r.rank)),
+        h('div', { class: 'col tight' }, h('span', { class: 'strong row tight' }, subs.length > 0 ? h('span', { class: 'lb-chevron', 'aria-hidden': 'true' }, icon('chevron-right')) : null, r.name), h('span', { class: 'dim small' }, subs.length > 0 ? `${kindLabel(kind)} · ${tp('lb.sub.count', subs.length)}` : kindLabel(kind))),
+        h('span', { class: 'mono' }, hubOf(r)),
+        fm.num(r.flights), fm.num(r.reputation, 1),
+        h('span', { class: 'strong' }, worthOf(r.netWorth, r.gain)),
+      ],
+    };
+    return [parent, ...subs.map((s) => subRow(s, r.name))];
+  });
   const table = dataTable(t('lb.panel'), [
     { label: t('lb.col.rank') }, { label: t('lb.col.company') }, { label: t('lb.col.hub') }, { label: t('lb.col.flights'), align: 'end' }, { label: t('lb.col.reputation'), align: 'end' },
     { label: career ? t('lb.col.worth') : sort === 'gain' ? t('lb.col.gain') : t('lb.col.worth'), align: 'end' },
-  ], rows.map((r) => {
-    const kind = kindOf(r, me.company.id, profiles.get(r.companyId));
-    return {
-      label: r.name,
-      selected: r.companyId === selected,
-      onFocus: () => showSelection(r),
-      onOpen: () => { showSelection(r); if (r.isAI) go(hashFor('company-sheet', r.companyId)); },
-      cells: [
-        h('span', { class: `rank ${r.companyId === me.company.id ? 'me' : ''}`.trim() }, String(r.rank)),
-        h('div', { class: 'col tight' }, h('span', { class: 'strong' }, r.name), h('span', { class: 'dim small' }, kindLabel(kind))),
-        h('span', { class: 'mono' }, hubOf(r)),
-        fm.num(r.flights), fm.num(r.reputation, 1),
-        h('span', { class: 'strong' }, !career && sort === 'gain' ? (r.gain === null ? '–' : fm.signedMoney(r.gain)) : fm.moneyShort(r.netWorth)),
-      ],
-    };
-  }), h('p', { class: 'dim', style: 'padding:22px' }, t('lb.empty')));
+  ], tableRows, h('p', { class: 'dim', style: 'padding:22px' }, t('lb.empty')));
+  // Opening or closing the subsidiaries changes the DOM in place (no redraw), so the focus stays on the row the keys were pressed on.
+  const trs = [...table.querySelectorAll<HTMLElement>('tbody tr')];
+  function setOpen(id: number, on: boolean): void {
+    if (on) open.add(id); else open.delete(id);
+    trs.forEach((tr, i) => { const o = owners[i]; if (o?.id !== id) return; if (o.nested) tr.hidden = !on; else tr.setAttribute('aria-expanded', String(on)); });
+  }
+  trs.forEach((tr, i) => { if (owners[i]!.nested) tr.hidden = !open.has(owners[i]!.id); });
 
   const sorts = h('div', { class: 'segments', role: 'group', 'aria-label': t('lb.title') }, SORT_KEYS.map((k, i) =>
     h('button', { type: 'button', class: 'seg', 'aria-pressed': String(!career && sort === k), disabled: career, onclick: () => { sort = k; redraw(); } }, keycap(String(i + 1)), h('span', null, t(`lb.sort.${k}`)))));
@@ -103,9 +124,14 @@ export async function leaderboard(ctx: Ctx): Promise<Screen> {
     h('aside', { class: 'lb-selection', 'aria-live': 'polite' }, panelHost));
 
   const duelTarget = (): void => { const s = rows.find((r) => r.companyId === selected); if (s && s.companyId !== me.company.id && current) go(hashFor('duel', s.companyId)); };
+  /** → opens, ← closes, Space toggles the subsidiaries of the row the focus is on (Enter does too, as the row's own action). */
+  const onRow = (on: (id: number) => void) => (): void => {
+    const id = selected;
+    if (id !== null && document.activeElement?.closest('[data-row]') && rows.find((r) => r.companyId === id)?.subsidiaries?.length) on(id);
+  };
   return {
     title: t('lb.title'), scene: 'leaderboard', tab: 'leaderboard', view, back: '#dashboard',
-    hints: [{ key: t('key.esc'), label: t('hint.dashboard') }, { key: '↑ ↓', label: t('hint.browse') }, { key: 'T', label: t('hint.career') }, { key: 'C', label: t('hint.compare') }],
-    keys: { c: duelTarget, t: cycleScope, 1: () => { sort = 'worth'; redraw(); }, 2: () => { sort = 'gain'; redraw(); }, 3: () => { sort = 'flights'; redraw(); }, 4: () => { sort = 'reputation'; redraw(); } },
+    hints: [{ key: t('key.esc'), label: t('hint.dashboard') }, { key: '↑ ↓', label: t('hint.browse') }, ...(rows.some((r) => r.subsidiaries?.length) ? [{ key: '→', label: t('lb.hint.subs') }] : []), { key: 'T', label: t('hint.career') }, { key: 'C', label: t('hint.compare') }],
+    keys: { right: onRow((id) => setOpen(id, true)), left: onRow((id) => setOpen(id, false)), space: onRow((id) => setOpen(id, !open.has(id))), c: duelTarget, t: cycleScope, 1: () => { sort = 'worth'; redraw(); }, 2: () => { sort = 'gain'; redraw(); }, 3: () => { sort = 'flights'; redraw(); }, 4: () => { sort = 'reputation'; redraw(); } },
   };
 }

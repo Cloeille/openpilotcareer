@@ -3580,6 +3580,20 @@ const table = {
   'hr.rest.title': ['Rest policy', 'Politique de repos'],
   'hr.rest.body': ['Morale also reads your rest policy, which is set with the leave calendar: {policy} today.', 'Le moral lit aussi ta politique de repos, réglée avec le calendrier des congés : {policy} aujourd’hui.'],
   'hr.rest.open': ['Open the leave calendar', 'Ouvrir le calendrier des congés'],
+
+  // ---- group scope: ledger, network, leaderboard
+  'scope.label': ['Scope', 'Périmètre'],
+  'scope.company': ['This company', 'Cette société'], 'scope.group': ['Including subsidiaries', 'Avec les filiales'],
+  'rp.s.balance.group': ['Group balance', 'Solde du groupe'], 'rp.s.ops.group': ['Group operations', 'Opérations du groupe'],
+  'rp.s.internal': ['between group companies, not counted in the totals', 'entre sociétés du groupe, hors totaux'],
+  'ln.legend.sub': ['Subsidiary', 'Filiale'],
+  'ln.sub.note': ['{name}’s line: it is run from that company.', 'Ligne de {name} : elle se gère depuis cette société.'],
+  'ln.sub.switch': ['Switch to {name}', 'Passer sur {name}'],
+  'lb.sub.row': ['{name}, subsidiary of {parent}, not ranked', '{name}, filiale de {parent}, hors classement'],
+  'lb.sub.of': ['subsidiary of {parent}', 'filiale de {parent}'],
+  'lb.sub.parent': ['{name}, {n} subsidiaries: Enter shows them', '{name}, {n} filiales : Entrée les affiche'],
+  'lb.sub.count.one': ['{n} subsidiary', '{n} filiale'], 'lb.sub.count.other': ['{n} subsidiaries', '{n} filiales'],
+  'lb.hint.subs': ['Subsidiaries', 'Filiales'],
 } as const satisfies Record<string, readonly [string, string]>;
 
 export type Key = keyof typeof table;

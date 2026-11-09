@@ -8,6 +8,7 @@ import { all, get, type Db } from './db.ts';
 import { monthKey, projectCharges } from './finance.ts';
 import { addMonths, balanceOf } from './game.ts';
 import { CATEGORY_SQL, LEDGER, SIGNED, monthStart, monthlyTotals, totalOf, type Totals } from './ledger-totals.ts';
+import { booksOf, idsOf, internalSql, subsidiaryCount } from './scope.ts';
 
 const UPCOMING_MAX = 6;
 /** One-off purchases and capital movements are not what a company burns: they stay out of the runway (an aircraft bought last month must not read as "two days of cash", nor a transfer to a subsidiary). */
@@ -77,9 +78,12 @@ export function cashView(db: Db, companyId: number, now: number, months: number)
 
 // ---------------------------------------------------------------- statement
 
+/** The statement of the company or, under `scope=group`, of the group: every posting of every book, newest first, with the running balance of the group's cash. What a group moves between its own companies is listed on both books but is
+ *  neither income nor spend: the day nets and the summary leave it out, so they read as the consolidated result. */
 export function statement(db: Db, companyId: number, now: number, q: StatementQuery): StatementView {
-  const where = ['t.company_id = ?'];
-  const params: (string | number)[] = [companyId];
+  const books = booksOf(db, companyId, q.scope), ids = idsOf(books), internal = internalSql(books);
+  const where = [`t.company_id IN (${ids})`];
+  const params: (string | number)[] = [];
   if (q.from) { where.push('t.at >= ?'); params.push(Date.parse(`${q.from}T00:00:00Z`)); }
   if (q.to) { where.push('t.at < ?'); params.push(Date.parse(`${q.to}T00:00:00Z`) + DAY_MS); }
   if (q.category) { where.push(`${CATEGORY_SQL} = ?`); params.push(q.category); }
@@ -87,36 +91,39 @@ export function statement(db: Db, companyId: number, now: number, q: StatementQu
   const filters = where.join(' AND ');
 
   // the running balance follows the dates shown (the order of the page), computed over the whole ledger before any filter
-  const page = all<{ id: number; at: number; kind: string; category: string; memo: string; amount: number; running: number; flightId: number | null;
+  const page = all<{ id: number; at: number; kind: string; category: string; memo: string; amount: number; running: number; flightId: number | null; companyId: number; companyName: string; internal: number;
     lineId: number | null; a: string | null; b: string | null; aircraftId: number | null; registration: string | null }>(db,
-    `WITH t AS (SELECT id, company_id, at, kind, amount, memo, flight_id, line_id, aircraft_id, SUM(amount) OVER (ORDER BY at, id) AS running FROM transactions WHERE company_id = ?)
-     SELECT t.id, t.at, t.kind, ${CATEGORY_SQL} AS category, t.memo, t.amount, t.running, t.flight_id AS flightId, t.line_id AS lineId, l.a, l.b, t.aircraft_id AS aircraftId, ac.registration
-     FROM t LEFT JOIN flights f ON f.id = t.flight_id LEFT JOIN lines l ON l.id = t.line_id AND l.company_id = t.company_id LEFT JOIN aircraft ac ON ac.id = t.aircraft_id AND ac.company_id = t.company_id
-     WHERE ${filters}${q.before ? ' AND (t.at, t.id) < (SELECT at, id FROM transactions WHERE id = ? AND company_id = ?)' : ''}
+    `WITH t AS (SELECT id, company_id, counterparty_id, at, kind, amount, memo, flight_id, line_id, aircraft_id, SUM(CASE WHEN ${internal} THEN 0 ELSE amount END) OVER (ORDER BY at, id) AS running FROM transactions t WHERE company_id IN (${ids}))
+     SELECT t.id, t.at, t.kind, ${CATEGORY_SQL} AS category, t.memo, t.amount, t.running, t.flight_id AS flightId, t.company_id AS companyId, c.name AS companyName, ${internal} AS internal, t.line_id AS lineId, l.a, l.b, t.aircraft_id AS aircraftId, ac.registration
+     FROM t JOIN companies c ON c.id = t.company_id LEFT JOIN flights f ON f.id = t.flight_id LEFT JOIN lines l ON l.id = t.line_id AND l.company_id = t.company_id LEFT JOIN aircraft ac ON ac.id = t.aircraft_id AND ac.company_id = t.company_id
+     WHERE ${filters}${q.before ? ` AND (t.at, t.id) < (SELECT at, id FROM transactions WHERE id = ? AND company_id IN (${ids}))` : ''}
      ORDER BY t.at DESC, t.id DESC LIMIT ?`,
-    companyId, ...params, ...(q.before ? [q.before, companyId] : []), q.limit + 1);
+    ...params, ...(q.before ? [q.before] : []), q.limit + 1);
   const rows = page.slice(0, q.limit);
 
   const days: StatementView['days'] = [];
   if (rows.length > 0) {
     const nets = new Map(all<{ day: string; net: number }>(db, `SELECT strftime('%Y-%m-%d', t.at / 1000, 'unixepoch') AS day, SUM(t.amount) AS net ${LEDGER}
-      WHERE ${filters} AND t.at >= ? AND t.at < ? GROUP BY day`, ...params, Date.parse(`${isoDay(rows.at(-1)!.at)}T00:00:00Z`), Date.parse(`${isoDay(rows[0]!.at)}T00:00:00Z`) + DAY_MS).map((r) => [r.day, r.net]));
+      WHERE ${filters} AND NOT ${internal} AND t.at >= ? AND t.at < ? GROUP BY day`, ...params, Date.parse(`${isoDay(rows.at(-1)!.at)}T00:00:00Z`), Date.parse(`${isoDay(rows[0]!.at)}T00:00:00Z`) + DAY_MS).map((r) => [r.day, r.net]));
     for (const r of rows) {
       const day = isoDay(r.at);
       if (days.at(-1)?.day !== day) days.push({ day, net: nets.get(day) ?? 0, rows: [] });
       days.at(-1)!.rows.push({
-        id: r.id, at: r.at, kind: r.kind, category: r.category as Category, memo: r.memo, amount: r.amount, balanceAfter: r.running, flightId: r.flightId,
+        id: r.id, at: r.at, kind: r.kind, category: r.category as Category, memo: r.memo, amount: r.amount, balanceAfter: r.running, flightId: r.flightId, companyId: r.companyId, companyName: r.companyName,
+        ...(r.internal ? { internal: true as const } : {}),
         line: r.lineId !== null && r.a !== null && r.b !== null ? { id: r.lineId, a: r.a, b: r.b } : null,
         aircraft: r.aircraftId !== null && r.registration !== null ? { id: r.aircraftId, registration: r.registration } : null,
       } satisfies StatementRow);
     }
   }
 
-  const byCategory = all<Totals & { n: number }>(db, `SELECT ${CATEGORY_SQL} AS category, ${SIGNED}, COUNT(*) AS n ${LEDGER} WHERE ${filters} GROUP BY category`, ...params);
+  const byCategory = all<Totals & { n: number }>(db, `SELECT ${CATEGORY_SQL} AS category, ${SIGNED}, COUNT(*) AS n ${LEDGER} WHERE ${filters} AND NOT ${internal} GROUP BY category`, ...params);
   const inflow = sumOf(byCategory, (c) => c.inflow), outflow = sumOf(byCategory, (c) => c.outflow);
+  const listed = get<{ n: number }>(db, `SELECT COUNT(*) AS n ${LEDGER} WHERE ${filters}`, ...params)!.n;
   return {
     days, next: page.length > q.limit ? rows.at(-1)!.id : null,
-    summary: { net: inflow - outflow, in: inflow, out: outflow, count: sumOf(byCategory, (c) => c.n), byCategory: byCategory.map(totalOf).sort((x, y) => CATEGORIES.indexOf(x.category) - CATEGORIES.indexOf(y.category)) },
-    scheduled: upcomingDebits(db, companyId, now)[0] ?? null,
+    balance: sumOf(books, (b) => balanceOf(db, b.id)), subsidiaries: subsidiaryCount(db, companyId),
+    summary: { net: inflow - outflow, in: inflow, out: outflow, count: listed, byCategory: byCategory.map(totalOf).sort((x, y) => CATEGORIES.indexOf(x.category) - CATEGORIES.indexOf(y.category)) },
+    scheduled: books.flatMap((b) => upcomingDebits(db, b.id, now)).sort((x, y) => x.amount - y.amount)[0] ?? null,
   };
 }

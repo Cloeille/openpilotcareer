@@ -28,6 +28,8 @@ export type Ctx = {
   snap: Snapshot;
   /** Route argument: `#job/J-1` -> 'J-1'. */
   arg: string | null;
+  /** What follows the `?` of the hash (`#network?scope=group`): the choices a screen keeps in the address. */
+  query: URLSearchParams;
   /** Reload `me` and redraw the current screen. */
   refresh: () => Promise<void>;
   go: (hash: string) => void;

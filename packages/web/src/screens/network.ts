@@ -1,6 +1,7 @@
 import type { CompanyProfile } from '@opc/shared';
 import { act } from '../actions.ts';
-import { fetchNetwork, setNetworkEnabled, type NetworkView } from '../api-lines.ts';
+import { session } from '../api.ts';
+import { fetchNetwork, setNetworkEnabled, type Line, type NetworkLine, type NetworkView } from '../api-lines.ts';
 import { button, icon, panel, titleBlock, unknownValue } from '../components.ts';
 import { aiRivals } from '../competition.ts';
 import { fmt } from '../format.ts';
@@ -8,11 +9,12 @@ import { t, tp } from '../i18n.ts';
 import { hashFor } from '../keys.ts';
 import { airportFacts, clockGroup, dayMedium, featureOff, pairLabel, sinceLabel, stateLabel, swatch, typeNames } from '../lines-ui.ts';
 import {
-  aircraftOfLine, clockNow, everyHours, faceToFace, flightsPerDay, inService, lineDelay, networkAirports, lineVisual, mapAirportCodes, mapAirports, mapFlights, mapLines, NETWORK_TAB, pairId, reopenTarget, rivalOrder,
+  aircraftOfLine, askedCompany, clockNow, companyName, everyHours, faceToFace, flightsPerDay, inService, lineDelay, networkAirports, lineVisual, mapAirportCodes, mapAirports, mapFlights, mapLines, NETWORK_TAB, pairId, reopenTarget, rivalOrder, subsidiariesOfNetwork,
   type FaceToFace,
 } from '../lines-view.ts';
 import { pollWhileShown } from '../live-poll.ts';
 import { buildNetworkMap, drawNetworkMap } from '../network-map.ts';
+import { scopeOf, scopeToggle } from '../scope.ts';
 import type { Ctx, Screen } from '../screen.ts';
 import { h } from '../ui.ts';
 
@@ -28,7 +30,7 @@ type Rival = { profile: CompanyProfile; net: NetworkView; name: string; lines: N
 /** The AI companies that fly lines. A server without the route, or a company without lines, is left out. */
 async function loadRivals(mine: NetworkView['lines']): Promise<Rival[]> {
   const { profiles } = await aiRivals();
-  const nets = await Promise.all(profiles.map((p) => fetchNetwork(p.id).catch(() => null)));
+  const nets = await Promise.all(profiles.map((p) => fetchNetwork({ company: p.id }).catch(() => null)));
   const found = profiles.flatMap((profile, i) => (nets[i]?.lines.length ? [{ profile, net: nets[i]!, name: profile.name, lines: nets[i]!.lines }] : []));
   return rivalOrder(mine, found);
 }
@@ -40,9 +42,13 @@ export async function network(ctx: Ctx): Promise<Screen> {
   const { me } = snap;
   const fm = fmt();
   const asked = ctx.arg === null ? NaN : Number(ctx.arg);
-  const own = await fetchNetwork();
+  const scope = scopeOf(ctx.query);
+  const own = await fetchNetwork({ scope });
   if (!own) return { title: t('ln.net.title', { company: me.company.name }), scene: 'jobs', tab: NETWORK_TAB, back: '#dashboard', hints: [{ key: t('key.esc'), label: t('hint.back') }], view: featureOff('ln.off.title') };
 
+  // A group view: the subsidiaries' lines and aircraft are on the map and in the list, tagged with their company. Read-only here (see `lineRow`).
+  const group = own.companies.length > 1;
+  const subHubs = subsidiariesOfNetwork(own).flatMap((c) => c.hubs);
   const rivals = await loadRivals(own.lines);
   const rival = rivals.find((r) => r.profile.id === asked) ?? null;
   /** What is on screen, replaced by each poll. */
@@ -50,11 +56,11 @@ export async function network(ctx: Ctx): Promise<Screen> {
   const shown = (): NetworkView => data.rival ?? data.own;
   const lines = shown().lines;
   const [facts, nameOf] = await Promise.all([
-    airportFacts(mapAirportCodes(own, rival?.net ?? null, [...me.hubs, ...(rival?.profile.hubs ?? [])])),
+    airportFacts(mapAirportCodes(own, rival?.net ?? null, [...me.hubs, ...subHubs, ...(rival?.profile.hubs ?? [])])),
     typeNames([...lines.flatMap((l) => l.aircraft.map((a) => a.icao)), ...me.fleet.map((a) => a.icao)]),
   ]);
   const city = new Map(facts.map((f) => [f.icao, f.city]));
-  const airports = mapAirports(facts, me.hubs, rival?.profile.hubs ?? []);
+  const airports = mapAirports(facts, me.hubs, rival?.profile.hubs ?? [], rival ? [] : subHubs);
   const redraw = (): void => { window.dispatchEvent(new Event('opc:redraw')); };
   if (!rival && (selected === null || !lines.some((l) => pairId(l) === selected))) selected = lines[0] ? pairId(lines[0]) : null;
 
@@ -83,7 +89,8 @@ export async function network(ctx: Ctx): Promise<Screen> {
     ? t('ln.net.rivalSub', { hub: city.get(rival.profile.hubs[0] ?? '') ?? rival.profile.hubs[0] ?? '–', lines: tp('ln.count', rival.net.lines.length), aircraft: tp('ln.net.rivalAircraft', fleetSize), flying: tp('ln.net.rivalFlying', rival.net.flying.length) })
     : t('ln.net.sub');
   const title = rival ? t('ln.net.rivalTitle', { company: rival.profile.name }) : t('ln.net.title', { company: me.company.name });
-  const header = h('div', { class: 'ln-header' }, titleBlock(h('span', { class: 'row tight' }, dot, status), title, h('p', { class: 'dim ln-sub' }, sub)), clock.root);
+  const header = h('div', { class: 'ln-header' }, titleBlock(h('span', { class: 'row tight' }, dot, status), title, h('p', { class: 'dim ln-sub' }, sub)),
+    h('div', { class: 'row' }, !rival && own.subsidiaries > 0 ? scopeToggle(scope) : null, clock.root));
 
   // ------------------------------------------------------------ my lines
   const states = new Map<number, HTMLElement>();
@@ -96,7 +103,14 @@ export async function network(ctx: Ctx): Promise<Screen> {
     paintMap();
     paintPrimary();
   };
-  const lineRow = (l: NetworkView['lines'][number]): HTMLElement => {
+  /** A subsidiary's line is read-only here: every line action acts on the active company, so the row says whose it is and the way to change it is to switch to that company. */
+  const switchTo = (companyId: number): void => {
+    session.company = companyId;
+    history.replaceState(null, '', '#network');
+    void ctx.refresh();
+  };
+  const foreign = (l: NetworkLine): boolean => l.companyId !== askedCompany(own);
+  const lineRow = (l: NetworkLine): HTMLElement => {
     const visual = lineVisual(l, own.flying);
     const id = pairId(l);
     const state = h('span', { class: 'ln-state-host' }, stateLabel(visual, lineDelay(l, own.flying)));
@@ -107,9 +121,9 @@ export async function network(ctx: Ctx): Promise<Screen> {
     const down = l.aircraft.some((a) => inspection.has(a.registration)) ? ` · ${t('ln.row.inspection')}` : '';
     return h('li', null, h('button', {
       type: 'button', id: `ln-row-${l.id}`, class: `ln-row${id === selected ? ' selected' : ''}`, 'data-row': '', 'data-line': id,
-      onfocus: () => select(id), onmouseenter: () => select(id), onclick: () => go(hashFor('line', l.id)),
+      onfocus: () => select(id), onmouseenter: () => select(id), onclick: () => (foreign(l) ? switchTo(l.companyId) : go(hashFor('line', l.id))),
     },
-    h('span', { class: 'ln-row-top' }, swatch(visual, id === selected), h('span', { class: 'mono strong ln-code' }, pairLabel(l.a, l.b)), state),
+    h('span', { class: 'ln-row-top' }, swatch(visual, id === selected), h('span', { class: 'mono strong ln-code' }, pairLabel(l.a, l.b)), group ? h('span', { class: `ln-company${foreign(l) ? ' sub' : ''}` }, companyName(own, l.companyId)) : null, state),
     h('span', { class: 'ln-row-details' },
       h('span', { class: 'muted small' }, `${city.get(l.a) ?? l.a} – ${city.get(l.b) ?? l.b} · ${when}`),
       h('span', { class: 'dim small' }, `${first}${rest.length ? ` +${rest.length}` : ''}${down}`))));
@@ -135,8 +149,10 @@ export async function network(ctx: Ctx): Promise<Screen> {
       return;
     }
     const l = data.own.lines.find((x) => pairId(x) === selected);
+    const owner = l && foreign(l) ? l.companyId : null;
     actions.replaceChildren(
-      ...(l ? [button(t('ln.open', { pair: pairLabel(l.a, l.b) }), { variant: 'primary', key: t('key.enter'), onclick: () => go(hashFor('line', l.id)) })] : []),
+      ...(owner !== null ? [h('p', { class: 'dim small' }, t('ln.sub.note', { name: companyName(data.own, owner) })), button(t('ln.sub.switch', { name: companyName(data.own, owner) }), { variant: 'primary', key: t('key.enter'), onclick: () => switchTo(owner) })]
+        : l ? [button(t('ln.open', { pair: pairLabel(l.a, l.b) }), { variant: 'primary', key: t('key.enter'), onclick: () => go(hashFor('line', l.id)) })] : []),
       button(t('ln.new'), { variant: 'ghost', key: 'N', onclick: () => go('#line-new') }));
   }
 
@@ -150,7 +166,7 @@ export async function network(ctx: Ctx): Promise<Screen> {
       h('span', { class: 'ln-face-line' }, h('span', { class: 'ln-face-who' }, t('ln.face.you')), h('span', { class: down ? 'ln-down' : 'muted' }, youState)),
       h('span', { class: 'ln-face-line' }, h('span', { class: 'ln-face-who' }, name), h('span', { class: 'muted' }, t('ln.row.every', { every: everyHours(s.rival) })))));
   };
-  const aloneRow = (l: NetworkView['lines'][number]): HTMLElement =>
+  const aloneRow = (l: Line): HTMLElement =>
     h('li', null, h('button', { type: 'button', class: 'ln-alone', 'data-row': '', 'aria-label': pairLabel(l.a, l.b) }, h('span', { class: 'mono strong' }, pairLabel(l.a, l.b)), h('span', { class: 'dim small' }, t('ln.row.every', { every: everyHours(l) }))));
 
   let side: HTMLElement;
@@ -169,11 +185,11 @@ export async function network(ctx: Ctx): Promise<Screen> {
   // ------------------------------------------------------------ footer: network tabs and legend
   const tabs = [{ id: null as number | null, name: t('ln.tabs.mine') }, ...rivals.map((r) => ({ id: r.profile.id, name: r.profile.name }))];
   const current = rival ? rival.profile.id : null;
-  const hashOf = (id: number | null): string => (id === null ? '#network' : hashFor('network', id));
+  const hashOf = (id: number | null): string => (id === null ? (scope === 'group' ? '#network?scope=group' : '#network') : hashFor('network', id));
   const switcher = h('div', { class: 'ln-tabs segments', role: 'group', 'aria-label': t('ln.tabs') }, tabs.map((tab) => h('button', { type: 'button', class: 'seg', 'aria-pressed': String(tab.id === current), onclick: () => go(hashOf(tab.id)) }, tab.name)));
   const legendItems: [string, string][] = rival
     ? [['rival', rival.profile.name], ['mine', t('ln.legend.yours')], ['contested', t('ln.contested')], ['plane', t('ln.legend.flying')]]
-    : [['mine', t('ln.legend.service')], ['route', t('ln.legend.own')], ['down', t('ln.state.interrupted', { n: 0 })], ['plane', t('ln.legend.flying')]];
+    : [['mine', t('ln.legend.service')], ['route', t('ln.legend.own')], ...(group ? [['sub', t('ln.legend.sub')] as [string, string]] : []), ['down', t('ln.state.interrupted', { n: 0 })], ['plane', t('ln.legend.flying')]];
   const legend = h('div', { class: 'ln-legend' }, legendItems.map(([kind, label]) =>
     h('span', { class: 'ln-legend-item' }, kind === 'plane' ? icon('plane', 16) : h('span', { class: `ln-legend-swatch ${kind}`, 'aria-hidden': 'true' }, kind === 'down' ? [h('i'), h('i'), h('i')] : null), label)));
 
@@ -181,10 +197,10 @@ export async function network(ctx: Ctx): Promise<Screen> {
   const view = h('div', { class: 'ln-net' }, mapHost, header, h('div', { class: 'ln-body' }, h('div', { class: 'ln-map-col' }, h('div', { class: 'ln-map-foot' }, switcher, legend)), h('div', { class: 'ln-side' }, side)));
 
   // ------------------------------------------------------------ live: the clock runs, the network refreshes
-  const signature = (n: NetworkView): string => n.lines.map((l) => `${l.id}:${l.status}:${lineDelay(l, n.flying)}`).join();
+  const signature = (n: NetworkView): string => n.lines.map((l) => `${l.companyId}:${l.id}:${l.status}:${lineDelay(l, n.flying)}`).join();
   pollWhileShown('ln-clock', view, async () => paintClock(), POLL_CLOCK_MS);
   pollWhileShown('ln-network', view, async () => {
-    const [fresh, freshRival] = await Promise.all([fetchNetwork(), rival ? fetchNetwork(rival.profile.id) : Promise.resolve(null)]);
+    const [fresh, freshRival] = await Promise.all([fetchNetwork({ scope }), rival ? fetchNetwork({ company: rival.profile.id }) : Promise.resolve(null)]);
     if (!fresh || (rival && !freshRival)) return;
     const before = signature(shown());
     data.own = fresh; data.rival = freshRival; data.at = Date.now();

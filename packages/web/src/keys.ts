@@ -58,11 +58,14 @@ export function stepRow(count: number, focused: number, dir: 1 | -1): number {
 
 /** `#job/J-1` -> { name: 'job', arg: 'J-1' }; the argument is URL-decoded. */
 export function parseHash(hash: string): { name: string; arg: string | null } {
-  const [name = '', ...rest] = hash.replace(/^#/, '').split('/');
+  const [name = '', ...rest] = hash.replace(/^#/, '').split('?', 1)[0]!.split('/');
   const raw = rest.join('/');
   let arg: string | null = null;
   try { arg = raw === '' ? null : decodeURIComponent(raw); } catch { arg = null; }
   return { name, arg };
 }
+
+/** `#finance/ledger?scope=group` -> `scope=group`: what a screen keeps in the address besides its route (read with `parseHash`, which leaves it out of the argument). */
+export const queryOf = (hash: string): URLSearchParams => new URLSearchParams(hash.split('?')[1] ?? '');
 
 export const hashFor = (name: string, arg?: string | number): string => `#${name}${arg === undefined ? '' : `/${encodeURIComponent(String(arg))}`}`;

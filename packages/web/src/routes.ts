@@ -1,4 +1,4 @@
-import { parseHash } from './keys.ts';
+import { parseHash, queryOf } from './keys.ts';
 import type { ScreenFn, Tab } from './screen.ts';
 import { companySheet } from './screens/company-sheet.ts';
 import { dashboard } from './screens/dashboard.ts';
@@ -76,8 +76,8 @@ export const routes: Record<Tab, ScreenFn> & Record<string, ScreenFn> = {
 /** Old bookmarks (`#flights`) keep working. */
 const ALIASES: Record<string, string> = { flights: 'history' };
 
-export function resolve(hash: string): { name: string; arg: string | null } {
+export function resolve(hash: string): { name: string; arg: string | null; query: URLSearchParams } {
   const { name, arg } = parseHash(hash);
   const target = ALIASES[name] ?? name;
-  return { name: target in routes ? target : 'dashboard', arg };
+  return { name: target in routes ? target : 'dashboard', arg, query: queryOf(hash) };
 }

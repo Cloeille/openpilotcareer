@@ -1,12 +1,13 @@
 // Lot LINES (v3): read models for the network map, the line page and the operations board. Nothing here writes.
 import {
   DAY_MS, ON_TIME_LIMIT_MIN, blockHours, dayStart, maskToDays, weekdayOf,
-  type AircraftLine, type CancelCause, type FlyingRow, type HistoryEntry, type HistorySource, type LineDay, type LineDetail, type LineLeg, type NetworkView, type OpsRow, type OpsView, type ScheduledFlight,
+  type AircraftLine, type CancelCause, type FlyingRow, type HistoryEntry, type HistorySource, type LineDay, type LineDetail, type LineLeg, type NetworkView, type OpsRow, type Scope, type OpsView, type ScheduledFlight,
 } from '@opc/shared';
 import { all, get, type Db } from './db.ts';
 import type { AircraftRow, FlightRow } from './game.ts';
-import { flightView, typeFor } from './game.ts';
+import { flightView, hubsOf, typeFor } from './game.ts';
 import { expectedPerDay } from './lines-manage.ts';
+import { booksOf, subsidiaryCount } from './scope.ts';
 import { crewCost, crewShortage, pilotNames, type Shortage } from './staff.ts';
 import { companyCode, legStatus, legView, lineAircraft, lineView, loadFactorOf, networkOf, type LegRow, type LineRow } from './lines.ts';
 
@@ -35,27 +36,31 @@ const legsOfDay = (db: Db, companyId: number, from: number): LegRow[] =>
 
 // ---------------------------------------------------------------- network
 
-/** `viewer` is the player's company; `target` the network shown (the viewer's own, or an AI company's). Only the viewer's own hand-flown flight is `own`. */
-export function networkView(db: Db, viewer: number, target: number, now: number): NetworkView {
-  const code = companyCode(db, target);
+/** `viewer` is the player's company; `target` the network shown (the viewer's own, or an AI company's). Only the viewer's own hand-flown flight is `own`.
+ *  `scope=group` adds the subsidiaries of `target` (their hubs, lines and aircraft in the air, the day's figures summed), and only for the viewer's own network: a rival is read as it is. */
+export function networkView(db: Db, viewer: number, target: number, now: number, scope: Scope = 'company'): NetworkView {
+  const books = booksOf(db, target, viewer === target ? scope : 'company');
   const n = networkOf(db, target);
-  const lines = all<LineRow>(db, 'SELECT * FROM lines WHERE company_id = ? ORDER BY id', target).map((l) => lineView(db, l));
-  const flying: FlyingRow[] = all<LegRow>(db, "SELECT * FROM scheduled_flights WHERE company_id = ? AND status = 'done' AND dep_at <= ? AND arr_at + delay_min * 60000 > ? ORDER BY dep_at", target, now, now)
-    .filter((l) => isFlying(l, now))
-    .map((l) => ({ flightId: l.id, flightNo: `${code} ${l.flight_no}`, lineId: l.line_id, from: l.origin, to: l.dest, progress: legProgress(l, now), delayMin: l.delay_min, reg: registrationOf(db, l.aircraft_id), own: false }));
-  if (viewer === target) {
-    for (const f of handFlights(db, target, now)) flying.push({ flightId: f.id, flightNo: `${code} F${f.id}`, lineId: null, from: f.origin, to: f.destination, progress: handProgress(db, f, now), delayMin: 0, reg: f.reg, own: true });
-  }
-  const today = legsOfDay(db, target, dayStart(now));
+  const lines = books.flatMap((b) => all<LineRow>(db, 'SELECT * FROM lines WHERE company_id = ? ORDER BY id', b.id).map((l) => ({ ...lineView(db, l), companyId: b.id })));
+  const flying: FlyingRow[] = books.flatMap((b) => {
+    const code = companyCode(db, b.id);
+    const legs = all<LegRow>(db, "SELECT * FROM scheduled_flights WHERE company_id = ? AND status = 'done' AND dep_at <= ? AND arr_at + delay_min * 60000 > ? ORDER BY dep_at", b.id, now, now)
+      .filter((l) => isFlying(l, now))
+      .map((l): FlyingRow => ({ flightId: l.id, flightNo: `${code} ${l.flight_no}`, lineId: l.line_id, from: l.origin, to: l.dest, progress: legProgress(l, now), delayMin: l.delay_min, reg: registrationOf(db, l.aircraft_id), own: false, companyId: b.id }));
+    const hand = viewer === target ? handFlights(db, b.id, now).map((f): FlyingRow => ({ flightId: f.id, flightNo: `${code} F${f.id}`, lineId: null, from: f.origin, to: f.destination, progress: handProgress(db, f, now), delayMin: 0, reg: f.reg, own: true, companyId: b.id })) : [];
+    return [...legs, ...hand];
+  });
+  const today = books.flatMap((b) => legsOfDay(db, b.id, dayStart(now)));
   const departed = today.filter((l) => l.status === 'done');
-  const next = get<LegRow>(db, "SELECT * FROM scheduled_flights WHERE company_id = ? AND status = 'scheduled' AND dep_at > ? ORDER BY dep_at, id LIMIT 1", target, now);
+  const next = books.flatMap((b) => get<LegRow>(db, "SELECT * FROM scheduled_flights WHERE company_id = ? AND status = 'scheduled' AND dep_at > ? ORDER BY dep_at, id LIMIT 1", b.id, now) ?? []).sort((x, y) => x.dep_at - y.dep_at || x.id - y.id)[0];
   return {
     now, enabled: (n?.enabled ?? 1) === 1, lapsedAt: n?.lapsed_at ?? null, lines, flying,
+    companies: books.map((b) => ({ id: b.id, name: b.name, hubs: hubsOf(db, b.id) })), subsidiaries: subsidiaryCount(db, target),
     today: {
       done: departed.filter((l) => l.arr_at + shiftOf(l) <= now).length,
       cancelled: today.filter((l) => l.status === 'cancelled' && l.taken_job === null).length,
       onTimePct: departed.length === 0 ? null : Math.round((100 * departed.filter((l) => l.delay_min <= ON_TIME_LIMIT_MIN).length) / departed.length),
-      nextDeparture: next ? legView(next, code, now) : null,
+      nextDeparture: next ? legView(next, companyCode(db, next.company_id), now) : null,
     },
   };
 }

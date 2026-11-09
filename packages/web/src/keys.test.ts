@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cycleTab, hashFor, keyAction, parseHash, shortcutOf, stepRow } from './keys.ts';
+import { cycleTab, hashFor, keyAction, parseHash, queryOf, shortcutOf, stepRow } from './keys.ts';
 import { TABS as HUD_TABS } from './screen.ts';
 
 const press = (key: string, mods: Partial<{ ctrlKey: boolean; metaKey: boolean; altKey: boolean; repeat: boolean }> = {}) => ({ key, ctrlKey: false, metaKey: false, altKey: false, ...mods });
@@ -110,4 +110,11 @@ test('a held key acts once: only the arrows repeat', () => {
   assert.equal(keyAction(press('ArrowDown', { repeat: true }), false), 'down');
   assert.equal(shortcutOf(press('ArrowRight', { repeat: true }), false), 'right');
   assert.equal(keyAction(press('q'), false), 'prev');
+});
+
+test('a hash carries a query next to its route: the argument never includes it', () => {
+  assert.deepEqual(parseHash('#finance/ledger?scope=group'), { name: 'finance', arg: 'ledger' });
+  assert.deepEqual(parseHash('#network?scope=group'), { name: 'network', arg: null });
+  assert.equal(queryOf('#network?scope=group').get('scope'), 'group');
+  assert.equal(queryOf('#network').get('scope'), null);
 });

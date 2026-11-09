@@ -1,7 +1,7 @@
 import { CATEGORIES, type Category, type StatementRow, type StatementView } from '@opc/shared';
 import { downloadExport } from '../api.ts';
 import { act } from '../actions.ts';
-import { fetchCash, fetchStatement } from '../api-reports.ts';
+import { fetchStatement } from '../api-reports.ts';
 import { button, icon, panel, segments, titleBlock } from '../components.ts';
 import { locale } from '../finance-ui.ts';
 import { fmt } from '../format.ts';
@@ -9,6 +9,7 @@ import { t, tp } from '../i18n.ts';
 import { reportHints, reportKeys, reportNav, reportsOff, figure, shareBar, signedMoney } from '../reports-ui.ts';
 import { CATEGORY_KEY, PERIODS, PERIOD_KEY, dayName, periodRange, type Period } from '../reports-view.ts';
 import type { Ctx, Screen } from '../screen.ts';
+import { scopeOf, scopeToggle } from '../scope.ts';
 import { h } from '../ui.ts';
 
 /** The filters survive a redraw, not a new visit. `limit` grows by a page each time "earlier" is pressed. */
@@ -19,11 +20,9 @@ const state: { period: Period; category: Category | ''; line: number | null; lim
 export async function financeLedger(ctx: Ctx): Promise<Screen> {
   const { go, snap } = ctx;
   const back = '#finance';
+  const scope = scopeOf(ctx.query);
   const range = periodRange(state.period, snap.at);
-  const [data, cash] = await Promise.all([
-    fetchStatement({ ...range, category: state.category, ...(state.line === null ? {} : { line: state.line }), limit: state.limit }),
-    fetchCash(1),
-  ]);
+  const data = await fetchStatement({ ...range, category: state.category, ...(state.line === null ? {} : { line: state.line }), limit: state.limit, scope });
   if (!data) return { title: t('rp.s.title'), scene: 'finance', tab: 'hubs', back, hints: [{ key: t('key.esc'), label: t('st.hint.company') }], view: reportsOff() };
 
   const fm = fmt(), loc = locale();
@@ -36,14 +35,15 @@ export async function financeLedger(ctx: Ctx): Promise<Screen> {
     state.category = order[(order.indexOf(state.category) + 1) % order.length]!;
     reset();
   };
-  const exportCsv = (): void => { void act(t('rp.s.exported'), () => downloadExport('transactions.csv')); };
+  const exportCsv = (): void => { void act(t('rp.s.exported'), () => downloadExport('transactions.csv', scope)); };
 
   // ------------------------------------------------------------ header: the account, the period's move
   const s = data.summary;
+  const group = scope === 'group';
   const header = h('div', { class: 'ln-header rp-header' },
     titleBlock(h('span', { class: 'row tight' }, h('span', { class: 'dot' }), h('span', null, `${t('rp.crumb')} · ${snap.me.company.name}`)), t('rp.s.title')),
     h('div', { class: 'rp-figures' },
-      figure(t('rp.s.balance'), fm.money(cash?.balance ?? snap.me.company.balance), null, (cash?.balance ?? snap.me.company.balance) < 0 ? 'warn' : null),
+      figure(t(group ? 'rp.s.balance.group' : 'rp.s.balance'), fm.money(data.balance), null, data.balance < 0 ? 'warn' : null),
       figure(t('rp.s.moved'), signedMoney(s.net), tp('rp.s.count', s.count)),
       figure(t('rp.s.in'), signedMoney(s.in), null), figure(t('rp.s.out'), signedMoney(-s.out), null)));
 
@@ -51,6 +51,7 @@ export async function financeLedger(ctx: Ctx): Promise<Screen> {
   const toolbar = h('div', { class: 'rp-toolbar' },
     segments(t('rp.s.period'), PERIODS.map((value) => ({ value, label: t(PERIOD_KEY[value]) })), state.period, (p) => { state.period = p; reset(); }),
     h('div', { class: 'row tight' },
+      data.subsidiaries > 0 ? scopeToggle(scope, () => { state.limit = PAGE; state.line = null; }) : null,
       h('button', { type: 'button', class: 'btn secondary small', onclick: nextCategory, 'aria-label': t('rp.s.category.label', { name: state.category === '' ? t('rp.s.all') : t(CATEGORY_KEY[state.category]) }) },
         h('span', null, state.category === '' ? t('rp.s.category') : t(CATEGORY_KEY[state.category])), icon('chevron-down')),
       state.line === null ? null : h('button', { type: 'button', class: 'btn ghost small', onclick: () => { state.line = null; reset(); } }, t('rp.s.clearLine'), icon('x')),
@@ -58,9 +59,11 @@ export async function financeLedger(ctx: Ctx): Promise<Screen> {
 
   // ------------------------------------------------------------ the rows, a group per day
   const tags = (r: StatementRow): HTMLElement => h('span', { class: 'rp-links' },
+    group ? h('span', { class: `rp-company${r.companyId === snap.me.company.id ? '' : ' sub'}` }, r.companyName) : null,
+    r.internal ? h('span', { class: 'dim' }, t('rp.s.internal')) : null,
     r.line ? h('button', { type: 'button', class: 'link-btn mono', 'aria-label': t('rp.s.filterLine', { line: `${r.line.a} – ${r.line.b}` }), onclick: () => { state.line = r.line!.id; reset(); } }, `${r.line.a}–${r.line.b}`) : null,
     r.aircraft ? h('span', { class: 'mono dim' }, r.aircraft.registration) : null);
-  const row = (r: StatementRow): HTMLElement => h('li', { class: 'rp-row', 'data-row': '', tabindex: 0, 'aria-label': `${fm.zulu(r.at)}, ${r.memo}, ${t(CATEGORY_KEY[r.category])}, ${fm.signedMoney(r.amount)}, ${fm.money(r.balanceAfter)}` },
+  const row = (r: StatementRow): HTMLElement => h('li', { class: 'rp-row', 'data-row': '', tabindex: 0, 'aria-label': `${fm.zulu(r.at)}, ${group ? `${r.companyName}, ` : ''}${r.memo}, ${t(CATEGORY_KEY[r.category])}, ${fm.signedMoney(r.amount)}, ${fm.money(r.balanceAfter)}` },
     h('span', { class: 'rp-row-time mono dim' }, fm.zulu(r.at)),
     h('span', { class: 'col tight rp-row-what' }, h('span', null, r.memo), tags(r)),
     h('span', { class: 'rp-row-cat dim' }, t(CATEGORY_KEY[r.category])),
@@ -69,7 +72,7 @@ export async function financeLedger(ctx: Ctx): Promise<Screen> {
   const days = data.days.map((d) => h('section', { class: 'rp-day', 'aria-label': dayName(d.day, loc) },
     h('h3', { class: 'rp-day-head' }, h('span', null, dayName(d.day, loc)), h('span', { class: 'dim' }, t('rp.s.dayNet', { amount: fm.signedMoney(d.net) }))),
     h('ul', { class: 'plain rp-rows' }, d.rows.map(row))));
-  const list = panel({ title: t('rp.s.ops'), action: data.days.length > 0 ? tp('rp.s.shown', s.count) : null, id: 'rp-ops', class: 'rp-main' },
+  const list = panel({ title: t(group ? 'rp.s.ops.group' : 'rp.s.ops'), action: data.days.length > 0 ? tp('rp.s.shown', s.count) : null, id: 'rp-ops', class: 'rp-main' },
     data.days.length === 0 ? h('p', { class: 'dim' }, t('rp.s.none')) : days,
     data.next === null ? null : button(t('rp.s.earlier'), { variant: 'ghost', onclick: () => { state.limit += PAGE; redraw(); } }));
 

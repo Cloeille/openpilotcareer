@@ -1,4 +1,4 @@
-import type { CashView, DecisionId, DecisionResult, ForecastView, ProfitBy, ProfitView, StatementView } from '@opc/shared';
+import type { CashView, DecisionId, DecisionResult, ForecastView, ProfitBy, ProfitView, Scope, StatementView } from '@opc/shared';
 import { api } from './api.ts';
 import { ApiError } from './errors.ts';
 
@@ -20,7 +20,7 @@ const qs = (o: Record<string, string | number | undefined>): string => {
   return s ? `?${s}` : '';
 };
 
-export type StatementFilter = { from?: string; to?: string; category?: string; line?: number; before?: number; limit?: number };
+export type StatementFilter = { from?: string; to?: string; category?: string; line?: number; before?: number; limit?: number; scope?: Scope };
 
 export const fetchCash = (months: number): Promise<CashView | null> => optional<CashView>(`/finance/cash${qs({ months })}`);
 export const fetchProfit = (by: ProfitBy, month?: string): Promise<ProfitView | null> => optional<ProfitView>(`/finance/lines${qs({ by, month })}`);

@@ -3,7 +3,7 @@ import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import {
   API_VERSION, acceptJobSchema, apiKeyCreateSchema, buyAircraftSchema, buyHubSchema, checkTelemetry, customAircraftSchema, deleteAccountSchema,
-  flightListQuerySchema, icaoAirportSchema, icaoTypeSchema, listQuerySchema, loginSchema, registerSchema, renameCompanySchema, resetCompanySchema, simbriefImportSchema, telemetrySchema,
+  flightListQuerySchema, icaoAirportSchema, icaoTypeSchema, loginSchema, registerSchema, renameCompanySchema, resetCompanySchema, scopeSchema, simbriefImportSchema, telemetrySchema, transactionsQuerySchema,
   type ApiKeyInfo, type ServerInfo,
 } from '@opc/shared';
 import { catchUp, seedAi } from './ai.ts';
@@ -231,12 +231,12 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
 
   app.get('/api/v1/me/export', async (req, reply) => {
     const p = account(req);
-    const format = parse(z.object({ format: z.enum(['json', 'flights.csv', 'transactions.csv']).default('json') }), req.query).format;
+    const { format, scope } = parse(z.object({ format: z.enum(['json', 'flights.csv', 'transactions.csv']).default('json'), scope: scopeSchema }), req.query);
     const stamp = new Date(now()).toISOString().slice(0, 10);
     const attach = (name: string) => reply.header('content-disposition', `attachment; filename="opc-${name}-${stamp}"`);
     if (format !== 'json' && p.companyId === null) throw new HttpError(409, 'no_company', 'you have no company yet: finish the onboarding');
     if (format === 'flights.csv') return attach('flights.csv').headers(CSV_HEADERS).send(flightsCsv(db, p.companyId!));
-    if (format === 'transactions.csv') return attach('transactions.csv').headers(CSV_HEADERS).send(transactionsCsv(db, p.companyId!));
+    if (format === 'transactions.csv') return attach('transactions.csv').headers(CSV_HEADERS).send(transactionsCsv(db, p.companyId!, scope));
     return attach('export.json').send(exportDocument(db, p.userId, info, now()));
   });
 
@@ -275,8 +275,8 @@ export async function buildApp(o: AppOptions): Promise<FastifyInstance> {
 
   // ---- company, fleet, hubs
   app.get('/api/v1/me/transactions', async (req) => {
-    const q = parse(listQuerySchema, req.query);
-    return transactionsOf(db, user(req).companyId, q.limit, q.before);
+    const q = parse(transactionsQuerySchema, req.query);
+    return transactionsOf(db, user(req).companyId, q.limit, q.before, q.scope);
   });
 
   app.post('/api/v1/me/hubs', async (req, reply) => {

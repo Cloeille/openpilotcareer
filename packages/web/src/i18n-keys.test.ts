@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { CREDIT_BANK_IDS, CREDIT_REFUSALS, SIM_AIRCRAFT_SOURCES, CATEGORIES, COST_PARTS, DECISIONS, FINANCE_SCREENS, PROFIT_BY, SCENARIOS, AIRCRAFT_CATEGORIES, COMPONENTS, FACILITY_KINDS, HAULS, MECHANICAL, MEAL_QUALITIES, PARTS_POLICIES, PART_CLASSES, REALISM_TOGGLES, RANKS, REST_POLICY_NAMES, SERVICE_ITEMS, SERVICE_MODES, STAFF_FAMILIES, WTCS, type AirportSize, type Ownership } from '@opc/shared';
-import { CESSION_REFUSALS, GROUP_ACTIVITIES, GROUP_CREATE_REFUSALS, GROUP_ROLES } from '@opc/shared';
+import { CESSION_REFUSALS, GROUP_ACTIVITIES, GROUP_CREATE_REFUSALS, GROUP_ROLES, SCOPES } from '@opc/shared';
 import { BALLOT_CHOICES, VOTE_STATUSES } from '@opc/shared';
 import { PAY_LEVELS, type PayLevel } from '@opc/shared';
 import type { Coverage, DutyRule, StaffRole, StaffState } from './api-staff.ts';
@@ -102,7 +102,7 @@ const LOOKUPS: readonly (readonly [string, readonly (string | number)[], string?
   ['rp.nav.', FINANCE_SCREENS], ['rp.l.by.', PROFIT_BY], ['rp.l.period.', PERIODS],
   ['tr.why.', OWN_WHYS], ['err.', OWN_WHYS], ['rt.why.', RETRAIN_WHYS], ['tr.mode.', TRAIN_MODES], ['tr.place.', TRAIN_PLACES],
   ['cr.bank.', CREDIT_BANK_IDS], ['cr.refusal.', CREDIT_REFUSALS], ['err.', CREDIT_REFUSALS],
-  ['gr.activity.', GROUP_ACTIVITIES], ['gr.role.', GROUP_ROLES], ['gr.cession.', CESSION_REFUSALS], ['gr.refusal.', GROUP_CREATE_REFUSALS], ['err.', ['has_subsidiaries', 'has_debt', 'is_subsidiary', 'not_in_group', 'leased_aircraft', 'aircraft_not_found', 'code_taken']],
+  ['scope.', SCOPES], ['gr.activity.', GROUP_ACTIVITIES], ['gr.role.', GROUP_ROLES], ['gr.cession.', CESSION_REFUSALS], ['gr.refusal.', GROUP_CREATE_REFUSALS], ['err.', ['has_subsidiaries', 'has_debt', 'is_subsidiary', 'not_in_group', 'leased_aircraft', 'aircraft_not_found', 'code_taken']],
   ['tx.kind.', ['credit', 'credit_fee', 'credit_installment', 'credit_prepay', 'credit_late_fee', 'overdraft_interest']], ['fin.kind.', ['credit_installment', 'overdraft_interest']],
   ['err.', ['not_in_alliance', 'alliance_full', 'alliance_name_taken', 'already_member', 'already_invited', 'already_voted', 'vote_closed', 'vote_not_found', 'not_invitable', 'leaving', 'already_leaving', 'company_not_found', 'invitation_not_found']],
   ['tx.kind.', ['alliance_dues']], ['fin.kind.', ['alliance_dues']],

@@ -1,5 +1,5 @@
 import { companiesOf, customAircraftOf, fleetView, flightView, flightsOf, hubsOf, pilotView, transactionsOf, type FlightRow } from './game.ts';
-import { EXPORT_SCHEMA_VERSION, type ServerInfo } from '@opc/shared';
+import { EXPORT_SCHEMA_VERSION, type Scope, type ServerInfo } from '@opc/shared';
 import { all, get, type Db } from './db.ts';
 
 type Cell = string | number | null;
@@ -15,7 +15,7 @@ export function toCsv(header: string[], rows: Cell[][]): string {
 }
 
 const allFlights = (db: Db, companyId: number): FlightRow[] => flightsOf(db, companyId, Number.MAX_SAFE_INTEGER);
-const allTransactions = (db: Db, companyId: number) => transactionsOf(db, companyId, Number.MAX_SAFE_INTEGER);
+const allTransactions = (db: Db, companyId: number, scope?: Scope) => transactionsOf(db, companyId, Number.MAX_SAFE_INTEGER, undefined, scope);
 const iso = (ms: number | null): string | null => (ms === null ? null : new Date(ms).toISOString());
 
 export function flightsCsv(db: Db, companyId: number): string {
@@ -25,8 +25,11 @@ export function flightsCsv(db: Db, companyId: number): string {
   );
 }
 
-export function transactionsCsv(db: Db, companyId: number): string {
-  return toCsv(['id', 'at', 'kind', 'amount', 'balanceAfter', 'flightId', 'memo'], allTransactions(db, companyId).map((t) => [t.id, iso(t.at), t.kind, t.amount, t.balanceAfter, t.flightId, t.memo]));
+/** Under `scope=group` the subsidiaries' rows are in too, with `company` (whose book) and `internal` (a transfer inside the group: sum the rest for the consolidated result); the company scope keeps its columns. */
+export function transactionsCsv(db: Db, companyId: number, scope: Scope = 'company'): string {
+  const group = scope === 'group';
+  return toCsv(['id', 'at', 'kind', 'amount', 'balanceAfter', 'flightId', 'memo', ...(group ? ['company', 'internal'] : [])],
+    allTransactions(db, companyId, scope).map((t) => [t.id, iso(t.at), t.kind, t.amount, t.balanceAfter, t.flightId, t.memo, ...(group ? [t.companyName, t.internal ? 'yes' : ''] : [])]));
 }
 
 /** Everything the server holds about one account, all of its companies included. Credentials (password hash, session tokens, API-key hashes) are not included. */

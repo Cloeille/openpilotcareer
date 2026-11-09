@@ -26,3 +26,15 @@
 .gp-arrow { display: flex; align-items: center; color: var(--text-secondary); }
 .gp-side .rp-value { font-size: 22px; }
 .gp-side .rp-figure { min-width: 100px; }
+
+/* ---- group scope: a subsidiary's mark on a ledger row, a network row, a leaderboard sub-row */
+.rp-company, .ln-company { font-size: 12px; color: var(--text-secondary); }
+.rp-company.sub, .ln-company.sub { padding: 0 6px; border: 1px solid var(--border-strong); border-radius: 3px; color: var(--text-secondary); }
+.ln-company { white-space: nowrap; }
+.ln-legend-swatch.sub { background: var(--text-secondary); opacity: .6; }
+table.data tbody tr.nested td, table.data tbody tr.nested th { height: 44px; color: var(--text-secondary); background: #FFFFFF05; }
+table.data tbody tr.nested th:first-child { padding-left: 24px; }
+.lb-sub-name { padding-left: 18px; }
+.lb-chevron { display: inline-flex; transition: transform .12s; }
+table.data tbody tr[aria-expanded='true'] .lb-chevron { transform: rotate(90deg); }
+tr[hidden] { display: none; }

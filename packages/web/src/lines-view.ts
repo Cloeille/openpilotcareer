@@ -1,5 +1,5 @@
 import { blockHours, type AircraftType, type LineBridgeSlot } from '@opc/shared';
-import type { CancelCause, LineProblemView, ProjectionStatus, ResolveOption, ScheduledFlightStatus, FlyingRow, Line, NetworkView, OpsRow, LineBody, LinePatch, ScheduledFlight } from './api-lines.ts';
+import type { CancelCause, LineProblemView, ProjectionStatus, ResolveOption, ScheduledFlightStatus, FlyingRow, Line, NetworkLine, NetworkView, OpsRow, LineBody, LinePatch, ScheduledFlight } from './api-lines.ts';
 import type { MapAirport, MapFlight, MapLine } from './network-map.ts';
 import type { Key } from './messages.ts';
 import type { Screen } from './screen.ts';
@@ -50,10 +50,16 @@ export const flightsPerDay = (l: Pick<Line, 'freqPerDay'>): number => l.freqPerD
 /** Aircraft of a line as the list shows them: `F-HAZA · ATR 72-600`, one per distinct aircraft. */
 export const aircraftOfLine = (l: Line, typeName: (icao: string) => string): string[] => l.aircraft.map((a) => `${a.registration} · ${typeName(a.icao)}`);
 
-/** Map lines of one network. `owner` says whose network it is; in the rival view the player's own lines are drawn dimmed behind it. */
+/** The company a network was asked for: the first of its `companies`. In a group view the lines and aircraft of the others are its subsidiaries'. */
+export const askedCompany = (n: NetworkView): number => n.companies[0]!.id;
+/** The subsidiaries of a group view (none in a company view). */
+export const subsidiariesOfNetwork = (n: NetworkView): NetworkView['companies'] => n.companies.slice(1);
+export const companyName = (n: NetworkView, id: number): string => n.companies.find((c) => c.id === id)?.name ?? '';
+
+/** Map lines of one network. `owner` says whose network it is (`sub`: a subsidiary's, in a group view); in the rival view the player's own lines are drawn dimmed behind it. */
 export function mapLines(own: NetworkView, rival: NetworkView | null): MapLine[] {
   const ownPairs = new Set(own.lines.map(pairId));
-  const mine = own.lines.map((l): MapLine => ({ id: pairId(l), a: l.a, b: l.b, owner: 'player', state: stateOf(lineVisual(l, own.flying)), ...(rival ? { dim: true } : {}) }));
+  const mine = own.lines.map((l): MapLine => ({ id: pairId(l), a: l.a, b: l.b, owner: l.companyId === askedCompany(own) ? 'player' : 'sub', state: stateOf(lineVisual(l, own.flying)), ...(rival ? { dim: true } : {}) }));
   if (!rival) return mine;
   const theirs = rival.lines.map((l): MapLine => ({ id: pairId(l), a: l.a, b: l.b, owner: 'rival', state: 'ok', ...(ownPairs.has(pairId(l)) ? { contested: true } : {}) }));
   return [...mine, ...theirs];
@@ -63,7 +69,7 @@ const stateOf = (v: LineVisual): MapLine['state'] => (v === 'paused' ? 'interrup
 /** Aircraft in the air: the player's own flight is `me`, the rest are autonomous; a rival view shows the rival's aircraft only. */
 export function mapFlights(own: NetworkView, rival: NetworkView | null, text: (f: FlyingRow, mine: boolean) => string): MapFlight[] {
   const source = rival ?? own;
-  const ownerOf = (f: FlyingRow): MapFlight['owner'] => (rival ? 'rival' : f.own ? 'me' : 'player');
+  const ownerOf = (f: FlyingRow): MapFlight['owner'] => (rival ? 'rival' : f.own ? 'me' : f.companyId === askedCompany(own) ? 'player' : 'sub');
   return source.flying.map((f): MapFlight => ({
     reg: f.reg, info: text(f, f.own && !rival), from: f.from, to: f.to, t: f.progress, owner: ownerOf(f),
     line: f.lineId === null ? null : lineId(source.lines, f.lineId),
@@ -86,8 +92,8 @@ export function mapAirportCodes(own: NetworkView, rival: NetworkView | null, hub
 }
 
 export type AirportFact = { icao: string; city: string; lat: number; lon: number };
-export function mapAirports(facts: readonly AirportFact[], playerHubs: readonly string[], rivalHubs: readonly string[]): MapAirport[] {
-  return facts.map((a) => ({ ...a, ...(playerHubs.includes(a.icao) ? { hub: 'player' as const } : rivalHubs.includes(a.icao) ? { hub: 'rival' as const } : {}) }));
+export function mapAirports(facts: readonly AirportFact[], playerHubs: readonly string[], rivalHubs: readonly string[], subHubs: readonly string[] = []): MapAirport[] {
+  return facts.map((a) => ({ ...a, ...(playerHubs.includes(a.icao) ? { hub: 'player' as const } : subHubs.includes(a.icao) ? { hub: 'sub' as const } : rivalHubs.includes(a.icao) ? { hub: 'rival' as const } : {}) }));
 }
 
 // ---------------------------------------------------------------- face to face (rival network)
