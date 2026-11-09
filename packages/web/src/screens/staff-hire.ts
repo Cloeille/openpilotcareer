@@ -1,21 +1,17 @@
 import { START_NOW_FEE, STAFF_FAMILIES } from '@opc/shared';
 import { act } from '../actions.ts';
-import { fetchCandidates, fetchStaff, hireCandidate, type Candidate, type CandidatesView, type StaffFamily, type StaffOverview } from '../api-staff.ts';
+import { fetchCandidates, fetchStaff, hireCandidate, type Candidate, type CandidatesView, type StaffFamily } from '../api-staff.ts';
 import { button, icon, panel, titleBlock } from '../components.ts';
 import { fmt } from '../format.ts';
 import { t, tp } from '../i18n.ts';
 import type { Ctx, Screen } from '../screen.ts';
-import { famLabel, hireFilter, meterBar, roleFull, roleShort, shortDate, staffOff, viewSwitch } from '../staff-ui.ts';
+import { famLabel, hireFilter, meterBar, pilotTypes, roleFull, roleShort, shortDate, staffOff, viewSwitch } from '../staff-ui.ts';
 import { keepSelection, moraleLevel, reliabilityTone, startsAt, unblocks } from '../staff-view.ts';
 import { h } from '../ui.ts';
 
 /** Every family the market lists: the server's own list, so a family added there is hireable here (the kitchen's cooks were missing from a hand-kept copy). */
 const FAMILIES: readonly StaffFamily[] = STAFF_FAMILIES;
 let selected: string | null = null;
-
-/** Pilot types the player can filter on: the type rows of the staffing overview. */
-const pilotTypes = (o: StaffOverview | null): { type: string; label: string }[] =>
-  (o?.families.find((f) => f.family === 'pilot')?.children ?? []).flatMap((c) => (c.type ? [{ type: c.type, label: c.label }] : []));
 
 /** `#staff/hire`: the job market, filtered, with the offer for the candidate in focus. */
 export async function staffHire(ctx: Ctx): Promise<Screen> {

@@ -1,11 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { AGENCY_MAX_COUNT } from '@opc/shared';
-import { barWidths, canSign, requestFor, stepCount, toggle } from './agency-view.ts';
-import type { MissionView } from './api-agency.ts';
+import { AGENCY_MAX_COUNT, STAFF_FAMILIES, HIRED_ROLES, isPost, requestForGap } from '@opc/shared';
+import { barWidths, canSign, retarget, stepCount, toggle } from './agency-view.ts';
+import type { AgencyRequest, MissionView } from './api-agency.ts';
 import { translate, translatePlural } from './i18n.ts';
+import { messageFor } from './messages.ts';
 
-const quote = (picked: string[], balanceAfter: number): NonNullable<MissionView['quote']> => ({ picked, commission: 34_080, surchargeMonthly: 1_400, balanceAfter });
+const quote = (picked: string[], balanceAfter: number): NonNullable<MissionView['quote']> => ({ picked, commission: 12_800, balanceAfter });
 
 test('the bars share one axis in days: the longest option fills it, the others are drawn to scale', () => {
   const w = barWidths([{ id: 'agency', phases: [2, 2] }, { id: 'train', phases: [21, 0] }, { id: 'classic', phases: [0, 7] }]);
@@ -15,9 +16,25 @@ test('the bars share one axis in days: the longest option fills it, the others a
   assert.deepEqual(barWidths([]).agency, [0, 0], 'no option, no bar, no division by zero');
 });
 
-test('the mission to propose for a gap asks for every open post, up to what one mission can hold', () => {
-  assert.deepEqual(requestFor({ base: 'LFLL', qual: 'CRJ7', open: 2 }), { base: 'LFLL', qual: 'CRJ7', count: 2 });
-  assert.equal(requestFor({ base: 'LFLL', qual: 'CRJ7', open: 40 }).count, AGENCY_MAX_COUNT);
+test('the mission to propose for a gap asks for every open post, up to what one mission can hold, for any family', () => {
+  assert.deepEqual(requestForGap({ family: 'pilot', base: 'LFLL', qual: 'CRJ7', open: 2 }), { family: 'pilot', role: 'captain', base: 'LFLL', qual: 'CRJ7', count: 2 });
+  assert.equal(requestForGap({ family: 'cabin', base: 'LFLL', qual: null, open: 41 }).count, AGENCY_MAX_COUNT);
+});
+
+const request = (over: Partial<AgencyRequest> = {}): AgencyRequest => ({ family: 'cabin', role: 'attendant', base: 'LFLL', qual: null, count: 3, ...over });
+
+test('choosing a family in the form always lands on a post that exists: its first role, and a rating for pilots only', () => {
+  for (const from of STAFF_FAMILIES) {
+    for (const to of STAFF_FAMILIES) {
+      const r = retarget(request({ family: from, role: HIRED_ROLES[from][0]!, qual: from === 'pilot' ? 'AT76' : null }), { family: to }, ['A319', 'AT76']);
+      assert.ok(isPost(r), `${from} to ${to}: ${JSON.stringify(r)}`);
+      assert.equal(r.count, 3, 'the count and the base are kept');
+    }
+  }
+  assert.equal(retarget(request(), { family: 'pilot' }, ['A319', 'AT76']).qual, 'A319', 'the first type she flies');
+  assert.equal(retarget(request(), { family: 'pilot' }, []).qual, null, 'no type to fly: the server will say why');
+  assert.deepEqual(retarget(request({ family: 'pilot', role: 'captain', qual: 'AT76' }), { role: 'fo' }, ['AT76']), request({ family: 'pilot', role: 'fo', qual: 'AT76' }), 'a role of the same family keeps the rating');
+  assert.equal(retarget(request(), { base: 'LFPG' }, []).base, 'LFPG');
 });
 
 test('the number of people wanted stays between one and what one mission can hold', () => {
@@ -42,17 +59,18 @@ test('the mission can be signed once the search is over, with someone held and a
 });
 
 test('plural messages of the agency read in the singular for one, in both languages', () => {
-  assert.equal(translatePlural('en', 'ag.sign', 1), 'Sign 1 pilot');
-  assert.equal(translatePlural('fr', 'ag.sign', 2), 'Signer 2 pilotes');
-  assert.equal(translatePlural('fr', 'ag.opts.title', 1, { qual: 'CRJ7', count: 1 }), 'Trois façons d’avoir ton pilote CRJ7');
-  assert.equal(translatePlural('fr', 'ag.opts.title', 2, { qual: 'CRJ7', count: 2 }), 'Trois façons d’avoir tes 2 pilotes CRJ7');
+  assert.equal(translatePlural('en', 'ag.sign', 1), 'Sign 1 person');
+  assert.equal(translatePlural('fr', 'ag.sign', 2), 'Signer 2 personnes');
+  assert.equal(translate('fr', 'ag.opts.title', { count: 10, post: 'Personnel navigant commercial' }), 'Façons d’avoir tes 10 × Personnel navigant commercial');
   assert.equal(translatePlural('en', 'ag.saved.days', 1), '1 day');
-  assert.equal(translate('fr', 'ag.fee.surchargeVal', { amount: '1 400 €' }), '+1 400 € / mois');
+  assert.equal(translatePlural('en', 'ag.fee.commission', 1), 'Commission · 1 month of salary each');
+  assert.equal(translatePlural('fr', 'ag.fee.commission', 1), 'Commission · 1 mois de salaire chacun');
 });
 
-test('no pilot missing but cabin crew is: the status and the empty card say how many to recruit, in both languages', () => {
-  assert.equal(translatePlural('fr', 'ag.status.cabin', 4), 'Aucune ligne ne manque de pilote, mais 4 PNC manquent : recrute-les dans Recrutement');
-  assert.equal(translatePlural('fr', 'ag.status.cabin', 1), 'Aucune ligne ne manque de pilote, mais 1 PNC manque : recrute-le dans Recrutement');
-  assert.match(translatePlural('en', 'ag.empty.cabin.body', 41), /41 cabin crew posts are open/);
+test('open posts of any family are counted, in both languages; the cabin-only wording is gone', () => {
+  assert.equal(translatePlural('fr', 'ag.status.open', 41), '41 postes sont ouverts');
+  assert.equal(translatePlural('en', 'ag.status.open', 1), '1 post is open');
+  assert.equal(translate('fr', 'ag.status.short', { lines: 'KSFO ⇄ KLAX', post: 'Pilotes A319', have: 2, need: 8 }), 'KSFO ⇄ KLAX manque de Pilotes A319 (2 sur 8)');
   assert.equal(translate('fr', 'ag.stat.staff.notice', { n: 8 }), '8 en préavis');
+  for (const gone of ['ag.status.cabin', 'ag.empty.cabin.title', 'ag.empty.cabin.body.one', 'ag.fee.surcharge', 'ag.cand.grid']) assert.equal(messageFor(gone), null, gone);
 });

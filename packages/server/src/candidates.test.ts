@@ -135,15 +135,19 @@ test('names follow the country of the base: JP and FR candidates, agency pilots,
   assert.equal(get<{ n: number }>(jp.h.db, 'SELECT COUNT(*) AS n FROM staff WHERE company_id = ? AND name LIKE ?', jp.cid, '% (interim)')!.n, 1);
 });
 
-test('the recruiter agency shortlists pilots named after the base country', async () => {
+test('the recruiter agency shortlists people of every family named after the base country', async () => {
   const w = await world('RJTT', 'RJBB');
   w.h.clock.t += 2 * HOUR;
   await w.call('GET', '/network');
-  const m = await w.call('POST', '/agency/missions', { base: 'RJTT', qual: 'AT76', count: 2 });
-  assert.equal(m.status, 201, m.text);
+  for (const post of [{ family: 'pilot', role: 'captain', qual: 'AT76' }, { family: 'cabin', role: 'attendant', qual: null }]) {
+    const m = await w.call('POST', '/agency/missions', { ...post, base: 'RJTT', count: 2 });
+    assert.equal(m.status, 201, m.text);
+  }
   w.h.clock.t += AGENCY_SEARCH_DAYS * DAY_MS;
-  const v = (await w.call('GET', '/agency/options')).body as AgencyView;
-  const list = v.mission!.shortlist!;
-  assert.equal(list.length, 3);
-  assert.ok(list.every((c) => fromPool(c.name, 'jp')), list.map((c) => c.name).join(', '));
+  for (const [family, qual] of [['pilot', 'AT76'], ['cabin', null]] as const) {
+    const v = (await w.call('GET', `/agency/options?family=${family}&role=${family === 'pilot' ? 'captain' : 'attendant'}&base=RJTT&count=2${qual ? `&qual=${qual}` : ''}`)).body as AgencyView;
+    const list = v.mission!.shortlist!;
+    assert.equal(list.length, 3);
+    assert.ok(list.every((c) => fromPool(c.name, 'jp')), `${family}: ${list.map((c) => c.name).join(', ')}`);
+  }
 });

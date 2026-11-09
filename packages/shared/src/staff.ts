@@ -8,8 +8,15 @@ import { DAY_MS } from './lines.ts';
 
 export const STAFF_FAMILIES = ['pilot', 'cabin', 'ground', 'admin', 'maintenance', 'kitchen'] as const;
 export type StaffFamily = (typeof STAFF_FAMILIES)[number];
-export type StaffRole = 'captain' | 'fo' | 'attendant' | 'agent' | 'clerk' | 'technician' | 'cook' | 'instructor';
+export const STAFF_ROLES = ['captain', 'fo', 'attendant', 'agent', 'clerk', 'technician', 'cook', 'instructor'] as const;
+export type StaffRole = (typeof STAFF_ROLES)[number];
 export const ROLE_OF: Record<Exclude<StaffFamily, 'pilot'>, StaffRole> = { cabin: 'attendant', ground: 'agent', admin: 'clerk', maintenance: 'technician', kitchen: 'cook' };
+/** Who can be hired, by family: a pilot is a captain or a first officer, every other family has its one role of `ROLE_OF`. An instructor is a pilot retrained (training.ts), never hired. */
+export const HIRED_ROLES: Record<StaffFamily, readonly StaffRole[]> = {
+  pilot: ['captain', 'fo'], cabin: [ROLE_OF.cabin], ground: [ROLE_OF.ground], admin: [ROLE_OF.admin], maintenance: [ROLE_OF.maintenance], kitchen: [ROLE_OF.kitchen],
+};
+/** A post that exists: a role of the family, and a type rating exactly when the family is pilots. */
+export const isPost = (p: { family: StaffFamily; role: StaffRole; qual: string | null }): boolean => HIRED_ROLES[p.family].includes(p.role) && (p.family === 'pilot') === (p.qual !== null);
 /** Only pilots and cabin crew fly: the line engine's crew check reads these two families. */
 export const FLYING_FAMILIES: readonly StaffFamily[] = ['pilot', 'cabin'];
 /** A pilot who teaches at the training centre (v4 TRAINING, C26): still a pilot row, with his ratings, but he no longer takes legs. */

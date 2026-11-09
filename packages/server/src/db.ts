@@ -404,7 +404,23 @@ const SCHEMA_LEG_LANDINGS = `
 CREATE INDEX scheduled_company_landed ON scheduled_flights(company_id, status, arr_at);
 `;
 
-export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT, SCHEMA_AGENCY, SCHEMA_REPORTS, SCHEMA_CREDIT, SCHEMA_SIM_AIRCRAFT_OVERRIDE, SCHEMA_TRAINING, SCHEMA_GROUP, SCHEMA_ALLIANCE, SCHEMA_HR, SCHEMA_LEG_LANDINGS];
+// OpenHangar v4, lot AGENCY (all profiles): a mission is for any post, not only a pilot's: `family` and `role` join `base` and `qual`, and `qual` is the type rating of a pilot only (NULL for every other family), so the table is rebuilt
+// (SQLite cannot relax NOT NULL in place). The agency no longer asks a salary premium, so `premium_pct` goes; one mission can ask for 20 people. A mission already open or signed was a pilot's: it becomes a captain's.
+// The people the agency signed before keep their rows as they are: their pay is on the staff row, not on the mission.
+const SCHEMA_AGENCY_ALL = `
+CREATE TABLE recruit_missions_new (
+  id INTEGER PRIMARY KEY, company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  family TEXT NOT NULL CHECK (family IN ('pilot','cabin','ground','admin','maintenance','kitchen')), role TEXT NOT NULL, base TEXT NOT NULL, qual TEXT,
+  count INTEGER NOT NULL CHECK (count BETWEEN 1 AND 20), started_at INTEGER NOT NULL, ready_at INTEGER NOT NULL, commission INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'searching' CHECK (status IN ('searching','signed','cancelled')));
+INSERT INTO recruit_missions_new (id, company_id, family, role, base, qual, count, started_at, ready_at, commission, status)
+  SELECT id, company_id, 'pilot', 'captain', base, qual, count, started_at, ready_at, commission, status FROM recruit_missions;
+DROP TABLE recruit_missions;
+ALTER TABLE recruit_missions_new RENAME TO recruit_missions;
+CREATE UNIQUE INDEX recruit_missions_open ON recruit_missions(company_id, family, role, base, COALESCE(qual, '')) WHERE status = 'searching';
+`;
+
+export const MIGRATIONS = [SCHEMA_V1, SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5, SCHEMA_V7, SCHEMA_SIMBRIEF, SCHEMA_V8, SCHEMA_V9, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_SIM_AIRCRAFT, SCHEMA_AGENCY, SCHEMA_REPORTS, SCHEMA_CREDIT, SCHEMA_SIM_AIRCRAFT_OVERRIDE, SCHEMA_TRAINING, SCHEMA_GROUP, SCHEMA_ALLIANCE, SCHEMA_HR, SCHEMA_LEG_LANDINGS, SCHEMA_AGENCY_ALL];
 
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);

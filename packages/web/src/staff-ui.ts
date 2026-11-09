@@ -50,3 +50,7 @@ export function staffEntry(overview: StaffOverview | null, go: (hash: string) =>
 
 /** What the recruitment screen is filtered on. The overview presets it (its `R` key and buttons) and the screen keeps it while the player moves around. */
 export const hireFilter: { family: StaffFamily; base: string | null; qual: string | null } = { family: 'pilot', base: null, qual: null };
+
+/** Pilot types the player can pick: the type rows of the staffing overview. */
+export const pilotTypes = (o: StaffOverview | null): { type: string; label: string }[] =>
+  (o?.families.find((f) => f.family === 'pilot')?.children ?? []).flatMap((c) => (c.type ? [{ type: c.type, label: c.label }] : []));

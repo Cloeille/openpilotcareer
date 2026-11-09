@@ -62,17 +62,21 @@ const ID_RE = /^(\d+)\.([A-Z]{4})\.([a-z]+)\.([A-Z0-9]{2,4}|-)\.(\d+)$/;
 /** One (day, base, family, qualification) has this many people at most (indexes 0 to CANDIDATE_CAP - 1): the market scans that far for people not hired yet, and `hire` refuses an id past it. */
 export const CANDIDATE_CAP = 5000;
 
-/** The person of index `i` for one (day, base, family, qualification), from a stream of their own: any id is rebuilt from itself, whoever else was hired before, and the name follows the country of the base. */
-function candidateAt(db: Db, companyId: number, day: number, base: string, family: StaffFamily, qual: string | null, i: number): Candidate {
-  const rand = mulberry32(hashSeed(`cand:${companyId}:${day}:${base}:${family}:${qual ?? '-'}:${i}`));
+/** A person drawn from `rand`, a stream of their own: the one generator of every family's experience, reliability, morale and pay (hours for a pilot, years for the others), whoever lists them.
+ *  The market and the recruiter agency each give it their own stream and id; the name follows the country of the base. */
+export function candidateFrom(db: Db, companyId: number, rand: () => number, id: string, base: string, family: StaffFamily, qual: string | null): Candidate {
   const experience = family === 'pilot' ? Math.round(500 + rand() ** 2 * 11_500) : Math.round(rand() * 20);
   const role = roleOf(family, experience);
   const salary = salaryFor(family, role, experienceFactor(family, experience), categoryOf(db, companyId, qual));
   return {
-    id: `${day}.${base}.${family}.${qual ?? '-'}.${i}`, family, role, name: nameFrom(rand, baseCountry(base)), base, qual, experience, reliability: 60 + Math.floor(rand() * 39), morale: 50 + Math.floor(rand() * 46),
+    id, family, role, name: nameFrom(rand, baseCountry(base)), base, qual, experience, reliability: 60 + Math.floor(rand() * 39), morale: 50 + Math.floor(rand() * 46),
     askingSalary: salary, noticeDays: DEFAULT_NOTICE_DAYS, premium: salary * HIRING_PREMIUM_MONTHS,
   };
 }
+
+/** The person of index `i` for one (day, base, family, qualification): any id is rebuilt from itself, whoever else was hired before. */
+const candidateAt = (db: Db, companyId: number, day: number, base: string, family: StaffFamily, qual: string | null, i: number): Candidate =>
+  candidateFrom(db, companyId, mulberry32(hashSeed(`cand:${companyId}:${day}:${base}:${family}:${qual ?? '-'}:${i}`)), `${day}.${base}.${family}.${qual ?? '-'}.${i}`, base, family, qual);
 
 /** The candidate ids the company has already hired (market and agency alike). */
 const hiredIds = (db: Db, companyId: number): Set<string> =>
