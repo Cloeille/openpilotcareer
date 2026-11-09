@@ -13,6 +13,8 @@ import { h } from '../ui.ts';
 /** The draft survives a redraw (a language change, a poll), not a new visit. */
 let draft: TransferDraft = emptyTransfer();
 const redraw = (): void => { window.dispatchEvent(new Event('opc:redraw')); };
+/** The group overview's row action: the next visit opens on this subsidiary. */
+export const pickSubsidiary = (id: number): void => { if (draft.sub !== id) draft = { ...draft, sub: id, aircraft: [] }; };
 
 /** `#group/transfers`: cash and aircraft from a parent to its subsidiary or back, validated together (one transaction on the server: all or nothing). Each company shows the server's own figures. */
 export async function groupTransfers(ctx: Ctx): Promise<Screen> {

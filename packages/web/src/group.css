@@ -1,16 +1,55 @@
 /* ---------------------------------------------------------------- group (v4 GROUP): the overview, the new subsidiary and the transfers.
    Same panels, figures and tokens as the reports (reports.css); only what they do not have is here. */
 
-.gp-cards { display: flex; flex-direction: column; gap: 10px; list-style: none; margin: 0; padding: 0; }
-.gp-card { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 3px; background: transparent; cursor: pointer; }
-.gp-card:hover { background: var(--surface-hover); }
-.gp-card.on { background: var(--surface-selected); border-color: var(--border-strong); }
-.gp-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.gp-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+/* Overview: one grid for the heading, every company and the total, so the figures line up in columns. Name, five figures, actions. */
+.gp-panel { container-type: inline-size; --gp-cols: minmax(220px, 1fr) 140px 160px 80px 90px 80px 210px; }
+.gp-panel .panel-body { padding: 6px 22px 14px; gap: 6px; }
+.gp-scroll { overflow-y: auto; min-height: 0; display: flex; flex-direction: column; gap: 6px; }
+.gp-top { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; padding-bottom: 4px; }
+.gp-note { margin: 0; max-width: 460px; text-align: right; font-size: 13px; color: var(--warning); }
+.gp-tree, .gp-subs { list-style: none; margin: 0; padding: 0; }
+.gp-row { display: grid; grid-template-columns: var(--gp-cols); align-items: center; column-gap: 20px; padding: 12px 16px; border: 1px solid transparent; border-radius: 3px; }
+.gp-head { padding-block: 4px 0; font-size: 13px; color: var(--text-tertiary); }
+.gp-head span { text-align: right; }
+.gp-figs { display: contents; }
+.gp-row .rp-figure { min-width: 0; align-items: flex-end; }
+.gp-row .rp-value { font-size: 18px; text-align: right; }
+.gp-row .rp-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .gp-name { font: 600 18px var(--display); margin: 0; }
-.gp-figs { display: flex; flex-wrap: wrap; gap: 8px 32px; }
-.gp-figs .rp-value { font-size: 20px; }
-.gp-figs .rp-figure { min-width: 110px; }
+.gp-parent .gp-name { font-size: 22px; }
+.gp-parent .rp-value { font-size: 22px; }
+.gp-id { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.gp-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.gp-actions .btn { height: 32px; font-size: 13px; }
+.gp-actions .btn:not(.ghost) { padding: 0 12px; }
+.gp-row[data-row] { cursor: pointer; }
+.gp-row[data-row]:hover { background: var(--surface-hover); }
+.gp-row.on { background: var(--surface-selected); border-color: var(--border-strong); box-shadow: inset 3px 0 0 var(--accent); }
+.gp-row:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.gp-subs { position: relative; }
+.gp-sub { position: relative; }
+.gp-sub::before, .gp-sub::after { content: ''; position: absolute; left: 26px; border: 0 solid var(--border-strong); }
+.gp-sub::before { top: 0; bottom: 0; border-left-width: 1px; }
+.gp-sub:last-child::before { bottom: 50%; }
+.gp-sub::after { top: 50%; width: 22px; border-top-width: 1px; }
+.gp-sub .gp-id { padding-left: 54px; }
+.gp-total { margin-top: 2px; padding-block: 10px 4px; border-radius: 0; border-top: 1px solid var(--border-strong); }
+.gp-total .gp-name { font-size: 16px; }
+.gp-total .rp-value { font-size: 18px; }
+
+@container (max-width: 900px) {
+  .gp-row { grid-template-columns: 1fr auto; row-gap: 10px; }
+  .gp-head { display: none; }
+  .gp-id { grid-column: 1; }
+  .gp-actions { grid-column: 2; }
+  .gp-figs { display: flex; flex-wrap: wrap; gap: 8px 24px; grid-column: 1 / -1; }
+  .gp-sub .gp-figs { padding-left: 54px; }
+  .gp-row .rp-figure { align-items: flex-start; min-width: 100px; }
+  .gp-row .rp-label { position: static; width: auto; height: auto; clip: auto; }
+  .gp-sub::before, .gp-sub::after { display: none; }
+  .gp-sub .gp-id { padding-left: 24px; }
+  .gp-sub .gp-figs { padding-left: 24px; }
+}
 
 .gp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .gp-aclist { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }

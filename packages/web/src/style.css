@@ -17,6 +17,7 @@
 @import './credit.css';
 @import './training.css';
 @import './hr.css';
+@import './group.css';
 
 :root {
   color-scheme: dark;
@@ -472,5 +473,4 @@ input.upper { text-transform: uppercase; }
 .ferry-offer, .ferry-panel, .ferry-confirm { display: flex; flex-direction: column; gap: 10px; }
 .ferry-title { font-size: 14px; font-weight: 500; margin: 0; }
 .ferry-form { align-items: flex-end; }
-@import './group.css';
 @import './alliance.css';
